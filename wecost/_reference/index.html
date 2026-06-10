@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💍 소희성우 결혼비용</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+/* ===== 기본 ===== */
+:root {
+  --purple: #6c63ff;
+  --green:  #2ecc71;
+  --red:    #e74c3c;
+  --orange: #f39c12;
+  --bg:     #f4f5fb;
+  --card:   #ffffff;
+  --text:   #1a1a2e;
+  --sub:    #888;
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ===== 레이아웃 ===== */
+.page { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+.header { text-align: center; margin-bottom: 28px; }
+.header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.header .sub { font-size: 13px; color: var(--sub); margin-top: 6px; }
+.header .updated { font-size: 11px; color: #bbb; margin-top: 3px; }
+
+/* ===== 요약 카드 ===== */
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.s-card { background: var(--card); border-radius: 16px; padding: 18px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+.s-card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--sub); margin-bottom: 8px; }
+.s-card .val { font-size: 22px; font-weight: 800; }
+.s-card .hint { font-size: 11px; color: #bbb; margin-top: 4px; }
+.s-card.purple .val { color: var(--purple); }
+.s-card.green  .val { color: var(--green); }
+.s-card.red    .val { color: var(--red); }
+
+/* ===== 진행률 ===== */
+.progress-card { background: var(--card); border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.progress-card h3 { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 12px; }
+.prog-bar { background: #eee; border-radius: 10px; height: 12px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--purple), #a29bfe); transition: width 1s ease; }
+.prog-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--sub); }
+
+/* ===== 차트 그리드 ===== */
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.chart-card { background: var(--card); border-radius: 16px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.chart-card h3 { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 12px; }
+.chart-wrap { position: relative; height: 220px; }
+
+/* ===== 잔금 타임라인 ===== */
+.tl-card { background: var(--card); border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.tl-card h3 { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 14px; }
+.tl-list { display: flex; flex-direction: column; gap: 8px; }
+.tl-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border-left: 4px solid; }
+.tl-item.urgent { border-color: var(--red);    background: #fff5f5; }
+.tl-item.soon   { border-color: var(--orange); background: #fffbf0; }
+.tl-item.normal { border-color: var(--purple); background: #f8f7ff; }
+.tl-item.past   { border-color: #ccc; background: #f7f7f7; opacity: 0.6; }
+.tl-date { font-size: 11px; font-weight: 700; min-width: 65px; color: #555; }
+.tl-dday { font-size: 13px; font-weight: 900; min-width: 52px; }
+.tl-dday.urgent { color: var(--red); }
+.tl-dday.soon   { color: var(--orange); }
+.tl-dday.normal { color: var(--purple); }
+.tl-dday.past   { color: #bbb; }
+.tl-info { flex: 1; }
+.tl-name { font-size: 13px; font-weight: 700; }
+.tl-cat  { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.tl-bal  { font-size: 15px; font-weight: 800; white-space: nowrap; }
+.tl-sum  { text-align: right; font-size: 12px; color: var(--sub); margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; }
+
+/* ===== 카테고리 요약 ===== */
+.cat-card { background: var(--card); border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.cat-card h3 { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 14px; }
+.cat-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.cat-row:last-child { border-bottom: none; }
+.cat-emoji { font-size: 18px; width: 28px; text-align: center; }
+.cat-label { flex: 1; font-size: 12px; font-weight: 600; }
+.cat-bar-wrap { width: 120px; }
+.cat-bar-bg { background: #eee; border-radius: 4px; height: 6px; overflow: hidden; }
+.cat-bar-fill { height: 100%; border-radius: 4px; background: var(--purple); }
+.cat-planned { font-size: 12px; font-weight: 700; min-width: 70px; text-align: right; color: var(--text); }
+.cat-paid    { font-size: 11px; min-width: 60px; text-align: right; }
+.cat-paid.has { color: var(--green); font-weight: 600; }
+.cat-paid.none { color: #ccc; }
+
+/* ===== 상세 테이블 ===== */
+.table-card { background: var(--card); border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.table-card h3 { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 12px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 8px 10px; background: #f5f5f7; font-size: 10px; font-weight: 700; color: #666; white-space: nowrap; }
+th:first-child { border-radius: 8px 0 0 8px; }
+th:last-child  { border-radius: 0 8px 8px 0; }
+td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafe; }
+.amt { font-weight: 700; white-space: nowrap; }
+.badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 8px; white-space: nowrap; }
+.badge.done    { background: #e8f8ef; color: #1e8449; }
+.badge.partial { background: #fff8e1; color: #b7770d; }
+.badge.unpaid  { background: #fef0f0; color: var(--red); }
+.badge.empty   { background: #f0f0f0; color: #aaa; }
+.mini-bar { display: flex; align-items: center; gap: 5px; }
+.mini-bg { flex: 1; background: #eee; border-radius: 3px; height: 5px; overflow: hidden; min-width: 40px; }
+.mini-fill { height: 100%; border-radius: 3px; background: var(--purple); }
+
+/* ===== 설정 패널 ===== */
+.config-btn { position: fixed; bottom: 24px; right: 24px; background: var(--purple); color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(108,99,255,0.4); z-index: 100; }
+.config-panel { display: none; position: fixed; bottom: 84px; right: 24px; background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 320px; z-index: 100; }
+.config-panel.open { display: block; }
+.config-panel h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+.config-panel input { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+.config-panel button { width: 100%; background: var(--purple); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.config-panel .hint { font-size: 11px; color: var(--sub); margin-top: 8px; line-height: 1.6; }
+
+/* ===== 로딩 / 에러 ===== */
+.loading { text-align: center; padding: 80px 20px; }
+.spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading p { color: var(--sub); font-size: 14px; }
+.setup-msg { text-align: center; padding: 60px 20px; }
+.setup-msg .icon { font-size: 48px; margin-bottom: 16px; }
+.setup-msg h2 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.setup-msg p { font-size: 13px; color: var(--sub); line-height: 1.7; }
+.hidden { display: none; }
+
+@media (max-width: 600px) {
+  .summary { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .s-card .val { font-size: 16px; }
+  .charts { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ⚙️ 설정 버튼 -->
+<button class="config-btn" onclick="toggleConfig()" title="구글 시트 URL 설정">⚙️</button>
+<div class="config-panel" id="config-panel">
+  <h4>⚙️ 데이터 소스 설정</h4>
+  <input type="text" id="sheet-url-input" placeholder="구글 시트 CSV URL 붙여넣기" />
+  <button onclick="saveAndReload()">저장 후 새로고침</button>
+  <div class="hint">
+    구글 시트 → 파일 → 공유 → 웹에 게시 →<br>
+    형식: <b>CSV</b> 선택 → URL 복사 후 붙여넣기
+  </div>
+</div>
+
+<!-- 초기 설정 안내 -->
+<div id="setup-screen" class="page hidden">
+  <div class="setup-msg">
+    <div class="icon">📊</div>
+    <h2>구글 시트를 연결해주세요</h2>
+    <p>오른쪽 하단 ⚙️ 버튼을 눌러<br>구글 시트 CSV URL을 입력하면 대시보드가 활성화돼요.</p>
+  </div>
+</div>
+
+<!-- 로딩 -->
+<div id="loading-screen" class="page hidden">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p id="loading-msg">데이터 불러오는 중…</p>
+  </div>
+</div>
+
+<!-- 대시보드 -->
+<div id="dash" class="page hidden">
+  <div class="header">
+    <h1>💍 소희성우 결혼비용</h1>
+    <div class="sub" id="header-sub"></div>
+    <div class="updated" id="header-updated"></div>
+  </div>
+
+  <div class="summary">
+    <div class="s-card purple">
+      <div class="lbl">총 예정 비용</div>
+      <div class="val" id="s-total">₩0</div>
+      <div class="hint" id="s-total-hint"></div>
+    </div>
+    <div class="s-card green">
+      <div class="lbl">지출 완료</div>
+      <div class="val" id="s-paid">₩0</div>
+      <div class="hint" id="s-paid-hint"></div>
+    </div>
+    <div class="s-card red">
+      <div class="lbl">잔여 예산</div>
+      <div class="val" id="s-remain">₩0</div>
+      <div class="hint" id="s-remain-hint"></div>
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <h3>📈 전체 지출 진행률</h3>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-labels">
+      <span id="prog-pct">0%</span>
+      <span id="prog-detail"></span>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-card">
+      <h3>🥧 카테고리별 예산 비율</h3>
+      <div class="chart-wrap"><canvas id="pie"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 예정 vs 실지출</h3>
+      <div class="chart-wrap"><canvas id="bar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tl-card">
+    <h3>🗓️ 잔금 납부 일정 <span style="font-size:11px;color:#bbb;font-weight:400">— 잔금지급일 기준</span></h3>
+    <div class="tl-list" id="timeline"></div>
+  </div>
+
+  <div class="cat-card">
+    <h3>🗂️ 카테고리별 요약</h3>
+    <div id="cat-rows"></div>
+  </div>
+
+  <div class="table-card">
+    <h3>📋 항목별 상세 <span id="tbl-count" style="font-size:11px;color:#bbb;font-weight:400"></span></h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>항목</th><th>카테고리</th><th>예정금액</th><th>계약금</th><th>잔금</th><th>실지출</th><th>진행</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== 설정 =====================
+const LS_KEY = 'wedding_sheet_url';
+
+function toggleConfig() {
+  const p = document.getElementById('config-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    document.getElementById('sheet-url-input').value = localStorage.getItem(LS_KEY) || '';
+  }
+}
+
+function saveAndReload() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  if (!url) return alert('URL을 입력해주세요.');
+  localStorage.setItem(LS_KEY, url);
+  document.getElementById('config-panel').classList.remove('open');
+  init();
+}
+
+// ===================== 유틸 =====================
+const CAT_COLOR = {
+  '🏰웨딩홀':'#FF6B6B','👗스드메':'#FF8E53','🤵🏻예복':'#FFC048',
+  '💍예물예단':'#FFE066','📷본식스냅영상':'#6BCB77','💄관리비용':'#4FC3F7',
+  '👥청첩장모임':'#7E57C2','🎞️스냅촬영':'#EC407A','🎁선물답례':'#26A69A',
+  '✈️신혼여행':'#42A5F5','🚘차(교통비)':'#8D6E63','🏠집':'#78909C',
+  '🛠️인테리어':'#66BB6A','🧴생활용품':'#FFCA28','🔌가전':'#EF5350',
+  '🛏️가구':'#AB47BC','✨기타':'#BDBDBD',
+};
+
+function won(n) {
+  n = Number(n) || 0;
+  if (n === 0) return '₩0';
+  if (n >= 100000000) return `₩${(n/100000000).toFixed(1)}억`;
+  if (n >= 10000)     return `₩${Math.round(n/10000).toLocaleString()}만`;
+  return `₩${n.toLocaleString()}`;
+}
+
+function dday(ds) {
+  if (!ds) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(ds); d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+
+// ===================== CSV 파싱 =====================
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line => {
+    // CSV 파싱 (따옴표 처리)
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; }
+      else if (line[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += line[i];
+    }
+    cols.push(cur.trim());
+
+    const row = {};
+    headers.forEach((h, i) => row[h] = (cols[i] || '').replace(/^"|"$/g,'').trim());
+    return row;
+  }).filter(r => r['이름']);
+}
+
+// ===================== 데이터 로딩 =====================
+async function fetchData(url) {
+  // 구글 시트 URL 정규화
+  let fetchUrl = url.trim();
+  if (fetchUrl.includes('docs.google.com/spreadsheets') && !fetchUrl.includes('output=csv') && !fetchUrl.includes('format=csv')) {
+    const idMatch = fetchUrl.match(/spreadsheets\/d\/([^/]+)/);
+    const gidMatch = fetchUrl.match(/[?&]gid=(\d+)/);
+    if (idMatch) {
+      fetchUrl = `https://docs.google.com/spreadsheets/d/${idMatch[1]}/export?format=csv${gidMatch ? '&gid='+gidMatch[1] : ''}`;
+    }
+  }
+
+  // CORS 우회: 구글 시트는 직접 fetch가 막혀있어 프록시 사용
+  const proxies = [
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => u, // 마지막엔 직접 시도
+  ];
+
+  let lastErr;
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy(fetchUrl));
+      if (!res.ok) { lastErr = new Error(`HTTP ${res.status}`); continue; }
+      const text = await res.text();
+      if (!text || text.trim().length < 10) { lastErr = new Error('데이터가 비어있어요'); continue; }
+      return parseCSV(text);
+    } catch(e) { lastErr = e; }
+  }
+  throw new Error(lastErr?.message || '데이터를 불러올 수 없어요');
+}
+
+// ===================== 렌더링 =====================
+let pieInst = null, barInst = null;
+
+function renderDash(rows) {
+  const items = rows.map(r => ({
+    name:       r['이름'] || '',
+    cat:        r['카테고리'] || '✨기타',
+    planned:    Number(r['예정금액']) || 0,
+    actual:     Number(r['지출금액']) || 0,
+    deposit:    Number(r['계약금'])   || 0,
+    balance:    Number(r['잔금'])     || 0,
+    balanceDue: r['잔금지급일'] || null,
+    memo:       r['메모'] || '',
+  }));
+
+  const totalPlanned = items.reduce((s,i)=>s+i.planned, 0);
+  const totalPaid    = items.reduce((s,i)=>s+i.actual+i.deposit, 0);
+  const totalRemain  = Math.max(0, totalPlanned - totalPaid);
+  const paidCount    = items.filter(i=>i.actual+i.deposit>0).length;
+
+  // 헤더
+  const now = new Date();
+  document.getElementById('header-sub').textContent = `총 ${items.length}개 항목`;
+  document.getElementById('header-updated').textContent =
+    `마지막 업데이트: ${now.toLocaleDateString('ko-KR')} ${now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`;
+
+  // 요약 카드
+  document.getElementById('s-total').textContent  = won(totalPlanned);
+  document.getElementById('s-paid').textContent   = won(totalPaid);
+  document.getElementById('s-remain').textContent = won(totalRemain);
+  document.getElementById('s-total-hint').textContent  = `${items.filter(i=>i.planned>0).length}개 항목`;
+  document.getElementById('s-paid-hint').textContent   = `${paidCount}개 납부`;
+  document.getElementById('s-remain-hint').textContent = totalPlanned > 0
+    ? `${Math.max(0,100-Math.round(totalPaid/totalPlanned*100))}% 남음` : '';
+
+  // 진행률
+  const pct = totalPlanned > 0 ? Math.min(100, Math.round(totalPaid/totalPlanned*100)) : 0;
+  document.getElementById('prog-fill').style.width  = pct + '%';
+  document.getElementById('prog-pct').textContent   = pct + '%';
+  document.getElementById('prog-detail').textContent = `${won(totalPaid)} / ${won(totalPlanned)}`;
+
+  // 카테고리 집계
+  const catMap = {};
+  items.forEach(i => {
+    if (!catMap[i.cat]) catMap[i.cat] = { planned:0, paid:0, count:0 };
+    catMap[i.cat].planned += i.planned;
+    catMap[i.cat].paid    += i.actual + i.deposit;
+    catMap[i.cat].count   += 1;
+  });
+  const cats = Object.entries(catMap).sort((a,b) => b[1].planned - a[1].planned);
+  const maxCatPlanned = Math.max(...cats.map(([,v])=>v.planned), 1);
+
+  // 파이 차트
+  if (pieInst) pieInst.destroy();
+  const activeCats = cats.filter(([,v])=>v.planned>0);
+  const pieSrc = activeCats.length > 0 ? activeCats : cats.slice(0,10);
+  pieInst = new Chart(document.getElementById('pie'), {
+    type: 'doughnut',
+    data: {
+      labels: pieSrc.map(([k])=>k),
+      datasets: [{ data: pieSrc.map(([,v])=>v.planned||v.count), backgroundColor: pieSrc.map(([k])=>CAT_COLOR[k]||'#ccc'), borderWidth:2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'right', labels:{ font:{size:9}, boxWidth:10, padding:5 } },
+        tooltip:{ callbacks:{ label: ctx => ` ${won(ctx.raw)}` } } } }
+  });
+
+  // 바 차트 (상위 8개)
+  if (barInst) barInst.destroy();
+  const barSrc = cats.slice(0, 8);
+  barInst = new Chart(document.getElementById('bar'), {
+    type: 'bar',
+    data: { labels: barSrc.map(([k])=>k),
+      datasets:[
+        { label:'예정', data:barSrc.map(([,v])=>v.planned), backgroundColor:'rgba(108,99,255,0.2)', borderColor:'#6c63ff', borderWidth:1.5 },
+        { label:'지출', data:barSrc.map(([,v])=>v.paid),    backgroundColor:'rgba(46,204,113,0.5)',  borderColor:'#2ecc71', borderWidth:1.5 }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ font:{size:9}, boxWidth:9 } },
+        tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${won(ctx.raw)}` } } },
+      scales:{ x:{ ticks:{ font:{size:8} } }, y:{ ticks:{ callback:v=>won(v), font:{size:8} } } } }
+  });
+
+  // 잔금 타임라인
+  const tlEl = document.getElementById('timeline');
+  tlEl.innerHTML = '';
+  const dues = items
+    .filter(i => i.balanceDue && i.balance > 0)
+    .map(i => ({ ...i, dd: dday(i.balanceDue) }))
+    .sort((a,b) => a.dd - b.dd);
+
+  if (dues.length === 0) {
+    tlEl.innerHTML = '<p style="color:#bbb;font-size:13px;text-align:center;padding:16px">잔금지급일과 잔금이 입력된 항목이 없어요.</p>';
+  } else {
+    dues.forEach(item => {
+      const d = item.dd;
+      const cls = d < 0 ? 'past' : d <= 7 ? 'urgent' : d <= 30 ? 'soon' : 'normal';
+      const ddTxt = d < 0 ? `D+${Math.abs(d)}` : d===0 ? 'D-Day!' : `D-${d}`;
+      const el = document.createElement('div');
+      el.className = `tl-item ${cls}`;
+      el.innerHTML = `
+        <div class="tl-date">${item.balanceDue.replace(/-/g,'/')}</div>
+        <div class="tl-dday ${cls}">${ddTxt}</div>
+        <div class="tl-info"><div class="tl-name">${item.name}</div><div class="tl-cat">${item.cat}</div></div>
+        <div class="tl-bal">${won(item.balance)}</div>
+      `;
+      tlEl.appendChild(el);
+    });
+    const soon30 = dues.filter(i=>i.dd>=0&&i.dd<=30).reduce((s,i)=>s+i.balance,0);
+    if (soon30 > 0) {
+      const s = document.createElement('div');
+      s.className = 'tl-sum';
+      s.innerHTML = `📌 30일 이내 납부 예정 합계: <strong>${won(soon30)}</strong>`;
+      tlEl.appendChild(s);
+    }
+  }
+
+  // 카테고리 요약 행
+  const catEl = document.getElementById('cat-rows');
+  catEl.innerHTML = '';
+  cats.forEach(([k,v]) => {
+    const barPct = Math.round(v.planned / maxCatPlanned * 100);
+    const emoji = k.match(/^\S+/)?.[0] || '';
+    const label = k.replace(/^\S+\s*/, '');
+    const div = document.createElement('div');
+    div.className = 'cat-row';
+    div.innerHTML = `
+      <div class="cat-emoji">${emoji}</div>
+      <div class="cat-label">${label}</div>
+      <div class="cat-bar-wrap">
+        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${barPct}%;background:${CAT_COLOR[k]||'#6c63ff'}"></div></div>
+      </div>
+      <div class="cat-planned">${won(v.planned)}</div>
+      <div class="cat-paid ${v.paid>0?'has':'none'}">${v.paid>0?won(v.paid):'-'}</div>
+    `;
+    catEl.appendChild(div);
+  });
+
+  // 상세 테이블
+  document.getElementById('tbl-count').textContent = `(${items.length}개)`;
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = '';
+  const maxP = Math.max(...items.map(i=>i.planned), 1);
+
+  [...items].sort((a,b) => b.planned - a.planned).forEach(item => {
+    const paid = item.actual + item.deposit;
+    const pct  = item.planned > 0 ? Math.min(100, Math.round(paid/item.planned*100)) : 0;
+    const barPct = item.planned > 0 ? Math.min(100, Math.round(item.planned/maxP*100)) : 0;
+    const badge =
+      paid > 0 && item.planned > 0 && paid >= item.planned ? '<span class="badge done">완납</span>' :
+      paid > 0 ? '<span class="badge partial">일부납부</span>' :
+      item.planned > 0 ? '<span class="badge unpaid">미납</span>' :
+      '<span class="badge empty">미입력</span>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="font-weight:600">${item.name}</span> ${badge}</td>
+      <td style="font-size:11px;color:#888">${item.cat}</td>
+      <td class="amt" style="color:${item.planned>0?'#333':'#ccc'}">${won(item.planned)}</td>
+      <td class="amt" style="color:${item.deposit>0?'#2ecc71':'#ccc'}">${item.deposit>0?won(item.deposit):'-'}</td>
+      <td class="amt" style="color:${item.balance>0?'#e74c3c':'#ccc'}">${item.balance>0?won(item.balance):'-'}</td>
+      <td class="amt" style="color:${paid>0?'#2ecc71':'#ccc'}">${won(paid)}</td>
+      <td>
+        <div class="mini-bar">
+          <div class="mini-bg"><div class="mini-fill" style="width:${barPct}%"></div></div>
+          <span style="font-size:10px;color:#bbb;min-width:22px">${item.planned>0?pct+'%':'-'}</span>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===================== 초기화 =====================
+function show(id) {
+  ['setup-screen','loading-screen','dash'].forEach(s => {
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+async function init() {
+  const url = localStorage.getItem(LS_KEY);
+  if (!url) { show('setup-screen'); return; }
+
+  show('loading-screen');
+  try {
+    document.getElementById('loading-msg').textContent = '구글 시트에서 데이터 불러오는 중…';
+    const rows = await fetchData(url);
+    renderDash(rows);
+    show('dash');
+  } catch(e) {
+    document.getElementById('loading-screen').innerHTML = `
+      <div class="loading">
+        <p style="color:#e74c3c">⚠️ 데이터를 불러올 수 없어요.<br><small>${e.message}</small></p>
+        <p style="margin-top:12px;font-size:12px;color:#aaa">구글 시트가 공개 설정되어 있는지 확인해주세요.</p>
+      </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

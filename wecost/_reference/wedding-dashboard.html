@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소희성우 결혼비용 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a2e; padding: 20px; }
+
+  .header { text-align: center; margin-bottom: 18px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+  .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .card { background: #fff; border-radius: 12px; padding: 14px 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); text-align: center; }
+  .card .label { font-size: 10px; color: #888; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .card .value { font-size: 17px; font-weight: 700; }
+  .card.total .value { color: #6c63ff; }
+  .card.paid .value { color: #2ecc71; }
+  .card.remaining .value { color: #e74c3c; }
+  .card .sub { font-size: 10px; color: #aaa; margin-top: 3px; }
+
+  .section { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 14px; }
+  .section h3 { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 12px; }
+
+  .progress-bar-wrap { background: #f0f0f0; border-radius: 8px; height: 10px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #6c63ff, #a29bfe); transition: width 0.8s ease; }
+  .progress-labels { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; color: #888; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .chart-wrap { position: relative; height: 200px; }
+
+  /* 잔금 타임라인 */
+  .timeline { display: flex; flex-direction: column; gap: 8px; }
+  .tl-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border-left: 4px solid #ccc; background: #fafafa; }
+  .tl-item.urgent { border-color: #e74c3c; background: #fff5f5; }
+  .tl-item.soon   { border-color: #f39c12; background: #fffbf0; }
+  .tl-item.normal { border-color: #6c63ff; background: #f8f7ff; }
+  .tl-item.past   { border-color: #ccc; background: #f5f5f5; opacity: 0.55; }
+  .tl-date { font-size: 11px; font-weight: 700; min-width: 58px; color: #555; }
+  .tl-dday { font-size: 12px; font-weight: 800; min-width: 48px; }
+  .tl-dday.urgent { color: #e74c3c; }
+  .tl-dday.soon   { color: #f39c12; }
+  .tl-dday.normal { color: #6c63ff; }
+  .tl-dday.past   { color: #aaa; }
+  .tl-info { flex: 1; }
+  .tl-name { font-size: 12px; font-weight: 600; }
+  .tl-cat  { font-size: 10px; color: #888; margin-top: 1px; }
+  .tl-amount { font-size: 13px; font-weight: 700; white-space: nowrap; }
+
+  /* 상세 테이블 */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 6px 8px; background: #f5f5f7; color: #666; font-weight: 600; font-size: 10px; }
+  td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .amount { font-weight: 600; white-space: nowrap; }
+  .badge { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 8px; }
+  .badge.done    { background: #e8f8ef; color: #27ae60; }
+  .badge.partial { background: #fff8e1; color: #f39c12; }
+  .badge.unpaid  { background: #fff3f3; color: #e74c3c; }
+  .badge.empty   { background: #f0f0f0; color: #aaa; }
+  .bar-cell { display: flex; align-items: center; gap: 5px; }
+  .bar-bg { flex: 1; background: #f0f0f0; border-radius: 4px; height: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: #6c63ff; }
+
+  .notice { background: #fffbea; border: 1px solid #ffe58f; border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #8a6900; margin-bottom: 14px; }
+  .notice strong { display: block; margin-bottom: 2px; }
+
+  .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 13px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid #e0e0e0; border-top-color: #6c63ff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+  .empty-msg { text-align: center; padding: 16px; color: #bbb; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div id="loading-msg">노션에서 데이터 불러오는 중…</div>
+</div>
+
+<div id="dashboard" class="hidden">
+  <div class="header">
+    <h1>💍 소희성우 결혼비용</h1>
+    <p id="last-updated"></p>
+  </div>
+
+  <div id="notice-box" class="notice hidden">
+    <strong>💡 금액을 입력해주세요</strong>
+    노션 가계부에서 <b>지출 금액 (대략적비용을 채워적어보세요)</b> 칸에 예정 금액을 입력하면 차트가 채워져요.
+  </div>
+
+  <div class="summary-cards">
+    <div class="card total">
+      <div class="label">총 예정 비용</div>
+      <div class="value" id="total-planned">-</div>
+      <div class="sub" id="planned-count"></div>
+    </div>
+    <div class="card paid">
+      <div class="label">지출 완료</div>
+      <div class="value" id="total-paid">-</div>
+      <div class="sub" id="paid-count"></div>
+    </div>
+    <div class="card remaining">
+      <div class="label">남은 예산</div>
+      <div class="value" id="total-remaining">-</div>
+      <div class="sub" id="remaining-sub"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>📈 전체 지출 진행률</h3>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-labels">
+      <span id="progress-pct">0%</span>
+      <span id="progress-label"></span>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="section" style="margin-bottom:0">
+      <h3>🥧 카테고리별 예산</h3>
+      <div class="chart-wrap"><canvas id="pie-chart"></canvas></div>
+    </div>
+    <div class="section" style="margin-bottom:0">
+      <h3>📊 예정 vs 지출</h3>
+      <div class="chart-wrap"><canvas id="bar-chart"></canvas></div>
+    </div>
+  </div>
+  <div style="margin-bottom:14px"></div>
+
+  <div class="section">
+    <h3>🗓️ 잔금 납부 일정 <span style="font-size:10px;color:#bbb;font-weight:400">잔금지급일 기준</span></h3>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="section">
+    <h3>📋 항목별 상세 <span id="item-count-label" style="font-size:11px;color:#aaa;font-weight:400"></span></h3>
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>카테고리</th>
+          <th>예정금액</th>
+          <th>지출</th>
+          <th>비율</th>
+        </tr>
+      </thead>
+      <tbody id="detail-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const CAT_COLORS = {
+  '🏰웨딩홀':'#FF6B6B','👗스드메':'#FF8E53','🤵🏻예복':'#FFC048',
+  '💍예물예단':'#FFE066','📷본식스냅영상':'#6BCB77','💄관리비용':'#4FC3F7',
+  '👥청첩장모임':'#7E57C2','🎞️스냅촬영':'#EC407A','🎁선물답례':'#26A69A',
+  '✈️신혼여행':'#42A5F5','🚘차(교통비)':'#8D6E63','🏠집':'#78909C',
+  '🛠️인테리어':'#66BB6A','🧴생활용품':'#FFCA28','🔌가전':'#EF5350',
+  '🛏️가구':'#AB47BC','✨기타':'#BDBDBD',
+};
+
+function won(n) {
+  if (!n || n === 0) return '₩0';
+  if (n >= 100000000) return `₩${(n/100000000).toFixed(1)}억`;
+  if (n >= 10000) return `₩${Math.round(n/10000).toLocaleString()}만`;
+  return `₩${n.toLocaleString()}`;
+}
+
+function dday(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+
+function parseProps(text) {
+  const m = text.match(/<properties>([\s\S]*?)<\/properties>/);
+  if (!m) return null;
+  try { return JSON.parse(m[1]); } catch(e) { return null; }
+}
+
+async function searchAll() {
+  // 여러 쿼리로 나눠서 전체 항목 수집 (중복 제거)
+  const queries = ['가계부', '가전 가구 생활', '웨딩 스드메 예복', '신혼여행 인테리어'];
+  const idSet = new Set();
+  const pages = [];
+
+  for (const q of queries) {
+    try {
+      const res = await window.cowork.callMcpTool(
+        'mcp__bbb8ad8e-9643-4fad-9a8d-ed715876b07e__notion-search',
+        { query: q, query_type: 'internal',
+          data_source_url: 'collection://0f51939e-63b9-8317-8501-8707d543416d',
+          page_size: 25, max_highlight_length: 0 }
+      );
+      for (const p of (res.results || [])) {
+        if (!idSet.has(p.id)) { idSet.add(p.id); pages.push(p); }
+      }
+    } catch(e) { /* 개별 쿼리 실패 무시 */ }
+  }
+  return pages;
+}
+
+async function loadData() {
+  try {
+    document.getElementById('loading-msg').textContent = '항목 목록 가져오는 중…';
+    const pages = await searchAll();
+    document.getElementById('loading-msg').textContent = `${pages.length}개 항목 세부 정보 로딩 중…`;
+
+    const allData = [];
+    for (let i = 0; i < pages.length; i += 8) {
+      const batch = pages.slice(i, i+8);
+      const results = await Promise.all(batch.map(p =>
+        window.cowork.callMcpTool('mcp__bbb8ad8e-9643-4fad-9a8d-ed715876b07e__notion-fetch', { id: p.id })
+      ));
+      allData.push(...results);
+    }
+
+    const items = allData.map(res => {
+      const p = parseProps(res.text || '');
+      if (!p) return null;
+      return {
+        name:      p['이름'] || '',
+        category:  p['카테고리'] || '✨기타',
+        planned:   p['지출 금액 (대략적비용을 채워적어보세요)'] || 0,
+        actual:    p['지출 금액'] || 0,
+        deposit:   p['계약금'] || 0,
+        balance:   p['잔금'] || 0,
+        balanceDue: p['date:잔금지급일:start'] || null,
+      };
+    }).filter(Boolean);
+
+    render(items);
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="color:#e74c3c;padding:40px;text-align:center;font-size:13px">오류 발생: ${e.message}</div>`;
+  }
+}
+
+let pieInst = null, barInst = null;
+
+function render(items) {
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    `${now.toLocaleDateString('ko-KR')} ${now.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} 업데이트 · ${items.length}개 항목`;
+
+  const totalPlanned = items.reduce((s,i) => s+i.planned, 0);
+  const totalPaid    = items.reduce((s,i) => s+i.actual+i.deposit, 0);
+  const totalRemain  = Math.max(0, totalPlanned - totalPaid);
+  const paidItems    = items.filter(i => i.actual+i.deposit > 0).length;
+  const plannedItems = items.filter(i => i.planned > 0).length;
+
+  // 금액 미입력 안내
+  if (totalPlanned === 0) {
+    document.getElementById('notice-box').classList.remove('hidden');
+  }
+
+  document.getElementById('total-planned').textContent   = won(totalPlanned);
+  document.getElementById('total-paid').textContent      = won(totalPaid);
+  document.getElementById('total-remaining').textContent = won(totalRemain);
+  document.getElementById('planned-count').textContent   = `${plannedItems}개 항목 입력됨`;
+  document.getElementById('paid-count').textContent      = `${paidItems}개 항목 납부`;
+  document.getElementById('remaining-sub').textContent   = totalPlanned > 0
+    ? `${Math.max(0, 100 - Math.round(totalPaid/totalPlanned*100))}% 남음`
+    : '금액 입력 후 확인';
+
+  // 진행률
+  const pct = totalPlanned > 0 ? Math.min(100, Math.round(totalPaid/totalPlanned*100)) : 0;
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent  = pct+'%';
+  document.getElementById('progress-label').textContent = `${won(totalPaid)} / ${won(totalPlanned)}`;
+
+  // 카테고리 집계
+  const catMap = {};
+  items.forEach(item => {
+    const c = item.category || '✨기타';
+    if (!catMap[c]) catMap[c] = { planned:0, paid:0, count:0 };
+    catMap[c].planned += item.planned;
+    catMap[c].paid    += item.actual + item.deposit;
+    catMap[c].count   += 1;
+  });
+  const cats = Object.entries(catMap).sort((a,b) => b[1].planned - a[1].planned);
+  const catsWithData = cats.filter(([,v]) => v.planned > 0 || v.paid > 0);
+  const chartCats = catsWithData.length > 0 ? catsWithData : cats.slice(0, 8);
+
+  // 파이 차트
+  if (pieInst) pieInst.destroy();
+  const hasPlanned = chartCats.some(([,v]) => v.planned > 0);
+  pieInst = new Chart(document.getElementById('pie-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: chartCats.map(([k]) => k),
+      datasets: [{
+        data: chartCats.map(([,v]) => hasPlanned ? v.planned : v.count),
+        backgroundColor: chartCats.map(([k]) => CAT_COLORS[k]||'#ccc'),
+        borderWidth: 2, borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'right', labels:{ font:{size:9}, boxWidth:10, padding:6 } },
+        tooltip: { callbacks: { label: ctx => hasPlanned ? ` ${won(ctx.raw)}` : ` ${ctx.raw}개 항목` } }
+      }
+    }
+  });
+
+  // 바 차트
+  if (barInst) barInst.destroy();
+  barInst = new Chart(document.getElementById('bar-chart'), {
+    type: 'bar',
+    data: {
+      labels: chartCats.map(([k]) => k),
+      datasets: [
+        { label:'예정', data: chartCats.map(([,v])=>v.planned), backgroundColor:'rgba(108,99,255,0.25)', borderColor:'#6c63ff', borderWidth:1.5 },
+        { label:'지출', data: chartCats.map(([,v])=>v.paid),    backgroundColor:'rgba(46,204,113,0.55)', borderColor:'#2ecc71', borderWidth:1.5 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels:{ font:{size:9}, boxWidth:9 } },
+        tooltip: { callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${won(ctx.raw)}` } }
+      },
+      scales: {
+        x: { ticks:{ font:{size:8} } },
+        y: { ticks:{ callback: v => won(v), font:{size:8} } }
+      }
+    }
+  });
+
+  // 잔금 납부 일정
+  const tlEl = document.getElementById('timeline');
+  tlEl.innerHTML = '';
+  const dueDates = items
+    .filter(i => i.balanceDue && i.balance > 0)
+    .map(i => ({ ...i, dd: dday(i.balanceDue) }))
+    .sort((a,b) => a.dd - b.dd);
+
+  if (dueDates.length === 0) {
+    tlEl.innerHTML = '<div class="empty-msg">잔금지급일과 잔금 금액이 입력된 항목이 없어요.<br>노션에서 항목별 <b>잔금</b>과 <b>잔금지급일</b>을 입력해보세요!</div>';
+  } else {
+    dueDates.forEach(item => {
+      const d = item.dd;
+      const cls = d < 0 ? 'past' : d <= 7 ? 'urgent' : d <= 30 ? 'soon' : 'normal';
+      const ddTxt = d < 0 ? `D+${Math.abs(d)}` : d === 0 ? 'D-Day!' : `D-${d}`;
+      const div = document.createElement('div');
+      div.className = `tl-item ${cls}`;
+      div.innerHTML = `
+        <div class="tl-date">${item.balanceDue.replace(/-/g,'/')}</div>
+        <div class="tl-dday ${cls}">${ddTxt}</div>
+        <div class="tl-info">
+          <div class="tl-name">${item.name}</div>
+          <div class="tl-cat">${item.category}</div>
+        </div>
+        <div class="tl-amount">${won(item.balance)}</div>
+      `;
+      tlEl.appendChild(div);
+    });
+    const soon30 = dueDates.filter(i => i.dd >= 0 && i.dd <= 30).reduce((s,i) => s+i.balance, 0);
+    if (soon30 > 0) {
+      const s = document.createElement('div');
+      s.style.cssText = 'text-align:right;font-size:11px;color:#888;margin-top:8px;padding-top:8px;border-top:1px solid #eee';
+      s.textContent = `📌 30일 이내 납부 예정 합계: ${won(soon30)}`;
+      tlEl.appendChild(s);
+    }
+  }
+
+  // 상세 테이블
+  document.getElementById('item-count-label').textContent = `(${items.length}개)`;
+  const tbody = document.getElementById('detail-table');
+  tbody.innerHTML = '';
+  const maxP = Math.max(...items.map(i=>i.planned), 1);
+
+  items.sort((a,b) => {
+    if (b.planned !== a.planned) return b.planned - a.planned;
+    return a.name.localeCompare(b.name, 'ko');
+  }).forEach(item => {
+    const paid = item.actual + item.deposit;
+    const pct  = item.planned > 0 ? Math.min(100, Math.round(item.planned/maxP*100)) : 0;
+    const badge = paid > 0 && item.planned > 0 && paid >= item.planned
+      ? '<span class="badge done">완납</span>'
+      : paid > 0 ? '<span class="badge partial">일부</span>'
+      : item.planned > 0 ? '<span class="badge unpaid">미납</span>'
+      : '<span class="badge empty">미입력</span>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item.name || '-'} ${badge}</td>
+      <td style="font-size:10px;color:#777">${item.category}</td>
+      <td class="amount" style="color:${item.planned>0?'#333':'#ccc'}">${won(item.planned)}</td>
+      <td class="amount" style="color:${paid>0?'#2ecc71':'#ccc'}">${won(paid)}</td>
+      <td><div class="bar-cell">
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span style="font-size:10px;color:#bbb;min-width:22px">${item.planned>0?pct+'%':'-'}</span>
+      </div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -1,0 +1,1460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  몰디브 허니문 리조트 비교 데이터
+  여행 일정: 2027년 3월 8일(일)~12일(목) 4박 5일
+  여행자: 임성우 + 임소희 (2인)
+  출처: 리얼몰디브(realmaldives.co.kr) / 허니문리조트(honeymoonresort.co.kr)
+  작성일: 2026-06-10
+  참고: 모든 가격은 1인 기준 달러. 수상비행기 이동비 포함. 항공권 별도.
+-->
+<maldives_resort_data>
+
+  <!-- ================================================================ -->
+  <!-- 공통 메타 정보 -->
+  <!-- ================================================================ -->
+  <trip_info>
+    <check_in>2027-03-08</check_in>
+    <check_out>2027-03-12</check_out>
+    <nights>4</nights>
+    <travelers>2</travelers>
+    <price_basis>1인 기준 달러 (USD)</price_basis>
+    <notes>
+      수상비행기 이동비 모두 숙박 가격에 포함.
+      항공권 별도 (네이버항공권/스카이스캐너 개인 구매 권장).
+      싱가포르 2박 + 몰디브 4박 일정 검토 중.
+    </notes>
+  </trip_info>
+
+  <agencies>
+    <agency id="realmaldives">
+      <name>리얼몰디브</name>
+      <url>http://realmaldives.co.kr/</url>
+      <characteristics>
+        몰디브인 운영 + 전직 호텔리어 운영. 24시간 카카오톡 긴급대응.
+        별도 할인 없음. 취소: 계약서 수령 3일 이내 예약금 환불 가능,
+        이후 불가. 출발 51일 전까지 잔금완납. 출발 50일 전~당일 취소 시 100% 배상.
+        잔금 환율: 네이버 송금보낼때 기준.
+      </characteristics>
+    </agency>
+    <agency id="honeymoonresort">
+      <name>허니문리조트</name>
+      <url>http://www.honeymoonresort.co.kr</url>
+      <characteristics>
+        허니문 전문 여행사. 1인 $150 상시 할인 + 2026-06-19까지 예약 시 추가 $50 = 최대 1인 $200 할인.
+        취소: 리조트 도착일 35일 이내 취소 시 총 리조트 요금 100% 취소료.
+        잔금: 출발 40일 전 완납(성수기 제외). 몰디브 환경세($12/박/인), GST 25년6월까지 16%, 7월부터 17% 포함 가격.
+      </characteristics>
+      <discount>
+        <always>1인당 $150 상시 할인</always>
+        <limited>1인당 추가 $50 (2026-06-19까지 예약 시)</limited>
+        <total_max>1인당 최대 $200 할인</total_max>
+      </discount>
+    </agency>
+  </agencies>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 1: 코라코라 -->
+  <!-- ================================================================ -->
+  <resort id="cora_cora">
+    <name_ko>코라코라</name_ko>
+    <name_en>Cora Cora Maldives</name_en>
+    <atoll>라아 아톨 (Raa Atoll)</atoll>
+    <island>마아미길리섬 (Maamigili)</island>
+    <coordinates lat="5.50" lon="72.90"/>
+    <distance_from_male_km>177</distance_from_male_km>
+    <direction_from_male>북서(NW)</direction_from_male>
+    <transfer type="seaplane" minutes="45">수상비행기 45분. 요금 숙박비에 포함.</transfer>
+    <opened>2021-10 (리브랜딩 재오픈. 기존 리조트 전면 리모델링)</opened>
+    <villas>100</villas>
+    <address>Raa Maamigili, Raa Atoll, 05161 Republic of Maldives</address>
+    <homepage>https://www.coracoraresorts.com/</homepage>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+      <agency_ref>honeymoonresort</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        활기차고 밝은 에너제틱한 분위기. 100헥타르 넓은 에메랄드 라군이 최대 강점.
+        도착하는 순간부터 사진 찍기에 바쁜 아름다운 바다색. 섬 자체도 잘 가꿔져 있어 산뜻하고 자유로운 느낌.
+        5개 레스토랑 모두 다인어라운드 무제한. 음식 퀄리티 높음 (향신료 약한 분도 만족).
+        라군이 넓으면서도 수중환경 좋음 (산호+열대어 풍부, 초보자도 스노클링 가능).
+        욕실 히든 해먹이 커플 포토스팟으로 유명.
+        단점: 활기찬 편이라 완전히 조용한 휴양 원하는 분에게는 약간 소란스럽게 느껴질 수 있음.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">5</rating>
+        <rating category="수중환경">4</rating>
+        <rating category="프라이빗">3</rating>
+        <rating category="다이닝">5</rating>
+        <rating category="분위기">활기찬_캐주얼</rating>
+      </ratings>
+      <pros>
+        <pro>100헥타르 넓은 에메랄드 라군, 바다색 최상급</pro>
+        <pro>5개 레스토랑 다인어라운드 무제한 (이탈리안·일식·아시안·인터내셔널)</pro>
+        <pro>프리미엄 주류 + 소주 무제한 포함</pro>
+        <pro>욕실 히든 해먹 — 특별한 커플 포토스팟</pro>
+        <pro>라군 넓고 수중환경도 좋음 (두 가지 모두 만족 가능한 드문 리조트)</pro>
+        <pro>45분 스파 트리트먼트 1회 AI 포함</pro>
+        <pro>선셋 크루즈 1회 포함</pro>
+      </pros>
+      <cons>
+        <con>활기찬 분위기 — 조용한 휴양 원하면 부적합</con>
+        <con>말레에서 가장 먼 아톨 중 하나 (177km, 수상비행기 45분)</con>
+        <con>일부 스페셜 메뉴(Teien 데판야키 등) 별도 추가금</con>
+        <con>100개 빌라로 완전한 프라이빗은 아님</con>
+      </cons>
+      <special_features>
+        <feature>욕실 히든 해먹 (라군 워터빌라)</feature>
+        <feature>소주 포함 프리미엄 올인클루시브</feature>
+        <feature>Cora Cora 앱으로 레스토랑 예약 관리</feature>
+      </special_features>
+    </characteristics>
+
+    <!-- 리얼몰디브 상품 -->
+    <agency_product agency="realmaldives">
+      <meal_plan id="PAI">프리미엄 올인클루시브 (Premium All-Inclusive)</meal_plan>
+      <season>시즌 구분 없음 (연중 동일 가격)</season>
+
+      <prices unit="USD_per_person">
+        <category name="단독_4박">
+          <room type="라군빌라">2768</room>
+          <room type="라군풀빌라">3114</room>
+        </category>
+        <category name="룸믹스_4박">
+          <room type="비치빌라2박+라군빌라2박">2825</room>
+          <room type="라군빌라2박+비치풀빌라2박">3198</room>
+          <room type="비치빌라2박+비치풀빌라2박">3256</room>
+          <room type="라군빌라2박+라군풀빌라2박">2941</room>
+          <room type="비치빌라2박+라군풀빌라2박">2999</room>
+          <room type="비치풀빌라2박+라군풀빌라2박">3371</room>
+        </category>
+        <category name="단독_5박">
+          <room type="라군빌라">3253</room>
+          <room type="라군풀빌라">3694</room>
+        </category>
+        <category name="1박추가">
+          <room type="라군빌라">544</room>
+          <room type="라군풀빌라">633</room>
+          <room type="비치빌라+라군빌라믹스">560</room>
+          <room type="라군빌라+비치풀빌라믹스">654</room>
+          <room type="라군빌라+라군풀빌라믹스">591</room>
+          <room type="비치빌라+라군풀빌라믹스">602</room>
+          <room type="비치풀빌라+라군풀빌라믹스">696</room>
+        </category>
+      </prices>
+
+      <promotions>
+        <promotion>별도 할인 없음</promotion>
+      </promotions>
+
+      <meal_plan_details>
+        <restaurants>
+          <restaurant>① Tazäa — 인터내셔널. 조중석식. 알라카르테+뷔페. 조식(알라카르테+뷔페), 중식(알라카르테), 석식(알라카르테 or 테마뷔페). 11:30-15:30 / 18:30-22:00.</restaurant>
+          <restaurant>② Acquapazza — 이탈리안. 중석식 알라카르테. 비치클럽 분위기. 12:00-15:00 / 18:30-22:00.</restaurant>
+          <restaurant>③ Ginger Moon — 아시안. 석식 알라카르테. "Eat the Streets" 스트리트푸드 컨셉. 18:30-22:00.</restaurant>
+          <restaurant>④ Teien — 일식. 석식 알라카르테. 데판야키·스시·쿠시야키. 18:30-22:00. ※데판야키는 별도 추가금.</restaurant>
+          <restaurant>⑤ MYCOFFEE — 자체로스팅 커피·샌드위치·수제젤라또. 11:30-22:30.</restaurant>
+          <restaurant>⑥ GRAB&GO — 테이크아웃 서비스.</restaurant>
+          <restaurant>Acquapazza Bar — 메인풀+해변 뷰. 프리미엄 스피릿·와인·맥주·칵테일·목테일.</restaurant>
+        </restaurants>
+        <beverages>
+          <item>프리미엄 브랜드 음료 + 주류 무제한 (소주 포함)</item>
+          <item>모든 레스토랑·바에서 운영시간 내 무제한</item>
+        </beverages>
+        <inclusions>
+          <item>조중석식 다인어라운드 무제한</item>
+          <item>미니바 맥주·와인·소프트드링크·스낵 무료 (1일 1회 리필)</item>
+          <item>45분 스파 트리트먼트 1회 (09:00-11:30, 만15세 이상)</item>
+          <item>선셋 크루즈 1회 (리조트 일정에 따라)</item>
+          <item>무동력 수상스포츠 무료 (카약·SUP·윈드서핑·카타마란)</item>
+          <item>스노클링 장비 무료 대여</item>
+          <item>Wi-Fi 무료</item>
+          <item>자전거 무료</item>
+          <item>피트니스센터 무료</item>
+          <item>키즈클럽 무료</item>
+          <item>수상비행기 45분 왕복 포함</item>
+          <item>수상비행기 대기 중 전용라운지 이용 (스낵·음료·Wi-Fi)</item>
+        </inclusions>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 청첩장 필수. 최소 4박 이상.</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 침대 데코레이션 1회</benefit>
+          <benefit>허니문 디너 1회 — Acquapazza 또는 Ginger Moon (체크인 후 사전예약 필수)</benefit>
+          <benefit>기념 케이크 1회</benefit>
+          <benefit>아로마틱 버블배스 포함 로맨틱 턴다운 서비스 1회 (사전 요청 필수)</benefit>
+        </benefits>
+        <comment>허니문 디너 포함이 강점. 마사지·플로팅조식 없음. 스파 1회는 AI 기본포함.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>계약서 수령 후 3일 이내: 예약금 환불 가능</rule>
+        <rule>출발 51일 전까지: 예약금 제외 전액 환불</rule>
+        <rule>출발 50일 전~당일: 상품가 100% 배상</rule>
+        <deposit>2인 기준 30만원</deposit>
+      </cancellation>
+    </agency_product>
+
+    <!-- 허니문리조트 상품 -->
+    <agency_product agency="honeymoonresort">
+      <meal_plan id="AI">올인클루시브 (All-Inclusive)</meal_plan>
+
+      <prices unit="USD_per_person">
+        <season name="성수기" from="2027-01-05" to="2027-04-04">
+          <note>3월 8일 기준 이 시즌 적용</note>
+          <category name="단독_4박">
+            <room type="라군빌라">2868</room>
+            <room type="라군풀빌라">3214</room>
+          </category>
+          <category name="단독_5박">
+            <room type="라군빌라">3253</room>
+            <room type="라군풀빌라">3694</room>
+          </category>
+          <category name="룸믹스_4박">
+            <room type="비치빌라2박+라군빌라2박">2925</room>
+            <room type="라군빌라2박+비치풀빌라2박">3298</room>
+            <room type="라군빌라2박+라군풀빌라2박">3041</room>
+            <room type="비치빌라2박+라군풀빌라2박">3099</room>
+            <room type="비치풀빌라2박+라군풀빌라2박">3471</room>
+          </category>
+          <category name="1박추가">
+            <room type="라군빌라">544</room>
+            <room type="라군풀빌라">633</room>
+          </category>
+        </season>
+        <season name="비수기" from="2027-04-05" to="2027-09-30">
+          <category name="단독_4박">
+            <room type="라군빌라">2364</room>
+            <room type="라군풀빌라">2931</room>
+          </category>
+        </season>
+        <season name="준성수기" from="2026-10-01" to="2026-12-23">
+          <category name="단독_4박">
+            <room type="라군빌라">2510</room>
+            <room type="라군풀빌라">3030</room>
+          </category>
+        </season>
+      </prices>
+
+      <discount_applied unit="USD_per_person">
+        <original>2868 (라군빌라 4박)</original>
+        <discount>200</discount>
+        <final>2668 (라군빌라 4박, 6/19 이전 예약 시)</final>
+        <note>라군풀빌라: 3214 → 3014</note>
+      </discount_applied>
+
+      <promotions>
+        <promotion>상시 1인 $150 할인</promotion>
+        <promotion>2026-06-19까지 예약 시 추가 1인 $50 할인 → 총 1인 최대 $200 할인</promotion>
+      </promotions>
+
+      <!-- 포함사항은 리얼몰디브와 동일 (PAI 동일 상품) -->
+      <meal_plan_details>같은 리조트 동일 플랜. 리얼몰디브 포함사항과 동일.</meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 청첩장 필수. 4박 이상.</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 침대 데코레이션 1회</benefit>
+          <benefit>허니문 디너 1회 — Acquapazza 또는 Ginger Moon</benefit>
+          <benefit>기념 케이크 1회</benefit>
+          <benefit>아로마틱 버블배스 포함 로맨틱 턴다운 서비스 1회</benefit>
+        </benefits>
+        <comment>리얼몰디브와 허니문 특전 동일. 가격 차이($100~$200)와 취소 규정 차이가 선택 기준.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>리조트 도착일 35일 이내 취소: 총 리조트 요금 100% 취소료</rule>
+        <rule>출발 40일 전 잔금 완납 (성수기 별도)</rule>
+      </cancellation>
+    </agency_product>
+
+    <!-- 두 여행사 비교 요약 -->
+    <agency_comparison>
+      <price_diff>리얼몰디브 $2,768 vs 허니문리조트 $2,668 (할인 후) → 허니문리조트가 $100 저렴 (라군빌라 기준)</price_diff>
+      <benefit_diff>특전 동일</benefit_diff>
+      <key_diff>취소 규정: 리얼몰디브가 더 유연 (51일 전까지 예약금 외 전액환불). 허니문리조트는 35일 이내 100% 취소료.</key_diff>
+    </agency_comparison>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 2: 아나네아 -->
+  <!-- ================================================================ -->
+  <resort id="ananea">
+    <name_ko>아나네아</name_ko>
+    <name_en>Ananea Madivaru Maldives</name_en>
+    <atoll>노스 아리 아톨 (North Ari Atoll)</atoll>
+    <coordinates lat="4.00" lon="72.80"/>
+    <distance_from_male_km>66</distance_from_male_km>
+    <direction_from_male>서(W)</direction_from_male>
+    <transfer type="seaplane" minutes="20">수상비행기 20분. 수상비행기 리조트 중 말레 최근접 그룹.</transfer>
+    <opened>2025-03 (신상. 오픈 직후 인기 리조트)</opened>
+    <villas>110</villas>
+    <structure>두 개의 프라이빗 섬을 오버워터 통로로 연결한 독특한 구조</structure>
+    <agencies_available>
+      <agency_ref>honeymoonresort</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        2025년 3월 오픈한 몰디브 최신 럭셔리 리조트. 두 섬 연결 구조로 중앙 라군이 형성되어 라군색이 최상급.
+        몰디브 유일 한식당(Seoul House) 포함 9개 레스토랑. 식도락 만족도 압도적.
+        워터풀빌라 라군뷰에 해먹 있음. 허니문리조트 담당자가 가장 강력 추천하는 리조트.
+        시설 모두 최신. 성수기 객실 빠른 마감. 신상 특성상 온라인 후기 부족.
+        베이비 상어·거북이 등 수중생물 풍부.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">5</rating>
+        <rating category="수중환경">4</rating>
+        <rating category="프라이빗">4</rating>
+        <rating category="다이닝">5</rating>
+        <rating category="시설">5_최신</rating>
+      </ratings>
+      <pros>
+        <pro>수상비행기 20분 — 가장 짧은 이동시간 그룹</pro>
+        <pro>2025년 3월 오픈 — 모든 시설 최신</pro>
+        <pro>몰디브 유일 한식당(Seoul House) 포함 9개 레스토랑</pro>
+        <pro>두 섬 연결 독특한 구조</pro>
+        <pro>워터풀빌라 라군뷰에 해먹 있음</pro>
+        <pro>중앙 라군 최상급 색감</pro>
+        <pro>HB+ 예약 시 AI 무료 업그레이드 조건 (11/30 이전 예약 시)</pro>
+        <pro>허니문리조트 담당자 추천 1위</pro>
+      </pros>
+      <cons>
+        <con>2025년 오픈으로 온라인 후기 절대적 부족</con>
+        <con>성수기 객실 빠른 마감</con>
+        <con>허니문리조트 단독 취급 (리얼몰디브 없음)</con>
+        <con>기본 플랜이 HB(조석식) — 식사 플랜 업그레이드 여부 확인 필요</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="honeymoonresort">
+      <meal_plan id="HB">조석식 (Half Board)</meal_plan>
+      <meal_plan id="HB_PLUS">조석식+ (HB Plus) — 음료 무제한 추가</meal_plan>
+      <meal_plan id="AI">다인어라운드 올인클루시브 (AI) — HB+에서 업그레이드</meal_plan>
+
+      <upgrade_promotion>
+        <condition>투숙기간 2027-01-11~05-10 / 2026-11-30까지 예약 시</condition>
+        <upgrade>HB PLUS → 다인어라운드 AI로 무료 업그레이드</upgrade>
+        <note>즉, 지금 예약하면 HB+ 가격에 AI(올인클루시브) 이용 가능!</note>
+      </upgrade_promotion>
+
+      <prices unit="USD_per_person">
+        <season name="성수기" from="2027-01-11" to="2027-04-10">
+          <note>3월 8일 기준 이 시즌 적용. 2026-11-30까지 예약 조건.</note>
+          <category name="HB_단독_4박">
+            <room type="비치풀빌라">2829</room>
+            <room type="워터풀빌라">2982</room>
+            <room type="워터풀빌라_라군뷰">3064</room>
+            <room type="디럭스_비치풀빌라">3253</room>
+            <room type="디럭스_워터풀빌라">3917</room>
+            <room type="디럭스_워터풀빌라_라군뷰">3990</room>
+          </category>
+          <category name="HB_룸믹스_4박">
+            <room type="비치풀빌라2박+워터풀빌라2박">2906</room>
+            <room type="비치풀빌라2박+워터풀빌라라군뷰2박">2946</room>
+            <room type="디럭스비치풀빌라2박+워터풀빌라2박">3117</room>
+            <room type="비치풀빌라2박+디럭스워터풀빌라2박">3373</room>
+            <room type="비치풀빌라2박+디럭스워터풀빌라라군뷰2박">3410</room>
+          </category>
+          <category name="HB_1박추가">
+            <room type="워터풀빌라">489</room>
+            <room type="워터풀빌라_라군뷰">510</room>
+            <room type="디럭스_워터풀빌라">723</room>
+          </category>
+          <category name="HB플러스_단독_4박">
+            <room type="워터풀빌라">3322</room>
+            <room type="워터풀빌라_라군뷰">3404</room>
+            <room type="디럭스_워터풀빌라">4257</room>
+          </category>
+          <category name="HB플러스_룸믹스_4박">
+            <room type="비치풀빌라2박+워터풀빌라2박">3246</room>
+            <room type="비치풀빌라2박+워터풀빌라라군뷰2박">3286</room>
+          </category>
+          <category name="HB플러스_1박추가">
+            <room type="워터풀빌라">574</room>
+            <room type="워터풀빌라_라군뷰">595</room>
+          </category>
+        </season>
+        <season name="준성수기" from="2027-04-11" to="2027-05-10">
+          <note>2027-03-31까지 예약 조건.</note>
+          <category name="HB_단독_4박">
+            <room type="워터풀빌라">2564</room>
+            <room type="워터풀빌라_라군뷰">2641</room>
+            <room type="디럭스_워터풀빌라">3127</room>
+          </category>
+        </season>
+        <season name="비수기" from="2027-05-11" to="2027-09-30">
+          <note>2027-03-31까지 예약 조건.</note>
+          <category name="HB_단독_4박">
+            <room type="워터풀빌라">2406</room>
+            <room type="워터풀빌라_라군뷰">2483</room>
+            <room type="디럭스_워터풀빌라">2967</room>
+          </category>
+        </season>
+      </prices>
+
+      <discount_applied unit="USD_per_person">
+        <original>2982 (HB 워터풀빌라 4박)</original>
+        <discount>200</discount>
+        <final>2782 (6/19 이전 예약 시)</final>
+        <note_hbplus>HB+: 3322 → 3122. HB+ 예약 시 AI 무료 업그레이드까지 → 사실상 AI 가격 = 3122</note_hbplus>
+      </discount_applied>
+
+      <meal_plan_details>
+        <HB>
+          <item>The Gallery 메인 레스토랑에서 조식·석식 뷔페</item>
+          <item>타 레스토랑 석식 이용 시 1인 하루 $45 크레딧 제공 (당일 11시 전 예약 필수)</item>
+          <item>피트니스센터 무료</item>
+          <item>스노클링 장비·무동력 수상스포츠 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>수상비행기 VIP 라운지 이용</item>
+        </HB>
+        <HB_PLUS>
+          <item>HB 전체 포함 + 음료 무제한 추가</item>
+          <item>모든 레스토랑·바에서 무제한 셀렉티드 알코올·논알코올</item>
+          <item>미니바 1일 1회 리필 (소프트드링크·맥주 2캔·물)</item>
+        </HB_PLUS>
+        <AI_dine_around>
+          <item>HB+ 전체 포함</item>
+          <item>중식: 운영 중인 레스토랑에서 제공</item>
+          <item>석식: The Gallery 뷔페 또는 Asian Food Street·FLAME·LUNA·FLORES 알라카르테 중 선택 (사전예약 필수)</item>
+          <item>풀빌라 투숙 시 플로팅 조식 1회</item>
+          <item>선셋 크루즈 1회</item>
+          <item>스파 15% 할인</item>
+          <note>LUNA(지중해식 오버워터)·Ikigai(데판야키): 2026-06-01 투숙 이후 6박 이상 시 무료, 4박은 유료</note>
+        </AI_dine_around>
+        <restaurants>
+          <restaurant>The Gallery — 메인 뷔페. 조·중·석식. 라이브쿠킹 스테이션.</restaurant>
+          <restaurant>Seoul House (Korean) — 몰디브 유일 한식당</restaurant>
+          <restaurant>Baan Talay (Thai) — 태국식</restaurant>
+          <restaurant>Tamarind (Indian) — 인도식</restaurant>
+          <restaurant>Kaage (Maldivian) — 몰디브 전통 하우스 디자인</restaurant>
+          <restaurant>FLAME — 그릴 레스토랑. 해산물·육류. 저녁만.</restaurant>
+          <restaurant>LUNA — 지중해식 오버워터 레스토랑 (4박: 별도요금, 6박+: 무료)</restaurant>
+          <restaurant>FLORES — 일본식+페루 퓨전 (Nikkei 요리)</restaurant>
+          <restaurant>Ikigai — 데판야키 (6박 이상 무료, 이하 유료)</restaurant>
+          <restaurant>Sting Bar — 메인 풀 바. 칵테일·피자·스낵. 09:00~마지막 손님.</restaurant>
+          <restaurant>Paradise Beach Club — 노스 아일랜드 선셋 바. 13:00~22:30.</restaurant>
+        </restaurants>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>6개월 이내 청첩장 필수. 4박 이상.</certificate_validity>
+        <benefits>
+          <benefit>침대 장식 1회</benefit>
+          <benefit>과일 바구니</benefit>
+          <benefit>해변에서 스파클링 와인 1병 + 캔들 디너 1회</benefit>
+        </benefits>
+        <comment>캔들 디너 포함이 강점. 마사지·스파 미포함 (별도 비용). 신상 리조트 시설 자체가 특전을 상쇄.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>리조트 도착일 35일 이내: 총 비용 100% 취소료</rule>
+        <rule>출발 60일 전(성수기 70일 전) 잔금 완납</rule>
+        <deposit>2인 기준 40만원</deposit>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 3: 벨리간두 -->
+  <!-- ================================================================ -->
+  <resort id="veligandu">
+    <name_ko>벨리간두</name_ko>
+    <name_en>Veligandu Maldives Resort Island</name_en>
+    <atoll>노스 아리 아톨 (Rasdhoo / North Ari Atoll)</atoll>
+    <coordinates lat="4.00" lon="72.80"/>
+    <distance_from_male_km>66</distance_from_male_km>
+    <direction_from_male>서(W)</direction_from_male>
+    <transfer type="seaplane" minutes="20">수상비행기 20분. 또는 스피드보트 60분 (1인 $80 왕복 할인 적용).</transfer>
+    <opened>1984년 창립 (몰디브 최초 리조트 중 하나). 2024년 11월 대규모 리노베이션 후 재오픈.</opened>
+    <villas>100</villas>
+    <operator>Crown and Champa Resorts (CCR)</operator>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        1984년 창립, 2024년 11월 18개월 리노베이션 후 재오픈. 시설 신축 수준.
+        노스 아리 아톨, 라스두 환초 인근. 고래상어 투어 연중 가능. 만타·너스샤크 투어 가능.
+        스노클링 명소로 오랫동안 유명. 수중환경과 라군 밸런스가 좋음.
+        수상비행기 20분으로 가장 빠른 이동 그룹. 서비스 친절, 한국인 취향 세심하게 맞춤.
+        2025년 리얼몰디브 기준 가장 많이 선택받은 리조트.
+        ⚠️ 중요: 오션풀빌라(신축 수영장 객실)에는 해먹 없음. 해먹 원하면 일반 오션빌라 선택 필요.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">4</rating>
+        <rating category="다이닝">3</rating>
+        <rating category="이동편의">5_최근접</rating>
+      </ratings>
+      <pros>
+        <pro>수상비행기 20분 — 말레 최근접 그룹</pro>
+        <pro>2024년 11월 전면 리노베이션 — 신축 수준 시설</pro>
+        <pro>고래상어 투어 연중 가능 (라스두 아톨 인근)</pro>
+        <pro>만타레이·너스샤크 투어 가능</pro>
+        <pro>스노클링 명소 — 수중환경과 라군 균형 최고</pro>
+        <pro>친절한 서비스. 한국인 취향 세심 대응.</pro>
+        <pro>2025년 리얼몰디브 최다 선택 리조트</pro>
+      </pros>
+      <cons>
+        <con>⚠️ 오션풀빌라(수영장 있는 객실)에 해먹 없음 — 해먹 원하면 일반 오션빌라로</con>
+        <con>허니문 특전 단순 (샴페인·과일바구니·베드데코만)</con>
+        <con>HB+Bev 기본 플랜은 올인클루시브 아님 (중식 별도)</con>
+        <con>레스토랑 1개 + 바 2개로 식사 다양성 부족</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="realmaldives">
+      <meal_plan id="HB_Bev">조석식+음료패키지 (HB + Beverage Package)</meal_plan>
+      <meal_plan id="AI">올인클루시브 (All Inclusive)</meal_plan>
+      <promotion>2026년 7월 31일까지 예약 특가 적용</promotion>
+
+      <prices unit="USD_per_person">
+        <season name="특가" note="26년 7월 31일까지 예약특가">
+          <category name="HB+Bev_단독_4박">
+            <room type="비치빌라">2108</room>
+            <room type="자쿠지비치빌라">2164</room>
+            <room type="오션자쿠지빌라">2220</room>
+            <room type="썬셋자쿠지비치빌라">2276</room>
+            <room type="썬셋오션빌라">2388</room>
+            <room type="오션풀빌라">2598</room>
+            <room type="썬셋오션풀빌라">2976</room>
+          </category>
+          <category name="HB+Bev_룸믹스_4박">
+            <room type="비치빌라2박+오션풀빌라2박">2353</room>
+            <room type="비치빌라2박+썬셋오션풀빌라2박">2542</room>
+          </category>
+          <category name="HB+Bev_1박추가">
+            <room type="비치빌라">421</room>
+            <room type="오션풀빌라">543</room>
+            <room type="썬셋오션풀빌라">638</room>
+          </category>
+          <category name="AI_단독_4박">
+            <room type="비치빌라">2360</room>
+            <room type="자쿠지비치빌라">2416</room>
+            <room type="오션자쿠지빌라">2472</room>
+            <room type="썬셋자쿠지비치빌라">2528</room>
+            <room type="썬셋오션빌라">2640</room>
+            <room type="오션풀빌라">2850</room>
+            <room type="썬셋오션풀빌라">3228</room>
+          </category>
+          <category name="AI_룸믹스_4박">
+            <room type="비치빌라2박+오션풀빌라2박">2605</room>
+            <room type="비치빌라2박+썬셋오션풀빌라2박">2794</room>
+          </category>
+          <category name="AI_1박추가">
+            <room type="비치빌라">484</room>
+            <room type="오션자쿠지빌라">512</room>
+            <room type="썬셋오션빌라">554</room>
+            <room type="오션풀빌라">606</room>
+            <room type="썬셋오션풀빌라">701</room>
+          </category>
+        </season>
+      </prices>
+
+      <meal_plan_details>
+        <HB_Bev>
+          <item>조식(07:30~10:30) + 석식(19:00~21:30) — Dhonveli 레스토랑 뷔페</item>
+          <item>Thundi Bar(08:00~01:00) + Raalhu Bar(10:00~23:00) 무제한 음료+주류</item>
+          <item>와인(스파클링·화이트·레드·로제)·맥주·칵테일·목테일·스피릿·주스·스무디·커피 무제한</item>
+        </HB_Bev>
+        <AI>
+          <item>HB+Bev 전체 포함</item>
+          <item>중식 추가 포함</item>
+          <item>스파 20% 할인</item>
+          <item>피트니스·다목적코트·탁구·당구·비치발리볼 무료</item>
+          <item>Wi-Fi·스노클링 장비 무료</item>
+          <item>수상비행기 왕복 포함 (or 스피드보트: 1인 $80 왕복 할인)</item>
+        </AI>
+      </meal_plan_details>
+
+      <important_notes>
+        <note>⚠️ 풀빌라(오션풀빌라, 썬셋오션풀빌라)에는 해먹 없음. 해먹 있는 것은 일반 오션빌라.</note>
+        <note>풀빌라 투숙 시 허니문 특전 플로팅 조식 없음.</note>
+      </important_notes>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 청첩장 필수</certificate_validity>
+        <benefits>
+          <benefit>샴페인 반병</benefit>
+          <benefit>과일 바구니 1회</benefit>
+          <benefit>스페셜 베드 데코레이션 1회</benefit>
+        </benefits>
+        <comment>9개 리조트 중 가장 단순한 특전. 리조트 강점(스노클링·고래상어·이동편의)이 특전보다 매력.</comment>
+      </honeymoon_benefit>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 4: 디구파루 -->
+  <!-- ================================================================ -->
+  <resort id="dhigufaru">
+    <name_ko>디구파루</name_ko>
+    <name_en>Dhigufaru Island Resort</name_en>
+    <atoll>바아 아톨 (Baa Atoll) — 유네스코 생물권 보존구역</atoll>
+    <coordinates lat="5.10" lon="72.90"/>
+    <distance_from_male_km>120</distance_from_male_km>
+    <direction_from_male>북서(NW)</direction_from_male>
+    <transfer type="seaplane" minutes="40">수상비행기 약 40분. 15:00 이후 공항 도착 시 국내선(약 20분)+스피드보트(약 30분)로 대체.</transfer>
+    <opened>2016-08</opened>
+    <villas>83</villas>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        몰디브 최상급 라군과 백사장을 가진 리조트. 바다색 가장 예쁜 곳 중 하나로 자주 언급.
+        유네스코 생물권 보존구역 하니파루베이 인접 — 만타레이 스노클링 가능 (시즌 한정).
+        리프 가까워 방 앞에서 거북이·가오리 자주 목격.
+        조용하고 프라이빗한 분위기 — 허니문 최적.
+        데크에서 물멍만 때려도 힐링. 수중환경 최상급.
+        2026년 석식 다인어라운드(알라카르테 세트) 도입으로 식사 다양성 개선.
+        2026-06-30까지 예약 시 객실 1단계 무료 업그레이드 프로모션.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">5</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">5</rating>
+        <rating category="다이닝">3</rating>
+        <rating category="조용함">5</rating>
+      </ratings>
+      <pros>
+        <pro>몰디브 최상급 라군 — 바다색 최고 수준</pro>
+        <pro>유네스코 보존구역 — 거북이·가오리·만타레이</pro>
+        <pro>방 앞 스노클링 가능, 리프 근접, 유속 잔잔</pro>
+        <pro>조용하고 프라이빗 — 신혼부부 최적</pro>
+        <pro>2026-06-30까지 예약 시 1단계 무료 업그레이드</pro>
+        <pro>AID 플랜 — 석식 알라카르테 세트 선택 가능</pro>
+        <pro>선셋 피싱·가이드 스노클링 포함</pro>
+      </pros>
+      <cons>
+        <con>섬이 작아 장기 투숙 시 동선 단조로울 수 있음</con>
+        <con>레스토랑 수 적음 (3개)</con>
+        <con>허니문 특전 기준 6개월 이내 (12개월 아님)</con>
+      </cons>
+      <upgrade_promotion>
+        <condition>2026년 6월 30일까지 예약 시</condition>
+        <detail>객실 1단계 무료 업그레이드: 선셋 워터빌라→선라이즈 풀워터빌라 / 선라이즈 풀워터빌라→선셋 풀워터빌라 (객실 가능 시)</detail>
+      </upgrade_promotion>
+    </characteristics>
+
+    <agency_product agency="realmaldives">
+      <meal_plan id="AI">올인클루시브 (All Inclusive)</meal_plan>
+      <meal_plan id="AID">올인클루시브+다인어라운드 (AID — All Inclusive Dine)</meal_plan>
+
+      <prices unit="USD_per_person">
+        <category name="AI_단독_4박_6박">
+          <room type="선라이즈비치빌라">4박:1747 / 6박:2178</room>
+          <room type="선셋비치빌라">4박:1895 / 6박:2400</room>
+          <room type="풀비치빌라">4박:2021 / 6박:2589</room>
+          <room type="선라이즈워터빌라">4박:2155 / 6박:2790</room>
+          <room type="선셋워터빌라">4박:2255 / 6박:2940</room>
+          <room type="선라이즈풀워터빌라">4박:2345 / 6박:3075</room>
+          <room type="선셋풀워터빌라">4박:2433 / 6박:3207</room>
+        </category>
+        <category name="AI_룸믹스_2박+2박_3박+3박">
+          <room type="비치빌라선라이즈+워터풀선라이즈">2046 / 2627</room>
+          <room type="비치빌라선라이즈+워터풀선셋">2090 / 2693</room>
+          <room type="비치빌라선셋+워터풀선라이즈">2120 / 2738</room>
+          <room type="비치빌라선셋+워터풀선셋">2164 / 2804</room>
+          <room type="비치풀빌라+워터풀선라이즈">2183 / 2832</room>
+          <room type="비치풀빌라+워터풀선셋">2227 / 2898</room>
+        </category>
+        <category name="AI_1박추가">
+          <room type="선라이즈비치빌라">316</room>
+          <room type="선라이즈워터빌라">418</room>
+          <room type="선셋워터빌라">443</room>
+          <room type="선라이즈풀워터빌라">465</room>
+          <room type="선셋풀워터빌라">487</room>
+        </category>
+        <category name="AID_단독_4박_6박">
+          <room type="선라이즈워터빌라">4박:2405 / 6박:3140</room>
+          <room type="선셋워터빌라">4박:2505 / 6박:3290</room>
+          <room type="선라이즈풀워터빌라">4박:2595 / 6박:3425</room>
+          <room type="선셋풀워터빌라">4박:2683 / 6박:3557</room>
+        </category>
+        <category name="AID_룸믹스_2박+2박">
+          <room type="비치빌라선라이즈+워터풀선라이즈">2296</room>
+          <room type="비치빌라선라이즈+워터풀선셋">2340</room>
+          <room type="비치빌라선셋+워터풀선라이즈">2370</room>
+          <room type="비치빌라선셋+워터풀선셋">2414</room>
+          <room type="비치풀빌라+워터풀선라이즈">2433</room>
+          <room type="비치풀빌라+워터풀선셋">2477</room>
+        </category>
+        <category name="AID_1박추가">
+          <room type="선라이즈워터빌라">468</room>
+          <room type="선라이즈풀워터빌라">515</room>
+          <room type="선셋풀워터빌라">537</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <AI>
+          <item>조·중·석식: Dhandifulhu 레스토랑 뷔페</item>
+          <item>Raagudi Bar: 매일 16:00~17:00 애프터눈 티+스낵</item>
+          <item>미니바: 맥주·소프트드링크·주스 1일 1회 리필</item>
+          <item>음료·주류: 식사시간 + 바 운영시간 무제한 (Thundi Pool Bar 24시간)</item>
+          <item>하우스리프 가이드 스노클링 1회 (주 2회 진행)</item>
+          <item>선셋 피싱 1회 (주 3회 진행)</item>
+          <item>카약 45분 1회 무료</item>
+          <item>피트니스·다목적코트·탁구·당구·비치발리볼 무료</item>
+          <item>스파 20% 할인</item>
+        </AI>
+        <AID>
+          <item>AI 전체 포함</item>
+          <item>석식: Dhandifulhu 뷔페 OR Muraka/Athiri Grill 4코스 세트 디너 중 선택 (사전예약 필수)</item>
+          <item>Athiri Grill·Muraka 알라카르테 30% 할인</item>
+        </AID>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>6개월 이내 청첩장 필수</certificate_validity>
+        <benefits>
+          <benefit>와인 1병</benefit>
+          <benefit>침대 데코레이션 1회</benefit>
+          <benefit>풀빌라 투숙 시 플로팅 조식 1회 (사전예약 필수)</benefit>
+        </benefits>
+        <comment>풀빌라 선택 시 플로팅 조식 포함. 청첩장 기준 6개월로 짧음 주의. 마사지·케이크 없음.</comment>
+      </honeymoon_benefit>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 5: 푸라베리 -->
+  <!-- ================================================================ -->
+  <resort id="furaveri">
+    <name_ko>푸라베리</name_ko>
+    <name_en>Furaveri Maldives</name_en>
+    <atoll>라아 아톨 (Raa Atoll)</atoll>
+    <coordinates lat="5.50" lon="73.00"/>
+    <distance_from_male_km>150</distance_from_male_km>
+    <direction_from_male>북서(NW)</direction_from_male>
+    <transfer type="seaplane" minutes="45">수상비행기 45분. 국내선 35분+스피드보트 35분 대안 있음.</transfer>
+    <opened>2016년 (일부 자료 2017)</opened>
+    <villas>168</villas>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        "실제로 가보면 사진보다 훨씬 좋다"는 말이 자주 나오는 숨은 명소.
+        한국인 방문 적어 후기 부족하지만 만족도 최상급.
+        오션빌라 인피니티 위드 해먹 타입 있음 → 해먹 있는 워터빌라 원하는 커플에게 최적.
+        하우스리프 가까워 방 앞 스노클링 바로 가능. 유속 잔잔해 초보자 스노클링 최적.
+        카잔 지붕 + 프라이빗 살라 + 큰 데크 → 로맨틱한 빌라 분위기 최고.
+        6개 레스토랑 크레딧 다인어라운드. 조용하고 프라이빗.
+        허니문 특전에 60분 커플 마사지 포함 — 리얼몰디브 6개 리조트 중 유일.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">5</rating>
+        <rating category="로맨틱">5</rating>
+        <rating category="다이닝">4</rating>
+      </ratings>
+      <pros>
+        <pro>오션빌라 인피니티 위드 해먹 — 해먹 있는 워터빌라 확보</pro>
+        <pro>허니문 특전에 60분 커플 마사지 포함 (리얼몰디브 리조트 중 유일)</pro>
+        <pro>유속 잔잔 — 초보자 스노클링 최적 환경</pro>
+        <pro>로맨틱한 빌라 (카잔 지붕·프라이빗 살라·큰 데크·해먹)</pro>
+        <pro>6개 레스토랑 다이닝 다양성</pro>
+        <pro>조용하고 프라이빗 (한국인 방문 적어 더 특별)</pro>
+        <pro>비치풀빌라→자쿠지 무료 업그레이드 프로모션 (7/31까지)</pro>
+      </pros>
+      <cons>
+        <con>한국어 후기 거의 없어 정보 수집 어려움</con>
+        <con>식사가 크레딧 방식 — 초과 시 추가금 발생</con>
+        <con>수상비행기 45분 — 라아 아톨 원거리</con>
+        <con>페스티브 시즌(12/24~12/31) 일부 레스토랑 미운영, 뉴이어 디너 $215 강제 부과</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="realmaldives">
+      <meal_plan id="AI">시 올인 (AI)</meal_plan>
+      <promotion>2026년 7월 31일까지 특가 + 비치풀빌라→비치풀빌라 위드 자쿠지 무료 업그레이드 (객실 가능 시)</promotion>
+
+      <prices unit="USD_per_person">
+        <category name="단독_3박_4박_5박">
+          <room type="비치빌라">3박:1822 / 4박:2133 / 5박:2444</room>
+          <room type="비치풀빌라">3박:1964 / 4박:2321 / 5박:2679</room>
+          <room type="비치풀빌라_위드자쿠지">3박:2047 / 4박:2432 / 5박:2817</room>
+          <room type="오션빌라_호라이즌_위드자쿠지">3박:2159 / 4박:2581 / 5박:3004</room>
+          <room type="오션빌라_인피니티_위드해먹">3박:2242 / 4박:2692 / 5박:3142</room>
+          <room type="오션풀빌라_선라이즈">3박:2388 / 4박:2887 / 5박:3386</room>
+          <room type="오션풀빌라_선셋">3박:2490 / 4박:3023 / 5박:3557</room>
+        </category>
+        <category name="룸믹스_2박+2박_2박+3박">
+          <room type="비치빌라+오션빌라호라이즌자쿠지">2357 / 2780</room>
+          <room type="비치빌라+오션빌라인피니티해먹">2413 / 2864</room>
+          <room type="비치빌라+오션풀선라이즈">2510 / 3010</room>
+          <room type="비치빌라+오션풀선셋">2578 / 3112</room>
+          <room type="비치풀빌라+오션빌라호라이즌자쿠지">2451 / 2874</room>
+          <room type="비치풀빌라+오션빌라인피니티해먹">2507 / 2958</room>
+          <room type="비치풀빌라+오션풀선라이즈">2604 / 3104</room>
+          <room type="비치풀빌라+오션풀선셋">2672 / 3206</room>
+          <room type="비치풀자쿠지+오션빌라호라이즌자쿠지">2507 / 2930</room>
+          <room type="비치풀자쿠지+오션빌라인피니티해먹">2562 / 3013</room>
+          <room type="비치풀자쿠지+오션풀선라이즈">2660 / 3160</room>
+          <room type="비치풀자쿠지+오션풀선셋">2728 / 3262</room>
+        </category>
+        <category name="1박추가">
+          <room type="비치빌라">411</room>
+          <room type="오션빌라_인피니티_위드해먹">551</room>
+          <room type="오션풀빌라_선라이즈">600</room>
+          <room type="오션풀빌라_선셋">634</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <AI>
+          <item>조식: Jaafaiy 레스토랑 인터내셔널 뷔페</item>
+          <item>중·석식: 6개 레스토랑 크레딧 방식 (중식 $30/인, 석식 $40/인)</item>
+          <item>Olives &amp; Vines(지중해): $40 크레딧</item>
+          <item>주류: Udhares Bar(10:00~24:00) 프리미엄 올인클루시브 무제한</item>
+          <item>미니바: 1일 1회 리필</item>
+          <item>풀빌라 투숙 시 플로팅 조식 1회</item>
+          <item>스노클링 장비·무동력 수상스포츠 무료</item>
+          <item>세일링 30분 무료·수영 30분 무료</item>
+          <item>스쿠버다이빙 10% 할인</item>
+          <item>수상비행기 45분 포함</item>
+        </AI>
+        <restaurants>
+          <restaurant>Jaafaiy — 인터내셔널 뷔페 (메인)</restaurant>
+          <restaurant>Raiyvilla — 아시안 퓨전 ($40)</restaurant>
+          <restaurant>Amigos — 멕시칸 ($40)</restaurant>
+          <restaurant>Ocean Spice — 인도식 ($40)</restaurant>
+          <restaurant>Olives &amp; Vines — 지중해식 ($40)</restaurant>
+          <restaurant>Aqua — 수상 레스토랑 ($40)</restaurant>
+          <restaurant>Udhares Bar — 바</restaurant>
+        </restaurants>
+      </meal_plan_details>
+
+      <festive_policy>
+        <item>최소 4박 이상 + 2026-12-31 투숙 시 New Year's Eve Dinner $215/성인 강제 부과</item>
+        <item>12/24~12/31: 모든 스페셜 레스토랑 운영 안 함. 메인 레스토랑만 운영.</item>
+        <item>12/24~2027-01-10: 출발일 기준 75일 전까지 전액 납부해야 최종 예약 확정.</item>
+      </festive_policy>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 청첩장 필수</certificate_validity>
+        <benefits>
+          <benefit>와인 1병 + 과일 플레이터</benefit>
+          <benefit>허니문 침대 장식</benefit>
+          <benefit>기념 케이크</benefit>
+          <benefit>스페셜 턴다운 서비스</benefit>
+          <benefit>60분 커플 마사지 1회 (체크인 후 사전예약 필수)</benefit>
+        </benefits>
+        <comment>리얼몰디브 6개 리조트 중 허니문 특전 가장 풍성. 60분 커플 마사지 포함 유일.</comment>
+      </honeymoon_benefit>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 6: 푸시파루 -->
+  <!-- ================================================================ -->
+  <resort id="fushifaru">
+    <name_ko>푸시파루</name_ko>
+    <name_en>Fushifaru Maldives</name_en>
+    <atoll>라비야니 아톨 (Lhaviyani Atoll)</atoll>
+    <coordinates lat="5.30" lon="73.60"/>
+    <distance_from_male_km>130</distance_from_male_km>
+    <direction_from_male>북북동(NNE) — 말레에서 거의 정북. 직선 비행 가능.</direction_from_male>
+    <transfer type="seaplane" minutes="35">수상비행기 35분. 정북 방향 직선 비행으로 라아/바아보다 빠름.</transfer>
+    <opened>2017-11. 2023년 전 객실 리노베이션 완료.</opened>
+    <villas>63</villas>
+    <operator>Muni Enterprises (몰디브 현지 소유)</operator>
+    <tripadvisor_rating>4.8/5</tripadvisor_rating>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        63개 소형 부티크 럭셔리 리조트. 붐비지 않는 극도의 프라이빗.
+        라비야니 아톨 — 말레에서 거의 정북 방향이라 수상비행기 35분으로 빠른 이동.
+        긴 샌드뱅크(모래톱)가 시그니처 포토스팟. 에메랄드빛 라군 아름다움.
+        푸시파루 틸라(만타레이 클리닝 스테이션) 바로 옆 — 만타 시즌(9~3월) 투어 가능.
+        수중 조형물 스노클링으로 인생샷 가능.
+        버틀러 서비스(WhatsApp 소통) — 즉각 응대, 합리적 요금으로 럭셔리 서비스.
+        TripAdvisor 4.8/5 고평점. 2023년 전 객실 리노베이션으로 시설 깔끔.
+        단점: 허니문 특전 가장 단순. 레스토랑 3개로 식사 다양성 부족. 3월은 만타 막바지 시즌.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">5_최고</rating>
+        <rating category="서비스">5</rating>
+        <rating category="다이닝">3</rating>
+      </ratings>
+      <pros>
+        <pro>63개 소형 부티크 — 최고의 프라이빗</pro>
+        <pro>수상비행기 35분 (정북 직선, 라아/바아보다 빠름)</pro>
+        <pro>만타레이 시즌(9~3월) — 3월은 막바지지만 가능</pro>
+        <pro>긴 샌드뱅크 포토스팟 — 인생사진</pro>
+        <pro>버틀러 서비스 (WhatsApp 즉각 응대)</pro>
+        <pro>TripAdvisor 4.8/5 고평점</pro>
+        <pro>수중 조형물 스노클링</pro>
+        <pro>2023년 전 객실 리노베이션 완료</pro>
+      </pros>
+      <cons>
+        <con>허니문 특전 가장 단순 (와인+턴다운만)</con>
+        <con>3월은 만타 시즌 막바지 — 보장 불가</con>
+        <con>레스토랑 3개로 식사 다양성 부족</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="realmaldives">
+      <meal_plan id="AI">올인클루시브 (AI)</meal_plan>
+
+      <prices unit="USD_per_person">
+        <category name="단독_4박">
+          <room type="비치빌라_선셋">2494</room>
+          <room type="풀비치빌라_선라이즈">2824</room>
+          <room type="풀비치빌라_선셋">2878</room>
+          <room type="자쿠지워터빌라">2764</room>
+          <room type="풀워터빌라">2992</room>
+          <room type="프리미엄풀워터빌라">3106</room>
+        </category>
+        <category name="룸믹스_4박">
+          <room type="비치선셋2박+자쿠지워터2박">2581</room>
+          <room type="비치선셋2박+풀워터2박">2695</room>
+          <room type="비치선셋2박+프리미엄풀워터2박">2752</room>
+          <room type="풀비치선라이즈2박+자쿠지워터2박">2747</room>
+          <room type="풀비치선셋2박+자쿠지워터2박">2774</room>
+          <room type="풀비치선라이즈2박+풀워터2박">2860</room>
+          <room type="풀비치선셋2박+풀워터2박">2887</room>
+          <room type="풀비치선라이즈2박+프리미엄풀워터2박">2917</room>
+          <room type="풀비치선셋2박+프리미엄풀워터2박">2944</room>
+          <room type="자쿠지워터2박+풀워터2박">2830</room>
+          <room type="자쿠지워터2박+프리미엄풀워터2박">2887</room>
+        </category>
+        <category name="1박추가">
+          <room type="비치빌라_선셋">483</room>
+          <room type="풀비치빌라_선라이즈">565</room>
+          <room type="자쿠지워터빌라">550</room>
+          <room type="풀워터빌라">607</room>
+          <room type="프리미엄풀워터빌라">636</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <AI>
+          <item>조·중·석식: Korakali 메인 레스토랑 (매일 테마 변경 뷔페)</item>
+          <item>주류: 무제한 포함</item>
+          <item>버틀러 서비스 (WhatsApp 소통, 일정 조율)</item>
+          <item>스노클링 장비 무료</item>
+          <item>수상스포츠 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>수상비행기 35분 포함</item>
+        </AI>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 청첩장 필수</certificate_validity>
+        <benefits>
+          <benefit>와인 1병 + 스낵</benefit>
+          <benefit>스페셜 턴다운 서비스 1회</benefit>
+        </benefits>
+        <comment>9개 리조트 중 허니문 특전 가장 단순. 리조트 자체 퀄리티(버틀러·만타·부티크)로 승부.</comment>
+      </honeymoon_benefit>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 7: 라야 바이 앳모스피어 -->
+  <!-- ================================================================ -->
+  <resort id="raaya">
+    <name_ko>라야 바이 앳모스피어</name_ko>
+    <name_en>Raaya by Atmosphere</name_en>
+    <atoll>라아 아톨 (Raa Atoll / 라 아톨)</atoll>
+    <coordinates lat="5.30" lon="72.90"/>
+    <distance_from_male_km>145</distance_from_male_km>
+    <direction_from_male>북서(NW)</direction_from_male>
+    <transfer type="seaplane" minutes="45">수상비행기 45~50분.</transfer>
+    <opened>2023년 (신생)</opened>
+    <villas>187</villas>
+    <operator>Atmosphere Core (그룹 9번째 리조트)</operator>
+    <agencies_available>
+      <agency_ref>realmaldives</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        2023년 오픈. 난파선 예술가 셉(Seb)의 이야기를 테마로 한 예술적 인테리어.
+        앳모스피어 그룹 특성상 식음료에 집중 — 6개 레스토랑+3바, 프리미엄 주류 모두 무료.
+        AI에 스파 45분 2회 포함 (4박 기준). 선셋 크루즈 포함.
+        워터빌라에 해먹 있음. 풀빌라는 개인풀.
+        187개 큰 섬, 성인 위주 (대부분 객실 아동 불가 — 비치풀빌라만 1명).
+        라아 아톨 위치로 만타 시즌(5~10월) 투어 간헐적 가능.
+        ⚠️ 금요일 갈라디너 시 타 레스토랑 전체 닫힘.
+        10월 10일까지 예약 특가 진행 중.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">3</rating>
+        <rating category="다이닝">5</rating>
+        <rating category="스파액티비티">5</rating>
+        <rating category="성인분위기">5</rating>
+      </ratings>
+      <pros>
+        <pro>6개 레스토랑+3바 — 식도락 최고</pro>
+        <pro>프리미엄 주류 모두 무제한</pro>
+        <pro>AI에 스파 2회(45분) 포함 (4박 기준)</pro>
+        <pro>워터빌라 해먹 있음</pro>
+        <pro>성인 위주 분위기</pro>
+        <pro>선셋 크루즈 포함</pro>
+        <pro>워터빌라+워터풀빌라 믹스 시 해먹+풀 모두 경험 가능</pro>
+      </pros>
+      <cons>
+        <con>금요일 갈라디너 시 RAAYA Life 외 모든 레스토랑 닫힘</con>
+        <con>수중환경이 라아 아톨 내에서 약한 편</con>
+        <con>대부분 객실 아동 불가 (비치풀빌라만 1명)</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="realmaldives">
+      <meal_plan id="AI">올인클루시브 (AI)</meal_plan>
+      <promotion>2026년 10월 10일까지 예약 특가</promotion>
+
+      <prices unit="USD_per_person">
+        <season name="1월5일~3월19일_4월1일~4월9일" from="2027-01-05" to="2027-03-19">
+          <category name="단독_4박">
+            <room type="비치빌라">2329</room>
+            <room type="워터빌라">2383</room>
+            <room type="워터빌라_위드풀">2545</room>
+            <room type="비치빌라_위드풀">2455</room>
+          </category>
+          <category name="룸믹스_4박">
+            <room type="비치빌라2박+워터빌라2박">2356</room>
+            <room type="비치빌라위드풀2박+워터빌라2박">2419</room>
+            <room type="비치빌라2박+워터빌라위드풀2박">2437</room>
+            <room type="비치빌라위드풀2박+워터빌라위드풀2박">2500</room>
+          </category>
+          <category name="1박추가">
+            <room type="비치빌라">561</room>
+            <room type="워터빌라">575</room>
+            <room type="워터빌라_위드풀">615</room>
+            <room type="비치빌라_위드풀">593</room>
+          </category>
+        </season>
+        <season name="3월20일~3월31일" from="2027-03-20" to="2027-03-31">
+          <note>3월 8일 체크인 기준 이 시즌 일부 적용</note>
+          <category name="단독_4박">
+            <room type="워터빌라">2508</room>
+            <room type="워터빌라_위드풀">2999</room>
+            <room type="비치빌라">2348</room>
+            <room type="비치빌라_위드풀">2648</room>
+          </category>
+          <category name="룸믹스_4박">
+            <room type="비치빌라2박+워터빌라2박">2428</room>
+            <room type="비치빌라2박+워터빌라위드풀2박">2669</room>
+            <room type="비치빌라위드풀2박+워터빌라위드풀2박">2819</room>
+          </category>
+        </season>
+      </prices>
+
+      <meal_plan_details>
+        <AI>
+          <item>RAAYA Life: 올데이다이닝 뷔페. 조식(07:00~10:00)·중식(12:00~14:30)·석식(19:00~22:00)</item>
+          <item>매주 금요일 Grand Maldivian Night 갈라디너 (이날 타 레스토랑 모두 closed)</item>
+          <item>SOAQ Pool Bar: 칵테일+스낵. 10:00~22:00</item>
+          <item>RAAYA HUB Sports Bar: 12:00~00:00</item>
+          <item>Seb's Shack: 16:00~19:00</item>
+          <item>프리미엄 브랜드 주류 모두 무제한</item>
+          <item>스파 트리트먼트 45분: 4~7박 2회, 8~11박 4회</item>
+          <item>다양한 스포츠 시설 (패들 테니스·미니 골프·풋살)</item>
+        </AI>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>6개월 이내 청첩장 필수</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 침대 장식</benefit>
+          <benefit>허니문 케이크</benefit>
+          <benefit>허니문 기프트</benefit>
+          <benefit>플로팅 조식 1회 (비치풀/워터풀 투숙 시만)</benefit>
+          <benefit>6박 이상 시 로맨틱 비치 디너 1회 (4박은 해당 없음)</benefit>
+        </benefits>
+        <comment>AI에 스파 2회 포함이 강점. 비치 디너는 6박 이상만. 청첩장 6개월 기준 주의.</comment>
+      </honeymoon_benefit>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 8: 앳모스피어 바루 -->
+  <!-- ================================================================ -->
+  <resort id="varu">
+    <name_ko>앳모스피어 바루</name_ko>
+    <name_en>Varu by Atmosphere</name_en>
+    <atoll>노스 말레 아톨 (North Malé Atoll)</atoll>
+    <coordinates lat="4.30" lon="73.40"/>
+    <distance_from_male_km>10</distance_from_male_km>
+    <direction_from_male>북(N)</direction_from_male>
+    <transfer type="speedboat" minutes="40">스피드보트 40~45분. 수상비행기 아님.</transfer>
+    <opened>2019</opened>
+    <villas>108</villas>
+    <address>North Male' Atoll, The Maldives</address>
+    <homepage>https://www.varu-atmosphere.com</homepage>
+    <agencies_available>
+      <agency_ref>honeymoonresort</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        노스 말레 아톨. 스피드보트 40~45분 이동 (수상비행기 아님).
+        바루 프리미엄 올인클루시브(VARU Plan) 운영.
+        스페셜티 레스토랑 4박 기준 2회 포함. 40종 이상 와인 포함.
+        도착 시 전통 보두베루 춤 환영 + 로즈 샴페인. 인상적인 체크인.
+        4박 기준 스파 45분 1회 포함. 선셋 크루즈 또는 스타게이징 크루즈 선택.
+        허니문 특전에 로맨틱 비치 디너 포함.
+        단점: 수상비행기 경험 없음. 말레 아톨 수중환경이 원거리보다 약함.
+        금요일 갈라디너 시 타 레스토랑 운영 중단.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">4</rating>
+        <rating category="서비스">5</rating>
+        <rating category="가성비">5</rating>
+        <rating category="이동">스피드보트_수상비행기없음</rating>
+      </ratings>
+      <pros>
+        <pro>스피드보트 이동 — 날씨 무관, 비용 포함</pro>
+        <pro>스파 45분 1회 AI 포함 (4박)</pro>
+        <pro>선셋 크루즈 or 스타게이징 크루즈 선택</pro>
+        <pro>허니문 특전에 로맨틱 비치 디너 포함</pro>
+        <pro>40종 이상 와인, 프리미엄 주류 포함</pro>
+        <pro>전통 보두베루 환영 + 로즈 샴페인</pro>
+        <pro>허니문리조트 $200 할인 가능</pro>
+      </pros>
+      <cons>
+        <con>수상비행기 경험 없음 (몰디브 핵심 경험 미싱)</con>
+        <con>말레 아톨 수중환경이 원거리 아톨보다 약함</con>
+        <con>레스토랑 4개, 스페셜티는 사전예약 필수</con>
+        <con>금요일 갈라디너 시 타 레스토랑 운영 중단</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="honeymoonresort">
+      <meal_plan id="VARU_PLAN">바루 프리미엄 올인클루시브 (VARU Plan)</meal_plan>
+      <promotion>2026년 10월 10일까지 예약 특가</promotion>
+
+      <prices unit="USD_per_person">
+        <season name="1월5일~3월19일_4월1일~4월9일">
+          <category name="단독_4박">
+            <room type="비치빌라">2180</room>
+            <room type="워터빌라">2324</room>
+            <room type="비치빌라_위드풀">2450</room>
+            <room type="워터빌라_위드풀">2774</room>
+          </category>
+          <category name="룸믹스_4박">
+            <room type="비치빌라2박+워터빌라2박">2252</room>
+            <room type="비치빌라2박+워터빌라위드풀2박">2476</room>
+            <room type="비치빌라위드풀2박+워터빌라위드풀2박">2612</room>
+          </category>
+          <category name="1박추가">
+            <room type="비치빌라">420</room>
+            <room type="워터빌라">456</room>
+            <room type="비치빌라_위드풀">488</room>
+            <room type="워터빌라_위드풀">569</room>
+          </category>
+        </season>
+        <season name="3월20일~3월31일">
+          <note>3월 8일 체크인 기준 이 시즌 일부 해당</note>
+          <category name="단독_4박">
+            <room type="비치빌라">2348</room>
+            <room type="워터빌라">2508</room>
+            <room type="비치빌라_위드풀">2648</room>
+            <room type="워터빌라_위드풀">2999</room>
+          </category>
+          <category name="룸믹스_4박">
+            <room type="비치빌라2박+워터빌라2박">2428</room>
+            <room type="비치빌라2박+워터빌라위드풀2박">2669</room>
+            <room type="비치빌라위드풀2박+워터빌라위드풀2박">2819</room>
+          </category>
+          <category name="1박추가">
+            <room type="워터빌라">502</room>
+            <room type="워터빌라_위드풀">627</room>
+          </category>
+        </season>
+        <season name="4월1일~9월30일">
+          <category name="단독_4박">
+            <room type="비치빌라">1756</room>
+            <room type="워터빌라">1868</room>
+            <room type="비치빌라_위드풀">1996</room>
+            <room type="워터빌라_위드풀">2204</room>
+          </category>
+        </season>
+      </prices>
+
+      <discount_applied unit="USD_per_person">
+        <original>2508 (3/20 시즌 워터빌라 4박)</original>
+        <discount>200</discount>
+        <final>2308</final>
+        <note>워터풀빌라: 2999 → 2799 (6/19 이전 예약)</note>
+      </discount_applied>
+
+      <meal_plan_details>
+        <VARU_PLAN>
+          <item>LIME &amp; CHILI: 조·중·석식 올데이 뷔페 (아시안·유럽·몰디비안·라이브쿠킹·피자·아이스크림). 조식 07:00~10:00, 중식 12:30~14:30, 석식 19:00~22:00.</item>
+          <item>매주 금요일 스페셜 인디언오션 갈라디너 (이날 타 레스토랑 닫힘)</item>
+          <item>BAY ROUGE 메인풀 바: 프리미엄 스피릿·맥주·40종 와인·칵테일. 10:00~01:00.</item>
+          <item>스페셜티 레스토랑: 3박-1회, 4~5박-2회, 6~7박-3회, 8~10박-4회 (사전예약 필수)</item>
+          <item>KAAGE (몰디브 전통): 중식 주 3회, 석식 주 6회</item>
+          <item>NU (지중해 수상레스토랑): 3코스. 중식 주 3회, 석식 주 6회.</item>
+          <item>CHARCOAL Beach Grill: 등심·갈비·케밥. 석식 주 6회.</item>
+          <item>스파: 4~7박 1회(45분), 8~11박 2회, 이후 박수 비례 증가</item>
+          <item>선셋 피싱 1회 (4박 이상, 날씨 따라 변동)</item>
+          <item>선셋 크루즈 or 스타게이징 크루즈 중 택1</item>
+          <item>미니바 1일 1회 리필 (와인·맥주·소프트드링크·스낵)</item>
+          <item>스노클링 매일 2회 위클리 셔틀, 장비 무료</item>
+          <item>무동력 수상스포츠 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>스피드보트 40분 왕복 포함</item>
+        </VARU_PLAN>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>12개월 이내 허니문 증명서류 필수. 4박 이상.</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 버블배스 + 침대 장식 (도착일 or 둘째날 저녁)</benefit>
+          <benefit>로맨틱 비치 디너 1회</benefit>
+          <benefit>허니문 케이크</benefit>
+          <benefit>허니문 메멘토</benefit>
+        </benefits>
+        <comment>비치 디너 4박부터 포함 강점. 스파 1회는 AI 기본 포함. 마사지 없음.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>리조트 도착일 35일 이내: 100% 취소료</rule>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 9: 사이라군 + SO몰디브 (믹스 상품) -->
+  <!-- ================================================================ -->
+  <resort id="saii_so">
+    <name_ko>사이라군 + SO몰디브</name_ko>
+    <name_en>SAii Lagoon Maldives + SO/ Maldives (CROSSROADS Complex)</name_en>
+    <atoll>사우스 말레 아톨 (South Malé Atoll) — 크로스로드 복합 단지</atoll>
+    <coordinates lat="4.10" lon="73.50"/>
+    <distance_from_male_km>10</distance_from_male_km>
+    <direction_from_male>남(S)</direction_from_male>
+    <transfer type="speedboat" minutes="15">스피드보트 15분. 말레에서 가장 가까운 리조트.</transfer>
+    <opened>SAii라군: 2019 / SO몰디브: 2024</opened>
+    <structure>크로스로드 복합 단지 내 두 리조트 믹스. 사이라군 2박 + SO몰디브 2박.</structure>
+    <agencies_available>
+      <agency_ref>honeymoonresort</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        말레 공항에서 스피드보트 15분. 가장 빠른 이동.
+        크로스로드 복합단지: 사이라군 + 하드락 리조트 + SO몰디브 + 마리나 쇼핑·다이닝 구역.
+        사이라군 2박 + SO몰디브 2박 믹스 상품. 두 가지 서로 다른 리조트 경험 가능.
+        총 14개 이상 레스토랑 이용 가능 (크로스로드 전체).
+        SO몰디브 투숙 구간에 60분 커플 마사지 + 플로팅 조식 포함.
+        전통 몰디브 분위기 약함. 복합 단지 특성상 편의성·다양성 중심.
+        사이라군에서는 수영장 없는 비치룸만 이용 가능.
+        2박마다 이동하는 번거로움 있음.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">3</rating>
+        <rating category="편의성">5</rating>
+        <rating category="다이닝다양성">5</rating>
+        <rating category="전통몰디브분위기">2</rating>
+        <rating category="이동편의">5_최근접</rating>
+      </ratings>
+      <pros>
+        <pro>스피드보트 15분 — 최근접</pro>
+        <pro>크로스로드 전체 14개+ 레스토랑</pro>
+        <pro>SO 투숙 시 60분 커플 마사지 + 플로팅 조식</pro>
+        <pro>두 리조트 경험</pro>
+        <pro>마리나 쇼핑·다이닝 이용</pro>
+        <pro>날씨 무관 스피드보트</pro>
+        <pro>허니문리조트 $200 할인</pro>
+      </pros>
+      <cons>
+        <con>전통 몰디브 분위기 약함</con>
+        <con>사이라군: 수영장 없는 비치룸만 가능</con>
+        <con>2박마다 이동 — 짐 싸는 번거로움</con>
+        <con>라군뷰·수중환경 원거리 아톨보다 약함</con>
+        <con>마리나 고급 레스토랑 일부: $50 크레딧만 (주류 불포함)</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="honeymoonresort">
+      <meal_plan id="AI">올인클루시브 (AI)</meal_plan>
+      <promotion>2026년 8월 31일까지 예약 조건</promotion>
+      <product_note>믹스 상품만 제공. 사이라군 or SO몰디브 단독 선택 불가.</product_note>
+
+      <prices unit="USD_per_person">
+        <season name="성수기" from="2027-01-05" to="2027-05-05">
+          <note>3월 8일 기준 이 시즌 적용</note>
+          <category name="믹스_4박">
+            <room type="비치룸2박+오버워터풀빌라2박">2480</room>
+            <room type="비치룸2박+오션오버워터풀빌라2박">2540</room>
+          </category>
+          <category name="믹스_5박">
+            <room type="비치룸3박+오버워터풀빌라2박">2790</room>
+            <room type="비치룸3박+오션오버워터풀빌라2박">2850</room>
+            <room type="비치룸2박+오버워터풀빌라3박">3205</room>
+            <room type="비치룸2박+오션오버워터풀빌라3박">3285</room>
+          </category>
+          <category name="믹스_6박">
+            <room type="비치룸3박+오버워터풀빌라3박">3510</room>
+            <room type="비치룸3박+오션오버워터풀빌라3박">3590</room>
+          </category>
+        </season>
+        <season name="비수기" from="2027-05-06" to="2027-09-30">
+          <category name="믹스_4박">
+            <room type="비치룸2박+오버워터풀빌라2박">2335</room>
+            <room type="비치룸2박+오션오버워터풀빌라2박">2355</room>
+          </category>
+        </season>
+      </prices>
+
+      <discount_applied unit="USD_per_person">
+        <original>2480</original>
+        <discount>200</discount>
+        <final>2280 (6/19 이전 예약, 비치룸2박+오버워터풀2박 기준)</final>
+      </discount_applied>
+
+      <meal_plan_details>
+        <SAii_AI>
+          <item>Sessions(사이라군): 조식 매일</item>
+          <item>총 9개 레스토랑 다인어라운드 중식 (사이라군+하드락+마리나)</item>
+          <item>총 14개 레스토랑 다인어라운드 석식</item>
+          <item>Miss Olive Oyl / Mr. Tomyam(사이라군 위치): 3코스 중·석식</item>
+          <item>Hard Rock Café·Kebab&amp;Kurry·Kin Kao Thai·Jiao Wu(마리나): 3코스</item>
+          <item>Ministry of Crab·Nihonbashi Blue·Carne Diem 등(마리나): $50 크레딧, 주류 불포함</item>
+          <item>음료 무제한 (마리나 레스토랑 제외)</item>
+          <item>무동력 수상스포츠·스노클링 장비 무료</item>
+          <item>쿠킹 클래스 1회 (사전예약)</item>
+          <item>30분 스냅 촬영 후 5×7 사진 1매 (레크레이션팀 예약)</item>
+          <item>크로스로드 무료 셔틀보트 매일 5회</item>
+        </SAii_AI>
+        <SO_AI>
+          <item>The Citronelle Club: 조·중·석식</item>
+          <item>Lazuli Beach Club·Hadaba: 중·석식</item>
+          <item>3코스 알라카르테 다인어라운드</item>
+          <item>모든 레스토랑·바: 맥주·칵테일·스피릿·와인·논알코올 무제한 (10:00~24:00)</item>
+          <item>플로팅 조식 1회 (SO 특전)</item>
+          <item>60분 커플 발리니스 마사지 1회 (SO 특전)</item>
+        </SO_AI>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>6개월 이내 청첩장 필수. 4박 이상.</certificate_validity>
+        <benefits>
+          <benefit>[사이라군] 허니문 셋업 1회</benefit>
+          <benefit>[사이라군] 와인 1병</benefit>
+          <benefit>[SO몰디브] 플로팅 조식 1회</benefit>
+          <benefit>[SO몰디브] 60분 커플 발리니스 마사지 1회</benefit>
+        </benefits>
+        <comment>두 리조트에 나뉘어 있음. SO 구간에 마사지+플로팅 조식 포함으로 알찬 편. 청첩장 6개월 기준.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>리조트 도착일 35일 이내: 100% 취소료</rule>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 비교 요약 -->
+  <!-- ================================================================ -->
+  <comparison_summary>
+    <by_transfer>
+      <group name="수상비행기_20분">
+        <resort_ref>veligandu</resort_ref>
+        <resort_ref>ananea</resort_ref>
+      </group>
+      <group name="수상비행기_35분">
+        <resort_ref>fushifaru</resort_ref>
+      </group>
+      <group name="수상비행기_40분">
+        <resort_ref>dhigufaru</resort_ref>
+      </group>
+      <group name="수상비행기_45분">
+        <resort_ref>cora_cora</resort_ref>
+        <resort_ref>furaveri</resort_ref>
+        <resort_ref>raaya</resort_ref>
+      </group>
+      <group name="스피드보트_15분">
+        <resort_ref>saii_so</resort_ref>
+      </group>
+      <group name="스피드보트_40분">
+        <resort_ref>varu</resort_ref>
+      </group>
+    </by_transfer>
+
+    <by_honeymoon_benefit_quality>
+      <tier name="최상">
+        <resort_ref note="커플 마사지 60분 포함">furaveri</resort_ref>
+        <resort_ref note="비치 디너 + 버블배스 + 케이크 + 메멘토">varu</resort_ref>
+        <resort_ref note="마사지+플로팅조식 (SO구간)">saii_so</resort_ref>
+      </tier>
+      <tier name="중간">
+        <resort_ref note="허니문 디너 포함">cora_cora</resort_ref>
+        <resort_ref note="캔들 디너 포함">ananea</resort_ref>
+        <resort_ref note="풀빌라 플로팅 조식">dhigufaru</resort_ref>
+        <resort_ref note="케이크+기프트+풀빌라 플로팅 조식">raaya</resort_ref>
+      </tier>
+      <tier name="단순">
+        <resort_ref note="샴페인+과일+베드데코만">veligandu</resort_ref>
+        <resort_ref note="와인+턴다운만">fushifaru</resort_ref>
+      </tier>
+    </by_honeymoon_benefit_quality>
+
+    <by_hammock_in_water_villa note="해먹 있는 워터빌라 여부">
+      <has_hammock>
+        <resort_ref note="욕실 히든 해먹 (라군 워터빌라)">cora_cora</resort_ref>
+        <resort_ref note="오션빌라 인피니티 위드 해먹 타입 있음">furaveri</resort_ref>
+        <resort_ref note="워터풀빌라 라군뷰 해먹 있음">ananea</resort_ref>
+        <resort_ref note="워터빌라(풀 아닌 것)에 해먹 있음">raaya</resort_ref>
+      </has_hammock>
+      <no_hammock_in_pool_villa>
+        <resort_ref note="오션풀빌라에 해먹 없음 — 일반 오션빌라에만 있음">veligandu</resort_ref>
+      </no_hammock_in_pool_villa>
+    </by_hammock_in_water_villa>
+
+    <by_price_range_4nights_water_pool_villa note="워터풀빌라 4박 1인 달러 기준">
+      <range name="2200~2500">
+        <resort_ref price="2345">dhigufaru_선라이즈풀워터</resort_ref>
+        <resort_ref price="2388">furaveri_오션풀선라이즈</resort_ref>
+        <resort_ref price="2480">saii_so_비치+오버워터풀</resort_ref>
+      </range>
+      <range name="2500~2800">
+        <resort_ref price="2545">raaya_워터풀</resort_ref>
+        <resort_ref price="2692">furaveri_오션인피니티해먹</resort_ref>
+        <resort_ref price="2764">fushifaru_자쿠지워터</resort_ref>
+        <resort_ref price="2782_할인후">ananea_워터풀HB</resort_ref>
+        <resort_ref price="2850">veligandu_오션풀</resort_ref>
+      </range>
+      <range name="2800~3200">
+        <resort_ref price="2999_원가">varu_워터풀</resort_ref>
+        <resort_ref price="2992">fushifaru_풀워터</resort_ref>
+        <resort_ref price="3014_할인후">cora_cora_라군풀_허니문리조트</resort_ref>
+        <resort_ref price="3114">cora_cora_라군풀_리얼몰디브</resort_ref>
+      </range>
+    </by_price_range_4nights_water_pool_villa>
+
+    <couples_preference_match note="소희님 선호 조건: 라군중심·올인클루시브·수상비행기·워터풀빌라or해먹워터빌라·예산$3000~3300">
+      <top_candidates>
+        <candidate rank="1" resort="cora_cora">라군·AI·수상비행기·히든해먹. 양쪽 여행사 비교 가능. 가격 $2,668~$3,014.</candidate>
+        <candidate rank="2" resort="ananea">라군·AI(업그레이드)·수상비행기20분·해먹워터풀. 한식당. 최신상. $2,782~$3,204.</candidate>
+        <candidate rank="3" resort="furaveri">라군·AI·수상비행기·해먹워터빌라·마사지포함. 조용한. $2,413~$2,887.</candidate>
+        <candidate rank="4" resort="dhigufaru">최상급라군·AI·수상비행기·조용함. 예산 하단($2,345~$2,683). 가성비 최고.</candidate>
+      </top_candidates>
+    </couples_preference_match>
+  </comparison_summary>
+
+</maldives_resort_data>

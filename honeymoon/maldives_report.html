@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몰디브 허니문 리조트 비교 보고서 · 2027년 3월</title>
+<style>
+  :root {
+    --ocean-deep: #0c447c;
+    --ocean-mid: #185FA5;
+    --ocean-light: #E6F1FB;
+    --ocean-pale: #f0f7ff;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --purple: #7F77DD;
+    --purple-light: #EEEDFE;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --gray-50: #f8f7f5;
+    --gray-100: #f1efe8;
+    --gray-200: #d3d1c7;
+    --gray-400: #888780;
+    --gray-600: #5f5e5a;
+    --gray-800: #2c2c2a;
+    --text: #1a1a18;
+    --text-muted: #5f5e5a;
+    --text-light: #888780;
+    --border: rgba(0,0,0,0.1);
+    --border-mid: rgba(0,0,0,0.15);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--gray-50);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── 헤더 ── */
+  .site-header {
+    flex-shrink: 0;
+    background: var(--ocean-deep);
+    color: white;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+  }
+  .site-header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+  .site-header h1 span { color: #9FE1CB; }
+  .header-meta { display: flex; gap: 16px; align-items: center; }
+  .header-badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+  }
+  .header-badge strong { color: white; }
+
+  /* ── 메인 레이아웃 ── */
+  .main-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── 왼쪽 지도 패널 ── */
+  .map-panel {
+    width: 32%;
+    flex-shrink: 0;
+    background: white;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .map-panel-inner {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .map-panel-inner::-webkit-scrollbar { width: 4px; }
+  .map-panel-inner::-webkit-scrollbar-track { background: transparent; }
+  .map-panel-inner::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+
+  .map-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  #maldivesMap {
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .map-legend {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .map-legend-header {
+    background: var(--gray-100);
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .legend-items { padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+  .legend-row { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .distance-table {
+    margin-top: 12px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .distance-table th {
+    background: var(--gray-100);
+    padding: 5px 8px;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  .distance-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .distance-table tr:last-child td { border-bottom: none; }
+  .distance-table .dist-km { color: var(--ocean-mid); font-weight: 600; }
+
+  .map-current-info {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--ocean-light);
+    border-radius: var(--radius);
+    border: 1px solid #B5D4F4;
+    min-height: 52px;
+    transition: all 0.2s;
+  }
+  .map-current-info .ci-label { font-size: 10px; color: var(--ocean-mid); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .map-current-info .ci-name { font-size: 13px; font-weight: 600; color: var(--ocean-deep); }
+  .map-current-info .ci-sub { font-size: 11px; color: var(--ocean-mid); margin-top: 2px; }
+
+  /* ── 오른쪽 보고서 패널 ── */
+  .report-panel {
+    flex: 1;
+    overflow-y: scroll;
+    padding: 0;
+  }
+  .report-panel::-webkit-scrollbar { width: 6px; }
+  .report-panel::-webkit-scrollbar-track { background: var(--gray-100); }
+  .report-panel::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+  .report-panel::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+  /* ── 리조트 섹션 ── */
+  .resort-section {
+    border-bottom: 2px solid var(--gray-100);
+    padding: 28px 28px 32px;
+  }
+
+  .resort-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .resort-header-left {}
+  .resort-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .resort-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .resort-name-en {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .resort-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    align-items: center;
+  }
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: #B5D4F4; }
+  .pill-teal { background: var(--teal-light); color: #085041; border-color: #9FE1CB; }
+  .pill-coral { background: var(--coral-light); color: #712B13; border-color: #F5C4B3; }
+  .pill-amber { background: var(--amber-light); color: #633806; border-color: #FAC775; }
+  .pill-purple { background: var(--purple-light); color: #3C3489; border-color: #CECBF6; }
+  .pill-gray { background: var(--gray-100); color: var(--gray-600); border-color: var(--gray-200); }
+
+  .resort-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--gray-100);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ── 콘텐츠 블록 공통 ── */
+  .block {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .block-header {
+    background: var(--gray-100);
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+  }
+  .block-body { padding: 14px; }
+
+  /* ── 기본 정보 블록 ── */
+  .resort-desc {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .pros, .cons {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+  }
+  .pros { background: #f0faf5; border: 1px solid #9FE1CB; }
+  .cons { background: #fdf4ee; border: 1px solid #F5C4B3; }
+  .pros-title { font-size: 11px; font-weight: 700; color: var(--teal); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .cons-title { font-size: 11px; font-weight: 700; color: var(--coral); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pros ul, .cons ul { list-style: none; padding: 0; }
+  .pros ul li, .cons ul li { font-size: 12px; line-height: 1.6; padding-left: 14px; position: relative; color: var(--text); margin-bottom: 2px; }
+  .pros ul li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-size: 11px; font-weight: 700; }
+  .cons ul li::before { content: '!'; position: absolute; left: 0; color: var(--coral); font-size: 11px; font-weight: 700; }
+
+  .rating-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .rating-item { text-align: center; padding: 8px 4px; background: var(--gray-50); border-radius: var(--radius); border: 1px solid var(--border); }
+  .rating-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .rating-stars { font-size: 13px; color: #f59e0b; letter-spacing: 1px; }
+  .rating-stars .empty { color: var(--gray-200); }
+
+  /* ── 가격 비교 블록 ── */
+  .price-compare { display: grid; gap: 12px; }
+  .price-compare.two-col { grid-template-columns: 1fr 1fr; }
+  .price-compare.one-col { grid-template-columns: 1fr; }
+
+  .price-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .price-card-header {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-card-header.real { background: var(--coral-light); border-bottom: 1px solid #F5C4B3; }
+  .price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid #B5D4F4; }
+  .price-agency { font-size: 12px; font-weight: 700; }
+  .price-agency.real { color: var(--coral); }
+  .price-agency.honey { color: var(--ocean-deep); }
+  .price-plan { font-size: 11px; color: var(--text-muted); }
+
+  .price-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .price-table tr { border-bottom: 1px solid var(--border); }
+  .price-table tr:last-child { border-bottom: none; }
+  .price-table td { padding: 7px 12px; }
+  .price-table td:first-child { color: var(--text-muted); }
+  .price-table td:last-child { text-align: right; font-weight: 600; color: var(--text); }
+  .price-main { font-size: 15px !important; color: var(--text) !important; }
+  .price-discount { color: var(--ocean-mid) !important; }
+  .price-original { text-decoration: line-through; color: var(--text-light) !important; font-size: 11px !important; font-weight: 400 !important; }
+  .promo-badge {
+    margin: 8px 12px;
+    padding: 6px 10px;
+    background: var(--amber-light);
+    border-radius: var(--radius);
+    font-size: 11px;
+    color: #633806;
+    border: 1px solid #FAC775;
+  }
+  .promo-badge strong { color: #412402; }
+
+  /* ── 식사 플랜 블록 ── */
+  .meal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .meal-item { padding: 8px 10px; background: var(--gray-50); border-radius: var(--radius); border: 1px solid var(--border); }
+  .meal-item-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; margin-bottom: 3px; }
+  .meal-item-value { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .meal-check { color: var(--teal); font-weight: 700; }
+  .meal-cross { color: var(--gray-400); }
+  .restaurant-list { margin-top: 10px; }
+  .restaurant-list ul { list-style: none; padding: 0; }
+  .restaurant-list li { font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text); display: flex; align-items: baseline; gap: 6px; }
+  .restaurant-list li:last-child { border-bottom: none; }
+  .rest-name { font-weight: 600; min-width: 100px; }
+  .rest-desc { color: var(--text-muted); }
+
+  /* ── 허니문 특전 블록 ── */
+  .honeymoon-block {}
+  .hm-criteria {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fdf4ee;
+    border: 1px solid #F5C4B3;
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #712B13;
+    margin-bottom: 10px;
+  }
+  .hm-list { list-style: none; padding: 0; margin-bottom: 10px; }
+  .hm-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 12.5px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .hm-list li:last-child { border-bottom: none; }
+  .hm-icon { color: #e91e8c; font-size: 13px; flex-shrink: 0; }
+  .hm-comment {
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .hm-comment.good { background: var(--teal-light); border-color: var(--teal); color: #085041; }
+  .hm-comment.ok { background: var(--ocean-light); border-color: var(--ocean-mid); color: var(--ocean-deep); }
+  .hm-comment.weak { background: var(--amber-light); border-color: var(--amber); color: #633806; }
+
+  /* ── 핀 하이라이트 애니메이션 ── */
+  .map-pin-active {
+    animation: pinPulse 0.4s ease;
+  }
+  @keyframes pinPulse {
+    0% { r: 8; }
+    50% { r: 12; }
+    100% { r: 10; }
+  }
+
+  /* ── 스크롤바 스타일링 ── */
+  .report-panel { scroll-behavior: smooth; }
+
+  /* ── 네비게이션 점 ── */
+  .nav-dots {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<header class="site-header">
+  <h1>🏝 몰디브 허니문 리조트 비교 <span>· 2027년 3월</span></h1>
+  <div class="header-meta">
+    <span class="header-badge">📅 <strong>3월 8~12일</strong> 4박 5일</span>
+    <span class="header-badge">👫 <strong>2인</strong> 기준 · 1인 요금 표시</span>
+    <span class="header-badge">🏢 리얼몰디브 · 허니문리조트</span>
+  </div>
+</header>
+
+<div class="main-layout">
+
+  <!-- 왼쪽 지도 패널 -->
+  <aside class="map-panel">
+    <div class="map-panel-inner">
+      <div class="map-title">리조트 위치 지도</div>
+
+      <!-- SVG 지도 -->
+      <svg id="maldivesMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
+        <rect width="280" height="540" fill="#cce8ff" rx="10"/>
+        <!-- 격자선 -->
+        <line x1="20" y1="30" x2="260" y2="30" stroke="#a8d4f5" stroke-width="0.4"/>
+        <line x1="20" y1="510" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+        <line x1="20" y1="30" x2="20" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+        <line x1="260" y1="30" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+        <line x1="140" y1="30" x2="140" y2="510" stroke="#a8d4f5" stroke-width="0.3" stroke-dasharray="3,5"/>
+        <!-- 위도 라벨 -->
+        <text x="22" y="28" font-size="7" fill="#7ab8e8" font-family="sans-serif">6°N</text>
+        <text x="22" y="508" font-size="7" fill="#7ab8e8" font-family="sans-serif">3°N</text>
+        <text x="18" y="270" font-size="7" fill="#7ab8e8" font-family="sans-serif" transform="rotate(-90,18,270)">72-74°E</text>
+        <!-- 방위 -->
+        <text x="140" y="22" text-anchor="middle" font-size="8" fill="#5a9fd4" font-family="sans-serif" font-weight="600">N ↑</text>
+
+        <!-- 아톨 타원 -->
+        <!-- 라아 아톨: 5.5°N, 72.9°E → x≈88, y≈90 -->
+        <ellipse cx="88" cy="90" rx="30" ry="18" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+        <text x="88" y="87" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라아 아톨</text>
+        <text x="88" y="97" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~160km NW</text>
+
+        <!-- 바아 아톨: 5.1°N, 72.9°E → x≈88, y≈158 -->
+        <ellipse cx="88" cy="158" rx="26" ry="15" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+        <text x="88" y="155" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">바아 아톨</text>
+        <text x="88" y="165" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">UNESCO ~120km</text>
+
+        <!-- 라비야니: 5.3°N, 73.6°E → x≈205, y≈125 -->
+        <ellipse cx="205" cy="125" rx="22" ry="13" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+        <text x="205" y="122" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라비야니</text>
+        <text x="205" y="132" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~130km NNE</text>
+
+        <!-- 아리 아톨: 4.0°N, 72.8°E → x≈78, y≈270 -->
+        <ellipse cx="78" cy="270" rx="28" ry="22" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+        <text x="78" y="265" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">아리 아톨</text>
+        <text x="78" y="275" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">N.Ari ~66km W</text>
+
+        <!-- 노스 말레: 4.3°N, 73.4°E → x≈188, y≈222 -->
+        <ellipse cx="188" cy="222" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+        <text x="188" y="219" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">노스 말레</text>
+        <text x="188" y="229" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+
+        <!-- 사우스 말레: 4.1°N, 73.5°E → x≈194, y≈254 -->
+        <ellipse cx="194" cy="256" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+        <text x="194" y="253" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">사우스 말레</text>
+        <text x="194" y="263" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+
+        <!-- 말레 공항 -->
+        <rect x="192" y="233" width="30" height="13" rx="3" fill="#1a1a18" opacity="0.9"/>
+        <text x="207" y="242" text-anchor="middle" font-size="7" fill="#f8f7f5" font-family="sans-serif" font-weight="600">말레 ✈</text>
+
+        <!-- 거리선 -->
+        <line x1="207" y1="233" x2="88" y2="108" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+        <line x1="207" y1="233" x2="78" y2="248" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+        <line x1="207" y1="233" x2="205" y2="138" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+
+        <!-- 리조트 핀들 -->
+        <!-- 코라코라 (라아, x≈80, y≈78) -->
+        <g id="pin-cora" style="cursor:pointer" onclick="scrollToSection('cora')">
+          <circle id="circle-cora" cx="75" cy="78" r="9" fill="#7F77DD" stroke="white" stroke-width="2"/>
+          <text x="75" y="82" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">코</text>
+          <title>코라코라</title>
+        </g>
+        <!-- 푸라베리 (라아, x≈100, y≈80) -->
+        <g id="pin-furaveri" style="cursor:pointer" onclick="scrollToSection('furaveri')">
+          <circle id="circle-furaveri" cx="102" cy="80" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+          <text x="102" y="84" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸라</text>
+          <title>푸라베리</title>
+        </g>
+        <!-- 라야 (라아 남부, x≈78, y≈104) -->
+        <g id="pin-raaya" style="cursor:pointer" onclick="scrollToSection('raaya')">
+          <circle id="circle-raaya" cx="74" cy="106" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+          <text x="74" y="110" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">라야</text>
+          <title>라야 바이 앳모스피어</title>
+        </g>
+        <!-- 디구파루 (바아, x≈100, y≈152) -->
+        <g id="pin-dhigufaru" style="cursor:pointer" onclick="scrollToSection('dhigufaru')">
+          <circle id="circle-dhigufaru" cx="103" cy="152" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+          <text x="103" y="156" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">디</text>
+          <title>디구파루</title>
+        </g>
+        <!-- 푸시파루 (라비야니, x≈202, y≈122) -->
+        <g id="pin-fushifaru" style="cursor:pointer" onclick="scrollToSection('fushifaru')">
+          <circle id="circle-fushifaru" cx="202" cy="122" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+          <text x="202" y="126" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸시</text>
+          <title>푸시파루</title>
+        </g>
+        <!-- 벨리간두 (노스아리, x≈68, y≈248) -->
+        <g id="pin-veligandu" style="cursor:pointer" onclick="scrollToSection('veligandu')">
+          <circle id="circle-veligandu" cx="68" cy="248" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+          <text x="68" y="252" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">벨</text>
+          <title>벨리간두</title>
+        </g>
+        <!-- 아나네아 (노스아리, x≈88, y≈256) -->
+        <g id="pin-ananea" style="cursor:pointer" onclick="scrollToSection('ananea')">
+          <circle id="circle-ananea" cx="90" cy="256" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+          <text x="90" y="260" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">아나</text>
+          <title>아나네아</title>
+        </g>
+        <!-- 바루 (노스 말레, x≈184, y≈218) -->
+        <g id="pin-varu" style="cursor:pointer" onclick="scrollToSection('varu')">
+          <circle id="circle-varu" cx="178" cy="214" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+          <text x="178" y="218" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">바루</text>
+          <title>앳모스피어 바루</title>
+        </g>
+        <!-- 사이라군 (사우스 말레, x≈188, y≈256) -->
+        <g id="pin-saii" style="cursor:pointer" onclick="scrollToSection('saii')">
+          <circle id="circle-saii" cx="200" cy="258" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+          <text x="200" y="262" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">사이</text>
+          <title>사이라군+SO몰디브</title>
+        </g>
+      </svg>
+
+      <!-- 현재 보고 있는 리조트 표시 -->
+      <div class="map-current-info" id="currentInfo">
+        <div class="ci-label">현재 보는 리조트</div>
+        <div class="ci-name">스크롤하면 자동 업데이트</div>
+        <div class="ci-sub">리조트 이름을 클릭해도 이동합니다</div>
+      </div>
+
+      <!-- 범례 -->
+      <div class="map-legend">
+        <div class="map-legend-header">핀 범례</div>
+        <div class="legend-items">
+          <div class="legend-row"><div class="legend-dot" style="background:#7F77DD"></div>코라코라 (양쪽 여행사)</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#D85A30"></div>리얼몰디브 전용</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#185FA5"></div>허니문리조트 전용</div>
+        </div>
+      </div>
+
+      <!-- 거리 요약 -->
+      <table class="distance-table">
+        <thead>
+          <tr><th>아톨</th><th>방향</th><th>거리</th><th>이동</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>라아</td><td>NW</td><td class="dist-km">~160km</td><td>수상비행기 45분</td></tr>
+          <tr><td>바아</td><td>NW</td><td class="dist-km">~120km</td><td>수상비행기 40분</td></tr>
+          <tr><td>라비야니</td><td>NNE</td><td class="dist-km">~130km</td><td>수상비행기 35분</td></tr>
+          <tr><td>N.아리</td><td>W</td><td class="dist-km">~66km</td><td>수상비행기 20분</td></tr>
+          <tr><td>말레 주변</td><td>—</td><td class="dist-km">~10km</td><td>스피드보트</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </aside>
+
+  <!-- 오른쪽 보고서 패널 -->
+  <main class="report-panel" id="reportPanel">
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 1. 코라코라 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="cora" id="section-cora">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">01 / 09</div>
+          <div class="resort-name">코라코라</div>
+          <div class="resort-name-en">Cora Cora Maldives</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">라아 아톨</span>
+            <span class="meta-pill pill-coral">수상비행기 45분</span>
+            <span class="meta-pill pill-gray">2021년 오픈</span>
+            <span class="meta-pill pill-gray">빌라 100개</span>
+            <span class="meta-pill pill-purple">리얼몰디브 + 허니문리조트</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#라군중심</span>
+            <span class="tag">#프리미엄올인클루시브</span>
+            <span class="tag">#다이닝강점</span>
+            <span class="tag">#활기찬분위기</span>
+            <span class="tag">#소주포함</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            라아 아톨 마아미길리섬에 위치한 코라코라는 2021년 10월 리브랜딩 재오픈한 현대적인 프리미엄 올인클루시브 리조트입니다.
+            말레에서 북서쪽으로 약 177km 떨어져 있어 수상비행기로 45분이 소요됩니다.
+            100헥타르의 넓고 투명한 에메랄드 라군이 가장 큰 자랑으로, 도착하는 순간부터 사진 찍기에 바쁠 만큼 바다색이 아름답습니다.
+            활기차고 자유로운 비치클럽 분위기가 특징이며, 5개의 레스토랑을 모두 무제한으로 이용할 수 있는 프리미엄 다인어라운드 플랜을 제공합니다.
+            욕실에 숨겨진 히든 해먹이 특별한 포토스팟으로 유명합니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>100헥타르 넓은 에메랄드 라군, 바다색 최상</li>
+                <li>5개 레스토랑 다인어라운드 무제한 (이탈리안·일식·아시안·인터내셔널)</li>
+                <li>프리미엄 주류 + 소주 무제한 포함</li>
+                <li>욕실 히든 해먹 — 특별한 커플 포토스팟</li>
+                <li>스노클링도 가능한 라군 (산호·열대어 풍부)</li>
+                <li>45분 스파 트리트먼트 1회 AI에 포함</li>
+                <li>허니문리조트는 $200 할인 가능</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>활기차고 캐주얼한 편 → 조용한 휴양 원하면 부적합</li>
+                <li>말레에서 가장 먼 아톨 중 하나 (수상비행기 45분)</li>
+                <li>일부 스페셜 메뉴(테판야키 등) 별도 추가금</li>
+                <li>100개 빌라로 규모가 있어 완전한 프라이빗은 아님</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item">
+              <div class="rating-label">라군 뷰</div>
+              <div class="rating-stars">★★★★★</div>
+            </div>
+            <div class="rating-item">
+              <div class="rating-label">수중환경</div>
+              <div class="rating-stars">★★★★<span class="empty">★</span></div>
+            </div>
+            <div class="rating-item">
+              <div class="rating-label">프라이빗</div>
+              <div class="rating-stars">★★★<span class="empty">★★</span></div>
+            </div>
+            <div class="rating-item">
+              <div class="rating-label">다이닝</div>
+              <div class="rating-stars">★★★★★</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 가격 비교 — 두 여행사 나란히 -->
+      <div class="block">
+        <div class="block-header">가격 비교 (1인 기준 · 3월 8일 시즌)</div>
+        <div class="block-body">
+          <div class="price-compare two-col">
+            <!-- 리얼몰디브 -->
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">프리미엄 올인 (PAI)</span>
+              </div>
+              <table class="price-table">
+                <tr><td>라군빌라 4박</td><td class="price-main">$2,768</td></tr>
+                <tr><td>비치2박+라군2박 믹스</td><td>$2,825</td></tr>
+                <tr><td>라군풀빌라 4박</td><td>$3,114</td></tr>
+                <tr><td>라군빌라+라군풀빌라 믹스</td><td>$2,941</td></tr>
+                <tr><td>1박 추가 (라군빌라)</td><td>$544</td></tr>
+                <tr><td>1박 추가 (라군풀빌라)</td><td>$633</td></tr>
+              </table>
+              <div class="promo-badge">수상비행기 45분 요금 포함</div>
+            </div>
+            <!-- 허니문리조트 -->
+            <div class="price-card">
+              <div class="price-card-header honey">
+                <span class="price-agency honey">허니문리조트</span>
+                <span class="price-plan">올인클루시브 (AI) · 1/5~4/4</span>
+              </div>
+              <table class="price-table">
+                <tr>
+                  <td>라군빌라 4박</td>
+                  <td>
+                    <div class="price-original">$2,868</div>
+                    <div class="price-discount">$2,668 <span style="font-size:10px;color:var(--text-muted)">(-$200)</span></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>비치2박+라군2박 믹스</td>
+                  <td>
+                    <div class="price-original">$2,925</div>
+                    <div class="price-discount">$2,725</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>라군풀빌라 4박</td>
+                  <td>
+                    <div class="price-original">$3,214</div>
+                    <div class="price-discount">$3,014</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>비치빌라+라군풀 믹스</td>
+                  <td>
+                    <div class="price-original">$3,099</div>
+                    <div class="price-discount">$2,899</div>
+                  </td>
+                </tr>
+                <tr><td>1박 추가 (라군빌라)</td><td>$544</td></tr>
+                <tr><td>1박 추가 (라군풀빌라)</td><td>$633</td></tr>
+              </table>
+              <div class="promo-badge">
+                <strong>현재 할인:</strong> 상시 $150 + 6/19까지 예약 시 추가 $50 = <strong>1인 최대 $200 할인</strong>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px; padding:8px 12px; background:var(--teal-light); border-radius:var(--radius); font-size:12px; color:#085041; border:1px solid #9FE1CB;">
+            💡 <strong>비교 포인트:</strong> 리얼몰디브 라군빌라 $2,768 vs 허니문리조트 할인 후 $2,668 → 허니문리조트가 $100 저렴. 단, 허니문리조트는 취소 규정이 더 엄격하니 확인 필요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 식사 플랜 -->
+      <div class="block">
+        <div class="block-header">AI 식사 플랜 포함 내용 (프리미엄 올인클루시브)</div>
+        <div class="block-body">
+          <div class="meal-grid">
+            <div class="meal-item"><div class="meal-item-label">식사 구성</div><div class="meal-item-value">3식 다인어라운드<br>5개 레스토랑 무제한</div></div>
+            <div class="meal-item"><div class="meal-item-label">주류</div><div class="meal-item-value"><span class="meal-check">✓</span> 프리미엄 브랜드 + <strong>소주</strong> 포함</div></div>
+            <div class="meal-item"><div class="meal-item-label">미니바</div><div class="meal-item-value"><span class="meal-check">✓</span> 맥주·와인·스낵 (1일 1회 리필)</div></div>
+            <div class="meal-item"><div class="meal-item-label">스파</div><div class="meal-item-value"><span class="meal-check">✓</span> 45분 트리트먼트 1회 포함</div></div>
+            <div class="meal-item"><div class="meal-item-label">선셋 크루즈</div><div class="meal-item-value"><span class="meal-check">✓</span> 1회 포함</div></div>
+            <div class="meal-item"><div class="meal-item-label">수상스포츠</div><div class="meal-item-value"><span class="meal-check">✓</span> 카약·SUP·윈드서핑 등</div></div>
+            <div class="meal-item"><div class="meal-item-label">스노클링 장비</div><div class="meal-item-value"><span class="meal-check">✓</span> 무료 대여</div></div>
+            <div class="meal-item"><div class="meal-item-label">Wi-Fi</div><div class="meal-item-value"><span class="meal-check">✓</span> 무료</div></div>
+          </div>
+          <div class="restaurant-list">
+            <ul>
+              <li><span class="rest-name">① Tazäa</span><span class="rest-desc">인터내셔널 — 조·중·석식 (알라카르테+뷔페)</span></li>
+              <li><span class="rest-name">② Acquapazza</span><span class="rest-desc">이탈리안 — 중·석식 알라카르테 (비치클럽 분위기)</span></li>
+              <li><span class="rest-name">③ Ginger Moon</span><span class="rest-desc">아시안 — 석식 알라카르테 (스트리트 푸드 컨셉)</span></li>
+              <li><span class="rest-name">④ Teien</span><span class="rest-desc">일식 — 석식 (데판야키·스시·쿠시야키 / 데판야키는 추가금)</span></li>
+              <li><span class="rest-name">⑤ MYCOFFEE</span><span class="rest-desc">커피숍 — 자체 로스팅 커피·샌드위치·수제 젤라또</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 허니문 특전 -->
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>12개월 이내</strong> 필수 · 4박 이상 투숙</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🌹</span>로맨틱 침대 데코레이션 1회</li>
+            <li><span class="hm-icon">🍽</span>Acquapazza 또는 Ginger Moon에서 허니문 디너 1회 (체크인 후 사전 예약 필수)</li>
+            <li><span class="hm-icon">🎂</span>기념 케이크 1회</li>
+            <li><span class="hm-icon">🛁</span>아로마틱 버블배스 + 로맨틱 턴다운 서비스 1회 (사전 요청 필수)</li>
+          </ul>
+          <div class="hm-comment ok">
+            💬 <strong>특전 평가:</strong> 허니문 디너가 포함된 점이 강점. 단, 별도 마사지나 플로팅 조식은 없음. 스파 1회는 AI 기본 포함 사항. 두 여행사 특전 내용 동일.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 2. 아나네아 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="ananea" id="section-ananea">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">02 / 09</div>
+          <div class="resort-name">아나네아</div>
+          <div class="resort-name-en">Ananea Madivaru Maldives</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">노스 아리 아톨</span>
+            <span class="meta-pill pill-blue">수상비행기 20분</span>
+            <span class="meta-pill pill-amber">2025년 3월 오픈 · 최신상</span>
+            <span class="meta-pill pill-gray">빌라 110개 (두 섬)</span>
+            <span class="meta-pill pill-blue">허니문리조트</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#라군중심</span>
+            <span class="tag">#수상비행기최근접</span>
+            <span class="tag">#한식당포함</span>
+            <span class="tag">#두섬연결</span>
+            <span class="tag">#허니문리조트추천1위</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            2025년 3월 오픈한 몰디브 최신 럭셔리 리조트입니다. 노스 아리 아톨에 위치하며 두 개의 프라이빗 섬이 오버워터 통로로 연결된 독특한 구조를 갖추고 있습니다.
+            말레에서 수상비행기로 단 20분 거리의 최근접 수상비행기 리조트 중 하나로, 이동 피로가 적습니다.
+            <strong>몰디브 유일의 한식당(Seoul House)</strong>을 포함한 9개의 레스토랑을 보유하고 있어 식도락 만족도가 뛰어납니다.
+            워터풀빌라 라군뷰에 해먹이 있어 허니문리조트 담당자가 가장 추천하는 객실 조합입니다.
+            신상 리조트 특성상 시설이 최신이며, 성수기 객실이 빠르게 마감되는 인기 리조트입니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>말레에서 수상비행기 20분 — 가장 짧은 이동시간</li>
+                <li>2025년 3월 오픈 — 모든 시설 최신</li>
+                <li>몰디브 유일 한식당(Seoul House) 포함 9개 레스토랑</li>
+                <li>두 섬 연결 구조 — 독특한 섬 경험</li>
+                <li>워터풀빌라 라군뷰에 해먹 있음</li>
+                <li>중앙 라군이 두 섬 사이에 형성 — 뽕따색 바다 최상급</li>
+                <li>허니문리조트 담당자 가장 추천 리조트</li>
+                <li>HB+ 예약 시 AI 무료 업그레이드 조건 있음</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>2025년 오픈으로 온라인 후기 절대적으로 부족</li>
+                <li>성수기 객실 빠른 마감 → 서둘러 예약 필요</li>
+                <li>허니문리조트 단독 취급 (리얼몰디브 없음)</li>
+                <li>기본 플랜이 HB(조석식)로 별도 확인 필요</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">프라이빗</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">다이닝</div><div class="rating-stars">★★★★★</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 1/11~4/10 성수기)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header honey">
+                <span class="price-agency honey">허니문리조트</span>
+                <span class="price-plan">HB (조석식) / HB+ (=AI 무료 업그레이드)</span>
+              </div>
+              <table class="price-table">
+                <tr>
+                  <td>워터풀빌라 4박 <span style="font-size:10px;color:var(--teal)">[인기!]</span></td>
+                  <td>
+                    <div>HB: $2,982 → <span class="price-discount">$2,782</span></div>
+                    <div style="font-size:11px;color:var(--ocean-mid)">HB+(=AI): $3,322 → $3,122</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>워터풀빌라 라군뷰 4박</td>
+                  <td>
+                    <div>HB: $3,064 → <span class="price-discount">$2,864</span></div>
+                    <div style="font-size:11px;color:var(--ocean-mid)">HB+(=AI): $3,404 → $3,204</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>비치풀빌라2박+워터풀빌라2박 <span style="font-size:10px;color:var(--teal)">[추천조합]</span></td>
+                  <td>
+                    <div>HB: $2,946 → <span class="price-discount">$2,746</span></div>
+                    <div style="font-size:11px;color:var(--ocean-mid)">HB+(=AI): $3,286 → $3,086</div>
+                  </td>
+                </tr>
+                <tr><td>1박 추가 (워터풀빌라, HB)</td><td>$489</td></tr>
+                <tr><td>1박 추가 (워터풀빌라, HB+)</td><td>$574</td></tr>
+              </table>
+              <div class="promo-badge">
+                <strong>⭐ 핵심 조건:</strong> <strong>11월 30일 이전 예약 시</strong> HB+ → AI 무료 업그레이드 적용. 즉 지금 예약하면 HB+ 가격에 AI(올인클루시브) 이용 가능!<br>
+                <strong>할인:</strong> 상시 $150 + 6/19 이전 $50 = 1인 최대 $200 할인
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">AI 식사 플랜 포함 내용 (HB+ = 다인어라운드 AI)</div>
+        <div class="block-body">
+          <div class="meal-grid">
+            <div class="meal-item"><div class="meal-item-label">식사 구성</div><div class="meal-item-value">조석식 뷔페 + 7개 알라카르테 다인어라운드</div></div>
+            <div class="meal-item"><div class="meal-item-label">주류</div><div class="meal-item-value"><span class="meal-check">✓</span> 모든 레스토랑·바 무제한</div></div>
+            <div class="meal-item"><div class="meal-item-label">미니바</div><div class="meal-item-value"><span class="meal-check">✓</span> 1일 1회 리필</div></div>
+            <div class="meal-item"><div class="meal-item-label">스파</div><div class="meal-item-value"><span class="meal-cross">—</span> 15% 할인만</div></div>
+            <div class="meal-item"><div class="meal-item-label">선셋 크루즈</div><div class="meal-item-value"><span class="meal-check">✓</span> AI에 포함</div></div>
+            <div class="meal-item"><div class="meal-item-label">스노클링 장비</div><div class="meal-item-value"><span class="meal-check">✓</span> 무료 대여</div></div>
+          </div>
+          <div class="restaurant-list">
+            <ul>
+              <li><span class="rest-name">The Gallery</span><span class="rest-desc">메인 뷔페 — 조·중·석식</span></li>
+              <li><span class="rest-name">Seoul House</span><span class="rest-desc">🇰🇷 한식 — 몰디브 유일 한식당!</span></li>
+              <li><span class="rest-name">Baan Talay</span><span class="rest-desc">태국식</span></li>
+              <li><span class="rest-name">Tamarind</span><span class="rest-desc">인도식</span></li>
+              <li><span class="rest-name">FLAME</span><span class="rest-desc">그릴 레스토랑</span></li>
+              <li><span class="rest-name">LUNA</span><span class="rest-desc">지중해식 오버워터 (6박 이상 시 무료, 4박은 유료)</span></li>
+              <li><span class="rest-name">FLORES</span><span class="rest-desc">일본식·페루 퓨전 (Nikkei 요리)</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>6개월 이내</strong> 필수 · 4박 이상</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🌹</span>침대 장식 1회</li>
+            <li><span class="hm-icon">🍓</span>과일 바구니</li>
+            <li><span class="hm-icon">🥂</span>해변에서 스파클링 와인 1병 + 캔들 디너 1회</li>
+          </ul>
+          <div class="hm-comment ok">
+            💬 <strong>특전 평가:</strong> 캔들 디너가 포함된 점이 로맨틱한 강점. 마사지·스파는 미포함이지만 가격 대비 합리적. 리조트 자체가 신상 럭셔리라 시설 퀄리티가 특전을 상쇄.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 3. 벨리간두 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="veligandu" id="section-veligandu">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">03 / 09</div>
+          <div class="resort-name">벨리간두</div>
+          <div class="resort-name-en">Veligandu Maldives Resort Island</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">노스 아리 아톨</span>
+            <span class="meta-pill pill-blue">수상비행기 20분</span>
+            <span class="meta-pill pill-gray">1984년 창립 · 2024.11 전면 리노베이션</span>
+            <span class="meta-pill pill-gray">100개 빌라</span>
+            <span class="meta-pill pill-coral">리얼몰디브</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#스노클링명소</span>
+            <span class="tag">#고래상어투어</span>
+            <span class="tag">#수상비행기최근접</span>
+            <span class="tag">#2024리노베이션</span>
+            <span class="tag">#풀빌라해먹없음주의</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            1984년 창립된 몰디브 최초 리조트 중 하나로, 2024년 11월 18개월에 걸친 대대적인 리노베이션 후 재오픈했습니다.
+            노스 아리 아톨에 위치하며, 말레에서 수상비행기로 20분이면 도착하는 가장 가까운 수상비행기 구간입니다.
+            라스두 아톨 인근에 위치해 연중 고래상어 투어가 가능하고, 스노클링 명소로 오랫동안 명성을 유지해 온 곳입니다.
+            <strong>주의: 오션풀빌라(신축 수영장 딸린 객실)에는 해먹이 없으며, 해먹이 있는 것은 일반 오션빌라입니다.</strong>
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>말레 수상비행기 20분 — 가장 짧은 이동</li>
+                <li>2024년 11월 전면 리노베이션 — 신축 수준의 시설</li>
+                <li>고래상어 투어 연중 가능 (라스두 아톨 인근)</li>
+                <li>스노클링 명소 — 다이나믹한 수중환경</li>
+                <li>에메랄드 라군과 수중환경 균형 잘 잡힘</li>
+                <li>친절한 서비스, 한국인 취향 맞는 세심함</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점 · 주의사항</div>
+              <ul>
+                <li>⚠️ <strong>오션풀빌라(수영장 객실)에 해먹 없음</strong> — 해먹 원하면 일반 오션빌라 선택</li>
+                <li>허니문 특전이 단순한 편 (샴페인·과일바구니·베드데코)</li>
+                <li>중식이 기본 AI 플랜에 없음 (조석식+음료 패키지)</li>
+                <li>기본 HB+Bev 플랜은 올인클루시브 아님</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">프라이빗</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">다이닝</div><div class="rating-stars">★★★<span class="empty">★★</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 7월 31일까지 특가)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">AI 올인 · 2025년 7월 31일까지 특가</span>
+              </div>
+              <table class="price-table">
+                <tr><td>오션 풀빌라 4박</td><td class="price-main">$2,850</td></tr>
+                <tr><td>썬셋 오션 풀빌라 4박</td><td>$3,228</td></tr>
+                <tr><td>오션 자쿠지 빌라 4박 (해먹 없음)</td><td>$2,472</td></tr>
+                <tr><td>썬셋 오션 빌라 4박 (해먹 없음)</td><td>$2,640</td></tr>
+                <tr><td>비치2박+오션풀2박 믹스</td><td>$2,605</td></tr>
+                <tr><td>1박 추가 (오션풀빌라)</td><td>$606</td></tr>
+              </table>
+              <div class="promo-badge" style="background:var(--amber-light);color:#633806;border-color:#FAC775">
+                ⚠️ <strong>해먹 주의:</strong> 오션풀빌라(수영장 있는 객실)에는 해먹 없음. HB+Bev 플랜은 조석식+음료만 포함 (AI보다 저렴하나 중식 별도)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">AI 올인 포함 내용</div>
+        <div class="block-body">
+          <div class="meal-grid">
+            <div class="meal-item"><div class="meal-item-label">식사</div><div class="meal-item-value">조·석식 뷔페 (Dhonveli 레스토랑)</div></div>
+            <div class="meal-item"><div class="meal-item-label">주류</div><div class="meal-item-value"><span class="meal-check">✓</span> Thundi Bar·Raalhu Bar 무제한</div></div>
+            <div class="meal-item"><div class="meal-item-label">미니바</div><div class="meal-item-value"><span class="meal-cross">—</span> AI 기본 미포함</div></div>
+            <div class="meal-item"><div class="meal-item-label">스파</div><div class="meal-item-value"><span class="meal-cross">—</span> 20% 할인만</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>12개월 이내</strong> 필수</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🥂</span>샴페인 반병</li>
+            <li><span class="hm-icon">🍓</span>과일 바구니</li>
+            <li><span class="hm-icon">🌹</span>스페셜 베드 데코레이션</li>
+          </ul>
+          <div class="hm-comment weak">
+            💬 <strong>특전 평가:</strong> 6개 리조트 중 가장 단순한 특전. 마사지·케이크·디너 없음. 리조트 자체 강점(스노클링, 고래상어)이 더 매력 포인트.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 4. 디구파루 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="dhigufaru" id="section-dhigufaru">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">04 / 09</div>
+          <div class="resort-name">디구파루</div>
+          <div class="resort-name-en">Dhigufaru Island Resort</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">바아 아톨 (유네스코)</span>
+            <span class="meta-pill pill-coral">수상비행기 40분</span>
+            <span class="meta-pill pill-gray">2016년 오픈</span>
+            <span class="meta-pill pill-gray">83개 빌라</span>
+            <span class="meta-pill pill-coral">리얼몰디브</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#몰디브최상급라군</span>
+            <span class="tag">#유네스코보존구역</span>
+            <span class="tag">#거북이가오리</span>
+            <span class="tag">#조용한신혼부부</span>
+            <span class="tag">#만타레이인접</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            바아 아톨 유네스코 생물권 보존구역 안에 위치한 디구파루는 몰디브에서 손에 꼽히는 최상급 라군과 백사장을 자랑합니다.
+            "라군 색이 가장 예쁜 리조트"로 자주 언급되며, 데크에 앉아 물멍만 때려도 힐링이 된다는 평이 많습니다.
+            유네스코 보존구역 하니파루베이에 인접해 만타레이 스노클링이 가능하고, 리프가 가까워 방 앞에서 거북이·가오리를 만나는 경험도 흔합니다.
+            조용하고 프라이빗한 분위기로 신혼부부에게 이상적이며, 2026년 6월 30일까지 예약 시 객실 1단계 무료 업그레이드 프로모션이 진행 중입니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>몰디브 최상급 라군 — 바다색이 특히 맑고 예쁨</li>
+                <li>유네스코 보존구역 — 거북이·가오리·만타레이</li>
+                <li>수중환경 최상급, 방 앞 스노클링 바로 가능</li>
+                <li>조용하고 프라이빗한 분위기 (허니문 최적)</li>
+                <li>AID 다인어라운드 플랜 — 석식 알라카르테 선택 가능</li>
+                <li>6/30까지 예약 시 객실 1단계 무료 업그레이드!</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>섬이 작아 장기 투숙 시 동선 단조로울 수 있음</li>
+                <li>레스토랑 수 적음 (3개)</li>
+                <li>허니문 특전 기준이 6개월 이내 (12개월 아님)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">프라이빗</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">다이닝</div><div class="rating-stars">★★★<span class="empty">★★</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 올인 / AID 올인다인)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">올인 / AID 올인다인 선택</span>
+              </div>
+              <table class="price-table">
+                <tr><td colspan="2" style="background:var(--ocean-light);color:var(--ocean-deep);font-weight:600;font-size:11px">올인 (All Inclusive)</td></tr>
+                <tr><td>선라이즈 워터빌라 4박</td><td>$2,155</td></tr>
+                <tr><td>선셋 워터빌라 4박</td><td>$2,255</td></tr>
+                <tr><td>선라이즈 풀 워터빌라 4박</td><td>$2,345</td></tr>
+                <tr><td>선셋 풀 워터빌라 4박</td><td>$2,433</td></tr>
+                <tr><td>비치+워터풀 2박+2박 믹스</td><td>$2,046~2,164</td></tr>
+                <tr><td colspan="2" style="background:var(--teal-light);color:#085041;font-weight:600;font-size:11px">AID 올인다인 (석식 알라카르테 선택 추가)</td></tr>
+                <tr><td>선라이즈 워터빌라 4박</td><td>$2,405</td></tr>
+                <tr><td>선라이즈 풀 워터빌라 4박</td><td>$2,595</td></tr>
+                <tr><td>선셋 풀 워터빌라 4박</td><td>$2,683</td></tr>
+                <tr><td>비치+워터풀 AID 믹스</td><td>$2,296~2,477</td></tr>
+                <tr><td>1박 추가 (선라이즈 워터)</td><td>$418</td></tr>
+              </table>
+              <div class="promo-badge">
+                🎁 <strong>6/30까지 예약 시</strong> 객실 1단계 무료 업그레이드 진행 중! (워터빌라 → 풀워터빌라 등)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">AI / AID 포함 내용</div>
+        <div class="block-body">
+          <div class="meal-grid">
+            <div class="meal-item"><div class="meal-item-label">식사 (올인)</div><div class="meal-item-value">3식 뷔페 (Dhandifulhu)</div></div>
+            <div class="meal-item"><div class="meal-item-label">식사 (AID)</div><div class="meal-item-value">3식 + 석식 4코스 세트디너 선택</div></div>
+            <div class="meal-item"><div class="meal-item-label">주류</div><div class="meal-item-value"><span class="meal-check">✓</span> 식사시간 + 바 무제한</div></div>
+            <div class="meal-item"><div class="meal-item-label">스파</div><div class="meal-item-value"><span class="meal-cross">—</span> 20% 할인</div></div>
+            <div class="meal-item"><div class="meal-item-label">스노클링 가이드</div><div class="meal-item-value"><span class="meal-check">✓</span> 하우스리프 가이드 주 2회</div></div>
+            <div class="meal-item"><div class="meal-item-label">선셋 피싱</div><div class="meal-item-value"><span class="meal-check">✓</span> 1회 (주 3회 진행)</div></div>
+            <div class="meal-item"><div class="meal-item-label">카약</div><div class="meal-item-value"><span class="meal-check">✓</span> 45분 1회 무료</div></div>
+            <div class="meal-item"><div class="meal-item-label">미니바</div><div class="meal-item-value"><span class="meal-check">✓</span> 1일 1회 리필</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>6개월 이내</strong> 필수</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🍷</span>와인 1병</li>
+            <li><span class="hm-icon">🌹</span>침대 데코레이션</li>
+            <li><span class="hm-icon">🥞</span>풀빌라 투숙 시 플로팅 조식 1회 (사전 예약 필수)</li>
+          </ul>
+          <div class="hm-comment ok">
+            💬 <strong>특전 평가:</strong> 풀빌라 선택 시 플로팅 조식이 포함되는 점이 강점. 청첩장 기준이 6개월로 짧으니 주의. 마사지·케이크 없음.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 5. 푸라베리 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="furaveri" id="section-furaveri">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">05 / 09</div>
+          <div class="resort-name">푸라베리</div>
+          <div class="resort-name-en">Furaveri Maldives</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">라아 아톨</span>
+            <span class="meta-pill pill-coral">수상비행기 45분</span>
+            <span class="meta-pill pill-gray">2016년 오픈</span>
+            <span class="meta-pill pill-gray">168개 빌라</span>
+            <span class="meta-pill pill-coral">리얼몰디브</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#해먹있는워터빌라</span>
+            <span class="tag">#로맨틱룸컨디션</span>
+            <span class="tag">#초보자스노클링최적</span>
+            <span class="tag">#6개레스토랑</span>
+            <span class="tag">#커플마사지포함</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            라아 아톨 23헥타르 자연 산호섬에 위치한 푸라베리는 "실제로 가보면 사진보다 훨씬 좋다"는 평이 많은 숨은 명소입니다.
+            한국인 방문이 적어 후기를 찾기 어렵지만, 방문한 분들의 만족도는 최상급입니다.
+            <strong>오션빌라 인피니티 위드 해먹</strong> 타입이 있어 해먹 있는 워터빌라를 원하는 커플에게 적합합니다.
+            하우스리프까지 거리가 가깝고 유속이 잔잔해 초보자도 방 앞에서 바로 스노클링을 즐길 수 있습니다.
+            카잔 지붕 + 프라이빗 살라 + 큰 데크의 로맨틱한 빌라 분위기가 특히 뛰어나며, 허니문 특전에 60분 커플 마사지가 포함된 유일한 리얼몰디브 리조트입니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>해먹 있는 워터빌라(오션빌라 인피니티) 있음</li>
+                <li>허니문 특전에 60분 커플 마사지 포함</li>
+                <li>유속 잔잔 — 초보자 스노클링 최적 환경</li>
+                <li>로맨틱한 빌라 컨디션 (카잔 지붕·개인풀·해먹)</li>
+                <li>6개 레스토랑 크레딧 다인어라운드</li>
+                <li>조용하고 프라이빗 (한국인 방문 적어 오히려 특별)</li>
+                <li>비치풀빌라 → 자쿠지 무료 업그레이드 프로모션</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>한국어 후기 거의 없어 정보 수집 어려움</li>
+                <li>식사가 크레딧 방식 — 초과 시 추가금 발생</li>
+                <li>말레에서 가장 먼 아톨 (수상비행기 45분)</li>
+                <li>페스티브 시즌(12/24~12/31) 일부 레스토랑 미운영</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">프라이빗</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">로맨틱</div><div class="rating-stars">★★★★★</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 7월 31일까지 특가)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">AI 올인</span>
+              </div>
+              <table class="price-table">
+                <tr><td>오션빌라 인피니티 위드 해먹 4박 ⭐</td><td class="price-main">$2,242</td></tr>
+                <tr><td>오션 풀빌라 선라이즈 4박</td><td>$2,388</td></tr>
+                <tr><td>오션 풀빌라 선셋 4박</td><td>$2,490</td></tr>
+                <tr><td>비치빌라+오션인피니티 2+2 믹스</td><td>$2,413</td></tr>
+                <tr><td>비치빌라+오션풀 선라이즈 2+2</td><td>$2,510</td></tr>
+                <tr><td>비치빌라+오션풀 선셋 2+2</td><td>$2,578</td></tr>
+                <tr><td>1박 추가 (인피니티 해먹)</td><td>$551</td></tr>
+              </table>
+              <div class="promo-badge">
+                🎁 비치풀빌라 → 비치풀빌라 위드 자쿠지 무료 업그레이드 (7/31까지, 객실 가능 시)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">AI 포함 내용 (6개 레스토랑 크레딧 방식)</div>
+        <div class="block-body">
+          <div class="meal-grid">
+            <div class="meal-item"><div class="meal-item-label">조식</div><div class="meal-item-value">Jaafaiy 레스토랑 인터내셔널 뷔페</div></div>
+            <div class="meal-item"><div class="meal-item-label">중·석식</div><div class="meal-item-value">6개 레스토랑 크레딧 (중식 $30 / 석식 $40)</div></div>
+            <div class="meal-item"><div class="meal-item-label">주류</div><div class="meal-item-value"><span class="meal-check">✓</span> Udhares Bar 무제한</div></div>
+            <div class="meal-item"><div class="meal-item-label">미니바</div><div class="meal-item-value"><span class="meal-check">✓</span> 1일 1회 리필</div></div>
+            <div class="meal-item"><div class="meal-item-label">스파</div><div class="meal-item-value"><span class="meal-cross">—</span> 10% 할인</div></div>
+            <div class="meal-item"><div class="meal-item-label">풀빌라 플로팅 조식</div><div class="meal-item-value"><span class="meal-check">✓</span> 1회 포함</div></div>
+          </div>
+          <div class="restaurant-list">
+            <ul>
+              <li><span class="rest-name">Jaafaiy</span><span class="rest-desc">인터내셔널 뷔페 (메인)</span></li>
+              <li><span class="rest-name">Raiyvilla</span><span class="rest-desc">아시안 퓨전 ($40 크레딧)</span></li>
+              <li><span class="rest-name">Amigos</span><span class="rest-desc">멕시칸 ($40 크레딧)</span></li>
+              <li><span class="rest-name">Ocean Spice</span><span class="rest-desc">인도식 ($40 크레딧)</span></li>
+              <li><span class="rest-name">Olives & Vines</span><span class="rest-desc">지중해식 ($40 크레딧)</span></li>
+              <li><span class="rest-name">Aqua</span><span class="rest-desc">수상 레스토랑 ($40 크레딧)</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>12개월 이내</strong> 필수</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🍷</span>와인 1병 + 과일 플레이터</li>
+            <li><span class="hm-icon">🌹</span>허니문 침대 장식</li>
+            <li><span class="hm-icon">🎂</span>기념 케이크</li>
+            <li><span class="hm-icon">🛁</span>스페셜 턴다운 서비스</li>
+            <li><span class="hm-icon">💆</span><strong>60분 커플 마사지 1회</strong> (체크인 후 사전 예약 필수)</li>
+          </ul>
+          <div class="hm-comment good">
+            💬 <strong>특전 평가:</strong> 리얼몰디브 6개 리조트 중 허니문 특전이 가장 풍성함. 특히 <strong>60분 커플 마사지 포함</strong>은 다른 리조트에 없는 차별점. 케이크·와인·데코까지 완비.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 6. 푸시파루 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="fushifaru" id="section-fushifaru">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">06 / 09</div>
+          <div class="resort-name">푸시파루</div>
+          <div class="resort-name-en">Fushifaru Maldives</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">라비야니 아톨</span>
+            <span class="meta-pill pill-coral">수상비행기 35분</span>
+            <span class="meta-pill pill-gray">2017년 오픈 · 2023 전객실 리노</span>
+            <span class="meta-pill pill-gray">63개 빌라 (소형 부티크)</span>
+            <span class="meta-pill pill-coral">리얼몰디브</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#소형부티크</span>
+            <span class="tag">#만타시즌9~3월</span>
+            <span class="tag">#샌드뱅크포토스팟</span>
+            <span class="tag">#버틀러서비스</span>
+            <span class="tag">#프라이빗최고</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            라비야니 아톨에 위치한 63개 빌라의 소형 부티크 럭셔리 리조트입니다. 2017년 오픈 후 2023년 전 객실 리노베이션을 마쳐 시설이 깔끔합니다.
+            말레에서 거의 정북 방향이라 직선 비행이 가능해 수상비행기 35분으로 라아/바아 아톨보다 오히려 빠릅니다.
+            긴 샌드뱅크(모래톱)가 시그니처 포토스팟이며, 바로 옆 푸시파루 틸라(만타 클리닝 스테이션)에서 9~3월 만타 시즌을 즐길 수 있습니다.
+            TripAdvisor 평점 4.8/5, 버틀러 서비스(WhatsApp 소통)로 세심한 케어를 제공합니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>63개 소형 부티크 — 붐비지 않는 극도의 프라이빗</li>
+                <li>수상비행기 35분 (라아/바아보다 빠름)</li>
+                <li>만타시즌(9~3월) — 3월은 막바지 시즌</li>
+                <li>긴 샌드뱅크 — 인생사진 포토스팟</li>
+                <li>버틀러 서비스 (WhatsApp으로 즉각 응대)</li>
+                <li>TripAdvisor 4.8/5 고평점</li>
+                <li>수중 조형물 스노클링 (인스타그래머블)</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>허니문 특전이 가장 단순 (와인+턴다운만)</li>
+                <li>3월은 만타 시즌 막바지 — 보장 불가</li>
+                <li>레스토랑 3개 (식사 다양성 부족)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">프라이빗</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">서비스</div><div class="rating-stars">★★★★★</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · AI 올인)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">AI 올인 · 수상비행기 35분 포함</span>
+              </div>
+              <table class="price-table">
+                <tr><td>자쿠지 워터빌라 4박</td><td>$2,764</td></tr>
+                <tr><td>풀 워터빌라 4박</td><td class="price-main">$2,992</td></tr>
+                <tr><td>프리미엄 풀 워터빌라 4박</td><td>$3,106</td></tr>
+                <tr><td>비치선셋2박+자쿠지워터2박 믹스</td><td>$2,581</td></tr>
+                <tr><td>비치선셋2박+풀워터2박 믹스</td><td>$2,695</td></tr>
+                <tr><td>자쿠지워터2박+풀워터2박 믹스</td><td>$2,830</td></tr>
+                <tr><td>1박 추가 (풀워터빌라)</td><td>$607</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>12개월 이내</strong> 필수</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🍷</span>와인 1병 + 스낵</li>
+            <li><span class="hm-icon">🛁</span>스페셜 턴다운 서비스 1회</li>
+          </ul>
+          <div class="hm-comment weak">
+            💬 <strong>특전 평가:</strong> 9개 리조트 중 가장 단순한 특전. 리조트 자체의 부티크 서비스·버틀러·만타 시즌이 특전을 대신하는 포지션. 특전보다 리조트 퀄리티로 승부.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 7. 라야 바이 앳모스피어 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="raaya" id="section-raaya">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">07 / 09</div>
+          <div class="resort-name">라야 바이 앳모스피어</div>
+          <div class="resort-name-en">Raaya by Atmosphere</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">라아 아톨 (라 아톨)</span>
+            <span class="meta-pill pill-coral">수상비행기 45~50분</span>
+            <span class="meta-pill pill-amber">2023년 오픈 · 신생</span>
+            <span class="meta-pill pill-gray">187개 빌라</span>
+            <span class="meta-pill pill-coral">리얼몰디브</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#레스토랑6개</span>
+            <span class="tag">#프리미엄주류포함</span>
+            <span class="tag">#스파2회포함</span>
+            <span class="tag">#성인위주</span>
+            <span class="tag">#워터빌라해먹있음</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            2023년 앳모스피어 그룹이 오픈한 신생 리조트로, 난파선 예술가 '셉(Seb)'의 이야기를 테마로 한 예술적인 인테리어가 특징입니다.
+            "먹고 마시고 놀고"에 특화된 앳모스피어 그룹답게 6개의 레스토랑과 3개의 바를 운영하며, 프리미엄 주류가 모두 무제한으로 포함됩니다.
+            187개의 비교적 큰 섬에 위치해 성인 위주의 조용한 분위기를 즐길 수 있으며, 워터빌라에는 해먹이 있습니다.
+            스파 트리트먼트 2회가 AI 플랜에 포함되어 있어 투숙 중 별도 비용 없이 스파를 즐길 수 있습니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>6개 레스토랑 + 3바 — 식도락 만족도 최상</li>
+                <li>프리미엄 주류 모두 포함 (타 리조트보다 넓은 범위)</li>
+                <li>AI에 스파 2회 45분 포함 (4박 기준)</li>
+                <li>워터빌라에 해먹 있음 (풀빌라는 개인풀)</li>
+                <li>성인 위주 — 조용하고 커플에 적합한 분위기</li>
+                <li>10월 10일까지 예약 특가 진행 중</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>금요일 갈라디너 시 타 레스토랑 전체 운영 중단</li>
+                <li>수중환경이 라군 대비 약함 (라아 아톨 중)</li>
+                <li>대부분 객실 아동 불가 (비치풀빌라만 1명 가능)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★<span class="empty">★★</span></div></div>
+            <div class="rating-item"><div class="rating-label">다이닝</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">스파·액티비티</div><div class="rating-stars">★★★★★</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 3/20~3/31 시즌 · 10/10까지 예약 특가)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header real">
+                <span class="price-agency real">리얼몰디브</span>
+                <span class="price-plan">AI 올인 (3/20~3/31 시즌 기준)</span>
+              </div>
+              <table class="price-table">
+                <tr><td>워터빌라 4박</td><td>$2,383</td></tr>
+                <tr><td>워터빌라 위드풀 4박</td><td class="price-main">$2,545</td></tr>
+                <tr><td>비치빌라 위드풀 4박</td><td>$2,455</td></tr>
+                <tr><td>비치2박+워터2박 믹스</td><td>$2,356</td></tr>
+                <tr><td>비치2박+워터풀2박 믹스</td><td>$2,437</td></tr>
+                <tr><td>1박 추가 (워터빌라)</td><td>$575</td></tr>
+                <tr><td>1박 추가 (워터풀빌라)</td><td>$615</td></tr>
+              </table>
+              <div class="promo-badge">ℹ️ 3월 8~19일은 1/5~3/19 시즌 ($2,508 워터빌라), 3/20부터 위 가격 적용</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>6개월 이내</strong> 필수</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🌹</span>로맨틱 침대 장식</li>
+            <li><span class="hm-icon">🎂</span>허니문 케이크</li>
+            <li><span class="hm-icon">🎁</span>허니문 기프트</li>
+            <li><span class="hm-icon">🥞</span>플로팅 조식 1회 (풀빌라 투숙 시만)</li>
+            <li><span class="hm-icon">🍽</span>6박 이상 시 로맨틱 비치 디너 (4박은 해당 없음)</li>
+          </ul>
+          <div class="hm-comment ok">
+            💬 <strong>특전 평가:</strong> AI에 스파 2회가 이미 포함이라 전체 가성비는 좋음. 단 비치 디너는 6박 이상에만 해당. 청첩장 기준 6개월 주의.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 8. 앳모스피어 바루 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="varu" id="section-varu">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">08 / 09</div>
+          <div class="resort-name">앳모스피어 바루</div>
+          <div class="resort-name-en">Varu by Atmosphere</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">노스 말레 아톨</span>
+            <span class="meta-pill pill-gray">스피드보트 40~45분</span>
+            <span class="meta-pill pill-gray">2019년 오픈</span>
+            <span class="meta-pill pill-gray">108개 빌라</span>
+            <span class="meta-pill pill-blue">허니문리조트</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#스피드보트이동</span>
+            <span class="tag">#수상비행기아님</span>
+            <span class="tag">#바루프리미엄AI</span>
+            <span class="tag">#스파포함</span>
+            <span class="tag">#허니문비치디너</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            노스 말레 아톨에 위치한 앳모스피어 바루는 수상비행기가 아닌 <strong>스피드보트 40~45분</strong>으로 이동하는 리조트입니다.
+            이동 비용이 상대적으로 저렴하고 날씨에 관계없이 안정적으로 이동할 수 있는 장점이 있습니다.
+            바루 프리미엄 올인클루시브 플랜(VARU Plan)으로 운영되며, 스페셜티 레스토랑 4박 2회 이용권이 포함되어 있습니다.
+            4박 투숙 시 45분 스파 트리트먼트 1회가 포함되고, 선셋 크루즈 또는 스타게이징 크루즈 중 선택 가능합니다.
+            몰디브 전통 문화에 집중한 컨셉으로, 도착 시 전통 보두베루(Boduberu) 춤 환영과 로즈 샴페인 제공이 인상적입니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>스피드보트 이동 — 날씨 무관, 이동비용 포함</li>
+                <li>스파 45분 1회 AI에 포함 (4박 기준)</li>
+                <li>선셋 크루즈 or 스타게이징 크루즈 선택</li>
+                <li>허니문 특전에 로맨틱 비치 디너 포함</li>
+                <li>40종 이상 와인, 프리미엄 주류 포함</li>
+                <li>도착 전통춤 환영 + 로즈 샴페인 — 인상적인 체크인</li>
+                <li>허니문리조트 $200 할인 가능</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>수상비행기 경험 없음 (몰디브 하이라이트 미싱)</li>
+                <li>말레 아톨은 수중환경이 원거리 아톨보다 약한 편</li>
+                <li>레스토랑이 4개로 적고, 스페셜티는 사전예약 필수</li>
+                <li>금요일 갈라디너 시 타 레스토랑 운영 중단</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">수중환경</div><div class="rating-stars">★★★★<span class="empty">★</span></div></div>
+            <div class="rating-item"><div class="rating-label">서비스</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">가성비</div><div class="rating-stars">★★★★★</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 3/20~3/31 시즌)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header honey">
+                <span class="price-agency honey">허니문리조트</span>
+                <span class="price-plan">바루 프리미엄 AI · 10/10까지 예약 특가</span>
+              </div>
+              <table class="price-table">
+                <tr>
+                  <td>워터빌라 4박</td>
+                  <td>
+                    <div class="price-original">$2,508</div>
+                    <div class="price-discount">$2,308</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>워터빌라 위드풀 4박</td>
+                  <td>
+                    <div class="price-original">$2,999</div>
+                    <div class="price-discount">$2,799</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>비치빌라 위드풀 4박</td>
+                  <td>
+                    <div class="price-original">$2,648</div>
+                    <div class="price-discount">$2,448</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>비치2박+워터2박 믹스</td>
+                  <td>
+                    <div class="price-original">$2,428</div>
+                    <div class="price-discount">$2,228</div>
+                  </td>
+                </tr>
+                <tr><td>1박 추가 (워터빌라)</td><td>$502</td></tr>
+                <tr><td>1박 추가 (워터풀빌라)</td><td>$627</td></tr>
+              </table>
+              <div class="promo-badge">1인 $200 할인 적용가 (상시 $150 + 6/19 이전 $50)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>12개월 이내</strong> 필수 · 4박 이상</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🛁</span>로맨틱 버블배스 + 침대 장식</li>
+            <li><span class="hm-icon">🍽</span>로맨틱 비치 디너 1회</li>
+            <li><span class="hm-icon">🎂</span>허니문 케이크</li>
+            <li><span class="hm-icon">🎁</span>허니문 메멘토</li>
+          </ul>
+          <div class="hm-comment good">
+            💬 <strong>특전 평가:</strong> 비치 디너가 4박부터 포함되는 점이 강점. 버블배스+케이크+메멘토까지 구성이 탄탄함. 마사지는 없지만 스파 1회가 AI에 포함.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 9. 사이라군 + SO몰디브 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <section class="resort-section" data-resort="saii" id="section-saii">
+      <div class="resort-header">
+        <div class="resort-header-left">
+          <div class="resort-num">09 / 09</div>
+          <div class="resort-name">사이라군 + SO몰디브</div>
+          <div class="resort-name-en">SAii Lagoon + SO/ Maldives · CROSSROADS</div>
+          <div class="resort-meta">
+            <span class="meta-pill pill-blue">사우스 말레 아톨</span>
+            <span class="meta-pill pill-teal">스피드보트 15분 (최근접)</span>
+            <span class="meta-pill pill-gray">2019년(SAii) · 2024년(SO)</span>
+            <span class="meta-pill pill-blue">허니문리조트</span>
+          </div>
+          <div class="resort-tags">
+            <span class="tag">#복합단지</span>
+            <span class="tag">#14개레스토랑</span>
+            <span class="tag">#스피드보트15분</span>
+            <span class="tag">#크로스로드</span>
+            <span class="tag">#SO커플마사지포함</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">리조트 기본 정보</div>
+        <div class="block-body">
+          <p class="resort-desc">
+            말레에서 스피드보트로 단 15분 거리의 크로스로드 복합 단지 안에 위치한 두 리조트를 믹스해서 이용하는 상품입니다.
+            사이라군(SAii)에서 2박, SO몰디브에서 2박을 하는 구성으로, 두 가지 서로 다른 리조트를 경험할 수 있습니다.
+            크로스로드 단지에는 사이라군, 하드락 리조트, SO몰디브와 더불어 마리나 쇼핑·다이닝 구역이 있어 총 14개 이상의 레스토랑을 이용할 수 있습니다.
+            전통적인 몰디브 분위기(고요한 섬 휴양)보다는 다양한 경험과 편의성을 추구하는 커플에게 적합합니다.
+            SO몰디브 투숙 시 60분 커플 마사지와 플로팅 조식이 포함됩니다.
+          </p>
+          <div class="pros-cons">
+            <div class="pros">
+              <div class="pros-title">강점</div>
+              <ul>
+                <li>말레 공항에서 스피드보트 15분 — 가장 빠른 이동</li>
+                <li>복합단지 14개+ 레스토랑 이용 가능</li>
+                <li>SO 투숙 시 60분 커플 마사지 + 플로팅 조식 포함</li>
+                <li>크로스로드 마리나 쇼핑·다이닝 자유 이용</li>
+                <li>두 가지 서로 다른 리조트 경험</li>
+                <li>날씨 무관한 스피드보트 이동</li>
+                <li>허니문리조트 $200 할인 가능</li>
+              </ul>
+            </div>
+            <div class="cons">
+              <div class="cons-title">약점</div>
+              <ul>
+                <li>전통 몰디브 분위기 약함 (복합 단지 특성상)</li>
+                <li>사이라군에서는 수영장 없는 비치룸만 이용 가능</li>
+                <li>2박마다 이동 — 짐 싸고 이동하는 번거로움</li>
+                <li>라군 뷰나 수중환경이 원거리 아톨보다 약함</li>
+                <li>마리나 일부 고급 레스토랑은 $50 크레딧만 제공</li>
+              </ul>
+            </div>
+          </div>
+          <div class="rating-grid">
+            <div class="rating-item"><div class="rating-label">라군 뷰</div><div class="rating-stars">★★★<span class="empty">★★</span></div></div>
+            <div class="rating-item"><div class="rating-label">편의성</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">다이닝 다양성</div><div class="rating-stars">★★★★★</div></div>
+            <div class="rating-item"><div class="rating-label">전통 몰디브 느낌</div><div class="rating-stars">★★<span class="empty">★★★</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">가격 (1인 기준 · 1/5~5/5 성수기)</div>
+        <div class="block-body">
+          <div class="price-compare one-col">
+            <div class="price-card">
+              <div class="price-card-header honey">
+                <span class="price-agency honey">허니문리조트</span>
+                <span class="price-plan">AI 올인 · 8/31까지 예약 조건</span>
+              </div>
+              <table class="price-table">
+                <tr><td>비치룸2박+오버워터풀빌라2박 (SAii+SO) ⭐</td><td class="price-main">$2,480</td></tr>
+                <tr><td>비치룸2박+오션오버워터풀빌라2박</td><td>$2,540</td></tr>
+                <tr>
+                  <td>위 가격 · 할인 후</td>
+                  <td>
+                    <div class="price-discount">$2,280 / $2,340</div>
+                    <div style="font-size:10px;color:var(--text-light)">1인 $200 할인 적용</div>
+                  </td>
+                </tr>
+              </table>
+              <div class="promo-badge">⚠️ 사이라군 단독 상품에서는 수영장 있는 객실 선택 불가 (비치룸만 가능). SO몰디브 구간에서 오버워터풀빌라 이용.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-header">허니문 특전</div>
+        <div class="block-body honeymoon-block">
+          <div class="hm-criteria">📋 청첩장 <strong>6개월 이내</strong> 필수 · 4박 이상</div>
+          <ul class="hm-list">
+            <li><span class="hm-icon">🌹</span>[사이라군] 허니문 셋업 1회</li>
+            <li><span class="hm-icon">🍷</span>[사이라군] 와인 1병</li>
+            <li><span class="hm-icon">🥞</span>[SO몰디브] 플로팅 조식 1회</li>
+            <li><span class="hm-icon">💆</span>[SO몰디브] 60분 커플 발리니스 마사지 1회</li>
+          </ul>
+          <div class="hm-comment ok">
+            💬 <strong>특전 평가:</strong> SO 투숙 구간에 커플 마사지+플로팅 조식이 포함되어 알찬 편. 단, 두 리조트에 나뉘어 있어 동일 리조트에서의 집중된 경험은 아님.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- end report-panel -->
+</div><!-- end main-layout -->
+
+<script>
+// IntersectionObserver: 스크롤 시 지도 핀 하이라이트
+const sections = document.querySelectorAll('.resort-section');
+const pinMap = {
+  cora: 'circle-cora',
+  ananea: 'circle-ananea',
+  veligandu: 'circle-veligandu',
+  dhigufaru: 'circle-dhigufaru',
+  furaveri: 'circle-furaveri',
+  fushifaru: 'circle-fushifaru',
+  raaya: 'circle-raaya',
+  varu: 'circle-varu',
+  saii: 'circle-saii'
+};
+const nameMap = {
+  cora: { name: '코라코라', sub: '라아 아톨 · 수상비행기 45분' },
+  ananea: { name: '아나네아', sub: '노스 아리 아톨 · 수상비행기 20분' },
+  veligandu: { name: '벨리간두', sub: '노스 아리 아톨 · 수상비행기 20분' },
+  dhigufaru: { name: '디구파루', sub: '바아 아톨 (UNESCO) · 수상비행기 40분' },
+  furaveri: { name: '푸라베리', sub: '라아 아톨 · 수상비행기 45분' },
+  fushifaru: { name: '푸시파루', sub: '라비야니 아톨 · 수상비행기 35분' },
+  raaya: { name: '라야 바이 앳모스피어', sub: '라아 아톨 · 수상비행기 45~50분' },
+  varu: { name: '앳모스피어 바루', sub: '노스 말레 아톨 · 스피드보트 40~45분' },
+  saii: { name: '사이라군 + SO몰디브', sub: '사우스 말레 아톨 · 스피드보트 15분' }
+};
+
+let currentActive = null;
+
+function activatePin(resortId) {
+  if (currentActive === resortId) return;
+  currentActive = resortId;
+
+  // 모든 핀 초기화
+  Object.values(pinMap).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.setAttribute('r', '9');
+      el.setAttribute('stroke-width', '2');
+      el.setAttribute('stroke', 'white');
+    }
+  });
+
+  // 선택된 핀 강조
+  const pinId = pinMap[resortId];
+  if (pinId) {
+    const el = document.getElementById(pinId);
+    if (el) {
+      el.setAttribute('r', '12');
+      el.setAttribute('stroke-width', '3');
+      el.setAttribute('stroke', '#FFD700');
+    }
+  }
+
+  // 현재 리조트 정보 업데이트
+  const info = nameMap[resortId];
+  if (info) {
+    const box = document.getElementById('currentInfo');
+    box.innerHTML = '<div class="ci-label">현재 보는 리조트</div><div class="ci-name">' + info.name + '</div><div class="ci-sub">' + info.sub + '</div>';
+  }
+}
+
+const observer = new IntersectionObserver((entries) => {
+  let bestEntry = null;
+  let bestRatio = 0;
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
+      bestRatio = entry.intersectionRatio;
+      bestEntry = entry;
+    }
+  });
+  if (bestEntry) {
+    const id = bestEntry.target.getAttribute('data-resort');
+    if (id) activatePin(id);
+  }
+}, {
+  root: document.getElementById('reportPanel'),
+  threshold: [0.1, 0.3, 0.5],
+  rootMargin: '-10% 0px -30% 0px'
+});
+
+sections.forEach(s => observer.observe(s));
+
+// 클릭 시 해당 섹션으로 스크롤
+function scrollToSection(id) {
+  const el = document.getElementById('section-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 초기 활성화
+activatePin('cora');
+</script>
+</body>
+</html>

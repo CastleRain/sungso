@@ -1,0 +1,1168 @@
+/* ════════════════════════════════════════════════════════════════
+   몰디브 허니문 · 디자인 시스템
+   기존 maldives_report.html 스타일 추출 + 탭/카드/토너먼트 확장
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 디자인 토큰 ── */
+:root {
+  --ocean-deep: #0c447c;
+  --ocean-mid: #185FA5;
+  --ocean-light: #E6F1FB;
+  --ocean-pale: #f0f7ff;
+  --teal: #1D9E75;
+  --teal-light: #E1F5EE;
+  --coral: #D85A30;
+  --coral-light: #FAECE7;
+  --purple: #7F77DD;
+  --purple-light: #EEEDFE;
+  --amber: #BA7517;
+  --amber-light: #FAEEDA;
+  --gray-50: #f8f7f5;
+  --gray-100: #f1efe8;
+  --gray-200: #d3d1c7;
+  --gray-400: #888780;
+  --gray-600: #5f5e5a;
+  --gray-800: #2c2c2a;
+  --text: #1a1a18;
+  --text-muted: #5f5e5a;
+  --text-light: #888780;
+  --border: rgba(0,0,0,0.1);
+  --border-mid: rgba(0,0,0,0.15);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* ── 리셋 & 베이스 ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   헤더
+   ════════════════════════════════════════════════════════════════ */
+.site-header {
+  flex-shrink: 0;
+  background: var(--ocean-deep);
+  color: white;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+.site-header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.site-header h1 span { color: #9FE1CB; }
+.header-meta { display: flex; gap: 12px; align-items: center; }
+.header-badge {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+}
+.header-badge strong { color: white; }
+
+/* D-Day 카운터 */
+.dday-badge {
+  background: rgba(159,225,203,0.2);
+  border: 1px solid rgba(159,225,203,0.4);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #9FE1CB;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   탭 네비게이션
+   ════════════════════════════════════════════════════════════════ */
+.tab-nav {
+  flex-shrink: 0;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 2px;
+  z-index: 90;
+}
+.tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--ocean-mid);
+  border-bottom-color: var(--ocean-mid);
+  font-weight: 600;
+}
+.tab-icon { font-size: 14px; }
+
+/* ════════════════════════════════════════════════════════════════
+   탭 콘텐츠 영역
+   ════════════════════════════════════════════════════════════════ */
+.main-layout {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.tab-content {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: none;
+}
+.tab-content.active { display: block; }
+.tab-content::-webkit-scrollbar { width: 6px; }
+.tab-content::-webkit-scrollbar-track { background: var(--gray-100); }
+.tab-content::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+.tab-content::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ════════════════════════════════════════════════════════════════
+   탭 1: 개요 & 카드
+   ════════════════════════════════════════════════════════════════ */
+.cards-toolbar {
+  padding: 14px 20px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.sort-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sort-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-mid);
+  background: var(--gray-50);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.sort-btn:hover { border-color: var(--ocean-mid); color: var(--ocean-mid); }
+.sort-btn.active {
+  background: var(--ocean-mid);
+  color: white;
+  border-color: var(--ocean-mid);
+}
+
+.filter-group { display: flex; gap: 6px; align-items: center; }
+.filter-select {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid var(--border-mid);
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+}
+.filter-check-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* 카드 그리드 */
+.cards-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; } }
+
+.resort-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.resort-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-image {
+  height: 160px;
+  background: linear-gradient(135deg, #185FA5 0%, #1D9E75 50%, #0c447c 100%);
+  position: relative;
+  overflow: hidden;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  opacity: 0.6;
+}
+.card-transfer-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+.card-hammock-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(29,158,117,0.85);
+  color: white;
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.card-body { padding: 14px; }
+.card-name-ko { font-size: 16px; font-weight: 700; color: var(--text); }
+.card-name-en { font-size: 11px; color: var(--text-light); margin-top: 1px; margin-bottom: 8px; }
+.card-atoll { font-size: 11px; color: var(--ocean-mid); font-weight: 500; }
+
+.card-ratings {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin: 10px 0;
+}
+.card-rating-item { text-align: center; }
+.card-rating-label { font-size: 9px; color: var(--text-light); }
+.card-rating-stars { font-size: 10px; }
+
+.card-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 10px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.card-price-label { font-size: 11px; color: var(--text-muted); }
+.card-price-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ocean-deep);
+}
+.card-price-unit { font-size: 10px; color: var(--text-light); }
+
+.card-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.tier-best { background: var(--teal-light); color: #085041; }
+.tier-mid { background: var(--ocean-light); color: var(--ocean-deep); }
+.tier-simple { background: var(--gray-100); color: var(--gray-600); }
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.card-tag {
+  font-size: 10px;
+  background: var(--gray-100);
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.card-detail-btn {
+  padding: 5px 12px;
+  background: var(--ocean-mid);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.card-detail-btn:hover { background: var(--ocean-deep); }
+
+/* 카드 없음 */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.no-results-icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ════════════════════════════════════════════════════════════════
+   상세 뷰 오버레이 (기존 2열 레이아웃)
+   ════════════════════════════════════════════════════════════════ */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  background: white;
+}
+.detail-overlay.open { display: flex; flex-direction: column; }
+.detail-overlay-header {
+  flex-shrink: 0;
+  background: var(--ocean-deep);
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.detail-close-btn {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.detail-close-btn:hover { background: rgba(255,255,255,0.25); }
+
+.detail-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 지도 패널 (상세 뷰) */
+.map-panel {
+  width: 30%;
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.map-panel-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.map-panel-inner::-webkit-scrollbar { width: 4px; }
+.map-panel-inner::-webkit-scrollbar-track { background: transparent; }
+.map-panel-inner::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+.map-title {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+#detailMap { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
+.map-current-info {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--ocean-light);
+  border-radius: var(--radius);
+  border: 1px solid #B5D4F4;
+  min-height: 52px;
+  transition: all 0.2s;
+}
+.map-current-info .ci-label { font-size: 10px; color: var(--ocean-mid); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.map-current-info .ci-name { font-size: 13px; font-weight: 600; color: var(--ocean-deep); }
+.map-current-info .ci-sub { font-size: 11px; color: var(--ocean-mid); margin-top: 2px; }
+.map-legend { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.map-legend-header { background: var(--gray-100); padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.legend-items { padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+.legend-row { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-muted); }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.distance-table { margin-top: 12px; width: 100%; border-collapse: collapse; font-size: 11px; }
+.distance-table th { background: var(--gray-100); padding: 5px 8px; text-align: left; color: var(--text-muted); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); }
+.distance-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.distance-table tr:last-child td { border-bottom: none; }
+.distance-table .dist-km { color: var(--ocean-mid); font-weight: 600; }
+
+/* 리포트 패널 (상세 뷰) */
+.report-panel {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+.report-panel::-webkit-scrollbar { width: 6px; }
+.report-panel::-webkit-scrollbar-track { background: var(--gray-100); }
+.report-panel::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+.report-panel::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ── 리조트 섹션 콘텐츠 (기존 스타일 유지) ── */
+.resort-section { border-bottom: 2px solid var(--gray-100); padding: 28px 28px 32px; }
+.resort-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.resort-num { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.resort-name { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; }
+.resort-name-en { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+.resort-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+.meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid transparent; }
+.pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: #B5D4F4; }
+.pill-teal { background: var(--teal-light); color: #085041; border-color: #9FE1CB; }
+.pill-coral { background: var(--coral-light); color: #712B13; border-color: #F5C4B3; }
+.pill-amber { background: var(--amber-light); color: #633806; border-color: #FAC775; }
+.pill-purple { background: var(--purple-light); color: #3C3489; border-color: #CECBF6; }
+.pill-gray { background: var(--gray-100); color: var(--gray-600); border-color: var(--gray-200); }
+.resort-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tag { font-size: 11px; color: var(--text-muted); background: var(--gray-100); padding: 2px 8px; border-radius: 4px; }
+
+/* 블록 공통 */
+.block { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.block-header { background: var(--gray-100); padding: 8px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+.block-body { padding: 14px; }
+
+.resort-desc { font-size: 13.5px; line-height: 1.75; color: var(--text); margin-bottom: 14px; }
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.pros { padding: 10px 12px; border-radius: var(--radius); background: #f0faf5; border: 1px solid #9FE1CB; }
+.cons { padding: 10px 12px; border-radius: var(--radius); background: #fdf4ee; border: 1px solid #F5C4B3; }
+.pros-title { font-size: 11px; font-weight: 700; color: var(--teal); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.cons-title { font-size: 11px; font-weight: 700; color: var(--coral); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.pros ul, .cons ul { list-style: none; padding: 0; }
+.pros ul li, .cons ul li { font-size: 12px; line-height: 1.6; padding-left: 14px; position: relative; color: var(--text); margin-bottom: 2px; }
+.pros ul li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-size: 11px; font-weight: 700; }
+.cons ul li::before { content: '!'; position: absolute; left: 0; color: var(--coral); font-size: 11px; font-weight: 700; }
+
+.rating-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rating-item { text-align: center; padding: 8px 4px; background: var(--gray-50); border-radius: var(--radius); border: 1px solid var(--border); }
+.rating-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+.rating-stars { font-size: 13px; color: #f59e0b; letter-spacing: 1px; }
+.rating-stars .empty { color: var(--gray-200); }
+
+/* 가격 블록 */
+.price-compare { display: grid; gap: 12px; }
+.price-compare.two-col { grid-template-columns: 1fr 1fr; }
+.price-compare.one-col { grid-template-columns: 1fr; }
+.price-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.price-card-header { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+.price-card-header.real { background: var(--coral-light); border-bottom: 1px solid #F5C4B3; }
+.price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid #B5D4F4; }
+.price-agency { font-size: 12px; font-weight: 700; }
+.price-agency.real { color: var(--coral); }
+.price-agency.honey { color: var(--ocean-deep); }
+.price-plan { font-size: 11px; color: var(--text-muted); }
+.price-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.price-table tr { border-bottom: 1px solid var(--border); }
+.price-table tr:last-child { border-bottom: none; }
+.price-table td { padding: 7px 12px; }
+.price-table td:first-child { color: var(--text-muted); }
+.price-table td:last-child { text-align: right; font-weight: 600; color: var(--text); }
+.price-main { font-size: 15px !important; color: var(--text) !important; }
+.price-discount { color: var(--ocean-mid) !important; }
+.price-original { text-decoration: line-through; color: var(--text-light) !important; font-size: 11px !important; font-weight: 400 !important; }
+.promo-badge { margin: 8px 12px; padding: 6px 10px; background: var(--amber-light); border-radius: var(--radius); font-size: 11px; color: #633806; border: 1px solid #FAC775; }
+.promo-badge strong { color: #412402; }
+
+/* 식사 플랜 블록 */
+.meal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.meal-item { padding: 8px 10px; background: var(--gray-50); border-radius: var(--radius); border: 1px solid var(--border); }
+.meal-item-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; margin-bottom: 3px; }
+.meal-item-value { font-size: 12px; color: var(--text); line-height: 1.5; }
+.meal-check { color: var(--teal); font-weight: 700; }
+.meal-cross { color: var(--gray-400); }
+.restaurant-list { margin-top: 10px; }
+.restaurant-list ul { list-style: none; padding: 0; }
+.restaurant-list li { font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text); display: flex; align-items: baseline; gap: 6px; }
+.restaurant-list li:last-child { border-bottom: none; }
+.rest-name { font-weight: 600; min-width: 100px; }
+.rest-desc { color: var(--text-muted); }
+
+/* 허니문 특전 블록 */
+.hm-criteria { display: inline-flex; align-items: center; gap: 6px; background: #fdf4ee; border: 1px solid #F5C4B3; border-radius: var(--radius); padding: 5px 10px; font-size: 12px; color: #712B13; margin-bottom: 10px; }
+.hm-list { list-style: none; padding: 0; margin-bottom: 10px; }
+.hm-list li { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--text); line-height: 1.5; }
+.hm-list li:last-child { border-bottom: none; }
+.hm-icon { color: #e91e8c; font-size: 13px; flex-shrink: 0; }
+.hm-comment { padding: 8px 12px; border-radius: var(--radius); font-size: 12px; line-height: 1.6; border-left: 3px solid; }
+.hm-comment.good { background: var(--teal-light); border-color: var(--teal); color: #085041; }
+.hm-comment.ok { background: var(--ocean-light); border-color: var(--ocean-mid); color: var(--ocean-deep); }
+.hm-comment.weak { background: var(--amber-light); border-color: var(--amber); color: #633806; }
+
+/* 유튜브/이미지 섹션 (상세 뷰) */
+.media-section { margin-top: 20px; }
+.media-images {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.media-thumb {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--gray-100);
+  cursor: pointer;
+}
+.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.media-thumb:hover img { opacity: 0.85; }
+.youtube-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.youtube-frame {
+  aspect-ratio: 16/9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+.youtube-frame iframe { width: 100%; height: 100%; border: none; }
+.youtube-empty {
+  aspect-ratio: 16/9;
+  border-radius: var(--radius);
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   탭 2: 가격 비교 테이블
+   ════════════════════════════════════════════════════════════════ */
+.price-tab-header {
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.price-tab-header h2 { font-size: 14px; font-weight: 600; color: var(--text); margin-right: 4px; }
+.couple-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.toggle-switch {
+  width: 32px; height: 18px;
+  background: var(--gray-200);
+  border-radius: 9px;
+  position: relative;
+  transition: background 0.2s;
+}
+.toggle-switch.on { background: var(--ocean-mid); }
+.toggle-knob {
+  width: 14px; height: 14px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.on .toggle-knob { left: 16px; }
+
+.price-table-wrap { padding: 20px; overflow-x: auto; }
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.compare-table th {
+  background: var(--ocean-deep);
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.compare-table th:hover { background: var(--ocean-mid); }
+.compare-table th.sorted { background: var(--teal); }
+.sort-indicator { margin-left: 4px; opacity: 0.7; }
+.compare-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: var(--gray-50); }
+.td-resort-name { font-weight: 600; color: var(--text); }
+.td-resort-name small { display: block; font-size: 10px; color: var(--text-light); font-weight: 400; }
+.td-price {
+  text-align: right;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.td-price .orig { font-size: 10px; color: var(--text-light); text-decoration: line-through; display: block; }
+.td-price.best { color: var(--teal); }
+.td-price.best .price-val { background: var(--teal-light); padding: 2px 6px; border-radius: 4px; }
+.td-price.na { color: var(--gray-400); font-weight: 400; font-style: italic; }
+.td-agency { font-size: 11px; }
+.td-plan { font-size: 11px; color: var(--text-muted); }
+.col-best-badge {
+  font-size: 9px;
+  background: var(--teal-light);
+  color: #085041;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   탭 3: 지도
+   ════════════════════════════════════════════════════════════════ */
+.map-tab-body {
+  display: flex;
+  height: 100%;
+}
+.map-tab-left {
+  width: 35%;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: white;
+  overflow-y: auto;
+  padding: 16px;
+}
+.map-tab-right {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+#mainSvgMap { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
+.leaflet-toggle-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border-mid);
+  background: var(--gray-50);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.leaflet-toggle-btn:hover, .leaflet-toggle-btn.open { background: var(--ocean-light); color: var(--ocean-deep); border-color: var(--ocean-mid); }
+#leafletMapContainer {
+  height: 400px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: none;
+}
+#leafletMapContainer.visible { display: block; }
+.map-resort-info {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.map-resort-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+
+/* ════════════════════════════════════════════════════════════════
+   탭 4: 토너먼트
+   ════════════════════════════════════════════════════════════════ */
+.tournament-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+.tournament-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.tournament-subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* 설정 화면 */
+.tournament-setup {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.setup-item label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+.setup-slider { width: 100%; accent-color: var(--ocean-mid); }
+.setup-slider-val { font-size: 11px; color: var(--ocean-mid); font-weight: 600; float: right; }
+.setup-start-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--ocean-mid);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.setup-start-btn:hover { background: var(--ocean-deep); }
+
+/* 대결 화면 */
+.tournament-match {
+  display: none;
+}
+.tournament-match.active { display: block; }
+.match-progress {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.match-progress-bar {
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 2px;
+  margin: 8px 0 20px;
+  overflow: hidden;
+}
+.match-progress-fill {
+  height: 100%;
+  background: var(--ocean-mid);
+  border-radius: 2px;
+  transition: width 0.4s;
+}
+.match-vs-label {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gray-200);
+  margin-bottom: 16px;
+  letter-spacing: 4px;
+}
+.match-cards {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.match-vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 60px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gray-400);
+}
+.match-resort-card {
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+}
+.match-resort-card:hover {
+  border-color: var(--ocean-mid);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.match-resort-card.selected {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.2);
+}
+.match-card-img {
+  height: 140px;
+  background: linear-gradient(135deg, #185FA5, #1D9E75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  position: relative;
+}
+.match-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.match-card-body { padding: 14px; }
+.match-card-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.match-card-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+.match-card-ratings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+.match-card-pros { font-size: 11px; color: var(--text-muted); }
+.match-card-pros li { margin-bottom: 2px; }
+.match-select-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--ocean-mid);
+  color: white;
+  transition: background 0.15s;
+  margin-top: 12px;
+}
+.match-select-btn:hover { background: var(--ocean-deep); }
+
+/* 결과 화면 */
+.tournament-result { display: none; }
+.tournament-result.active { display: block; }
+.result-winner {
+  background: linear-gradient(135deg, #0c447c, #185FA5);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.result-crown { font-size: 40px; margin-bottom: 8px; }
+.result-label { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.result-name { font-size: 28px; font-weight: 800; }
+.result-name-en { font-size: 14px; opacity: 0.7; margin-top: 4px; }
+.result-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+.result-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.result-btn.primary { background: var(--teal); color: white; }
+.result-btn.secondary { background: rgba(255,255,255,0.2); color: white; }
+.result-rounds {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.result-rounds-header { background: var(--gray-100); padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.result-round-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.result-round-row:last-child { border-bottom: none; }
+.result-winner-name { font-weight: 600; color: var(--teal); }
+.result-loser-name { color: var(--text-muted); }
+
+.tournament-reset-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 20px;
+  border: 1px solid var(--border-mid);
+  background: white;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.tournament-reset-btn:hover { color: var(--coral); border-color: var(--coral); }
+
+/* ════════════════════════════════════════════════════════════════
+   탭 5: PDF 뷰어
+   ════════════════════════════════════════════════════════════════ */
+.pdf-tab-body {
+  display: flex;
+  height: 100%;
+}
+.pdf-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: white;
+  overflow-y: auto;
+}
+.pdf-sidebar-header {
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  background: var(--gray-100);
+}
+.pdf-group { border-bottom: 1px solid var(--border); }
+.pdf-group-label { padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.04em; background: var(--gray-50); }
+.pdf-item {
+  padding: 9px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pdf-item:hover { background: var(--ocean-pale); color: var(--ocean-mid); }
+.pdf-item.active { background: var(--ocean-light); color: var(--ocean-deep); font-weight: 600; }
+.pdf-item:last-child { border-bottom: none; }
+.pdf-icon { font-size: 14px; }
+
+.pdf-viewer-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--gray-100);
+}
+.pdf-toolbar {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pdf-toolbar-title { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
+.pdf-page-controls { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.pdf-page-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border-mid);
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.pdf-page-btn:hover { background: var(--gray-100); }
+.pdf-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pdf-canvas-wrap {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 16px;
+}
+#pdfCanvas {
+  max-width: 100%;
+  box-shadow: var(--shadow-lg);
+  background: white;
+}
+.pdf-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+}
+.pdf-empty-icon { font-size: 40px; }
+.pdf-server-note {
+  margin: 10px 16px;
+  padding: 8px 12px;
+  background: var(--amber-light);
+  border: 1px solid #FAC775;
+  border-radius: var(--radius);
+  font-size: 11px;
+  color: #633806;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   핀 애니메이션 (SVG)
+   ════════════════════════════════════════════════════════════════ */
+@keyframes pinPulse {
+  0% { r: 8; }
+  50% { r: 13; }
+  100% { r: 10; }
+}
+.map-pin-active { animation: pinPulse 0.35s ease; }
+
+/* ════════════════════════════════════════════════════════════════
+   공통 유틸리티
+   ════════════════════════════════════════════════════════════════ */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.text-teal { color: var(--teal); }
+.text-coral { color: var(--coral); }
+.text-ocean { color: var(--ocean-mid); }
+.fw-600 { font-weight: 600; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+
+/* ════════════════════════════════════════════════════════════════
+   지도 탭 — 리조트 정보 패널 (오른쪽)
+   ════════════════════════════════════════════════════════════════ */
+.map-resort-info { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+
+.map-info-header { margin-bottom: 14px; }
+.map-info-name { font-size: 17px; font-weight: 700; color: var(--text); }
+.map-info-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+.map-info-stats { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.map-stat { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--gray-50); border-radius: 6px; border: 1px solid var(--border); font-size: 12px; }
+.map-stat-label { color: var(--text-muted); }
+.map-stat-val { font-weight: 600; color: var(--text); }
+
+.map-info-ratings { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.map-rating-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.map-rating-row span:first-child { color: var(--text-muted); }
+
+.map-info-hammock { font-size: 11px; color: var(--teal); font-weight: 600; margin-bottom: 10px; padding: 5px 8px; background: var(--teal-light); border-radius: 6px; }
+.map-detail-btn { width: 100%; padding: 9px; background: var(--ocean-mid); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.map-detail-btn:hover { background: var(--ocean-deep); }
+
+/* SVG 핀 활성 상태 */
+.map-pin.active circle { filter: drop-shadow(0 0 6px rgba(0,0,0,0.5)); stroke-width: 3; }
+
+/* ════════════════════════════════════════════════════════════════
+   토너먼트 탭 — 새 클래스
+   ════════════════════════════════════════════════════════════════ */
+.tournament-setup { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 28px; box-shadow: var(--shadow); }
+.tournament-title { text-align: center; font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.tournament-desc { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+
+.weights-panel { background: var(--gray-50); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+.weights-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.weights-help { font-size: 11px; color: var(--text-light); margin-bottom: 14px; }
+.weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.weight-row:last-child { margin-bottom: 0; }
+.weight-label { font-size: 12px; color: var(--text-muted); min-width: 64px; }
+.weight-slider { flex: 1; accent-color: var(--ocean-mid); }
+.weight-val { font-size: 12px; font-weight: 700; color: var(--ocean-mid); min-width: 14px; text-align: center; }
+
+.tournament-actions { display: flex; gap: 10px; justify-content: center; }
+.tournament-start-btn { padding: 12px 28px; background: var(--ocean-mid); color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.tournament-start-btn:hover { background: var(--ocean-deep); }
+.tournament-resume-btn { padding: 12px 20px; background: var(--gray-100); color: var(--text-muted); border: 1px solid var(--border-mid); border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.tournament-resume-btn:hover { background: var(--gray-200); color: var(--text); }
+
+/* 대결 화면 */
+.tournament-match { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; box-shadow: var(--shadow); }
+.tournament-progress { margin-bottom: 20px; }
+.round-label { font-size: 14px; font-weight: 700; color: var(--ocean-deep); }
+.match-count { font-size: 12px; color: var(--text-muted); margin-left: 10px; }
+.progress-bar-wrap { height: 4px; background: var(--gray-200); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--ocean-mid); border-radius: 2px; transition: width 0.4s; }
+
+.match-arena { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
+.vs-badge { display: flex; align-items: center; justify-content: center; padding-top: 80px; font-size: 20px; font-weight: 800; color: var(--gray-400); }
+
+.match-resort-card { background: white; border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s, box-shadow 0.15s; }
+.match-resort-card:hover { border-color: var(--ocean-mid); box-shadow: var(--shadow-lg); }
+.match-card-image { height: 140px; background: linear-gradient(135deg, var(--ocean-mid), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
+.match-card-image img { width: 100%; height: 100%; object-fit: cover; }
+.match-card-placeholder { font-size: 36px; }
+.match-card-body { padding: 14px; }
+.match-resort-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.match-resort-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+.match-ratings { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.match-rating { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+.match-rating span:first-child { color: var(--text-muted); }
+.match-rating.highlighted { font-weight: 600; }
+.match-rating.highlighted span:first-child { color: var(--ocean-mid); }
+.match-price { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 8px; margin-bottom: 4px; }
+.match-price strong { color: var(--ocean-deep); font-size: 14px; }
+.match-hammock { font-size: 11px; color: var(--teal); font-weight: 600; margin-bottom: 6px; }
+.match-pick-btn { width: 100%; padding: 10px; background: var(--ocean-mid); color: white; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.match-pick-btn:hover { background: var(--ocean-deep); }
+
+.tournament-footer-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+.skip-match-btn { padding: 7px 16px; background: var(--gray-100); border: 1px solid var(--border-mid); border-radius: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.skip-match-btn:hover { background: var(--gray-200); }
+.reset-tournament-btn { padding: 7px 16px; background: white; border: 1px solid var(--border-mid); border-radius: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.reset-tournament-btn:hover { color: var(--coral); border-color: var(--coral); }
+
+/* 결과 화면 */
+.tournament-result { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 28px; box-shadow: var(--shadow); text-align: center; }
+.result-title { font-size: 20px; font-weight: 800; color: var(--text); margin: 12px 0 4px; }
+.result-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.result-champion { background: var(--gray-50); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; text-align: left; }
+.result-name { font-size: 22px; font-weight: 800; color: var(--text); margin-top: 14px; }
+.result-name-en { font-size: 13px; color: var(--text-light); }
+.result-atoll { font-size: 12px; color: var(--text-muted); margin: 6px 0 12px; }
+.result-prices { margin-bottom: 12px; }
+.result-price-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.result-price-row:last-child { border-bottom: none; }
+.result-price-row span:first-child { color: var(--text-muted); }
+.result-price-row span:last-child { font-weight: 600; color: var(--ocean-deep); }
+.result-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.7; }
+.result-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.result-detail-btn { padding: 10px 20px; background: var(--ocean-mid); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.result-detail-btn:hover { background: var(--ocean-deep); }
+.result-restart-btn { padding: 10px 20px; background: var(--gray-100); color: var(--text-muted); border: 1px solid var(--border-mid); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.result-restart-btn:hover { background: var(--gray-200); color: var(--text); }
+
+/* ════════════════════════════════════════════════════════════════
+   PDF 탭 — 새 클래스
+   ════════════════════════════════════════════════════════════════ */
+.pdf-list-item { padding: 9px 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; display: flex; align-items: center; gap: 6px; }
+.pdf-list-item:hover { background: var(--ocean-pale); color: var(--ocean-mid); }
+.pdf-list-item.active { background: var(--ocean-light); color: var(--ocean-deep); font-weight: 600; }
+.pdf-item-icon { font-size: 14px; flex-shrink: 0; }
+.pdf-item-label { font-size: 11px; line-height: 1.4; }
+
+.pdf-loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--text-muted); font-size: 13px; }
+.pdf-loading-spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--ocean-mid); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.pdf-error { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.pdf-error-msg { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.8; }
+
+.pdf-page-input { width: 48px; padding: 4px 6px; border: 1px solid var(--border-mid); border-radius: 4px; font-size: 12px; text-align: center; }
+.pdf-page-input::-webkit-inner-spin-button { display: none; }

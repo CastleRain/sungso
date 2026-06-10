@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몰디브 허니문 리조트 비교 · 2027년 3월</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ 헤더 -->
+<header class="site-header">
+  <h1>🌊 <span>몰디브</span> 허니문 리조트 비교</h1>
+  <div class="header-meta">
+    <span class="header-badge">📅 <strong>2027.03.08</strong>~12</span>
+    <span class="header-badge">👫 <strong>2인</strong></span>
+    <span class="header-badge">🏝️ <strong>9개</strong> 리조트</span>
+    <span class="dday-badge" id="ddayBadge">D-...</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ 탭 네비게이션 -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="cards">
+    <span class="tab-icon">🏨</span> 개요 & 카드
+  </button>
+  <button class="tab-btn" data-tab="price">
+    <span class="tab-icon">💰</span> 가격 비교
+  </button>
+  <button class="tab-btn" data-tab="map">
+    <span class="tab-icon">🗺️</span> 지도
+  </button>
+  <button class="tab-btn" data-tab="tournament">
+    <span class="tab-icon">🏆</span> 토너먼트
+  </button>
+  <button class="tab-btn" data-tab="pdf">
+    <span class="tab-icon">📄</span> PDF 뷰어
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════════ 메인 콘텐츠 -->
+<div class="main-layout">
+
+  <!-- 탭 1: 개요 & 카드 -->
+  <div class="tab-content active" id="tab-cards">
+    <div class="cards-toolbar">
+      <span class="sort-label">정렬</span>
+      <button class="sort-btn active" data-sort="water_pool_4n">🏊 워터풀 4박 최저가</button>
+      <button class="sort-btn" data-sort="mix_4n">🔀 비치+워터 믹스</button>
+      <button class="sort-btn" data-sort="water_4n">🌊 워터 4박</button>
+      <button class="sort-btn" data-sort="beach_4n">🏖️ 비치 4박</button>
+      <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+        <span class="sort-label">필터</span>
+        <select class="filter-select" id="filterTransfer">
+          <option value="">이동시간 전체</option>
+          <option value="15">15분 (스피드보트)</option>
+          <option value="20">20분 수상비행기</option>
+          <option value="35">35분 수상비행기</option>
+          <option value="40">40분 수상비행기</option>
+          <option value="40sb">40분 스피드보트</option>
+          <option value="45">45분 수상비행기</option>
+        </select>
+        <select class="filter-select" id="filterAtoll">
+          <option value="">아톨 전체</option>
+          <option value="라아">라아 아톨</option>
+          <option value="바아">바아 아톨</option>
+          <option value="노스 아리">노스 아리 아톨</option>
+          <option value="라비야니">라비야니 아톨</option>
+          <option value="말레">말레 아톨</option>
+        </select>
+        <label class="filter-check-label">
+          <input type="checkbox" id="filterHammock"> 🛏️ 해먹 있음
+        </label>
+      </div>
+    </div>
+    <div class="cards-grid" id="cardsGrid">
+      <!-- JS로 렌더링 -->
+    </div>
+  </div>
+
+  <!-- 탭 2: 가격 비교 -->
+  <div class="tab-content" id="tab-price">
+    <div class="price-tab-header">
+      <h2>가격 비교 테이블</h2>
+      <span style="font-size:12px; color:var(--text-muted);">컬럼 헤더 클릭 시 정렬 · 1인 USD 기준</span>
+      <div style="margin-left:auto;">
+        <label class="couple-toggle" id="coupleToggle">
+          <div class="toggle-switch" id="coupleSwitch">
+            <div class="toggle-knob"></div>
+          </div>
+          2인 합산 보기
+        </label>
+      </div>
+    </div>
+    <div class="price-table-wrap" id="priceTableWrap">
+      <!-- JS로 렌더링 -->
+    </div>
+  </div>
+
+  <!-- 탭 3: 지도 -->
+  <div class="tab-content" id="tab-map" style="overflow:hidden; padding:0;">
+    <div class="map-tab-body">
+      <div class="map-tab-left">
+        <p class="map-title">몰디브 리조트 위치</p>
+        <!-- SVG 지도 (기존 HTML에서 이동) -->
+        <svg id="mainSvgMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
+          <rect width="280" height="540" fill="#cce8ff" rx="10"/>
+          <line x1="20" y1="30" x2="260" y2="30" stroke="#a8d4f5" stroke-width="0.4"/>
+          <line x1="20" y1="510" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+          <line x1="20" y1="30" x2="20" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+          <line x1="260" y1="30" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+          <line x1="140" y1="30" x2="140" y2="510" stroke="#a8d4f5" stroke-width="0.3" stroke-dasharray="3,5"/>
+          <text x="22" y="28" font-size="7" fill="#7ab8e8" font-family="sans-serif">6°N</text>
+          <text x="22" y="508" font-size="7" fill="#7ab8e8" font-family="sans-serif">3°N</text>
+          <text x="18" y="270" font-size="7" fill="#7ab8e8" font-family="sans-serif" transform="rotate(-90,18,270)">72-74°E</text>
+          <text x="140" y="22" text-anchor="middle" font-size="8" fill="#5a9fd4" font-family="sans-serif" font-weight="600">N ↑</text>
+          <!-- 아톨 영역 -->
+          <ellipse cx="88" cy="90" rx="30" ry="18" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+          <text x="88" y="87" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라아 아톨</text>
+          <text x="88" y="97" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~160km NW</text>
+          <ellipse cx="88" cy="158" rx="26" ry="15" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+          <text x="88" y="155" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">바아 아톨</text>
+          <text x="88" y="165" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">UNESCO ~120km</text>
+          <ellipse cx="205" cy="125" rx="22" ry="13" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+          <text x="205" y="122" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라비야니</text>
+          <text x="205" y="132" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~130km NNE</text>
+          <ellipse cx="78" cy="270" rx="28" ry="22" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+          <text x="78" y="265" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">아리 아톨</text>
+          <text x="78" y="275" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">N.Ari ~66km W</text>
+          <ellipse cx="188" cy="222" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+          <text x="188" y="219" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">노스 말레</text>
+          <text x="188" y="229" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+          <ellipse cx="194" cy="256" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+          <text x="194" y="253" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">사우스 말레</text>
+          <text x="194" y="263" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+          <!-- 말레 공항 -->
+          <rect x="192" y="233" width="30" height="13" rx="3" fill="#1a1a18" opacity="0.9"/>
+          <text x="207" y="242" text-anchor="middle" font-size="7" fill="#f8f7f5" font-family="sans-serif" font-weight="600">말레 ✈</text>
+          <!-- 거리선 -->
+          <line x1="207" y1="233" x2="88" y2="108" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+          <line x1="207" y1="233" x2="78" y2="248" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+          <line x1="207" y1="233" x2="205" y2="138" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+          <!-- 리조트 핀들 (JS에서 클릭 이벤트 추가) -->
+          <g class="map-pin" data-resort="cora_cora" style="cursor:pointer">
+            <circle id="svg-pin-cora_cora" cx="75" cy="78" r="9" fill="#7F77DD" stroke="white" stroke-width="2"/>
+            <text x="75" y="82" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">코</text>
+          </g>
+          <g class="map-pin" data-resort="furaveri" style="cursor:pointer">
+            <circle id="svg-pin-furaveri" cx="102" cy="80" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+            <text x="102" y="84" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸라</text>
+          </g>
+          <g class="map-pin" data-resort="raaya" style="cursor:pointer">
+            <circle id="svg-pin-raaya" cx="74" cy="106" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+            <text x="74" y="110" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">라야</text>
+          </g>
+          <g class="map-pin" data-resort="dhigufaru" style="cursor:pointer">
+            <circle id="svg-pin-dhigufaru" cx="103" cy="152" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+            <text x="103" y="156" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">디</text>
+          </g>
+          <g class="map-pin" data-resort="fushifaru" style="cursor:pointer">
+            <circle id="svg-pin-fushifaru" cx="202" cy="122" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+            <text x="202" y="126" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸시</text>
+          </g>
+          <g class="map-pin" data-resort="veligandu" style="cursor:pointer">
+            <circle id="svg-pin-veligandu" cx="68" cy="248" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+            <text x="68" y="252" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">벨</text>
+          </g>
+          <g class="map-pin" data-resort="ananea" style="cursor:pointer">
+            <circle id="svg-pin-ananea" cx="90" cy="256" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+            <text x="90" y="260" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">아나</text>
+          </g>
+          <g class="map-pin" data-resort="varu" style="cursor:pointer">
+            <circle id="svg-pin-varu" cx="178" cy="214" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+            <text x="178" y="218" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">바루</text>
+          </g>
+          <g class="map-pin" data-resort="saii_so" style="cursor:pointer">
+            <circle id="svg-pin-saii_so" cx="200" cy="258" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+            <text x="200" y="262" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">사이</text>
+          </g>
+        </svg>
+
+        <div class="map-current-info" id="mapCurrentInfo">
+          <div class="ci-label">선택한 리조트</div>
+          <div class="ci-name">핀을 클릭해보세요</div>
+          <div class="ci-sub">위치·이동시간·거리 표시</div>
+        </div>
+
+        <div class="map-legend" style="margin-top:12px;">
+          <div class="map-legend-header">아톨 범례</div>
+          <div class="legend-items">
+            <div class="legend-row"><div class="legend-dot" style="background:#7F77DD"></div>코라코라 (라아)</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#D85A30"></div>푸라베리·라야·디구파루·푸시파루·벨리간두 (라아/바아/아리/라비야니)</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#185FA5"></div>아나네아·바루·사이라군 (아리·말레)</div>
+          </div>
+        </div>
+
+        <table class="distance-table" style="margin-top:10px;">
+          <thead><tr><th>리조트</th><th>이동</th><th>거리</th></tr></thead>
+          <tbody>
+            <tr><td>아나네아·벨리간두</td><td>✈ 20분</td><td class="dist-km">66km</td></tr>
+            <tr><td>푸시파루</td><td>✈ 35분</td><td class="dist-km">130km</td></tr>
+            <tr><td>디구파루</td><td>✈ 40분</td><td class="dist-km">120km</td></tr>
+            <tr><td>코라코라·푸라베리·라야</td><td>✈ 45분</td><td class="dist-km">145~177km</td></tr>
+            <tr><td>바루·사이라군</td><td>🚤 15~40분</td><td class="dist-km">10km</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="map-tab-right">
+        <div class="map-resort-info" id="mapInfoPanel">
+          <div style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px 0;">
+            왼쪽 지도의 핀을 클릭하면<br>리조트 정보가 표시됩니다
+          </div>
+        </div>
+
+        <button class="leaflet-toggle-btn" id="leafletToggle">
+          🗺️ 인터랙티브 지도 열기 (OpenStreetMap)
+        </button>
+        <div id="leafletMapWrap" style="display:none;">
+          <div id="leafletMap" style="height:400px;border-radius:10px;overflow:hidden;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 탭 4: 토너먼트 -->
+  <div class="tab-content" id="tab-tournament">
+    <div class="tournament-wrap" id="tournamentWrap">
+      <!-- JS로 렌더링 -->
+    </div>
+  </div>
+
+  <!-- 탭 5: PDF 뷰어 -->
+  <div class="tab-content" id="tab-pdf" style="overflow:hidden; padding:0;">
+    <div class="pdf-tab-body">
+      <div class="pdf-sidebar">
+        <div class="pdf-sidebar-header">📄 PDF 파일 목록</div>
+        <div class="pdf-server-note">
+          ⚠️ PDF 뷰어는 <strong>VS Code Live Server</strong>에서 실행 시 동작합니다
+        </div>
+        <div id="pdfList"><!-- JS로 렌더링 --></div>
+      </div>
+      <div class="pdf-viewer-area" id="pdfViewerWrap">
+        <div class="pdf-toolbar">
+          <span class="pdf-toolbar-title" id="pdfTitle">PDF를 선택해주세요</span>
+          <div class="pdf-page-controls">
+            <button class="pdf-page-btn" id="pdfPrevBtn" disabled>◀</button>
+            <span id="pdfPageCounter">-</span>
+            <button class="pdf-page-btn" id="pdfNextBtn" disabled>▶</button>
+            <input type="number" id="pdfPageInput" class="pdf-page-input" min="1" placeholder="쪽">
+            <button class="pdf-page-btn" id="pdfGoBtn">이동</button>
+          </div>
+        </div>
+        <div class="pdf-canvas-wrap">
+          <div class="pdf-loading" id="pdfLoading" style="display:none;">
+            <div class="pdf-loading-spinner"></div>
+            <div>PDF 로딩 중...</div>
+          </div>
+          <div class="pdf-error" id="pdfError" style="display:flex;">
+            <div class="pdf-error-msg">왼쪽에서 PDF를 선택하세요</div>
+          </div>
+          <canvas id="pdfCanvas" style="display:none; max-width:100%;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- .main-layout -->
+
+<!-- ══════════════════════════════════════════════ 상세 뷰 오버레이 -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-overlay-header">
+    <span id="detailOverlayTitle" style="font-size:15px; font-weight:600;">리조트 상세</span>
+    <button class="detail-close-btn" id="detailCloseBtn">✕ 닫기</button>
+  </div>
+  <div class="detail-body">
+    <div class="map-panel">
+      <div class="map-panel-inner">
+        <p class="map-title">위치</p>
+        <svg id="detailMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
+          <!-- 같은 SVG 지도 (간소화) — JS에서 핀 강조 처리 -->
+          <use href="#mainSvgMap"/>
+        </svg>
+        <div class="map-current-info" id="detailMapInfo">
+          <div class="ci-label">현재 리조트</div>
+          <div class="ci-name" id="detailMapName">—</div>
+          <div class="ci-sub" id="detailMapSub">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="report-panel" id="detailReportPanel">
+      <!-- JS로 렌더링 -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
