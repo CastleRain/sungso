@@ -39,6 +39,17 @@
       font-weight: 700;
     }
     .flatpickr-day.flatpickr-disabled { color: #e0e0e0 !important; }
+    /* 월 드롭다운 글씨 깨짐 수정 */
+    .flatpickr-monthDropdown-months {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif !important;
+      font-size: 15px !important; font-weight: 700 !important; color: #333 !important;
+      background: transparent; border: none; outline: none; cursor: pointer;
+      -webkit-appearance: none; appearance: none; padding: 0;
+    }
+    .numInput.cur-year {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif !important;
+      font-weight: 700 !important; color: #333 !important;
+    }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -97,15 +108,24 @@
       background: white; border-radius: 22px; padding: 24px;
       text-decoration: none; color: inherit;
       box-shadow: 0 2px 14px rgba(0,0,0,0.055);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      border: 2px solid transparent;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       display: flex; flex-direction: column; gap: 10px;
     }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(0,0,0,0.1); }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(255,107,157,0.12); border-color: #FFD0E4; }
     .icon-wrap { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
     .badge { display: inline-block; font-size: 11px; font-weight: 600; color: #FF85B3; background: #FFF0F6; padding: 3px 10px; border-radius: 20px; }
     .card-title { font-size: 16px; font-weight: 700; color: #111; margin-top: 8px; }
     .card-desc { font-size: 13px; color: #aaa; line-height: 1.65; }
-    .card-link { font-size: 12px; color: #ddd; margin-top: 4px; }
+    .card-cta {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: #FFF8FA; border-radius: 14px; margin-top: 4px;
+      transition: background 0.18s;
+    }
+    .card:hover .card-cta { background: #FFE8F2; }
+    .card-cta-text { font-size: 13px; font-weight: 600; color: #FF85B3; }
+    .card-cta-arrow { font-size: 15px; color: #FF85B3; transition: transform 0.18s; }
+    .card:hover .card-cta-arrow { transform: translateX(5px); }
 
     /* ── Events section ── */
     .events-wrap { width: 100%; max-width: 560px; }
@@ -128,9 +148,13 @@
       background: white; border-radius: 16px; padding: 14px 18px;
       display: flex; align-items: center; gap: 14px;
       box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+      cursor: pointer; border: 1.5px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
     }
+    .event-row:hover { background: #FDFAFA; }
     .event-row.past  { opacity: 0.35; }
-    .event-row.next  { border: 1.5px solid #FFCCE0; box-shadow: 0 4px 18px rgba(255,107,157,0.1); }
+    .event-row.next  { border-color: #FFCCE0; box-shadow: 0 4px 18px rgba(255,107,157,0.1); }
+    .event-row.active-sel { border-color: #FF85B3 !important; background: #FFF5F8 !important; box-shadow: 0 4px 18px rgba(255,107,157,0.15) !important; }
     .ev-emoji { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
     .ev-info  { flex: 1; min-width: 0; }
     .ev-title { font-size: 14px; font-weight: 600; color: #333; }
@@ -262,9 +286,9 @@
   </header>
 
   <div class="dday-card">
-    <div class="dday-label">결혼식까지</div>
+    <div class="dday-label" id="ddayLabel">결혼식까지</div>
     <div class="dday-number" id="ddayNum">—</div>
-    <div class="dday-date">2027년 3월 6일 토요일</div>
+    <div class="dday-date" id="ddayDate">2027년 3월 6일 토요일</div>
   </div>
 
   <div class="grid">
@@ -275,7 +299,7 @@
         <div class="card-title">WeCost</div>
         <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악해요</div>
       </div>
-      <div class="card-link">바로가기 →</div>
+      <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
     </a>
     <a class="card" href="./honeymoon/index.html">
       <div class="icon-wrap" style="background:#F0F8FF;">🌴</div>
@@ -284,7 +308,7 @@
         <div class="card-title">Honeymoon</div>
         <div class="card-desc">몰디브 리조트 비교 및<br>패키지 정보를 정리한 플래너</div>
       </div>
-      <div class="card-link">바로가기 →</div>
+      <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
     </a>
   </div>
 
@@ -459,11 +483,29 @@
   const eventsCol = collection(db, 'events');
 
   // ── State ──
-  let allEvents  = [];
-  let activeTab  = 'list';
-  let calDate    = new Date();
-  let selectedDate = null;
-  let selectedEmoji = '📅';
+  let allEvents      = [];
+  let activeTab      = 'list';
+  let calDate        = new Date();
+  let selectedDate   = null;
+  let selectedEmoji  = '📅';
+  let selectedEvId   = null;   // 선택된 일정 id
+
+  // ── D-day card update / reset ──
+  function updateDdayCard(ev) {
+    const diffMs  = new Date(ev.date + 'T00:00:00') - new Date(TODAY + 'T00:00:00');
+    const diff    = Math.round(diffMs / 86400000);
+    const ddayStr = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day! 🎉' : 'D+' + Math.abs(diff);
+    const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+    document.getElementById('ddayLabel').textContent = ev.emoji + ' ' + ev.title + '까지';
+    document.getElementById('ddayNum').textContent   = ddayStr;
+    document.getElementById('ddayDate').textContent  = dateStr;
+  }
+  function resetDdayCard() {
+    const diff = Math.ceil((new Date('2027-03-06T00:00:00') - new Date(TODAY + 'T00:00:00')) / 86400000);
+    document.getElementById('ddayLabel').textContent = '결혼식까지';
+    document.getElementById('ddayNum').textContent   = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day 💒' : 'D+' + Math.abs(diff);
+    document.getElementById('ddayDate').textContent  = '2027년 3월 6일 토요일';
+  }
 
   // Today string (local time, YYYY-MM-DD)
   function todayStr() {
@@ -522,8 +564,12 @@
       const ddayStr = isPast ? '완료 ✓' : diff === 0 ? 'D-Day! 🎉' : 'D-' + diff;
       const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
 
+      const isSel = ev.id === selectedEvId;
       const row = document.createElement('div');
-      row.className = 'event-row' + (isPast ? ' past' : '') + (isNext ? ' next' : '');
+      row.className = 'event-row' +
+        (isPast  ? ' past'       : '') +
+        (isNext  ? ' next'       : '') +
+        (isSel   ? ' active-sel' : '');
       row.innerHTML =
         '<div class="ev-emoji">' + ev.emoji + '</div>' +
         '<div class="ev-info">' +
@@ -533,8 +579,16 @@
         '<div class="ev-dday">' + ddayStr + '</div>' +
         '<button class="ev-delete" title="삭제">🗑️</button>';
 
-      row.querySelector('.ev-delete').addEventListener('click', () => {
+      row.querySelector('.ev-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
         deleteDoc(doc(db, 'events', ev.id));
+        if (selectedEvId === ev.id) { selectedEvId = null; resetDdayCard(); }
+      });
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.ev-delete')) return;
+        if (selectedEvId === ev.id) { selectedEvId = null; resetDdayCard(); }
+        else { selectedEvId = ev.id; updateDdayCard(ev); }
+        renderList();
       });
       listEl.appendChild(row);
     });
