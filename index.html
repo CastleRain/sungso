@@ -3,144 +3,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sungso</title>
+  <title>성우 &amp; 소희</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
-      background: #f5f5f7;
+      background: linear-gradient(160deg, #FFF5F7 0%, #FFF0EA 100%);
       min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 140px;
+    }
+
+    /* ── Floating particles ── */
+    .particles {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      opacity: 0;
+      animation: floatUp var(--dur) ease-in infinite;
+      animation-delay: var(--delay);
+      left: var(--x);
+      bottom: -20px;
+      color: var(--color);
+      font-size: var(--size);
+    }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+      15%  { opacity: 0.65; }
+      85%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translateY(-100vh) rotate(25deg); }
+    }
+
+    /* ── Layout ── */
+    .main {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      padding: 64px 20px 40px;
+      gap: 28px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 56px;
-    }
-
+    /* ── Header ── */
+    header { text-align: center; }
     header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #111;
-      letter-spacing: -0.5px;
+      font-size: 40px;
+      font-weight: 800;
+      color: #1a1a1a;
+      letter-spacing: -2px;
     }
-
-    header p {
-      margin-top: 8px;
+    .amp { color: #FF6B9D; }
+    header .sub {
+      margin-top: 10px;
       font-size: 15px;
-      color: #888;
+      color: #bbb;
+      letter-spacing: 0.2px;
     }
 
+    /* ── D-day ── */
+    .dday-card {
+      background: white;
+      border-radius: 28px;
+      padding: 32px 56px;
+      text-align: center;
+      box-shadow: 0 4px 28px rgba(255, 107, 157, 0.13);
+    }
+    .dday-label  { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #ccc; text-transform: uppercase; }
+    .dday-number {
+      font-size: 64px;
+      font-weight: 900;
+      color: #FF6B9D;
+      letter-spacing: -3px;
+      line-height: 1.1;
+      margin: 8px 0 4px;
+    }
+    .dday-date   { font-size: 13px; color: #ddd; }
+
+    /* ── Project cards ── */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+      gap: 14px;
       width: 100%;
-      max-width: 640px;
+      max-width: 560px;
     }
-
     .card {
-      background: #fff;
-      border-radius: 24px;
-      padding: 28px 28px 24px;
+      background: white;
+      border-radius: 22px;
+      padding: 24px;
       text-decoration: none;
       color: inherit;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.055);
       transition: transform 0.18s ease, box-shadow 0.18s ease;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
     }
-
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 32px rgba(0,0,0,0.1);
     }
-
     .icon-wrap {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
     }
-
-    .card-body {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .badge {
+      display: inline-block;
+      font-size: 11px; font-weight: 600;
+      color: #FF85B3;
+      background: #FFF0F6;
+      padding: 3px 10px;
+      border-radius: 20px;
     }
+    .card-title { font-size: 16px; font-weight: 700; color: #111; margin-top: 8px; }
+    .card-desc  { font-size: 13px; color: #aaa; line-height: 1.65; }
+    .card-link  { font-size: 12px; color: #ddd; margin-top: 4px; }
 
-    .card-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #111;
-      letter-spacing: -0.3px;
-    }
-
-    .card-desc {
-      font-size: 13.5px;
-      color: #888;
-      line-height: 1.6;
-    }
-
-    .card-arrow {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #bbb;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    footer {
-      margin-top: 56px;
-      font-size: 13px;
+    /* ── Events ── */
+    .events-wrap { width: 100%; max-width: 560px; }
+    .section-label {
+      text-align: center;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px;
       color: #ccc;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .event-list { display: flex; flex-direction: column; gap: 8px; }
+    .event-row {
+      background: white;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+    }
+    .event-row.past  { opacity: 0.35; }
+    .event-row.next  { border: 1.5px solid #FFCCE0; box-shadow: 0 4px 18px rgba(255,107,157,0.1); }
+    .ev-emoji { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+    .ev-info  { flex: 1; min-width: 0; }
+    .ev-title { font-size: 14px; font-weight: 600; color: #333; }
+    .ev-date  { font-size: 12px; color: #ccc; margin-top: 2px; }
+    .ev-dday  { font-size: 12px; font-weight: 700; color: #FF6B9D; flex-shrink: 0; }
+    .event-row.past .ev-dday { color: #ccc; }
+
+    footer { font-size: 13px; color: #ddd; text-align: center; }
+
+    /* ── Characters ── */
+    .scene {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100%; height: 115px;
+      pointer-events: none;
+      z-index: 20;
+      overflow: hidden;
+    }
+    /* Outer div: horizontal movement */
+    .char-h-boy  { position: absolute; bottom: 0; animation: moveRight 30s linear infinite; }
+    .char-h-girl { position: absolute; bottom: 0; animation: moveLeft  24s linear infinite; }
+    /* Inner div: vertical bob */
+    .char-bob { animation: bob 0.45s ease-in-out alternate infinite; }
+    .char-bob-delay { animation: bob 0.45s ease-in-out alternate infinite; animation-delay: 0.22s; }
+
+    @keyframes moveRight {
+      from { transform: translateX(-100px); }
+      to   { transform: translateX(calc(100vw + 100px)); }
+    }
+    @keyframes moveLeft {
+      from { transform: translateX(calc(100vw + 100px)); }
+      to   { transform: translateX(-100px); }
+    }
+    @keyframes bob {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-7px); }
+    }
+
+    @media (max-width: 480px) {
+      header h1    { font-size: 32px; }
+      .dday-number { font-size: 52px; }
+      .dday-card   { padding: 26px 36px; }
     }
   </style>
 </head>
 <body>
 
+<!-- Floating particles -->
+<div class="particles" id="particles"></div>
+
+<div class="main">
+
   <header>
-    <h1>Sungso</h1>
-    <p>개인 프로젝트 모음</p>
+    <h1>성우 <span class="amp">♥</span> 소희</h1>
+    <div class="sub">우리의 결혼 준비 공간 💕</div>
   </header>
 
-  <div class="grid">
-
-    <a class="card" href="./wecost/index.html">
-      <div class="icon-wrap" style="background: #FFF0F3;">💍</div>
-      <div class="card-body">
-        <div class="card-title">WeCost</div>
-        <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악하는 웨딩 가계부</div>
-      </div>
-      <div class="card-arrow">바로가기 →</div>
-    </a>
-
-    <a class="card" href="./honeymoon/index.html">
-      <div class="icon-wrap" style="background: #F0F7FF;">🌴</div>
-      <div class="card-body">
-        <div class="card-title">Honeymoon</div>
-        <div class="card-desc">몰디브 신혼여행 리조트 비교 및<br>패키지 정보를 정리한 플래너</div>
-      </div>
-      <div class="card-arrow">바로가기 →</div>
-    </a>
-
+  <div class="dday-card">
+    <div class="dday-label">결혼식까지</div>
+    <div class="dday-number" id="ddayNum">—</div>
+    <div class="dday-date">2027년 3월 6일 토요일</div>
   </div>
 
-  <footer>sungso · 2026</footer>
+  <div class="grid">
+    <a class="card" href="./wecost/index.html">
+      <div class="icon-wrap" style="background:#FFF0F5;">💍</div>
+      <div>
+        <span class="badge">웨딩 가계부</span>
+        <div class="card-title">WeCost</div>
+        <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악해요</div>
+      </div>
+      <div class="card-link">바로가기 →</div>
+    </a>
+    <a class="card" href="./honeymoon/index.html">
+      <div class="icon-wrap" style="background:#F0F8FF;">🌴</div>
+      <div>
+        <span class="badge">신혼여행 플래너</span>
+        <div class="card-title">Honeymoon</div>
+        <div class="card-desc">몰디브 리조트 비교 및<br>패키지 정보를 정리한 플래너</div>
+      </div>
+      <div class="card-link">바로가기 →</div>
+    </a>
+  </div>
+
+  <div class="events-wrap">
+    <div class="section-label">일정</div>
+    <div class="event-list" id="eventList">
+      <div style="text-align:center;padding:24px;color:#ddd;font-size:13px;">불러오는 중...</div>
+    </div>
+  </div>
+
+  <footer>성우 ♥ 소희 · 2027</footer>
+</div>
+
+<!-- Character scene -->
+<div class="scene">
+
+  <!-- 성우 (boy, walks left → right) -->
+  <div class="char-h-boy">
+    <div class="char-bob">
+      <svg width="58" height="92" viewBox="0 0 58 92" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hair -->
+        <ellipse cx="29" cy="12" rx="15" ry="9" fill="#3B2314"/>
+        <rect x="14" y="8" width="30" height="11" rx="5" fill="#3B2314"/>
+        <!-- Head -->
+        <circle cx="29" cy="23" r="14" fill="#F5CBA7"/>
+        <!-- Ears -->
+        <circle cx="15" cy="23" r="4.5" fill="#F5CBA7"/>
+        <circle cx="43" cy="23" r="4.5" fill="#F5CBA7"/>
+        <!-- Eyes -->
+        <circle cx="23" cy="21" r="2.3" fill="#2d2d2d"/>
+        <circle cx="35" cy="21" r="2.3" fill="#2d2d2d"/>
+        <circle cx="23.8" cy="20.2" r="0.9" fill="white"/>
+        <circle cx="35.8" cy="20.2" r="0.9" fill="white"/>
+        <!-- Smile -->
+        <path d="M 22 27 Q 29 33 36 27" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Neck -->
+        <rect x="24" y="36" width="10" height="6" rx="2" fill="#F5CBA7"/>
+        <!-- Shirt -->
+        <rect x="15" y="40" width="28" height="24" rx="8" fill="#5B8EE0"/>
+        <!-- Collar line -->
+        <path d="M 24 41 L 29 48 L 34 41" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Left arm + hand -->
+        <rect x="7" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
+        <circle cx="11" cy="60" r="4.5" fill="#F5CBA7"/>
+        <!-- Right arm + hand -->
+        <rect x="43" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
+        <circle cx="47" cy="60" r="4.5" fill="#F5CBA7"/>
+        <!-- Pants left -->
+        <rect x="15" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
+        <!-- Pants right -->
+        <rect x="32" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
+        <!-- Shoes -->
+        <ellipse cx="20" cy="85" rx="9" ry="5" fill="#1C2A38"/>
+        <ellipse cx="37" cy="85" rx="9" ry="5" fill="#1C2A38"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 소희 (girl, walks right → left, SVG flipped so she faces left) -->
+  <div class="char-h-girl">
+    <div class="char-bob-delay">
+      <svg width="62" height="98" viewBox="0 0 62 98" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+        <!-- Hair base -->
+        <ellipse cx="31" cy="13" rx="17" ry="12" fill="#4A2E2E"/>
+        <!-- Pigtails -->
+        <ellipse cx="12" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(-12 12 26)"/>
+        <ellipse cx="50" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(12 50 26)"/>
+        <!-- Ribbons -->
+        <circle cx="14" cy="16" r="5" fill="#FF85B3"/>
+        <circle cx="48" cy="16" r="5" fill="#FF85B3"/>
+        <!-- Head -->
+        <circle cx="31" cy="26" r="15" fill="#F5CBA7"/>
+        <!-- Ears -->
+        <circle cx="16" cy="26" r="4.5" fill="#F5CBA7"/>
+        <circle cx="46" cy="26" r="4.5" fill="#F5CBA7"/>
+        <!-- Blush -->
+        <ellipse cx="21" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
+        <ellipse cx="41" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
+        <!-- Eyes -->
+        <circle cx="25" cy="23" r="2.6" fill="#2d2d2d"/>
+        <circle cx="37" cy="23" r="2.6" fill="#2d2d2d"/>
+        <circle cx="25.9" cy="22.1" r="1.1" fill="white"/>
+        <circle cx="37.9" cy="22.1" r="1.1" fill="white"/>
+        <!-- Lashes -->
+        <path d="M 23 19.5 L 24.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M 35 19.5 L 36.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Smile -->
+        <path d="M 25 31 Q 31 37 37 31" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Neck -->
+        <rect x="26" y="40" width="10" height="6" rx="2" fill="#F5CBA7"/>
+        <!-- Dress body -->
+        <path d="M 17 45 L 45 45 L 47 65 L 15 65 Z" fill="#FF85B3"/>
+        <!-- White collar -->
+        <ellipse cx="31" cy="46" rx="9" ry="4.5" fill="white" opacity="0.55"/>
+        <!-- Dress skirt -->
+        <path d="M 10 61 Q 31 72 52 61 L 54 79 Q 31 87 8 79 Z" fill="#FF85B3"/>
+        <!-- Arms + hands -->
+        <rect x="8"  y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
+        <circle cx="12" cy="63" r="5" fill="#F5CBA7"/>
+        <rect x="45" y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
+        <circle cx="50" cy="63" r="5" fill="#F5CBA7"/>
+        <!-- Legs -->
+        <rect x="19" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
+        <rect x="33" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
+        <!-- Shoes -->
+        <ellipse cx="24" cy="95" rx="9" ry="5" fill="#FF4081"/>
+        <ellipse cx="38" cy="95" rx="9" ry="5" fill="#FF4081"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Particles ──
+  (function () {
+    const container = document.getElementById('particles');
+    const symbols = ['♥', '♡', '✦', '✧', '❋', '✿'];
+    const colors  = ['#FF6B9D', '#FFB3CC', '#FF85B3', '#FFD0E4', '#FF4081'];
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement('div');
+      el.className = 'particle';
+      el.textContent = symbols[i % symbols.length];
+      el.style.setProperty('--x',     (Math.random() * 100) + '%');
+      el.style.setProperty('--dur',   (7 + Math.random() * 9) + 's');
+      el.style.setProperty('--delay', '-' + (Math.random() * 14) + 's');
+      el.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+      el.style.setProperty('--size',  (10 + Math.random() * 11) + 'px');
+      container.appendChild(el);
+    }
+  })();
+
+  // ── D-day ──
+  (function () {
+    const wedding = new Date('2027-03-06T00:00:00');
+    const today   = new Date(); today.setHours(0, 0, 0, 0);
+    const diff    = Math.ceil((wedding - today) / 86400000);
+    const el      = document.getElementById('ddayNum');
+    if      (diff > 0) el.textContent = 'D-' + diff;
+    else if (diff === 0) el.textContent = 'D-Day 💒';
+    else                 el.textContent = 'D+' + Math.abs(diff);
+  })();
+
+  // ── Events ──
+  (function () {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+
+    function render(events) {
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const nextIdx = events.findIndex(e => new Date(e.date).getTime() >= todayMs);
+      const listEl  = document.getElementById('eventList');
+      listEl.innerHTML = '';
+
+      events.forEach(function (ev, i) {
+        const evTime  = new Date(ev.date).getTime();
+        const isPast  = evTime < todayMs;
+        const isNext  = i === nextIdx;
+        const diff    = Math.round((evTime - todayMs) / 86400000);
+        const ddayStr = isPast ? '완료 ✓' : diff === 0 ? 'D-Day! 🎉' : 'D-' + diff;
+        const dateStr = new Date(ev.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const row = document.createElement('div');
+        row.className = 'event-row' + (isPast ? ' past' : '') + (isNext ? ' next' : '');
+        row.innerHTML =
+          '<div class="ev-emoji">' + ev.emoji + '</div>' +
+          '<div class="ev-info">' +
+            '<div class="ev-title">' + ev.title + '</div>' +
+            '<div class="ev-date">'  + dateStr  + '</div>' +
+          '</div>' +
+          '<div class="ev-dday">' + ddayStr + '</div>';
+        listEl.appendChild(row);
+      });
+    }
+
+    fetch('./events.json')
+      .then(function (r) { return r.json(); })
+      .then(render)
+      .catch(function () {
+        document.getElementById('eventList').innerHTML =
+          '<div style="text-align:center;padding:24px;color:#ddd;font-size:13px;">' +
+          '이벤트를 불러올 수 없어요<br>' +
+          '<small style="font-size:11px;">GitHub Pages에 배포 후 정상 동작해요</small></div>';
+      });
+  })();
+</script>
 
 </body>
 </html>
