@@ -4,7 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>성우 &amp; 소희</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
+    /* ── Flatpickr theme override ── */
+    .flatpickr-calendar {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      border-radius: 20px !important;
+      box-shadow: 0 8px 36px rgba(255,107,157,0.18) !important;
+      border: 1.5px solid #FFECF3 !important;
+      padding: 8px;
+    }
+    .flatpickr-months { padding: 4px 0 2px; }
+    .flatpickr-month  { color: #333 !important; fill: #333 !important; }
+    .flatpickr-current-month { font-size: 15px !important; font-weight: 700 !important; color: #333 !important; }
+    .flatpickr-current-month select,
+    .flatpickr-current-month input.cur-year { color: #333 !important; font-weight: 700; }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: #ccc !important; }
+    .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: #FF6B9D !important; }
+    .flatpickr-weekday { color: #ccc !important; font-weight: 600 !important; font-size: 12px !important; }
+    .flatpickr-day {
+      border-radius: 10px !important;
+      font-size: 13px !important;
+      color: #333 !important;
+      border: none !important;
+    }
+    .flatpickr-day:hover { background: #FFF0F5 !important; color: #FF6B9D !important; }
+    .flatpickr-day.today { border: 1.5px solid #FF6B9D !important; color: #FF6B9D !important; font-weight: 700; }
+    .flatpickr-day.today:hover { background: #FFF0F5 !important; }
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+      background: #FF6B9D !important;
+      border-color: #FF6B9D !important;
+      color: white !important;
+      font-weight: 700;
+    }
+    .flatpickr-day.flatpickr-disabled { color: #e0e0e0 !important; }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -141,7 +176,7 @@
       transition: border-color 0.15s; font-family: inherit; color: #333;
     }
     .form-input:focus { border-color: #FF6B9D; }
-    input[type="date"].form-input { flex: 0 0 auto; min-width: 130px; }
+    #formDate { flex: 0 0 auto; min-width: 130px; cursor: pointer; }
     .form-submit {
       padding: 10px 18px; background: #FF6B9D; color: white;
       border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
@@ -212,7 +247,7 @@
       .dday-number { font-size: 52px; }
       .dday-card   { padding: 26px 36px; }
       .form-row    { flex-wrap: wrap; }
-      input[type="date"].form-input { flex: 1 1 100%; }
+      #formDate { flex: 1 1 100%; }
     }
   </style>
 </head>
@@ -273,7 +308,7 @@
         <div class="emoji-picker" id="emojiPicker"></div>
         <div class="form-row">
           <input type="text" class="form-input" id="formTitle" placeholder="일정 제목 입력">
-          <input type="date" class="form-input" id="formDate">
+          <input type="text" class="form-input" id="formDate" placeholder="날짜 선택" readonly>
           <button class="form-submit" id="formSubmit">추가</button>
         </div>
       </div>
@@ -360,6 +395,10 @@
   </div>
 </div>
 
+<!-- Flatpickr -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
 <!-- Particles + D-day (non-module) -->
 <script>
   // Particles
@@ -379,6 +418,14 @@
       c.appendChild(el);
     }
   })();
+
+  // Flatpickr date picker
+  flatpickr('#formDate', {
+    locale: 'ko',
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
+    disableMobile: true,
+  });
 
   // D-day
   (function () {
