@@ -127,8 +127,13 @@ export const RESORTS = [
     coords: { lat: 5.50, lon: 72.90 },
     svg_pin: { cx: 75, cy: 78, color: '#7F77DD', label: '코' },
 
-    youtube_ids: [],   // TODO: '[코라코라 몰디브] 브이로그' 검색 후 추가
-    image_urls: [],    // TODO: https://www.coracoraresorts.com/ 이미지 추가
+    youtube_ids: ['i20UlJteOTQ', 'VTfkgPkT85A', 'LMYzHSpAkEM'],
+    image_urls: [
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Cora-Cora-Maldives.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Lagoon-Pool-Villa-Facade-Cora-Cora-Maldives-5.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Beach-Villa-Cora-Cora-Maldives-2.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Areal-Cora-Cora-Maldives-3.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -207,8 +212,13 @@ export const RESORTS = [
     coords: { lat: 4.00, lon: 72.80 },
     svg_pin: { cx: 90, cy: 256, color: '#185FA5', label: '아나' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['n8xHrToY8-w', 'WOseNXs1vqk', 'CKJIzL4WWR0'],
+    image_urls: [
+      'https://image-tc.galaxy.tf/wijpeg-cfejik4vw9kz5988ntdaix7x2/ananea-madivaru-112.jpg?width=1200',
+      'https://image-tc.galaxy.tf/wijpeg-bggoggtrh11o5oext7nerzykz/ananea-madivaru-026.jpg?width=1200',
+      'https://image-tc.galaxy.tf/wijpeg-8td7xw3ndgxyfdf47rpj3uin8/ananea-madivaru-079.jpg?width=1200',
+      'https://image-tc.galaxy.tf/wijpeg-6fsesl9xb5hiuyx7c7obeydjp/ananea-madivaru-324.jpg?width=1200',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -284,8 +294,12 @@ export const RESORTS = [
     coords: { lat: 4.00, lon: 72.80 },
     svg_pin: { cx: 68, cy: 248, color: '#D85A30', label: '벨' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['PM298A8Ymtk', 'w-Wue2E0WwQ', '1WSY9DavJkg'],
+    image_urls: [
+      'https://veligandu.com/wp-content/uploads/2026/02/ISLAND-AERIAL-1024x576.jpg',
+      'https://veligandu.com/wp-content/uploads/2024/11/Veligandu_Beach_Swing_819x1024.webp',
+      'https://veligandu.com/wp-content/uploads/slider/cache/13151d5b2990e4c3cedaa768a799aeb6/SOPV2-0001.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -360,8 +374,13 @@ export const RESORTS = [
     coords: { lat: 5.10, lon: 72.90 },
     svg_pin: { cx: 103, cy: 152, color: '#D85A30', label: '디' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['G6HVSEXZBCo', '6sgjxRBvPIA', 'z3u3UuDniHg'],
+    image_urls: [
+      'https://dhigufaru.com/app/wp-content/uploads/2025/12/Dhigufaru-Island-Resort-1536x620.jpg',
+      'https://dhigufaru.com/app/wp-content/uploads/2025/12/Veli-Beach-Sunset-1920x620.jpg',
+      'https://dhigufaru.com/app/wp-content/uploads/2025/12/Pool-Beach-Villa-1920x620.jpg',
+      'https://dhigufaru.com/app/wp-content/uploads/2026/01/Pool-Water-Villa--1920x620.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -434,8 +453,13 @@ export const RESORTS = [
     coords: { lat: 5.50, lon: 73.00 },
     svg_pin: { cx: 102, cy: 80, color: '#D85A30', label: '푸라' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['LS_jGCiTZKc', 'ZCEvzb4YHaw', 'BYaTWFyLbTw'],
+    image_urls: [
+      'https://furaveri.com/wp-content/uploads/2022/04/GardenVilla_Sleep.jpg',
+      'https://furaveri.com/wp-content/uploads/2025/05/BeachPoolVilla1_pool-scaled.jpg',
+      'https://furaveri.com/wp-content/uploads/2022/04/Ocean-Villa-5-scaled.jpg',
+      'https://furaveri.com/wp-content/uploads/2022/03/AerialView3-1024x575-1.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -504,8 +528,13 @@ export const RESORTS = [
     coords: { lat: 5.30, lon: 73.60 },
     svg_pin: { cx: 202, cy: 122, color: '#D85A30', label: '푸시' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['OTAb8F8sStw', 'udf6i_5ku0w', 'uyusMa5j64Y'],
+    image_urls: [
+      'https://www.fushifaru.com/wp-content/uploads/2025/03/villas-1.webp',
+      'https://www.fushifaru.com/wp-content/uploads/2025/03/villas-2.webp',
+      'https://www.fushifaru.com/wp-content/uploads/2026/03/Heroshot-04-scaled.jpg',
+      'https://www.fushifaru.com/wp-content/uploads/2026/06/MF-5039-scaled.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -580,8 +609,13 @@ export const RESORTS = [
     coords: { lat: 5.30, lon: 72.90 },
     svg_pin: { cx: 74, cy: 106, color: '#D85A30', label: '라야' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['v6y3Soz3fnc', 'BQzSpDUr9A8'],
+    image_urls: [
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Raaya-by-Atmosphere.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Amari-Raaya-Maldives-Beach-Pool-Villa-Pool-View-9.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Arm-Aerial-Ocean-Villas-9.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Amari-Raaya-Maldives-Exterior-Ocean-Villas-View-From-Beach-Sunset-3.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -656,8 +690,13 @@ export const RESORTS = [
     coords: { lat: 4.30, lon: 73.40 },
     svg_pin: { cx: 178, cy: 214, color: '#185FA5', label: '바루' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['aa6ltrVtRyM', 'yc5aF_urq4o', 'd03h9-BViIw'],
+    image_urls: [
+      'https://www.neoscapesmaldives.com/wp-content/uploads/VARU-BY-ATMOSPHERE-AERIALS-AND-GENERIC-ISLAND-AERIAL-07-1.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/BEACH-VILLAS-1.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/WATER-VILLAS-1.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/VARU-BY-ATMOSPHERE-VILLAS-BEACH-VILLA-WITH-POOL-DECK-VIEW-02-1.jpg',
+    ],
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -731,8 +770,13 @@ export const RESORTS = [
     coords: { lat: 4.10, lon: 73.50 },
     svg_pin: { cx: 200, cy: 258, color: '#185FA5', label: '사이' },
 
-    youtube_ids: [],
-    image_urls: [],
+    youtube_ids: ['JOp-7_B21LU', '78NHW9RYiaA', 'nU5EUMwXJH4'],
+    image_urls: [
+      'https://www.saiihotels.com/wp-content/uploads/2026/02/MLEGSQQ_Resort_Aerial_05-scaled.jpg',
+      'https://www.saiihotels.com/wp-content/uploads/2026/02/MLEGSQQ_Resort_Aerial_01-scaled.jpg',
+      'https://www.saiihotels.com/wp-content/uploads/2026/01/MLEGSQQ_BeachVillaKing_Bedroom_1-scaled.jpg',
+      'https://www.saiihotels.com/wp-content/uploads/2026/02/MLEGSQQ_OverwaterVilla_SunsetView_1-scaled.jpg',
+    ],
   },
 ];
 
