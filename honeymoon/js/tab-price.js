@@ -3,17 +3,17 @@
 import { RESORTS, getBestPrice } from './resorts-data.js';
 
 const PRICE_KEYS = [
-  { key: 'water_pool_4n', label: '워터풀빌라 4박' },
-  { key: 'mix_4n',        label: '비치+워터 믹스' },
-  { key: 'water_4n',      label: '워터빌라 4박' },
-  { key: 'beach_4n',      label: '비치빌라 4박' },
+  { key: 'water_pool_4n', label: '🏊 워터풀 4박', short: '워터풀' },
+  { key: 'mix_4n',        label: '🔀 믹스 4박',   short: '믹스' },
+  { key: 'water_4n',      label: '🌊 워터 4박',   short: '워터' },
+  { key: 'beach_4n',      label: '🏖️ 비치 4박',   short: '비치' },
 ];
 
 const AGENCY_NAMES = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };
 
 let sortKey = 'water_pool_4n';
 let sortDir = 'asc';
-let coupleMode = false; // 2인 합산
+let coupleMode = false;
 
 function getAllPricesForKey(resort, key) {
   const results = [];
@@ -35,12 +35,29 @@ function getAllPricesForKey(resort, key) {
 function findBestInColumn(key) {
   let best = Infinity;
   for (const r of RESORTS) {
-    const prices = getAllPricesForKey(r, key);
-    for (const p of prices) {
+    for (const p of getAllPricesForKey(r, key)) {
       if (p.final < best) best = p.final;
     }
   }
   return best === Infinity ? null : best;
+}
+
+function renderSummaryCards() {
+  const bests = {};
+  for (const { key } of PRICE_KEYS) bests[key] = findBestInColumn(key);
+
+  const cards = PRICE_KEYS.map(({ key, short }) => {
+    const b = bests[key];
+    if (!b) return '';
+    const resort = RESORTS.find(r => getAllPricesForKey(r, key).some(p => p.final === b));
+    return `<div class="price-summary-card">
+      <div class="psc-label">${short} 최저가</div>
+      <div class="psc-price">$${b.toLocaleString()}<small>/인</small></div>
+      <div class="psc-resort">${resort?.name_ko || ''}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="price-summary-row">${cards}</div>`;
 }
 
 function renderTable() {
@@ -50,7 +67,6 @@ function renderTable() {
   const bests = {};
   for (const { key } of PRICE_KEYS) bests[key] = findBestInColumn(key);
 
-  // 정렬
   const sorted = [...RESORTS].sort((a, b) => {
     const pa = getBestPrice(a, sortKey);
     const pb = getBestPrice(b, sortKey);
@@ -61,70 +77,83 @@ function renderTable() {
   });
 
   const mul = coupleMode ? 2 : 1;
-  const unitNote = coupleMode ? '2인 합산 USD' : '1인 USD';
 
   const headerCols = PRICE_KEYS.map(({ key, label }) => {
     const active = key === sortKey;
-    const indicator = active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
-    return `<th class="${active ? 'sorted' : ''}" data-key="${key}">${label}<span class="sort-indicator">${indicator}</span></th>`;
+    const arrow = active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+    return `<th class="th-price${active ? ' sorted' : ''}" data-key="${key}">${label}${arrow}</th>`;
   }).join('');
 
-  const rows = sorted.map(resort => {
+  const rows = sorted.map((resort, idx) => {
+    const tierBadge = {
+      '최상': '<span class="tier-dot tier-best-dot"></span>',
+      '중간': '<span class="tier-dot tier-mid-dot"></span>',
+      '단순': '<span class="tier-dot tier-simple-dot"></span>',
+    }[resort.honeymoon_tier] || '';
+
+    const transferIcon = resort.transfer_type === 'seaplane' ? '✈' : '🚤';
+
     const priceCols = PRICE_KEYS.map(({ key }) => {
       const prices = getAllPricesForKey(resort, key);
-      if (prices.length === 0) {
-        return `<td class="td-price na">—</td>`;
-      }
-      // 여러 여행사가 있으면 각각 표시
+      if (prices.length === 0) return `<td class="td-price na">—</td>`;
+
       const cells = prices.map(p => {
         const finalAmt = p.final * mul;
         const isBest = p.final === bests[key];
         const discHtml = p.disc != null
-          ? `<span class="orig">$${(p.base * mul).toLocaleString()}</span>`
+          ? `<span class="orig">$${(p.base * mul).toLocaleString()}</span> `
           : '';
-        const valHtml = isBest
-          ? `<span class="price-val">$${finalAmt.toLocaleString()}</span>`
-          : `$${finalAmt.toLocaleString()}`;
-        const badge = isBest ? '<span class="col-best-badge">최저</span>' : '';
-        const agLabel = prices.length > 1 ? `<div style="font-size:10px;color:var(--text-light);">${p.agName}</div>` : '';
-        return `<div style="margin-bottom:${prices.length > 1 ? '4px' : '0'}">${agLabel}${discHtml}<span class="${isBest ? 'td-price best' : ''}">${valHtml}${badge}</span></div>`;
+        return `<div class="price-cell-row">
+          ${prices.length > 1 ? `<span class="ag-label">${p.agName}</span>` : ''}
+          ${discHtml}<span class="${isBest ? 'best-price' : ''}">$${finalAmt.toLocaleString()}</span>
+          ${isBest ? '<span class="best-badge">최저</span>' : ''}
+        </div>`;
       }).join('');
       return `<td class="td-price">${cells}</td>`;
     }).join('');
 
-    const agencyBadges = Object.keys(resort.agencies).map(agId => {
-      const cls = agId === 'realmaldives' ? 'pill-coral' : 'pill-blue';
-      return `<span class="meta-pill ${cls}" style="font-size:10px;">${AGENCY_NAMES[agId]}</span>`;
-    }).join(' ');
+    const mealPlans = Object.values(resort.agencies)
+      .map(ag => ag.meal_plan_name?.split('(')[0]?.trim() || ag.meal_plan)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join('<br>');
 
     return `
-<tr>
-  <td class="td-resort-name">
-    ${resort.name_ko}
-    <small>${resort.name_en}</small>
-    <div style="margin-top:4px;">${agencyBadges}</div>
+<tr class="resort-row">
+  <td class="td-resort">
+    <div class="resort-name-wrap">
+      ${tierBadge}<strong>${resort.name_ko}</strong>
+    </div>
+    <div class="resort-sub">${transferIcon} ${resort.transfer_minutes}분 · ${resort.atoll}</div>
+    ${resort.has_hammock ? '<div class="hammock-note">🛏️ 해먹</div>' : ''}
   </td>
-  <td class="td-plan">
-    ${Object.values(resort.agencies).map(ag => `<div>${ag.meal_plan_name?.split('(')[0] || ag.meal_plan}</div>`).join('')}
-  </td>
+  <td class="td-plan"><div style="font-size:11px;color:var(--text-muted);">${mealPlans}</div></td>
   ${priceCols}
 </tr>`;
   }).join('');
 
   wrap.innerHTML = `
-<div style="margin-bottom:10px; font-size:12px; color:var(--text-muted);">💡 단위: ${unitNote} · 할인 후 가격 기준 · <span style="background:var(--teal-light);color:#085041;padding:2px 6px;border-radius:4px;font-size:11px;">최저</span> 표시 = 해당 항목 최저가</div>
+${renderSummaryCards()}
+<div class="table-meta">
+  💡 <b>${coupleMode ? '2인 합산' : '1인'} USD</b> · 할인 후 기준 · <span class="best-badge">최저</span> = 해당 항목 최저가 · 헤더 클릭 시 정렬
+  <span class="tier-legend">
+    <span class="tier-dot tier-best-dot"></span>최상
+    <span class="tier-dot tier-mid-dot"></span>중간
+    <span class="tier-dot tier-simple-dot"></span>기본
+  </span>
+</div>
+<div class="table-scroll-wrap">
 <table class="compare-table">
   <thead>
     <tr>
-      <th data-key="_name">리조트</th>
-      <th data-key="_plan">식사 플랜</th>
+      <th class="th-resort" data-key="_name">리조트</th>
+      <th class="th-plan" data-key="_plan">식사</th>
       ${headerCols}
     </tr>
   </thead>
   <tbody>${rows}</tbody>
-</table>`;
+</table>
+</div>`;
 
-  // 정렬 클릭
   wrap.querySelectorAll('th[data-key]').forEach(th => {
     th.addEventListener('click', () => {
       const k = th.dataset.key;
@@ -139,13 +168,11 @@ function renderTable() {
 export function initPrice() {
   renderTable();
 
-  // 2인 합산 토글
   const toggle = document.getElementById('coupleToggle');
   if (toggle) {
     toggle.addEventListener('click', () => {
       coupleMode = !coupleMode;
-      const sw = document.getElementById('coupleSwitch');
-      sw?.classList.toggle('on', coupleMode);
+      document.getElementById('coupleSwitch')?.classList.toggle('on', coupleMode);
       renderTable();
     });
   }

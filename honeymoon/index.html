@@ -45,24 +45,26 @@
   <!-- 탭 1: 개요 & 카드 -->
   <div class="tab-content active" id="tab-cards">
     <div class="cards-toolbar">
-      <span class="sort-label">정렬</span>
-      <button class="sort-btn active" data-sort="water_pool_4n">🏊 워터풀 4박 최저가</button>
-      <button class="sort-btn" data-sort="mix_4n">🔀 비치+워터 믹스</button>
-      <button class="sort-btn" data-sort="water_4n">🌊 워터 4박</button>
-      <button class="sort-btn" data-sort="beach_4n">🏖️ 비치 4박</button>
-      <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+      <div class="toolbar-row">
+        <span class="sort-label">정렬 기준</span>
+        <button class="sort-btn active" data-sort="water_pool_4n">🏊 워터풀 4박</button>
+        <button class="sort-btn" data-sort="mix_4n">🔀 믹스 4박</button>
+        <button class="sort-btn" data-sort="water_4n">🌊 워터 4박</button>
+        <button class="sort-btn" data-sort="beach_4n">🏖️ 비치 4박</button>
+      </div>
+      <div class="toolbar-row toolbar-filters">
         <span class="sort-label">필터</span>
         <select class="filter-select" id="filterTransfer">
-          <option value="">이동시간 전체</option>
-          <option value="15">15분 (스피드보트)</option>
-          <option value="20">20분 수상비행기</option>
-          <option value="35">35분 수상비행기</option>
-          <option value="40">40분 수상비행기</option>
-          <option value="40sb">40분 스피드보트</option>
-          <option value="45">45분 수상비행기</option>
+          <option value="">✈ 이동수단 전체</option>
+          <option value="15">🚤 15분 스피드보트</option>
+          <option value="20">✈ 20분 수상비행기</option>
+          <option value="35">✈ 35분 수상비행기</option>
+          <option value="40">✈ 40분 수상비행기</option>
+          <option value="40sb">🚤 40분 스피드보트</option>
+          <option value="45">✈ 45분 수상비행기</option>
         </select>
         <select class="filter-select" id="filterAtoll">
-          <option value="">아톨 전체</option>
+          <option value="">📍 아톨 전체</option>
           <option value="라아">라아 아톨</option>
           <option value="바아">바아 아톨</option>
           <option value="노스 아리">노스 아리 아톨</option>
@@ -72,7 +74,14 @@
         <label class="filter-check-label">
           <input type="checkbox" id="filterHammock"> 🛏️ 해먹 있음
         </label>
+        <div class="price-filter-wrap">
+          <span class="sort-label">💰 최대 예산</span>
+          <input type="range" id="filterMaxPrice" min="1500" max="3500" step="100" value="3500" class="price-slider">
+          <span class="price-display" id="priceDisplay">$3,500 이하</span>
+          <button class="price-reset-btn" id="priceReset">초기화</button>
+        </div>
       </div>
+      <div class="filter-summary" id="filterSummary"></div>
     </div>
     <div class="cards-grid" id="cardsGrid">
       <!-- JS로 렌더링 -->

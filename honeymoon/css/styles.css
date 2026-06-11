@@ -1166,3 +1166,296 @@ body {
 
 .pdf-page-input { width: 48px; padding: 4px 6px; border: 1px solid var(--border-mid); border-radius: 4px; font-size: 12px; text-align: center; }
 .pdf-page-input::-webkit-inner-spin-button { display: none; }
+
+/* ════════════════════════════════════════════════════════════════
+   카드 탭 — 새 필터/정렬 영역
+   ════════════════════════════════════════════════════════════════ */
+.cards-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+.toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.toolbar-filters { gap: 8px; }
+
+/* 가격 슬라이더 필터 */
+.price-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.price-slider {
+  width: 120px;
+  accent-color: var(--ocean-mid);
+  cursor: pointer;
+}
+.price-display {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 90px;
+  font-weight: 500;
+}
+.price-display.price-active { color: var(--ocean-mid); font-weight: 600; }
+.price-reset-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border-mid);
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.price-reset-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+/* 필터 결과 요약 */
+.filter-summary {
+  display: none;
+  padding: 6px 12px;
+  background: var(--ocean-pale);
+  border: 1px solid #B5D4F4;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.filter-summary b { color: var(--ocean-deep); }
+.summary-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ocean-mid);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+/* 카드 최저가 배지 */
+.card-rank-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(29,158,117,0.9);
+  color: white;
+  border-radius: 12px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.card-price-value.price-best { color: var(--teal); }
+.price-na { font-size: 11px; color: var(--text-light); font-style: italic; }
+
+/* ════════════════════════════════════════════════════════════════
+   가격 비교 탭 — 개선 스타일
+   ════════════════════════════════════════════════════════════════ */
+
+/* 가격 요약 카드 (탭 상단 4개) */
+.price-summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 16px 20px 0;
+}
+@media (max-width: 800px) { .price-summary-row { grid-template-columns: repeat(2, 1fr); } }
+.price-summary-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.psc-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.psc-price { font-size: 18px; font-weight: 800; color: var(--teal); }
+.psc-price small { font-size: 11px; color: var(--text-light); font-weight: 400; }
+.psc-resort { font-size: 11px; color: var(--ocean-mid); font-weight: 600; margin-top: 2px; }
+
+/* 테이블 메타 & 스크롤 래퍼 */
+.table-meta {
+  padding: 10px 20px;
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.table-scroll-wrap {
+  padding: 0 20px 20px;
+  overflow-x: auto;
+}
+
+/* 티어 도트 */
+.tier-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 3px; }
+.tier-best-dot { background: var(--teal); }
+.tier-mid-dot { background: var(--ocean-mid); }
+.tier-simple-dot { background: var(--gray-400); }
+.tier-legend { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+
+/* 개선된 테이블 셀 */
+.td-resort { min-width: 140px; }
+.td-plan { min-width: 120px; }
+.th-resort, .th-plan, .th-price { white-space: nowrap; }
+.resort-name-wrap { display: flex; align-items: center; gap: 4px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.resort-sub { font-size: 10px; color: var(--text-muted); }
+.hammock-note { font-size: 10px; color: var(--teal); font-weight: 600; margin-top: 2px; }
+
+/* 가격 셀 */
+.price-cell-row { margin-bottom: 4px; display: flex; align-items: center; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
+.price-cell-row:last-child { margin-bottom: 0; }
+.ag-label { font-size: 9px; color: var(--text-light); }
+.best-price { color: var(--teal); font-weight: 700; background: var(--teal-light); padding: 1px 5px; border-radius: 4px; }
+.best-badge { font-size: 9px; background: var(--teal-light); color: #085041; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+.orig { font-size: 10px; color: var(--text-light); text-decoration: line-through; }
+
+/* ════════════════════════════════════════════════════════════════
+   상세 뷰 — 이미지 갤러리
+   ════════════════════════════════════════════════════════════════ */
+.image-gallery {
+  margin: 0 0 4px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
+}
+.gallery-main {
+  width: 100%;
+  height: 280px;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--teal));
+  overflow: hidden;
+}
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s;
+}
+.gallery-thumbs {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--gray-800);
+}
+.gallery-thumb {
+  flex: 1;
+  height: 52px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  border-radius: 2px;
+}
+.gallery-thumb.active, .gallery-thumb:hover { opacity: 1; }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-empty {
+  height: 200px;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  flex-direction: column;
+  gap: 8px;
+  color: rgba(255,255,255,0.6);
+}
+.gallery-empty small { font-size: 12px; }
+
+/* ════════════════════════════════════════════════════════════════
+   상세 뷰 — 유튜브 섹션
+   ════════════════════════════════════════════════════════════════ */
+.yt-section { }
+.yt-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.yt-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.yt-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: #ff0000;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.yt-search-btn:hover { background: #cc0000; }
+
+/* 영상 없을 때: 검색 카드 3개 */
+.yt-empty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.yt-search-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 10px;
+  background: var(--gray-50);
+  border: 1px dashed var(--border-mid);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  text-align: center;
+}
+.yt-search-card:hover {
+  background: #fff5f5;
+  border-color: #ff0000;
+  color: #cc0000;
+}
+.yt-search-icon { font-size: 20px; }
+.yt-search-text { font-size: 11px; line-height: 1.4; }
+
+/* 영상 있을 때: iframe 그리드 */
+.yt-embed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (max-width: 600px) { .yt-embed-grid { grid-template-columns: 1fr; } }
+.yt-embed-wrap {
+  aspect-ratio: 16/9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+  box-shadow: var(--shadow);
+}
+.yt-embed-wrap iframe { width: 100%; height: 100%; border: none; }
+
+/* 취소 정책 노트 */
+.cancellation-note {
+  margin: 8px 12px;
+  padding: 5px 10px;
+  background: var(--gray-50);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-light);
+  border-left: 2px solid var(--border-mid);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   반응형 조정
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .price-filter-wrap { margin-left: 0; }
+  .price-slider { width: 80px; }
+  .yt-empty-grid { grid-template-columns: 1fr; }
+  .price-summary-row { grid-template-columns: repeat(2, 1fr); }
+  .pros-cons { grid-template-columns: 1fr; }
+}
