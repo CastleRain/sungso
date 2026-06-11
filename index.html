@@ -94,12 +94,18 @@
     header .sub { margin-top: 10px; font-size: 15px; color: #bbb; }
 
     /* ── D-day ── */
+    .dday-row {
+      display: flex; gap: 12px; width: 100%; max-width: 560px;
+      overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+    }
+    .dday-row::-webkit-scrollbar { display: none; }
     .dday-card {
-      background: white; border-radius: 28px; padding: 32px 56px;
+      background: white; border-radius: 28px; padding: 28px 36px;
       text-align: center; box-shadow: 0 4px 28px rgba(255,107,157,0.13);
+      flex: 1 0 180px;
     }
     .dday-label { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #ccc; text-transform: uppercase; }
-    .dday-number { font-size: 64px; font-weight: 900; color: #FF6B9D; letter-spacing: -3px; line-height: 1.1; margin: 8px 0 4px; }
+    .dday-number { font-size: 60px; font-weight: 900; color: #FF6B9D; letter-spacing: -3px; line-height: 1.1; margin: 8px 0 4px; }
     .dday-date { font-size: 13px; color: #ddd; }
 
     /* ── Project cards ── */
@@ -154,13 +160,21 @@
     .event-row:hover { background: #FDFAFA; }
     .event-row.past  { opacity: 0.35; }
     .event-row.next  { border-color: #FFCCE0; box-shadow: 0 4px 18px rgba(255,107,157,0.1); }
-    .event-row.active-sel { border-color: #FF85B3 !important; background: #FFF5F8 !important; box-shadow: 0 4px 18px rgba(255,107,157,0.15) !important; }
+    .event-row.pinned { border-color: #FF85B3 !important; background: #FFF5F8 !important; box-shadow: 0 4px 18px rgba(255,107,157,0.15) !important; }
     .ev-emoji { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
     .ev-info  { flex: 1; min-width: 0; }
     .ev-title { font-size: 14px; font-weight: 600; color: #333; }
     .ev-date  { font-size: 12px; color: #ccc; margin-top: 2px; }
     .ev-dday  { font-size: 12px; font-weight: 700; color: #FF6B9D; flex-shrink: 0; }
     .event-row.past .ev-dday { color: #ccc; }
+    .ev-pin {
+      opacity: 0; border: none; background: none; font-size: 13px;
+      cursor: pointer; padding: 4px 6px; border-radius: 8px;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .event-row:hover .ev-pin { opacity: 0.4; }
+    .ev-pin.pinned { opacity: 1; }
+    .ev-pin:hover { opacity: 1 !important; background: #FFF0F5; }
     .ev-delete {
       opacity: 0; border: none; background: none; font-size: 14px;
       cursor: pointer; color: #ddd; padding: 4px 6px; border-radius: 8px;
@@ -268,8 +282,8 @@
 
     @media (max-width: 480px) {
       header h1    { font-size: 32px; }
-      .dday-number { font-size: 52px; }
-      .dday-card   { padding: 26px 36px; }
+      .dday-number { font-size: 48px; }
+      .dday-card   { padding: 22px 20px; min-width: 155px; }
       .form-row    { flex-wrap: wrap; }
       #formDate { flex: 1 1 100%; }
     }
@@ -285,10 +299,12 @@
     <div class="sub">우리의 결혼 준비 공간 💕</div>
   </header>
 
-  <div class="dday-card">
-    <div class="dday-label" id="ddayLabel">결혼식까지</div>
-    <div class="dday-number" id="ddayNum">—</div>
-    <div class="dday-date" id="ddayDate">2027년 3월 6일 토요일</div>
+  <div class="dday-row" id="ddayRow">
+    <div class="dday-card" id="ddayWedding">
+      <div class="dday-label">결혼식까지</div>
+      <div class="dday-number" id="ddayNum">—</div>
+      <div class="dday-date">2027년 3월 6일 토요일</div>
+    </div>
   </div>
 
   <div class="grid">
@@ -467,7 +483,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, deleteDoc, doc,
+    getFirestore, collection, addDoc, deleteDoc, updateDoc, doc,
     onSnapshot, query, orderBy, serverTimestamp, getDocs
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -488,23 +504,26 @@
   let calDate        = new Date();
   let selectedDate   = null;
   let selectedEmoji  = '📅';
-  let selectedEvId   = null;   // 선택된 일정 id
 
-  // ── D-day card update / reset ──
-  function updateDdayCard(ev) {
-    const diffMs  = new Date(ev.date + 'T00:00:00') - new Date(TODAY + 'T00:00:00');
-    const diff    = Math.round(diffMs / 86400000);
-    const ddayStr = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day! 🎉' : 'D+' + Math.abs(diff);
-    const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
-    document.getElementById('ddayLabel').textContent = ev.emoji + ' ' + ev.title + '까지';
-    document.getElementById('ddayNum').textContent   = ddayStr;
-    document.getElementById('ddayDate').textContent  = dateStr;
-  }
-  function resetDdayCard() {
-    const diff = Math.ceil((new Date('2027-03-06T00:00:00') - new Date(TODAY + 'T00:00:00')) / 86400000);
-    document.getElementById('ddayLabel').textContent = '결혼식까지';
-    document.getElementById('ddayNum').textContent   = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day 💒' : 'D+' + Math.abs(diff);
-    document.getElementById('ddayDate').textContent  = '2027년 3월 6일 토요일';
+  // ── D-day cards ──
+  function renderDdayCards() {
+    const row = document.getElementById('ddayRow');
+    row.querySelectorAll('.dday-card-dynamic').forEach(c => c.remove());
+
+    allEvents.filter(ev => ev.pinned).forEach(ev => {
+      const diffMs  = new Date(ev.date + 'T00:00:00') - new Date(TODAY + 'T00:00:00');
+      const diff    = Math.round(diffMs / 86400000);
+      const ddayStr = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day! 🎉' : 'D+' + Math.abs(diff);
+      const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+
+      const card = document.createElement('div');
+      card.className = 'dday-card dday-card-dynamic';
+      card.innerHTML =
+        '<div class="dday-label">' + ev.emoji + ' ' + ev.title + '까지</div>' +
+        '<div class="dday-number">' + ddayStr + '</div>' +
+        '<div class="dday-date">' + dateStr + '</div>';
+      row.appendChild(card);
+    });
   }
 
   // Today string (local time, YYYY-MM-DD)
@@ -539,6 +558,7 @@
   // ── Real-time subscription ──
   onSnapshot(query(eventsCol, orderBy('date')), snap => {
     allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderDdayCards();
     if (activeTab === 'list') renderList();
     else renderCalendar();
   });
@@ -564,12 +584,12 @@
       const ddayStr = isPast ? '완료 ✓' : diff === 0 ? 'D-Day! 🎉' : 'D-' + diff;
       const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
 
-      const isSel = ev.id === selectedEvId;
+      const isPinned = ev.pinned === true;
       const row = document.createElement('div');
       row.className = 'event-row' +
-        (isPast  ? ' past'       : '') +
-        (isNext  ? ' next'       : '') +
-        (isSel   ? ' active-sel' : '');
+        (isPast   ? ' past'   : '') +
+        (isNext   ? ' next'   : '') +
+        (isPinned ? ' pinned' : '');
       row.innerHTML =
         '<div class="ev-emoji">' + ev.emoji + '</div>' +
         '<div class="ev-info">' +
@@ -577,18 +597,20 @@
           '<div class="ev-date">'  + dateStr  + '</div>' +
         '</div>' +
         '<div class="ev-dday">' + ddayStr + '</div>' +
+        '<button class="ev-pin' + (isPinned ? ' pinned' : '') + '" title="' + (isPinned ? '고정 해제' : 'D-day에 고정') + '">📌</button>' +
         '<button class="ev-delete" title="삭제">🗑️</button>';
 
+      row.querySelector('.ev-pin').addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateDoc(doc(db, 'events', ev.id), { pinned: !isPinned });
+      });
       row.querySelector('.ev-delete').addEventListener('click', (e) => {
         e.stopPropagation();
         deleteDoc(doc(db, 'events', ev.id));
-        if (selectedEvId === ev.id) { selectedEvId = null; resetDdayCard(); }
       });
       row.addEventListener('click', (e) => {
-        if (e.target.closest('.ev-delete')) return;
-        if (selectedEvId === ev.id) { selectedEvId = null; resetDdayCard(); }
-        else { selectedEvId = ev.id; updateDdayCard(ev); }
-        renderList();
+        if (e.target.closest('.ev-delete') || e.target.closest('.ev-pin')) return;
+        updateDoc(doc(db, 'events', ev.id), { pinned: !isPinned });
       });
       listEl.appendChild(row);
     });
