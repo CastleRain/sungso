@@ -15,24 +15,17 @@
       padding-bottom: 140px;
     }
 
-    /* ── Floating particles ── */
+    /* ── Particles ── */
     .particles {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
+      pointer-events: none; z-index: 0; overflow: hidden;
     }
     .particle {
-      position: absolute;
-      opacity: 0;
-      animation: floatUp var(--dur) ease-in infinite;
-      animation-delay: var(--delay);
-      left: var(--x);
-      bottom: -20px;
-      color: var(--color);
-      font-size: var(--size);
+      position: absolute; opacity: 0;
+      animation: floatUp var(--dur) ease-in infinite var(--delay);
+      left: var(--x); bottom: -20px;
+      color: var(--color); font-size: var(--size);
     }
     @keyframes floatUp {
       0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
@@ -43,110 +36,62 @@
 
     /* ── Layout ── */
     .main {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 64px 20px 40px;
-      gap: 28px;
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 64px 20px 40px; gap: 28px;
     }
 
     /* ── Header ── */
     header { text-align: center; }
-    header h1 {
-      font-size: 40px;
-      font-weight: 800;
-      color: #1a1a1a;
-      letter-spacing: -2px;
-    }
+    header h1 { font-size: 40px; font-weight: 800; color: #1a1a1a; letter-spacing: -2px; }
     .amp { color: #FF6B9D; }
-    header .sub {
-      margin-top: 10px;
-      font-size: 15px;
-      color: #bbb;
-      letter-spacing: 0.2px;
-    }
+    header .sub { margin-top: 10px; font-size: 15px; color: #bbb; }
 
     /* ── D-day ── */
     .dday-card {
-      background: white;
-      border-radius: 28px;
-      padding: 32px 56px;
-      text-align: center;
-      box-shadow: 0 4px 28px rgba(255, 107, 157, 0.13);
+      background: white; border-radius: 28px; padding: 32px 56px;
+      text-align: center; box-shadow: 0 4px 28px rgba(255,107,157,0.13);
     }
-    .dday-label  { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #ccc; text-transform: uppercase; }
-    .dday-number {
-      font-size: 64px;
-      font-weight: 900;
-      color: #FF6B9D;
-      letter-spacing: -3px;
-      line-height: 1.1;
-      margin: 8px 0 4px;
-    }
-    .dday-date   { font-size: 13px; color: #ddd; }
+    .dday-label { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #ccc; text-transform: uppercase; }
+    .dday-number { font-size: 64px; font-weight: 900; color: #FF6B9D; letter-spacing: -3px; line-height: 1.1; margin: 8px 0 4px; }
+    .dday-date { font-size: 13px; color: #ddd; }
 
     /* ── Project cards ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
-      gap: 14px;
-      width: 100%;
-      max-width: 560px;
-    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; width: 100%; max-width: 560px; }
     .card {
-      background: white;
-      border-radius: 22px;
-      padding: 24px;
-      text-decoration: none;
-      color: inherit;
+      background: white; border-radius: 22px; padding: 24px;
+      text-decoration: none; color: inherit;
       box-shadow: 0 2px 14px rgba(0,0,0,0.055);
       transition: transform 0.18s ease, box-shadow 0.18s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: flex; flex-direction: column; gap: 10px;
     }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 32px rgba(0,0,0,0.1);
-    }
-    .icon-wrap {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-    }
-    .badge {
-      display: inline-block;
-      font-size: 11px; font-weight: 600;
-      color: #FF85B3;
-      background: #FFF0F6;
-      padding: 3px 10px;
-      border-radius: 20px;
-    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(0,0,0,0.1); }
+    .icon-wrap { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; color: #FF85B3; background: #FFF0F6; padding: 3px 10px; border-radius: 20px; }
     .card-title { font-size: 16px; font-weight: 700; color: #111; margin-top: 8px; }
-    .card-desc  { font-size: 13px; color: #aaa; line-height: 1.65; }
-    .card-link  { font-size: 12px; color: #ddd; margin-top: 4px; }
+    .card-desc { font-size: 13px; color: #aaa; line-height: 1.65; }
+    .card-link { font-size: 12px; color: #ddd; margin-top: 4px; }
 
-    /* ── Events ── */
+    /* ── Events section ── */
     .events-wrap { width: 100%; max-width: 560px; }
-    .section-label {
-      text-align: center;
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 2px;
-      color: #ccc;
-      text-transform: uppercase;
-      margin-bottom: 14px;
+    .section-label { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #ccc; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* ── View tabs ── */
+    .view-tabs { display: flex; background: #F8F0F4; border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+    .tab-btn {
+      flex: 1; padding: 8px 0; border: none; background: transparent;
+      border-radius: 10px; font-size: 13px; font-weight: 600; color: #ccc;
+      cursor: pointer; transition: all 0.18s; font-family: inherit;
     }
+    .tab-btn.active { background: white; color: #FF6B9D; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+
+    /* ── List view ── */
+    #listView { display: block; }
+    #listView.hidden { display: none; }
     .event-list { display: flex; flex-direction: column; gap: 8px; }
     .event-row {
-      background: white;
-      border-radius: 16px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background: white; border-radius: 16px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px;
       box-shadow: 0 1px 8px rgba(0,0,0,0.04);
     }
     .event-row.past  { opacity: 0.35; }
@@ -157,52 +102,125 @@
     .ev-date  { font-size: 12px; color: #ccc; margin-top: 2px; }
     .ev-dday  { font-size: 12px; font-weight: 700; color: #FF6B9D; flex-shrink: 0; }
     .event-row.past .ev-dday { color: #ccc; }
+    .ev-delete {
+      opacity: 0; border: none; background: none; font-size: 14px;
+      cursor: pointer; color: #ddd; padding: 4px 6px; border-radius: 8px;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .event-row:hover .ev-delete { opacity: 1; }
+    .ev-delete:hover { color: #FF6B9D; background: #FFF0F5; }
+
+    /* ── Add form ── */
+    .add-btn {
+      width: 100%; margin-top: 10px;
+      padding: 13px; border: 2px dashed #FFD0E0; border-radius: 16px;
+      background: transparent; color: #FFB3CC; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s; font-family: inherit;
+    }
+    .add-btn:hover { border-color: #FF6B9D; color: #FF6B9D; background: #FFF8FA; }
+    .add-form {
+      display: none; background: white; border-radius: 18px;
+      padding: 18px; margin-top: 10px;
+      box-shadow: 0 4px 20px rgba(255,107,157,0.1);
+      border: 1.5px solid #FFECF3;
+    }
+    .add-form.show { display: block; }
+    .form-label { font-size: 11px; font-weight: 700; color: #ccc; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    .emoji-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .emoji-pick-btn {
+      width: 38px; height: 38px; border: 2px solid #f0f0f0; border-radius: 10px;
+      background: white; font-size: 18px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .emoji-pick-btn.selected { border-color: #FF6B9D; background: #FFF0F6; }
+    .form-row { display: flex; gap: 8px; align-items: center; }
+    .form-input {
+      flex: 1; padding: 10px 14px; border: 1.5px solid #f0f0f0;
+      border-radius: 12px; font-size: 14px; outline: none;
+      transition: border-color 0.15s; font-family: inherit; color: #333;
+    }
+    .form-input:focus { border-color: #FF6B9D; }
+    input[type="date"].form-input { flex: 0 0 auto; min-width: 130px; }
+    .form-submit {
+      padding: 10px 18px; background: #FF6B9D; color: white;
+      border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap; font-family: inherit;
+    }
+    .form-submit:hover { background: #FF4081; }
+
+    /* ── Calendar view ── */
+    #calView { display: none; }
+    #calView.show { display: block; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav {
+      width: 34px; height: 34px; border-radius: 50%; border: none;
+      background: white; font-size: 18px; cursor: pointer; color: #bbb;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07); transition: color 0.15s;
+    }
+    .cal-nav:hover { color: #FF6B9D; }
+    .cal-month-label { font-size: 15px; font-weight: 700; color: #333; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-day-name { text-align: center; font-size: 11px; font-weight: 600; color: #ccc; padding: 4px 0 8px; }
+    .cal-cell {
+      position: relative; text-align: center; padding: 6px 2px 8px;
+      border-radius: 10px; min-height: 46px;
+    }
+    .cal-cell.other-month { opacity: 0.25; }
+    .cal-cell.has-event { cursor: pointer; }
+    .cal-cell.has-event:hover { background: #FFF5F8; }
+    .cal-cell.selected { background: #FFF0F6; }
+    .cal-date { font-size: 13px; color: #333; font-weight: 500; line-height: 26px; }
+    .cal-cell.today .cal-date {
+      background: #FF6B9D; color: white; border-radius: 50%;
+      width: 26px; height: 26px; line-height: 26px; margin: 0 auto;
+    }
+    .cal-dots { display: flex; justify-content: center; gap: 3px; margin-top: 4px; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: #FF6B9D; }
+
+    /* Date popup */
+    .cal-popup {
+      display: none; margin-top: 12px; background: white;
+      border-radius: 14px; padding: 14px 18px;
+      box-shadow: 0 4px 18px rgba(255,107,157,0.1);
+      border: 1.5px solid #FFCCE0;
+    }
+    .cal-popup.show { display: block; }
+    .cal-popup-title { font-size: 12px; font-weight: 700; color: #FF6B9D; margin-bottom: 10px; letter-spacing: 0.3px; }
+    .cal-popup-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: #333; border-top: 1px solid #fafafa; }
+    .cal-popup-item:first-of-type { border-top: none; }
 
     footer { font-size: 13px; color: #ddd; text-align: center; }
 
     /* ── Characters ── */
     .scene {
-      position: fixed;
-      bottom: 0; left: 0;
+      position: fixed; bottom: 0; left: 0;
       width: 100%; height: 115px;
-      pointer-events: none;
-      z-index: 20;
-      overflow: hidden;
+      pointer-events: none; z-index: 20; overflow: hidden;
     }
-    /* Outer div: horizontal movement */
     .char-h-boy  { position: absolute; bottom: 0; animation: moveRight 30s linear infinite; }
     .char-h-girl { position: absolute; bottom: 0; animation: moveLeft  24s linear infinite; }
-    /* Inner div: vertical bob */
-    .char-bob { animation: bob 0.45s ease-in-out alternate infinite; }
-    .char-bob-delay { animation: bob 0.45s ease-in-out alternate infinite; animation-delay: 0.22s; }
-
-    @keyframes moveRight {
-      from { transform: translateX(-100px); }
-      to   { transform: translateX(calc(100vw + 100px)); }
-    }
-    @keyframes moveLeft {
-      from { transform: translateX(calc(100vw + 100px)); }
-      to   { transform: translateX(-100px); }
-    }
-    @keyframes bob {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-7px); }
-    }
+    .char-bob       { animation: bob 0.45s ease-in-out alternate infinite; }
+    .char-bob-delay { animation: bob 0.45s ease-in-out alternate infinite 0.22s; }
+    @keyframes moveRight { from { transform: translateX(-100px); } to { transform: translateX(calc(100vw + 100px)); } }
+    @keyframes moveLeft  { from { transform: translateX(calc(100vw + 100px)); } to { transform: translateX(-100px); } }
+    @keyframes bob { from { transform: translateY(0px); } to { transform: translateY(-7px); } }
 
     @media (max-width: 480px) {
       header h1    { font-size: 32px; }
       .dday-number { font-size: 52px; }
       .dday-card   { padding: 26px 36px; }
+      .form-row    { flex-wrap: wrap; }
+      input[type="date"].form-input { flex: 1 1 100%; }
     }
   </style>
 </head>
 <body>
 
-<!-- Floating particles -->
 <div class="particles" id="particles"></div>
 
 <div class="main">
-
   <header>
     <h1>성우 <span class="amp">♥</span> 소희</h1>
     <div class="sub">우리의 결혼 준비 공간 💕</div>
@@ -235,188 +253,385 @@
     </a>
   </div>
 
+  <!-- Events -->
   <div class="events-wrap">
     <div class="section-label">일정</div>
-    <div class="event-list" id="eventList">
-      <div style="text-align:center;padding:24px;color:#ddd;font-size:13px;">불러오는 중...</div>
+
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tabList">리스트</button>
+      <button class="tab-btn" id="tabCal">달력</button>
+    </div>
+
+    <!-- List view -->
+    <div id="listView">
+      <div class="event-list" id="eventList">
+        <div style="text-align:center;padding:28px;color:#ddd;font-size:13px;">불러오는 중...</div>
+      </div>
+      <button class="add-btn" id="addBtn">+ 일정 추가</button>
+      <div class="add-form" id="addForm">
+        <div class="form-label">이모지</div>
+        <div class="emoji-picker" id="emojiPicker"></div>
+        <div class="form-row">
+          <input type="text" class="form-input" id="formTitle" placeholder="일정 제목 입력">
+          <input type="date" class="form-input" id="formDate">
+          <button class="form-submit" id="formSubmit">추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar view -->
+    <div id="calView">
+      <div class="cal-header">
+        <button class="cal-nav" id="calPrev">‹</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button class="cal-nav" id="calNext">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-popup" id="calPopup"></div>
     </div>
   </div>
 
   <footer>성우 ♥ 소희 · 2027</footer>
 </div>
 
-<!-- Character scene -->
+<!-- Characters -->
 <div class="scene">
-
-  <!-- 성우 (boy, walks left → right) -->
   <div class="char-h-boy">
     <div class="char-bob">
       <svg width="58" height="92" viewBox="0 0 58 92" xmlns="http://www.w3.org/2000/svg">
-        <!-- Hair -->
         <ellipse cx="29" cy="12" rx="15" ry="9" fill="#3B2314"/>
         <rect x="14" y="8" width="30" height="11" rx="5" fill="#3B2314"/>
-        <!-- Head -->
         <circle cx="29" cy="23" r="14" fill="#F5CBA7"/>
-        <!-- Ears -->
         <circle cx="15" cy="23" r="4.5" fill="#F5CBA7"/>
         <circle cx="43" cy="23" r="4.5" fill="#F5CBA7"/>
-        <!-- Eyes -->
         <circle cx="23" cy="21" r="2.3" fill="#2d2d2d"/>
         <circle cx="35" cy="21" r="2.3" fill="#2d2d2d"/>
         <circle cx="23.8" cy="20.2" r="0.9" fill="white"/>
         <circle cx="35.8" cy="20.2" r="0.9" fill="white"/>
-        <!-- Smile -->
         <path d="M 22 27 Q 29 33 36 27" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <!-- Neck -->
         <rect x="24" y="36" width="10" height="6" rx="2" fill="#F5CBA7"/>
-        <!-- Shirt -->
         <rect x="15" y="40" width="28" height="24" rx="8" fill="#5B8EE0"/>
-        <!-- Collar line -->
         <path d="M 24 41 L 29 48 L 34 41" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- Left arm + hand -->
         <rect x="7" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
         <circle cx="11" cy="60" r="4.5" fill="#F5CBA7"/>
-        <!-- Right arm + hand -->
         <rect x="43" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
         <circle cx="47" cy="60" r="4.5" fill="#F5CBA7"/>
-        <!-- Pants left -->
         <rect x="15" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
-        <!-- Pants right -->
         <rect x="32" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
-        <!-- Shoes -->
         <ellipse cx="20" cy="85" rx="9" ry="5" fill="#1C2A38"/>
         <ellipse cx="37" cy="85" rx="9" ry="5" fill="#1C2A38"/>
       </svg>
     </div>
   </div>
-
-  <!-- 소희 (girl, walks right → left, SVG flipped so she faces left) -->
   <div class="char-h-girl">
     <div class="char-bob-delay">
       <svg width="62" height="98" viewBox="0 0 62 98" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
-        <!-- Hair base -->
         <ellipse cx="31" cy="13" rx="17" ry="12" fill="#4A2E2E"/>
-        <!-- Pigtails -->
         <ellipse cx="12" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(-12 12 26)"/>
         <ellipse cx="50" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(12 50 26)"/>
-        <!-- Ribbons -->
         <circle cx="14" cy="16" r="5" fill="#FF85B3"/>
         <circle cx="48" cy="16" r="5" fill="#FF85B3"/>
-        <!-- Head -->
         <circle cx="31" cy="26" r="15" fill="#F5CBA7"/>
-        <!-- Ears -->
         <circle cx="16" cy="26" r="4.5" fill="#F5CBA7"/>
         <circle cx="46" cy="26" r="4.5" fill="#F5CBA7"/>
-        <!-- Blush -->
         <ellipse cx="21" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
         <ellipse cx="41" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
-        <!-- Eyes -->
         <circle cx="25" cy="23" r="2.6" fill="#2d2d2d"/>
         <circle cx="37" cy="23" r="2.6" fill="#2d2d2d"/>
         <circle cx="25.9" cy="22.1" r="1.1" fill="white"/>
         <circle cx="37.9" cy="22.1" r="1.1" fill="white"/>
-        <!-- Lashes -->
         <path d="M 23 19.5 L 24.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
         <path d="M 35 19.5 L 36.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
-        <!-- Smile -->
         <path d="M 25 31 Q 31 37 37 31" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <!-- Neck -->
         <rect x="26" y="40" width="10" height="6" rx="2" fill="#F5CBA7"/>
-        <!-- Dress body -->
         <path d="M 17 45 L 45 45 L 47 65 L 15 65 Z" fill="#FF85B3"/>
-        <!-- White collar -->
         <ellipse cx="31" cy="46" rx="9" ry="4.5" fill="white" opacity="0.55"/>
-        <!-- Dress skirt -->
         <path d="M 10 61 Q 31 72 52 61 L 54 79 Q 31 87 8 79 Z" fill="#FF85B3"/>
-        <!-- Arms + hands -->
         <rect x="8"  y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
         <circle cx="12" cy="63" r="5" fill="#F5CBA7"/>
         <rect x="45" y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
         <circle cx="50" cy="63" r="5" fill="#F5CBA7"/>
-        <!-- Legs -->
         <rect x="19" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
         <rect x="33" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
-        <!-- Shoes -->
         <ellipse cx="24" cy="95" rx="9" ry="5" fill="#FF4081"/>
         <ellipse cx="38" cy="95" rx="9" ry="5" fill="#FF4081"/>
       </svg>
     </div>
   </div>
-
 </div>
 
+<!-- Particles + D-day (non-module) -->
 <script>
-  // ── Particles ──
+  // Particles
   (function () {
-    const container = document.getElementById('particles');
-    const symbols = ['♥', '♡', '✦', '✧', '❋', '✿'];
-    const colors  = ['#FF6B9D', '#FFB3CC', '#FF85B3', '#FFD0E4', '#FF4081'];
+    const c = document.getElementById('particles');
+    const sym = ['♥','♡','✦','✧','❋','✿'];
+    const col = ['#FF6B9D','#FFB3CC','#FF85B3','#FFD0E4','#FF4081'];
     for (let i = 0; i < 16; i++) {
       const el = document.createElement('div');
       el.className = 'particle';
-      el.textContent = symbols[i % symbols.length];
+      el.textContent = sym[i % sym.length];
       el.style.setProperty('--x',     (Math.random() * 100) + '%');
       el.style.setProperty('--dur',   (7 + Math.random() * 9) + 's');
       el.style.setProperty('--delay', '-' + (Math.random() * 14) + 's');
-      el.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+      el.style.setProperty('--color', col[Math.floor(Math.random() * col.length)]);
       el.style.setProperty('--size',  (10 + Math.random() * 11) + 'px');
-      container.appendChild(el);
+      c.appendChild(el);
     }
   })();
 
-  // ── D-day ──
+  // D-day
   (function () {
     const wedding = new Date('2027-03-06T00:00:00');
-    const today   = new Date(); today.setHours(0, 0, 0, 0);
+    const today   = new Date(); today.setHours(0,0,0,0);
     const diff    = Math.ceil((wedding - today) / 86400000);
     const el      = document.getElementById('ddayNum');
-    if      (diff > 0) el.textContent = 'D-' + diff;
+    if      (diff > 0)  el.textContent = 'D-' + diff;
     else if (diff === 0) el.textContent = 'D-Day 💒';
     else                 el.textContent = 'D+' + Math.abs(diff);
   })();
+</script>
 
-  // ── Events ──
-  (function () {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const todayMs = today.getTime();
+<!-- Firebase (module) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc, doc,
+    onSnapshot, query, orderBy, serverTimestamp, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    function render(events) {
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));
-      const nextIdx = events.findIndex(e => new Date(e.date).getTime() >= todayMs);
-      const listEl  = document.getElementById('eventList');
-      listEl.innerHTML = '';
+  const app = initializeApp({
+    apiKey:            "AIzaSyBz-P5ycMAjYZBV7hkcZDrmq28EAw7Hsp8",
+    authDomain:        "sungso-358cb.firebaseapp.com",
+    projectId:         "sungso-358cb",
+    storageBucket:     "sungso-358cb.firebasestorage.app",
+    messagingSenderId: "143797950443",
+    appId:             "1:143797950443:web:95b0f616246d84aae3bae"
+  });
+  const db = getFirestore(app);
+  const eventsCol = collection(db, 'events');
 
-      events.forEach(function (ev, i) {
-        const evTime  = new Date(ev.date).getTime();
-        const isPast  = evTime < todayMs;
-        const isNext  = i === nextIdx;
-        const diff    = Math.round((evTime - todayMs) / 86400000);
-        const ddayStr = isPast ? '완료 ✓' : diff === 0 ? 'D-Day! 🎉' : 'D-' + diff;
-        const dateStr = new Date(ev.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  // ── State ──
+  let allEvents  = [];
+  let activeTab  = 'list';
+  let calDate    = new Date();
+  let selectedDate = null;
+  let selectedEmoji = '📅';
 
-        const row = document.createElement('div');
-        row.className = 'event-row' + (isPast ? ' past' : '') + (isNext ? ' next' : '');
-        row.innerHTML =
-          '<div class="ev-emoji">' + ev.emoji + '</div>' +
-          '<div class="ev-info">' +
-            '<div class="ev-title">' + ev.title + '</div>' +
-            '<div class="ev-date">'  + dateStr  + '</div>' +
-          '</div>' +
-          '<div class="ev-dday">' + ddayStr + '</div>';
-        listEl.appendChild(row);
-      });
+  // Today string (local time, YYYY-MM-DD)
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  const TODAY = todayStr();
+
+  // ── Seed initial data if collection is empty ──
+  const SEED = [
+    { date: '2026-09-13', title: '웨딩 촬영',      emoji: '📸' },
+    { date: '2026-10-01', title: '청첩장 제작',     emoji: '✉️' },
+    { date: '2026-11-01', title: '청첩장 발송',     emoji: '📬' },
+    { date: '2026-12-15', title: '드레스 최종 피팅', emoji: '👗' },
+    { date: '2027-01-20', title: '신혼집 계약',     emoji: '🏠' },
+    { date: '2027-02-15', title: '혼수 준비 완료',  emoji: '🛍️' },
+    { date: '2027-03-06', title: '결혼식',          emoji: '💒' },
+    { date: '2027-03-10', title: '신혼여행 출발',   emoji: '✈️' },
+  ];
+  (async () => {
+    const snap = await getDocs(eventsCol);
+    if (snap.empty) {
+      for (const ev of SEED) {
+        await addDoc(eventsCol, { ...ev, createdAt: serverTimestamp() });
+      }
+    }
+  })();
+
+  // ── Real-time subscription ──
+  onSnapshot(query(eventsCol, orderBy('date')), snap => {
+    allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (activeTab === 'list') renderList();
+    else renderCalendar();
+  });
+
+  // ── List rendering ──
+  function renderList() {
+    const listEl = document.getElementById('eventList');
+    if (!listEl) return;
+
+    if (allEvents.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;padding:28px;color:#ddd;font-size:13px;">아직 일정이 없어요</div>';
+      return;
     }
 
-    fetch('./events.json')
-      .then(function (r) { return r.json(); })
-      .then(render)
-      .catch(function () {
-        document.getElementById('eventList').innerHTML =
-          '<div style="text-align:center;padding:24px;color:#ddd;font-size:13px;">' +
-          '이벤트를 불러올 수 없어요<br>' +
-          '<small style="font-size:11px;">GitHub Pages에 배포 후 정상 동작해요</small></div>';
+    const nextIdx = allEvents.findIndex(e => e.date >= TODAY);
+    listEl.innerHTML = '';
+
+    allEvents.forEach((ev, i) => {
+      const isPast  = ev.date < TODAY;
+      const isNext  = i === nextIdx;
+      const diffMs  = new Date(ev.date + 'T00:00:00') - new Date(TODAY + 'T00:00:00');
+      const diff    = Math.round(diffMs / 86400000);
+      const ddayStr = isPast ? '완료 ✓' : diff === 0 ? 'D-Day! 🎉' : 'D-' + diff;
+      const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+
+      const row = document.createElement('div');
+      row.className = 'event-row' + (isPast ? ' past' : '') + (isNext ? ' next' : '');
+      row.innerHTML =
+        '<div class="ev-emoji">' + ev.emoji + '</div>' +
+        '<div class="ev-info">' +
+          '<div class="ev-title">' + ev.title + '</div>' +
+          '<div class="ev-date">'  + dateStr  + '</div>' +
+        '</div>' +
+        '<div class="ev-dday">' + ddayStr + '</div>' +
+        '<button class="ev-delete" title="삭제">🗑️</button>';
+
+      row.querySelector('.ev-delete').addEventListener('click', () => {
+        deleteDoc(doc(db, 'events', ev.id));
       });
+      listEl.appendChild(row);
+    });
+  }
+
+  // ── Calendar rendering ──
+  const DAY_NAMES = ['일','월','화','수','목','금','토'];
+
+  function renderCalendar() {
+    const gridEl = document.getElementById('calGrid');
+    if (!gridEl) return;
+
+    const y = calDate.getFullYear();
+    const m = calDate.getMonth();
+    document.getElementById('calMonthLabel').textContent = y + '년 ' + (m + 1) + '월';
+
+    // Build date → events map
+    const evMap = {};
+    allEvents.forEach(ev => {
+      (evMap[ev.date] = evMap[ev.date] || []).push(ev);
+    });
+
+    const firstDay    = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+    let html = DAY_NAMES.map(n => `<div class="cal-day-name">${n}</div>`).join('');
+
+    // Leading empty cells
+    for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell other-month"></div>';
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds  = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      const evs = evMap[ds] || [];
+      const isToday    = ds === TODAY;
+      const isSelected = ds === selectedDate;
+      const hasEvent   = evs.length > 0;
+
+      let cls = 'cal-cell';
+      if (isToday)    cls += ' today';
+      if (hasEvent)   cls += ' has-event';
+      if (isSelected) cls += ' selected';
+
+      const dots = evs.slice(0, 3).map(() => '<div class="cal-dot"></div>').join('');
+
+      html += `<div class="${cls}" data-date="${ds}">
+        <div class="cal-date">${d}</div>
+        ${dots ? '<div class="cal-dots">' + dots + '</div>' : ''}
+      </div>`;
+    }
+
+    gridEl.innerHTML = html;
+
+    gridEl.querySelectorAll('.cal-cell.has-event').forEach(cell => {
+      cell.addEventListener('click', () => {
+        selectedDate = cell.dataset.date;
+        renderCalendar();
+        showCalPopup(evMap[selectedDate] || []);
+      });
+    });
+
+    // Keep popup visible if date is still selected
+    if (selectedDate && evMap[selectedDate]) showCalPopup(evMap[selectedDate]);
+    else if (selectedDate && !evMap[selectedDate]) document.getElementById('calPopup').classList.remove('show');
+  }
+
+  function showCalPopup(events) {
+    const popup = document.getElementById('calPopup');
+    if (!popup) return;
+    const dateStr = new Date(selectedDate + 'T00:00:00').toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+    popup.innerHTML =
+      '<div class="cal-popup-title">' + dateStr + '</div>' +
+      events.map(ev =>
+        '<div class="cal-popup-item"><span>' + ev.emoji + '</span><span>' + ev.title + '</span></div>'
+      ).join('');
+    popup.classList.add('show');
+  }
+
+  // ── Tab switching ──
+  document.getElementById('tabList').addEventListener('click', () => {
+    activeTab = 'list';
+    document.getElementById('tabList').classList.add('active');
+    document.getElementById('tabCal').classList.remove('active');
+    document.getElementById('listView').classList.remove('hidden');
+    document.getElementById('calView').classList.remove('show');
+    renderList();
+  });
+
+  document.getElementById('tabCal').addEventListener('click', () => {
+    activeTab = 'calendar';
+    document.getElementById('tabCal').classList.add('active');
+    document.getElementById('tabList').classList.remove('active');
+    document.getElementById('calView').classList.add('show');
+    document.getElementById('listView').classList.add('hidden');
+    renderCalendar();
+  });
+
+  // ── Calendar navigation ──
+  document.getElementById('calPrev').addEventListener('click', () => {
+    calDate = new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1);
+    selectedDate = null;
+    document.getElementById('calPopup').classList.remove('show');
+    renderCalendar();
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    calDate = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1);
+    selectedDate = null;
+    document.getElementById('calPopup').classList.remove('show');
+    renderCalendar();
+  });
+
+  // ── Add form ──
+  const QUICK_EMOJIS = ['📸','💍','✉️','📬','👗','🏠','🛍️','💒','✈️','📅','🎉','💕'];
+
+  (function initEmojiPicker() {
+    const picker = document.getElementById('emojiPicker');
+    QUICK_EMOJIS.forEach(em => {
+      const btn = document.createElement('button');
+      btn.className = 'emoji-pick-btn' + (em === selectedEmoji ? ' selected' : '');
+      btn.textContent = em;
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        selectedEmoji = em;
+        picker.querySelectorAll('.emoji-pick-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+      picker.appendChild(btn);
+    });
   })();
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    document.getElementById('addForm').classList.toggle('show');
+  });
+
+  document.getElementById('formSubmit').addEventListener('click', async () => {
+    const title = document.getElementById('formTitle').value.trim();
+    const date  = document.getElementById('formDate').value;
+    if (!title || !date) return;
+
+    await addDoc(eventsCol, { title, date, emoji: selectedEmoji, createdAt: serverTimestamp() });
+
+    document.getElementById('formTitle').value = '';
+    document.getElementById('formDate').value  = '';
+    document.getElementById('addForm').classList.remove('show');
+  });
 </script>
 
 </body>
