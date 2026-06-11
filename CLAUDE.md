@@ -17,8 +17,8 @@ sungso/
 ├── js/
 │   ├── app.js       ← 파티클, Flatpickr 초기화, D-day 초기 렌더
 │   └── firebase.js  ← Firebase 모듈 (이벤트 CRUD, D-day 카드, 달력)
-├── wecost/          ← 결혼 비용 관리 앱 (별도 CLAUDE.md 예정)
-└── honeymoon/       ← 몰디브 신혼여행 플래너 (별도 CLAUDE.md 예정)
+├── wecost/          ← 결혼 비용 관리 앱 (CLAUDE.md 있음)
+└── honeymoon/       ← 몰디브 신혼여행 플래너 (CLAUDE.md 있음)
 ```
 
 ---
@@ -115,12 +115,14 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 
 ## 서브 프로젝트 (간략)
 
-| 폴더 | URL | 설명 |
-|---|---|---|
-| `wecost/` | `/sungso/wecost/` | 결혼 비용 항목별 관리, 예산 트래킹 |
-| `honeymoon/` | `/sungso/honeymoon/` | 몰디브 리조트 비교 및 패키지 플래너 |
+| 폴더 | URL | 데이터 소스 | 설명 |
+|---|---|---|---|
+| `wecost/` | `/sungso/wecost/` | Google Sheets CSV | 결혼 비용·저축·집 계획 3페이지 SPA |
+| `honeymoon/` | `/sungso/honeymoon/` | JS 하드코딩 | 몰디브 9개 리조트 비교, 토너먼트, PDF 뷰어 |
 
 각 서브 프로젝트는 독립적인 `index.html` 보유. 세부 내용은 각 폴더의 `CLAUDE.md` 참조.
+
+**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 완전 정적이며 백엔드 없음.
 
 ---
 
@@ -143,4 +145,4 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 - **결혼식 중복 카드 버그 수정:** HTML 하드코딩 카드 + Firebase 핀 카드가 동시에 렌더되던 문제 해결. `renderDdayCards()`가 행 전체를 초기화 후 재렌더하도록 변경. 핀된 이벤트가 없을 때만 기본 결혼식 카드 표시.
 - **파일 분리:** `index.html` 단일 파일에 있던 CSS/JS를 `css/style.css`, `js/app.js`, `js/firebase.js` 로 분리.
 
-**다음:** wecost / honeymoon 각각 CLAUDE.md 작성 예정.
+**다음:** wecost / honeymoon 각각 CLAUDE.md 작성 완료.
