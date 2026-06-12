@@ -22,13 +22,17 @@ function getTransferLabel(r) {
   return `✈ ${r.transfer_minutes}분`;
 }
 
-function ratingStars(n) {
-  return '★'.repeat(n) + '☆'.repeat(5 - n);
+function ratingDot(n) {
+  return `<span class="rdot rdot-${n}">${n}</span>`;
 }
+
+const TIER_EMOJI = { '최상': '💗', '중간': '💛', '단순': '○' };
+const TIER_SHORT = { '최상': '허니문 최상', '중간': '중간', '단순': '기본' };
 
 function renderCard(resort, sortKey, rank) {
   const price = getBestPrice(resort, sortKey);
   const isPriceBest = rank === 1 && price != null;
+  const showRank = rank <= 3 && price != null;
 
   const heroImg = getFeaturedImage(resort);
   const imgHtml = heroImg
@@ -37,50 +41,51 @@ function renderCard(resort, sortKey, rank) {
       + `<div class="card-image-placeholder" style="display:none;">🏝️</div>`
     : `<div class="card-image-placeholder">🏝️</div>`;
 
-  const rankBadge = isPriceBest
-    ? `<div class="card-rank-badge">💰 최저가</div>` : '';
+  const rankBadge = showRank ? `<div class="card-rank-badge rank-${rank}">#${rank}</div>` : '';
 
   return `
 <div class="resort-card" data-id="${resort.id}" onclick="window._cardClick('${resort.id}')">
   <div class="card-image">
     ${imgHtml}
-    <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
-    ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
+    <div class="card-image-gradient"></div>
+    <div class="card-badges-top">
+      <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
+      ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
+    </div>
     ${rankBadge}
   </div>
   <div class="card-body">
     <div class="card-name-ko">${resort.name_ko}</div>
-    <div class="card-name-en">${resort.name_en}</div>
-    <div class="card-atoll">📍 ${resort.atoll}</div>
+    <div class="card-name-sub">${resort.atoll} · ${resort.name_en}</div>
     <div class="card-ratings">
       <div class="card-rating-item">
         <div class="card-rating-label">라군</div>
-        <div class="card-rating-stars">${ratingStars(resort.ratings.lagoon)}</div>
+        <div class="card-rating-val">${ratingDot(resort.ratings.lagoon)}</div>
       </div>
       <div class="card-rating-item">
         <div class="card-rating-label">수중</div>
-        <div class="card-rating-stars">${ratingStars(resort.ratings.underwater)}</div>
+        <div class="card-rating-val">${ratingDot(resort.ratings.underwater)}</div>
       </div>
       <div class="card-rating-item">
         <div class="card-rating-label">프라이빗</div>
-        <div class="card-rating-stars">${ratingStars(resort.ratings.privacy)}</div>
+        <div class="card-rating-val">${ratingDot(resort.ratings.privacy)}</div>
       </div>
       <div class="card-rating-item">
         <div class="card-rating-label">다이닝</div>
-        <div class="card-rating-stars">${ratingStars(resort.ratings.dining)}</div>
+        <div class="card-rating-val">${ratingDot(resort.ratings.dining)}</div>
       </div>
     </div>
-    <div class="card-price-row">
-      <span class="card-price-label">${SORT_LABELS[sortKey]}</span>
-      <span>
+    <div class="card-price-block">
+      <div class="card-price-label">${SORT_LABELS[sortKey]}</div>
+      <div class="card-price-main">
         ${price != null
-          ? `<span class="card-price-value${isPriceBest ? ' price-best' : ''}">$${price.toLocaleString()}</span> <span class="card-price-unit">/인</span>`
+          ? `<span class="card-price-value${isPriceBest ? ' price-best' : ''}">$${price.toLocaleString()}</span><span class="card-price-unit"> / 인</span>`
           : '<span class="price-na">해당 없음</span>'}
-      </span>
+      </div>
     </div>
     <div class="card-footer">
-      <span class="card-tier-badge ${TIER_CLASS[resort.honeymoon_tier] || 'tier-simple'}">${TIER_LABEL[resort.honeymoon_tier]}</span>
-      <button class="card-detail-btn" onclick="event.stopPropagation(); window._cardClick('${resort.id}')">상세 보기 →</button>
+      <span class="card-tier-badge ${TIER_CLASS[resort.honeymoon_tier] || 'tier-simple'}">${TIER_EMOJI[resort.honeymoon_tier]} ${TIER_SHORT[resort.honeymoon_tier]}</span>
+      <button class="card-detail-btn" onclick="event.stopPropagation(); window._cardClick('${resort.id}')">상세 →</button>
     </div>
   </div>
 </div>`;

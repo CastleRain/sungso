@@ -23,7 +23,7 @@ function setHeroBg() {
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
-  const target = new Date('2027-03-08');
+  const target = new Date('2027-03-07');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));

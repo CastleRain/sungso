@@ -365,7 +365,7 @@ body {
   padding: 14px;
   gap: 12px;
 }
-#tab-cards.detail-open .card-image { height: 140px; }
+#tab-cards.detail-open .card-image { height: 150px; }
 
 /* 카드 상세 닫기 바 */
 .cards-detail-close-bar {
@@ -420,21 +420,24 @@ body {
 
 .resort-card {
   background: white;
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   cursor: pointer;
 }
 .resort-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 36px rgba(0,0,0,0.14);
-  border-color: rgba(29,158,117,0.35);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.13);
+  border-color: rgba(29,158,117,0.28);
+}
+.resort-card:hover .card-image img {
+  transform: scale(1.06);
 }
 
 .card-image {
-  height: 180px;
+  height: 210px;
   background: linear-gradient(135deg, #6EC8A8 0%, #3BB08A 50%, #15785A 100%);
   position: relative;
   overflow: hidden;
@@ -443,6 +446,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
 }
 .card-image-placeholder {
   width: 100%;
@@ -450,76 +454,112 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  opacity: 0.6;
+  font-size: 36px;
+  opacity: 0.5;
+}
+/* 이미지 하단 그라디언트 오버레이 */
+.card-image-gradient {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: linear-gradient(to top, rgba(0,0,0,0.40), transparent);
+  pointer-events: none;
+}
+/* 뱃지 묶음 (좌상단) */
+.card-badges-top {
+  position: absolute;
+  top: 9px; left: 9px;
+  display: flex;
+  gap: 5px;
 }
 .card-transfer-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.52);
   color: white;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   backdrop-filter: blur(4px);
 }
 .card-hammock-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(29,158,117,0.85);
+  background: rgba(29,158,117,0.88);
   color: white;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 3px 8px;
   font-size: 10px;
   font-weight: 600;
+  backdrop-filter: blur(4px);
 }
+/* 순위 뱃지 (우하단) */
+.card-rank-badge {
+  position: absolute;
+  bottom: 9px; right: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+.rank-1 { background: rgba(29,158,117,0.88); color: white; }
+.rank-2 { background: rgba(127,119,221,0.82); color: white; }
+.rank-3 { background: rgba(0,0,0,0.48); color: white; }
 
-.card-body { padding: 14px; }
-.card-name-ko { font-size: 16px; font-weight: 700; color: var(--text); }
-.card-name-en { font-size: 11px; color: var(--text-light); margin-top: 1px; margin-bottom: 8px; }
-.card-atoll { font-size: 11px; color: var(--ocean-mid); font-weight: 500; }
+.card-body { padding: 14px 14px 12px; }
+.card-name-ko { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.card-name-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; margin-bottom: 10px; }
 
+/* 평점: 색상 점 + 숫자 */
 .card-ratings {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
-  margin: 10px 0;
+  margin-bottom: 12px;
 }
 .card-rating-item { text-align: center; }
-.card-rating-label { font-size: 9px; color: var(--text-light); }
-.card-rating-stars { font-size: 10px; }
+.card-rating-label { font-size: 9px; color: var(--text-light); margin-bottom: 3px; }
+.card-rating-val { display: flex; justify-content: center; }
+.rdot {
+  display: inline-block;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  font-size: 10px; font-weight: 700;
+  line-height: 22px; text-align: center;
+}
+.rdot-5 { background: #0B5B45; color: white; }
+.rdot-4 { background: var(--primary); color: white; }
+.rdot-3 { background: var(--amber); color: white; }
+.rdot-2 { background: var(--gray-200); color: var(--gray-600); }
+.rdot-1 { background: var(--gray-100); color: var(--text-light); }
 
-.card-price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 10px 0 8px;
-  padding-top: 8px;
+/* 가격 블록 */
+.card-price-block {
+  padding: 10px 0 8px;
   border-top: 1px solid var(--border);
 }
-.card-price-label { font-size: 11px; color: var(--text-muted); }
+.card-price-label { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+.card-price-main { display: flex; align-items: baseline; gap: 3px; }
 .card-price-value {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--ocean-deep);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
 }
+.card-price-value.price-best { color: var(--primary-deep); }
 .card-price-unit { font-size: 10px; color: var(--text-light); }
 
+/* Tier pill */
 .card-tier-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
 }
-.tier-best { background: var(--teal-light); color: #085041; }
-.tier-mid { background: var(--ocean-light); color: var(--ocean-deep); }
-.tier-simple { background: var(--gray-100); color: var(--gray-600); }
+.tier-best { background: var(--primary-light); color: var(--primary-deep); border: 1px solid rgba(29,158,117,0.20); }
+.tier-mid { background: var(--amber-light); color: #92400E; border: 1px solid rgba(217,119,6,0.20); }
+.tier-simple { background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--border); }
 
 .card-footer {
   display: flex;
@@ -527,30 +567,22 @@ body {
   align-items: center;
   margin-top: 10px;
 }
-.card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
-.card-tag {
-  font-size: 10px;
+.card-detail-btn {
+  padding: 5px 13px;
   background: var(--gray-100);
   color: var(--text-muted);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.card-detail-btn {
-  padding: 5px 14px;
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
-  border: none;
+  border: 1px solid var(--border-mid);
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 .card-detail-btn:hover {
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  box-shadow: 0 3px 10px rgba(29,158,117,0.35);
-  transform: translateY(-1px);
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-deep);
 }
 
 /* 카드 없음 */
