@@ -9,6 +9,13 @@
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════════ 홈 내비 바 -->
+<div class="back-nav">
+  <a href="../" class="back-nav-link">🏠 sungso 홈으로</a>
+  <span class="back-nav-sep">·</span>
+  <span class="back-nav-title">몰디브 허니문 플래너</span>
+</div>
+
 <!-- ══════════════════════════════════════════════ 헤더 -->
 <header class="site-header">
   <h1>🌊 <span>몰디브</span> 허니문 리조트 비교</h1>
@@ -88,6 +95,9 @@
       </div>
       <!-- 오른쪽: 선택된 리조트 상세 -->
       <div class="cards-right-col" id="cardsDetailPanel">
+        <div class="cards-detail-close-bar">
+          <button class="cards-detail-back-btn" onclick="window.closeCardDetail()">← 목록으로</button>
+        </div>
         <div class="cards-detail-empty">
           <div style="font-size:48px;">🏝️</div>
           <div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>

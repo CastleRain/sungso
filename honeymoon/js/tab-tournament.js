@@ -161,6 +161,10 @@ function renderMatch() {
   </div>
 </div>`;
 
+  window._tournamentDetailClick = (id) => {
+    window.dispatchEvent(new CustomEvent('open-detail', { detail: { id } }));
+  };
+
   document.querySelectorAll('.match-pick-btn').forEach(btn => {
     btn.addEventListener('click', () => pickWinner(btn.dataset.id));
   });
@@ -200,7 +204,10 @@ function renderMatchCard(resort, side) {
     ${price ? `<div class="match-price">워터풀 최저 <strong>$${price.toLocaleString()}</strong>/인</div>` : ''}
     ${resort.has_hammock ? '<div class="match-hammock">🛏️ 해먹 있음</div>' : ''}
   </div>
-  <button class="match-pick-btn" data-id="${resort.id}">💗 선택!</button>
+  <div class="match-card-actions">
+    <button class="match-detail-btn" onclick="window._tournamentDetailClick?.('${resort.id}')">📋 상세</button>
+    <button class="match-pick-btn" data-id="${resort.id}">💗 선택!</button>
+  </div>
 </div>`;
 }
 

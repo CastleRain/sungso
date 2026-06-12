@@ -213,64 +213,123 @@ body {
   cursor: pointer;
 }
 
-/* 카드 탭 분할 레이아웃 */
+/* ── 홈 버튼 바 ── */
+.back-nav {
+  flex-shrink: 0;
+  background: #3C2030;
+  padding: 5px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.back-nav-link {
+  color: #FFB3CC;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s;
+}
+.back-nav-link:hover { color: white; }
+.back-nav-sep { color: rgba(255,255,255,0.25); }
+.back-nav-title { color: rgba(255,255,255,0.4); font-size: 10px; }
+
+/* ── 카드 탭 레이아웃 (그리드 ↔ 분할) ── */
 .cards-split-layout {
   display: flex;
   height: 100%;
   overflow: hidden;
 }
+/* 기본: 왼쪽이 전체 너비 */
 .cards-left-col {
-  width: 460px;
+  width: 100%;
   flex-shrink: 0;
-  border-right: 1px solid var(--border);
+  border-right: none;
   overflow-y: auto;
   overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
 }
 .cards-left-col .cards-toolbar {
   position: sticky;
   top: 0;
   z-index: 50;
 }
+/* 기본: 오른쪽 패널 숨김 */
 .cards-right-col {
   flex: 1;
   overflow-y: auto;
   background: white;
   min-width: 0;
+  min-height: 0;
+  display: none;
 }
-.cards-detail-empty {
+/* detail-open 시: 분할 레이아웃 */
+#tab-cards.detail-open .cards-left-col {
+  width: 460px;
+  border-right: 1px solid var(--border);
+}
+#tab-cards.detail-open .cards-right-col {
+  display: block;
+}
+#tab-cards.detail-open .cards-grid {
+  grid-template-columns: repeat(2, 1fr);
+  padding: 14px;
+  gap: 12px;
+}
+#tab-cards.detail-open .card-image { height: 140px; }
+
+/* 카드 상세 닫기 바 */
+.cards-detail-close-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--gray-100);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 14px;
-  color: var(--text-muted);
+}
+.cards-detail-back-btn {
+  background: none;
+  border: none;
+  color: var(--primary-deep);
   font-size: 13px;
-  text-align: center;
-  line-height: 1.7;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s;
+}
+.cards-detail-back-btn:hover { background: var(--primary-light); }
+
+.cards-detail-empty {
+  display: none;
 }
 .resort-card.selected {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(255,107,157,0.25);
 }
-@media (max-width: 900px) {
-  .cards-split-layout { flex-direction: column; }
-  .cards-left-col { width: 100%; max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
-  .cards-right-col { flex: 1; }
-}
 
-/* 카드 그리드 */
+/* 카드 그리드: 기본 3열 */
 .cards-grid {
-  padding: 14px;
+  padding: 20px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
-.cards-left-col .cards-grid { grid-template-columns: repeat(2, 1fr); }
-.cards-left-col .card-image { height: 140px; }
-@media (max-width: 460px) { .cards-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; } }
+
+/* 모바일 분할 */
+@media (max-width: 900px) {
+  #tab-cards.detail-open .cards-split-layout { flex-direction: column; }
+  #tab-cards.detail-open .cards-left-col { width: 100%; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+}
 
 .resort-card {
   background: white;
@@ -758,6 +817,7 @@ body {
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
+  min-height: 0;
 }
 #mainSvgMap { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
 .leaflet-toggle-btn {
@@ -787,7 +847,8 @@ body {
   background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-y: auto;
+  min-height: 0;
 }
 .map-resort-info .resort-section { padding: 16px 20px 24px; }
 .map-resort-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
@@ -920,6 +981,38 @@ body {
 .match-card-ratings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
 .match-card-pros { font-size: 11px; color: var(--text-muted); }
 .match-card-pros li { margin-bottom: 2px; }
+/* 매치 카드 하단 버튼 그룹 */
+.match-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.match-pick-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+  color: white;
+  transition: all 0.15s;
+}
+.match-pick-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.match-detail-btn {
+  padding: 10px 14px;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.match-detail-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 .match-select-btn {
   width: 100%;
   padding: 10px;
@@ -1192,8 +1285,6 @@ body {
 .match-price { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 8px; margin-bottom: 4px; }
 .match-price strong { color: var(--ocean-deep); font-size: 14px; }
 .match-hammock { font-size: 11px; color: var(--teal); font-weight: 600; margin-bottom: 6px; }
-.match-pick-btn { width: 100%; padding: 10px; background: var(--ocean-mid); color: white; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.match-pick-btn:hover { background: var(--ocean-deep); }
 
 .tournament-footer-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
 .skip-match-btn { padding: 7px 16px; background: var(--gray-100); border: 1px solid var(--border-mid); border-radius: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
@@ -1547,3 +1638,53 @@ body {
   .price-summary-row { grid-template-columns: repeat(2, 1fr); }
   .pros-cons { grid-template-columns: 1fr; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   리조트 메모 섹션 (Firebase 연동)
+   ════════════════════════════════════════════════════════════════ */
+.resort-memo-input {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--gray-50);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  resize: vertical;
+  transition: border-color 0.15s, background 0.15s;
+  box-sizing: border-box;
+}
+.resort-memo-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: white;
+}
+.resort-memo-input::placeholder { color: var(--text-light); }
+.memo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.memo-status {
+  font-size: 11px;
+  color: var(--teal);
+  font-weight: 500;
+  transition: opacity 0.3s;
+}
+.memo-save-btn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.memo-save-btn:hover { opacity: 0.85; }
+.memo-save-btn:disabled { opacity: 0.5; cursor: default; }

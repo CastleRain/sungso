@@ -6,6 +6,7 @@ import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
+import { loadNote, saveNote } from './firebase-notes.js';
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
@@ -47,12 +48,31 @@ function openDetailInCards(resortId) {
   if (!resort) return;
   const panel = document.getElementById('cardsDetailPanel');
   if (panel) {
+    // 닫기 버튼 바 유지, 그 아래에 상세 렌더
+    const closeBar = panel.querySelector('.cards-detail-close-bar');
     panel.innerHTML = renderResortDetail(resort);
+    if (closeBar) panel.insertBefore(closeBar, panel.firstChild);
     panel.scrollTop = 0;
+    initMemoBlock(resortId);
   }
+  document.getElementById('tab-cards').classList.add('detail-open');
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
   document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
 }
+
+window.closeCardDetail = function() {
+  document.getElementById('tab-cards').classList.remove('detail-open');
+  const panel = document.getElementById('cardsDetailPanel');
+  if (!panel) return;
+  const closeBar = panel.querySelector('.cards-detail-close-bar');
+  panel.innerHTML = '';
+  if (closeBar) panel.appendChild(closeBar);
+  const empty = document.createElement('div');
+  empty.className = 'cards-detail-empty';
+  empty.innerHTML = '<div style="font-size:48px;">🏝️</div><div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
+  panel.appendChild(empty);
+  document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+};
 
 // ── 지도/토너먼트용 오버레이 ────────────────────────────────────────
 export function openDetail(resortId) {
@@ -72,6 +92,7 @@ export function openDetail(resortId) {
   panel.innerHTML = renderResortDetail(resort);
   overlay.classList.add('open');
   panel.scrollTop = 0;
+  initMemoBlock(resort.id);
 }
 
 export function closeDetail() {
@@ -86,6 +107,7 @@ function openDetailInMap(resortId) {
   if (panel) {
     panel.innerHTML = renderResortDetail(resort);
     panel.scrollTop = 0;
+    initMemoBlock(resort.id);
   }
 }
 
@@ -318,8 +340,60 @@ function renderResortDetail(r) {
     <div class="block-header">📄 관련 PDF 견적서</div>
     <div class="block-body">${pdfLinksHtml}</div>
   </div>
+
+  <!-- 우리 메모 -->
+  <div class="block" id="memoBlock_${r.id}">
+    <div class="block-header">💬 우리 메모</div>
+    <div class="block-body">
+      <textarea class="resort-memo-input" id="memoInput_${r.id}"
+        placeholder="리조트에 대한 생각, 느낌, 체크사항을 메모하세요..."
+        rows="4"></textarea>
+      <div class="memo-footer">
+        <span class="memo-status" id="memoStatus_${r.id}"></span>
+        <button class="memo-save-btn" id="memoSaveBtn_${r.id}" onclick="window._saveMemo('${r.id}')">저장</button>
+      </div>
+    </div>
+  </div>
 </section>`;
 }
+
+// ── 메모 블록 초기화 & 저장 ────────────────────────────────────────
+let _memoDebounce = null;
+
+function initMemoBlock(resortId) {
+  const ta = document.getElementById(`memoInput_${resortId}`);
+  const status = document.getElementById(`memoStatus_${resortId}`);
+  if (!ta) return;
+
+  loadNote(resortId).then(text => {
+    ta.value = text;
+  });
+
+  ta.addEventListener('input', () => {
+    clearTimeout(_memoDebounce);
+    if (status) status.textContent = '...';
+    _memoDebounce = setTimeout(() => window._saveMemo(resortId), 1500);
+  });
+}
+
+window._saveMemo = async function(resortId) {
+  const ta = document.getElementById(`memoInput_${resortId}`);
+  const status = document.getElementById(`memoStatus_${resortId}`);
+  const btn = document.getElementById(`memoSaveBtn_${resortId}`);
+  if (!ta) return;
+  if (btn) btn.disabled = true;
+  try {
+    await saveNote(resortId, ta.value);
+    if (status) {
+      status.textContent = '저장됨 ✓';
+      setTimeout(() => { if (status) status.textContent = ''; }, 2500);
+    }
+  } catch (_) {
+    if (status) status.textContent = '저장 실패';
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
 
 // PDF 탭으로 이동 + 파일 열기
 window.openPdfFromDetail = function(file, label) {
