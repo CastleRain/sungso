@@ -3,10 +3,10 @@
 import { RESORTS, getBestPrice } from './resorts-data.js';
 
 const PRICE_KEYS = [
-  { key: 'water_pool_4n', label: '🏊 워터풀 4박', short: '워터풀' },
-  { key: 'mix_4n',        label: '🔀 믹스 4박',   short: '믹스' },
-  { key: 'water_4n',      label: '🌊 워터 4박',   short: '워터' },
-  { key: 'beach_4n',      label: '🏖️ 비치 4박',   short: '비치' },
+  { key: 'water_pool_4n', label: '🏊 워터풀 4박', short: '워터풀', icon: '🏊' },
+  { key: 'mix_4n',        label: '🔀 믹스 4박',   short: '믹스',   icon: '🔀' },
+  { key: 'water_4n',      label: '🌊 워터 4박',   short: '워터',   icon: '🌊' },
+  { key: 'beach_4n',      label: '🏖️ 비치 4박',   short: '비치',   icon: '🏖️' },
 ];
 
 const AGENCY_NAMES = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
@@ -16,6 +16,12 @@ let sortDir = 'asc';
 let coupleMode = false;
 let onDetailOpen = null;
 let selectedResortId = null;
+
+window._priceSortBy = (key) => {
+  sortKey = key;
+  sortDir = 'asc';
+  renderTable();
+};
 
 window._priceResortClick = (id) => {
   selectedResortId = id;
@@ -51,24 +57,30 @@ function findBestInColumn(key) {
   return best === Infinity ? null : best;
 }
 
-function renderSummaryCards() {
-  const bests = {};
-  for (const { key } of PRICE_KEYS) bests[key] = findBestInColumn(key);
+function findMaxInColumn(key) {
+  let max = 0;
+  for (const r of RESORTS) {
+    for (const p of getAllPricesForKey(r, key)) {
+      if (p.final > max) max = p.final;
+    }
+  }
+  return max || null;
+}
 
-  const mul = coupleMode ? 2 : 1;
-  const suffix = coupleMode ? '/2인' : '/인';
-
-  const cards = PRICE_KEYS.map(({ key, short }) => {
+function renderSummaryCards(bests, mul, suffix) {
+  const cards = PRICE_KEYS.map(({ key, short, icon }) => {
     const b = bests[key];
     if (!b) return '';
     const resort = RESORTS.find(r => getAllPricesForKey(r, key).some(p => p.final === b));
-    return `<div class="price-summary-card">
-      <div class="psc-label">${short} 최저가</div>
-      <div class="psc-price">$${(b * mul).toLocaleString()}<small>${suffix}</small></div>
+    const isActive = key === sortKey;
+    return `<div class="price-summary-card${isActive ? ' active' : ''}" onclick="window._priceSortBy('${key}')">
+      <div class="psc-icon">${icon}</div>
+      <div class="psc-label">${short}</div>
+      <div class="psc-price">$${(b * mul).toLocaleString()}</div>
+      <div class="psc-suffix">${suffix} · 최저가</div>
       <div class="psc-resort">${resort?.name_ko || ''}</div>
     </div>`;
   }).join('');
-
   return `<div class="price-summary-row">${cards}</div>`;
 }
 
@@ -77,7 +89,11 @@ function renderTable() {
   if (!wrap) return;
 
   const bests = {};
-  for (const { key } of PRICE_KEYS) bests[key] = findBestInColumn(key);
+  const maxPrices = {};
+  for (const { key } of PRICE_KEYS) {
+    bests[key] = findBestInColumn(key);
+    maxPrices[key] = findMaxInColumn(key);
+  }
 
   const sorted = [...RESORTS].sort((a, b) => {
     const pa = getBestPrice(a, sortKey);
@@ -88,7 +104,15 @@ function renderTable() {
     return sortDir === 'asc' ? pa - pb : pb - pa;
   });
 
+  // 정렬 기준 컬럼의 순위 맵 (가격 있는 리조트만)
+  let rankCounter = 0;
+  const rankMap = {};
+  sorted.forEach(r => {
+    if (getBestPrice(r, sortKey) != null) rankMap[r.id] = ++rankCounter;
+  });
+
   const mul = coupleMode ? 2 : 1;
+  const suffix = coupleMode ? '/2인' : '/인';
 
   const headerCols = PRICE_KEYS.map(({ key, label }) => {
     const active = key === sortKey;
@@ -96,7 +120,7 @@ function renderTable() {
     return `<th class="th-price${active ? ' sorted' : ''}" data-key="${key}">${label}${arrow}</th>`;
   }).join('');
 
-  const rows = sorted.map((resort, idx) => {
+  const rows = sorted.map(resort => {
     const tierBadge = {
       '최상': '<span class="tier-dot tier-best-dot"></span>',
       '중간': '<span class="tier-dot tier-mid-dot"></span>',
@@ -104,24 +128,41 @@ function renderTable() {
     }[resort.honeymoon_tier] || '';
 
     const transferIcon = resort.transfer_type === 'seaplane' ? '✈' : '🚤';
+    const rank = rankMap[resort.id];
+    const rankBadge = rank <= 3
+      ? `<span class="price-rank-pill rank-${rank}">#${rank}</span>` : '';
 
     const priceCols = PRICE_KEYS.map(({ key }) => {
       const prices = getAllPricesForKey(resort, key);
       if (prices.length === 0) return `<td class="td-price na">—</td>`;
 
+      const resortBest = Math.min(...prices.map(p => p.final));
+      const colBest = bests[key];
+      const colMax = maxPrices[key];
+      const barPct = (colBest && colMax && colMax > colBest)
+        ? Math.round((1 - (resortBest - colBest) / (colMax - colBest)) * 100)
+        : 100;
+      const barClass = resortBest === colBest ? 'bar-best'
+        : barPct >= 70 ? 'bar-good' : barPct >= 45 ? 'bar-mid' : 'bar-low';
+
+      const isColBest = resortBest === colBest;
+
       const cells = prices.map(p => {
         const finalAmt = p.final * mul;
-        const isBest = p.final === bests[key];
+        const isBest = p.final === colBest;
         const discHtml = p.disc != null
-          ? `<span class="orig">$${(p.base * mul).toLocaleString()}</span> `
-          : '';
+          ? `<span class="orig">$${(p.base * mul).toLocaleString()}</span> ` : '';
         return `<div class="price-cell-row">
           ${prices.length > 1 ? `<span class="ag-label">${p.agName}</span>` : ''}
           ${discHtml}<span class="${isBest ? 'best-price' : ''}">$${finalAmt.toLocaleString()}</span>
           ${isBest ? '<span class="best-badge">최저</span>' : ''}
         </div>`;
       }).join('');
-      return `<td class="td-price">${cells}</td>`;
+
+      return `<td class="td-price${isColBest ? ' col-best' : ''}">
+        ${cells}
+        <div class="price-bar-wrap"><div class="price-bar-fill ${barClass}" style="width:${barPct}%"></div></div>
+      </td>`;
     }).join('');
 
     const mealPlans = Object.values(resort.agencies)
@@ -130,10 +171,10 @@ function renderTable() {
       .join('<br>');
 
     return `
-<tr class="resort-row${selectedResortId === resort.id ? ' selected' : ''}" data-resort-id="${resort.id}">
+<tr class="resort-row${selectedResortId === resort.id ? ' selected' : ''}" data-resort-id="${resort.id}" onclick="window._priceResortClick('${resort.id}')">
   <td class="td-resort">
     <div class="resort-name-wrap">
-      ${tierBadge}<strong class="resort-name-link" onclick="window._priceResortClick('${resort.id}')">${resort.name_ko}</strong><button class="price-detail-btn" onclick="window._priceResortClick('${resort.id}')">📋</button>
+      ${rankBadge}${tierBadge}<strong class="resort-name-link">${resort.name_ko}</strong>
     </div>
     <div class="resort-sub">${transferIcon} ${resort.transfer_minutes}분 · ${resort.atoll}</div>
     ${resort.has_hammock ? '<div class="hammock-note">🛏️ 해먹</div>' : ''}
@@ -144,9 +185,9 @@ function renderTable() {
   }).join('');
 
   wrap.innerHTML = `
-${renderSummaryCards()}
+${renderSummaryCards(bests, mul, suffix)}
 <div class="table-meta">
-  💡 <b>${coupleMode ? '2인 합산' : '1인'} USD</b> · 할인 후 기준 · <span class="best-badge">최저</span> = 해당 항목 최저가 · 헤더 클릭 시 정렬
+  💡 <b>${coupleMode ? '2인 합산' : '1인'} USD</b> · 할인 후 기준 · <span class="best-badge">최저</span> = 해당 항목 최저가 · 헤더·카드 클릭 시 정렬
   <span class="tier-legend">
     <span class="tier-dot tier-best-dot"></span>최상
     <span class="tier-dot tier-mid-dot"></span>중간
