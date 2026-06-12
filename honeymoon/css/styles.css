@@ -1435,12 +1435,12 @@ body {
 /* ════════════════════════════════════════════════════════════════
    핀 애니메이션 (SVG)
    ════════════════════════════════════════════════════════════════ */
-@keyframes pinPulse {
-  0% { r: 8; }
-  50% { r: 13; }
-  100% { r: 10; }
+@keyframes pinPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1.22); }
 }
-.map-pin-active { animation: pinPulse 0.35s ease; }
 
 /* ════════════════════════════════════════════════════════════════
    공통 유틸리티
@@ -1475,8 +1475,24 @@ body {
 .map-detail-btn { width: 100%; padding: 9px; background: var(--ocean-mid); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
 .map-detail-btn:hover { background: var(--ocean-deep); }
 
-/* SVG 핀 활성 상태 */
-.map-pin.active circle { filter: drop-shadow(0 0 6px rgba(0,0,0,0.5)); stroke-width: 3; }
+/* SVG 핀 — hover / active */
+.map-pin {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: filter 0.18s ease;
+}
+.map-pin:hover {
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.45));
+}
+.map-pin.active {
+  animation: pinPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  filter: drop-shadow(0 0 8px rgba(29,158,117,0.8));
+}
+.map-pin.active circle {
+  stroke: var(--primary);
+  stroke-width: 3;
+}
 
 /* ════════════════════════════════════════════════════════════════
    토너먼트 탭 — 새 클래스
@@ -2122,8 +2138,69 @@ body {
 .minimap-legend .legend-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
 .minimap-legend .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-/* SVG 핀 활성 상태 */
-.map-pin.active circle { stroke: var(--primary); stroke-width: 3; filter: drop-shadow(0 0 4px rgba(29,158,117,0.7)); }
+/* 이동 경로 패널 */
+.map-route-panel {
+  border-top: 1px solid var(--border);
+  padding: 10px 10px 6px;
+}
+.map-route-empty {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-light);
+  line-height: 1.7;
+  padding: 6px 0 4px;
+}
+.map-route-card { display: flex; flex-direction: column; gap: 0; }
+.route-stop { display: flex; align-items: flex-start; gap: 8px; }
+.route-stop-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  margin-top: 3px; flex-shrink: 0;
+}
+.airport-dot { background: var(--gray-500, #6B7280); border: 2px solid var(--gray-300, #D1D5DB); }
+.resort-dot  { background: var(--primary); border: 2px solid var(--primary-light); }
+.route-stop-label { font-size: 11px; font-weight: 600; color: var(--text); }
+.route-stop-label.resort-label { color: var(--primary-deep); }
+.route-stop-sub { font-size: 10px; color: var(--text-light); margin-top: 1px; }
+.route-connector {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0 3px 4px;
+  margin: 2px 0;
+}
+.route-conn-line {
+  width: 2px; height: 26px;
+  background: linear-gradient(to bottom, var(--gray-300, #D1D5DB), var(--primary-light));
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.route-conn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-pale);
+  border: 1px solid rgba(29,158,117,0.2);
+  border-radius: 10px;
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary-deep);
+}
+.map-route-detail-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.2px;
+}
+.map-route-detail-btn:hover { background: var(--primary-deep); }
 
 /* ════════════════════════════════════════════════════════════════
    메모 팝업 (플로팅 댓글 스레드)
