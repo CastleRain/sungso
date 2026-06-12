@@ -3,7 +3,7 @@
 성우 & 소희의 몰디브 리조트 비교 및 패키지 정보를 정리한 플래너.
 
 **배포 URL:** `https://CastleRain.github.io/sungso/honeymoon/`  
-**데이터:** `js/resorts-data.js`에 하드코딩 (9개 리조트, 2개 여행사)
+**데이터:** `js/resorts-data.js`에 하드코딩 (12개 리조트, 3개 여행사)
 
 ---
 
@@ -47,10 +47,10 @@ honeymoon/
 ## 5개 탭
 
 ### 1. 개요 & 카드 (`tab-cards.js`)
-- 리조트 카드 그리드 (이미지, 평점, 최저가 표시)
+- **분할 레이아웃:** 왼쪽=카드 목록(460px), 오른쪽=선택된 리조트 상세 패널
 - 정렬 버튼: 워터풀 4박 최저가 / 비치+워터 믹스 / 워터 4박 / 비치 4박
-- 필터: 이동 수단 (수상비행기/스피드보트) / 아톨 / 해먹 빌라 여부
-- 카드 클릭 → 상세 오버레이 (`openDetail()`)
+- 필터: 이동 수단 (`seaplane`/`speedboat` 타입 기준) / 지역 / 해먹 여부 / 최대 예산 슬라이더
+- 카드 클릭 → 오른쪽 패널에 인라인 상세 렌더 (`openDetailInCards()`, 오버레이 아님)
 - 허니문 티어 배지: 최상 / 중간 / 단순
 
 ### 2. 가격비교 (`tab-price.js`)
@@ -61,8 +61,8 @@ honeymoon/
 - 1인 / 2인 합산 전환 토글 (`coupleMode`)
 
 ### 3. 지도 (`tab-map.js`)
-- `index.html`에 SVG 지도 하드코딩 (9개 리조트 핀 + 말레 공항)
-- 핀 클릭 → 우측 패널에 리조트 요약 (가격·평점·이동수단)
+- `index.html`에 SVG 지도 하드코딩 (12개 리조트 핀 + 말레 공항)
+- 핀 클릭 → 우측 패널에 **바로 전체 리조트 상세** 표시 (`openDetailInMap()`, 중간 요약 단계 없음)
 - "인터랙티브 지도 열기" → Leaflet + OpenStreetMap 레이어 지연 로드
 - Leaflet 마커 클릭 → 팝업 + 상세 보기 버튼
 
@@ -81,17 +81,22 @@ honeymoon/
 
 ---
 
-## 상세 오버레이 (`app.js`)
+## 상세 패널 / 오버레이 (`app.js`)
 
-`openDetail(resortId)` / `closeDetail()` 로 제어.
+| 함수 | 렌더 위치 | 용도 |
+|---|---|---|
+| `openDetailInCards(id)` | `#cardsDetailPanel` (카드 탭 오른쪽) | 카드 클릭 |
+| `openDetailInMap(id)` | `#mapInfoPanel` (지도 탭 오른쪽) | SVG 핀 클릭 |
+| `openDetail(id)` | `#detailOverlay` (전체화면 오버레이) | 토너먼트 결과에서 상세보기 |
 
-`renderResortDetail(resort)` 가 생성하는 HTML 구조:
-- 리조트 이미지 헤더
+`renderResortDetail(resort)` 공통 HTML 구조:
+- 이미지 갤러리 (썸네일 hover → ⭐ 클릭 시 대표 이미지 설정, localStorage 저장)
 - 아톨, 이동 수단, 여행사 배지
 - 평점 4항목 (라군/수중/프라이빗/다이닝)
 - 여행사별 가격표 (원가 → 할인가, 허니문 혜택)
 - 장단점 목록
-- PDF 보기 버튼 → `window.openPdfFromDetail()` → `open-pdf` 이벤트 발송
+- 유튜브 영상 섹션
+- PDF 보기 버튼 → `openPdfFromDetail()` → `open-pdf` 이벤트 발송
 
 ---
 
@@ -99,12 +104,13 @@ honeymoon/
 
 ### 내보내기
 ```js
-export const RESORTS       // 리조트 배열 (9개)
+export const RESORTS       // 리조트 배열 (12개)
 export const TRIP_INFO     // 여행 일정 정보 (출발일: 2027-03-08 등)
-export const AGENCIES      // 여행사 정보 (2개)
+export const AGENCIES      // 여행사 정보 (3개: realmaldives, honeymoonresort, tourmin)
 export function getBestPrice(resort, priceKey)
 export function sortByPrice(resorts, priceKey)
 export function getResortById(id)
+export function getFeaturedImage(resort)  // localStorage 저장값 우선, 없으면 featured_image, 없으면 image_urls[0]
 ```
 
 ### 리조트 객체 구조
@@ -119,13 +125,16 @@ export function getResortById(id)
   honeymoon_tier,     // '최상' | '중간' | '단순'
   agencies: {
     realmaldives: { meal_plan, meal_plan_name, beach_4n, water_4n, water_pool_4n, mix_4n, *_disc, honeymoon_benefits },
-    honeymoonresort: { ... }  // 일부 리조트만
+    honeymoonresort: { ... },  // 일부 리조트만
+    tourmin: { ... }           // 투어민 3개 리조트 (PDF 없음)
   },
-  pdfs,               // 연결 PDF 파일 경로 배열
+  pdfs,               // 연결 PDF 파일 경로 배열 (tourmin 리조트는 [])
   coords: { lat, lon },
-  svg_pin: { x, y, color },
+  svg_pin: { cx, cy, color }, // SVG 지도 핀 좌표
   tags, pros, cons,
   image_urls,
+  featured_image,     // '' 기본값. getFeaturedImage()는 localStorage 저장값 우선 사용
+  youtube_ids,        // YouTube 영상 ID 배열
   description
 }
 ```
@@ -139,24 +148,28 @@ export function getResortById(id)
 | `mix_4n` | 비치+워터 믹스 4박 1인 USD |
 | `*_disc` | 할인 적용 후 가격 (없으면 원가 사용) |
 
-### 9개 리조트 목록
-| id | 이름 | 아톨 | 이동 |
-|---|---|---|---|
-| `cora_cora` | 코라코라 | 라무 아톨 | 수상비행기 |
-| `ananea` | 아나네아 | 바 아톨 | 수상비행기 |
-| `veligandu` | 벨리간두 | 아리 아톨 | 수상비행기 |
-| `dhigufaru` | 디구파루 | 바 아톨 | 수상비행기 |
-| `furaveri` | 푸라베리 | 라무 아톨 | 수상비행기 |
-| `fushifaru` | 푸시파루 | 라무 아톨 | 수상비행기 |
-| `raaya` | 라야 | 라무 아톨 | 수상비행기 |
-| `varu` | 앳모스피어바루 | 북말레 아톨 | 스피드보트 40분 |
-| `saii_so` | 사이라군+SO | 북말레 아톨 | 스피드보트 40분 |
+### 12개 리조트 목록
+| # | id | 이름 | 아톨 | 이동 | 여행사 |
+|---|---|---|---|---|---|
+| 1 | `cora_cora` | 코라코라 | 라아 아톨 | 수상비행기 45분 | 리얼몰디브 |
+| 2 | `ananea` | 아나네아 | 바아 아톨 | 수상비행기 20분 | 리얼몰디브 |
+| 3 | `veligandu` | 벨리간두 | 노스 아리 아톨 | 수상비행기 20분 | 리얼몰디브 |
+| 4 | `dhigufaru` | 디구파루 | 바아 아톨 | 수상비행기 40분 | 리얼몰디브 |
+| 5 | `furaveri` | 푸라베리 | 라아 아톨 | 수상비행기 45분 | 리얼몰디브 |
+| 6 | `fushifaru` | 푸시파루 | 라비야니 아톨 | 수상비행기 35분 | 리얼몰디브 |
+| 7 | `raaya` | 라야 | 라아 아톨 | 수상비행기 45분 | 리얼몰디브 |
+| 8 | `varu` | 앳모스피어바루 | 노스 말레 아톨 | 스피드보트 40분 | 리얼몰디브+허니문 |
+| 9 | `saii_so` | 사이라군+SO | 노스 말레 아톨 | 스피드보트 40분 | 리얼몰디브+허니문 |
+| 10 | `emerald` | 에메랄드 파스멘두 | 라아 아톨 | 수상비행기 50분 | 투어민 |
+| 11 | `oblu_sangeli` | 오블루 상겔리 | 노스 말레 아톨 | 스피드보트 50분 | 투어민 |
+| 12 | `outrigger` | 아웃리거 마푸시바루 | 사우스 아리 아톨 | 수상비행기 25분 | 투어민 |
 
-### 2개 여행사
+### 3개 여행사
 | id | 이름 | 특이사항 |
 |---|---|---|
 | `realmaldives` | 리얼몰디브 | 기본 여행사 |
 | `honeymoonresort` | 허니문리조트 | $200 추가 할인 (기간 한정) |
+| `tourmin` | 투어민 | PDF 없음. 3개 리조트 전담. outrigger는 2026년 가격 참고치 주의 |
 
 ---
 
@@ -207,8 +220,26 @@ PDF 파일 추가 → `data/리조트별/` 또는 `data/패키지/`에 파일 �
 
 ---
 
+## 디자인 시스템 (`css/styles.css`)
+
+sungso 루트 사이트와 통일된 핑크/로즈 테마:
+- 배경: `linear-gradient(135deg, #FFF5F7 0%, #FFF0EA 100%)`
+- 헤더: `#C44B6A → #FF6B9D` 그라디언트
+- 주요 변수: `--primary: #FF6B9D`, `--primary-deep: #C44B6A`
+- `--ocean-*` 변수는 핑크로 리매핑 (backward compat)
+- 카드 탭: `.cards-split-layout` (460px 왼쪽 + flex:1 오른쪽)
+
+## 대표 이미지 설정 방법
+
+1. **코드로 설정:** `resorts-data.js`에서 해당 리조트의 `featured_image: 'https://...'`에 URL 직접 입력
+2. **UI로 설정:** 리조트 상세 > 이미지 갤러리 > 썸네일 hover > ⭐ 클릭
+   - `localStorage['featured_img_' + resortId]`에 저장됨
+   - 브라우저 캐시 삭제 시 초기화됨
+
 ## 진행 상황
 
 | 날짜 | 작업 |
 |---|---|
-| 2026-06-12 | CLAUDE.md 최초 작성 — 파일 구조, 탭별 기능, 데이터 구조 문서화 |
+| 2026-06-12 | CLAUDE.md 최초 작성 |
+| 2026-06-12 | 핑크 테마 전환, 리조트 3개 추가(투어민), featured_image 지원 |
+| 2026-06-12 | UX 7종 개선: 분할레이아웃·지도 핀 직접 상세·토너먼트 버그·필터 단순화·2인합산 수정·대표이미지 UI |
