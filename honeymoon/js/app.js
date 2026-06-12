@@ -7,7 +7,7 @@ import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { initPlan } from './tab-plan.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
-import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
+import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages, subscribeAllMetaCounts } from './firebase-notes.js';
 import { subscribePicks, setPick, removePick } from './firebase-picks.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
 
@@ -277,6 +277,141 @@ window._removePickForResort = async function(resortId) {
   } catch { showToast('해제 실패', 'error'); }
 };
 
+// ── 메모 메타 (개수/최신) 전역 캐시 ──────────────────────────────
+let _memoMeta = {}; // { resortId: { commentCount, lastComment, lastAuthor, lastUpdatedAt, resortName } }
+window._memoMeta = _memoMeta;
+
+function _getMemoCnt(resortId) {
+  return _memoMeta[resortId]?.commentCount || 0;
+}
+
+function relativeTime(ts) {
+  if (!ts?.toDate) return '';
+  try {
+    const diff = (Date.now() - ts.toDate().getTime()) / 1000;
+    if (diff < 60)    return '방금 전';
+    if (diff < 3600)  return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    return `${Math.floor(diff / 86400)}일 전`;
+  } catch { return ''; }
+}
+
+function _refreshMemoCountBadges() {
+  // 카드 그리드 배지 갱신
+  document.querySelectorAll('.resort-card').forEach(card => {
+    const id = card.dataset.id;
+    const cnt = _getMemoCnt(id);
+    let badge = card.querySelector('.card-memo-badge');
+    if (!badge) {
+      const img = card.querySelector('.card-image');
+      if (img) {
+        badge = document.createElement('div');
+        badge.className = 'card-memo-badge';
+        img.appendChild(badge);
+      }
+    }
+    if (badge) {
+      badge.textContent = cnt ? `💬 ${cnt}` : '';
+      badge.style.display = cnt ? 'flex' : 'none';
+    }
+  });
+
+  // 플랜 탭 Pick 슬롯 배지 갱신
+  document.querySelectorAll('.pick-slot-filled').forEach(slot => {
+    const onclick = slot.getAttribute('onclick') || '';
+    const m = onclick.match(/_openPickModal\?\.?\('([^']+)'\)/);
+    if (!m) return;
+    const id = m[1];
+    const cnt = _getMemoCnt(id);
+    let badge = slot.querySelector('.psc-memo-badge');
+    if (!badge) {
+      const name = slot.querySelector('.psc-name');
+      if (name) {
+        badge = document.createElement('span');
+        badge.className = 'psc-memo-badge';
+        name.after(badge);
+      }
+    }
+    if (badge) {
+      badge.textContent = cnt ? `💬 ${cnt}` : '';
+      badge.style.display = cnt ? '' : 'none';
+    }
+  });
+
+  // 상세 시트 메모 버튼 갱신
+  const memoBtn = document.querySelector('#detailSheetBody .memo-trigger-btn');
+  if (memoBtn && _currentDetailResortId) {
+    const cnt = _getMemoCnt(_currentDetailResortId);
+    memoBtn.textContent = `💬 메모${cnt ? ` ${cnt}` : ''}`;
+  }
+}
+
+// ── 메모 알림 센터 ────────────────────────────────────────────────
+let _memoCenterOpen = false;
+window._memoCenterOpen = false;
+
+window._toggleMemoCenter = function() {
+  _memoCenterOpen ? window._closeMemoCenter() : window._openMemoCenter();
+};
+
+window._openMemoCenter = function() {
+  _memoCenterOpen = true;
+  window._memoCenterOpen = true;
+  _renderMemoCenterItems();
+  document.getElementById('memoCenterBackdrop').style.display = 'block';
+  // 다음 프레임에 클래스 추가 (트랜지션 트리거)
+  requestAnimationFrame(() => {
+    document.getElementById('memoCenterDrawer').classList.add('mcd-open');
+  });
+};
+
+window._closeMemoCenter = function() {
+  _memoCenterOpen = false;
+  window._memoCenterOpen = false;
+  document.getElementById('memoCenterDrawer').classList.remove('mcd-open');
+  document.getElementById('memoCenterBackdrop').style.display = 'none';
+};
+
+function _renderMemoCenterItems() {
+  const list = document.getElementById('memoCenterList');
+  if (!list) return;
+
+  const entries = Object.entries(_memoMeta)
+    .filter(([, m]) => m.commentCount > 0 && m.resortName)
+    .sort((a, b) => {
+      const ta = a[1].lastUpdatedAt?.toDate?.()?.getTime() || 0;
+      const tb = b[1].lastUpdatedAt?.toDate?.()?.getTime() || 0;
+      return tb - ta;
+    });
+
+  if (!entries.length) {
+    list.innerHTML = '<div class="mcd-empty">아직 메모가 없어요<br><small>리조트 상세에서 메모를 남겨보세요</small></div>';
+    return;
+  }
+
+  list.innerHTML = entries.map(([resortId, m]) => {
+    const timeStr = relativeTime(m.lastUpdatedAt);
+    const textPreview = (m.lastComment || '').slice(0, 45) + ((m.lastComment || '').length > 45 ? '…' : '');
+    const authorAvatar = m.lastAuthor === '소희' ? '👩' : '🧑';
+    return `
+<div class="mcd-item" onclick="window._memoCenterOpenResort('${resortId}')">
+  <div class="mcd-resort-row">
+    <span class="mcd-resort-name">${m.resortName}</span>
+    <span class="mcd-time">${timeStr}</span>
+  </div>
+  <div class="mcd-author">${authorAvatar} ${m.lastAuthor}</div>
+  <div class="mcd-text">${textPreview.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+  <div class="mcd-count-chip">💬 메모 ${m.commentCount}개</div>
+</div>`;
+  }).join('');
+}
+
+window._memoCenterOpenResort = function(resortId) {
+  window._closeMemoCenter();
+  openDetailSheet(resortId);
+  setTimeout(() => window._openMemo(resortId), 320);
+};
+
 // ── 메모 팝업 ──────────────────────────────────────────────────────
 let _memoResortId = null;
 let _memoUnsub = null;
@@ -322,7 +457,8 @@ window._sendMemo = async function() {
   const btn = document.getElementById('memoSendBtn');
   btn.disabled = true;
   try {
-    await addComment(_memoResortId, _memoAuthor, text);
+    const resort = RESORTS.find(r => r.id === _memoResortId);
+    await addComment(_memoResortId, resort?.name_ko || '', _memoAuthor, text);
     ta.value = '';
     ta.focus();
   } finally {
@@ -655,7 +791,7 @@ function renderResortDetail(r) {
         <div class="fit-score-label">취향 적합도</div>
       </div>
       <button class="pick-trigger-btn" onclick="window._openPickModal('${r.id}')">💗 Pick</button>
-      <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모</button>
+      <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모${_getMemoCnt(r.id) ? ` ${_getMemoCnt(r.id)}` : ''}</button>
     </div>
   </div>
 
@@ -775,6 +911,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window._pickModalResortId) window._openPickModal(window._pickModalResortId);
   });
 
+  // ── 전역 메모 메타 구독 (개수 배지 + 알림 센터) ─────────────────
+  subscribeAllMetaCounts(meta => {
+    _memoMeta = meta;
+    window._memoMeta = meta;
+    _refreshMemoCountBadges();
+    if (_memoCenterOpen) _renderMemoCenterItems();
+    const total = Object.values(meta).reduce((s, m) => s + (m.commentCount || 0), 0);
+    const countEl = document.getElementById('memoNotifCount');
+    if (countEl) { countEl.textContent = total; countEl.style.display = total ? '' : 'none'; }
+  });
+
   // ── 플랜 탭 기본 초기화 (기본 활성 탭) ─────────────────────────
   tabInited.add('plan');
   initPlan({ openDetailFn: openDetailSheet });
@@ -798,11 +945,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePrefsHint();
   });
 
-  // ESC 키로 sheet 닫기
+  // ESC 키 — 우선순위: 알림센터 → 메모 → pick → detailSheet
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      if (window._pickModalResortId) { window._closePickModal?.(); return; }
-      if (_memoResortId)             { window._closeMemo?.();      return; }
+      if (_memoCenterOpen)           { window._closeMemoCenter?.(); return; }
+      if (_memoResortId)             { window._closeMemo?.();       return; }
+      if (window._pickModalResortId) { window._closePickModal?.();  return; }
       if (document.getElementById('detailSheet')?.classList.contains('ds-open')) {
         window.closeDetailSheet();
       }

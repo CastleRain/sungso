@@ -58,6 +58,10 @@
   <button class="tab-btn" data-tab="pdf">
     <span class="tab-icon">📄</span> PDF 뷰어
   </button>
+  <button class="memo-notif-btn" id="memoNotifBtn" onclick="window._toggleMemoCenter?.()">
+    💬 <span class="memo-notif-label">메모</span>
+    <span class="memo-notif-count" id="memoNotifCount" style="display:none">0</span>
+  </button>
 </nav>
 
 <!-- ══════════════════════════════════════════════ 메인 콘텐츠 -->
@@ -262,6 +266,18 @@
   </div>
 </div>
 <div class="memo-popup-backdrop" id="memoBackdrop" onclick="window._closeMemo()" style="display:none;"></div>
+
+<!-- ══════════════════════════════════════════════ 메모 알림 센터 -->
+<div class="memo-center-backdrop" id="memoCenterBackdrop" onclick="window._closeMemoCenter?.()" style="display:none;"></div>
+<div class="memo-center-drawer" id="memoCenterDrawer">
+  <div class="mcd-header">
+    <span>💬 우리의 메모</span>
+    <button class="mcd-close-btn" onclick="window._closeMemoCenter?.()">✕</button>
+  </div>
+  <div class="mcd-list" id="memoCenterList">
+    <div class="mcd-empty">아직 메모가 없어요<br><small>리조트 상세에서 메모를 남겨보세요</small></div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════ Pick 모달 -->
 <div class="pick-modal" id="pickModal" style="display:none;">

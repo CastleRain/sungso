@@ -1,11 +1,12 @@
 // firebase-notes.js — 리조트 댓글 메모 + 이미지 관리 CRUD (Firestore)
 // 댓글: resort_notes/{resortId}/comments/{commentId}
 // 이미지: resort_images/{resortId}  { urls: string[] }
+// 메타: resort_note_meta/{resortId}  { commentCount, lastComment, lastAuthor, lastUpdatedAt, resortName }
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, deleteDoc, doc,
          onSnapshot, query, orderBy, serverTimestamp,
-         getDoc, setDoc }
+         getDoc, setDoc, updateDoc, increment }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -21,7 +22,6 @@ const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
 // 실시간 댓글 구독 — 반환값은 unsubscribe 함수
-// callback: ({ id, author, text, createdAt }[]) => void
 export function subscribeComments(resortId, callback) {
   const ref = collection(db, 'resort_notes', resortId, 'comments');
   const q = query(ref, orderBy('createdAt', 'asc'));
@@ -30,16 +30,39 @@ export function subscribeComments(resortId, callback) {
   }, () => callback([]));
 }
 
-export async function addComment(resortId, author, text) {
+// resortName 파라미터 추가 — 신규 댓글에 resortId/resortName 저장 + 메타 갱신
+export async function addComment(resortId, resortName, author, text) {
   const ref = collection(db, 'resort_notes', resortId, 'comments');
-  await addDoc(ref, { author, text, createdAt: serverTimestamp() });
+  await addDoc(ref, { resortId, resortName, author, text, createdAt: serverTimestamp() });
+
+  const metaRef = doc(db, 'resort_note_meta', resortId);
+  await setDoc(metaRef, {
+    commentCount: increment(1),
+    lastComment: text,
+    lastAuthor: author,
+    lastUpdatedAt: serverTimestamp(),
+    resortName,
+  }, { merge: true });
 }
 
 export async function deleteComment(resortId, commentId) {
   await deleteDoc(doc(db, 'resort_notes', resortId, 'comments', commentId));
+  try {
+    await updateDoc(doc(db, 'resort_note_meta', resortId), { commentCount: increment(-1) });
+  } catch (_) {}
 }
 
-// 이미지 관리 — resort_images/{resortId} { urls: string[] }
+// resort_note_meta 전체 구독 — cb({ resortId: { commentCount, lastComment, lastAuthor, lastUpdatedAt, resortName } })
+export function subscribeAllMetaCounts(cb) {
+  const ref = collection(db, 'resort_note_meta');
+  return onSnapshot(ref, snap => {
+    const meta = {};
+    snap.forEach(d => { meta[d.id] = d.data(); });
+    cb(meta);
+  }, () => cb({}));
+}
+
+// 이미지 관리
 export async function getCustomImages(resortId) {
   try {
     const snap = await getDoc(doc(db, 'resort_images', resortId));

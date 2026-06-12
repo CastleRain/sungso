@@ -127,12 +127,13 @@ function _renderPickSlot(resortId, rank, person) {
   const imgHtml = img
     ? `<img src="${img}" alt="${r.name_ko}" onerror="this.style.display='none'">`
     : `<div class="psc-no-img">🏝️</div>`;
+  const memoCnt = window._memoMeta?.[r.id]?.commentCount || 0;
   return `
 <div class="pick-slot-card pick-slot-filled" onclick="window._openPickModal?.('${r.id}')">
   <div class="psc-rank-badge">${RANK_EMOJI[rank]} ${RANK_LABELS[rank]}</div>
   <div class="psc-img">${imgHtml}</div>
   <div class="psc-body">
-    <div class="psc-name">${r.name_ko}</div>
+    <div class="psc-name">${r.name_ko}${memoCnt ? `<span class="psc-memo-badge">💬 ${memoCnt}</span>` : ''}</div>
     <div class="psc-sub">${r.atoll} · ${r.transfer_type === 'seaplane' ? '✈' : '🚤'} ${r.transfer_minutes}분</div>
     <div class="psc-actions">
       <button class="psc-detail-btn" onclick="event.stopPropagation(); window._planOpenDetail?.('${r.id}')">상세 보기</button>
