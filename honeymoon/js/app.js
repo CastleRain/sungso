@@ -35,7 +35,14 @@ function switchTab(tabId) {
 
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
-    if (tabId === 'price') initPrice();
+    if (tabId === 'price') {
+      initPrice(openDetailInPrice);
+      initResizeHandle(
+        document.getElementById('priceResizeHandle'),
+        document.querySelector('.price-left-col'),
+        'price-left-w', 280, 780
+      );
+    }
     if (tabId === 'map') {
       initMap(openDetailInMap);
       initResizeHandle(
@@ -103,6 +110,34 @@ window.closeCardDetail = function() {
   empty.innerHTML = '<div style="font-size:48px;">🏝️</div><div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
   panel.appendChild(empty);
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+};
+
+// ── 가격 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
+function openDetailInPrice(resortId) {
+  const resort = RESORTS.find(r => r.id === resortId);
+  if (!resort) return;
+  const panel = document.getElementById('priceDetailPanel');
+  if (panel) {
+    const closeBar = panel.querySelector('.price-detail-close-bar');
+    panel.innerHTML = renderResortDetail(resort);
+    if (closeBar) panel.insertBefore(closeBar, panel.firstChild);
+    panel.scrollTop = 0;
+  }
+  document.getElementById('tab-price').classList.add('detail-open');
+}
+
+window.closePriceDetail = function() {
+  document.getElementById('tab-price').classList.remove('detail-open');
+  const panel = document.getElementById('priceDetailPanel');
+  if (!panel) return;
+  const closeBar = panel.querySelector('.price-detail-close-bar');
+  panel.innerHTML = '';
+  if (closeBar) panel.appendChild(closeBar);
+  const empty = document.createElement('div');
+  empty.className = 'price-detail-empty';
+  empty.innerHTML = '<div style="font-size:48px;">💰</div><div>리조트 이름을 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
+  panel.appendChild(empty);
+  document.querySelectorAll('.resort-row').forEach(r => r.classList.remove('selected'));
 };
 
 // ── 지도/토너먼트용 오버레이 ────────────────────────────────────────

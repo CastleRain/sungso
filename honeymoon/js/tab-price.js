@@ -14,6 +14,15 @@ const AGENCY_NAMES = { realmaldives: '리얼몰디브', honeymoonresort: '허니
 let sortKey = 'water_pool_4n';
 let sortDir = 'asc';
 let coupleMode = false;
+let onDetailOpen = null;
+let selectedResortId = null;
+
+window._priceResortClick = (id) => {
+  selectedResortId = id;
+  document.querySelectorAll('.resort-row').forEach(r => r.classList.remove('selected'));
+  document.querySelector(`.resort-row[data-resort-id="${id}"]`)?.classList.add('selected');
+  if (onDetailOpen) onDetailOpen(id);
+};
 
 function getAllPricesForKey(resort, key) {
   const results = [];
@@ -121,10 +130,10 @@ function renderTable() {
       .join('<br>');
 
     return `
-<tr class="resort-row">
+<tr class="resort-row${selectedResortId === resort.id ? ' selected' : ''}" data-resort-id="${resort.id}">
   <td class="td-resort">
     <div class="resort-name-wrap">
-      ${tierBadge}<strong>${resort.name_ko}</strong>
+      ${tierBadge}<strong class="resort-name-link" onclick="window._priceResortClick('${resort.id}')">${resort.name_ko}</strong><button class="price-detail-btn" onclick="window._priceResortClick('${resort.id}')">📋</button>
     </div>
     <div class="resort-sub">${transferIcon} ${resort.transfer_minutes}분 · ${resort.atoll}</div>
     ${resort.has_hammock ? '<div class="hammock-note">🛏️ 해먹</div>' : ''}
@@ -168,7 +177,8 @@ ${renderSummaryCards()}
   });
 }
 
-export function initPrice() {
+export function initPrice(detailOpenFn) {
+  onDetailOpen = detailOpenFn;
   renderTable();
 
   const toggle = document.getElementById('coupleToggle');

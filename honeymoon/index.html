@@ -108,21 +108,37 @@
   </div>
 
   <!-- 탭 2: 가격 비교 -->
-  <div class="tab-content" id="tab-price">
-    <div class="price-tab-header">
-      <h2>가격 비교 테이블</h2>
-      <span style="font-size:12px; color:var(--text-muted);">컬럼 헤더 클릭 시 정렬 · 1인 USD 기준</span>
-      <div style="margin-left:auto;">
-        <label class="couple-toggle" id="coupleToggle">
-          <div class="toggle-switch" id="coupleSwitch">
-            <div class="toggle-knob"></div>
+  <div class="tab-content" id="tab-price" style="overflow:hidden; padding:0;">
+    <div class="price-split-layout">
+      <!-- 왼쪽: 가격 테이블 -->
+      <div class="price-left-col">
+        <div class="price-tab-header">
+          <h2>가격 비교 테이블</h2>
+          <span style="font-size:12px; color:var(--text-muted);">컬럼 헤더 클릭 시 정렬 · 1인 USD 기준</span>
+          <div style="margin-left:auto;">
+            <label class="couple-toggle" id="coupleToggle">
+              <div class="toggle-switch" id="coupleSwitch">
+                <div class="toggle-knob"></div>
+              </div>
+              2인 합산 보기
+            </label>
           </div>
-          2인 합산 보기
-        </label>
+        </div>
+        <div class="price-table-wrap" id="priceTableWrap">
+          <!-- JS로 렌더링 -->
+        </div>
       </div>
-    </div>
-    <div class="price-table-wrap" id="priceTableWrap">
-      <!-- JS로 렌더링 -->
+      <div class="resize-handle" id="priceResizeHandle"></div>
+      <!-- 오른쪽: 선택된 리조트 상세 -->
+      <div class="price-right-col" id="priceDetailPanel">
+        <div class="price-detail-close-bar">
+          <button class="cards-detail-back-btn" onclick="window.closePriceDetail()">← 목록으로</button>
+        </div>
+        <div class="price-detail-empty">
+          <div style="font-size:48px;">💰</div>
+          <div>리조트 이름을 클릭하면<br>상세 정보가 여기 표시됩니다</div>
+        </div>
+      </div>
     </div>
   </div>
 
