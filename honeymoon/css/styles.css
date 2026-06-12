@@ -250,6 +250,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
+  transition: width 0.22s ease;
 }
 .cards-left-col .cards-toolbar {
   position: sticky;
@@ -263,7 +264,11 @@ body {
   background: white;
   min-width: 0;
   min-height: 0;
-  display: none;
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  overflow: hidden;
 }
 /* detail-open 시: 분할 레이아웃 */
 #tab-cards.detail-open .cards-left-col {
@@ -271,7 +276,11 @@ body {
   border-right: 1px solid var(--border);
 }
 #tab-cards.detail-open .cards-right-col {
-  display: block;
+  width: auto;
+  opacity: 1;
+  pointer-events: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 #tab-cards.detail-open .cards-grid {
   grid-template-columns: repeat(2, 1fr);

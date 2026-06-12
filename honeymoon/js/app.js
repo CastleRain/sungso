@@ -502,10 +502,10 @@ document.addEventListener('DOMContentLoaded', () => {
     'cards-left-w', 240, 700
   );
 
-  // 왼쪽 그리드 빈 공간 클릭 → 목록으로
-  document.getElementById('cardsGrid')?.addEventListener('click', e => {
+  // 왼쪽 영역(툴바·그리드 포함) 클릭 → 상세 닫고 전체 그리드 복귀
+  document.querySelector('.cards-left-col')?.addEventListener('click', e => {
     if (!document.getElementById('tab-cards').classList.contains('detail-open')) return;
-    if (e.target.closest('.resort-card')) return;
+    if (e.target.closest('.resort-card')) return; // 카드 클릭은 상세 전환
     window.closeCardDetail();
   });
 
