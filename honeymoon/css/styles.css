@@ -4062,3 +4062,380 @@ body {
   justify-content: center;
 }
 .day-add-btn:hover { background: var(--primary); color: white; }
+
+/* ════════════════════════════════════════════════════════════════
+   일정표 — View / Edit 모드 (확장 편집 UI)
+   ════════════════════════════════════════════════════════════════ */
+
+/* 일정표 헤더 오른쪽 그룹 */
+.iti-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 저장 상태 표시 */
+.iti-save-status {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 3px 8px;
+  display: none;
+}
+.iti-save-status:not(:empty) { display: inline-block; }
+.status-saving { color: #888; background: var(--gray-100); }
+.status-saved  { color: #27AE60; background: #EAFAF1; }
+.status-error  { color: #dc4e38; background: #FEF0ED; }
+
+/* Day 카드 편집 강조 */
+.itinerary-day.editing {
+  background: var(--primary-pale);
+  border-radius: 12px;
+  border-left: 3px solid var(--primary);
+  margin-left: -3px;
+}
+
+/* ── View mode header ── */
+.day-view-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.day-view-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.day-edit-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+.day-edit-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-pale);
+  color: var(--primary-deep);
+}
+
+/* ── Transport / Stay chips ── */
+.day-meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta-chip-transport { background: #FEF4EA; border-color: #E67E22; color: #B35800; }
+.meta-chip-stay      { background: #F0EEFF; border-color: #7B68EE; color: #5040C0; }
+
+/* ── Mood 표시 (view mode) ── */
+.day-mood-view {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border-left: 2px solid var(--primary-light);
+}
+
+/* ── 아이템 리스트 (view mode) ── */
+.day-items-view {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.day-item-view {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.item-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.item-time-display {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+.item-text-display {
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.item-todo { opacity: 0.42; }
+.item-todo .item-text-display { font-style: italic; }
+.todo-pill {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  background: var(--gray-100);
+  border-radius: 20px;
+  padding: 1px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Edit mode header row ── */
+.day-edit-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.day-edit-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text);
+  border: none;
+  border-bottom: 2px solid var(--primary);
+  background: transparent;
+  outline: none;
+  padding: 4px 2px;
+  min-width: 0;
+}
+.day-edit-title::placeholder { color: var(--text-light); font-weight: 400; }
+.day-save-close-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.day-save-close-btn:hover { opacity: 0.85; }
+
+/* ── Edit mode fields grid ── */
+.day-edit-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+@media (max-width: 500px) { .day-edit-fields-grid { grid-template-columns: 1fr; } }
+.day-edit-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.day-edit-field-input {
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  padding: 5px 9px;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  outline: none;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.day-edit-field-input:focus { border-color: var(--primary); }
+
+/* ── Edit mode items section ── */
+.day-edit-items-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.day-items-edit {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.day-item-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 5px 8px;
+  transition: border-color 0.12s;
+}
+.day-item-edit-row:focus-within { border-color: var(--primary); }
+
+.item-type-cycle {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.12s, transform 0.1s;
+}
+.item-type-cycle:hover { opacity: 0.75; transform: scale(1.1); }
+.item-type-cycle:active { transform: scale(0.9); }
+
+.item-time-input {
+  width: 58px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 6px;
+  border: none;
+  outline: none;
+  color: var(--text-muted);
+  background: transparent;
+}
+.item-time-input::placeholder { color: var(--text-light); font-family: inherit; }
+
+.item-text-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 4px 4px;
+  border: none;
+  outline: none;
+  color: var(--text);
+  background: transparent;
+}
+.item-text-input::placeholder { color: var(--text-light); }
+
+.item-reorder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.item-reorder-btns button {
+  width: 18px;
+  height: 15px;
+  border: none;
+  background: none;
+  color: var(--text-light);
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  padding: 0;
+}
+.item-reorder-btns button:hover:not(:disabled) { background: var(--gray-100); color: var(--text); }
+.item-reorder-btns button:disabled { opacity: 0.25; cursor: default; }
+
+.item-del-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.12s, background 0.12s;
+}
+.item-del-btn:hover { color: #dc4e38; background: #FEF0ED; }
+
+/* ── Edit mode add row ── */
+.day-edit-add-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 4px;
+  background: var(--gray-50);
+  border: 1px dashed var(--border-mid);
+  border-radius: 9px;
+  padding: 5px 8px;
+}
+.item-type-select {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: inherit;
+  padding: 4px 6px;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  background: white;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  max-width: 110px;
+}
+.item-type-select:focus { border-color: var(--primary); }
+.day-add-time {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.15s;
+}
+.day-add-time:focus { border-color: var(--primary); }
+.day-add-time::placeholder { color: var(--text-light); }

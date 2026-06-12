@@ -13,25 +13,120 @@ const ROUTE_NODES = [
 const RANK_EMOJI  = ['🥇', '🥈', '🥉'];
 const RANK_LABELS = ['1위', '2위', '3위'];
 
-// 기본 일정 템플릿 (8일 7박)
 const TRIP_TEMPLATE = [
-  { day: 1, date: '2027-03-07', city: '인천 → 싱가폴', title: '출발', transport: '인천공항 출발', stay: '싱가폴 호텔', items: ['인천공항 집결', '싱가폴 창이공항 도착', '호텔 체크인'] },
-  { day: 2, date: '2027-03-08', city: '싱가폴', title: '싱가폴 관광', transport: null, stay: '싱가폴 호텔', items: ['마리나베이샌즈', '가든스바이더베이', '야경 감상'] },
-  { day: 3, date: '2027-03-09', city: '싱가폴 → 몰디브', title: '몰디브 이동', transport: '싱가폴 → 말레 비행 + 리조트 이동', stay: '{{resort}}', items: ['창이공항 출발', '말레 도착', '리조트 이동', '체크인'] },
-  { day: 4, date: '2027-03-10', city: '몰디브', title: '리조트 Day 2', transport: null, stay: '{{resort}}', items: ['조식', '스노클링', '선셋 크루즈'] },
-  { day: 5, date: '2027-03-11', city: '몰디브', title: '리조트 Day 3', transport: null, stay: '{{resort}}', items: ['조식', '수중 액티비티', '스파'] },
-  { day: 6, date: '2027-03-12', city: '몰디브', title: '리조트 Day 4', transport: null, stay: '{{resort}}', items: ['조식', '다이빙', '커플 사진 촬영'] },
-  { day: 7, date: '2027-03-13', city: '몰디브', title: '리조트 마지막날', transport: '리조트 → 말레 공항', stay: '{{resort}}', items: ['조식', '체크아웃', '출국'] },
-  { day: 8, date: '2027-03-14', city: '인천', title: '귀국', transport: '말레 → 인천 도착', stay: null, items: ['귀국', '수고했어요! 💕'] },
+  { day: 1, date: '2027-03-07', city: '인천 → 싱가폴', title: '출발', transport: '인천공항 출발', stay: '싱가폴 호텔', items: [
+    { type: 'transport', text: '인천공항 집결', time: '' },
+    { type: 'flight',    text: '싱가폴 창이공항 도착', time: '' },
+    { type: 'hotel',     text: '호텔 체크인', time: '' },
+  ]},
+  { day: 2, date: '2027-03-08', city: '싱가폴', title: '싱가폴 관광', transport: null, stay: '싱가폴 호텔', items: [
+    { type: 'activity', text: '마리나베이샌즈', time: '' },
+    { type: 'activity', text: '가든스바이더베이', time: '' },
+    { type: 'rest',     text: '야경 감상', time: '21:00' },
+  ]},
+  { day: 3, date: '2027-03-09', city: '싱가폴 → 몰디브', title: '몰디브 이동', transport: '싱가폴 → 말레 비행 + 리조트 이동', stay: '{{resort}}', items: [
+    { type: 'flight',    text: '창이공항 출발', time: '' },
+    { type: 'flight',    text: '말레 도착', time: '' },
+    { type: 'transport', text: '리조트 이동', time: '' },
+    { type: 'hotel',     text: '체크인', time: '' },
+  ]},
+  { day: 4, date: '2027-03-10', city: '몰디브', title: '리조트 Day 2', transport: null, stay: '{{resort}}', items: [
+    { type: 'meal',     text: '조식', time: '08:00' },
+    { type: 'activity', text: '스노클링', time: '' },
+    { type: 'activity', text: '선셋 크루즈', time: '' },
+  ]},
+  { day: 5, date: '2027-03-11', city: '몰디브', title: '리조트 Day 3', transport: null, stay: '{{resort}}', items: [
+    { type: 'meal',     text: '조식', time: '08:00' },
+    { type: 'activity', text: '수중 액티비티', time: '' },
+    { type: 'rest',     text: '스파', time: '' },
+  ]},
+  { day: 6, date: '2027-03-12', city: '몰디브', title: '리조트 Day 4', transport: null, stay: '{{resort}}', items: [
+    { type: 'meal',     text: '조식', time: '08:00' },
+    { type: 'activity', text: '다이빙', time: '' },
+    { type: 'activity', text: '커플 사진 촬영', time: '' },
+  ]},
+  { day: 7, date: '2027-03-13', city: '몰디브', title: '리조트 마지막날', transport: '리조트 → 말레 공항', stay: '{{resort}}', items: [
+    { type: 'meal',   text: '조식', time: '08:00' },
+    { type: 'hotel',  text: '체크아웃', time: '' },
+    { type: 'flight', text: '출국', time: '' },
+  ]},
+  { day: 8, date: '2027-03-14', city: '인천', title: '귀국', transport: '말레 → 인천 도착', stay: null, items: [
+    { type: 'flight', text: '귀국', time: '' },
+    { type: 'rest',   text: '수고했어요! 💕', time: '' },
+  ]},
 ];
 
+const ITEM_TYPES = {
+  flight:    { icon: '✈',  label: '항공',     color: '#4A90D9', bg: '#EBF4FF' },
+  hotel:     { icon: '🏨', label: '숙박',     color: '#7B68EE', bg: '#F0EEFF' },
+  transport: { icon: '🚌', label: '이동',     color: '#E67E22', bg: '#FEF4EA' },
+  meal:      { icon: '🍽', label: '식사',     color: '#27AE60', bg: '#EAFAF1' },
+  activity:  { icon: '🏄', label: '액티비티', color: '#1D9E75', bg: '#E6F6F1' },
+  rest:      { icon: '😴', label: '휴식',     color: '#8E8E93', bg: '#F5F5F7' },
+  memo:      { icon: '📝', label: '메모',     color: '#888',    bg: '#F9F9F9' },
+};
+const ITEM_TYPE_ORDER = ['flight', 'hotel', 'transport', 'meal', 'activity', 'rest', 'memo'];
+
+// ── 모듈 상태 ─────────────────────────────────────────────────────────
 let _openDetailFn = null;
 let _picksUnsub   = null;
 let _itiUnsub     = null;
 let _currentDays  = [];
+let _editMode     = {};   // { [dayIndex]: boolean }
+let _saveTimer    = null;
+let _saveStatus   = 'idle';
+let _lastSaveTime = 0;
 
+// ── 유틸 ──────────────────────────────────────────────────────────────
+const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function normalizeItem(item) {
+  if (typeof item === 'string') return { type: 'memo', text: item, time: '' };
+  return { type: item.type || 'memo', text: item.text || '', time: item.time || '' };
+}
+
+function _updateSaveStatus(status) {
+  _saveStatus = status;
+  const el = document.getElementById('itiSaveStatus');
+  if (!el) return;
+  if (status === 'idle')         { el.textContent = ''; el.className = 'iti-save-status'; }
+  else if (status === 'saving')  { el.textContent = '저장 중...'; el.className = 'iti-save-status status-saving'; }
+  else if (status === 'saved')   {
+    el.textContent = '✓ 저장됨'; el.className = 'iti-save-status status-saved';
+    setTimeout(() => { if (_saveStatus === 'saved') _updateSaveStatus('idle'); }, 2500);
+  }
+  else if (status === 'error')   { el.textContent = '저장 실패'; el.className = 'iti-save-status status-error'; }
+}
+
+function _scheduleSave() {
+  clearTimeout(_saveTimer);
+  _updateSaveStatus('saving');
+  _saveTimer = setTimeout(async () => {
+    try {
+      _lastSaveTime = Date.now();
+      await setItinerary(_currentDays);
+      _updateSaveStatus('saved');
+    } catch {
+      _updateSaveStatus('error');
+      window._showToast?.('저장 실패', 'error');
+    }
+  }, 800);
+}
+
+function _rerenderDayCard(dayIndex) {
+  const old = document.querySelector(`.itinerary-day[data-day-index="${dayIndex}"]`);
+  if (!old) return;
+  const d = _currentDays[dayIndex];
+  if (!d) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = _renderDayCard(d, dayIndex);
+  old.replaceWith(tmp.firstElementChild);
+}
+
+// ── initPlan ──────────────────────────────────────────────────────────
 export function initPlan({ openDetailFn }) {
   _openDetailFn = openDetailFn;
+  _editMode = {};
 
   const wrap = document.getElementById('planWrap');
   if (!wrap) return;
@@ -54,16 +149,17 @@ export function initPlan({ openDetailFn }) {
 
   if (_itiUnsub) _itiUnsub();
   _itiUnsub = subscribeItinerary(days => {
+    if (Date.now() - _lastSaveTime < 3000) return;
+    if (Object.values(_editMode).some(Boolean)) return;
     _currentDays = days || [];
+    _editMode = {};
     _renderItinerary(_currentDays);
   });
 
-  // 플랜 탭에서 리조트 상세 열기
   window._planOpenDetail = (id) => {
     window.dispatchEvent(new CustomEvent('open-detail', { detail: { id } }));
   };
 
-  // Pick 제거
   window._removePick = async (person, rank) => {
     try {
       await removePick(person, parseInt(rank));
@@ -71,7 +167,6 @@ export function initPlan({ openDetailFn }) {
     } catch { window._showToast?.('해제 실패', 'error'); }
   };
 
-  // 최종 협의 후보 토글
   window._toggleFinalCandidate = async (resortId) => {
     const picks = window._currentPicks || {};
     const current = [...(picks.finalCandidates || [])];
@@ -84,7 +179,6 @@ export function initPlan({ openDetailFn }) {
     } catch { window._showToast?.('저장 실패', 'error'); }
   };
 
-  // 리조트 확정
   window._confirmResort = async (resortId) => {
     try {
       await setConfirmedResort(resortId || null);
@@ -92,54 +186,127 @@ export function initPlan({ openDetailFn }) {
     } catch { window._showToast?.('저장 실패', 'error'); }
   };
 
-  // 기본 일정 자동 생성
   window._autoFillItinerary = async () => {
     const picks = window._currentPicks || {};
     const confirmedId   = picks.confirmedResort;
     const confirmedName = confirmedId
       ? (RESORTS.find(r => r.id === confirmedId)?.name_ko || '리조트 (미정)')
       : '리조트 (미정)';
-
     const days = TRIP_TEMPLATE.map(d => ({
       ...d,
       stay: d.stay ? d.stay.replace('{{resort}}', confirmedName) : d.stay,
     }));
-
     try {
+      _lastSaveTime = Date.now();
       await setItinerary(days);
+      _currentDays = days;
+      _editMode = {};
+      _renderItinerary(_currentDays);
       window._showToast?.('✓ 기본 일정이 생성됐어요');
     } catch { window._showToast?.('저장 실패', 'error'); }
   };
 
-  // 일정 항목 추가
-  window._addDayItem = async (dayIndex, text) => {
-    if (!text.trim() || !_currentDays[dayIndex]) return;
-    const days = _currentDays.map((d, i) =>
-      i === dayIndex ? { ...d, items: [...(d.items || []), text.trim()] } : d
-    );
-    try { await setItinerary(days); } catch { window._showToast?.('저장 실패', 'error'); }
-  };
-
-  // 일정 항목 삭제
-  window._removeDayItem = async (dayIndex, itemIndex) => {
-    if (!_currentDays[dayIndex]) return;
-    const days = _currentDays.map((d, i) => {
-      if (i !== dayIndex) return d;
-      const items = [...(d.items || [])];
-      items.splice(itemIndex, 1);
-      return { ...d, items };
-    });
-    try { await setItinerary(days); } catch { window._showToast?.('저장 실패', 'error'); }
-  };
-
-  // 일정 전체 초기화
   window._resetItinerary = async () => {
     if (!confirm('일정을 초기화하고 기본 템플릿으로 다시 채울까요?')) return;
     window._autoFillItinerary();
   };
+
+  // ── Day 편집 핸들러 ──────────────────────────────────────────────
+  window._toggleDayEdit = (dayIndex) => {
+    _editMode[dayIndex] = !_editMode[dayIndex];
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._updateDayField = (dayIndex, field, value) => {
+    if (!_currentDays[dayIndex]) return;
+    _currentDays[dayIndex] = { ..._currentDays[dayIndex], [field]: value };
+    _scheduleSave();
+  };
+
+  window._updateItemField = (dayIndex, itemIndex, field, value) => {
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    if (!items[itemIndex]) return;
+    items[itemIndex] = { ...items[itemIndex], [field]: value };
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+  };
+
+  window._cycleItemType = (dayIndex, itemIndex) => {
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    if (!items[itemIndex]) return;
+    const cur = items[itemIndex].type || 'memo';
+    const next = ITEM_TYPE_ORDER[(ITEM_TYPE_ORDER.indexOf(cur) + 1) % ITEM_TYPE_ORDER.length];
+    items[itemIndex] = { ...items[itemIndex], type: next };
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._moveItemUp = (dayIndex, itemIndex) => {
+    if (itemIndex <= 0) return;
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    [items[itemIndex - 1], items[itemIndex]] = [items[itemIndex], items[itemIndex - 1]];
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._moveItemDown = (dayIndex, itemIndex) => {
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    if (itemIndex >= items.length - 1) return;
+    [items[itemIndex], items[itemIndex + 1]] = [items[itemIndex + 1], items[itemIndex]];
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._addDayItem = (dayIndex) => {
+    const typeEl = document.getElementById(`addItemType_${dayIndex}`);
+    const textEl = document.getElementById(`addItemText_${dayIndex}`);
+    const timeEl = document.getElementById(`addItemTime_${dayIndex}`);
+    const text = textEl?.value.trim();
+    if (!text) return;
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    items.push({ type: typeEl?.value || 'memo', text, time: timeEl?.value.trim() || '' });
+    _currentDays[dayIndex] = { ...d, items };
+    if (textEl) textEl.value = '';
+    if (timeEl) timeEl.value = '';
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._addDayItemQuick = (dayIndex, text) => {
+    if (!text.trim() || !_currentDays[dayIndex]) return;
+    const d = _currentDays[dayIndex];
+    const items = (d.items || []).map(normalizeItem);
+    items.push({ type: 'memo', text: text.trim(), time: '' });
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
+
+  window._removeDayItem = (dayIndex, itemIndex) => {
+    const d = _currentDays[dayIndex];
+    if (!d) return;
+    const items = (d.items || []).map(normalizeItem);
+    items.splice(itemIndex, 1);
+    _currentDays[dayIndex] = { ...d, items };
+    _scheduleSave();
+    _rerenderDayCard(dayIndex);
+  };
 }
 
-// ── 여행 요약 헤더 ─────────────────────────────────────────────────
+// ── 여행 요약 헤더 ────────────────────────────────────────────────────
 function _renderTripHeader() {
   return `
 <div class="plan-trip-header">
@@ -157,7 +324,7 @@ function _renderTripHeader() {
 </div>`;
 }
 
-// ── Route Strip ────────────────────────────────────────────────────
+// ── Route Strip ───────────────────────────────────────────────────────
 function _renderRouteStrip() {
   const nodes = ROUTE_NODES.map((n, i) => {
     const nightsHtml = n.nights != null ? `<div class="rn-nights">${n.nights}박</div>` : '';
@@ -174,7 +341,6 @@ ${i > 0 ? '<div class="route-arrow">›</div>' : ''}
   ${nightsHtml}
 </div>`;
   }).join('');
-
   return `
 <div class="plan-section">
   <div class="plan-section-label">여정 개요</div>
@@ -182,20 +348,16 @@ ${i > 0 ? '<div class="route-arrow">›</div>' : ''}
 </div>`;
 }
 
-// ── 확정 리조트 히어로 카드 ─────────────────────────────────────────
+// ── 확정 리조트 히어로 카드 ───────────────────────────────────────────
 function _renderConfirmed(picks) {
   const el = document.getElementById('planConfirmed');
   if (!el) return;
-
   const confirmedId = picks.confirmedResort;
   if (!confirmedId) { el.innerHTML = ''; return; }
-
   const r = RESORTS.find(x => x.id === confirmedId);
   if (!r) { el.innerHTML = ''; return; }
-
   const img   = getFeaturedImage(r);
   const price = getBestPrice(r, 'water_pool_4n');
-
   el.innerHTML = `
 <div class="plan-section confirmed-section">
   <div class="plan-section-label">🏆 우리의 리조트</div>
@@ -218,10 +380,8 @@ function _renderConfirmed(picks) {
 </div>`;
 }
 
-// ── 커플 Top 3 ─────────────────────────────────────────────────────
-function _resortById(id) {
-  return id ? RESORTS.find(r => r.id === id) : null;
-}
+// ── 커플 Top 3 ────────────────────────────────────────────────────────
+function _resortById(id) { return id ? RESORTS.find(r => r.id === id) : null; }
 
 function _renderPickSlot(resortId, rank, person) {
   if (!resortId) {
@@ -257,14 +417,11 @@ function _renderPickSlot(resortId, rank, person) {
 function _renderTopThree(picks) {
   const el = document.getElementById('planTopThree');
   if (!el) return;
-
   const soheePicks   = picks.sohee   || [null, null, null];
   const sungwooPicks = picks.sungwoo || [null, null, null];
   const finals       = picks.finalCandidates || [];
   const confirmedId  = picks.confirmedResort;
-
-  const commonIds = soheePicks.filter(id => id && sungwooPicks.includes(id));
-
+  const commonIds    = soheePicks.filter(id => id && sungwooPicks.includes(id));
   const soheeEmpty   = soheePicks.every(id => !id);
   const sungwooEmpty = sungwooPicks.every(id => !id);
 
@@ -283,7 +440,6 @@ function _renderTopThree(picks) {
       }).join('')
     : '<span class="no-common-text">두 사람의 공통 선택이 없어요</span>';
 
-  // 최종 협의 후보 — finalCandidates에 있는 것만, 확정 버튼 포함
   const allResortIds = [...new Set([...soheePicks, ...sungwooPicks].filter(Boolean))];
 
   const finalsHtml = finals.length > 0
@@ -297,18 +453,16 @@ function _renderTopThree(picks) {
   <div class="final-cand-btns">
     ${isConfirmed
       ? `<span class="final-confirmed-badge">✓ 확정됨</span>`
-      : `<button class="final-confirm-btn" onclick="window._confirmResort?.('${r.id}')">✓ 이 리조트로 확정</button>`
-    }
+      : `<button class="final-confirm-btn" onclick="window._confirmResort?.('${r.id}')">✓ 이 리조트로 확정</button>`}
     <button class="final-remove-btn" onclick="window._toggleFinalCandidate?.('${id}')">제거</button>
   </div>
 </div>`;
       }).join('')
     : '<span class="no-common-text">최종 후보가 없어요 — 아래 목록에서 + 버튼으로 추가해보세요</span>';
 
-  // Pick된 전체 리조트 (최종 후보에 추가/제거용 토글)
   const toggleHtml = allResortIds.length > 0
     ? allResortIds.map(id => {
-        const r       = _resortById(id);
+        const r = _resortById(id);
         if (!r) return '';
         const isFinal = finals.includes(id);
         return `<span class="final-toggle-badge ${isFinal ? 'final-active' : ''}" onclick="window._toggleFinalCandidate?.('${id}')">${r.name_ko}${isFinal ? ' ✓' : ' +'}</span>`;
@@ -354,11 +508,10 @@ function _renderTopThree(picks) {
 </div>`;
 }
 
-// ── 일정표 타임라인 ─────────────────────────────────────────────────
+// ── 일정표 타임라인 ───────────────────────────────────────────────────
 function _renderItinerary(days) {
   const el = document.getElementById('planItinerary');
   if (!el) return;
-
   if (!days || days.length === 0) {
     el.innerHTML = `
 <div class="plan-section">
@@ -372,65 +525,157 @@ function _renderItinerary(days) {
 </div>`;
     return;
   }
-
   el.innerHTML = `
 <div class="plan-section">
   <div class="plan-section-header-row">
     <div class="plan-section-label">여행 일정표</div>
-    <button class="iti-reset-btn" onclick="window._resetItinerary?.()">↺ 초기화</button>
+    <div class="iti-header-right">
+      <span id="itiSaveStatus" class="iti-save-status"></span>
+      <button class="iti-reset-btn" onclick="window._resetItinerary?.()">↺ 초기화</button>
+    </div>
   </div>
-  <div class="itinerary-timeline">${days.map(_renderDayCard).join('')}</div>
+  <div class="itinerary-timeline">${days.map((d, i) => _renderDayCard(d, i)).join('')}</div>
 </div>`;
 }
 
 function _renderDayCard(d, dayIndex) {
+  return _editMode[dayIndex] ? _renderDayCardEdit(d, dayIndex) : _renderDayCardView(d, dayIndex);
+}
+
+function _getCityEmoji(city) {
+  if (!city) return '📍';
+  if (city.includes('Singapore') || city.includes('싱가폴')) return '🇸🇬';
+  if (city.includes('Male') || city.includes('몰디브') || city.includes('말레')) return '🌊';
+  if (city.includes('인천')) return '✈️';
+  return '📍';
+}
+
+// ── View mode ─────────────────────────────────────────────────────────
+function _renderDayCardView(d, dayIndex) {
+  const items = (d.items || []).map(normalizeItem);
   const dateStr = d.date
     ? new Date(d.date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
     : '';
-  const cityEmoji =
-    (d.city?.includes('Singapore') || d.city?.includes('싱가폴')) ? '🇸🇬' :
-    (d.city?.includes('Male') || d.city?.includes('몰디브') || d.city?.includes('말레')) ? '🌊' :
-    (d.city?.includes('인천')) ? '✈️' : '📍';
+  const cityEmoji = _getCityEmoji(d.city);
 
-  const transportHtml = d.transport
-    ? `<div class="day-meta-row"><span class="day-meta-icon">🚌</span><span>${d.transport}</span></div>` : '';
-  const stayHtml = d.stay
-    ? `<div class="day-meta-row"><span class="day-meta-icon">🏨</span><span>${d.stay}</span></div>` : '';
+  const transportChip = d.transport
+    ? `<span class="meta-chip meta-chip-transport">🚌 ${esc(d.transport)}</span>` : '';
+  const stayChip = d.stay
+    ? `<span class="meta-chip meta-chip-stay">🏨 ${esc(d.stay)}</span>` : '';
 
-  const itemsHtml = (d.items || []).map((it, itemIdx) => `
-<li class="day-item">
-  <span class="day-item-text">${it.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>
-  <button class="day-item-del" onclick="window._removeDayItem(${dayIndex}, ${itemIdx})" title="삭제">×</button>
-</li>`).join('');
+  const itemsHtml = items.map((it) => {
+    const T = ITEM_TYPES[it.type] || ITEM_TYPES.memo;
+    const isTodo = !it.text || it.text.includes('미정');
+    return `
+<li class="day-item-view${isTodo ? ' item-todo' : ''}">
+  <span class="item-chip" style="background:${T.bg};color:${T.color}">${T.icon} ${T.label}</span>
+  ${it.time ? `<span class="item-time-display">${esc(it.time)}</span>` : ''}
+  <span class="item-text-display">${esc(it.text)}</span>
+  ${isTodo ? '<span class="todo-pill">추후 입력</span>' : ''}
+</li>`;
+  }).join('');
 
-  const moodHtml = d.mood ? `<div class="day-mood">"${d.mood}"</div>` : '';
+  const moodHtml = d.mood ? `<div class="day-mood-view">"${esc(d.mood)}"</div>` : '';
 
   return `
-<div class="itinerary-day">
+<div class="itinerary-day" data-day-index="${dayIndex}">
   <div class="day-num-col">
     <div class="day-num-label">DAY</div>
     <div class="day-num-val">${d.day}</div>
   </div>
   <div class="day-body">
-    <div class="day-header">
-      <div class="day-header-left">
+    <div class="day-view-header">
+      <div class="day-view-header-left">
         <span class="day-city-emoji">${cityEmoji}</span>
         <div>
-          <div class="day-title">${d.title || d.city || ''}</div>
-          <div class="day-date-sub">${dateStr}${d.city ? ` · ${d.city}` : ''}</div>
+          <div class="day-title">${esc(d.title || d.city || '')}</div>
+          <div class="day-date-sub">${dateStr}${d.city ? ` · ${esc(d.city)}` : ''}</div>
         </div>
       </div>
-      ${moodHtml}
+      <button class="day-edit-btn" onclick="window._toggleDayEdit(${dayIndex})">✏️ 편집</button>
     </div>
-    <div class="day-meta">
-      ${transportHtml}
-      ${stayHtml}
-    </div>
-    ${itemsHtml.length ? `<ul class="day-items">${itemsHtml}</ul>` : ''}
+    ${(transportChip || stayChip) ? `<div class="day-meta-chips">${transportChip}${stayChip}</div>` : ''}
+    ${moodHtml}
+    ${items.length ? `<ul class="day-items-view">${itemsHtml}</ul>` : ''}
     <div class="day-add-row">
-      <input class="day-add-input" placeholder="항목 추가..."
-        onkeydown="if(event.key==='Enter'&&this.value.trim()){window._addDayItem(${dayIndex},this.value.trim());this.value='';event.preventDefault()}">
-      <button class="day-add-btn" onclick="const i=this.previousElementSibling;if(i.value.trim()){window._addDayItem(${dayIndex},i.value.trim());i.value=''}">+</button>
+      <input class="day-add-input" placeholder="항목 빠르게 추가 (Enter)..."
+        onkeydown="if(event.key==='Enter'&&this.value.trim()){window._addDayItemQuick(${dayIndex},this.value.trim());this.value='';event.preventDefault()}">
+      <button class="day-add-btn" onclick="const i=this.previousElementSibling;if(i.value.trim()){window._addDayItemQuick(${dayIndex},i.value.trim());i.value=''}">+</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── Edit mode ─────────────────────────────────────────────────────────
+function _renderDayCardEdit(d, dayIndex) {
+  const items = (d.items || []).map(normalizeItem);
+  const cityEmoji = _getCityEmoji(d.city);
+
+  const itemsEditHtml = items.map((it, j) => {
+    const T = ITEM_TYPES[it.type] || ITEM_TYPES.memo;
+    return `
+<li class="day-item-edit-row">
+  <button class="item-type-cycle" onclick="window._cycleItemType(${dayIndex},${j})"
+    title="${T.label}" style="background:${T.bg};color:${T.color}">${T.icon}</button>
+  <input class="item-time-input" value="${esc(it.time)}" placeholder="시간"
+    oninput="window._updateItemField(${dayIndex},${j},'time',this.value)">
+  <input class="item-text-input" value="${esc(it.text)}" placeholder="내용 입력"
+    oninput="window._updateItemField(${dayIndex},${j},'text',this.value)">
+  <div class="item-reorder-btns">
+    <button onclick="window._moveItemUp(${dayIndex},${j})"${j === 0 ? ' disabled' : ''}>↑</button>
+    <button onclick="window._moveItemDown(${dayIndex},${j})"${j === items.length - 1 ? ' disabled' : ''}>↓</button>
+  </div>
+  <button class="item-del-btn" onclick="window._removeDayItem(${dayIndex},${j})">×</button>
+</li>`;
+  }).join('');
+
+  const typeOptions = ITEM_TYPE_ORDER.map(t =>
+    `<option value="${t}">${ITEM_TYPES[t].icon} ${ITEM_TYPES[t].label}</option>`
+  ).join('');
+
+  return `
+<div class="itinerary-day editing" data-day-index="${dayIndex}">
+  <div class="day-num-col">
+    <div class="day-num-label">DAY</div>
+    <div class="day-num-val">${d.day}</div>
+  </div>
+  <div class="day-body">
+    <div class="day-edit-header-row">
+      <span class="day-city-emoji" style="font-size:20px;flex-shrink:0">${cityEmoji}</span>
+      <input class="day-edit-title" value="${esc(d.title || '')}" placeholder="제목..."
+        oninput="window._updateDayField(${dayIndex},'title',this.value)">
+      <button class="day-save-close-btn" onclick="window._toggleDayEdit(${dayIndex})">완료</button>
+    </div>
+    <div class="day-edit-fields-grid">
+      <label class="day-edit-field-label">날짜
+        <input type="date" class="day-edit-field-input" value="${d.date || ''}"
+          oninput="window._updateDayField(${dayIndex},'date',this.value)">
+      </label>
+      <label class="day-edit-field-label">도시/지역
+        <input type="text" class="day-edit-field-input" value="${esc(d.city || '')}" placeholder="예: 몰디브"
+          oninput="window._updateDayField(${dayIndex},'city',this.value)">
+      </label>
+      <label class="day-edit-field-label">이동 수단
+        <input type="text" class="day-edit-field-input" value="${esc(d.transport || '')}" placeholder="예: 수상비행기 45분"
+          oninput="window._updateDayField(${dayIndex},'transport',this.value)">
+      </label>
+      <label class="day-edit-field-label">숙박
+        <input type="text" class="day-edit-field-input" value="${esc(d.stay || '')}" placeholder="예: 코라코라 리조트"
+          oninput="window._updateDayField(${dayIndex},'stay',this.value)">
+      </label>
+      <label class="day-edit-field-label" style="grid-column:1/-1">오늘의 무드
+        <input type="text" class="day-edit-field-input" value="${esc(d.mood || '')}" placeholder="예: 파란 바다 위의 하루..."
+          oninput="window._updateDayField(${dayIndex},'mood',this.value)">
+      </label>
+    </div>
+    <div class="day-edit-items-label">일정 항목</div>
+    <ul class="day-items-edit">${itemsEditHtml}</ul>
+    <div class="day-edit-add-row">
+      <select class="item-type-select" id="addItemType_${dayIndex}">${typeOptions}</select>
+      <input class="day-add-input" id="addItemText_${dayIndex}" placeholder="항목 내용..."
+        onkeydown="if(event.key==='Enter'){window._addDayItem(${dayIndex});event.preventDefault()}">
+      <input class="day-add-time" id="addItemTime_${dayIndex}" placeholder="시간">
+      <button class="day-add-btn" onclick="window._addDayItem(${dayIndex})">+</button>
     </div>
   </div>
 </div>`;
