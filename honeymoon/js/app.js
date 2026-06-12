@@ -6,7 +6,7 @@ import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
-import { subscribeComments, addComment, deleteComment } from './firebase-notes.js';
+import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
@@ -266,10 +266,11 @@ function stars(n, max = 5) {
   return '★'.repeat(n) + '<span class="empty">' + '★'.repeat(max - n) + '</span>';
 }
 
-function renderImageGallery(r) {
+function renderGalleryContent(r, overrideUrls) {
+  const urls = overrideUrls !== undefined ? overrideUrls : (r.image_urls && r.image_urls.length ? r.image_urls : null);
   const hero = getFeaturedImage(r);
-  if (hero || (r.image_urls && r.image_urls.length)) {
-    const galleryUrls = r.image_urls && r.image_urls.length ? r.image_urls : [hero];
+  if (hero || (urls && urls.length)) {
+    const galleryUrls = (urls && urls.length) ? urls : [hero];
     const mainUrl = hero || galleryUrls[0];
     const thumbs = galleryUrls.map((url, i) =>
       `<div class="gallery-thumb${getFeaturedImage(r) === url ? ' active' : ''}" data-idx="${i}" data-url="${encodeURIComponent(url)}" onclick="window._galleryThumb(this,'${r.id}')">
@@ -287,6 +288,88 @@ function renderImageGallery(r) {
   }
   return `<div class="gallery-empty">🏝️<br><small>이미지 준비 중</small></div>`;
 }
+
+function renderImageGallery(r) {
+  return `<div class="gallery-outer" id="galleryOuter_${r.id}">
+  ${renderGalleryContent(r)}
+  <button class="gallery-edit-btn" onclick="window._openImageEdit('${r.id}')" title="이미지 추가/삭제">🖼️ 편집</button>
+</div>`;
+}
+
+// 이미지 편집 팝업 상태
+let _imgResortId = null;
+let _imgEditUrls = [];
+
+window._openImageEdit = async function(resortId) {
+  _imgResortId = resortId;
+  const r = RESORTS.find(x => x.id === resortId);
+  if (!r) return;
+
+  // Firebase 커스텀 이미지 또는 기본 이미지 로드
+  const custom = await getCustomImages(resortId);
+  _imgEditUrls = custom !== null ? [...custom] : [...(r.image_urls || [])];
+
+  _renderImgEditList();
+  document.getElementById('imgEditPopup').style.display = 'flex';
+  document.getElementById('imgEditBackdrop').style.display = 'block';
+};
+
+window._closeImageEdit = function() {
+  document.getElementById('imgEditPopup').style.display = 'none';
+  document.getElementById('imgEditBackdrop').style.display = 'none';
+  _imgResortId = null;
+};
+
+function _renderImgEditList() {
+  const wrap = document.getElementById('imgEditList');
+  if (!wrap) return;
+  if (!_imgEditUrls.length) {
+    wrap.innerHTML = '<div class="img-edit-empty">이미지 URL이 없습니다</div>';
+    return;
+  }
+  wrap.innerHTML = _imgEditUrls.map((url, i) => `
+    <div class="img-edit-row">
+      <img class="img-edit-thumb" src="${url}" onerror="this.style.opacity='0.2'" loading="lazy" alt="">
+      <span class="img-edit-url" title="${url}">${url.length > 55 ? url.slice(0, 55) + '…' : url}</span>
+      <button class="img-edit-del" onclick="window._imgDel(${i})" title="삭제">×</button>
+    </div>
+  `).join('');
+}
+
+window._imgDel = function(idx) {
+  _imgEditUrls.splice(idx, 1);
+  _renderImgEditList();
+};
+
+window._imgAdd = function() {
+  const input = document.getElementById('imgAddInput');
+  const url = (input.value || '').trim();
+  if (!url) return;
+  _imgEditUrls.push(url);
+  input.value = '';
+  _renderImgEditList();
+};
+
+window._imgSave = async function() {
+  if (!_imgResortId) return;
+  const btn = document.getElementById('imgSaveBtn');
+  btn.disabled = true;
+  btn.textContent = '저장 중…';
+  try {
+    await saveCustomImages(_imgResortId, [..._imgEditUrls]);
+    // 갤러리 DOM 즉시 갱신
+    const r = RESORTS.find(x => x.id === _imgResortId);
+    const outer = document.getElementById(`galleryOuter_${_imgResortId}`);
+    if (r && outer) {
+      outer.innerHTML = renderGalleryContent(r, _imgEditUrls)
+        + `<button class="gallery-edit-btn" onclick="window._openImageEdit('${_imgResortId}')" title="이미지 추가/삭제">🖼️ 편집</button>`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '저장';
+    window._closeImageEdit();
+  }
+};
 
 window._galleryThumb = function(el, resortId) {
   const url = decodeURIComponent(el.dataset.url || '');

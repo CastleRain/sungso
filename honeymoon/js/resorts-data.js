@@ -27,8 +27,8 @@ export const AGENCIES = {
   },
   tourmin: {
     name: '투어민',
-    url: '',
-    note: '투어민 제공 견적. PDF 견적서 없음.',
+    url: 'https://www.tourmin.co.kr',
+    note: '에메랄드·오블루상겔리·아웃리거·아마리라야 취급. 취소 규정 리조트별 상이.',
     discount_per_person: 0,
   },
 };
@@ -572,16 +572,16 @@ export const RESORTS = [
 
     ratings: { lagoon: 4, underwater: 3, privacy: 4, dining: 5 },
 
-    description: '2023년 오픈. 예술적 인테리어. 6개 레스토랑+3바, 프리미엄 주류 무료. AI에 스파 45분 2회 포함(4박). 성인 위주. 워터빌라에 해먹 있음.',
+    description: '2023년 오픈. 아마리 라야(Amari Raaya)로도 알려짐. 예술적 인테리어. 6개 레스토랑+3바, 프리미엄 주류 무료. AI에 스파 45분 1회 포함(4~7박). 스페셜티 다이닝 3곳 4박 1회씩 포함. 성인 위주. 워터빌라에 해먹 있음.',
 
     pros: [
+      '스페셜티 다이닝 3곳(이탈리안·아시안·아라빅) — 4박 1회씩 무료 포함',
       '6개 레스토랑+3바 — 식도락 최고',
       '프리미엄 주류 모두 무제한',
-      'AI에 스파 2회(45분) 포함 (4박 기준) ⭐',
+      'AI에 스파 45분 1회 포함 (4~7박)',
+      '매일 가이드 스노클링 + 선셋피싱 + 선셋크루즈 포함',
       '워터빌라 해먹 있음',
       '성인 위주 분위기',
-      '선셋 크루즈 포함',
-      '워터빌라+워터풀빌라 믹스 시 해먹+풀 모두 경험 가능',
     ],
     cons: [
       '금요일 갈라디너 시 RAAYA Life 외 모든 레스토랑 닫힘',
@@ -605,11 +605,33 @@ export const RESORTS = [
           '로맨틱 침대 장식',
           '허니문 케이크',
           '허니문 기프트',
-          '플로팅 조식 1회 (풀빌라 투숙 시만)',
-          '로맨틱 비치 디너 1회 (6박 이상만 — 4박은 해당 없음)',
+          '플로팅 조식 1회 (비치풀/워터풀 투숙 시만)',
+          '로맨틱 비치 디너 1회 (3월 4박 투숙 시 포함 — 확인 권장)',
         ],
-        honeymoon_comment: 'AI에 스파 2회 포함이 강점. 비치 디너는 6박 이상만. 청첩장 6개월 기준 주의.',
+        honeymoon_comment: 'AI에 스파+스노클링+선셋크루즈+피싱+스페셜티다이닝 포함. 청첩장 6개월 기준 주의.',
         cancellation: '계약 3일 이내 환불 / 51일 전 전액환불',
+      },
+      tourmin: {
+        meal_plan: 'AI',
+        meal_plan_name: '올인클루시브 프로모션 (AI)',
+        // 정가 → 프로모션 할인가
+        beach_4n: 2529,       beach_4n_disc: 2325,  // 비치빌라
+        water_4n: 2583,       water_4n_disc: 2379,  // 워터빌라 (해먹!)
+        water_pool_4n: 2745,  water_pool_4n_disc: 2743, // 워터풀 (할인 미미)
+        mix_4n: 2556,         mix_4n_disc: 2352,    // 비치+워터 믹스
+        discount_per_person: 0,
+        discount_note: '프로모션 할인가 적용 (2027-01-05~03-19 기준)',
+        promotions: ['프로모션 할인가 적용 — 워터풀빌라 제외 유의미한 할인'],
+        price_note: '요금 적용기간: 2027-01-05 ~ 2027-03-19 (3월 8일 포함)',
+        honeymoon_benefits: [
+          '로맨틱 침대장식 1회',
+          '로맨틱 비치디너 1회 (4박 이상)',
+          '허니문 케이크 1회',
+          '허니문 기념 기프트',
+          '비치풀/워터풀 투숙 시 플로팅 조식 1회',
+        ],
+        honeymoon_comment: '투어민 4박도 비치 디너 포함 확인됨. 리얼몰디브와 동일 포함사항 + 프로모션 할인.',
+        cancellation: '투어민 취소 규정 확인 필요',
       },
     },
 
@@ -836,18 +858,35 @@ export const RESORTS = [
       tourmin: {
         meal_plan: 'DAI',
         meal_plan_name: '디럭스 프리미엄 올인클루시브',
-        water_4n: 3198,
-        water_pool_4n: 3293,
-        mix_4n: 3517,
+        beach_4n: null,       // 비치빌라 단독 4박 없음 (믹스만 제공)
+        water_4n: 3198,       // 워터빌라 (1박 추가 $554)
+        water_pool_4n: 3293,  // 자쿠지워터→워터빌라위드풀 (1박 추가 $578)
+        mix_4n: 3517,         // 비치빌라2박+자쿠지워터2박 (비치빌라 1박 추가 $690)
+        // 추가 믹스 옵션
+        extra_rooms: {
+          '자쿠지비치빌라2박+워터풀빌라2박': { price: 3541, extra_per_night_beach: 702 },
+          '워터빌라2박+워터풀빌라2박': { price: 3245 },
+          '비치풀빌라2박+워터풀빌라2박': { price: 3701, extra_per_night_beach_pool: 782 },
+        },
+        ai_inclusions: [
+          '알라카르테 메인코스 무제한 (전 레스토랑)',
+          '프리미엄 와인·샴페인·위스키 40여 종 무제한',
+          '소믈리에 5명 상주',
+          '하우스리프 스노클링 무료 (객실 앞 직접 입수)',
+          '무동력 수상스포츠 무료',
+          '피트니스·테니스 무료',
+          'Wi-Fi 무료',
+          '수상비행기 45~55분 포함',
+        ],
         honeymoon_benefits: [
           '스파 60분 1회',
           '샴페인 1병 (도착일)',
           '비치 로맨틱 디너 1회',
           '체크인 시 가능 시 객실 업그레이드',
-          '4박 이상: 돌핀투어 or 전통낚시 1회 (택1)',
+          '돌핀투어 or 전통낚시 1회 선택 (4박 이상)',
         ],
-        honeymoon_comment: '스파+로맨틱 디너 포함. 다이닝 퀄리티 12개 리조트 중 최상.',
-        cancellation: '투어민 확인 필요',
+        honeymoon_comment: '스파+로맨틱 디너 포함. 다이닝 퀄리티 12개 리조트 최상. 가격은 최고.',
+        cancellation: '투어민 취소 규정 확인 필요',
         price_note: '요금 적용기간 2027-01-11 ~ 2027-04-11 (3월 포함)',
       },
     },
@@ -908,10 +947,38 @@ export const RESORTS = [
       tourmin: {
         meal_plan: 'SERENITY',
         meal_plan_name: '세러너티 AI 플랜',
-        beach_4n: 2182,
-        water_4n: 2236,
-        water_pool_4n: 2632,
-        mix_4n: 2406,
+        beach_4n: 2182,       // 비치빌라 (1박 추가 $448)
+        water_4n: 2236,       // 워터빌라 (1박 추가 $462)
+        water_pool_4n: 2632,  // 워터풀빌라 (1박 추가 $561)
+        mix_4n: 2406,         // 비치빌라2박+워터풀빌라2박
+        // 추가 객실 타입
+        extra_rooms: {
+          '비치풀빌라': { price_4n: 2452, extra_per_night: 516 },
+          '허니문셀렉트오션빌라': { price_4n: 3046, extra_per_night: 664 },
+          '비치풀빌라2박+워터풀빌라2박': { price_4n: 2542 },
+          '비치빌라2박+허니문셀렉트2박': { price_4n: 2614 },
+          '비치풀빌라2박+허니문셀렉트2박': { price_4n: 2750 },
+        },
+        ai_inclusions: [
+          '조·중·석식 포함 (세러너티 플랜)',
+          '음료·주류 무제한',
+          'Specialty Fine Dining 2회 — Just Wok / Just Grill (4~7박 기준)',
+          '스파 45분 1회 (18세 이상, 4~7박 기준)',
+          '선셋 피싱 1회',
+          '가이드 스노클링 or 문라이트 크루즈 중 택 1',
+          '성인 전용 섬 One Banyan Island 이용',
+          '성인전용 바 이용',
+          '무동력 수상스포츠·스노클링 장비 무료',
+          'Wi-Fi 무료',
+          '스피드보트 50분 포함',
+        ],
+        // 허니문 셀렉트 오션빌라 추가 혜택
+        honeymoon_select_villa_extras: [
+          '인빌라 체크인',
+          '버틀러 & 버기 서비스',
+          '인빌라 조식 1회',
+          '커플 마사지 1회 (4박 이상)',
+        ],
         honeymoon_benefits: [
           '로맨틱 침대장식 1회',
           '로맨틱 캔들릿 디너 1회',
@@ -919,7 +986,7 @@ export const RESORTS = [
           '로맨틱 턴다운 (아로마틱 버블배스) 1회',
           '허니문 기프트 1회',
         ],
-        honeymoon_comment: '5종 특전 포함으로 허니문 특전 구성 충실. 스파·스페셜티 다이닝은 AI 기본 포함.',
+        honeymoon_comment: '5종 특전+스파+스페셜티다이닝+선셋피싱 AI 포함. 12개 중 가성비 최고 포지션.',
         cancellation: '35일 이내 취소 100% 취소료',
         price_note: '요금 적용기간 2027-01-05 ~ 2027-04-09 (3월 포함)',
       },
@@ -931,7 +998,13 @@ export const RESORTS = [
     svg_pin: { cx: 200, cy: 218, color: '#185FA5', label: '오블루' },
 
     youtube_ids: ['qYAe3-ytPvo', 'j5qyQ8_83xY', 'HqQTo1POia8'],
-    image_urls: [],
+    image_urls: [
+      'https://www.neoscapesmaldives.com/wp-content/uploads/OBLU-SELECT-at-Sangeli-AERIAL-VIEW-FULL-RESORT-VIEW.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/OBLU-SELECT-at-Sangeli-Water-Villas-Aerial-of-Water-Villas-Section-08.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/Water-Villa-with-Pool-OBLU-Select-at-Sangeli-4.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/OBLU-SELECT-at-Sangeli-AERIAL-OF-SANGS-BAR-AND-LAGOON.jpg',
+      'https://www.neoscapesmaldives.com/wp-content/uploads/OBLU-SELECT-at-Sangeli-Honeymoon-Water-Suites-with-Pool-View-from-Deck-and-Pool-1.jpg',
+    ],
     featured_image: '',
   },
 
@@ -976,19 +1049,50 @@ export const RESORTS = [
     agencies: {
       tourmin: {
         meal_plan: 'AI',
-        meal_plan_name: 'Dine Around 올인클루시브',
-        beach_4n: 3260,
-        water_4n: 3060,
-        water_pool_4n: 3240,
-        mix_4n: 3250,
+        meal_plan_name: 'Dine Around AI (HB에서 업그레이드)',
+        // ⚠️ 2026년 1~2월 기준 참고가격. 2027년 3월 요금 미확정 — 반드시 재확인
+        // AI 업그레이드 가격 (HB → AI)
+        beach_4n: 3260,       // 비치빌라 AI
+        water_4n: 3060,       // 오버워터빌라 AI (추천)
+        water_pool_4n: 3240,  // 오버워터위드풀 AI (추천 ⭐)
+        mix_4n: 3250,         // 비치빌라2박+오버워터위드풀2박 AI믹스
+        // HB 기본 가격 (AI 대비 약 $400~460 저렴)
+        hb_prices: {
+          '비치빌라': 2800,
+          '비치풀빌라': 3162,
+          '오버워터빌라': 2600,
+          '선셋오버워터핫탑': 2730,
+          '오버워터위드풀': 2780,      // 추천 ⭐
+          '선셋오버워터위드풀': 3100,
+        },
+        // AI 전체 가격표
+        ai_prices: {
+          '비치빌라': 3260,
+          '비치풀빌라': 3622,
+          '오버워터빌라': 3060,
+          '선셋오버워터핫탑': 3190,
+          '오버워터위드풀': 3240,      // 추천 ⭐
+          '선셋오버워터위드풀': 3560,
+        },
+        ai_inclusions: [
+          'Destination Dining 25% 할인',
+          '스파 트리트먼트 10% 할인',
+          '소믈리에 초이스 와인·스파클링·샴페인 20% 할인',
+          '선셋 크루즈 1회 (날씨·스케줄 따라 변경 가능)',
+          '무동력 워터스포츠 장비 무료대여',
+          '셀렉티드 익스커션 20% 할인 (터틀스노클링·돌핀트립·선셋피싱)',
+          '셀렉티드 워터스포츠 15% 할인',
+          'PADI 코스·디스커버 스쿠버 10% 할인',
+          '데판야끼 석식 1회 (⚠️ 2026.01~10.31 기준, 3월 적용 여부 재확인)',
+        ],
         honeymoon_benefits: [
           '도착 시 스파클링 와인 1병',
           '과일바구니 + 허니문 케이크',
           '로맨틱 침대장식 + 욕조셋업 1회',
         ],
-        honeymoon_comment: '기본 3종 특전. 허니문리조트 기준보다 단출하나 Destination Dining 25% 할인 등 부가혜택 다수.',
-        cancellation: '투어민 확인 필요',
-        price_note: '⚠️ 2026년 1-2월 기준 참고가격. 2027년 3월 요금 미확정 — 반드시 재확인.',
+        honeymoon_comment: '3종 기본 특전. AI 포함 Destination Dining 25% + 선셋크루즈 1회. ⚠️ 3월 요금 미확정 재확인 필요.',
+        cancellation: '투어민 취소 규정 확인 필요',
+        price_note: '⚠️ 2026년 1~2월 기준 참고가격. 2027년 3월 요금 미확정 — 투어민 담당자(김수연 부장) 재확인 필요.',
       },
     },
 
@@ -998,7 +1102,12 @@ export const RESORTS = [
     svg_pin: { cx: 76, cy: 285, color: '#D85A30', label: '아웃' },
 
     youtube_ids: ['Br9owPz9eRQ', 'ormGNZQVXs8', 'nddJH3VHEnc'],
-    image_urls: [],
+    image_urls: [
+      'https://news.outrigger.com/wp-content/uploads/2022/04/Outrigger-Maldives-Maafushivaru-Resort-Aerial-1.jpg',
+      'https://news.outrigger.com/wp-content/uploads/2022/04/Outrigger-Maldives-Maafushivaru-Resort-Water-Pool-Villa.jpg',
+      'https://news.outrigger.com/wp-content/uploads/2022/04/Outrigger-Maldives-Maafushivaru-Resort-Water-Villas-Aerial.jpg',
+      'https://news.outrigger.com/wp-content/uploads/2022/04/Outrigger-Maldives-Maafushivaru-Resort-Moodhu-Grill-.jpg',
+    ],
     featured_image: '',
   },
 ];

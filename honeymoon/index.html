@@ -235,6 +235,24 @@
 </div>
 <div class="memo-popup-backdrop" id="memoBackdrop" onclick="window._closeMemo()" style="display:none;"></div>
 
+<!-- ══════════════════════════════════════════════ 이미지 편집 팝업 -->
+<div class="img-edit-popup" id="imgEditPopup" style="display:none;">
+  <div class="img-edit-header">
+    <span>🖼️ 이미지 관리</span>
+    <button class="img-edit-close" onclick="window._closeImageEdit()">✕</button>
+  </div>
+  <div class="img-edit-list" id="imgEditList"></div>
+  <div class="img-edit-add-row">
+    <input id="imgAddInput" type="url" placeholder="이미지 URL 입력 (https://...)" onkeydown="if(event.key==='Enter')window._imgAdd()">
+    <button class="img-add-btn" onclick="window._imgAdd()">+ 추가</button>
+  </div>
+  <div class="img-edit-footer">
+    <button class="img-save-btn" id="imgSaveBtn" onclick="window._imgSave()">저장</button>
+    <button class="img-cancel-btn" onclick="window._closeImageEdit()">취소</button>
+  </div>
+</div>
+<div class="img-edit-backdrop" id="imgEditBackdrop" onclick="window._closeImageEdit()" style="display:none;"></div>
+
 <!-- ══════════════════════════════════════════════ 미니맵 플로팅 패널 -->
 <div class="minimap-float" id="minimapFloat">
   <div class="minimap-header">

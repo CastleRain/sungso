@@ -1,9 +1,11 @@
-// firebase-notes.js — 리조트 댓글 메모 CRUD (Firestore 서브컬렉션)
-// 컬렉션: resort_notes/{resortId}/comments/{commentId}
+// firebase-notes.js — 리조트 댓글 메모 + 이미지 관리 CRUD (Firestore)
+// 댓글: resort_notes/{resortId}/comments/{commentId}
+// 이미지: resort_images/{resortId}  { urls: string[] }
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, serverTimestamp }
+         onSnapshot, query, orderBy, serverTimestamp,
+         getDoc, setDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -35,4 +37,16 @@ export async function addComment(resortId, author, text) {
 
 export async function deleteComment(resortId, commentId) {
   await deleteDoc(doc(db, 'resort_notes', resortId, 'comments', commentId));
+}
+
+// 이미지 관리 — resort_images/{resortId} { urls: string[] }
+export async function getCustomImages(resortId) {
+  try {
+    const snap = await getDoc(doc(db, 'resort_images', resortId));
+    return snap.exists() ? (snap.data().urls ?? null) : null;
+  } catch { return null; }
+}
+
+export async function saveCustomImages(resortId, urls) {
+  await setDoc(doc(db, 'resort_images', resortId), { urls });
 }

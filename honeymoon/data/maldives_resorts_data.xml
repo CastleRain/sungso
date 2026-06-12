@@ -1018,8 +1018,8 @@
   <!-- 리조트 7: 라야 바이 앳모스피어 -->
   <!-- ================================================================ -->
   <resort id="raaya">
-    <name_ko>라야 바이 앳모스피어</name_ko>
-    <name_en>Raaya by Atmosphere</name_en>
+    <name_ko>아마리 라야 (라야 바이 앳모스피어)</name_ko>
+    <name_en>Amari Raaya Maldives (formerly Raaya by Atmosphere)</name_en>
     <atoll>라아 아톨 (Raa Atoll / 라 아톨)</atoll>
     <coordinates lat="5.30" lon="72.90"/>
     <distance_from_male_km>145</distance_from_male_km>
@@ -1030,11 +1030,12 @@
     <operator>Atmosphere Core (그룹 9번째 리조트)</operator>
     <agencies_available>
       <agency_ref>realmaldives</agency_ref>
+      <agency_ref>tourmin</agency_ref>
     </agencies_available>
 
     <characteristics>
       <description><![CDATA[
-        2023년 오픈. 난파선 예술가 셉(Seb)의 이야기를 테마로 한 예술적 인테리어.
+        2023년 오픈. 아마리(Amari) 브랜드 운영 (Atmosphere Core에서 리브랜딩). 난파선 예술가 셉(Seb)의 이야기를 테마로 한 예술적 인테리어.
         앳모스피어 그룹 특성상 식음료에 집중 — 6개 레스토랑+3바, 프리미엄 주류 모두 무료.
         AI에 스파 45분 2회 포함 (4박 기준). 선셋 크루즈 포함.
         워터빌라에 해먹 있음. 풀빌라는 개인풀.
@@ -1151,10 +1152,65 @@
           <benefit>허니문 케이크</benefit>
           <benefit>허니문 기프트</benefit>
           <benefit>플로팅 조식 1회 (비치풀/워터풀 투숙 시만)</benefit>
-          <benefit>6박 이상 시 로맨틱 비치 디너 1회 (4박은 해당 없음)</benefit>
+          <benefit>로맨틱 비치 디너 1회 (3월 4박 투숙 시 포함 확인됨 — 확인 권장)</benefit>
         </benefits>
-        <comment>AI에 스파 2회 포함이 강점. 비치 디너는 6박 이상만. 청첩장 6개월 기준 주의.</comment>
+        <comment>AI에 스파+스노클링+선셋크루즈+피싱+스페셜티다이닝 모두 포함. 청첩장 6개월 기준 주의.</comment>
       </honeymoon_benefit>
+    </agency_product>
+
+    <!-- 투어민 상품 (프로모션 할인가) -->
+    <agency_product agency="tourmin">
+      <meal_plan id="AI">올인클루시브 프로모션 (AI)</meal_plan>
+      <price_note>요금 적용기간: 2027-01-05 ~ 2027-03-19 (3월 8일 포함). 프로모션 할인가 적용.</price_note>
+
+      <prices unit="USD_per_person">
+        <category name="정가_4박">
+          <room type="비치빌라">2529</room>
+          <room type="워터빌라_해먹있음">2583</room>
+          <room type="워터풀빌라">2745</room>
+          <room type="비치풀빌라">2655</room>
+        </category>
+        <category name="프로모션_할인가_4박">
+          <room type="비치빌라">2325</room>
+          <room type="워터빌라_해먹있음">2379</room>
+          <room type="워터풀빌라">2743</room>
+          <room type="비치풀빌라">2469</room>
+        </category>
+        <category name="정가_룸믹스_4박">
+          <room type="비치빌라2박+워터빌라2박">2556</room>
+          <room type="비치풀빌라2박+워터빌라2박">2619</room>
+          <room type="비치빌라2박+워터풀빌라2박">2637</room>
+          <room type="비치풀빌라2박+워터풀빌라2박">2700</room>
+        </category>
+        <category name="프로모션_룸믹스_4박">
+          <room type="비치빌라2박+워터빌라2박">2352</room>
+          <room type="비치풀빌라2박+워터빌라2박">2424</room>
+          <room type="비치빌라2박+워터풀빌라2박">2534</room>
+          <room type="비치풀빌라2박+워터풀빌라2박">2606</room>
+        </category>
+        <category name="1박추가">
+          <room type="비치빌라">561</room>
+          <room type="워터빌라">575</room>
+          <room type="워터풀빌라">615</room>
+          <room type="비치풀빌라">593</room>
+        </category>
+      </prices>
+
+      <honeymoon_benefit>
+        <certificate_validity>4박 이상, 1년 이내 허니문 증명서류 필수</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 침대장식 1회</benefit>
+          <benefit>로맨틱 비치 디너 1회 (4박 이상 포함 확인됨)</benefit>
+          <benefit>허니문 케이크 1회</benefit>
+          <benefit>허니문 기념 기프트</benefit>
+          <benefit>비치풀/워터풀 투숙 시 플로팅 조식 1회</benefit>
+        </benefits>
+        <comment>투어민 기준 4박도 비치 디너 포함. 리얼몰디브 대비 프로모션 할인가 적용 (워터풀빌라 제외).</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>투어민 취소 규정 확인 필요</rule>
+      </cancellation>
     </agency_product>
   </resort>
 
@@ -1503,11 +1559,14 @@
 
       <prices unit="USD_per_person">
         <category name="단독_4박">
-          <room type="워터빌라">3198</room>
-          <room type="워터풀빌라">3293</room>
+          <room type="워터빌라" extra_per_night="554">3198</room>
+          <room type="자쿠지워터→워터빌라위드풀" extra_per_night="578">3293</room>
         </category>
         <category name="룸믹스_4박">
-          <room type="믹스">3517</room>
+          <room type="비치빌라2박+자쿠지워터2박" extra_beach_night="690">3517</room>
+          <room type="자쿠지비치빌라2박+워터풀빌라2박" extra_beach_night="702">3541</room>
+          <room type="워터빌라2박+워터풀빌라2박">3245</room>
+          <room type="비치풀빌라2박+워터풀빌라2박" extra_beach_pool_night="782">3701</room>
         </category>
       </prices>
 
@@ -1596,31 +1655,44 @@
 
       <prices unit="USD_per_person">
         <category name="단독_4박">
-          <room type="비치빌라">2182</room>
-          <room type="워터빌라">2236</room>
-          <room type="워터풀빌라">2632</room>
+          <room type="비치빌라" extra_per_night="448">2182</room>
+          <room type="워터빌라" extra_per_night="462">2236</room>
+          <room type="비치풀빌라" extra_per_night="516">2452</room>
+          <room type="워터풀빌라" extra_per_night="561">2632</room>
+          <room type="허니문셀렉트오션빌라" extra_per_night="664">3046</room>
         </category>
         <category name="룸믹스_4박">
-          <room type="믹스">2406</room>
+          <room type="비치빌라2박+워터풀빌라2박">2406</room>
+          <room type="비치풀빌라2박+워터풀빌라2박">2542</room>
+          <room type="비치빌라2박+허니문셀렉트2박">2614</room>
+          <room type="비치풀빌라2박+허니문셀렉트2박">2750</room>
         </category>
       </prices>
 
       <meal_plan_details>
         <SERENITY>
-          <item>조·중·석식 포함</item>
+          <item>조·중·석식 포함 (세러너티 플랜)</item>
           <item>음료·주류 무제한</item>
-          <item>스파 45분 1회 AI 기본 포함</item>
-          <item>스페셜티 다이닝 2회 AI 기본 포함</item>
+          <item>Specialty Fine Dining 2회 — Just Wok / Just Grill (4~7박 기준, 사전예약 필수)</item>
+          <item>스파 45분 1회 (18세 이상, 4~7박 기준)</item>
+          <item>선셋 피싱 1회</item>
+          <item>가이드 스노클링 or 문라이트 크루즈 중 택 1</item>
           <item>성인 전용 섬 One Banyan Island 이용</item>
           <item>성인전용 바 이용</item>
           <item>무동력 수상스포츠·스노클링 장비 무료</item>
           <item>Wi-Fi 무료</item>
           <item>스피드보트 50분 포함</item>
         </SERENITY>
+        <honeymoon_select_villa_extras note="허니문 셀렉트 오션빌라 전용 추가 혜택">
+          <item>인빌라 체크인</item>
+          <item>버틀러 &amp; 버기 서비스</item>
+          <item>인빌라 조식 1회</item>
+          <item>커플 마사지 1회 (4박 이상)</item>
+        </honeymoon_select_villa_extras>
         <restaurants>
-          <restaurant>Just Wok — 아시안</restaurant>
-          <restaurant>Just Grill — 그릴</restaurant>
-          <restaurant>기타 스페셜티 레스토랑 (사전예약 2회 포함)</restaurant>
+          <restaurant>Just Wok — 아시안 퓨전 스페셜티 (AI 2회 포함)</restaurant>
+          <restaurant>Just Grill — 그릴 스페셜티 (AI 2회 포함)</restaurant>
+          <restaurant>기타 레스토랑 다수 (메인 뷔페 포함)</restaurant>
         </restaurants>
       </meal_plan_details>
 
@@ -1693,31 +1765,53 @@
       <meal_plan id="AI">다인어라운드 올인클루시브 (Dine Around AI)</meal_plan>
       <price_note>⚠️ 2026년 1~2월 기준 참고가격. 2027년 3월 요금 미확정 — 반드시 투어민에 재확인.</price_note>
 
-      <prices unit="USD_per_person">
-        <category name="단독_4박_참고가">
-          <room type="비치빌라">3260</room>
-          <room type="워터빌라">3060</room>
-          <room type="워터풀빌라">3240</room>
+      <prices unit="USD_per_person" note="⚠️ 2026년 1~2월 기준. 2027년 3월 요금 미확정 — 재확인 필수">
+        <category name="HB_4박_참고가">
+          <room type="비치빌라">2800</room>
+          <room type="비치풀빌라">3162</room>
+          <room type="오버워터빌라">2600</room>
+          <room type="선셋오버워터핫탑">2730</room>
+          <room type="오버워터위드풀_추천">2780</room>
+          <room type="선셋오버워터위드풀">3100</room>
         </category>
-        <category name="룸믹스_4박_참고가">
-          <room type="믹스">3250</room>
+        <category name="AI업그레이드_4박_참고가">
+          <room type="비치빌라">3260</room>
+          <room type="비치풀빌라">3622</room>
+          <room type="오버워터빌라">3060</room>
+          <room type="선셋오버워터핫탑">3190</room>
+          <room type="오버워터위드풀_추천">3240</room>
+          <room type="선셋오버워터위드풀">3560</room>
+        </category>
+        <category name="AI믹스_4박_참고가">
+          <room type="비치빌라2박+오버워터위드풀2박">3250</room>
+          <room type="비치빌라2박+선셋오버워터위드풀2박">3410</room>
+          <room type="비치풀빌라2박+오버워터위드풀2박">3430</room>
+          <room type="비치풀빌라2박+선셋오버워터위드풀2박">3591</room>
         </category>
       </prices>
 
       <meal_plan_details>
         <AI>
-          <item>다인어라운드 올인클루시브 — 복수 레스토랑 석식 포함</item>
-          <item>Art-I-San 파인다이닝 이용 (사전예약)</item>
+          <item>Dine Around 올인클루시브 — 복수 레스토랑 조·중·석식</item>
+          <item>Art-I-San 파인다이닝 이용 포함 (사전예약 필수)</item>
           <item>음료·주류 무제한</item>
-          <item>스파·다이닝·워터스포츠 할인 혜택 (세부 조건 투어민 확인)</item>
+          <item>Destination Dining 25% 할인</item>
+          <item>스파 트리트먼트 10% 할인</item>
+          <item>소믈리에 초이스 와인·스파클링·샴페인 20% 할인</item>
+          <item>선셋 크루즈 1회 (날씨·스케줄 따라 변경 가능)</item>
+          <item>무동력 워터스포츠 장비 무료대여</item>
+          <item>셀렉티드 익스커션 20% 할인 (터틀스노클링·돌핀트립·선셋피싱)</item>
+          <item>셀렉티드 워터스포츠 15% 할인</item>
+          <item>PADI 코스·디스커버 스쿠버 10% 할인</item>
+          <item>데판야끼 석식 1회 (⚠️ 2026.01~10.31 기준, 3월 투숙 적용 여부 재확인)</item>
+          <item>고래상어 투어 이용 가능 (연중, 별도 비용)</item>
           <item>무동력 수상스포츠·스노클링 장비 무료</item>
-          <item>고래상어 투어 이용 가능 (연중, 추가 비용)</item>
           <item>Wi-Fi 무료</item>
           <item>수상비행기 25분 포함</item>
         </AI>
         <restaurants>
-          <restaurant>Art-I-San — 파인다이닝 (메인)</restaurant>
-          <restaurant>기타 다인어라운드 레스토랑</restaurant>
+          <restaurant>Art-I-San — 파인다이닝 (메인 스페셜티)</restaurant>
+          <restaurant>기타 Dine Around 레스토랑 (상세 투어민 확인)</restaurant>
         </restaurants>
       </meal_plan_details>
 

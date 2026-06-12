@@ -1976,3 +1976,188 @@ body {
   white-space: nowrap;
 }
 .memo-trigger-btn:hover { background: var(--primary); color: white; }
+
+/* ── 이미지 갤러리 편집 버튼 ─────────────────────────────────────── */
+.gallery-outer {
+  position: relative;
+}
+.gallery-edit-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 5px 11px;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s, border-color 0.15s;
+  z-index: 10;
+}
+.gallery-edit-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-deep);
+}
+
+/* ── 이미지 편집 팝업 ────────────────────────────────────────────── */
+.img-edit-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(480px, 94vw);
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+  z-index: 4000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.img-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 14px;
+}
+.img-edit-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-light);
+  line-height: 1;
+}
+.img-edit-close:hover { color: var(--text); }
+
+.img-edit-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 60px;
+}
+.img-edit-empty {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 13px;
+  padding: 16px 0;
+}
+.img-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gray-50, #f9f9f9);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 10px;
+}
+.img-edit-thumb {
+  width: 52px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: #eee;
+}
+.img-edit-url {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-light);
+  word-break: break-all;
+  line-height: 1.4;
+}
+.img-edit-del {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  color: #bbb;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.img-edit-del:hover {
+  color: #e55;
+  background: #fff0f0;
+}
+
+.img-edit-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+.img-edit-add-row input {
+  flex: 1;
+  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+}
+.img-edit-add-row input:focus { border-color: var(--primary); }
+.img-add-btn {
+  padding: 8px 14px;
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  color: var(--primary-deep);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.img-add-btn:hover { background: var(--primary); color: white; }
+
+.img-edit-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+}
+.img-save-btn {
+  padding: 8px 22px;
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.img-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.img-save-btn:hover:not(:disabled) { opacity: 0.85; }
+.img-cancel-btn {
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+}
+.img-cancel-btn:hover { border-color: var(--text-light); color: var(--text); }
+
+.img-edit-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 3999;
+}
