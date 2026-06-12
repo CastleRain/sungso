@@ -127,18 +127,14 @@ export function initMap(detailOpenFn) {
     if (onDetailOpen) onDetailOpen(id);
   };
 
-  // SVG 핀 클릭 이벤트
+  // SVG 핀 클릭 이벤트 → 바로 상세 표시
   document.querySelectorAll('.map-pin').forEach(pin => {
     pin.addEventListener('click', () => {
       const resortId = pin.dataset.resort;
-      const resort = getResortById(resortId);
-      if (!resort) return;
-
-      // 모든 핀 일반 상태로
+      if (!resortId) return;
       document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
       pin.classList.add('active');
-
-      showMapInfo(resort);
+      if (onDetailOpen) onDetailOpen(resortId);
     });
   });
 

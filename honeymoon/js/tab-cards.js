@@ -97,13 +97,8 @@ function applyFilters() {
     // 아톨 필터
     if (atollVal && !r.atoll.includes(atollVal)) return false;
     // 이동수단 필터
-    if (transferVal) {
-      if (transferVal === '40sb' && !(r.transfer_type === 'speedboat' && r.transfer_minutes === 40)) return false;
-      else if (transferVal !== '40sb') {
-        const mins = parseInt(transferVal);
-        if (!isNaN(mins) && r.transfer_minutes !== mins) return false;
-      }
-    }
+    if (transferVal === 'seaplane' && r.transfer_type !== 'seaplane') return false;
+    if (transferVal === 'speedboat' && r.transfer_type !== 'speedboat') return false;
     // 최대 가격 필터 — 어떤 여행사든 현재 정렬 기준 가격이 maxPrice 이하면 통과
     if (maxPrice < 3500) {
       const best = getBestPrice(r, currentSort);

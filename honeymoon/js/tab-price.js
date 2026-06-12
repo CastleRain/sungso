@@ -46,13 +46,16 @@ function renderSummaryCards() {
   const bests = {};
   for (const { key } of PRICE_KEYS) bests[key] = findBestInColumn(key);
 
+  const mul = coupleMode ? 2 : 1;
+  const suffix = coupleMode ? '/2인' : '/인';
+
   const cards = PRICE_KEYS.map(({ key, short }) => {
     const b = bests[key];
     if (!b) return '';
     const resort = RESORTS.find(r => getAllPricesForKey(r, key).some(p => p.final === b));
     return `<div class="price-summary-card">
       <div class="psc-label">${short} 최저가</div>
-      <div class="psc-price">$${b.toLocaleString()}<small>/인</small></div>
+      <div class="psc-price">$${(b * mul).toLocaleString()}<small>${suffix}</small></div>
       <div class="psc-resort">${resort?.name_ko || ''}</div>
     </div>`;
   }).join('');

@@ -213,15 +213,64 @@ body {
   cursor: pointer;
 }
 
+/* 카드 탭 분할 레이아웃 */
+.cards-split-layout {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+.cards-left-col {
+  width: 460px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.cards-left-col .cards-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.cards-right-col {
+  flex: 1;
+  overflow-y: auto;
+  background: white;
+  min-width: 0;
+}
+.cards-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.7;
+}
+.resort-card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255,107,157,0.25);
+}
+@media (max-width: 900px) {
+  .cards-split-layout { flex-direction: column; }
+  .cards-left-col { width: 100%; max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .cards-right-col { flex: 1; }
+}
+
 /* 카드 그리드 */
 .cards-grid {
-  padding: 20px;
+  padding: 14px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
-@media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) { .cards-grid { grid-template-columns: 1fr; } }
+.cards-left-col .cards-grid { grid-template-columns: repeat(2, 1fr); }
+.cards-left-col .card-image { height: 140px; }
+@media (max-width: 460px) { .cards-grid { grid-template-columns: 1fr; } }
 
 .resort-card {
   background: white;
@@ -734,11 +783,13 @@ body {
 }
 #leafletMapContainer.visible { display: block; }
 .map-resort-info {
+  flex: 1;
   background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  overflow: hidden;
 }
+.map-resort-info .resort-section { padding: 16px 20px 24px; }
 .map-resort-info h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1372,6 +1423,21 @@ body {
 }
 .gallery-thumb.active, .gallery-thumb:hover { opacity: 1; }
 .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-set-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 12px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 4px;
+  padding: 1px 3px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  line-height: 1.4;
+}
+.gallery-thumb:hover .gallery-set-btn { opacity: 1; }
+.gallery-thumb { position: relative; }
 .gallery-empty {
   height: 200px;
   background: linear-gradient(135deg, var(--ocean-deep), var(--teal));

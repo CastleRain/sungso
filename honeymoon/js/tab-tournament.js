@@ -70,7 +70,7 @@ function renderSetup() {
   wrap.innerHTML = `
 <div class="tournament-setup">
   <div class="tournament-title">🏆 리조트 토너먼트</div>
-  <p class="tournament-desc">9개 리조트를 1:1 대결로 비교해 최종 추천 리조트를 찾습니다.<br>먼저 어떤 요소를 중요하게 생각하는지 설정해주세요.</p>
+  <p class="tournament-desc">12개 리조트를 1:1 대결로 비교해 최종 추천 리조트를 찾습니다.<br>먼저 어떤 요소를 중요하게 생각하는지 설정해주세요.</p>
 
   <div class="weights-panel">
     <div class="weights-title">⚖️ 선호도 가중치 설정</div>
@@ -142,7 +142,7 @@ function renderMatch() {
   const priceKey = 'water_pool_4n';
 
   wrap.innerHTML = `
-<div class="tournament-match">
+<div class="tournament-match active">
   <div class="tournament-progress">
     <span class="round-label">${getRoundLabel()}</span>
     <span class="match-count">${doneMatches + 1} / ${totalMatches} 매치</span>
@@ -248,7 +248,7 @@ function renderResult() {
     ? `<img src="${champImg}" alt="${champion.name_ko}" style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;">`
     : `<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:64px;">🏝️</div>`;
 
-  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };
+  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
   const priceRows = ['water_pool_4n','mix_4n','water_4n','beach_4n'].map(key => {
     const labels = { water_pool_4n: '워터풀 4박', mix_4n: '믹스 4박', water_4n: '워터 4박', beach_4n: '비치 4박' };
     const prices = Object.entries(champion.agencies).map(([id, ag]) => {
@@ -263,7 +263,7 @@ function renderResult() {
   }).filter(Boolean).join('');
 
   wrap.innerHTML = `
-<div class="tournament-result">
+<div class="tournament-result active">
   <div class="result-crown">🏆</div>
   <div class="result-title">토너먼트 결과</div>
   <div class="result-subtitle">두 분의 최종 선택 리조트</div>

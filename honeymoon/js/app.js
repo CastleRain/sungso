@@ -35,13 +35,26 @@ function switchTab(tabId) {
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
     if (tabId === 'price') initPrice();
-    if (tabId === 'map') initMap(openDetail);
+    if (tabId === 'map') initMap(openDetailInMap);
     if (tabId === 'tournament') initTournament();
     if (tabId === 'pdf') initPdf();
   }
 }
 
-// ── 상세 오버레이 ───────────────────────────────────────────────────
+// ── 카드 탭 분할 오른쪽 패널에 상세 렌더 ──────────────────────────
+function openDetailInCards(resortId) {
+  const resort = RESORTS.find(r => r.id === resortId);
+  if (!resort) return;
+  const panel = document.getElementById('cardsDetailPanel');
+  if (panel) {
+    panel.innerHTML = renderResortDetail(resort);
+    panel.scrollTop = 0;
+  }
+  document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
+}
+
+// ── 지도/토너먼트용 오버레이 ────────────────────────────────────────
 export function openDetail(resortId) {
   const resort = RESORTS.find(r => r.id === resortId);
   if (!resort) return;
@@ -65,6 +78,17 @@ export function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
 
+// ── 지도 탭 오른쪽 패널에 상세 렌더 (핀 직접 클릭용) ──────────────
+function openDetailInMap(resortId) {
+  const resort = RESORTS.find(r => r.id === resortId);
+  if (!resort) return;
+  const panel = document.getElementById('mapInfoPanel');
+  if (panel) {
+    panel.innerHTML = renderResortDetail(resort);
+    panel.scrollTop = 0;
+  }
+}
+
 // ── 리조트 상세 HTML 렌더링 ────────────────────────────────────────
 function stars(n, max = 5) {
   return '★'.repeat(n) + '<span class="empty">' + '★'.repeat(max - n) + '</span>';
@@ -76,8 +100,9 @@ function renderImageGallery(r) {
     const galleryUrls = r.image_urls && r.image_urls.length ? r.image_urls : [hero];
     const mainUrl = hero || galleryUrls[0];
     const thumbs = galleryUrls.map((url, i) =>
-      `<div class="gallery-thumb${i === 0 ? ' active' : ''}" data-idx="${i}" onclick="window._galleryThumb(this,'${r.id}')">
+      `<div class="gallery-thumb${getFeaturedImage(r) === url ? ' active' : ''}" data-idx="${i}" data-url="${encodeURIComponent(url)}" onclick="window._galleryThumb(this,'${r.id}')">
         <img src="${url}" alt="${r.name_ko}" loading="lazy" onerror="this.parentElement.style.display='none'">
+        <div class="gallery-set-btn" onclick="event.stopPropagation();window._setFeatured('${r.id}',this.closest('.gallery-thumb').dataset.url)" title="대표 이미지로 설정">⭐</div>
       </div>`
     ).join('');
     return `
@@ -92,13 +117,26 @@ function renderImageGallery(r) {
 }
 
 window._galleryThumb = function(el, resortId) {
-  const idx = parseInt(el.dataset.idx);
-  const resort = RESORTS.find(r => r.id === resortId);
-  if (!resort) return;
+  const url = decodeURIComponent(el.dataset.url || '');
   const main = document.getElementById(`galleryMainImg_${resortId}`);
-  if (main && resort.image_urls[idx]) main.src = resort.image_urls[idx];
+  if (main && url) main.src = url;
   el.closest('.gallery-thumbs')?.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+};
+
+window._setFeatured = function(resortId, encodedUrl) {
+  const url = decodeURIComponent(encodedUrl);
+  try { localStorage.setItem('featured_img_' + resortId, url); } catch (_) {}
+  const main = document.getElementById(`galleryMainImg_${resortId}`);
+  if (main) main.src = url;
+  const cardImg = document.querySelector(`.resort-card[data-id="${resortId}"] .card-image img`);
+  if (cardImg) cardImg.src = url;
+  // 토스트
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1D9E75;color:white;padding:9px 18px;border-radius:10px;font-size:12px;z-index:9999;box-shadow:0 3px 12px rgba(0,0,0,0.2);';
+  toast.textContent = '✓ 대표 이미지로 설정됨';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
 };
 
 function renderYoutubeSection(r) {
@@ -309,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   tabInited.add('cards');
-  initCards(openDetail);
+  initCards(openDetailInCards);
 
   window.addEventListener('open-detail', (e) => openDetail(e.detail.id));
 });

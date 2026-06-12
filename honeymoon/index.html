@@ -15,7 +15,7 @@
   <div class="header-meta">
     <span class="header-badge">📅 <strong>2027.03.08</strong>~12</span>
     <span class="header-badge">👫 <strong>2인</strong></span>
-    <span class="header-badge">🏝️ <strong>9개</strong> 리조트</span>
+    <span class="header-badge">🏝️ <strong>12개</strong> 리조트</span>
     <span class="dday-badge" id="ddayBadge">D-...</span>
   </div>
 </header>
@@ -43,48 +43,56 @@
 <div class="main-layout">
 
   <!-- 탭 1: 개요 & 카드 -->
-  <div class="tab-content active" id="tab-cards">
-    <div class="cards-toolbar">
-      <div class="toolbar-row">
-        <span class="sort-label">정렬 기준</span>
-        <button class="sort-btn active" data-sort="water_pool_4n">🏊 워터풀 4박</button>
-        <button class="sort-btn" data-sort="mix_4n">🔀 믹스 4박</button>
-        <button class="sort-btn" data-sort="water_4n">🌊 워터 4박</button>
-        <button class="sort-btn" data-sort="beach_4n">🏖️ 비치 4박</button>
-      </div>
-      <div class="toolbar-row toolbar-filters">
-        <span class="sort-label">필터</span>
-        <select class="filter-select" id="filterTransfer">
-          <option value="">✈ 이동수단 전체</option>
-          <option value="15">🚤 15분 스피드보트</option>
-          <option value="20">✈ 20분 수상비행기</option>
-          <option value="35">✈ 35분 수상비행기</option>
-          <option value="40">✈ 40분 수상비행기</option>
-          <option value="40sb">🚤 40분 스피드보트</option>
-          <option value="45">✈ 45분 수상비행기</option>
-        </select>
-        <select class="filter-select" id="filterAtoll">
-          <option value="">📍 아톨 전체</option>
-          <option value="라아">라아 아톨</option>
-          <option value="바아">바아 아톨</option>
-          <option value="노스 아리">노스 아리 아톨</option>
-          <option value="라비야니">라비야니 아톨</option>
-          <option value="말레">말레 아톨</option>
-        </select>
-        <label class="filter-check-label">
-          <input type="checkbox" id="filterHammock"> 🛏️ 해먹 있음
-        </label>
-        <div class="price-filter-wrap">
-          <span class="sort-label">💰 최대 예산</span>
-          <input type="range" id="filterMaxPrice" min="1500" max="3500" step="100" value="3500" class="price-slider">
-          <span class="price-display" id="priceDisplay">$3,500 이하</span>
-          <button class="price-reset-btn" id="priceReset">초기화</button>
+  <div class="tab-content active" id="tab-cards" style="overflow:hidden; padding:0;">
+    <div class="cards-split-layout">
+      <!-- 왼쪽: 카드 목록 -->
+      <div class="cards-left-col">
+        <div class="cards-toolbar">
+          <div class="toolbar-row">
+            <span class="sort-label">정렬</span>
+            <button class="sort-btn active" data-sort="water_pool_4n">🏊 워터풀</button>
+            <button class="sort-btn" data-sort="mix_4n">🔀 믹스</button>
+            <button class="sort-btn" data-sort="water_4n">🌊 워터</button>
+            <button class="sort-btn" data-sort="beach_4n">🏖️ 비치</button>
+          </div>
+          <div class="toolbar-row toolbar-filters">
+            <span class="sort-label">필터</span>
+            <select class="filter-select" id="filterTransfer">
+              <option value="">이동수단 전체</option>
+              <option value="seaplane">✈ 수상비행기</option>
+              <option value="speedboat">🚤 스피드보트</option>
+            </select>
+            <select class="filter-select" id="filterAtoll">
+              <option value="">📍 지역 전체</option>
+              <option value="라아">라아 아톨</option>
+              <option value="바아">바아 아톨</option>
+              <option value="라비야니">라비야니</option>
+              <option value="아리">아리 아톨</option>
+              <option value="말레">말레 아톨</option>
+            </select>
+            <label class="filter-check-label">
+              <input type="checkbox" id="filterHammock"> 🛏️ 해먹
+            </label>
+          </div>
+          <div class="toolbar-row">
+            <span class="sort-label">💰 예산</span>
+            <input type="range" id="filterMaxPrice" min="1500" max="3500" step="100" value="3500" class="price-slider">
+            <span class="price-display" id="priceDisplay">제한 없음</span>
+            <button class="price-reset-btn" id="priceReset">초기화</button>
+          </div>
+          <div class="filter-summary" id="filterSummary"></div>
+        </div>
+        <div class="cards-grid" id="cardsGrid">
+          <!-- JS로 렌더링 -->
         </div>
       </div>
-      <div class="filter-summary" id="filterSummary"></div>
-    </div>
-    <div class="cards-grid" id="cardsGrid">
-      <!-- JS로 렌더링 -->
+      <!-- 오른쪽: 선택된 리조트 상세 -->
+      <div class="cards-right-col" id="cardsDetailPanel">
+        <div class="cards-detail-empty">
+          <div style="font-size:48px;">🏝️</div>
+          <div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>
+        </div>
+      </div>
     </div>
   </div>
 

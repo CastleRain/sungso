@@ -1008,6 +1008,10 @@ export const RESORTS = [
 
 /** 대표 이미지: featured_image 우선, 없으면 image_urls[0] */
 export function getFeaturedImage(resort) {
+  try {
+    const stored = localStorage.getItem('featured_img_' + resort.id);
+    if (stored) return stored;
+  } catch (_) {}
   return resort.featured_image || resort.image_urls?.[0] || null;
 }
 
