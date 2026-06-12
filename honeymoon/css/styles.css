@@ -252,6 +252,10 @@ body {
   min-height: 0;
   transition: width 0.22s ease;
 }
+/* 상세 닫힌 상태: 리사이즈 핸들의 인라인 style.width 무력화 */
+#tab-cards:not(.detail-open) .cards-left-col {
+  width: 100% !important;
+}
 .cards-left-col .cards-toolbar {
   position: sticky;
   top: 0;
