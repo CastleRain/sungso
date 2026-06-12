@@ -11,10 +11,10 @@ function showMapInfo(resort) {
   const panel = document.getElementById('mapInfoPanel');
   if (!panel) return;
 
-  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };
+  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
   const agIds = Object.keys(resort.agencies);
   const agBadges = agIds.map(id => {
-    const cls = id === 'realmaldives' ? 'pill-coral' : 'pill-blue';
+    const cls = id === 'realmaldives' ? 'pill-coral' : id === 'tourmin' ? 'pill-teal' : 'pill-blue';
     return `<span class="meta-pill ${cls}" style="font-size:11px;">${agencyNames[id]}</span>`;
   }).join(' ');
 

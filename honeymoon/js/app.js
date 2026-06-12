@@ -5,7 +5,7 @@ import { initPrice } from './tab-price.js';
 import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
-import { RESORTS, getBestPrice } from './resorts-data.js';
+import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
@@ -71,8 +71,11 @@ function stars(n, max = 5) {
 }
 
 function renderImageGallery(r) {
-  if (r.image_urls && r.image_urls.length) {
-    const thumbs = r.image_urls.map((url, i) =>
+  const hero = getFeaturedImage(r);
+  if (hero || (r.image_urls && r.image_urls.length)) {
+    const galleryUrls = r.image_urls && r.image_urls.length ? r.image_urls : [hero];
+    const mainUrl = hero || galleryUrls[0];
+    const thumbs = galleryUrls.map((url, i) =>
       `<div class="gallery-thumb${i === 0 ? ' active' : ''}" data-idx="${i}" onclick="window._galleryThumb(this,'${r.id}')">
         <img src="${url}" alt="${r.name_ko}" loading="lazy" onerror="this.parentElement.style.display='none'">
       </div>`
@@ -80,9 +83,9 @@ function renderImageGallery(r) {
     return `
 <div class="image-gallery">
   <div class="gallery-main" id="galleryMain_${r.id}">
-    <img src="${r.image_urls[0]}" alt="${r.name_ko}" id="galleryMainImg_${r.id}" onerror="this.src=''; this.style.display='none'">
+    <img src="${mainUrl}" alt="${r.name_ko}" id="galleryMainImg_${r.id}" onerror="this.src=''; this.style.display='none'">
   </div>
-  ${r.image_urls.length > 1 ? `<div class="gallery-thumbs">${thumbs}</div>` : ''}
+  ${galleryUrls.length > 1 ? `<div class="gallery-thumbs">${thumbs}</div>` : ''}
 </div>`;
   }
   return `<div class="gallery-empty">🏝️<br><small>이미지 준비 중</small></div>`;
@@ -148,8 +151,8 @@ function renderYoutubeSection(r) {
 function renderResortDetail(r) {
   const agencies = r.agencies;
   const agencyIds = Object.keys(agencies);
-  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };
-  const agencyClass = { realmaldives: 'real', honeymoonresort: 'honey' };
+  const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
+  const agencyClass = { realmaldives: 'real', honeymoonresort: 'honey', tourmin: 'tour' };
 
   // 가격 카드
   const priceCardsHtml = agencyIds.map(agId => {
@@ -173,6 +176,9 @@ function renderResortDetail(r) {
     const promoHtml = ag.promotions?.length
       ? ag.promotions.map(p => `<div class="promo-badge">🎯 ${p}</div>`).join('')
       : '';
+    const priceNoteHtml = ag.price_note
+      ? `<div class="promo-badge" style="background:#FFF8E1;border-color:#FBC02D;color:#6D4C00;">📅 ${ag.price_note}</div>`
+      : '';
 
     return `
 <div class="price-card">
@@ -182,6 +188,7 @@ function renderResortDetail(r) {
   </div>
   <table class="price-table">${rows.join('')}</table>
   ${promoHtml}
+  ${priceNoteHtml}
   <div class="cancellation-note">📋 취소: ${ag.cancellation || '미확인'}</div>
 </div>`;
   }).join('');
@@ -200,7 +207,7 @@ function renderResortDetail(r) {
   <!-- 헤더 -->
   <div class="resort-header">
     <div class="resort-header-left">
-      <div class="resort-num">${String(r.num).padStart(2,'0')} / 09</div>
+      <div class="resort-num">${String(r.num).padStart(2,'0')} / 12</div>
       <div class="resort-name">${r.name_ko}</div>
       <div class="resort-name-en">${r.name_en}</div>
       <div class="resort-meta">

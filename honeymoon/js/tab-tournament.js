@@ -1,6 +1,6 @@
 // tab-tournament.js — 1vs1 토너먼트 (9개 리조트 → 우승 리조트)
 
-import { RESORTS, getBestPrice } from './resorts-data.js';
+import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 
 const STORAGE_KEY = 'maldives-tournament-state';
 const WEIGHTS_KEY = 'maldives-tournament-weights';
@@ -178,8 +178,9 @@ function renderMatch() {
 function renderMatchCard(resort, side) {
   const priceKey = 'water_pool_4n';
   const price = getBestPrice(resort, priceKey);
-  const imgHtml = resort.image_urls.length
-    ? `<img src="${resort.image_urls[0]}" alt="${resort.name_ko}" loading="lazy" onerror="this.style.display='none';">`
+  const heroImg = getFeaturedImage(resort);
+  const imgHtml = heroImg
+    ? `<img src="${heroImg}" alt="${resort.name_ko}" loading="lazy" onerror="this.style.display='none';">`
     : `<div class="match-card-placeholder">🏝️</div>`;
   const ratingHtml = ['lagoon','underwater','privacy','dining'].map(key => {
     const w = (state.weights[key] || 0);
@@ -242,8 +243,9 @@ function renderResult() {
   const champion = getResortById(state.champion);
   if (!champion) { renderSetup(); return; }
 
-  const imgHtml = champion.image_urls.length
-    ? `<img src="${champion.image_urls[0]}" alt="${champion.name_ko}" style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;">`
+  const champImg = getFeaturedImage(champion);
+  const imgHtml = champImg
+    ? `<img src="${champImg}" alt="${champion.name_ko}" style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;">`
     : `<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:64px;">🏝️</div>`;
 
   const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };

@@ -1,6 +1,6 @@
 // tab-cards.js — 카드 그리드 + 필터/정렬
 
-import { RESORTS, getBestPrice, sortByPrice } from './resorts-data.js';
+import { RESORTS, getBestPrice, sortByPrice, getFeaturedImage } from './resorts-data.js';
 
 let onDetailOpen = null;
 let currentSort = 'water_pool_4n';
@@ -30,8 +30,9 @@ function renderCard(resort, sortKey, rank) {
   const price = getBestPrice(resort, sortKey);
   const isPriceBest = rank === 1 && price != null;
 
-  const imgHtml = (resort.image_urls && resort.image_urls.length)
-    ? `<img src="${resort.image_urls[0]}" alt="${resort.name_ko}" loading="lazy"
+  const heroImg = getFeaturedImage(resort);
+  const imgHtml = heroImg
+    ? `<img src="${heroImg}" alt="${resort.name_ko}" loading="lazy"
          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">`
       + `<div class="card-image-placeholder" style="display:none;">🏝️</div>`
     : `<div class="card-image-placeholder">🏝️</div>`;

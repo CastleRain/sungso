@@ -20,10 +20,16 @@ export const AGENCIES = {
     name: '허니문리조트',
     url: 'http://www.honeymoonresort.co.kr',
     note: '허니문 전문. 취소: 35일 이내 100% 취소료. 잔금 출발 40일 전.',
-    discount_per_person: 200,  // 6/19까지 $200 ($150 상시 + $50 한시)
+    discount_per_person: 200,
     discount_always: 150,
     discount_limited: 50,
     discount_deadline: '2026-06-19',
+  },
+  tourmin: {
+    name: '투어민',
+    url: '',
+    note: '투어민 제공 견적. PDF 견적서 없음.',
+    discount_per_person: 0,
   },
 };
 
@@ -134,6 +140,7 @@ export const RESORTS = [
       'https://www.neoscapesmaldives.com/wp-content/uploads/Beach-Villa-Cora-Cora-Maldives-2.jpg',
       'https://www.neoscapesmaldives.com/wp-content/uploads/Areal-Cora-Cora-Maldives-3.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -219,6 +226,7 @@ export const RESORTS = [
       'https://image-tc.galaxy.tf/wijpeg-8td7xw3ndgxyfdf47rpj3uin8/ananea-madivaru-079.jpg?width=1200',
       'https://image-tc.galaxy.tf/wijpeg-6fsesl9xb5hiuyx7c7obeydjp/ananea-madivaru-324.jpg?width=1200',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -300,6 +308,7 @@ export const RESORTS = [
       'https://veligandu.com/wp-content/uploads/2024/11/Veligandu_Beach_Swing_819x1024.webp',
       'https://veligandu.com/wp-content/uploads/slider/cache/13151d5b2990e4c3cedaa768a799aeb6/SOPV2-0001.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -381,6 +390,7 @@ export const RESORTS = [
       'https://dhigufaru.com/app/wp-content/uploads/2025/12/Pool-Beach-Villa-1920x620.jpg',
       'https://dhigufaru.com/app/wp-content/uploads/2026/01/Pool-Water-Villa--1920x620.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -460,6 +470,7 @@ export const RESORTS = [
       'https://furaveri.com/wp-content/uploads/2022/04/Ocean-Villa-5-scaled.jpg',
       'https://furaveri.com/wp-content/uploads/2022/03/AerialView3-1024x575-1.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -535,6 +546,7 @@ export const RESORTS = [
       'https://www.fushifaru.com/wp-content/uploads/2026/03/Heroshot-04-scaled.jpg',
       'https://www.fushifaru.com/wp-content/uploads/2026/06/MF-5039-scaled.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -616,6 +628,7 @@ export const RESORTS = [
       'https://www.neoscapesmaldives.com/wp-content/uploads/Arm-Aerial-Ocean-Villas-9.jpg',
       'https://www.neoscapesmaldives.com/wp-content/uploads/Amari-Raaya-Maldives-Exterior-Ocean-Villas-View-From-Beach-Sunset-3.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -697,6 +710,7 @@ export const RESORTS = [
       'https://www.neoscapesmaldives.com/wp-content/uploads/WATER-VILLAS-1.jpg',
       'https://www.neoscapesmaldives.com/wp-content/uploads/VARU-BY-ATMOSPHERE-VILLAS-BEACH-VILLA-WITH-POOL-DECK-VIEW-02-1.jpg',
     ],
+    featured_image: '',
   },
 
   // ─────────────────────────────────────────────────────────────────
@@ -777,11 +791,225 @@ export const RESORTS = [
       'https://www.saiihotels.com/wp-content/uploads/2026/01/MLEGSQQ_BeachVillaKing_Bedroom_1-scaled.jpg',
       'https://www.saiihotels.com/wp-content/uploads/2026/02/MLEGSQQ_OverwaterVilla_SunsetView_1-scaled.jpg',
     ],
+    featured_image: '',
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    id: 'emerald',
+    num: 10,
+    name_ko: '에메랄드 파스멘두',
+    name_en: 'Emerald Faarufushi Resort & Spa',
+    atoll: '라아 아톨',
+    atoll_en: 'Raa Atoll',
+    transfer_type: 'seaplane',
+    transfer_minutes: 50,
+    distance_km: 160,
+    direction: '북서(NW)',
+    opened: '2019',
+    villas: 80,
+    homepage: 'https://www.emerald-faarufushi.com',
+    mood: '럭셔리_올인클루시브',
+    has_hammock: false,
+    hammock_note: null,
+    honeymoon_tier: '최상',
+    tags: ['LHW회원', '수상비행기', '이탈리아럭셔리', '프리미엄와인40종', '하우스리프', 'AI'],
+
+    ratings: { lagoon: 5, underwater: 5, privacy: 4, dining: 5 },
+
+    description: '라아 아톨 수상비행기 50분. LHW(Leading Hotels of the World) 회원 이탈리아 럭셔리 브랜드 Emerald Collection 운영. 디럭스 프리미엄 AI — 프리미엄 와인/샴페인/위스키 40여 종 포함, 알라카르테 메인코스 무제한, 소믈리에 5명 상주. 하우스리프 우수.',
+
+    pros: [
+      'LHW 멤버 — 9개 중 다이닝·주류 퀄리티 최상위',
+      '알라카르테 무제한 + 소믈리에 5명 상주',
+      '하우스리프 우수, 객실 앞 직접 스노클링',
+      '트립어드바이저 최상위 평점',
+      '허니문: 스파 60분 + 비치 로맨틱 디너 포함',
+    ],
+    cons: [
+      '가격 최고가 — 12개 리조트 중 최상위',
+      '수상비행기 50분 이동, 날씨 영향 있음',
+      '투어민 단독 제공 (타 여행사 비교 불가)',
+    ],
+
+    agencies: {
+      tourmin: {
+        meal_plan: 'DAI',
+        meal_plan_name: '디럭스 프리미엄 올인클루시브',
+        water_4n: 3198,
+        water_pool_4n: 3293,
+        mix_4n: 3517,
+        honeymoon_benefits: [
+          '스파 60분 1회',
+          '샴페인 1병 (도착일)',
+          '비치 로맨틱 디너 1회',
+          '체크인 시 가능 시 객실 업그레이드',
+          '4박 이상: 돌핀투어 or 전통낚시 1회 (택1)',
+        ],
+        honeymoon_comment: '스파+로맨틱 디너 포함. 다이닝 퀄리티 12개 리조트 중 최상.',
+        cancellation: '투어민 확인 필요',
+        price_note: '요금 적용기간 2027-01-11 ~ 2027-04-11 (3월 포함)',
+      },
+    },
+
+    pdfs: [],
+
+    coords: { lat: 5.85, lon: 72.98 },
+    svg_pin: { cx: 108, cy: 96, color: '#9b59b6', label: '에메' },
+
+    youtube_ids: ['b9xhHmjxJnM', 'oE40_1VxGVE', 'MrEvVTrZbNw'],
+    image_urls: [
+      'https://cdn.prod.website-files.com/614dd23228b0182a7ae09c18/61649add64745861533c6b8b_xs_faarufushi-bg-video.jpg',
+      'https://cdn.prod.website-files.com/614dd23228b0182a7ae09c18/663e4297d15472ac142715fc_xs_faarufushi_eclipse4.jpg',
+      'https://cdn.prod.website-files.com/614dd23228b0182a7ae09c18/663e45a1b90054db08849c51_xs_faarufushi_medit5.jpg',
+    ],
+    featured_image: '',
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    id: 'oblu_sangeli',
+    num: 11,
+    name_ko: '오블루 상겔리',
+    name_en: 'OBLU SELECT Sangeli',
+    atoll: '노스 말레 아톨',
+    atoll_en: 'North Malé Atoll',
+    transfer_type: 'speedboat',
+    transfer_minutes: 50,
+    distance_km: 18,
+    direction: '북(N)',
+    opened: '2017',
+    villas: 120,
+    homepage: 'https://www.coloursofoblu.com/oblu-select-sangeli',
+    mood: '가성비_럭셔리',
+    has_hammock: false,
+    hammock_note: null,
+    honeymoon_tier: '최상',
+    tags: ['스피드보트', '성인전용', '프라이빗', '가성비럭셔리', 'AI', '스파포함'],
+
+    ratings: { lagoon: 4, underwater: 4, privacy: 5, dining: 4 },
+
+    description: '노스 말레 아톨 스피드보트 50분. 모던/세련된 디자인, 객실 간 간격 넓어 프라이빗. 성인 전용 섬(One Banyan Island) + 성인전용 바 보유. 라군 넓고 하우스리프 접근성 좋음. 12개 중 가격 최저 포지션.',
+
+    pros: [
+      '12개 중 가격 최저 — 워터빌라 $2,182~',
+      '스피드보트 50분 — 수상비행기 대비 저렴·확실',
+      '성인 전용 섬 + 성인전용 바 운영',
+      '스파 45분 + Specialty Dining 2회 기본 포함',
+      '다양한 레스토랑 구성 (Just Wok, Just Grill 등)',
+    ],
+    cons: [
+      '프리미엄 주류 구성은 에메랄드 대비 약함',
+      '수상비행기 경험 없음',
+      '투어민 단독 제공 (타 여행사 비교 불가)',
+    ],
+
+    agencies: {
+      tourmin: {
+        meal_plan: 'SERENITY',
+        meal_plan_name: '세러너티 AI 플랜',
+        beach_4n: 2182,
+        water_4n: 2236,
+        water_pool_4n: 2632,
+        mix_4n: 2406,
+        honeymoon_benefits: [
+          '로맨틱 침대장식 1회',
+          '로맨틱 캔들릿 디너 1회',
+          '허니문 케이크 1회',
+          '로맨틱 턴다운 (아로마틱 버블배스) 1회',
+          '허니문 기프트 1회',
+        ],
+        honeymoon_comment: '5종 특전 포함으로 허니문 특전 구성 충실. 스파·스페셜티 다이닝은 AI 기본 포함.',
+        cancellation: '35일 이내 취소 100% 취소료',
+        price_note: '요금 적용기간 2027-01-05 ~ 2027-04-09 (3월 포함)',
+      },
+    },
+
+    pdfs: [],
+
+    coords: { lat: 4.40, lon: 73.55 },
+    svg_pin: { cx: 200, cy: 218, color: '#185FA5', label: '오블루' },
+
+    youtube_ids: ['qYAe3-ytPvo', 'j5qyQ8_83xY', 'HqQTo1POia8'],
+    image_urls: [],
+    featured_image: '',
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    id: 'outrigger',
+    num: 12,
+    name_ko: '아웃리거 마푸시바루',
+    name_en: 'Outrigger Maldives Maafushivaru Resort',
+    atoll: '사우스 아리 아톨',
+    atoll_en: 'South Ari Atoll',
+    transfer_type: 'seaplane',
+    transfer_minutes: 25,
+    distance_km: 90,
+    direction: '서(W)',
+    opened: '2020',
+    villas: 81,
+    homepage: 'https://www.outrigger.com/hotels-resorts/maldives/outrigger-maldives-maafushivaru-resort',
+    mood: '모던_파인다이닝',
+    has_hammock: false,
+    hammock_note: null,
+    honeymoon_tier: '중간',
+    tags: ['수상비행기25분', '고래상어투어', '파인다이닝', '화이트모던', '신혼인기'],
+
+    ratings: { lagoon: 4, underwater: 5, privacy: 4, dining: 4 },
+
+    description: '사우스 아리 아톨 수상비행기 25분 (12개 중 최단 이동). 2020년 리빌딩 화이트톤 모던 디자인, 신부들에게 인기. 고래상어 투어 연중 가능. Art-I-San 파인다이닝 레스토랑 운영.',
+
+    pros: [
+      '수상비행기 25분 — 12개 중 이동 가장 짧음',
+      '고래상어 투어 연중 가능 (사우스 아리 아톨)',
+      '2020년 신축 화이트톤 모던 디자인',
+      '파인다이닝 Art-I-San 등 고급 레스토랑',
+      '다양한 할인 혜택 (스파·다이닝·워터스포츠)',
+    ],
+    cons: [
+      '⚠️ 2027년 3월 요금표 미확정 — 투어민 재확인 필요',
+      '허니문 특전이 3개로 에메랄드·오블루보다 적음',
+      '투어민 단독 제공 (타 여행사 비교 불가)',
+    ],
+
+    agencies: {
+      tourmin: {
+        meal_plan: 'AI',
+        meal_plan_name: 'Dine Around 올인클루시브',
+        beach_4n: 3260,
+        water_4n: 3060,
+        water_pool_4n: 3240,
+        mix_4n: 3250,
+        honeymoon_benefits: [
+          '도착 시 스파클링 와인 1병',
+          '과일바구니 + 허니문 케이크',
+          '로맨틱 침대장식 + 욕조셋업 1회',
+        ],
+        honeymoon_comment: '기본 3종 특전. 허니문리조트 기준보다 단출하나 Destination Dining 25% 할인 등 부가혜택 다수.',
+        cancellation: '투어민 확인 필요',
+        price_note: '⚠️ 2026년 1-2월 기준 참고가격. 2027년 3월 요금 미확정 — 반드시 재확인.',
+      },
+    },
+
+    pdfs: [],
+
+    coords: { lat: 3.75, lon: 72.82 },
+    svg_pin: { cx: 76, cy: 285, color: '#D85A30', label: '아웃' },
+
+    youtube_ids: ['Br9owPz9eRQ', 'ormGNZQVXs8', 'nddJH3VHEnc'],
+    image_urls: [],
+    featured_image: '',
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
 // 헬퍼 함수들
+
+/** 대표 이미지: featured_image 우선, 없으면 image_urls[0] */
+export function getFeaturedImage(resort) {
+  return resort.featured_image || resort.image_urls?.[0] || null;
+}
 
 /** 특정 정렬 기준에 따라 RESORTS를 정렬하고 best price를 반환 */
 export function getBestPrice(resort, priceKey = 'water_pool_4n') {

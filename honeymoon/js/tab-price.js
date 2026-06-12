@@ -9,7 +9,7 @@ const PRICE_KEYS = [
   { key: 'beach_4n',      label: '🏖️ 비치 4박',   short: '비치' },
 ];
 
-const AGENCY_NAMES = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트' };
+const AGENCY_NAMES = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
 
 let sortKey = 'water_pool_4n';
 let sortDir = 'asc';

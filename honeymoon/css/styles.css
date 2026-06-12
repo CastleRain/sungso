@@ -3,36 +3,47 @@
    기존 maldives_report.html 스타일 추출 + 탭/카드/토너먼트 확장
    ════════════════════════════════════════════════════════════════ */
 
-/* ── 디자인 토큰 ── */
+/* ── 디자인 토큰 — 핑크/로즈 테마 (sungso 메인 사이트 통일) ── */
 :root {
-  --ocean-deep: #0c447c;
-  --ocean-mid: #185FA5;
-  --ocean-light: #E6F1FB;
-  --ocean-pale: #f0f7ff;
-  --teal: #1D9E75;
-  --teal-light: #E1F5EE;
-  --coral: #D85A30;
-  --coral-light: #FAECE7;
-  --purple: #7F77DD;
-  --purple-light: #EEEDFE;
-  --amber: #BA7517;
-  --amber-light: #FAEEDA;
-  --gray-50: #f8f7f5;
-  --gray-100: #f1efe8;
-  --gray-200: #d3d1c7;
-  --gray-400: #888780;
-  --gray-600: #5f5e5a;
-  --gray-800: #2c2c2a;
-  --text: #1a1a18;
-  --text-muted: #5f5e5a;
-  --text-light: #888780;
-  --border: rgba(0,0,0,0.1);
-  --border-mid: rgba(0,0,0,0.15);
-  --radius: 8px;
-  --radius-lg: 12px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+  /* primary: sungso 핑크 */
+  --primary:       #FF6B9D;
+  --primary-deep:  #C44B6A;
+  --primary-light: #FDEEF4;
+  --primary-pale:  #FFF5F8;
+
+  /* backward-compat ocean-* → 핑크/로즈 */
+  --ocean-deep:    #C44B6A;
+  --ocean-mid:     #FF6B9D;
+  --ocean-light:   #FDEEF4;
+  --ocean-pale:    #FFF5F8;
+
+  --teal:          #1D9E75;
+  --teal-light:    #E1F5EE;
+  --coral:         #D85A30;
+  --coral-light:   #FAECE7;
+  --purple:        #9b59b6;
+  --purple-light:  #F3E8FA;
+  --amber:         #BA7517;
+  --amber-light:   #FAEEDA;
+
+  --gray-50:       #FFF8FB;
+  --gray-100:      #FFF0F5;
+  --gray-200:      #F0C8D5;
+  --gray-400:      #C09090;
+  --gray-600:      #7A5060;
+  --gray-800:      #3C2030;
+
+  --text:          #1a1818;
+  --text-muted:    #7A5060;
+  --text-light:    #C09090;
+  --border:        rgba(220, 90, 120, 0.13);
+  --border-mid:    rgba(220, 90, 120, 0.22);
+
+  --radius:        8px;
+  --radius-lg:     14px;
+  --shadow-sm:     0 1px 4px rgba(200, 80, 100, 0.08);
+  --shadow:        0 3px 14px rgba(200, 80, 100, 0.11);
+  --shadow-lg:     0 8px 32px rgba(200, 80, 100, 0.20);
 }
 
 /* ── 리셋 & 베이스 ── */
@@ -42,7 +53,7 @@ body {
   font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
   font-size: 14px;
   color: var(--text);
-  background: var(--gray-50);
+  background: linear-gradient(135deg, #FFF5F7 0%, #FFF0EA 100%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -53,16 +64,17 @@ body {
    ════════════════════════════════════════════════════════════════ */
 .site-header {
   flex-shrink: 0;
-  background: var(--ocean-deep);
+  background: linear-gradient(135deg, #C44B6A 0%, #FF6B9D 100%);
   color: white;
   padding: 10px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 100;
+  box-shadow: 0 2px 12px rgba(196,75,106,0.35);
 }
 .site-header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
-.site-header h1 span { color: #9FE1CB; }
+.site-header h1 span { color: #FFD6E8; }
 .header-meta { display: flex; gap: 12px; align-items: center; }
 .header-badge {
   background: rgba(255,255,255,0.12);
@@ -76,12 +88,12 @@ body {
 
 /* D-Day 카운터 */
 .dday-badge {
-  background: rgba(159,225,203,0.2);
-  border: 1px solid rgba(159,225,203,0.4);
+  background: rgba(255,200,220,0.25);
+  border: 1px solid rgba(255,200,220,0.5);
   border-radius: 20px;
   padding: 3px 10px;
   font-size: 11px;
-  color: #9FE1CB;
+  color: #FFD6E8;
   font-weight: 600;
 }
 
@@ -174,11 +186,12 @@ body {
   color: var(--text-muted);
   transition: all 0.15s;
 }
-.sort-btn:hover { border-color: var(--ocean-mid); color: var(--ocean-mid); }
+.sort-btn:hover { border-color: var(--primary); color: var(--primary); }
 .sort-btn.active {
-  background: var(--ocean-mid);
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
   color: white;
-  border-color: var(--ocean-mid);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(200,80,100,0.30);
 }
 
 .filter-group { display: flex; gap: 6px; align-items: center; }
@@ -220,13 +233,14 @@ body {
   cursor: pointer;
 }
 .resort-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 36px rgba(200,80,100,0.22);
+  border-color: rgba(255,107,157,0.4);
 }
 
 .card-image {
-  height: 160px;
-  background: linear-gradient(135deg, #185FA5 0%, #1D9E75 50%, #0c447c 100%);
+  height: 180px;
+  background: linear-gradient(135deg, #FF85B3 0%, #FFB3CC 50%, #C44B6A 100%);
   position: relative;
   overflow: hidden;
 }
@@ -327,17 +341,22 @@ body {
   border-radius: 4px;
 }
 .card-detail-btn {
-  padding: 5px 12px;
-  background: var(--ocean-mid);
+  padding: 5px 14px;
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 20px;
   font-size: 12px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(200,80,100,0.25);
 }
-.card-detail-btn:hover { background: var(--ocean-deep); }
+.card-detail-btn:hover {
+  background: linear-gradient(135deg, #a83558, #e8507a);
+  box-shadow: 0 3px 10px rgba(200,80,100,0.40);
+  transform: translateY(-1px);
+}
 
 /* 카드 없음 */
 .no-results {
@@ -360,12 +379,13 @@ body {
 .detail-overlay.open { display: flex; flex-direction: column; }
 .detail-overlay-header {
   flex-shrink: 0;
-  background: var(--ocean-deep);
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
   color: white;
   padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(196,75,106,0.3);
 }
 .detail-close-btn {
   background: rgba(255,255,255,0.15);
@@ -415,7 +435,7 @@ body {
   padding: 10px 12px;
   background: var(--ocean-light);
   border-radius: var(--radius);
-  border: 1px solid #B5D4F4;
+  border: 1px solid rgba(255,107,157,0.3);
   min-height: 52px;
   transition: all 0.2s;
 }
@@ -453,7 +473,7 @@ body {
 .resort-name-en { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
 .resort-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
 .meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid transparent; }
-.pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: #B5D4F4; }
+.pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: rgba(255,107,157,0.3); }
 .pill-teal { background: var(--teal-light); color: #085041; border-color: #9FE1CB; }
 .pill-coral { background: var(--coral-light); color: #712B13; border-color: #F5C4B3; }
 .pill-amber { background: var(--amber-light); color: #633806; border-color: #FAC775; }
@@ -491,7 +511,9 @@ body {
 .price-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .price-card-header { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
 .price-card-header.real { background: var(--coral-light); border-bottom: 1px solid #F5C4B3; }
-.price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid #B5D4F4; }
+.price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid rgba(255,107,157,0.3); }
+.price-card-header.tour { background: #f0f8f0; border-bottom: 1px solid #9FE1CB; }
+.price-agency.tour { color: #0a7a5a; }
 .price-agency { font-size: 12px; font-weight: 700; }
 .price-agency.real { color: var(--coral); }
 .price-agency.honey { color: var(--ocean-deep); }
@@ -600,7 +622,7 @@ body {
   position: relative;
   transition: background 0.2s;
 }
-.toggle-switch.on { background: var(--ocean-mid); }
+.toggle-switch.on { background: linear-gradient(135deg, var(--primary-deep), var(--primary)); }
 .toggle-knob {
   width: 14px; height: 14px;
   background: white;
@@ -623,7 +645,7 @@ body {
   box-shadow: var(--shadow);
 }
 .compare-table th {
-  background: var(--ocean-deep);
+  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
   color: white;
   padding: 10px 12px;
   text-align: left;
@@ -632,8 +654,8 @@ body {
   cursor: pointer;
   user-select: none;
 }
-.compare-table th:hover { background: var(--ocean-mid); }
-.compare-table th.sorted { background: var(--teal); }
+.compare-table th:hover { background: linear-gradient(135deg, #a83558, #e8507a); }
+.compare-table th.sorted { background: linear-gradient(135deg, var(--teal), #1D9E75); }
 .sort-indicator { margin-left: 4px; opacity: 0.7; }
 .compare-table td {
   padding: 10px 12px;
@@ -866,7 +888,7 @@ body {
 .tournament-result { display: none; }
 .tournament-result.active { display: block; }
 .result-winner {
-  background: linear-gradient(135deg, #0c447c, #185FA5);
+  background: linear-gradient(135deg, #C44B6A, #FF6B9D);
   color: white;
   border-radius: var(--radius-lg);
   padding: 32px;
@@ -1105,7 +1127,7 @@ body {
 
 .match-resort-card { background: white; border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s, box-shadow 0.15s; }
 .match-resort-card:hover { border-color: var(--ocean-mid); box-shadow: var(--shadow-lg); }
-.match-card-image { height: 140px; background: linear-gradient(135deg, var(--ocean-mid), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
+.match-card-image { height: 140px; background: linear-gradient(135deg, var(--primary), #FFB3CC); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
 .match-card-image img { width: 100%; height: 100%; object-fit: cover; }
 .match-card-placeholder { font-size: 36px; }
 .match-card-body { padding: 14px; }
@@ -1215,12 +1237,12 @@ body {
   display: none;
   padding: 6px 12px;
   background: var(--ocean-pale);
-  border: 1px solid #B5D4F4;
+  border: 1px solid rgba(255,107,157,0.3);
   border-radius: 6px;
   font-size: 12px;
   color: var(--text-muted);
 }
-.filter-summary b { color: var(--ocean-deep); }
+.filter-summary b { color: var(--primary-deep); }
 .summary-count {
   display: inline-flex;
   align-items: center;
