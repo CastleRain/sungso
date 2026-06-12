@@ -8,6 +8,19 @@ import { initPdf } from './tab-pdf.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
 
+// ── Hero 배경 이미지 설정 ─────────────────────────────────────────
+function setHeroBg() {
+  const bg = document.getElementById('heroBg');
+  if (!bg) return;
+  for (const r of RESORTS) {
+    const img = getFeaturedImage(r) || (r.image_urls && r.image_urls[0]);
+    if (img) {
+      bg.style.backgroundImage = `url(${img})`;
+      return;
+    }
+  }
+}
+
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
   const target = new Date('2027-03-08');
@@ -584,6 +597,7 @@ window.openPdfFromDetail = function(file, label) {
 // ── 초기화 ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updateDDay();
+  setHeroBg();
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));

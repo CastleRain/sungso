@@ -65,41 +65,138 @@ body {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   헤더
+   Hero 섹션
    ════════════════════════════════════════════════════════════════ */
-.site-header {
+.site-hero {
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--primary-deep) 0%, var(--primary) 100%);
+  position: relative;
+  height: 164px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+/* 배경 이미지 레이어 (JS로 background-image 주입) */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0B5B45 0%, #1D9E75 60%, #2EC495 100%);
+  background-size: cover;
+  background-position: center 35%;
+  transform: scale(1.06);
+  filter: brightness(0.72);
+  transition: background-image 0.5s ease;
+}
+
+/* Glass Morphism 오버레이 */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(11,91,69,0.70) 0%,
+    rgba(29,158,117,0.45) 100%
+  );
+  display: flex;
+  flex-direction: column;
   color: white;
-  padding: 10px 24px;
+}
+
+/* 상단 내비 바 */
+.hero-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  z-index: 100;
-  box-shadow: 0 2px 12px rgba(21,120,90,0.30);
-}
-.site-header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
-.site-header h1 span { color: rgba(255,255,255,0.75); }
-.header-meta { display: flex; gap: 12px; align-items: center; }
-.header-badge {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 20px;
-  padding: 3px 10px;
+  gap: 8px;
+  padding: 10px 20px 4px;
   font-size: 11px;
-  color: rgba(255,255,255,0.85);
 }
-.header-badge strong { color: white; }
+.hero-back {
+  color: rgba(255,255,255,0.80);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+.hero-back:hover { opacity: 0.6; }
+.hero-topbar-sep { opacity: 0.35; }
+.hero-topbar-title { opacity: 0.60; font-size: 11px; }
 
-/* D-Day 카운터 */
-.dday-badge {
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 11px;
-  color: white;
-  font-weight: 700;
+/* 메인 콘텐츠 */
+.hero-body {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 20px 16px;
+  gap: 16px;
+}
+.hero-text-group { display: flex; flex-direction: column; gap: 3px; }
+.hero-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.65;
+}
+.hero-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
+}
+.hero-subline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.82;
+  margin-top: 1px;
+}
+.hero-sep { opacity: 0.4; }
+
+/* D-Day + 리조트 수 카드 */
+.hero-stats { display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+.hero-stat-dday,
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 14px;
+  padding: 9px 16px 8px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  gap: 1px;
+}
+.hero-dday-num {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.hero-dday-label,
+.hero-stat-label {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  opacity: 0.70;
+}
+.hero-stat-num {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+/* 탭 네비게이션 위 그림자 라인 */
+.site-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -218,28 +315,8 @@ body {
   cursor: pointer;
 }
 
-/* ── 홈 버튼 바 ── */
-.back-nav {
-  flex-shrink: 0;
-  background: #3C2030;
-  padding: 5px 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-}
-.back-nav-link {
-  color: #6EC8A8;
-  text-decoration: none;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: color 0.15s;
-}
-.back-nav-link:hover { color: white; }
-.back-nav-sep { color: rgba(255,255,255,0.25); }
-.back-nav-title { color: rgba(255,255,255,0.4); font-size: 10px; }
+/* ── 홈 버튼 바 (레거시 — hero-topbar로 대체됨) ── */
+.back-nav { display: none; }
 
 /* ── 카드 탭 레이아웃 (그리드 ↔ 분할) ── */
 .cards-split-layout {
