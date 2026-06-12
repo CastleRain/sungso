@@ -1721,6 +1721,68 @@ body {
 #tab-cards:not(.detail-open) .resize-handle { display: none; }
 
 /* ════════════════════════════════════════════════════════════════
+   미니맵 플로팅 패널
+   ════════════════════════════════════════════════════════════════ */
+.minimap-float {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 300;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  display: none;
+  flex-direction: column;
+  width: 180px;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+.minimap-float.visible { display: flex; }
+.minimap-float.expanded { width: 280px; }
+.minimap-float.collapsed .minimap-body { display: none; }
+
+.minimap-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  background: var(--primary-light);
+  border-bottom: 1px solid rgba(196,75,106,0.2);
+  flex-shrink: 0;
+  cursor: default;
+}
+.minimap-title { font-size: 11px; font-weight: 700; color: var(--primary-deep); }
+.minimap-header-btns { display: flex; gap: 2px; }
+.minimap-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; padding: 1px 5px; border-radius: 4px;
+  color: var(--primary-deep); line-height: 1;
+  transition: background 0.15s;
+}
+.minimap-btn:hover { background: var(--primary); color: white; }
+
+.minimap-body {
+  overflow: hidden;
+  height: 260px; /* small: 모든 핀 포함 클립 */
+  transition: height 0.25s ease;
+}
+.minimap-float.expanded .minimap-body { height: 580px; overflow-y: auto; }
+.minimap-body svg { display: block; width: 100%; height: auto; }
+
+.minimap-legend {
+  display: none;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  background: var(--gray-50);
+}
+.minimap-float.expanded .minimap-legend { display: block; }
+.minimap-legend .legend-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+.minimap-legend .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* SVG 핀 활성 상태 */
+.map-pin.active circle { stroke: var(--primary); stroke-width: 3; filter: drop-shadow(0 0 4px rgba(196,75,106,0.6)); }
+
+/* ════════════════════════════════════════════════════════════════
    메모 팝업 (플로팅 댓글 스레드)
    ════════════════════════════════════════════════════════════════ */
 .memo-popup {

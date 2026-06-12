@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>몰디브 허니문 리조트 비교 · 2027년 3월</title>
 <link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
 
@@ -34,9 +33,6 @@
   </button>
   <button class="tab-btn" data-tab="price">
     <span class="tab-icon">💰</span> 가격 비교
-  </button>
-  <button class="tab-btn" data-tab="map">
-    <span class="tab-icon">🗺️</span> 지도
   </button>
   <button class="tab-btn" data-tab="tournament">
     <span class="tab-icon">🏆</span> 토너먼트
@@ -142,148 +138,7 @@
     </div>
   </div>
 
-  <!-- 탭 3: 지도 -->
-  <div class="tab-content" id="tab-map" style="overflow:hidden; padding:0;">
-    <div class="map-tab-body">
-      <div class="map-tab-left">
-        <p class="map-title">몰디브 리조트 위치</p>
-        <!-- SVG 지도 (기존 HTML에서 이동) -->
-        <svg id="mainSvgMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
-          <rect width="280" height="540" fill="#cce8ff" rx="10"/>
-          <line x1="20" y1="30" x2="260" y2="30" stroke="#a8d4f5" stroke-width="0.4"/>
-          <line x1="20" y1="510" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
-          <line x1="20" y1="30" x2="20" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
-          <line x1="260" y1="30" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
-          <line x1="140" y1="30" x2="140" y2="510" stroke="#a8d4f5" stroke-width="0.3" stroke-dasharray="3,5"/>
-          <text x="22" y="28" font-size="7" fill="#7ab8e8" font-family="sans-serif">6°N</text>
-          <text x="22" y="508" font-size="7" fill="#7ab8e8" font-family="sans-serif">3°N</text>
-          <text x="18" y="270" font-size="7" fill="#7ab8e8" font-family="sans-serif" transform="rotate(-90,18,270)">72-74°E</text>
-          <text x="140" y="22" text-anchor="middle" font-size="8" fill="#5a9fd4" font-family="sans-serif" font-weight="600">N ↑</text>
-          <!-- 아톨 영역 -->
-          <ellipse cx="88" cy="90" rx="30" ry="18" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
-          <text x="88" y="87" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라아 아톨</text>
-          <text x="88" y="97" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~160km NW</text>
-          <ellipse cx="88" cy="158" rx="26" ry="15" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
-          <text x="88" y="155" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">바아 아톨</text>
-          <text x="88" y="165" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">UNESCO ~120km</text>
-          <ellipse cx="205" cy="125" rx="22" ry="13" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
-          <text x="205" y="122" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라비야니</text>
-          <text x="205" y="132" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~130km NNE</text>
-          <ellipse cx="78" cy="270" rx="28" ry="22" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
-          <text x="78" y="265" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">아리 아톨</text>
-          <text x="78" y="275" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">N.Ari ~66km W</text>
-          <ellipse cx="188" cy="222" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
-          <text x="188" y="219" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">노스 말레</text>
-          <text x="188" y="229" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
-          <ellipse cx="194" cy="256" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
-          <text x="194" y="253" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">사우스 말레</text>
-          <text x="194" y="263" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
-          <!-- 말레 공항 -->
-          <rect x="192" y="233" width="30" height="13" rx="3" fill="#1a1a18" opacity="0.9"/>
-          <text x="207" y="242" text-anchor="middle" font-size="7" fill="#f8f7f5" font-family="sans-serif" font-weight="600">말레 ✈</text>
-          <!-- 거리선 -->
-          <line x1="207" y1="233" x2="88" y2="108" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
-          <line x1="207" y1="233" x2="78" y2="248" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
-          <line x1="207" y1="233" x2="205" y2="138" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
-          <!-- 리조트 핀들 (JS에서 클릭 이벤트 추가) -->
-          <g class="map-pin" data-resort="cora_cora" style="cursor:pointer">
-            <circle id="svg-pin-cora_cora" cx="75" cy="78" r="9" fill="#7F77DD" stroke="white" stroke-width="2"/>
-            <text x="75" y="82" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">코</text>
-          </g>
-          <g class="map-pin" data-resort="furaveri" style="cursor:pointer">
-            <circle id="svg-pin-furaveri" cx="102" cy="80" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="102" y="84" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸라</text>
-          </g>
-          <g class="map-pin" data-resort="raaya" style="cursor:pointer">
-            <circle id="svg-pin-raaya" cx="74" cy="106" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="74" y="110" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">라야</text>
-          </g>
-          <g class="map-pin" data-resort="dhigufaru" style="cursor:pointer">
-            <circle id="svg-pin-dhigufaru" cx="103" cy="152" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="103" y="156" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">디</text>
-          </g>
-          <g class="map-pin" data-resort="fushifaru" style="cursor:pointer">
-            <circle id="svg-pin-fushifaru" cx="202" cy="122" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="202" y="126" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸시</text>
-          </g>
-          <g class="map-pin" data-resort="veligandu" style="cursor:pointer">
-            <circle id="svg-pin-veligandu" cx="68" cy="248" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="68" y="252" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">벨</text>
-          </g>
-          <g class="map-pin" data-resort="ananea" style="cursor:pointer">
-            <circle id="svg-pin-ananea" cx="90" cy="256" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
-            <text x="90" y="260" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">아나</text>
-          </g>
-          <g class="map-pin" data-resort="varu" style="cursor:pointer">
-            <circle id="svg-pin-varu" cx="178" cy="214" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
-            <text x="178" y="218" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">바루</text>
-          </g>
-          <g class="map-pin" data-resort="saii_so" style="cursor:pointer">
-            <circle id="svg-pin-saii_so" cx="200" cy="258" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
-            <text x="200" y="262" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">사이</text>
-          </g>
-          <g class="map-pin" data-resort="emerald" style="cursor:pointer">
-            <circle id="svg-pin-emerald" cx="108" cy="96" r="9" fill="#9b59b6" stroke="white" stroke-width="2"/>
-            <text x="108" y="100" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">에메</text>
-          </g>
-          <g class="map-pin" data-resort="oblu_sangeli" style="cursor:pointer">
-            <circle id="svg-pin-oblu_sangeli" cx="200" cy="218" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
-            <text x="200" y="222" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">오블루</text>
-          </g>
-          <g class="map-pin" data-resort="outrigger" style="cursor:pointer">
-            <circle id="svg-pin-outrigger" cx="76" cy="285" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
-            <text x="76" y="289" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">아웃</text>
-          </g>
-        </svg>
-
-        <div class="map-current-info" id="mapCurrentInfo">
-          <div class="ci-label">선택한 리조트</div>
-          <div class="ci-name">핀을 클릭해보세요</div>
-          <div class="ci-sub">위치·이동시간·거리 표시</div>
-        </div>
-
-        <div class="map-legend" style="margin-top:12px;">
-          <div class="map-legend-header">아톨 범례</div>
-          <div class="legend-items">
-            <div class="legend-row"><div class="legend-dot" style="background:#7F77DD"></div>코라코라 (라아)</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#9b59b6"></div>에메랄드 (라아)</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#D85A30"></div>푸라베리·라야·디구파루·푸시파루·벨리간두·아웃리거 (라아/바아/아리)</div>
-            <div class="legend-row"><div class="legend-dot" style="background:#185FA5"></div>아나네아·바루·사이라군·오블루 (아리·말레)</div>
-          </div>
-        </div>
-
-        <table class="distance-table" style="margin-top:10px;">
-          <thead><tr><th>리조트</th><th>이동</th><th>거리</th></tr></thead>
-          <tbody>
-            <tr><td>아웃리거 마푸시바루</td><td>✈ 25분</td><td class="dist-km">90km</td></tr>
-            <tr><td>아나네아·벨리간두</td><td>✈ 20분</td><td class="dist-km">66km</td></tr>
-            <tr><td>푸시파루</td><td>✈ 35분</td><td class="dist-km">130km</td></tr>
-            <tr><td>디구파루</td><td>✈ 40분</td><td class="dist-km">120km</td></tr>
-            <tr><td>코라코라·푸라베리·라야·에메랄드</td><td>✈ 45~55분</td><td class="dist-km">145~177km</td></tr>
-            <tr><td>바루·사이라군·오블루상겔리</td><td>🚤 40~50분</td><td class="dist-km">10~18km</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="resize-handle" id="mapResizeHandle"></div>
-      <div class="map-tab-right">
-        <div class="map-resort-info" id="mapInfoPanel">
-          <div style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px 0;">
-            왼쪽 지도의 핀을 클릭하면<br>리조트 정보가 표시됩니다
-          </div>
-        </div>
-
-        <button class="leaflet-toggle-btn" id="leafletToggle">
-          🗺️ 인터랙티브 지도 열기 (OpenStreetMap)
-        </button>
-        <div id="leafletMapWrap" style="display:none;">
-          <div id="leafletMap" style="height:400px;border-radius:10px;overflow:hidden;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 탭 4: 토너먼트 -->
+  <!-- 탭 3: 토너먼트 -->
   <div class="tab-content" id="tab-tournament">
     <div class="tournament-wrap" id="tournamentWrap">
       <!-- JS로 렌더링 -->
@@ -380,8 +235,110 @@
 </div>
 <div class="memo-popup-backdrop" id="memoBackdrop" onclick="window._closeMemo()" style="display:none;"></div>
 
+<!-- ══════════════════════════════════════════════ 미니맵 플로팅 패널 -->
+<div class="minimap-float" id="minimapFloat">
+  <div class="minimap-header">
+    <span class="minimap-title">📍 위치 지도</span>
+    <div class="minimap-header-btns">
+      <button class="minimap-btn" id="minimapExpandBtn" title="크게 보기">⤢</button>
+      <button class="minimap-btn" id="minimapCollapseBtn" title="접기">−</button>
+    </div>
+  </div>
+  <div class="minimap-body" id="minimapBody">
+    <svg id="mainSvgMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
+      <rect width="280" height="540" fill="#cce8ff" rx="10"/>
+      <line x1="20" y1="30" x2="260" y2="30" stroke="#a8d4f5" stroke-width="0.4"/>
+      <line x1="20" y1="510" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+      <line x1="20" y1="30" x2="20" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+      <line x1="260" y1="30" x2="260" y2="510" stroke="#a8d4f5" stroke-width="0.4"/>
+      <line x1="140" y1="30" x2="140" y2="510" stroke="#a8d4f5" stroke-width="0.3" stroke-dasharray="3,5"/>
+      <text x="22" y="28" font-size="7" fill="#7ab8e8" font-family="sans-serif">6°N</text>
+      <text x="22" y="508" font-size="7" fill="#7ab8e8" font-family="sans-serif">3°N</text>
+      <text x="18" y="270" font-size="7" fill="#7ab8e8" font-family="sans-serif" transform="rotate(-90,18,270)">72-74°E</text>
+      <text x="140" y="22" text-anchor="middle" font-size="8" fill="#5a9fd4" font-family="sans-serif" font-weight="600">N ↑</text>
+      <ellipse cx="88" cy="90" rx="30" ry="18" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+      <text x="88" y="87" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라아 아톨</text>
+      <text x="88" y="97" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~160km NW</text>
+      <ellipse cx="88" cy="158" rx="26" ry="15" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+      <text x="88" y="155" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">바아 아톨</text>
+      <text x="88" y="165" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">UNESCO ~120km</text>
+      <ellipse cx="205" cy="125" rx="22" ry="13" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+      <text x="205" y="122" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">라비야니</text>
+      <text x="205" y="132" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~130km NNE</text>
+      <ellipse cx="78" cy="270" rx="28" ry="22" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.7"/>
+      <text x="78" y="265" text-anchor="middle" font-size="7.5" fill="#085041" font-family="sans-serif" font-weight="600">아리 아톨</text>
+      <text x="78" y="275" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">N.Ari ~66km W</text>
+      <ellipse cx="188" cy="222" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+      <text x="188" y="219" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">노스 말레</text>
+      <text x="188" y="229" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+      <ellipse cx="194" cy="256" rx="18" ry="10" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.8" opacity="0.6"/>
+      <text x="194" y="253" text-anchor="middle" font-size="7" fill="#085041" font-family="sans-serif">사우스 말레</text>
+      <text x="194" y="263" text-anchor="middle" font-size="6.5" fill="#0F6E56" font-family="sans-serif">~10km</text>
+      <rect x="192" y="233" width="30" height="13" rx="3" fill="#1a1a18" opacity="0.9"/>
+      <text x="207" y="242" text-anchor="middle" font-size="7" fill="#f8f7f5" font-family="sans-serif" font-weight="600">말레 ✈</text>
+      <line x1="207" y1="233" x2="88" y2="108" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+      <line x1="207" y1="233" x2="78" y2="248" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+      <line x1="207" y1="233" x2="205" y2="138" stroke="#93c8f0" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.7"/>
+      <g class="map-pin" data-resort="cora_cora" style="cursor:pointer">
+        <circle cx="75" cy="78" r="9" fill="#7F77DD" stroke="white" stroke-width="2"/>
+        <text x="75" y="82" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">코</text>
+      </g>
+      <g class="map-pin" data-resort="furaveri" style="cursor:pointer">
+        <circle cx="102" cy="80" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="102" y="84" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸라</text>
+      </g>
+      <g class="map-pin" data-resort="raaya" style="cursor:pointer">
+        <circle cx="74" cy="106" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="74" y="110" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">라야</text>
+      </g>
+      <g class="map-pin" data-resort="dhigufaru" style="cursor:pointer">
+        <circle cx="103" cy="152" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="103" y="156" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">디</text>
+      </g>
+      <g class="map-pin" data-resort="fushifaru" style="cursor:pointer">
+        <circle cx="202" cy="122" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="202" y="126" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">푸시</text>
+      </g>
+      <g class="map-pin" data-resort="veligandu" style="cursor:pointer">
+        <circle cx="68" cy="248" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="68" y="252" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">벨</text>
+      </g>
+      <g class="map-pin" data-resort="ananea" style="cursor:pointer">
+        <circle cx="90" cy="256" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+        <text x="90" y="260" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">아나</text>
+      </g>
+      <g class="map-pin" data-resort="varu" style="cursor:pointer">
+        <circle cx="178" cy="214" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+        <text x="178" y="218" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">바루</text>
+      </g>
+      <g class="map-pin" data-resort="saii_so" style="cursor:pointer">
+        <circle cx="200" cy="258" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+        <text x="200" y="262" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif" font-weight="700">사이</text>
+      </g>
+      <g class="map-pin" data-resort="emerald" style="cursor:pointer">
+        <circle cx="108" cy="96" r="9" fill="#9b59b6" stroke="white" stroke-width="2"/>
+        <text x="108" y="100" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">에메</text>
+      </g>
+      <g class="map-pin" data-resort="oblu_sangeli" style="cursor:pointer">
+        <circle cx="200" cy="218" r="9" fill="#185FA5" stroke="white" stroke-width="2"/>
+        <text x="200" y="222" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">오블루</text>
+      </g>
+      <g class="map-pin" data-resort="outrigger" style="cursor:pointer">
+        <circle cx="76" cy="285" r="9" fill="#D85A30" stroke="white" stroke-width="2"/>
+        <text x="76" y="289" text-anchor="middle" font-size="7" fill="white" font-family="sans-serif" font-weight="700">아웃</text>
+      </g>
+    </svg>
+    <!-- 확장 시 표시 -->
+    <div class="minimap-legend" id="minimapLegend">
+      <div class="legend-row"><div class="legend-dot" style="background:#7F77DD"></div>코라코라 (라아)</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#9b59b6"></div>에메랄드 (라아)</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#D85A30"></div>푸라베리·라야·디구·푸시·벨리간두·아웃리거</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#185FA5"></div>아나네아·바루·사이·오블루 (아리·말레)</div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════ JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script type="module" src="js/app.js"></script>
 

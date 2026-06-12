@@ -33,6 +33,9 @@ function switchTab(tabId) {
   if (btn) btn.classList.add('active');
   if (content) content.classList.add('active');
 
+  // 미니맵: 카드 탭에서만 표시
+  document.getElementById('minimapFloat')?.classList.toggle('visible', tabId === 'cards');
+
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
     if (tabId === 'price') {
@@ -41,14 +44,6 @@ function switchTab(tabId) {
         document.getElementById('priceResizeHandle'),
         document.querySelector('.price-left-col'),
         'price-left-w', 280, 780
-      );
-    }
-    if (tabId === 'map') {
-      initMap(openDetailInMap);
-      initResizeHandle(
-        document.getElementById('mapResizeHandle'),
-        document.querySelector('.map-tab-left'),
-        'map-left-w', 180, 520
       );
     }
     if (tabId === 'tournament') initTournament();
@@ -96,6 +91,9 @@ function openDetailInCards(resortId) {
   document.getElementById('tab-cards').classList.add('detail-open');
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
   document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
+  // 미니맵 핀 하이라이트
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.map-pin[data-resort="${resortId}"]`)?.classList.add('active');
 }
 
 window.closeCardDetail = function() {
@@ -110,6 +108,7 @@ window.closeCardDetail = function() {
   empty.innerHTML = '<div style="font-size:48px;">🏝️</div><div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
   panel.appendChild(empty);
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
 };
 
 // ── 가격 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
@@ -162,17 +161,6 @@ export function openDetail(resortId) {
 
 export function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
-}
-
-// ── 지도 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
-function openDetailInMap(resortId) {
-  const resort = RESORTS.find(r => r.id === resortId);
-  if (!resort) return;
-  const panel = document.getElementById('mapInfoPanel');
-  if (panel) {
-    panel.innerHTML = renderResortDetail(resort);
-    panel.scrollTop = 0;
-  }
 }
 
 // ── 메모 팝업 ──────────────────────────────────────────────────────
@@ -546,6 +534,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   tabInited.add('cards');
   initCards(openDetailInCards);
+
+  // 미니맵 초기화 (지도 탭 없이 바로)
+  initMap(openDetailInCards);
+  document.getElementById('minimapFloat')?.classList.add('visible');
 
   window.addEventListener('open-detail', (e) => openDetail(e.detail.id));
 });
