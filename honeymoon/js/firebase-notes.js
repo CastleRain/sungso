@@ -1,7 +1,9 @@
-// firebase-notes.js — 리조트 메모 CRUD (Firestore 'resort_notes' 컬렉션)
+// firebase-notes.js — 리조트 댓글 메모 CRUD (Firestore 서브컬렉션)
+// 컬렉션: resort_notes/{resortId}/comments/{commentId}
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
+import { getFirestore, collection, addDoc, deleteDoc, doc,
+         onSnapshot, query, orderBy, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -16,16 +18,21 @@ const FIREBASE_CONFIG = {
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
-export async function loadNote(resortId) {
-  try {
-    const snap = await getDoc(doc(db, 'resort_notes', resortId));
-    return snap.exists() ? (snap.data().note || '') : '';
-  } catch (_) { return ''; }
+// 실시간 댓글 구독 — 반환값은 unsubscribe 함수
+// callback: ({ id, author, text, createdAt }[]) => void
+export function subscribeComments(resortId, callback) {
+  const ref = collection(db, 'resort_notes', resortId, 'comments');
+  const q = query(ref, orderBy('createdAt', 'asc'));
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  }, () => callback([]));
 }
 
-export async function saveNote(resortId, text) {
-  await setDoc(doc(db, 'resort_notes', resortId), {
-    note: text,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
+export async function addComment(resortId, author, text) {
+  const ref = collection(db, 'resort_notes', resortId, 'comments');
+  await addDoc(ref, { author, text, createdAt: serverTimestamp() });
+}
+
+export async function deleteComment(resortId, commentId) {
+  await deleteDoc(doc(db, 'resort_notes', resortId, 'comments', commentId));
 }

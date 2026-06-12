@@ -93,6 +93,7 @@
           <!-- JS로 렌더링 -->
         </div>
       </div>
+      <div class="resize-handle" id="cardsResizeHandle"></div>
       <!-- 오른쪽: 선택된 리조트 상세 -->
       <div class="cards-right-col" id="cardsDetailPanel">
         <div class="cards-detail-close-bar">
@@ -248,6 +249,7 @@
         </table>
       </div>
 
+      <div class="resize-handle" id="mapResizeHandle"></div>
       <div class="map-tab-right">
         <div class="map-resort-info" id="mapInfoPanel">
           <div style="color:var(--text-muted); font-size:13px; text-align:center; padding:20px 0;">
@@ -335,6 +337,32 @@
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════ 메모 팝업 -->
+<div class="memo-popup" id="memoPopup" style="display:none;">
+  <div class="memo-popup-header">
+    <span class="memo-popup-title">💬 우리 메모</span>
+    <button class="memo-popup-close" onclick="window._closeMemo()">✕</button>
+  </div>
+  <div class="memo-comments-wrap" id="memoComments">
+    <div class="memo-empty">아직 메모가 없어요 ✏️</div>
+  </div>
+  <div class="memo-input-area">
+    <div class="memo-author-pick" id="memoAuthorPick">
+      <button class="author-btn active" data-author="성우">
+        <span class="author-avatar">🧑</span> 성우
+      </button>
+      <button class="author-btn" data-author="소희">
+        <span class="author-avatar">👩</span> 소희
+      </button>
+    </div>
+    <div class="memo-compose">
+      <textarea id="memoComposeTa" placeholder="메모를 입력하세요..." rows="2"></textarea>
+      <button class="memo-send-btn" id="memoSendBtn" onclick="window._sendMemo()">전송</button>
+    </div>
+  </div>
+</div>
+<div class="memo-popup-backdrop" id="memoBackdrop" onclick="window._closeMemo()" style="display:none;"></div>
 
 <!-- ══════════════════════════════════════════════ JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

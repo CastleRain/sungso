@@ -6,7 +6,7 @@ import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
-import { loadNote, saveNote } from './firebase-notes.js';
+import { subscribeComments, addComment, deleteComment } from './firebase-notes.js';
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
@@ -36,10 +36,43 @@ function switchTab(tabId) {
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
     if (tabId === 'price') initPrice();
-    if (tabId === 'map') initMap(openDetailInMap);
+    if (tabId === 'map') {
+      initMap(openDetailInMap);
+      initResizeHandle(
+        document.getElementById('mapResizeHandle'),
+        document.querySelector('.map-tab-left'),
+        'map-left-w', 180, 520
+      );
+    }
     if (tabId === 'tournament') initTournament();
     if (tabId === 'pdf') initPdf();
   }
+}
+
+// ── 패널 리사이즈 핸들 ─────────────────────────────────────────────
+function initResizeHandle(handle, leftEl, storageKey, min = 200, max = 720) {
+  if (!handle || !leftEl) return;
+  const stored = parseInt(localStorage.getItem(storageKey));
+  if (stored && stored >= min && stored <= max) leftEl.style.width = stored + 'px';
+
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    handle.classList.add('dragging');
+    const startX = e.clientX;
+    const startW = leftEl.getBoundingClientRect().width;
+    const onMove = mv => {
+      const w = Math.max(min, Math.min(max, startW + mv.clientX - startX));
+      leftEl.style.width = w + 'px';
+    };
+    const onUp = () => {
+      handle.classList.remove('dragging');
+      localStorage.setItem(storageKey, Math.round(leftEl.getBoundingClientRect().width));
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
 
 // ── 카드 탭 분할 오른쪽 패널에 상세 렌더 ──────────────────────────
@@ -48,12 +81,10 @@ function openDetailInCards(resortId) {
   if (!resort) return;
   const panel = document.getElementById('cardsDetailPanel');
   if (panel) {
-    // 닫기 버튼 바 유지, 그 아래에 상세 렌더
     const closeBar = panel.querySelector('.cards-detail-close-bar');
     panel.innerHTML = renderResortDetail(resort);
     if (closeBar) panel.insertBefore(closeBar, panel.firstChild);
     panel.scrollTop = 0;
-    initMemoBlock(resortId);
   }
   document.getElementById('tab-cards').classList.add('detail-open');
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
@@ -92,14 +123,13 @@ export function openDetail(resortId) {
   panel.innerHTML = renderResortDetail(resort);
   overlay.classList.add('open');
   panel.scrollTop = 0;
-  initMemoBlock(resort.id);
 }
 
 export function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
 
-// ── 지도 탭 오른쪽 패널에 상세 렌더 (핀 직접 클릭용) ──────────────
+// ── 지도 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
 function openDetailInMap(resortId) {
   const resort = RESORTS.find(r => r.id === resortId);
   if (!resort) return;
@@ -107,8 +137,105 @@ function openDetailInMap(resortId) {
   if (panel) {
     panel.innerHTML = renderResortDetail(resort);
     panel.scrollTop = 0;
-    initMemoBlock(resort.id);
   }
+}
+
+// ── 메모 팝업 ──────────────────────────────────────────────────────
+let _memoResortId = null;
+let _memoUnsub = null;
+let _memoAuthor = '성우';
+
+window._openMemo = function(resortId) {
+  _memoResortId = resortId;
+
+  // 이전 구독 정리
+  if (_memoUnsub) { _memoUnsub(); _memoUnsub = null; }
+
+  // 팝업 표시
+  const popup = document.getElementById('memoPopup');
+  const backdrop = document.getElementById('memoBackdrop');
+  popup.style.display = 'flex';
+  backdrop.style.display = 'block';
+
+  // 작성자 버튼 상태 초기화
+  document.querySelectorAll('.author-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.author === _memoAuthor);
+    b.onclick = () => {
+      _memoAuthor = b.dataset.author;
+      document.querySelectorAll('.author-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    };
+  });
+
+  // 실시간 댓글 구독
+  _memoUnsub = subscribeComments(resortId, renderMemoComments);
+};
+
+window._closeMemo = function() {
+  document.getElementById('memoPopup').style.display = 'none';
+  document.getElementById('memoBackdrop').style.display = 'none';
+  if (_memoUnsub) { _memoUnsub(); _memoUnsub = null; }
+  _memoResortId = null;
+};
+
+window._sendMemo = async function() {
+  const ta = document.getElementById('memoComposeTa');
+  const text = ta.value.trim();
+  if (!text || !_memoResortId) return;
+  const btn = document.getElementById('memoSendBtn');
+  btn.disabled = true;
+  try {
+    await addComment(_memoResortId, _memoAuthor, text);
+    ta.value = '';
+    ta.focus();
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+window._deleteMemo = async function(commentId) {
+  if (!_memoResortId) return;
+  await deleteComment(_memoResortId, commentId);
+};
+
+function renderMemoComments(comments) {
+  const wrap = document.getElementById('memoComments');
+  if (!wrap) return;
+  if (!comments.length) {
+    wrap.innerHTML = '<div class="memo-empty">아직 메모가 없어요 ✏️</div>';
+    return;
+  }
+  wrap.innerHTML = comments.map(c => {
+    const isSungwoo = c.author === '성우';
+    let timeStr = '';
+    try {
+      if (c.createdAt?.toDate) {
+        timeStr = c.createdAt.toDate().toLocaleString('ko-KR', {
+          month: 'numeric', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+      }
+    } catch (_) {}
+    // XSS 방지 — text를 textContent로 이스케이프 처리
+    const escaped = c.text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+    return `
+<div class="memo-comment ${isSungwoo ? 'comment-sungwoo' : 'comment-sohee'}">
+  <div class="comment-avatar">${isSungwoo ? '🧑' : '👩'}</div>
+  <div class="comment-bubble">
+    <div class="comment-meta">
+      <span class="comment-author">${c.author}</span>
+      <span class="comment-time">${timeStr}</span>
+    </div>
+    <div class="comment-text">${escaped}</div>
+  </div>
+  <button class="comment-del-btn" onclick="window._deleteMemo('${c.id}')" title="삭제">🗑</button>
+</div>`;
+  }).join('');
+  wrap.scrollTop = wrap.scrollHeight;
 }
 
 // ── 리조트 상세 HTML 렌더링 ────────────────────────────────────────
@@ -153,7 +280,6 @@ window._setFeatured = function(resortId, encodedUrl) {
   if (main) main.src = url;
   const cardImg = document.querySelector(`.resort-card[data-id="${resortId}"] .card-image img`);
   if (cardImg) cardImg.src = url;
-  // 토스트
   const toast = document.createElement('div');
   toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1D9E75;color:white;padding:9px 18px;border-radius:10px;font-size:12px;z-index:9999;box-shadow:0 3px 12px rgba(0,0,0,0.2);';
   toast.textContent = '✓ 대표 이미지로 설정됨';
@@ -214,7 +340,6 @@ function renderResortDetail(r) {
   const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
   const agencyClass = { realmaldives: 'real', honeymoonresort: 'honey', tourmin: 'tour' };
 
-  // 가격 카드
   const priceCardsHtml = agencyIds.map(agId => {
     const ag = agencies[agId];
     const rows = [];
@@ -239,7 +364,6 @@ function renderResortDetail(r) {
     const priceNoteHtml = ag.price_note
       ? `<div class="promo-badge" style="background:#FFF8E1;border-color:#FBC02D;color:#6D4C00;">📅 ${ag.price_note}</div>`
       : '';
-
     return `
 <div class="price-card">
   <div class="price-card-header ${agencyClass[agId]}">
@@ -253,11 +377,9 @@ function renderResortDetail(r) {
 </div>`;
   }).join('');
 
-  // 허니문 특전
   const hmAg = agencies[agencyIds[0]];
   const hmTierClass = r.honeymoon_tier === '최상' ? 'good' : r.honeymoon_tier === '중간' ? 'ok' : 'weak';
 
-  // PDF 링크
   const pdfLinksHtml = r.pdfs.length
     ? r.pdfs.map(p => `<button class="card-detail-btn" onclick="openPdfFromDetail('${p.file}', '${p.label}')" style="margin:4px 6px 4px 0;">📄 ${p.label}</button>`).join('')
     : '<span style="color:var(--text-light);font-size:12px;">관련 PDF 없음</span>';
@@ -279,6 +401,7 @@ function renderResortDetail(r) {
       </div>
       <div class="resort-tags">${(r.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
     </div>
+    <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모</button>
   </div>
 
   <!-- 이미지 갤러리 -->
@@ -340,60 +463,8 @@ function renderResortDetail(r) {
     <div class="block-header">📄 관련 PDF 견적서</div>
     <div class="block-body">${pdfLinksHtml}</div>
   </div>
-
-  <!-- 우리 메모 -->
-  <div class="block" id="memoBlock_${r.id}">
-    <div class="block-header">💬 우리 메모</div>
-    <div class="block-body">
-      <textarea class="resort-memo-input" id="memoInput_${r.id}"
-        placeholder="리조트에 대한 생각, 느낌, 체크사항을 메모하세요..."
-        rows="4"></textarea>
-      <div class="memo-footer">
-        <span class="memo-status" id="memoStatus_${r.id}"></span>
-        <button class="memo-save-btn" id="memoSaveBtn_${r.id}" onclick="window._saveMemo('${r.id}')">저장</button>
-      </div>
-    </div>
-  </div>
 </section>`;
 }
-
-// ── 메모 블록 초기화 & 저장 ────────────────────────────────────────
-let _memoDebounce = null;
-
-function initMemoBlock(resortId) {
-  const ta = document.getElementById(`memoInput_${resortId}`);
-  const status = document.getElementById(`memoStatus_${resortId}`);
-  if (!ta) return;
-
-  loadNote(resortId).then(text => {
-    ta.value = text;
-  });
-
-  ta.addEventListener('input', () => {
-    clearTimeout(_memoDebounce);
-    if (status) status.textContent = '...';
-    _memoDebounce = setTimeout(() => window._saveMemo(resortId), 1500);
-  });
-}
-
-window._saveMemo = async function(resortId) {
-  const ta = document.getElementById(`memoInput_${resortId}`);
-  const status = document.getElementById(`memoStatus_${resortId}`);
-  const btn = document.getElementById(`memoSaveBtn_${resortId}`);
-  if (!ta) return;
-  if (btn) btn.disabled = true;
-  try {
-    await saveNote(resortId, ta.value);
-    if (status) {
-      status.textContent = '저장됨 ✓';
-      setTimeout(() => { if (status) status.textContent = ''; }, 2500);
-    }
-  } catch (_) {
-    if (status) status.textContent = '저장 실패';
-  } finally {
-    if (btn) btn.disabled = false;
-  }
-};
 
 // PDF 탭으로 이동 + 파일 열기
 window.openPdfFromDetail = function(file, label) {
@@ -413,11 +484,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (_memoResortId) window._closeMemo();
+      else closeDetail();
+    }
+  });
 
-  // 오버레이 배경 클릭으로 닫기
   document.getElementById('detailOverlay')?.addEventListener('click', e => {
     if (e.target === e.currentTarget) closeDetail();
+  });
+
+  // 카드 리사이즈 핸들
+  initResizeHandle(
+    document.getElementById('cardsResizeHandle'),
+    document.querySelector('.cards-left-col'),
+    'cards-left-w', 240, 700
+  );
+
+  // 왼쪽 그리드 빈 공간 클릭 → 목록으로
+  document.getElementById('cardsGrid')?.addEventListener('click', e => {
+    if (!document.getElementById('tab-cards').classList.contains('detail-open')) return;
+    if (e.target.closest('.resort-card')) return;
+    window.closeCardDetail();
   });
 
   tabInited.add('cards');
