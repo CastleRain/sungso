@@ -387,7 +387,10 @@ window._imgSave = async function() {
 window._galleryThumb = function(el, resortId) {
   const url = decodeURIComponent(el.dataset.url || '');
   const main = document.getElementById(`galleryMainImg_${resortId}`);
-  if (main && url) main.src = url;
+  if (main && url) {
+    main.style.opacity = '0';
+    setTimeout(() => { main.src = url; main.style.opacity = '1'; }, 120);
+  }
   el.closest('.gallery-thumbs')?.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
 };
@@ -453,45 +456,76 @@ function renderYoutubeSection(r) {
 </div>`;
 }
 
+function buildQuickSummary(r) {
+  const items = [];
+  const ok = (label) => items.push({ label, ok: true });
+  const warn = (label) => items.push({ label, ok: false });
+
+  // 이동 수단
+  if (r.transfer_type === 'seaplane') {
+    r.transfer_minutes <= 35 ? ok(`✈ 수상비행기 ${r.transfer_minutes}분`) : warn(`✈ 수상비행기 ${r.transfer_minutes}분`);
+  } else {
+    ok(`🚤 스피드보트 ${r.transfer_minutes}분`);
+  }
+  if (r.has_hammock) ok('🛏️ 해먹 있음');
+  if (r.ratings.lagoon >= 4) ok('라군뷰 최상');
+  if (r.ratings.privacy >= 4) ok('프라이버시 우수');
+  if (r.ratings.dining >= 4) ok('다이닝 우수');
+  if (r.ratings.underwater >= 4) ok('스노클링 우수');
+  const hasAI = Object.values(r.agencies).some(ag => ag.meal_plan === 'AI');
+  if (hasAI) ok('올인클루시브 포함');
+
+  return items.slice(0, 7).map(({ label, ok: isOk }) =>
+    `<span class="qs-item ${isOk ? 'qs-ok' : 'qs-warn'}">${label}</span>`
+  ).join('');
+}
+
 function renderResortDetail(r) {
   const agencies = r.agencies;
   const agencyIds = Object.keys(agencies);
   const agencyNames = { realmaldives: '리얼몰디브', honeymoonresort: '허니문리조트', tourmin: '투어민' };
   const agencyClass = { realmaldives: 'real', honeymoonresort: 'honey', tourmin: 'tour' };
 
+  // 적합도 점수
+  const fitScore = Math.round((r.ratings.lagoon + r.ratings.underwater + r.ratings.privacy + r.ratings.dining) / 20 * 100);
+
+  // 가격 카드 (prow 스타일)
   const priceCardsHtml = agencyIds.map(agId => {
     const ag = agencies[agId];
-    const rows = [];
     const key_labels = [
       ['water_pool_4n', '🏊 워터풀빌라 4박'],
       ['water_4n', '🌊 워터빌라 4박'],
       ['mix_4n', '🔀 비치+워터 믹스 4박'],
       ['beach_4n', '🏖️ 비치빌라 4박'],
     ];
-    for (const [key, label] of key_labels) {
-      if (ag[key] == null) continue;
+    const rows = key_labels.filter(([k]) => ag[k] != null).map(([key, label]) => {
       const disc = ag[key + '_disc'];
       const base = ag[key];
-      const val = disc != null
-        ? `<span class="price-original">$${base.toLocaleString()}</span> <span class="price-discount">→ $${disc.toLocaleString()}</span>`
-        : `<span>$${base.toLocaleString()}</span>`;
-      rows.push(`<tr><td>${label}</td><td class="price-main">${val}</td></tr>`);
-    }
+      const hasDiscount = disc != null;
+      return `
+<div class="prow">
+  <span class="prow-label">${label}</span>
+  <div class="prow-prices">
+    ${hasDiscount ? `<span class="prow-original">$${base.toLocaleString()}</span>` : ''}
+    <span class="prow-final${hasDiscount ? ' is-discount' : ''}">$${(hasDiscount ? disc : base).toLocaleString()}</span>
+    <span class="prow-unit">/인</span>
+  </div>
+</div>`;
+    }).join('');
+
     const promoHtml = ag.promotions?.length
-      ? ag.promotions.map(p => `<div class="promo-badge">🎯 ${p}</div>`).join('')
-      : '';
+      ? ag.promotions.map(p => `<div class="promo-badge">🎯 ${p}</div>`).join('') : '';
     const priceNoteHtml = ag.price_note
-      ? `<div class="promo-badge" style="background:#FFF8E1;border-color:#FBC02D;color:#6D4C00;">📅 ${ag.price_note}</div>`
-      : '';
+      ? `<div class="promo-badge" style="background:#FFF8E1;border-color:#FBC02D;color:#6D4C00;">📅 ${ag.price_note}</div>` : '';
+
     return `
 <div class="price-card">
   <div class="price-card-header ${agencyClass[agId]}">
     <span class="price-agency ${agencyClass[agId]}">${agencyNames[agId]}</span>
     <span class="price-plan">${ag.meal_plan_name || ag.meal_plan}</span>
   </div>
-  <table class="price-table">${rows.join('')}</table>
-  ${promoHtml}
-  ${priceNoteHtml}
+  <div class="price-rows">${rows}</div>
+  ${promoHtml}${priceNoteHtml}
   <div class="cancellation-note">📋 취소: ${ag.cancellation || '미확인'}</div>
 </div>`;
   }).join('');
@@ -500,7 +534,7 @@ function renderResortDetail(r) {
   const hmTierClass = r.honeymoon_tier === '최상' ? 'good' : r.honeymoon_tier === '중간' ? 'ok' : 'weak';
 
   const pdfLinksHtml = r.pdfs.length
-    ? r.pdfs.map(p => `<button class="card-detail-btn" onclick="openPdfFromDetail('${p.file}', '${p.label}')" style="margin:4px 6px 4px 0;">📄 ${p.label}</button>`).join('')
+    ? r.pdfs.map(p => `<button class="pdf-link-btn" onclick="openPdfFromDetail('${p.file}', '${p.label}')">📄 ${p.label}</button>`).join('')
     : '<span style="color:var(--text-light);font-size:12px;">관련 PDF 없음</span>';
 
   return `
@@ -508,36 +542,53 @@ function renderResortDetail(r) {
   <!-- 헤더 -->
   <div class="resort-header">
     <div class="resort-header-left">
-      <div class="resort-num">${String(r.num).padStart(2,'0')} / 12</div>
       <div class="resort-name">${r.name_ko}</div>
       <div class="resort-name-en">${r.name_en}</div>
       <div class="resort-meta">
         <span class="meta-pill pill-blue">📍 ${r.atoll}</span>
         <span class="meta-pill pill-teal">${r.transfer_type === 'seaplane' ? '✈️' : '🚤'} ${r.transfer_minutes}분</span>
         ${r.villas ? `<span class="meta-pill pill-gray">🏠 ${r.villas}빌라</span>` : ''}
-        <span class="meta-pill pill-gray">📅 ${r.opened}년 오픈</span>
-        ${agencyIds.map(id => `<span class="meta-pill pill-${id === 'realmaldives' ? 'coral' : 'blue'}">${agencyNames[id]}</span>`).join('')}
+        ${r.opened ? `<span class="meta-pill pill-gray">📅 ${r.opened}년 오픈</span>` : ''}
+        ${agencyIds.map(id => `<span class="meta-pill pill-${id === 'realmaldives' ? 'coral' : id === 'tourmin' ? 'teal' : 'blue'}">${agencyNames[id]}</span>`).join('')}
       </div>
-      <div class="resort-tags">${(r.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</div>
     </div>
-    <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모</button>
+    <div class="detail-header-actions">
+      <div class="fit-score">
+        <div class="fit-score-num">${fitScore}%</div>
+        <div class="fit-score-label">취향 적합도</div>
+      </div>
+      <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모</button>
+    </div>
   </div>
+
+  <!-- Quick Summary -->
+  <div class="quick-summary">${buildQuickSummary(r)}</div>
 
   <!-- 이미지 갤러리 -->
   ${renderImageGallery(r)}
 
+  <!-- 가격 -->
+  <div class="block">
+    <div class="block-header">가격 비교 · 1인 USD · 4박</div>
+    <div class="block-body">
+      <div class="price-compare ${agencyIds.length > 1 ? 'two-col' : 'one-col'}">
+        ${priceCardsHtml}
+      </div>
+    </div>
+  </div>
+
   <!-- 기본 정보 -->
   <div class="block">
-    <div class="block-header">📋 기본 정보 & 특징</div>
+    <div class="block-header">리조트 특징</div>
     <div class="block-body">
       <p class="resort-desc">${r.description}</p>
       <div class="pros-cons">
         <div class="pros">
-          <div class="pros-title">✅ 장점</div>
+          <div class="pros-title">장점</div>
           <ul>${r.pros.map(p => `<li>${p}</li>`).join('')}</ul>
         </div>
         <div class="cons">
-          <div class="cons-title">⚠️ 단점</div>
+          <div class="cons-title">주의사항</div>
           <ul>${r.cons.map(c => `<li>${c}</li>`).join('')}</ul>
         </div>
       </div>
@@ -550,19 +601,9 @@ function renderResortDetail(r) {
     </div>
   </div>
 
-  <!-- 가격 -->
-  <div class="block">
-    <div class="block-header">💰 가격 비교 (1인 기준 USD · 4박)</div>
-    <div class="block-body">
-      <div class="price-compare ${agencyIds.length > 1 ? 'two-col' : 'one-col'}">
-        ${priceCardsHtml}
-      </div>
-    </div>
-  </div>
-
   <!-- 허니문 특전 -->
   <div class="block">
-    <div class="block-header">💍 허니문 특전</div>
+    <div class="block-header">허니문 특전</div>
     <div class="block-body honeymoon-block">
       <ul class="hm-list">
         ${(hmAg.honeymoon_benefits || []).map(b => `<li><span class="hm-icon">💗</span>${b}</li>`).join('')}
@@ -573,13 +614,13 @@ function renderResortDetail(r) {
 
   <!-- 유튜브 영상 -->
   <div class="block">
-    <div class="block-header">📹 영상 후기</div>
+    <div class="block-header">영상 후기</div>
     <div class="block-body">${renderYoutubeSection(r)}</div>
   </div>
 
   <!-- PDF -->
   <div class="block">
-    <div class="block-header">📄 관련 PDF 견적서</div>
+    <div class="block-header">관련 PDF 견적서</div>
     <div class="block-body">${pdfLinksHtml}</div>
   </div>
 </section>`;

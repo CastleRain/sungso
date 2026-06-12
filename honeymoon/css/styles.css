@@ -699,12 +699,58 @@ body {
 .report-panel::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
 .report-panel::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
 
-/* ── 리조트 섹션 콘텐츠 (기존 스타일 유지) ── */
-.resort-section { border-bottom: 2px solid var(--gray-100); padding: 28px 28px 32px; }
-.resort-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
-.resort-num { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-.resort-name { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; }
-.resort-name-en { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+/* ── 리조트 섹션 콘텐츠 ── */
+.resort-section { padding: 24px 24px 32px; }
+.resort-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.resort-num { display: none; }
+.resort-name { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.6px; line-height: 1.15; }
+.resort-name-en { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
+
+/* 헤더 우측 액션 영역 */
+.detail-header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+
+/* 적합도 카드 */
+.fit-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--primary-pale);
+  border: 1px solid rgba(29,158,117,0.18);
+  border-radius: 12px;
+  padding: 8px 14px 6px;
+  min-width: 68px;
+}
+.fit-score-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary-deep);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.fit-score-label { font-size: 8px; font-weight: 600; color: var(--primary); opacity: 0.75; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+/* Quick Summary 스트립 */
+.quick-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.qs-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.qs-ok { background: var(--primary-light); color: var(--primary-deep); }
+.qs-warn { background: var(--amber-light); color: #92400E; }
+.qs-icon { font-size: 11px; }
 .resort-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
 .meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid transparent; }
 .pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: rgba(29,158,117,0.25); }
@@ -717,9 +763,28 @@ body {
 .tag { font-size: 11px; color: var(--text-muted); background: var(--gray-100); padding: 2px 8px; border-radius: 4px; }
 
 /* 블록 공통 */
-.block { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.block-header { background: var(--gray-100); padding: 8px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
-.block-body { padding: 14px; }
+.block { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.block-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 16px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+.block-header::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 13px;
+  background: var(--primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.block-body { padding: 16px; }
 
 .resort-desc { font-size: 13.5px; line-height: 1.75; color: var(--text); margin-bottom: 14px; }
 .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
@@ -739,19 +804,39 @@ body {
 .rating-stars .empty { color: var(--gray-200); }
 
 /* 가격 블록 */
-.price-compare { display: grid; gap: 12px; }
+.price-compare { display: grid; gap: 14px; }
 .price-compare.two-col { grid-template-columns: 1fr 1fr; }
 .price-compare.one-col { grid-template-columns: 1fr; }
-.price-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.price-card-header { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+.price-card { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.price-card-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .price-card-header.real { background: var(--coral-light); border-bottom: 1px solid #F5C4B3; }
 .price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid rgba(29,158,117,0.25); }
-.price-card-header.tour { background: #f0f8f0; border-bottom: 1px solid #9FE1CB; }
-.price-agency.tour { color: #0a7a5a; }
-.price-agency { font-size: 12px; font-weight: 700; }
+.price-card-header.tour { background: #f0faf6; border-bottom: 1px solid rgba(29,158,117,0.18); }
+.price-agency { font-size: 13px; font-weight: 700; }
 .price-agency.real { color: var(--coral); }
 .price-agency.honey { color: var(--ocean-deep); }
-.price-plan { font-size: 11px; color: var(--text-muted); }
+.price-agency.tour { color: #0a7a5a; }
+.price-plan { font-size: 10px; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; }
+
+/* 가격 행 (table 대신) */
+.price-rows { padding: 4px 0; }
+.prow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.prow:last-child { border-bottom: none; }
+.prow-label { font-size: 12px; color: var(--text-muted); flex: 1; }
+.prow-prices { display: flex; align-items: baseline; gap: 6px; }
+.prow-original { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
+.prow-final { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.prow-final.is-discount { color: var(--primary-deep); }
+.prow-unit { font-size: 10px; color: var(--text-light); }
+
+/* 레거시 price-table (가격비교 탭 용) */
 .price-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .price-table tr { border-bottom: 1px solid var(--border); }
 .price-table tr:last-child { border-bottom: none; }
@@ -759,7 +844,7 @@ body {
 .price-table td:first-child { color: var(--text-muted); }
 .price-table td:last-child { text-align: right; font-weight: 600; color: var(--text); }
 .price-main { font-size: 15px !important; color: var(--text) !important; }
-.price-discount { color: var(--ocean-mid) !important; }
+.price-discount { color: var(--primary) !important; }
 .price-original { text-decoration: line-through; color: var(--text-light) !important; font-size: 11px !important; font-weight: 400 !important; }
 .promo-badge { margin: 8px 12px; padding: 6px 10px; background: var(--amber-light); border-radius: var(--radius); font-size: 11px; color: #633806; border: 1px solid #FAC775; }
 .promo-badge strong { color: #412402; }
@@ -1646,7 +1731,7 @@ body {
 }
 .gallery-main {
   width: 100%;
-  height: 280px;
+  height: 320px;
   background: linear-gradient(135deg, var(--ocean-deep), var(--teal));
   overflow: hidden;
 }
@@ -1655,24 +1740,27 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: opacity 0.2s;
+  transition: opacity 0.22s ease;
 }
 .gallery-thumbs {
   display: flex;
-  gap: 3px;
-  padding: 3px;
-  background: var(--gray-800);
+  gap: 4px;
+  padding: 6px;
+  background: var(--gray-100);
+  border-top: 1px solid var(--border);
 }
 .gallery-thumb {
   flex: 1;
-  height: 52px;
+  height: 56px;
   overflow: hidden;
   cursor: pointer;
-  opacity: 0.55;
+  opacity: 0.50;
   transition: opacity 0.15s;
-  border-radius: 2px;
+  border-radius: 6px;
+  border: 2px solid transparent;
 }
-.gallery-thumb.active, .gallery-thumb:hover { opacity: 1; }
+.gallery-thumb.active { opacity: 1; border-color: var(--primary); }
+.gallery-thumb:hover { opacity: 0.85; }
 .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .gallery-set-btn {
   position: absolute;
@@ -1787,6 +1875,19 @@ body {
   color: var(--text-light);
   border-left: 2px solid var(--border-mid);
 }
+.pdf-link-btn {
+  display: inline-block;
+  margin: 4px 6px 4px 0;
+  padding: 6px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pdf-link-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary-deep); }
 
 /* ════════════════════════════════════════════════════════════════
    반응형 조정
