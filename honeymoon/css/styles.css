@@ -465,44 +465,51 @@ body {
   background: linear-gradient(to top, rgba(0,0,0,0.40), transparent);
   pointer-events: none;
 }
-/* 뱃지 묶음 (좌상단) */
-.card-badges-top {
+/* 이동수단 뱃지 (우상단) */
+.card-transfer-badge {
+  position: absolute;
+  top: 9px; right: 9px;
+  background: rgba(0,0,0,0.48);
+  color: rgba(255,255,255,0.92);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+/* 해먹 뱃지 (좌상단) */
+.card-hammock-badge {
   position: absolute;
   top: 9px; left: 9px;
-  display: flex;
-  gap: 5px;
-}
-.card-transfer-badge {
-  background: rgba(0,0,0,0.52);
+  background: rgba(29,158,117,0.82);
   color: white;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 3px 8px;
   font-size: 10px;
   font-weight: 600;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.card-hammock-badge {
-  background: rgba(29,158,117,0.88);
-  color: white;
-  border-radius: 10px;
-  padding: 3px 8px;
-  font-size: 10px;
-  font-weight: 600;
-  backdrop-filter: blur(4px);
-}
-/* 순위 뱃지 (우하단) */
+/* 큐레이션 순위 뱃지 (좌하단) — 프리미엄 컨설턴트 스타일 */
 .card-rank-badge {
   position: absolute;
-  bottom: 9px; right: 9px;
-  font-size: 12px;
-  font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 10px;
-  backdrop-filter: blur(6px);
+  bottom: 10px; left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 2px solid rgba(255,255,255,0.50);
 }
-.rank-1 { background: rgba(29,158,117,0.88); color: white; }
-.rank-2 { background: rgba(127,119,221,0.82); color: white; }
-.rank-3 { background: rgba(0,0,0,0.48); color: white; }
+.rank-1 { background: rgba(21,120,90,0.82); color: white; border-left-color: rgba(255,255,255,0.60); }
+.rank-2 { background: rgba(100,95,200,0.72); color: rgba(255,255,255,0.95); border-left-color: rgba(255,255,255,0.45); }
+.rank-3 { background: rgba(20,20,20,0.52); color: rgba(255,255,255,0.82); border-left-color: rgba(255,255,255,0.28); }
 
 .card-body { padding: 14px 14px 12px; }
 .card-name-ko { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
@@ -1526,43 +1533,34 @@ body {
 }
 .price-reset-btn:hover { border-color: var(--coral); color: var(--coral); }
 
-/* 필터 결과 요약 */
+/* 정렬 컨텍스트 바 */
 .filter-summary {
   display: none;
-  padding: 6px 12px;
-  background: var(--ocean-pale);
-  border: 1px solid var(--border-mid);
-  border-radius: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.filter-summary b { color: var(--primary-deep); }
-.summary-count {
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background: var(--ocean-mid);
-  color: white;
-  border-radius: 10px;
-  padding: 1px 7px;
+  gap: 7px;
+  padding: 7px 14px;
+  background: var(--primary-pale);
+  border-top: 1px solid rgba(29,158,117,0.10);
+  border-bottom: 1px solid rgba(29,158,117,0.10);
+}
+.ctx-icon {
   font-size: 11px;
-  font-weight: 700;
-  margin-right: 4px;
+  color: var(--primary);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.ctx-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.ctx-text strong { color: var(--primary-deep); font-weight: 700; }
+.ctx-rank-note {
+  color: var(--text-light);
+  font-size: 10px;
 }
 
-/* 카드 최저가 배지 */
-.card-rank-badge {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  background: rgba(29,158,117,0.9);
-  color: white;
-  border-radius: 12px;
-  padding: 3px 9px;
-  font-size: 11px;
-  font-weight: 700;
-}
-.card-price-value.price-best { color: var(--teal); }
+.card-price-value.price-best { color: var(--primary-deep); }
 .price-na { font-size: 11px; color: var(--text-light); font-style: italic; }
 
 /* ════════════════════════════════════════════════════════════════

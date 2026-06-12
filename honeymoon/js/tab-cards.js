@@ -29,6 +29,20 @@ function ratingDot(n) {
 const TIER_EMOJI = { '최상': '💗', '중간': '💛', '단순': '○' };
 const TIER_SHORT = { '최상': '허니문 최상', '중간': '중간', '단순': '기본' };
 
+const RANK_SHORT = {
+  water_pool_4n: '워터풀',
+  mix_4n: '믹스',
+  water_4n: '워터',
+  beach_4n: '비치',
+};
+const SORT_FULL_NAME = {
+  water_pool_4n: '워터풀빌라 4박',
+  mix_4n: '비치+워터 믹스 4박',
+  water_4n: '워터빌라 4박',
+  beach_4n: '비치빌라 4박',
+};
+const RANK_SYMBOL = { 1: '✦', 2: '✧', 3: '·' };
+
 function renderCard(resort, sortKey, rank) {
   const price = getBestPrice(resort, sortKey);
   const isPriceBest = rank === 1 && price != null;
@@ -41,17 +55,17 @@ function renderCard(resort, sortKey, rank) {
       + `<div class="card-image-placeholder" style="display:none;">🏝️</div>`
     : `<div class="card-image-placeholder">🏝️</div>`;
 
-  const rankBadge = showRank ? `<div class="card-rank-badge rank-${rank}">#${rank}</div>` : '';
+  const rankBadge = showRank
+    ? `<div class="card-rank-badge rank-${rank}">${RANK_SYMBOL[rank]} ${RANK_SHORT[sortKey]} ${rank}위</div>`
+    : '';
 
   return `
 <div class="resort-card" data-id="${resort.id}" onclick="window._cardClick('${resort.id}')">
   <div class="card-image">
     ${imgHtml}
     <div class="card-image-gradient"></div>
-    <div class="card-badges-top">
-      <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
-      ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
-    </div>
+    ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
+    <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
     ${rankBadge}
   </div>
   <div class="card-body">
@@ -118,22 +132,26 @@ function updateFilterSummary(sorted) {
   if (!summaryEl) return;
 
   if (sorted.length === 0) {
-    summaryEl.textContent = '조건에 맞는 리조트가 없습니다';
-    summaryEl.style.display = 'block';
+    summaryEl.innerHTML = '<span class="ctx-text">조건에 맞는 리조트가 없습니다</span>';
+    summaryEl.style.display = 'flex';
     return;
   }
 
   const prices = sorted.map(r => getBestPrice(r, currentSort)).filter(p => p != null);
-  if (prices.length === 0) { summaryEl.style.display = 'none'; return; }
+  const minP = prices.length ? Math.min(...prices) : null;
+  const maxP = prices.length ? Math.max(...prices) : null;
+  const rangeStr = (minP != null && minP !== maxP)
+    ? ` · $${minP.toLocaleString()} – $${maxP.toLocaleString()} /인`
+    : '';
 
-  const minP = Math.min(...prices);
-  const maxP = Math.max(...prices);
-  const cheapest = sorted.find(r => getBestPrice(r, currentSort) === minP);
-
-  summaryEl.innerHTML = `<span class="summary-count">${sorted.length}개 리조트</span>
-    · 가격 범위: <b>$${minP.toLocaleString()}</b> ~ <b>$${maxP.toLocaleString()}</b> /인
-    · 최저가: <b>${cheapest?.name_ko}</b> ($${minP.toLocaleString()})`;
-  summaryEl.style.display = 'block';
+  summaryEl.innerHTML = `
+    <span class="ctx-icon">✦</span>
+    <span class="ctx-text">
+      <strong>${SORT_FULL_NAME[currentSort]}</strong> 최저가순${rangeStr}
+      <span class="ctx-rank-note">· 상위 3개 리조트 큐레이션 강조</span>
+    </span>
+  `;
+  summaryEl.style.display = 'flex';
 }
 
 function renderGrid() {
