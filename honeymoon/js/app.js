@@ -100,7 +100,7 @@ function switchTab(tabId) {
         'price-left-w', 280, 780
       );
     }
-    if (tabId === 'tournament') initTournament();
+    if (tabId === 'tournament') initTournament(openDetailInTournament);
     if (tabId === 'pdf') initPdf();
   }
 }
@@ -132,6 +132,24 @@ function initResizeHandle(handle, leftEl, storageKey, min = 200, max = 720) {
 }
 
 // ── 카드 탭 분할 오른쪽 패널에 상세 렌더 ──────────────────────────
+// ── 토너먼트 탭 오른쪽 상세 패널 ─────────────────────────────────
+function openDetailInTournament(resortId) {
+  const resort = RESORTS.find(r => r.id === resortId);
+  const col = document.getElementById('tournamentDetailCol');
+  if (!col || !resort) return;
+
+  // 현재 매치에서 이 리조트가 선택 가능한 상대인지 확인해서 "선택" 버튼 표시
+  col.innerHTML = `
+    <div class="tournament-detail-bar">
+      <button class="tdb-back-btn" onclick="window._tournamentCloseDetail()">← 돌아가기</button>
+      <button class="tdb-pick-btn" onclick="window._tournamentPick('${resort.id}')">💗 이 리조트 선택</button>
+    </div>
+    <div class="tournament-detail-content">${renderResortDetail(resort)}</div>`;
+
+  document.getElementById('tournamentSplit')?.classList.add('detail-open');
+  col.scrollTop = 0;
+}
+
 let _currentDetailResortId = null;
 
 function openDetailInCards(resortId) {

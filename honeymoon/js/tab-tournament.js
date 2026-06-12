@@ -9,6 +9,26 @@ const RATING_KEYS = ['lagoon', 'underwater', 'privacy', 'dining'];
 const RATING_LABELS = { lagoon: '라군뷰', underwater: '수중환경', privacy: '프라이빗', dining: '다이닝' };
 
 let state = null;  // { phase, bracket, currentMatch, winners, weights, champion }
+let onDetailOpen = null;
+
+// ── 상세 패널 열기/닫기 ────────────────────────────────────────────
+function openTournamentDetail(resortId) {
+  if (onDetailOpen) onDetailOpen(resortId);
+}
+
+function closeTournamentDetail() {
+  document.getElementById('tournamentSplit')?.classList.remove('detail-open');
+  const col = document.getElementById('tournamentDetailCol');
+  if (col) col.innerHTML = '';
+}
+
+window._tournamentCloseDetail = closeTournamentDetail;
+
+window._tournamentPick = (id) => {
+  closeTournamentDetail();
+  // 상세 닫기 애니메이션 후 선택 처리
+  setTimeout(() => pickWinner(id), 30);
+};
 
 // ── 가중치 계산 점수 ────────────────────────────────────────────────
 function weightedScore(resort, weights) {
@@ -161,9 +181,7 @@ function renderMatch() {
   </div>
 </div>`;
 
-  window._tournamentDetailClick = (id) => {
-    window.dispatchEvent(new CustomEvent('open-detail', { detail: { id } }));
-  };
+  window._tournamentDetailClick = openTournamentDetail;
 
   document.querySelectorAll('.match-pick-btn').forEach(btn => {
     btn.addEventListener('click', () => pickWinner(btn.dataset.id));
@@ -212,6 +230,7 @@ function renderMatchCard(resort, side) {
 }
 
 function pickWinner(winnerId) {
+  closeTournamentDetail();
   const loserId = currentMatchPair().find(id => id !== winnerId);
 
   state.winners[state.roundIndex] = state.winners[state.roundIndex] || [];
@@ -290,10 +309,7 @@ function renderResult() {
   </div>
 </div>`;
 
-  window._tournamentDetailClick = (id) => {
-    // app.js의 openDetail 함수 연결 필요 — 이벤트로 전달
-    window.dispatchEvent(new CustomEvent('open-detail', { detail: { id } }));
-  };
+  window._tournamentDetailClick = openTournamentDetail;
 
   document.getElementById('restartBtn').addEventListener('click', () => {
     state = null;
@@ -303,6 +319,7 @@ function renderResult() {
 }
 
 export function initTournament(detailOpenFn) {
+  if (detailOpenFn) onDetailOpen = detailOpenFn;
   const saved = loadState();
   if (saved && saved.phase === 'match') {
     state = saved;

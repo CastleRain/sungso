@@ -1138,6 +1138,83 @@ body {
 /* ════════════════════════════════════════════════════════════════
    탭 4: 토너먼트
    ════════════════════════════════════════════════════════════════ */
+/* ── 토너먼트 split 레이아웃 ──────────────────────────────────── */
+.tournament-split {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+.tournament-main-col {
+  width: 100%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tournament-detail-col {
+  width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: white;
+  border-left: 1px solid transparent;
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0s 0.32s;
+}
+.tournament-split.detail-open .tournament-main-col {
+  width: 420px;
+}
+.tournament-split.detail-open .tournament-detail-col {
+  width: calc(100% - 420px);
+  overflow-y: auto;
+  border-color: var(--border);
+  animation: detailSlideIn 0.3s ease both;
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 상세 패널 상단 바 */
+.tournament-detail-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.tdb-back-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 8px;
+  background: white;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.tdb-back-btn:hover { border-color: var(--primary); color: var(--primary-deep); }
+.tdb-pick-btn {
+  padding: 7px 18px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.2px;
+}
+.tdb-pick-btn:hover { background: var(--primary-deep); }
+.tdb-pick-btn:active { transform: scale(0.96); }
+
+/* split 상태에서 wrap max-width 해제 */
+.tournament-split.detail-open .tournament-wrap {
+  max-width: 100%;
+}
+
 .tournament-wrap {
   max-width: 900px;
   margin: 0 auto;
