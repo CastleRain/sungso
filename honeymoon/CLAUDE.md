@@ -236,6 +236,20 @@ sungso 루트 사이트와 통일된 핑크/로즈 테마:
    - `localStorage['featured_img_' + resortId]`에 저장됨
    - 브라우저 캐시 삭제 시 초기화됨
 
+## 리조트 메모 (Firebase)
+
+`js/firebase-notes.js` — `resort_notes` Firestore 컬렉션 연동 (신규 파일)
+
+| 함수 | 설명 |
+|---|---|
+| `loadNote(resortId)` | 문서 ID = resortId, `note` 필드 읽기 |
+| `saveNote(resortId, text)` | `{ note, updatedAt: serverTimestamp() }` 병합 저장 |
+
+- 모든 상세 패널(카드·지도·오버레이)에서 리조트를 열면 자동 로드
+- textarea `input` 시 1.5초 debounce 자동저장 + 수동 저장 버튼
+
+---
+
 ## 진행 상황
 
 | 날짜 | 작업 |
@@ -243,3 +257,4 @@ sungso 루트 사이트와 통일된 핑크/로즈 테마:
 | 2026-06-12 | CLAUDE.md 최초 작성 |
 | 2026-06-12 | 핑크 테마 전환, 리조트 3개 추가(투어민), featured_image 지원 |
 | 2026-06-12 | UX 7종 개선: 분할레이아웃·지도 핀 직접 상세·토너먼트 버그·필터 단순화·2인합산 수정·대표이미지 UI |
+| 2026-06-12 | UX 5종 추가: 카드→분할 전환·홈 내비바·스크롤 픽스·리조트 메모(Firebase)·토너먼트 상세보기 |
