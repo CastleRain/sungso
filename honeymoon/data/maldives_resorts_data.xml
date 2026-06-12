@@ -3,9 +3,10 @@
   몰디브 허니문 리조트 비교 데이터
   여행 일정: 2027년 3월 8일(일)~12일(목) 4박 5일
   여행자: 임성우 + 임소희 (2인)
-  출처: 리얼몰디브(realmaldives.co.kr) / 허니문리조트(honeymoonresort.co.kr)
-  작성일: 2026-06-10
-  참고: 모든 가격은 1인 기준 달러. 수상비행기 이동비 포함. 항공권 별도.
+  출처: 리얼몰디브(realmaldives.co.kr) / 허니문리조트(honeymoonresort.co.kr) / 투어민(tourmin.co.kr)
+  참고: 리조트별 PDF 상세 자료 반영 (2026-06-12 업데이트)
+  작성일: 2026-06-10 / 최종수정: 2026-06-12
+  참고: 모든 가격은 1인 기준 달러. 수상비행기·스피드보트 이동비 포함. 항공권 별도.
 -->
 <maldives_resort_data>
 
@@ -49,6 +50,14 @@
         <limited>1인당 추가 $50 (2026-06-19까지 예약 시)</limited>
         <total_max>1인당 최대 $200 할인</total_max>
       </discount>
+    </agency>
+    <agency id="tourmin">
+      <name>투어민</name>
+      <url>https://www.tourmin.co.kr</url>
+      <characteristics>
+        몰디브 전문 여행사. 에메랄드·오블루상겔리·아웃리거 3개 리조트 단독 취급.
+        취소 규정 및 할인 조건은 리조트별 상이 — 예약 전 반드시 확인.
+      </characteristics>
     </agency>
   </agencies>
 
@@ -339,6 +348,11 @@
         <upgrade>HB PLUS → 다인어라운드 AI로 무료 업그레이드</upgrade>
         <note>즉, 지금 예약하면 HB+ 가격에 AI(올인클루시브) 이용 가능!</note>
       </upgrade_promotion>
+      <upgrade_promotion>
+        <condition>투숙기간 2027-05-11~09-30 / 2027-03-31까지 예약 시</condition>
+        <upgrade>HB → HB PLUS 무료 업그레이드 + HB PLUS → 다인어라운드 AI 무료 업그레이드</upgrade>
+        <note>비수기 투숙: HB 가격에 AI 이용 가능. 3월 31일까지 예약해야 혜택 적용.</note>
+      </upgrade_promotion>
 
       <prices unit="USD_per_person">
         <season name="성수기" from="2027-01-11" to="2027-04-10">
@@ -566,7 +580,15 @@
         <AI>
           <item>HB+Bev 전체 포함</item>
           <item>중식 추가 포함</item>
-          <item>스파 20% 할인</item>
+          <item>도착일 샴페인 1병</item>
+          <item>50여 종 와인 포함 (화이트·레드·스파클링)</item>
+          <item>로컬 투어 컬렉션 1회 (가이드 투어)</item>
+          <item>플로팅 조식 1회 (4박 이상, 특정 빌라 투숙 시, 사전예약 필수)</item>
+          <item>비치 디너 1회 (날짜 지정, 사전예약 필수)</item>
+          <item>High Tea 매일 (시간 지정 애프터눈 티)</item>
+          <item>스파 30분 무료 (7박 이상) — 4박은 스파 20% 할인</item>
+          <item>세탁 서비스 (박수에 따른 규정 적용)</item>
+          <item>스파 20% 할인 (4~6박 투숙 시)</item>
           <item>피트니스·다목적코트·탁구·당구·비치발리볼 무료</item>
           <item>Wi-Fi·스노클링 장비 무료</item>
           <item>수상비행기 왕복 포함 (or 스피드보트: 1인 $80 왕복 할인)</item>
@@ -823,6 +845,9 @@
           <item>스노클링 장비·무동력 수상스포츠 무료</item>
           <item>세일링 30분 무료·수영 30분 무료</item>
           <item>스쿠버다이빙 10% 할인</item>
+          <item>익스커션 1회 포함 (4박 기준, 투숙 조건 충족 시)</item>
+          <item>세탁 서비스 (7박 이상 규정 확인 필요)</item>
+          <item>7박·11박 스파 포함 — 투숙 박수에 따라 스파 트리트먼트 제공 규정 적용</item>
           <item>수상비행기 45분 포함</item>
         </AI>
         <restaurants>
@@ -946,14 +971,36 @@
 
       <meal_plan_details>
         <AI>
-          <item>조·중·석식: Korakali 메인 레스토랑 (매일 테마 변경 뷔페)</item>
-          <item>주류: 무제한 포함</item>
-          <item>버틀러 서비스 (WhatsApp 소통, 일정 조율)</item>
+          <item>조·중·석식: Korakali 레스토랑 (라이브 쿠킹 스테이션 포함 인터내셔널 뷔페)</item>
+          <item>Raakani 레스토랑: 중식 1인 $25 크레딧 / 석식 1인 $40 크레딧 (사전예약 필수)</item>
+          <item>Teppanyaki / Fanihandhi Bar / Thundi 바 포함</item>
+          <item>프리미엄 브랜드 음료·주류 무제한 (모든 레스토랑·바)</item>
+          <item>Fanihandhi Bar: 10:00~23:00 아이스크림 무제한</item>
+          <item>미니바: 논알코올+맥주 1일 1리필</item>
+          <item>50분 커플 스파 트리트먼트 1회 (AI 기본 포함, 사전예약 필수)</item>
+          <item>15분 포토숏 세션 1회 (AI 기본 포함)</item>
+          <item>풀빌라 투숙 시 플로팅 조식 1회</item>
+          <item>가이드 하우스 리프 스노클링 트립 1회 (사전예약 필수)</item>
+          <item>핀 토이 또는 바나나 보트 체험 1회</item>
+          <item>그룹 샌드뱅크 체험 1회</item>
+          <item>선셋 피싱 1회</item>
+          <item>선셋 그룹 크루즈 or 돌핀 크루즈 중 진행 가능한 익스커션 1회</item>
+          <item>아일랜드 호스트(버틀러) 서비스 — WhatsApp 즉각 응대, 일정 조율</item>
+          <item>매일 2회 턴다운 서비스</item>
+          <item>피트니스·멀티스포츠코트 무료</item>
+          <item>무동력 수상 스포츠 무료 (카누·SUP·패들보트)</item>
           <item>스노클링 장비 무료</item>
-          <item>수상스포츠 무료</item>
+          <item>Koko Kids Club 무료 (4~11세)</item>
           <item>Wi-Fi 무료</item>
           <item>수상비행기 35분 포함</item>
         </AI>
+        <restaurants>
+          <restaurant>Korakali — 인터내셔널 메인 다이닝. 조·중·석식 (라이브 쿠킹 스테이션)</restaurant>
+          <restaurant>Raakani — 스페셜티. 중식 $25 크레딧 / 석식 $40 크레딧 (사전예약)</restaurant>
+          <restaurant>Teppanyaki — 일식 철판구이</restaurant>
+          <restaurant>Fanihandhi Bar — 바·아이스크림. 10:00~23:00</restaurant>
+          <restaurant>Thundi — 바</restaurant>
+        </restaurants>
       </meal_plan_details>
 
       <honeymoon_benefit>
@@ -1064,13 +1111,37 @@
         <AI>
           <item>RAAYA Life: 올데이다이닝 뷔페. 조식(07:00~10:00)·중식(12:00~14:30)·석식(19:00~22:00)</item>
           <item>매주 금요일 Grand Maldivian Night 갈라디너 (이날 타 레스토랑 모두 closed)</item>
+          <item>Speciality Dine Around — 4박 투숙 시 각 1회씩 제공 (사전예약 필수, 날씨/예약 가능 여부 따라 변동):
+            · The Village — 이탈리안 (파스타·뇨끼·리조또)
+            · Ampere &amp; ND — 팬 아시아 퀴진 (스테이크·씨푸드·베지테리안)
+            · MIZAJ — Middle Eastern Fine Dining</item>
+          <item>5박 이상: 1박당 3개 스페셜티 레스토랑 중 택 1 추가</item>
           <item>SOAQ Pool Bar: 칵테일+스낵. 10:00~22:00</item>
           <item>RAAYA HUB Sports Bar: 12:00~00:00</item>
           <item>Seb's Shack: 16:00~19:00</item>
           <item>프리미엄 브랜드 주류 모두 무제한</item>
-          <item>스파 트리트먼트 45분: 4~7박 2회, 8~11박 4회</item>
-          <item>다양한 스포츠 시설 (패들 테니스·미니 골프·풋살)</item>
+          <item>미니바 1일 1회 리필 (알코올·무알코올)</item>
+          <item>ELENA Spa: 45분 스파 트리트먼트 — 4~7박 1회, 8~11박 2회 (사전예약)</item>
+          <item>스노클링 투어 매일 1회 (날씨·현지 사정에 따라 변동, 사전예약)</item>
+          <item>선셋 피싱 1회</item>
+          <item>선셋 크루즈 1회</item>
+          <item>도니(전통 목선) 만들기 체험 1회</item>
+          <item>피트니스·패들 테니스·미니 골프·풋살 무료</item>
+          <item>YOGA·필라테스·주간 웰니스 프로그램 무료</item>
+          <item>DISCOVERY DEN Kids Club 무료</item>
+          <item>무동력 수상스포츠·스노클링 장비 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>수상비행기 45~50분 포함</item>
         </AI>
+        <restaurants>
+          <restaurant>RAAYA Life — 올데이 다이닝 뷔페 (메인)</restaurant>
+          <restaurant>The Village — 이탈리안 스페셜티 (4박 1회 포함)</restaurant>
+          <restaurant>Ampere &amp; ND — 팬 아시아 스페셜티 (4박 1회 포함)</restaurant>
+          <restaurant>MIZAJ — Middle Eastern Fine Dining (4박 1회 포함)</restaurant>
+          <restaurant>SOAQ Pool Bar — 칵테일·스낵 10:00~22:00</restaurant>
+          <restaurant>RAAYA HUB Sports Bar — 12:00~00:00</restaurant>
+          <restaurant>Seb's Shack — 16:00~19:00</restaurant>
+        </restaurants>
       </meal_plan_details>
 
       <honeymoon_benefit>
@@ -1214,8 +1285,10 @@
           <item>선셋 크루즈 or 스타게이징 크루즈 중 택1</item>
           <item>미니바 1일 1회 리필 (와인·맥주·소프트드링크·스낵)</item>
           <item>스노클링 매일 2회 위클리 셔틀, 장비 무료</item>
-          <item>무동력 수상스포츠 무료</item>
+          <item>무동력 수상스포츠 무료 (SUP·카누·워터바이크)</item>
+          <item>처음 두 레귤러 다이브 20% 할인</item>
           <item>Wi-Fi 무료</item>
+          <item>도착 시 전통 보두베루 환영 퍼포먼스 + 로즈 샴페인</item>
           <item>스피드보트 40분 왕복 포함</item>
         </VARU_PLAN>
       </meal_plan_details>
@@ -1337,6 +1410,11 @@
           <item>Ministry of Crab·Nihonbashi Blue·Carne Diem 등(마리나): $50 크레딧, 주류 불포함</item>
           <item>음료 무제한 (마리나 레스토랑 제외)</item>
           <item>무동력 수상스포츠·스노클링 장비 무료</item>
+          <item>Snorkeling 101 액티비티 (가이드 스노클링 기초 체험)</item>
+          <item>Maldives Discovery Center 가이드 투어 매일</item>
+          <item>Marine Discovery Center — 산호보전 투어 + 돌핀 투어</item>
+          <item>도서관 스낵박스 제공</item>
+          <item>선라이즈 요가·아쿠아요가·비치발리볼·줄바(Zumba) 무료</item>
           <item>쿠킹 클래스 1회 (사전예약)</item>
           <item>30분 스냅 촬영 후 5×7 사진 1매 (레크레이션팀 예약)</item>
           <item>크로스로드 무료 셔틀보트 매일 5회</item>
@@ -1369,6 +1447,297 @@
   </resort>
 
   <!-- ================================================================ -->
+  <!-- 리조트 10: 에메랄드 파스멘두 (투어민 단독) -->
+  <!-- ================================================================ -->
+  <resort id="emerald">
+    <name_ko>에메랄드 파스멘두</name_ko>
+    <name_en>Emerald Faarufushi Resort &amp; Spa</name_en>
+    <atoll>라아 아톨 (Raa Atoll)</atoll>
+    <coordinates lat="5.85" lon="72.98"/>
+    <distance_from_male_km>160</distance_from_male_km>
+    <direction_from_male>북서(NW)</direction_from_male>
+    <transfer type="seaplane" minutes="50">수상비행기 50분. 12개 리조트 중 최장 이동.</transfer>
+    <opened>2019</opened>
+    <villas>80</villas>
+    <homepage>https://www.emerald-faarufushi.com</homepage>
+    <operator>Emerald Collection (이탈리아 럭셔리 브랜드)</operator>
+    <membership>LHW (Leading Hotels of the World) 회원</membership>
+    <agencies_available>
+      <agency_ref>tourmin</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        라아 아톨 수상비행기 50분. LHW(Leading Hotels of the World) 회원 이탈리아 럭셔리 브랜드.
+        디럭스 프리미엄 AI — 프리미엄 와인/샴페인/위스키 40여 종 포함, 알라카르테 메인코스 무제한.
+        소믈리에 5명 상주. 하우스리프 우수 — 객실 앞 직접 스노클링.
+        트립어드바이저 최상위 평점. 12개 리조트 중 다이닝·주류 퀄리티 최상위.
+        단점: 12개 리조트 중 가격 최고가. 투어민 단독 취급.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">5</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">4</rating>
+        <rating category="다이닝">5_최상위</rating>
+        <rating category="주류퀄리티">5_최상위</rating>
+      </ratings>
+      <pros>
+        <pro>LHW 멤버 — 다이닝·주류 퀄리티 12개 리조트 중 최상위</pro>
+        <pro>알라카르테 메인코스 무제한 + 소믈리에 5명 상주</pro>
+        <pro>프리미엄 와인·샴페인·위스키 40여 종 포함</pro>
+        <pro>하우스리프 우수, 객실 앞 직접 스노클링</pro>
+        <pro>트립어드바이저 최상위 평점</pro>
+        <pro>허니문: 스파 60분 + 비치 로맨틱 디너 포함</pro>
+        <pro>돌핀 투어 또는 전통 낚시 1회 포함 (4박 이상)</pro>
+      </pros>
+      <cons>
+        <con>12개 리조트 중 가격 최고가</con>
+        <con>수상비행기 50분 — 최장 이동</con>
+        <con>투어민 단독 제공 (타 여행사 비교 불가)</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="tourmin">
+      <meal_plan id="DAI">디럭스 프리미엄 올인클루시브 (Deluxe All-Inclusive)</meal_plan>
+      <price_note>요금 적용기간: 2027-01-11 ~ 2027-04-11 (3월 8일 포함)</price_note>
+
+      <prices unit="USD_per_person">
+        <category name="단독_4박">
+          <room type="워터빌라">3198</room>
+          <room type="워터풀빌라">3293</room>
+        </category>
+        <category name="룸믹스_4박">
+          <room type="믹스">3517</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <DAI>
+          <item>알라카르테 메인코스 무제한 (전 레스토랑)</item>
+          <item>프리미엄 와인·샴페인·위스키·스피릿 40여 종 무제한</item>
+          <item>소믈리에 5명 상주</item>
+          <item>하우스리프 스노클링 무료 (객실 앞 직접 입수 가능)</item>
+          <item>무동력 수상스포츠 무료</item>
+          <item>피트니스·테니스 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>수상비행기 50분 포함</item>
+        </DAI>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>투어민 확인 필요</certificate_validity>
+        <benefits>
+          <benefit>스파 60분 1회</benefit>
+          <benefit>샴페인 1병 (도착일)</benefit>
+          <benefit>비치 로맨틱 디너 1회</benefit>
+          <benefit>체크인 시 가능하면 객실 업그레이드</benefit>
+          <benefit>돌핀 투어 or 전통 낚시 1회 선택 (4박 이상)</benefit>
+        </benefits>
+        <comment>스파 60분 + 로맨틱 디너 포함. 다이닝 퀄리티 12개 리조트 최상. 가격은 최고.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>투어민 취소 규정 확인 필요</rule>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 11: 오블루 상겔리 (투어민 단독) -->
+  <!-- ================================================================ -->
+  <resort id="oblu_sangeli">
+    <name_ko>오블루 상겔리</name_ko>
+    <name_en>OBLU SELECT Sangeli</name_en>
+    <atoll>노스 말레 아톨 (North Malé Atoll)</atoll>
+    <coordinates lat="4.40" lon="73.55"/>
+    <distance_from_male_km>18</distance_from_male_km>
+    <direction_from_male>북(N)</direction_from_male>
+    <transfer type="speedboat" minutes="50">스피드보트 50분. 수상비행기 없음.</transfer>
+    <opened>2017</opened>
+    <villas>120</villas>
+    <homepage>https://www.coloursofoblu.com/oblu-select-sangeli</homepage>
+    <agencies_available>
+      <agency_ref>tourmin</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        노스 말레 아톨 스피드보트 50분. 모던·세련된 디자인, 객실 간 간격 넓어 프라이빗.
+        성인 전용 섬(One Banyan Island) + 성인전용 바 보유.
+        라군 넓고 하우스리프 접근성 좋음.
+        세러너티 AI 기본 플랜에 스파 45분 + 스페셜티 다이닝 2회 포함.
+        12개 리조트 중 가격 최저 포지션 (워터빌라 $2,182~).
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">4</rating>
+        <rating category="프라이빗">5</rating>
+        <rating category="다이닝">4</rating>
+        <rating category="가성비">5</rating>
+      </ratings>
+      <pros>
+        <pro>12개 리조트 중 가격 최저 — 워터빌라 4박 $2,182~</pro>
+        <pro>스피드보트 50분 — 수상비행기 대비 저렴·확실</pro>
+        <pro>성인 전용 섬 + 성인전용 바</pro>
+        <pro>스파 45분 + 스페셜티 다이닝 2회 AI 기본 포함</pro>
+        <pro>허니문 특전 5종 (침대장식·캔들디너·케이크·버블배스·기프트)</pro>
+        <pro>Just Wok·Just Grill 등 다양한 레스토랑 구성</pro>
+      </pros>
+      <cons>
+        <con>수상비행기 경험 없음</con>
+        <con>프리미엄 주류 구성은 에메랄드 대비 약함</con>
+        <con>투어민 단독 제공</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="tourmin">
+      <meal_plan id="SERENITY">세러너티 AI 플랜 (Serenity AI)</meal_plan>
+      <price_note>요금 적용기간: 2027-01-05 ~ 2027-04-09 (3월 8일 포함)</price_note>
+
+      <prices unit="USD_per_person">
+        <category name="단독_4박">
+          <room type="비치빌라">2182</room>
+          <room type="워터빌라">2236</room>
+          <room type="워터풀빌라">2632</room>
+        </category>
+        <category name="룸믹스_4박">
+          <room type="믹스">2406</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <SERENITY>
+          <item>조·중·석식 포함</item>
+          <item>음료·주류 무제한</item>
+          <item>스파 45분 1회 AI 기본 포함</item>
+          <item>스페셜티 다이닝 2회 AI 기본 포함</item>
+          <item>성인 전용 섬 One Banyan Island 이용</item>
+          <item>성인전용 바 이용</item>
+          <item>무동력 수상스포츠·스노클링 장비 무료</item>
+          <item>Wi-Fi 무료</item>
+          <item>스피드보트 50분 포함</item>
+        </SERENITY>
+        <restaurants>
+          <restaurant>Just Wok — 아시안</restaurant>
+          <restaurant>Just Grill — 그릴</restaurant>
+          <restaurant>기타 스페셜티 레스토랑 (사전예약 2회 포함)</restaurant>
+        </restaurants>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>35일 이내 취소 100% 취소료. 투어민 조건 확인.</certificate_validity>
+        <benefits>
+          <benefit>로맨틱 침대장식 1회</benefit>
+          <benefit>로맨틱 캔들릿 디너 1회</benefit>
+          <benefit>허니문 케이크 1회</benefit>
+          <benefit>로맨틱 턴다운 (아로마틱 버블배스) 1회</benefit>
+          <benefit>허니문 기프트 1회</benefit>
+        </benefits>
+        <comment>5종 허니문 특전 구성 충실. 스파·스페셜티 다이닝은 AI 기본 포함으로 실질 혜택 높음.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>35일 이내 취소 100% 취소료</rule>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
+  <!-- 리조트 12: 아웃리거 마푸시바루 (투어민 단독) -->
+  <!-- ================================================================ -->
+  <resort id="outrigger">
+    <name_ko>아웃리거 마푸시바루</name_ko>
+    <name_en>Outrigger Maldives Maafushivaru Resort</name_en>
+    <atoll>사우스 아리 아톨 (South Ari Atoll)</atoll>
+    <coordinates lat="3.90" lon="72.75"/>
+    <distance_from_male_km>90</distance_from_male_km>
+    <direction_from_male>서(W)</direction_from_male>
+    <transfer type="seaplane" minutes="25">수상비행기 25분. 12개 리조트 중 수상비행기 이동 최단.</transfer>
+    <opened>2020 (리빌딩)</opened>
+    <villas>81</villas>
+    <homepage>https://www.outrigger.com/hotels-resorts/maldives/outrigger-maldives-maafushivaru-resort</homepage>
+    <agencies_available>
+      <agency_ref>tourmin</agency_ref>
+    </agencies_available>
+
+    <characteristics>
+      <description><![CDATA[
+        사우스 아리 아톨 수상비행기 25분 — 12개 리조트 중 수상비행기 이동 최단.
+        2020년 리빌딩 화이트톤 모던 디자인. 신부들에게 인기.
+        고래상어 투어 연중 가능 (사우스 아리 아톨).
+        Art-I-San 파인다이닝 레스토랑 운영.
+        ⚠️ 2027년 3월 요금표 미확정 — 투어민 재확인 필수.
+      ]]></description>
+      <ratings>
+        <rating category="라군뷰">4</rating>
+        <rating category="수중환경">5</rating>
+        <rating category="프라이빗">4</rating>
+        <rating category="다이닝">4</rating>
+        <rating category="이동편의">5_수상비행기최단</rating>
+      </ratings>
+      <pros>
+        <pro>수상비행기 25분 — 12개 리조트 중 수상비행기 이동 가장 짧음</pro>
+        <pro>고래상어 투어 연중 가능 (사우스 아리 아톨)</pro>
+        <pro>2020년 신축 화이트톤 모던 디자인</pro>
+        <pro>Art-I-San 파인다이닝 레스토랑</pro>
+        <pro>스파·다이닝·워터스포츠 다양한 할인 혜택</pro>
+      </pros>
+      <cons>
+        <con>⚠️ 2027년 3월 요금표 미확정 — 투어민 재확인 필수</con>
+        <con>허니문 특전 3종으로 에메랄드·오블루보다 적음</con>
+        <con>투어민 단독 제공</con>
+      </cons>
+    </characteristics>
+
+    <agency_product agency="tourmin">
+      <meal_plan id="AI">다인어라운드 올인클루시브 (Dine Around AI)</meal_plan>
+      <price_note>⚠️ 2026년 1~2월 기준 참고가격. 2027년 3월 요금 미확정 — 반드시 투어민에 재확인.</price_note>
+
+      <prices unit="USD_per_person">
+        <category name="단독_4박_참고가">
+          <room type="비치빌라">3260</room>
+          <room type="워터빌라">3060</room>
+          <room type="워터풀빌라">3240</room>
+        </category>
+        <category name="룸믹스_4박_참고가">
+          <room type="믹스">3250</room>
+        </category>
+      </prices>
+
+      <meal_plan_details>
+        <AI>
+          <item>다인어라운드 올인클루시브 — 복수 레스토랑 석식 포함</item>
+          <item>Art-I-San 파인다이닝 이용 (사전예약)</item>
+          <item>음료·주류 무제한</item>
+          <item>스파·다이닝·워터스포츠 할인 혜택 (세부 조건 투어민 확인)</item>
+          <item>무동력 수상스포츠·스노클링 장비 무료</item>
+          <item>고래상어 투어 이용 가능 (연중, 추가 비용)</item>
+          <item>Wi-Fi 무료</item>
+          <item>수상비행기 25분 포함</item>
+        </AI>
+        <restaurants>
+          <restaurant>Art-I-San — 파인다이닝 (메인)</restaurant>
+          <restaurant>기타 다인어라운드 레스토랑</restaurant>
+        </restaurants>
+      </meal_plan_details>
+
+      <honeymoon_benefit>
+        <certificate_validity>투어민 확인 필요</certificate_validity>
+        <benefits>
+          <benefit>도착 시 스파클링 와인 1병</benefit>
+          <benefit>과일바구니 + 허니문 케이크</benefit>
+          <benefit>로맨틱 침대장식 + 욕조셋업 1회</benefit>
+        </benefits>
+        <comment>기본 3종 특전. Destination Dining 25% 할인 등 부가혜택 다수. ⚠️ 2027년 3월 요금 미확정.</comment>
+      </honeymoon_benefit>
+
+      <cancellation>
+        <rule>투어민 취소 규정 확인 필요</rule>
+      </cancellation>
+    </agency_product>
+  </resort>
+
+  <!-- ================================================================ -->
   <!-- 비교 요약 -->
   <!-- ================================================================ -->
   <comparison_summary>
@@ -1376,6 +1745,9 @@
       <group name="수상비행기_20분">
         <resort_ref>veligandu</resort_ref>
         <resort_ref>ananea</resort_ref>
+      </group>
+      <group name="수상비행기_25분">
+        <resort_ref note="사우스 아리 아톨 — 12개 중 수상비행기 최단">outrigger</resort_ref>
       </group>
       <group name="수상비행기_35분">
         <resort_ref>fushifaru</resort_ref>
@@ -1388,11 +1760,17 @@
         <resort_ref>furaveri</resort_ref>
         <resort_ref>raaya</resort_ref>
       </group>
+      <group name="수상비행기_50분">
+        <resort_ref note="라아 아톨 — 최장 이동">emerald</resort_ref>
+      </group>
       <group name="스피드보트_15분">
         <resort_ref>saii_so</resort_ref>
       </group>
       <group name="스피드보트_40분">
         <resort_ref>varu</resort_ref>
+      </group>
+      <group name="스피드보트_50분">
+        <resort_ref>oblu_sangeli</resort_ref>
       </group>
     </by_transfer>
 
@@ -1401,16 +1779,19 @@
         <resort_ref note="커플 마사지 60분 포함">furaveri</resort_ref>
         <resort_ref note="비치 디너 + 버블배스 + 케이크 + 메멘토">varu</resort_ref>
         <resort_ref note="마사지+플로팅조식 (SO구간)">saii_so</resort_ref>
+        <resort_ref note="스파60분+로맨틱디너+돌핀투어 — 다이닝 최상위">emerald</resort_ref>
+        <resort_ref note="5종: 침대장식+캔들디너+케이크+버블배스+기프트. 스파AI포함">oblu_sangeli</resort_ref>
       </tier>
       <tier name="중간">
         <resort_ref note="허니문 디너 포함">cora_cora</resort_ref>
         <resort_ref note="캔들 디너 포함">ananea</resort_ref>
         <resort_ref note="풀빌라 플로팅 조식">dhigufaru</resort_ref>
         <resort_ref note="케이크+기프트+풀빌라 플로팅 조식">raaya</resort_ref>
+        <resort_ref note="스파클링와인+과일케이크+침대장식욕조셋업">outrigger</resort_ref>
       </tier>
       <tier name="단순">
         <resort_ref note="샴페인+과일+베드데코만">veligandu</resort_ref>
-        <resort_ref note="와인+턴다운만">fushifaru</resort_ref>
+        <resort_ref note="와인+턴다운만 (AI에 스파·포토·스노클링 등 대거 포함으로 상쇄)">fushifaru</resort_ref>
       </tier>
     </by_honeymoon_benefit_quality>
 
@@ -1423,17 +1804,22 @@
       </has_hammock>
       <no_hammock_in_pool_villa>
         <resort_ref note="오션풀빌라에 해먹 없음 — 일반 오션빌라에만 있음">veligandu</resort_ref>
+        <resort_ref note="해먹 없음">emerald</resort_ref>
+        <resort_ref note="해먹 없음">oblu_sangeli</resort_ref>
+        <resort_ref note="해먹 없음">outrigger</resort_ref>
       </no_hammock_in_pool_villa>
     </by_hammock_in_water_villa>
 
     <by_price_range_4nights_water_pool_villa note="워터풀빌라 4박 1인 달러 기준">
       <range name="2200~2500">
+        <resort_ref price="2236">oblu_sangeli_워터빌라 (스피드보트)</resort_ref>
         <resort_ref price="2345">dhigufaru_선라이즈풀워터</resort_ref>
         <resort_ref price="2388">furaveri_오션풀선라이즈</resort_ref>
         <resort_ref price="2480">saii_so_비치+오버워터풀</resort_ref>
       </range>
       <range name="2500~2800">
         <resort_ref price="2545">raaya_워터풀</resort_ref>
+        <resort_ref price="2632">oblu_sangeli_워터풀빌라</resort_ref>
         <resort_ref price="2692">furaveri_오션인피니티해먹</resort_ref>
         <resort_ref price="2764">fushifaru_자쿠지워터</resort_ref>
         <resort_ref price="2782_할인후">ananea_워터풀HB</resort_ref>
@@ -1443,7 +1829,11 @@
         <resort_ref price="2999_원가">varu_워터풀</resort_ref>
         <resort_ref price="2992">fushifaru_풀워터</resort_ref>
         <resort_ref price="3014_할인후">cora_cora_라군풀_허니문리조트</resort_ref>
+        <resort_ref price="3060">outrigger_워터빌라 (수상비행기25분, 요금미확정)</resort_ref>
         <resort_ref price="3114">cora_cora_라군풀_리얼몰디브</resort_ref>
+        <resort_ref price="3198">emerald_워터빌라</resort_ref>
+        <resort_ref price="3240">outrigger_워터풀빌라 (요금미확정)</resort_ref>
+        <resort_ref price="3293">emerald_워터풀빌라</resort_ref>
       </range>
     </by_price_range_4nights_water_pool_villa>
 
@@ -1453,6 +1843,8 @@
         <candidate rank="2" resort="ananea">라군·AI(업그레이드)·수상비행기20분·해먹워터풀. 한식당. 최신상. $2,782~$3,204.</candidate>
         <candidate rank="3" resort="furaveri">라군·AI·수상비행기·해먹워터빌라·마사지포함. 조용한. $2,413~$2,887.</candidate>
         <candidate rank="4" resort="dhigufaru">최상급라군·AI·수상비행기·조용함. 예산 하단($2,345~$2,683). 가성비 최고.</candidate>
+        <candidate rank="5" resort="emerald">라군·프리미엄AI·수상비행기50분·다이닝최상위·LHW. 예산 상단($3,198~$3,293). 투어민 단독.</candidate>
+        <candidate rank="6" resort="outrigger">수상비행기25분 최단·고래상어연중·AI. 예산 $3,060~$3,240. ⚠️요금미확정. 투어민 단독.</candidate>
       </top_candidates>
     </couples_preference_match>
   </comparison_summary>
