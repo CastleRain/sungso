@@ -1,5 +1,5 @@
 // firebase-picks.js — couplePicks + itinerary CRUD (Firestore)
-// couplePicks/main : { sohee: string[], sungwoo: string[], finalCandidates: string[], updatedAt }
+// couplePicks/main : { sohee: string[], sungwoo: string[], finalCandidates: string[], confirmedResort: string|null, updatedAt }
 // itineraries/main : { days: [...], updatedAt }
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -29,9 +29,10 @@ function normalizePicks(data) {
     return a.slice(0, 3);
   };
   return {
-    sohee:           norm(data?.sohee),
-    sungwoo:         norm(data?.sungwoo),
-    finalCandidates: Array.isArray(data?.finalCandidates) ? data.finalCandidates : [],
+    sohee:            norm(data?.sohee),
+    sungwoo:          norm(data?.sungwoo),
+    finalCandidates:  Array.isArray(data?.finalCandidates) ? data.finalCandidates : [],
+    confirmedResort:  data?.confirmedResort ?? null,
   };
 }
 
@@ -73,4 +74,8 @@ export async function setFinalCandidates(ids) {
 
 export async function setItinerary(days) {
   await setDoc(itineraryRef(), { days, updatedAt: serverTimestamp() });
+}
+
+export async function setConfirmedResort(resortId) {
+  await setDoc(picksRef(), { confirmedResort: resortId ?? null, updatedAt: serverTimestamp() }, { merge: true });
 }

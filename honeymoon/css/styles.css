@@ -3765,3 +3765,300 @@ body {
     background: var(--gray-200);
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   플랜 탭 — 확정 리조트 + 최종 후보 + 일정 편집
+   ════════════════════════════════════════════════════════════════ */
+
+/* 확정 리조트 히어로 카드 */
+.confirmed-section .plan-section-label {
+  font-size: 16px;
+  color: var(--primary-deep);
+}
+.confirmed-resort-card {
+  display: flex;
+  gap: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid var(--primary);
+  box-shadow: 0 4px 24px rgba(29,158,117,0.15);
+  background: white;
+}
+.confirmed-img {
+  width: 220px;
+  flex-shrink: 0;
+}
+.confirmed-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.confirmed-body {
+  flex: 1;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.confirmed-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+.confirmed-en {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: -2px;
+}
+.confirmed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.confirmed-meta span {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 9px;
+}
+.confirmed-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.confirmed-detail-btn {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.confirmed-detail-btn:hover { opacity: 0.85; }
+.confirmed-change-btn {
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.confirmed-change-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+@media (max-width: 560px) {
+  .confirmed-resort-card { flex-direction: column; }
+  .confirmed-img { width: 100%; height: 160px; }
+}
+
+/* 최종 협의 후보 — 새 레이아웃 */
+.final-section {
+  margin-top: 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+.final-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.final-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.final-section-hint {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.final-candidates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.final-candidate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: border-color 0.15s;
+}
+.final-candidate-row.final-confirmed {
+  border-color: var(--primary);
+  background: var(--primary-pale);
+}
+.final-cand-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.final-cand-name:hover { color: var(--primary); text-decoration: underline; }
+.final-cand-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.final-confirm-btn {
+  padding: 6px 13px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.final-confirm-btn:hover { opacity: 0.85; }
+.final-confirm-btn:active { transform: scale(0.96); }
+.final-confirmed-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-deep);
+  padding: 5px 11px;
+  background: var(--primary-light);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.final-remove-btn {
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.final-remove-btn:hover { border-color: #dc4e38; color: #dc4e38; }
+.final-toggle-area {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.final-toggle-label {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+/* 일정표 — 자동 생성 버튼 */
+.iti-autofill-btn {
+  margin-top: 16px;
+  padding: 11px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.iti-autofill-btn:hover { opacity: 0.87; }
+.iti-autofill-btn:active { transform: scale(0.97); }
+
+/* 일정표 헤더 행 (타이틀 + 초기화 버튼) */
+.plan-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.plan-section-header-row .plan-section-label { margin-bottom: 0; }
+.iti-reset-btn {
+  font-size: 11px;
+  color: var(--text-light);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.iti-reset-btn:hover { border-color: var(--text-muted); color: var(--text-muted); }
+
+/* 일정 항목 편집 */
+.day-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.day-item-text { flex: 1; }
+.day-item-del {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 3px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+}
+.day-items li:hover .day-item-del { opacity: 1; }
+.day-item-del:hover { color: #dc4e38 !important; opacity: 1; }
+
+.day-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.day-add-input {
+  flex: 1;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.15s;
+}
+.day-add-input:focus { border-color: var(--primary); }
+.day-add-input::placeholder { color: var(--text-light); }
+.day-add-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  color: var(--primary-deep);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.day-add-btn:hover { background: var(--primary); color: white; }
