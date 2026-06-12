@@ -132,7 +132,7 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 
 각 서브 프로젝트는 독립적인 `index.html` 보유. 세부 내용은 각 폴더의 `CLAUDE.md` 참조.
 
-**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 리조트 데이터는 JS 하드코딩이지만, **댓글 메모는 Firebase Firestore 사용** (`resort_notes/{resortId}/comments` 서브컬렉션).
+**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 리조트 데이터는 JS 하드코딩이지만, **댓글 메모·커플 picks·일정표는 Firebase Firestore 사용** (세부 컬렉션은 `honeymoon/CLAUDE.md` 참조).
 
 ---
 
@@ -168,3 +168,11 @@ honeymoon 앱 대규모 UX 개선 — 상세 내용은 `honeymoon/CLAUDE.md` 참
 - 메모 팝업: 상세 헤더 "💬 메모" 버튼 → 플로팅 채팅 UI
 - 토너먼트: 매치 중 상세보기 버튼, 버그 수정
 - sungso 홈으로 돌아가는 내비 바 추가
+
+### 2026-06-13 (honeymoon 플랜 탭 + 편집 UX)
+
+- **Detail Sheet 통일:** 모든 리조트 상세를 우측 슬라이드 패널(모바일: 바텀시트)로 단일화. `openDetailSheet` / `closeDetailSheet` API.
+- **메모 UX 개선:** z-index 수정(5400), 메모 카운트 배지(카드/Pick슬롯/상세헤더), `resort_note_meta` 컬렉션 추가, 메모 알림 센터 드로어 추가
+- **플랜 탭 (`tab-plan.js`):** 커플 Top3 Pick 슬롯, 최종 후보 + 확정, "🏆 우리의 리조트" 히어로 카드, 기본 일정 8일 자동 생성
+- **일정표 편집 UX:** Day 카드 View/Edit 모드, 7종 항목 타입 시스템(항공/숙박/이동/식사/액티비티/휴식/메모), 자동저장(800ms debounce), ↑↓ 순서변경, 미정 pill, Firebase 콜백 억제
+- **새 Firebase 컬렉션:** `couplePicks/main` (pick + 확정), `itineraries/main` (세부일정), `resort_note_meta/{id}` (댓글 수 캐시)
