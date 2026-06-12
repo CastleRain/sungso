@@ -257,18 +257,14 @@ body {
   top: 0;
   z-index: 50;
 }
-/* 기본: 오른쪽 패널 숨김 */
+/* 기본: 오른쪽 패널 숨김 — display:none으로 flex 공간 완전 제거 */
 .cards-right-col {
   flex: 1;
   overflow-y: auto;
   background: white;
   min-width: 0;
   min-height: 0;
-  width: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-  overflow: hidden;
+  display: none;
 }
 /* detail-open 시: 분할 레이아웃 */
 #tab-cards.detail-open .cards-left-col {
@@ -276,11 +272,7 @@ body {
   border-right: 1px solid var(--border);
 }
 #tab-cards.detail-open .cards-right-col {
-  width: auto;
-  opacity: 1;
-  pointer-events: auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: block;
 }
 #tab-cards.detail-open .cards-grid {
   grid-template-columns: repeat(2, 1fr);
