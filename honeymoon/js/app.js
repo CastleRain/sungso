@@ -9,6 +9,17 @@ import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
 
+function showToast(msg, type = 'success', duration = 2000) {
+  const el = document.createElement('div');
+  el.className = `toast-msg toast-${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('toast-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }, duration);
+}
+
 function getAccessDesc(resort) {
   const isSeaplane = resort.transfer_type === 'seaplane';
   const mins = resort.transfer_minutes;
@@ -438,11 +449,7 @@ window._setFeatured = function(resortId, encodedUrl) {
   if (main) main.src = url;
   const cardImg = document.querySelector(`.resort-card[data-id="${resortId}"] .card-image img`);
   if (cardImg) cardImg.src = url;
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1D9E75;color:white;padding:9px 18px;border-radius:10px;font-size:12px;z-index:9999;box-shadow:0 3px 12px rgba(0,0,0,0.2);';
-  toast.textContent = '✓ 대표 이미지로 설정됨';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2000);
+  showToast('✓ 대표 이미지로 설정됨');
 };
 
 function renderYoutubeSection(r) {

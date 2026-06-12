@@ -54,9 +54,11 @@ function renderCard(resort, sortKey, rank) {
   const heroImg = getFeaturedImage(resort);
   const imgHtml = heroImg
     ? `<img src="${heroImg}" alt="${resort.name_ko}" loading="lazy"
-         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">`
+         onload="this.classList.add('img-loaded'); this.parentElement.classList.add('img-ready')"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; this.parentElement.classList.add('img-ready')">`
       + `<div class="card-image-placeholder" style="display:none;">🏝️</div>`
     : `<div class="card-image-placeholder">🏝️</div>`;
+  const imageClass = heroImg ? 'card-image' : 'card-image img-ready';
 
   const rankBadge = showRank
     ? `<div class="card-rank-badge rank-${rank}">${RANK_SYMBOL[rank]} ${RANK_SHORT[sortKey]} ${rank}위</div>`
@@ -64,7 +66,7 @@ function renderCard(resort, sortKey, rank) {
 
   return `
 <div class="resort-card" data-id="${resort.id}" onclick="window._cardClick('${resort.id}')">
-  <div class="card-image">
+  <div class="${imageClass}">
     ${imgHtml}
     <div class="card-image-gradient"></div>
     ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
@@ -176,6 +178,10 @@ function renderGrid() {
   }
 
   grid.innerHTML = sorted.map((r, i) => renderCard(r, currentSort, i + 1)).join('');
+  // stagger 애니메이션 delay — index 8 이후는 동일하게 cap
+  grid.querySelectorAll('.resort-card').forEach((card, i) => {
+    card.style.setProperty('--card-i', Math.min(i, 8));
+  });
   updateFilterSummary(sorted);
 }
 

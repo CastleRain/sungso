@@ -52,6 +52,32 @@
 }
 
 /* ── 리셋 & 베이스 ── */
+/* ── 공통 애니메이션 키프레임 ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes detailSlideIn {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(8px) scale(0.95); }
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
@@ -249,7 +275,10 @@ body {
   overflow-y: auto;
   display: none;
 }
-.tab-content.active { display: block; }
+.tab-content.active {
+  display: block;
+  animation: tabFadeIn 0.2s ease both;
+}
 .tab-content::-webkit-scrollbar { width: 6px; }
 .tab-content::-webkit-scrollbar-track { background: var(--gray-100); }
 .tab-content::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
@@ -359,6 +388,7 @@ body {
 }
 #tab-cards.detail-open .cards-right-col {
   display: block;
+  animation: detailSlideIn 0.25s ease both;
 }
 #tab-cards.detail-open .cards-grid {
   grid-template-columns: repeat(2, 1fr);
@@ -426,6 +456,8 @@ body {
   box-shadow: var(--shadow-sm);
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   cursor: pointer;
+  animation: cardIn 0.35s ease both;
+  animation-delay: calc(var(--card-i, 0) * 45ms);
 }
 .resort-card:hover {
   transform: translateY(-6px);
@@ -438,16 +470,24 @@ body {
 
 .card-image {
   height: 210px;
-  background: linear-gradient(135deg, #6EC8A8 0%, #3BB08A 50%, #15785A 100%);
+  background: linear-gradient(90deg, #c2e4d8 25%, #d9f0e6 50%, #c2e4d8 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
   position: relative;
   overflow: hidden;
+}
+.card-image.img-ready {
+  animation: none;
+  background: linear-gradient(135deg, #6EC8A8 0%, #3BB08A 50%, #15785A 100%);
 }
 .card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  opacity: 0;
+  transition: opacity 0.38s ease, transform 0.4s ease;
 }
+.card-image img.img-loaded { opacity: 1; }
 .card-image-placeholder {
   width: 100%;
   height: 100%;
@@ -1950,6 +1990,41 @@ body {
   transition: background 0.15s, border-color 0.15s;
 }
 .pdf-link-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary-deep); }
+
+/* ── 버튼 press 효과 (공통) ──────────────────────────────────────── */
+.sort-btn:active,
+.pref-btn:active,
+.tab-btn:active,
+.card-detail-btn:active,
+.loc-map-btn:active,
+.prefs-toggle-btn:active,
+.memo-trigger-btn:active,
+.map-route-detail-btn:active,
+.price-summary-card:active,
+.resort-card:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.08s ease !important;
+}
+
+/* ── 토스트 알림 ─────────────────────────────────────────────────── */
+.toast-msg {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  padding: 10px 20px;
+  background: var(--text);
+  color: white;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+  animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: none;
+}
+.toast-msg.toast-success { background: var(--primary); }
+.toast-msg.toast-error   { background: #DC2626; }
+.toast-msg.toast-out     { animation: toastOut 0.22s ease both; }
 
 /* ── 취향 설정 패널 ───────────────────────────────────────────── */
 .prefs-toggle-row {
