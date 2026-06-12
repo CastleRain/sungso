@@ -80,7 +80,9 @@ messagingSenderId: "143797950443"
 appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 ```
 
-**Firestore 컬렉션:** `events`
+**Firestore 컬렉션**
+
+`events` (sungso 루트 — 일정 관리):
 
 | 필드 | 타입 | 예시 |
 |---|---|---|
@@ -88,6 +90,14 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 | `title` | string | `"결혼식"` |
 | `emoji` | string | `"💒"` |
 | `pinned` | boolean | `true` (없으면 false 취급) |
+| `createdAt` | serverTimestamp | — |
+
+`resort_notes/{resortId}/comments` (honeymoon — 댓글 메모):
+
+| 필드 | 타입 | 예시 |
+|---|---|---|
+| `author` | string | `"성우"` \| `"소희"` |
+| `text` | string | `"라군뷰가 정말 예쁘다"` |
 | `createdAt` | serverTimestamp | — |
 
 **보안 규칙:** 현재 `allow read, write: if true` (전체 공개)
@@ -118,11 +128,11 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 | 폴더 | URL | 데이터 소스 | 설명 |
 |---|---|---|---|
 | `wecost/` | `/sungso/wecost/` | Google Sheets CSV | 결혼 비용·저축·집 계획 3페이지 SPA |
-| `honeymoon/` | `/sungso/honeymoon/` | JS 하드코딩 | 몰디브 9개 리조트 비교, 토너먼트, PDF 뷰어 |
+| `honeymoon/` | `/sungso/honeymoon/` | JS 하드코딩 + Firebase | 몰디브 12개 리조트 비교, 토너먼트, PDF 뷰어 |
 
 각 서브 프로젝트는 독립적인 `index.html` 보유. 세부 내용은 각 폴더의 `CLAUDE.md` 참조.
 
-**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 완전 정적이며 백엔드 없음.
+**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 리조트 데이터는 JS 하드코딩이지만, **댓글 메모는 Firebase Firestore 사용** (`resort_notes/{resortId}/comments` 서브컬렉션).
 
 ---
 
@@ -146,3 +156,15 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 - **파일 분리:** `index.html` 단일 파일에 있던 CSS/JS를 `css/style.css`, `js/app.js`, `js/firebase.js` 로 분리.
 
 **다음:** wecost / honeymoon 각각 CLAUDE.md 작성 완료.
+
+### 2026-06-12 (honeymoon 집중 개발)
+
+honeymoon 앱 대규모 UX 개선 — 상세 내용은 `honeymoon/CLAUDE.md` 참조.
+
+- 리조트 12개 / 여행사 3개로 확장 (투어민 추가)
+- 핑크/로즈 테마로 전환 (sungso 메인과 통일)
+- 5탭 UX 전면 개선: 카드 그리드↔분할 전환, 드래그 리사이즈, 지도 핀 직접 상세
+- Firebase 연동 추가: `resort_notes` 서브컬렉션으로 성우/소희 댓글 메모 저장
+- 메모 팝업: 상세 헤더 "💬 메모" 버튼 → 플로팅 채팅 UI
+- 토너먼트: 매치 중 상세보기 버튼, 버그 수정
+- sungso 홈으로 돌아가는 내비 바 추가
