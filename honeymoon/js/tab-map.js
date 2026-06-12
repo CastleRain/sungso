@@ -1,9 +1,31 @@
-// tab-map.js — 미니맵 플로팅 패널 (SVG 핀 + 확장/접기 + 경로 패널)
+// tab-map.js — 미니맵 (pill ↔ full ↔ hidden 3상태)
 
 import { RESORTS } from './resorts-data.js';
 
 let onDetailOpen = null;
+let float, collapseBtn, expandBtn;
 
+// ── 상태 관리 ──────────────────────────────────────────────────────
+function setMapState(state) {
+  if (!float) return;
+  const titleEl = float.querySelector('.minimap-title');
+  float.classList.remove('map-pill', 'map-hidden');
+
+  if (state === 'pill') {
+    float.classList.add('map-pill');
+    if (titleEl) titleEl.textContent = '📍 위치 보기';
+    if (collapseBtn) { collapseBtn.textContent = '▾'; collapseBtn.title = '지도 열기'; }
+    if (expandBtn) expandBtn.style.display = 'none';
+  } else if (state === 'full') {
+    if (titleEl) titleEl.textContent = '📍 위치 지도';
+    if (collapseBtn) { collapseBtn.textContent = '✕'; collapseBtn.title = '접기'; }
+    if (expandBtn) expandBtn.style.display = '';
+  } else if (state === 'hidden') {
+    float.classList.add('map-hidden');
+  }
+}
+
+// ── 경로 패널 렌더 ────────────────────────────────────────────────
 function renderRoutePanel(resortId) {
   const panel = document.getElementById('mapRoutePanel');
   if (!panel) return;
@@ -46,15 +68,38 @@ function renderRoutePanel(resortId) {
 </div>`;
 }
 
+// ── 외부 공개 API ──────────────────────────────────────────────────
+// 상세 패널 열릴 때: 미니맵 숨김
+window._minimapHide = () => setMapState('hidden');
+
+// 상세 패널 닫힐 때: pill 상태로 복귀
+window._minimapShow = () => setMapState('pill');
+
+// 상세 패널 내 "지도에서 보기" 클릭: 상세 닫고 full 지도 + 핀 강조
+window._minimapShowWithPin = (resortId) => {
+  window.closeCardDetail?.();
+  setTimeout(() => {
+    setMapState('full');
+    document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.map-pin[data-resort="${resortId}"]`)?.classList.add('active');
+    renderRoutePanel(resortId);
+  }, 80);
+};
+
+// ── 초기화 ────────────────────────────────────────────────────────
 export function initMap(detailOpenFn) {
   if (detailOpenFn) onDetailOpen = detailOpenFn;
+  float = document.getElementById('minimapFloat');
+  expandBtn = document.getElementById('minimapExpandBtn');
+  collapseBtn = document.getElementById('minimapCollapseBtn');
 
-  window._mapDetailClick = (id) => {
-    if (onDetailOpen) onDetailOpen(id);
-  };
+  window._mapDetailClick = (id) => { if (onDetailOpen) onDetailOpen(id); };
 
+  // 기본 상태: pill
+  setMapState('pill');
   renderRoutePanel(null);
 
+  // 핀 클릭
   document.querySelectorAll('.map-pin').forEach(pin => {
     pin.addEventListener('click', () => {
       const resortId = pin.dataset.resort;
@@ -66,18 +111,21 @@ export function initMap(detailOpenFn) {
     });
   });
 
-  // 확대/축소 버튼
-  const float = document.getElementById('minimapFloat');
-  const expandBtn = document.getElementById('minimapExpandBtn');
-  const collapseBtn = document.getElementById('minimapCollapseBtn');
-
-  expandBtn?.addEventListener('click', () => {
-    const isExpanded = float.classList.toggle('expanded');
-    expandBtn.textContent = isExpanded ? '⤡' : '⤢';
+  // 헤더 클릭: pill ↔ full 토글 (pill 상태에서는 헤더 전체 클릭 가능)
+  const header = float?.querySelector('.minimap-header');
+  header?.addEventListener('click', (e) => {
+    if (!float.classList.contains('map-pill')) return; // full 상태에서는 버튼만
+    setMapState('full');
+  });
+  collapseBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isPill = float.classList.contains('map-pill');
+    setMapState(isPill ? 'full' : 'pill');
   });
 
-  collapseBtn?.addEventListener('click', () => {
-    const isCollapsed = float.classList.toggle('collapsed');
-    collapseBtn.textContent = isCollapsed ? '+' : '−';
+  // 확대 버튼 (full 상태에서만 표시)
+  expandBtn?.addEventListener('click', () => {
+    float.classList.toggle('expanded');
+    expandBtn.textContent = float.classList.contains('expanded') ? '⤡' : '⤢';
   });
 }

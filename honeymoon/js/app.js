@@ -9,6 +9,20 @@ import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
 
+function getAccessDesc(resort) {
+  const isSeaplane = resort.transfer_type === 'seaplane';
+  const mins = resort.transfer_minutes;
+  if (isSeaplane) {
+    if (mins <= 30) return `공항에서 수상비행기로 단 ${mins}분. 하늘 위에서 내려다보는 에메랄드빛 산호 군도가 여행의 첫 장면이 됩니다.`;
+    if (mins <= 40) return `수상비행기 ${mins}분, 몰디브 특유의 이동 방식으로 도착까지 이미 여행이 시작됩니다. 창밖으로 펼쳐지는 산호섬 뷰가 기대감을 높여줍니다.`;
+    return `수상비행기 ${mins}분 거리의 외딴 아톨. 공항에서 멀수록 군중을 벗어난 온전한 자연 속 리조트를 경험합니다.`;
+  } else {
+    if (mins <= 25) return `공항에서 스피드보트로 ${mins}분, 이동 부담이 가장 적은 말레 아톨 리조트. 도착 직후부터 온전한 휴식을 시작할 수 있습니다.`;
+    if (mins <= 60) return `스피드보트 ${mins}분, 파도 위를 달리며 도착하는 과정 자체가 몰디브 특유의 경험입니다. 풍부한 해양 생태계가 기다립니다.`;
+    return `스피드보트 ${mins}분, 긴 이동이지만 그만큼 깊숙이 자리한 리조트. 외부와 단절된 완전한 프라이버시를 원하는 커플에게 적합합니다.`;
+  }
+}
+
 function updatePrefsHint() {
   const el = document.getElementById('prefsHint');
   if (!el) return;
@@ -121,6 +135,7 @@ function openDetailInCards(resortId) {
     panel.scrollTop = 0;
   }
   document.getElementById('tab-cards').classList.add('detail-open');
+  window._minimapHide?.();
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
   document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
   // 미니맵 핀 하이라이트
@@ -141,6 +156,8 @@ window.closeCardDetail = function() {
   panel.appendChild(empty);
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+  _currentDetailResortId = null;
+  window._minimapShow?.();
 };
 
 // ── 가격 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
@@ -585,6 +602,30 @@ function renderResortDetail(r) {
 
   <!-- 이미지 갤러리 -->
   ${renderImageGallery(r)}
+
+  <!-- 위치 & 이동 -->
+  <div class="block">
+    <div class="block-header">위치 &amp; 이동</div>
+    <div class="location-card">
+      <div class="location-visual ${r.transfer_type === 'seaplane' ? 'loc-sea' : 'loc-boat'}">
+        <div class="loc-transfer-icon">${r.transfer_type === 'seaplane' ? '✈' : '🚤'}</div>
+        <div class="loc-minutes">${r.transfer_minutes}<span class="loc-min-unit">분</span></div>
+        <div class="loc-from">말레 공항 기준</div>
+      </div>
+      <div class="location-info">
+        <div class="loc-atoll-row">
+          <span class="loc-atoll-badge">${r.atoll}</span>
+          ${r.transfer_type === 'seaplane'
+            ? '<span class="loc-type-badge loc-type-sea">✈ 수상비행기</span>'
+            : '<span class="loc-type-badge loc-type-boat">🚤 스피드보트</span>'}
+        </div>
+        <div class="loc-access-desc">${getAccessDesc(r)}</div>
+        <button class="loc-map-btn" onclick="window._minimapShowWithPin('${r.id}')">
+          🗺️ 지도에서 보기
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 가격 -->
   <div class="block">
