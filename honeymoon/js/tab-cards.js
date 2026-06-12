@@ -44,12 +44,26 @@ const SORT_FULL_NAME = {
 };
 const RANK_SYMBOL = { 1: '✦', 2: '✧', 3: '·' };
 
+function getPickBadgeLabel(resortId) {
+  const picks = window._currentPicks;
+  if (!picks) return '';
+  const RANK = ['1위', '2위', '3위'];
+  const parts = [];
+  for (const [person, label] of [['sohee','소희'],['sungwoo','성우']]) {
+    (picks[person] || []).forEach((id, i) => {
+      if (id === resortId) parts.push(`${label} ${RANK[i]}`);
+    });
+  }
+  return parts.join(' · ');
+}
+
 function renderCard(resort, sortKey, rank) {
   const price = getBestPrice(resort, sortKey);
   const isPriceBest = rank === 1 && price != null;
   const showRank = rank <= 3 && price != null;
   const fitScore = calcFitScore(resort);
   const fitClass = fitScore >= 80 ? 'fit-high' : fitScore >= 60 ? 'fit-mid' : 'fit-low';
+  const pickLabel = getPickBadgeLabel(resort.id);
 
   const heroImg = getFeaturedImage(resort);
   const imgHtml = heroImg
@@ -72,6 +86,7 @@ function renderCard(resort, sortKey, rank) {
     ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
     <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
     ${rankBadge}
+    <div class="pick-badge-overlay" style="display:${pickLabel ? 'block' : 'none'}">${pickLabel}</div>
   </div>
   <div class="card-body">
     <div class="card-name-ko">${resort.name_ko}</div>
@@ -190,6 +205,19 @@ export function initCards(detailOpenFn) {
 
   window._cardClick = (id) => { if (onDetailOpen) onDetailOpen(id); };
   window._renderCards = renderGrid;
+
+  // picks 변경 시 카드 재렌더 없이 배지만 갱신
+  window._refreshCardPickBadges = () => {
+    document.querySelectorAll('.resort-card').forEach(card => {
+      const id    = card.dataset.id;
+      const label = getPickBadgeLabel(id);
+      const overlay = card.querySelector('.pick-badge-overlay');
+      if (overlay) {
+        overlay.textContent    = label;
+        overlay.style.display  = label ? 'block' : 'none';
+      }
+    });
+  };
 
   // 정렬 버튼
   document.querySelectorAll('.sort-btn').forEach(btn => {

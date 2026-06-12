@@ -43,11 +43,14 @@
 
 <!-- ══════════════════════════════════════════════ 탭 네비게이션 -->
 <nav class="tab-nav">
-  <button class="tab-btn active" data-tab="cards">
-    <span class="tab-icon">🏨</span> 개요 & 카드
+  <button class="tab-btn active" data-tab="plan">
+    <span class="tab-icon">💍</span> 우리의 플랜
+  </button>
+  <button class="tab-btn" data-tab="cards">
+    <span class="tab-icon">🏨</span> 리조트 정보
   </button>
   <button class="tab-btn" data-tab="price">
-    <span class="tab-icon">💰</span> 가격 비교
+    <span class="tab-icon">💰</span> 견적 비교
   </button>
   <button class="tab-btn" data-tab="tournament">
     <span class="tab-icon">🏆</span> 토너먼트
@@ -60,8 +63,15 @@
 <!-- ══════════════════════════════════════════════ 메인 콘텐츠 -->
 <div class="main-layout">
 
-  <!-- 탭 1: 개요 & 카드 -->
-  <div class="tab-content active" id="tab-cards" style="overflow:hidden; padding:0;">
+  <!-- 탭 1: 우리의 플랜 -->
+  <div class="tab-content active" id="tab-plan">
+    <div class="plan-wrap" id="planWrap">
+      <!-- JS로 렌더링 -->
+    </div>
+  </div>
+
+  <!-- 탭 2: 리조트 정보 -->
+  <div class="tab-content" id="tab-cards" style="overflow:hidden; padding:0;">
     <div class="cards-split-layout">
       <!-- 왼쪽: 카드 목록 -->
       <div class="cards-left-col">
@@ -296,6 +306,36 @@
   </div>
 </div>
 <div class="memo-popup-backdrop" id="memoBackdrop" onclick="window._closeMemo()" style="display:none;"></div>
+
+<!-- ══════════════════════════════════════════════ Pick 모달 -->
+<div class="pick-modal" id="pickModal" style="display:none;">
+  <div class="pick-modal-header">
+    <div class="pick-modal-resort-name" id="pickModalResortName">리조트 이름</div>
+    <button class="pick-modal-close" onclick="window._closePickModal()">✕</button>
+  </div>
+  <div class="pick-modal-body">
+    <div class="pick-person-row">
+      <div class="pick-person-label pick-label-sohee">👩 소희</div>
+      <div class="pick-slots-row">
+        <button class="pick-slot-btn" data-person="sohee" data-rank="0" onclick="window._handlePickSlot('sohee',0)">🥇 1위</button>
+        <button class="pick-slot-btn" data-person="sohee" data-rank="1" onclick="window._handlePickSlot('sohee',1)">🥈 2위</button>
+        <button class="pick-slot-btn" data-person="sohee" data-rank="2" onclick="window._handlePickSlot('sohee',2)">🥉 3위</button>
+      </div>
+    </div>
+    <div class="pick-person-row">
+      <div class="pick-person-label pick-label-sungwoo">🧑 성우</div>
+      <div class="pick-slots-row">
+        <button class="pick-slot-btn" data-person="sungwoo" data-rank="0" onclick="window._handlePickSlot('sungwoo',0)">🥇 1위</button>
+        <button class="pick-slot-btn" data-person="sungwoo" data-rank="1" onclick="window._handlePickSlot('sungwoo',1)">🥈 2위</button>
+        <button class="pick-slot-btn" data-person="sungwoo" data-rank="2" onclick="window._handlePickSlot('sungwoo',2)">🥉 3위</button>
+      </div>
+    </div>
+  </div>
+  <div class="pick-modal-footer">
+    <button class="pick-remove-all-btn" id="pickRemoveBtn" onclick="window._removePickForResort(window._pickModalResortId)" style="display:none;">× 이 리조트 Pick 모두 해제</button>
+  </div>
+</div>
+<div class="pick-modal-backdrop" id="pickModalBackdrop" onclick="window._closePickModal()" style="display:none;"></div>
 
 <!-- ══════════════════════════════════════════════ 이미지 편집 팝업 -->
 <div class="img-edit-popup" id="imgEditPopup" style="display:none;">

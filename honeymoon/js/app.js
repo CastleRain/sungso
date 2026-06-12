@@ -5,9 +5,14 @@ import { initPrice } from './tab-price.js';
 import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
+import { initPlan } from './tab-plan.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
+import { subscribePicks, setPick, removePick } from './firebase-picks.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
+
+// showToast를 window에도 노출 (tab-plan.js에서 사용)
+window._showToast = (msg, type, dur) => showToast(msg, type, dur);
 
 function showToast(msg, type = 'success', duration = 2000) {
   const el = document.createElement('div');
@@ -92,6 +97,15 @@ function switchTab(tabId) {
 
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
+    if (tabId === 'plan') initPlan({ openDetailFn: openDetailInCards });
+    if (tabId === 'cards') {
+      initCards(openDetailInCards);
+      initResizeHandle(
+        document.getElementById('cardsResizeHandle'),
+        document.querySelector('.cards-left-col'),
+        'cards-left-w', 240, 700
+      );
+    }
     if (tabId === 'price') {
       initPrice(openDetailInPrice);
       initResizeHandle(
@@ -240,6 +254,72 @@ export function openDetail(resortId) {
 export function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
+
+// ── Pick 모달 ──────────────────────────────────────────────────────
+window._pickModalResortId = null;
+
+window._openPickModal = function(resortId) {
+  const r = RESORTS.find(x => x.id === resortId);
+  if (!r) return;
+  window._pickModalResortId = resortId;
+
+  document.getElementById('pickModalResortName').textContent = r.name_ko;
+
+  const picks = window._currentPicks || { sohee: [null,null,null], sungwoo: [null,null,null] };
+  document.querySelectorAll('.pick-slot-btn').forEach(btn => {
+    const person = btn.dataset.person;
+    const rank   = parseInt(btn.dataset.rank);
+    const cur    = picks[person]?.[rank];
+    btn.classList.remove('slot-active', 'slot-taken');
+    if (cur === resortId) {
+      btn.classList.add('slot-active');
+      btn.textContent = `✓ ${['🥇','🥈','🥉'][rank]} ${rank+1}위`;
+    } else if (cur) {
+      const ex = RESORTS.find(x => x.id === cur);
+      btn.classList.add('slot-taken');
+      btn.textContent = `${['🥇','🥈','🥉'][rank]} ${rank+1}위 (현재: ${ex?.name_ko || '…'})`;
+    } else {
+      btn.textContent = `${['🥇','🥈','🥉'][rank]} ${rank+1}위`;
+    }
+  });
+
+  const anyPick = ['sohee','sungwoo'].some(p => picks[p]?.includes(resortId));
+  const removeBtn = document.getElementById('pickRemoveBtn');
+  if (removeBtn) removeBtn.style.display = anyPick ? 'block' : 'none';
+
+  document.getElementById('pickModal').style.display = 'flex';
+  document.getElementById('pickModalBackdrop').style.display = 'block';
+};
+
+window._closePickModal = function() {
+  document.getElementById('pickModal').style.display = 'none';
+  document.getElementById('pickModalBackdrop').style.display = 'none';
+  window._pickModalResortId = null;
+};
+
+window._handlePickSlot = async function(person, rank) {
+  const resortId = window._pickModalResortId;
+  if (!resortId) return;
+  try {
+    await setPick(person, rank, resortId);
+    showToast('✓ Pick 저장됨');
+    window._openPickModal(resortId);
+  } catch { showToast('저장 실패', 'error'); }
+};
+
+window._removePickForResort = async function(resortId) {
+  const picks = window._currentPicks || {};
+  try {
+    for (const person of ['sohee','sungwoo']) {
+      const arr = picks[person] || [];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === resortId) await removePick(person, i);
+      }
+    }
+    showToast('Pick이 해제됐어요');
+    window._closePickModal();
+  } catch { showToast('해제 실패', 'error'); }
+};
 
 // ── 메모 팝업 ──────────────────────────────────────────────────────
 let _memoResortId = null;
@@ -618,6 +698,7 @@ function renderResortDetail(r) {
         <div class="fit-score-num">${fitScore}%</div>
         <div class="fit-score-label">취향 적합도</div>
       </div>
+      <button class="pick-trigger-btn" onclick="window._openPickModal('${r.id}')">💗 Pick</button>
       <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모</button>
     </div>
   </div>
@@ -741,21 +822,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === e.currentTarget) closeDetail();
   });
 
-  // 카드 리사이즈 핸들
-  initResizeHandle(
-    document.getElementById('cardsResizeHandle'),
-    document.querySelector('.cards-left-col'),
-    'cards-left-w', 240, 700
-  );
+  // ── 전역 picks 구독 (모든 탭 공유) ─────────────────────────────
+  window._currentPicks = { sohee: [null,null,null], sungwoo: [null,null,null], finalCandidates: [] };
+  subscribePicks(picks => {
+    window._currentPicks = picks;
+    window._refreshCardPickBadges?.();
+    // Pick 모달이 열려있으면 슬롯 상태 갱신
+    if (window._pickModalResortId) window._openPickModal(window._pickModalResortId);
+  });
 
-  // 왼쪽 영역(툴바·그리드 포함) 클릭 → 상세 닫고 전체 그리드 복귀
-  document.querySelector('.cards-left-col')?.addEventListener('click', e => {
-    if (!document.getElementById('tab-cards').classList.contains('detail-open')) return;
-    if (e.target.closest('.resort-card')) return; // 카드 클릭은 상세 전환
+  // ── 플랜 탭 기본 초기화 (기본 활성 탭) ─────────────────────────
+  tabInited.add('plan');
+  initPlan({ openDetailFn: openDetailInCards });
+
+  // ── 미니맵 초기화 ────────────────────────────────────────────────
+  initMap(openDetailInCards);
+  // 기본 탭이 plan이므로 minimap은 숨김 상태로 시작
+  document.getElementById('minimapFloat')?.classList.remove('visible');
+
+  // ── 왼쪽 영역 클릭 → 상세 닫기 (cards 탭이 초기화된 후에 이벤트 위임) ──
+  document.querySelector('.main-layout')?.addEventListener('click', e => {
+    if (!document.getElementById('tab-cards')?.classList.contains('detail-open')) return;
+    if (!e.target.closest('#tab-cards')) return;
+    if (e.target.closest('.resort-card') || e.target.closest('.cards-right-col')) return;
     window.closeCardDetail();
   });
 
-  // 취향 설정 패널 초기화 — 변경 시 카드 재렌더 + 상세 점수 갱신
+  // ── 취향 설정 패널 초기화 ────────────────────────────────────────
   updatePrefsHint();
   initPrefsPanel(() => {
     window._renderCards?.();
@@ -768,13 +861,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updatePrefsHint();
   });
-
-  tabInited.add('cards');
-  initCards(openDetailInCards);
-
-  // 미니맵 초기화 (지도 탭 없이 바로)
-  initMap(openDetailInCards);
-  document.getElementById('minimapFloat')?.classList.add('visible');
 
   window.addEventListener('open-detail', (e) => openDetail(e.detail.id));
 });

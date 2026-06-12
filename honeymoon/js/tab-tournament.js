@@ -307,6 +307,10 @@ function renderResult() {
     <button class="result-detail-btn" onclick="window._tournamentDetailClick?.('${champion.id}')">📋 상세 정보 보기</button>
     <button class="result-restart-btn" id="restartBtn">🔄 다시 시작</button>
   </div>
+  <div class="result-pick-row">
+    <span class="result-pick-label">이 리조트를 Pick으로 저장하기</span>
+    <button class="result-pick-btn" onclick="window._openPickModal?.('${champion.id}')">💗 Pick 지정</button>
+  </div>
 </div>`;
 
   window._tournamentDetailClick = openTournamentDetail;
