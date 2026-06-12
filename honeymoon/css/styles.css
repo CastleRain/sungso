@@ -1889,6 +1889,90 @@ body {
 }
 .pdf-link-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary-deep); }
 
+/* ── 취향 설정 패널 ───────────────────────────────────────────── */
+.prefs-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+.prefs-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: white;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.prefs-toggle-btn .prefs-arrow { font-size: 10px; transition: transform 0.2s; }
+.prefs-toggle-btn.active { border-color: var(--primary); color: var(--primary-deep); }
+.prefs-toggle-btn.active .prefs-arrow { transform: rotate(180deg); }
+.prefs-hint {
+  font-size: 11px;
+  color: var(--text-light);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prefs-panel {
+  display: none;
+  background: var(--primary-pale);
+  border: 1px solid rgba(29,158,117,0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 8px;
+}
+.prefs-panel.open { display: block; }
+.prefs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+.prefs-dim { display: flex; flex-direction: column; gap: 6px; }
+.prefs-label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+.prefs-btns { display: flex; gap: 4px; }
+.pref-btn {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  white-space: nowrap;
+  text-align: center;
+}
+.pref-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-deep);
+}
+.pref-btn:not(.active):hover { border-color: var(--border-mid); background: var(--gray-50); color: var(--text-muted); }
+
+/* ── 카드 적합도 배지 ─────────────────────────────────────────── */
+.card-fit-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  letter-spacing: -0.2px;
+}
+.fit-high { background: var(--primary-light); color: var(--primary-deep); }
+.fit-mid  { background: #FEF3C7; color: #92400E; }
+.fit-low  { background: var(--gray-100); color: var(--gray-600); }
+
 /* ════════════════════════════════════════════════════════════════
    반응형 조정
    ════════════════════════════════════════════════════════════════ */

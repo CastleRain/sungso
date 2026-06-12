@@ -99,6 +99,50 @@
             <button class="price-reset-btn" id="priceReset">초기화</button>
           </div>
           <div class="filter-summary" id="filterSummary"></div>
+          <!-- 취향 설정 -->
+          <div class="toolbar-row prefs-toggle-row">
+            <button class="prefs-toggle-btn" id="prefsToggleBtn">
+              <span>✦ 취향 설정</span>
+              <span class="prefs-arrow">▾</span>
+            </button>
+            <span class="prefs-hint" id="prefsHint">라군·수중·프라이빗·다이닝 모두 보통</span>
+          </div>
+          <div class="prefs-panel" id="prefsPanel">
+            <div class="prefs-grid">
+              <div class="prefs-dim">
+                <div class="prefs-label">🌊 라군뷰</div>
+                <div class="prefs-btns">
+                  <button class="pref-btn" id="pref_lagoon_0">관심없음</button>
+                  <button class="pref-btn" id="pref_lagoon_1">보통</button>
+                  <button class="pref-btn" id="pref_lagoon_2">매우 중요</button>
+                </div>
+              </div>
+              <div class="prefs-dim">
+                <div class="prefs-label">🐠 수중환경</div>
+                <div class="prefs-btns">
+                  <button class="pref-btn" id="pref_underwater_0">관심없음</button>
+                  <button class="pref-btn" id="pref_underwater_1">보통</button>
+                  <button class="pref-btn" id="pref_underwater_2">매우 중요</button>
+                </div>
+              </div>
+              <div class="prefs-dim">
+                <div class="prefs-label">🔒 프라이버시</div>
+                <div class="prefs-btns">
+                  <button class="pref-btn" id="pref_privacy_0">관심없음</button>
+                  <button class="pref-btn" id="pref_privacy_1">보통</button>
+                  <button class="pref-btn" id="pref_privacy_2">매우 중요</button>
+                </div>
+              </div>
+              <div class="prefs-dim">
+                <div class="prefs-label">🍽️ 다이닝</div>
+                <div class="prefs-btns">
+                  <button class="pref-btn" id="pref_dining_0">관심없음</button>
+                  <button class="pref-btn" id="pref_dining_1">보통</button>
+                  <button class="pref-btn" id="pref_dining_2">매우 중요</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="cards-grid" id="cardsGrid">
           <!-- JS로 렌더링 -->

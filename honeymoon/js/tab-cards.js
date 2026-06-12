@@ -1,6 +1,7 @@
 // tab-cards.js — 카드 그리드 + 필터/정렬
 
 import { RESORTS, getBestPrice, sortByPrice, getFeaturedImage } from './resorts-data.js';
+import { calcFitScore } from './user-prefs.js';
 
 let onDetailOpen = null;
 let currentSort = 'water_pool_4n';
@@ -47,6 +48,8 @@ function renderCard(resort, sortKey, rank) {
   const price = getBestPrice(resort, sortKey);
   const isPriceBest = rank === 1 && price != null;
   const showRank = rank <= 3 && price != null;
+  const fitScore = calcFitScore(resort);
+  const fitClass = fitScore >= 80 ? 'fit-high' : fitScore >= 60 ? 'fit-mid' : 'fit-low';
 
   const heroImg = getFeaturedImage(resort);
   const imgHtml = heroImg
@@ -99,6 +102,7 @@ function renderCard(resort, sortKey, rank) {
     </div>
     <div class="card-footer">
       <span class="card-tier-badge ${TIER_CLASS[resort.honeymoon_tier] || 'tier-simple'}">${TIER_EMOJI[resort.honeymoon_tier]} ${TIER_SHORT[resort.honeymoon_tier]}</span>
+      <span class="card-fit-badge ${fitClass}" title="취향 적합도">${fitScore}%</span>
       <button class="card-detail-btn" onclick="event.stopPropagation(); window._cardClick('${resort.id}')">상세 →</button>
     </div>
   </div>

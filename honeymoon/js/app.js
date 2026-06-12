@@ -7,6 +7,22 @@ import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages } from './firebase-notes.js';
+import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
+
+function updatePrefsHint() {
+  const el = document.getElementById('prefsHint');
+  if (!el) return;
+  const p = getPrefs();
+  const WLABEL = ['관심없음', '보통', '중요'];
+  const KEYS = [
+    { key: 'lagoon', label: '라군' },
+    { key: 'underwater', label: '수중' },
+    { key: 'privacy', label: '프라이빗' },
+    { key: 'dining', label: '다이닝' },
+  ];
+  const parts = KEYS.filter(k => p[k.key] !== 1).map(k => `${k.label} ${WLABEL[p[k.key]]}`);
+  el.textContent = parts.length === 0 ? '모두 보통' : parts.join(' · ');
+}
 
 // ── Hero 배경 이미지 설정 ─────────────────────────────────────────
 function setHeroBg() {
@@ -91,7 +107,10 @@ function initResizeHandle(handle, leftEl, storageKey, min = 200, max = 720) {
 }
 
 // ── 카드 탭 분할 오른쪽 패널에 상세 렌더 ──────────────────────────
+let _currentDetailResortId = null;
+
 function openDetailInCards(resortId) {
+  _currentDetailResortId = resortId;
   const resort = RESORTS.find(r => r.id === resortId);
   if (!resort) return;
   const panel = document.getElementById('cardsDetailPanel');
@@ -487,7 +506,7 @@ function renderResortDetail(r) {
   const agencyClass = { realmaldives: 'real', honeymoonresort: 'honey', tourmin: 'tour' };
 
   // 적합도 점수
-  const fitScore = Math.round((r.ratings.lagoon + r.ratings.underwater + r.ratings.privacy + r.ratings.dining) / 20 * 100);
+  const fitScore = calcFitScore(r);
 
   // 가격 카드 (prow 스타일)
   const priceCardsHtml = agencyIds.map(agId => {
@@ -668,6 +687,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('tab-cards').classList.contains('detail-open')) return;
     if (e.target.closest('.resort-card')) return; // 카드 클릭은 상세 전환
     window.closeCardDetail();
+  });
+
+  // 취향 설정 패널 초기화 — 변경 시 카드 재렌더 + 상세 점수 갱신
+  updatePrefsHint();
+  initPrefsPanel(() => {
+    window._renderCards?.();
+    if (_currentDetailResortId) {
+      const resort = RESORTS.find(r => r.id === _currentDetailResortId);
+      if (resort) {
+        const scoreEl = document.querySelector('#cardsDetailPanel .fit-score-num');
+        if (scoreEl) scoreEl.textContent = calcFitScore(resort) + '%';
+      }
+    }
+    updatePrefsHint();
   });
 
   tabInited.add('cards');
