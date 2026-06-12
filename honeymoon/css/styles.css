@@ -3414,3 +3414,164 @@ body {
 }
 .result-pick-btn:hover  { background: var(--primary-deep); }
 .result-pick-btn:active { transform: scale(0.96); }
+
+/* ════════════════════════════════════════════════════════════════
+   Detail Modal Sheet
+   ════════════════════════════════════════════════════════════════ */
+
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sheetOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(16px); }
+}
+
+/* Backdrop */
+.ds-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 4400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.ds-backdrop.ds-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Sheet — desktop: right-side floating panel */
+.detail-sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(640px, 55vw);
+  background: #FAFBFC;
+  z-index: 4500;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px 0 0 20px;
+  box-shadow: -16px 0 64px rgba(0, 0, 0, 0.18), -1px 0 0 rgba(0,0,0,0.06);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.32, 0, 0, 1);
+  overflow: hidden;
+}
+.detail-sheet.ds-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+.detail-sheet.ds-closing {
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: opacity 0.20s ease, transform 0.22s ease;
+}
+
+/* Sheet header */
+.detail-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 14px 16px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.detail-sheet-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-mid);
+  background: var(--gray-50);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background 0.12s, border-color 0.12s;
+  line-height: 1;
+}
+.detail-sheet-close:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-400);
+  color: var(--text);
+}
+
+/* Sheet body — scrollable */
+.detail-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.detail-sheet-body .resort-section {
+  padding-bottom: 48px;
+}
+
+/* Cards 탭 — 전체 너비 */
+#tab-cards {
+  overflow-y: auto;
+}
+.cards-left-col {
+  width: 100% !important;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* Price 탭 — 전체 너비 */
+.price-left-col {
+  width: 100% !important;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── 모바일: bottom sheet ── */
+@media (max-width: 680px) {
+  .detail-sheet {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 94svh;
+    max-height: 94svh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 48px rgba(0,0,0,0.20);
+    transform: translateY(100%);
+    opacity: 1;
+    transition: transform 0.36s cubic-bezier(0.32, 0, 0, 1);
+  }
+  .detail-sheet.ds-open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .detail-sheet.ds-closing {
+    transform: translateY(100%);
+    opacity: 1;
+    transition: transform 0.24s ease;
+  }
+  /* 모바일 bottom sheet 핸들 */
+  .detail-sheet-header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--gray-200);
+  }
+}

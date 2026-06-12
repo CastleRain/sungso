@@ -97,25 +97,11 @@ function switchTab(tabId) {
 
   if (!tabInited.has(tabId)) {
     tabInited.add(tabId);
-    if (tabId === 'plan') initPlan({ openDetailFn: openDetailInCards });
-    if (tabId === 'cards') {
-      initCards(openDetailInCards);
-      initResizeHandle(
-        document.getElementById('cardsResizeHandle'),
-        document.querySelector('.cards-left-col'),
-        'cards-left-w', 240, 700
-      );
-    }
-    if (tabId === 'price') {
-      initPrice(openDetailInPrice);
-      initResizeHandle(
-        document.getElementById('priceResizeHandle'),
-        document.querySelector('.price-left-col'),
-        'price-left-w', 280, 780
-      );
-    }
+    if (tabId === 'plan')       initPlan({ openDetailFn: openDetailSheet });
+    if (tabId === 'cards')      initCards(openDetailSheet);
+    if (tabId === 'price')      initPrice(openDetailSheet);
     if (tabId === 'tournament') initTournament(openDetailInTournament);
-    if (tabId === 'pdf') initPdf();
+    if (tabId === 'pdf')        initPdf();
   }
 }
 
@@ -145,14 +131,75 @@ function initResizeHandle(handle, leftEl, storageKey, min = 200, max = 720) {
   });
 }
 
-// ── 카드 탭 분할 오른쪽 패널에 상세 렌더 ──────────────────────────
-// ── 토너먼트 탭 오른쪽 상세 패널 ─────────────────────────────────
+// ── Detail Modal Sheet ─────────────────────────────────────────────
+let _currentDetailResortId = null;
+let _sheetCloseTimer = null;
+
+function openDetailSheet(resortId) {
+  const resort = RESORTS.find(r => r.id === resortId);
+  if (!resort) return;
+
+  _currentDetailResortId = resortId;
+
+  const sheet   = document.getElementById('detailSheet');
+  const backdrop = document.getElementById('detailSheetBackdrop');
+  const body    = document.getElementById('detailSheetBody');
+  if (!sheet || !body) return;
+
+  // 이미 열려있으면 콘텐츠만 교체 (애니메이션 없이)
+  const alreadyOpen = sheet.classList.contains('ds-open');
+  if (alreadyOpen) {
+    body.innerHTML = renderResortDetail(resort);
+    body.scrollTop = 0;
+    return;
+  }
+
+  body.innerHTML = renderResortDetail(resort);
+  body.scrollTop = 0;
+
+  if (_sheetCloseTimer) { clearTimeout(_sheetCloseTimer); _sheetCloseTimer = null; }
+  sheet.classList.remove('ds-closing');
+  backdrop.classList.add('ds-open');
+  // 다음 프레임에 열기 (트랜지션 트리거)
+  requestAnimationFrame(() => { sheet.classList.add('ds-open'); });
+
+  // 카드 선택 하이라이트
+  document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.map-pin[data-resort="${resortId}"]`)?.classList.add('active');
+
+  // 취향 점수 갱신용 트래킹
+  // (prefs panel onChange에서 scoreEl 갱신 시 사용)
+}
+
+window.closeDetailSheet = function() {
+  const sheet    = document.getElementById('detailSheet');
+  const backdrop = document.getElementById('detailSheetBackdrop');
+  if (!sheet) return;
+
+  sheet.classList.add('ds-closing');
+  backdrop.classList.remove('ds-open');
+
+  _sheetCloseTimer = setTimeout(() => {
+    sheet.classList.remove('ds-open', 'ds-closing');
+    document.getElementById('detailSheetBody').innerHTML = '';
+    document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
+    _currentDetailResortId = null;
+  }, 260);
+};
+
+// 하위 호환 alias (tab-plan.js의 window.dispatchEvent('open-detail') 등)
+export function openDetail(resortId) { openDetailSheet(resortId); }
+export function closeDetail()        { window.closeDetailSheet(); }
+
+// ── 토너먼트 탭 split 패널 상세 (모달 시트와 별도) ─────────────────
 function openDetailInTournament(resortId) {
   const resort = RESORTS.find(r => r.id === resortId);
   const col = document.getElementById('tournamentDetailCol');
   if (!col || !resort) return;
 
-  // 현재 매치에서 이 리조트가 선택 가능한 상대인지 확인해서 "선택" 버튼 표시
   col.innerHTML = `
     <div class="tournament-detail-bar">
       <button class="tdb-back-btn" onclick="window._tournamentCloseDetail()">← 돌아가기</button>
@@ -162,97 +209,6 @@ function openDetailInTournament(resortId) {
 
   document.getElementById('tournamentSplit')?.classList.add('detail-open');
   col.scrollTop = 0;
-}
-
-let _currentDetailResortId = null;
-
-function openDetailInCards(resortId) {
-  _currentDetailResortId = resortId;
-  const resort = RESORTS.find(r => r.id === resortId);
-  if (!resort) return;
-  const panel = document.getElementById('cardsDetailPanel');
-  if (panel) {
-    const closeBar = panel.querySelector('.cards-detail-close-bar');
-    panel.innerHTML = renderResortDetail(resort);
-    if (closeBar) panel.insertBefore(closeBar, panel.firstChild);
-    panel.scrollTop = 0;
-  }
-  document.getElementById('tab-cards').classList.add('detail-open');
-  window._minimapHide?.();
-  document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
-  document.querySelector(`.resort-card[data-id="${resortId}"]`)?.classList.add('selected');
-  // 미니맵 핀 하이라이트
-  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
-  document.querySelector(`.map-pin[data-resort="${resortId}"]`)?.classList.add('active');
-}
-
-window.closeCardDetail = function() {
-  document.getElementById('tab-cards').classList.remove('detail-open');
-  const panel = document.getElementById('cardsDetailPanel');
-  if (!panel) return;
-  const closeBar = panel.querySelector('.cards-detail-close-bar');
-  panel.innerHTML = '';
-  if (closeBar) panel.appendChild(closeBar);
-  const empty = document.createElement('div');
-  empty.className = 'cards-detail-empty';
-  empty.innerHTML = '<div style="font-size:48px;">🏝️</div><div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
-  panel.appendChild(empty);
-  document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
-  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
-  _currentDetailResortId = null;
-  window._minimapShow?.();
-};
-
-// ── 가격 탭 오른쪽 패널에 상세 렌더 ──────────────────────────────
-function openDetailInPrice(resortId) {
-  const resort = RESORTS.find(r => r.id === resortId);
-  if (!resort) return;
-  const panel = document.getElementById('priceDetailPanel');
-  if (panel) {
-    const closeBar = panel.querySelector('.price-detail-close-bar');
-    panel.innerHTML = renderResortDetail(resort);
-    if (closeBar) panel.insertBefore(closeBar, panel.firstChild);
-    panel.scrollTop = 0;
-  }
-  document.getElementById('tab-price').classList.add('detail-open');
-}
-
-window.closePriceDetail = function() {
-  document.getElementById('tab-price').classList.remove('detail-open');
-  const panel = document.getElementById('priceDetailPanel');
-  if (!panel) return;
-  const closeBar = panel.querySelector('.price-detail-close-bar');
-  panel.innerHTML = '';
-  if (closeBar) panel.appendChild(closeBar);
-  const empty = document.createElement('div');
-  empty.className = 'price-detail-empty';
-  empty.innerHTML = '<div style="font-size:48px;">💰</div><div>리조트 이름을 클릭하면<br>상세 정보가 여기 표시됩니다</div>';
-  panel.appendChild(empty);
-  document.querySelectorAll('.resort-row').forEach(r => r.classList.remove('selected'));
-};
-
-// ── 지도/토너먼트용 오버레이 ────────────────────────────────────────
-export function openDetail(resortId) {
-  const resort = RESORTS.find(r => r.id === resortId);
-  if (!resort) return;
-
-  const overlay = document.getElementById('detailOverlay');
-  const title = document.getElementById('detailOverlayTitle');
-  const panel = document.getElementById('detailReportPanel');
-  const mapName = document.getElementById('detailMapName');
-  const mapSub = document.getElementById('detailMapSub');
-
-  title.textContent = `${resort.name_ko}  ·  ${resort.name_en}`;
-  mapName.textContent = resort.name_ko;
-  mapSub.textContent = `${resort.atoll} · ${resort.transfer_type === 'seaplane' ? '✈' : '🚤'} ${resort.transfer_minutes}분 · ${resort.distance_km}km`;
-
-  panel.innerHTML = renderResortDetail(resort);
-  overlay.classList.add('open');
-  panel.scrollTop = 0;
-}
-
-export function closeDetail() {
-  document.getElementById('detailOverlay').classList.remove('open');
 }
 
 // ── Pick 모달 ──────────────────────────────────────────────────────
@@ -810,57 +766,48 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      if (_memoResortId) window._closeMemo();
-      else closeDetail();
-    }
-  });
-
-  document.getElementById('detailOverlay')?.addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeDetail();
-  });
 
   // ── 전역 picks 구독 (모든 탭 공유) ─────────────────────────────
   window._currentPicks = { sohee: [null,null,null], sungwoo: [null,null,null], finalCandidates: [] };
   subscribePicks(picks => {
     window._currentPicks = picks;
     window._refreshCardPickBadges?.();
-    // Pick 모달이 열려있으면 슬롯 상태 갱신
     if (window._pickModalResortId) window._openPickModal(window._pickModalResortId);
   });
 
   // ── 플랜 탭 기본 초기화 (기본 활성 탭) ─────────────────────────
   tabInited.add('plan');
-  initPlan({ openDetailFn: openDetailInCards });
+  initPlan({ openDetailFn: openDetailSheet });
 
   // ── 미니맵 초기화 ────────────────────────────────────────────────
-  initMap(openDetailInCards);
-  // 기본 탭이 plan이므로 minimap은 숨김 상태로 시작
+  initMap(openDetailSheet);
   document.getElementById('minimapFloat')?.classList.remove('visible');
-
-  // ── 왼쪽 영역 클릭 → 상세 닫기 (cards 탭이 초기화된 후에 이벤트 위임) ──
-  document.querySelector('.main-layout')?.addEventListener('click', e => {
-    if (!document.getElementById('tab-cards')?.classList.contains('detail-open')) return;
-    if (!e.target.closest('#tab-cards')) return;
-    if (e.target.closest('.resort-card') || e.target.closest('.cards-right-col')) return;
-    window.closeCardDetail();
-  });
 
   // ── 취향 설정 패널 초기화 ────────────────────────────────────────
   updatePrefsHint();
   initPrefsPanel(() => {
     window._renderCards?.();
+    // detail sheet가 열려있으면 취향 점수 즉시 갱신
     if (_currentDetailResortId) {
       const resort = RESORTS.find(r => r.id === _currentDetailResortId);
       if (resort) {
-        const scoreEl = document.querySelector('#cardsDetailPanel .fit-score-num');
+        const scoreEl = document.querySelector('#detailSheetBody .fit-score-num');
         if (scoreEl) scoreEl.textContent = calcFitScore(resort) + '%';
       }
     }
     updatePrefsHint();
   });
 
-  window.addEventListener('open-detail', (e) => openDetail(e.detail.id));
+  // ESC 키로 sheet 닫기
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (window._pickModalResortId) { window._closePickModal?.(); return; }
+      if (_memoResortId)             { window._closeMemo?.();      return; }
+      if (document.getElementById('detailSheet')?.classList.contains('ds-open')) {
+        window.closeDetailSheet();
+      }
+    }
+  });
+
+  window.addEventListener('open-detail', (e) => openDetailSheet(e.detail.id));
 });

@@ -71,10 +71,8 @@
   </div>
 
   <!-- 탭 2: 리조트 정보 -->
-  <div class="tab-content" id="tab-cards" style="overflow:hidden; padding:0;">
-    <div class="cards-split-layout">
-      <!-- 왼쪽: 카드 목록 -->
-      <div class="cards-left-col">
+  <div class="tab-content" id="tab-cards" style="overflow-y:auto; padding:0;">
+    <div class="cards-left-col">
         <div class="cards-toolbar">
           <div class="toolbar-row">
             <span class="sort-label">정렬</span>
@@ -157,52 +155,26 @@
         <div class="cards-grid" id="cardsGrid">
           <!-- JS로 렌더링 -->
         </div>
-      </div>
-      <div class="resize-handle" id="cardsResizeHandle"></div>
-      <!-- 오른쪽: 선택된 리조트 상세 -->
-      <div class="cards-right-col" id="cardsDetailPanel">
-        <div class="cards-detail-close-bar">
-          <button class="cards-detail-back-btn" onclick="window.closeCardDetail()">← 목록으로</button>
-        </div>
-        <div class="cards-detail-empty">
-          <div style="font-size:48px;">🏝️</div>
-          <div>리조트 카드를 클릭하면<br>상세 정보가 여기 표시됩니다</div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- 탭 2: 가격 비교 -->
-  <div class="tab-content" id="tab-price" style="overflow:hidden; padding:0;">
-    <div class="price-split-layout">
-      <!-- 왼쪽: 가격 테이블 -->
-      <div class="price-left-col">
-        <div class="price-tab-header">
-          <h2>가격 비교 테이블</h2>
-          <span style="font-size:12px; color:var(--text-muted);">컬럼 헤더 클릭 시 정렬 · 1인 USD 기준</span>
-          <div style="margin-left:auto;">
-            <label class="couple-toggle" id="coupleToggle">
-              <div class="toggle-switch" id="coupleSwitch">
-                <div class="toggle-knob"></div>
-              </div>
-              2인 합산 보기
-            </label>
-          </div>
-        </div>
-        <div class="price-table-wrap" id="priceTableWrap">
-          <!-- JS로 렌더링 -->
+  <!-- 탭 3: 견적 비교 -->
+  <div class="tab-content" id="tab-price" style="overflow-y:auto; padding:0;">
+    <div class="price-left-col">
+      <div class="price-tab-header">
+        <h2>견적 비교 테이블</h2>
+        <span style="font-size:12px; color:var(--text-muted);">컬럼 헤더 클릭 시 정렬 · 1인 USD 기준</span>
+        <div style="margin-left:auto;">
+          <label class="couple-toggle" id="coupleToggle">
+            <div class="toggle-switch" id="coupleSwitch">
+              <div class="toggle-knob"></div>
+            </div>
+            2인 합산 보기
+          </label>
         </div>
       </div>
-      <div class="resize-handle" id="priceResizeHandle"></div>
-      <!-- 오른쪽: 선택된 리조트 상세 -->
-      <div class="price-right-col" id="priceDetailPanel">
-        <div class="price-detail-close-bar">
-          <button class="cards-detail-back-btn" onclick="window.closePriceDetail()">← 목록으로</button>
-        </div>
-        <div class="price-detail-empty">
-          <div style="font-size:48px;">💰</div>
-          <div>리조트 이름을 클릭하면<br>상세 정보가 여기 표시됩니다</div>
-        </div>
+      <div class="price-table-wrap" id="priceTableWrap">
+        <!-- JS로 렌더링 -->
       </div>
     </div>
   </div>
@@ -254,30 +226,14 @@
 
 </div><!-- .main-layout -->
 
-<!-- ══════════════════════════════════════════════ 상세 뷰 오버레이 -->
-<div class="detail-overlay" id="detailOverlay">
-  <div class="detail-overlay-header">
-    <span id="detailOverlayTitle" style="font-size:15px; font-weight:600;">리조트 상세</span>
-    <button class="detail-close-btn" id="detailCloseBtn">✕ 닫기</button>
+<!-- ══════════════════════════════════════════════ Detail Modal Sheet -->
+<div class="ds-backdrop" id="detailSheetBackdrop" onclick="window.closeDetailSheet?.()"></div>
+<div class="detail-sheet" id="detailSheet">
+  <div class="detail-sheet-header">
+    <button class="detail-sheet-close" id="detailSheetClose" onclick="window.closeDetailSheet?.()">✕</button>
   </div>
-  <div class="detail-body">
-    <div class="map-panel">
-      <div class="map-panel-inner">
-        <p class="map-title">위치</p>
-        <svg id="detailMap" viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg">
-          <!-- 같은 SVG 지도 (간소화) — JS에서 핀 강조 처리 -->
-          <use href="#mainSvgMap"/>
-        </svg>
-        <div class="map-current-info" id="detailMapInfo">
-          <div class="ci-label">현재 리조트</div>
-          <div class="ci-name" id="detailMapName">—</div>
-          <div class="ci-sub" id="detailMapSub">—</div>
-        </div>
-      </div>
-    </div>
-    <div class="report-panel" id="detailReportPanel">
-      <!-- JS로 렌더링 -->
-    </div>
+  <div class="detail-sheet-body" id="detailSheetBody">
+    <!-- renderResortDetail로 렌더링 -->
   </div>
 </div>
 
