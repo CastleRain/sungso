@@ -1,3 +1,92 @@
+/* ── PIN 잠금 오버레이 ── */
+#pin-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #fff0f5 0%, #f5f0ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+#pin-box {
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 36px 36px;
+  box-shadow: 0 20px 60px rgba(255,107,157,0.15), 0 4px 16px rgba(0,0,0,0.06);
+  text-align: center;
+  width: 320px;
+  max-width: 90vw;
+}
+#pin-emoji { font-size: 44px; margin-bottom: 12px; }
+#pin-title { font-size: 20px; font-weight: 800; color: #1a1a2e; margin: 0 0 6px; }
+#pin-title span { color: #FF6B9D; }
+#pin-sub { font-size: 13px; color: #aaa; margin: 0 0 28px; }
+
+#pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.pin-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid #e0c4d8;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.pin-dot.filled {
+  background: #FF6B9D;
+  border-color: #FF6B9D;
+  transform: scale(1.15);
+}
+
+#pin-error {
+  min-height: 20px;
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+#pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.pin-key {
+  height: 56px;
+  border: none;
+  border-radius: 14px;
+  background: #fdf0f5;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+  font-family: inherit;
+}
+.pin-key:hover { background: #ffe0ec; }
+.pin-key:active { background: #FF6B9D; color: #fff; transform: scale(0.94); }
+.pin-back { font-size: 18px; background: #f5f5f5; color: #888; }
+.pin-back:hover { background: #fee2e2; color: #ef4444; }
+
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+#pin-box.shake { animation: pinShake 0.45s ease; }
+
+@media (max-width: 480px) {
+  #pin-box { padding: 32px 20px 28px; }
+  .pin-key { height: 52px; font-size: 18px; }
+}
+
 /* ── Flatpickr theme override ── */
 .flatpickr-calendar {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;

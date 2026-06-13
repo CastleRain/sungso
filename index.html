@@ -9,6 +9,110 @@
 </head>
 <body>
 
+<!-- ===== PIN 잠금 오버레이 ===== -->
+<div id="pin-overlay">
+  <div id="pin-box">
+    <div id="pin-emoji">💍</div>
+    <h2 id="pin-title">성우 <span>♥</span> 소희</h2>
+    <p id="pin-sub">접근 코드 4자리를 입력해주세요</p>
+    <div id="pin-dots">
+      <span class="pin-dot" id="pd0"></span>
+      <span class="pin-dot" id="pd1"></span>
+      <span class="pin-dot" id="pd2"></span>
+      <span class="pin-dot" id="pd3"></span>
+    </div>
+    <div id="pin-error"></div>
+    <div id="pin-keypad">
+      <button class="pin-key" onclick="_pinKey('1')">1</button>
+      <button class="pin-key" onclick="_pinKey('2')">2</button>
+      <button class="pin-key" onclick="_pinKey('3')">3</button>
+      <button class="pin-key" onclick="_pinKey('4')">4</button>
+      <button class="pin-key" onclick="_pinKey('5')">5</button>
+      <button class="pin-key" onclick="_pinKey('6')">6</button>
+      <button class="pin-key" onclick="_pinKey('7')">7</button>
+      <button class="pin-key" onclick="_pinKey('8')">8</button>
+      <button class="pin-key" onclick="_pinKey('9')">9</button>
+      <span></span>
+      <button class="pin-key" onclick="_pinKey('0')">0</button>
+      <button class="pin-key pin-back" onclick="_pinBack()">⌫</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ★ PIN 변경: 아래 숫자를 바꾸면 됩니다
+  var PIN = '0306';
+  var TOKEN_KEY = 'sungso_pin_auth';
+  var EXPIRE_MS = 30 * 24 * 60 * 60 * 1000; // 30일
+
+  // 저장된 인증 확인
+  try {
+    var stored = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
+    if (stored && (Date.now() - stored.ts) < EXPIRE_MS) {
+      document.getElementById('pin-overlay').style.display = 'none';
+      return;
+    }
+  } catch(e) {}
+
+  var entered = '';
+
+  function updateDots() {
+    for (var i = 0; i < 4; i++) {
+      var dot = document.getElementById('pd' + i);
+      dot.classList.toggle('filled', i < entered.length);
+    }
+  }
+
+  function shake() {
+    var box = document.getElementById('pin-box');
+    box.classList.add('shake');
+    setTimeout(function() { box.classList.remove('shake'); }, 500);
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('pin-error');
+    el.textContent = msg;
+    entered = '';
+    updateDots();
+    shake();
+    setTimeout(function() { el.textContent = ''; }, 2000);
+  }
+
+  function tryUnlock() {
+    if (entered === PIN) {
+      localStorage.setItem(TOKEN_KEY, JSON.stringify({ ts: Date.now() }));
+      var ov = document.getElementById('pin-overlay');
+      ov.style.opacity = '0';
+      setTimeout(function() { ov.style.display = 'none'; }, 300);
+    } else {
+      showError('올바르지 않은 코드예요 🙅');
+    }
+  }
+
+  window._pinKey = function(k) {
+    if (entered.length >= 4) return;
+    entered += k;
+    updateDots();
+    if (entered.length === 4) {
+      setTimeout(tryUnlock, 120);
+    }
+  };
+
+  window._pinBack = function() {
+    entered = entered.slice(0, -1);
+    updateDots();
+  };
+
+  // 키보드 지원
+  document.addEventListener('keydown', function(e) {
+    if (document.getElementById('pin-overlay').style.display === 'none') return;
+    if (e.key >= '0' && e.key <= '9') { window._pinKey(e.key); }
+    else if (e.key === 'Backspace') { window._pinBack(); }
+  });
+})();
+</script>
+
 <div class="particles" id="particles"></div>
 
 <div class="main">
