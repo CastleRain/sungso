@@ -261,7 +261,7 @@ footer { font-size: 13px; color: #ddd; text-align: center; }
 .scene {
   position: fixed; bottom: 0; left: 0;
   width: 100%; height: 115px;
-  pointer-events: none; z-index: 20; overflow: hidden;
+  pointer-events: none; z-index: 20; overflow: visible;
 }
 .char-h-boy  { position: absolute; bottom: 0; animation: moveRight 30s linear infinite; }
 .char-h-girl { position: absolute; bottom: 0; animation: moveLeft  24s linear infinite; }
