@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💍 결혼 재무 플래너</title>
+<script>
+// PIN 인증 가드 — 토큰 없으면 루트로 리다이렉트
+(function(){
+  var TOKEN_KEY='sungso_pin_auth', EXPIRE=30*24*60*60*1000;
+  try{var s=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');if(s&&Date.now()-s.ts<EXPIRE)return;}catch(e){}
+  location.replace('../?return='+encodeURIComponent(location.pathname));
+})();
+</script>
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/dashboard.css">

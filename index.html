@@ -82,6 +82,10 @@
   function tryUnlock() {
     if (entered === PIN) {
       localStorage.setItem(TOKEN_KEY, JSON.stringify({ ts: Date.now() }));
+      // ?return= 파라미터 있으면 원래 목적지로 복귀
+      var params = new URLSearchParams(location.search);
+      var returnTo = params.get('return');
+      if (returnTo) { location.replace(returnTo); return; }
       var ov = document.getElementById('pin-overlay');
       ov.style.opacity = '0';
       setTimeout(function() { ov.style.display = 'none'; }, 300);
