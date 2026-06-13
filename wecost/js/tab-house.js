@@ -7,10 +7,6 @@ let _currentAvailCash = 0;
 export function initHouseInputs(st) {
   const cfg = st.settings || {};
 
-  // 부모님 지원금 입력 초기값 (최초 1회만)
-  _initSupportInp('inp-sohee-sup', cfg.parentSupportSohee);
-  _initSupportInp('inp-sunwo-sup', cfg.parentSupportSunwo);
-
   const limitEl = document.getElementById('inp-loan-limit');
   if (limitEl && cfg.monthlyPaymentLimit) limitEl.value = cfg.monthlyPaymentLimit;
 
@@ -43,11 +39,18 @@ export function renderHouse(st) {
   _set('cash-savings',  won(st.coupleSavings || 0));
   _set('cash-wedding',  `-${won(st.totalPlanned || 0)}`);
   _set('cash-wedding-note', st.totalPlanned === 0 ? '(결혼비용 탭에서 연동)' : '(Firebase 연동)');
-  // 지원금 레이블(won 형식) + 입력값 동기화 (포커스 중이 아닐 때만)
-  _set('cash-sohee-sup', cfg.parentSupportSohee > 0 ? won(cfg.parentSupportSohee) : '');
-  _set('cash-sunwo-sup', cfg.parentSupportSunwo > 0 ? won(cfg.parentSupportSunwo) : '');
-  _syncSupportInp('inp-sohee-sup', cfg.parentSupportSohee);
-  _syncSupportInp('inp-sunwo-sup', cfg.parentSupportSunwo);
+  // 부모님 지원금 합산 표시 (read-only, 현금흐름 탭 입력 연동)
+  const supTotal = supS + supW;
+  const supNoteEl = document.getElementById('cash-sup-note');
+  if (supTotal > 0) {
+    _set('cash-sup-total', won(supTotal));
+    if (supNoteEl) supNoteEl.textContent = `(소희 ${won(cfg.parentSupportSohee || 0)} + 성우 ${won(cfg.parentSupportSunwo || 0)} 포함)`;
+  } else {
+    const sS = cfg.parentSupportSohee || 0;
+    const sW = cfg.parentSupportSunwo || 0;
+    _set('cash-sup-total', (sS + sW) > 0 ? `${won(sS + sW)} (미포함)` : '-');
+    if (supNoteEl) supNoteEl.textContent = '(현금흐름 탭에서 설정)';
+  }
   _set('cash-available', wonDetailed(avail));
 
   // 조정 항목 (매 렌더마다 갱신)
@@ -147,25 +150,31 @@ export function renderLoans(loans, availCash) {
 }
 
 export function renderPresetCards() {
-  const rate   = Number(document.getElementById('preset-rate')?.value  || 3.5);
-  const term   = Number(document.getElementById('preset-term')?.value  || 30);
-  const avail  = _currentAvailCash;
-  const grid   = document.getElementById('preset-grid');
+  const rate  = Number(document.getElementById('preset-rate')?.value  || 3.5);
+  const term  = Number(document.getElementById('preset-term')?.value  || 30);
+  const avail = _currentAvailCash;
+  const limit = Number(document.getElementById('inp-loan-limit')?.value) || 0;
+  const grid  = document.getElementById('preset-grid');
   if (!grid) return;
 
-  // 집 가격별 관점: 가용현금 기준으로 각 집 가격에 필요한 대출 계산
-  const housePrices = [200000000, 300000000, 400000000, 500000000, 600000000, 700000000];
-  grid.innerHTML = housePrices.map(price => {
-    const loanAmt = Math.max(0, price - avail);
-    const monthly = loanAmt > 0 ? calcLoanMonthly({ amount: loanAmt, rate, term, grace: 0, type: '원리금' }) : 0;
-    const canAfford = loanAmt <= avail * 2;
+  // 대출 금액 기준: 가용현금 + 대출 = 살 수 있는 집 가격
+  const loanAmounts = [50000000, 100000000, 150000000, 200000000, 300000000, 400000000, 500000000, 600000000];
+  grid.innerHTML = loanAmounts.map(loanAmt => {
+    const housePrice = avail + loanAmt;
+    const monthly    = calcLoanMonthly({ amount: loanAmt, rate, term, grace: 0, type: '원리금' });
+    let statusCls = '', statusTxt = '';
+    if (limit > 0) {
+      if (monthly <= limit * 0.8)  { statusCls = 'preset-ok';   statusTxt = '여유'; }
+      else if (monthly <= limit)   { statusCls = 'preset-warn'; statusTxt = '주의'; }
+      else                         { statusCls = 'preset-over'; statusTxt = '부담'; }
+    }
     return `
-      <div class="preset-card">
-        <div class="preset-loan-lbl">집 가격</div>
-        <div class="preset-house-price">${won(price)}</div>
-        <div class="preset-loan-lbl" style="margin-top:6px">필요 대출 ${won(loanAmt)}</div>
-        <div class="preset-monthly-val">${monthly > 0 ? `월 ${wonFull(monthly)}` : '대출 불필요'}</div>
+      <div class="preset-card ${statusCls}">
+        <div class="preset-loan-lbl">${won(loanAmt)} 대출 시</div>
+        <div class="preset-house-price">${won(housePrice)}</div>
+        <div class="preset-monthly-val">월 ${wonFull(monthly)}</div>
         <div class="preset-detail">현금 ${won(avail)} + 대출 ${won(loanAmt)}</div>
+        ${statusTxt ? `<div class="preset-status-badge ${statusCls}">${statusTxt}</div>` : ''}
       </div>
     `;
   }).join('');

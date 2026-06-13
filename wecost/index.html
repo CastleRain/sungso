@@ -256,6 +256,44 @@
       </div>
     </div>
 
+    <!-- 부모님 지원금 -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-hdr">
+        <span class="card-title">부모님 지원금</span>
+        <span class="card-title-sub">포함 체크 시 가용현금 계산에 반영돼요.</span>
+      </div>
+      <div class="two-col">
+        <div class="person-card">
+          <div class="person-name" style="color:var(--expense)">🌸 소희 부모님</div>
+          <label class="inp-lbl">지원 금액 (원)</label>
+          <div class="sav-inp-row">
+            <input type="text" inputmode="numeric" id="inp-sohee-sup"
+                   placeholder="예) 30,000,000"
+                   oninput="window._onSupportAmountChange('sohee', this)">
+            <span class="sav-amt-lbl" id="cash-sohee-sup"></span>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-top:10px">
+            <input type="checkbox" class="toggle-chk" id="chk-sohee-sup" onchange="window._onSupportToggle()">
+            가용현금 계산에 포함
+          </label>
+        </div>
+        <div class="person-card">
+          <div class="person-name" style="color:var(--primary)">🌊 성우 부모님</div>
+          <label class="inp-lbl">지원 금액 (원)</label>
+          <div class="sav-inp-row">
+            <input type="text" inputmode="numeric" id="inp-sunwo-sup"
+                   placeholder="예) 30,000,000"
+                   oninput="window._onSupportAmountChange('sunwo', this)">
+            <span class="sav-amt-lbl" id="cash-sunwo-sup"></span>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-top:10px">
+            <input type="checkbox" class="toggle-chk" id="chk-sunwo-sup" onchange="window._onSupportToggle()">
+            가용현금 계산에 포함
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- 월별 누적 차트 -->
     <div class="card" style="margin-top:16px">
       <div class="card-hdr"><span class="card-title">월별 저축 누적액</span></div>
@@ -395,29 +433,12 @@
         <div class="cash-calc-lbl">결혼비용 <small id="cash-wedding-note">(결혼비용 탭 연동)</small></div>
         <div class="cash-calc-val v-neg" id="cash-wedding">-₩0</div>
       </div>
-      <div class="cash-calc-row">
+      <div class="cash-calc-row" id="cash-sup-row">
         <div class="cash-calc-lbl">
-          <input type="checkbox" class="toggle-chk" id="chk-sohee-sup" onchange="window._onSupportToggle()">
-          <label for="chk-sohee-sup">소희 부모님 지원금 포함</label>
+          부모님 지원금
+          <small id="cash-sup-note" style="margin-left:4px">(현금흐름 탭에서 설정)</small>
         </div>
-        <div class="support-inp-wrap">
-          <input type="text" inputmode="numeric" class="support-amt-inp" id="inp-sohee-sup"
-                 placeholder="예) 30,000,000"
-                 oninput="window._onSupportAmountChange('sohee', this)">
-          <span class="cash-calc-val v-pos" id="cash-sohee-sup"></span>
-        </div>
-      </div>
-      <div class="cash-calc-row">
-        <div class="cash-calc-lbl">
-          <input type="checkbox" class="toggle-chk" id="chk-sunwo-sup" onchange="window._onSupportToggle()">
-          <label for="chk-sunwo-sup">성우 부모님 지원금 포함</label>
-        </div>
-        <div class="support-inp-wrap">
-          <input type="text" inputmode="numeric" class="support-amt-inp" id="inp-sunwo-sup"
-                 placeholder="예) 30,000,000"
-                 oninput="window._onSupportAmountChange('sunwo', this)">
-          <span class="cash-calc-val v-pos" id="cash-sunwo-sup"></span>
-        </div>
+        <div class="cash-calc-val v-pos" id="cash-sup-total">-</div>
       </div>
       <div id="extra-expenses-list"></div>
       <div class="adj-add-row">
@@ -433,7 +454,7 @@
 
     <!-- 대출 금액별 시나리오 카드 -->
     <div class="card">
-      <div class="card-hdr"><span class="card-title">집 가격별 시나리오</span></div>
+      <div class="card-hdr"><span class="card-title">대출 금액별 집 예산 예상</span></div>
       <div class="scenario-controls">
         <div class="inp-grp" style="flex-direction:row;align-items:center;gap:8px">
           <label>금리 <strong id="preset-rate-display">3.5</strong>%</label>

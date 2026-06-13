@@ -22,11 +22,24 @@ export function initCashflowInputs(st) {
   savLbl('inp-sohee-mon', 'lbl-sm');
   savLbl('inp-sunwo-cur', 'lbl-wc');
   savLbl('inp-sunwo-mon', 'lbl-wm');
+
+  // 부모님 지원금 입력 초기화 (현금흐름 탭으로 이동)
+  _setFmt('inp-sohee-sup', cfg.parentSupportSohee || 0);
+  _setFmt('inp-sunwo-sup', cfg.parentSupportSunwo || 0);
+  savLbl('inp-sohee-sup', 'cash-sohee-sup');
+  savLbl('inp-sunwo-sup', 'cash-sunwo-sup');
 }
 
 export function renderCashflow(st) {
-  const wedDate = document.getElementById('inp-wed-date')?.value || st.settings?.weddingDate || '';
+  const cfg     = st.settings  || {};
+  const wedDate = document.getElementById('inp-wed-date')?.value || cfg.weddingDate || '';
   const months  = monthsBetween(wedDate);
+
+  // 부모님 지원금 동기화 (포커스 중이 아닐 때만)
+  _syncIfNotFocused('inp-sohee-sup', cfg.parentSupportSohee);
+  _syncIfNotFocused('inp-sunwo-sup', cfg.parentSupportSunwo);
+  savLbl('inp-sohee-sup', 'cash-sohee-sup');
+  savLbl('inp-sunwo-sup', 'cash-sunwo-sup');
 
   // 개월 수 레이블
   const lbl = document.getElementById('lbl-months-left');
@@ -122,4 +135,10 @@ function _setFmt(id, n) {
   const el = document.getElementById(id);
   if (!el) return;
   el.value = n > 0 ? Math.round(n).toLocaleString() : '';
+}
+
+function _syncIfNotFocused(id, n) {
+  const el = document.getElementById(id);
+  if (!el || document.activeElement === el) return;
+  el.value = (n || 0) > 0 ? Math.round(n).toLocaleString() : '';
 }
