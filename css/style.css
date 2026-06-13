@@ -270,6 +270,11 @@ footer { font-size: 13px; color: #ddd; text-align: center; }
 @keyframes moveRight { from { transform: translateX(-100px); } to { transform: translateX(calc(100vw + 100px)); } }
 @keyframes moveLeft  { from { transform: translateX(calc(100vw + 100px)); } to { transform: translateX(-100px); } }
 @keyframes bob { from { transform: translateY(0px); } to { transform: translateY(-7px); } }
+@keyframes heartPopUp {
+  0%   { transform: translateY(0)    scale(0.6); opacity: 0; }
+  40%  { transform: translateY(-18px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-36px) scale(0.7); opacity: 0; }
+}
 
 @media (max-width: 480px) {
   header h1    { font-size: 32px; }
