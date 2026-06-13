@@ -1,0 +1,369 @@
+/* ════════════════════════════════════════════════════════════════
+   몰디브 허니문 · 디자인 시스템
+   기존 maldives_report.html 스타일 추출 + 탭/카드/토너먼트 확장
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 디자인 토큰 — 에메랄드/뉴트럴 테마 ── */
+:root {
+  /* primary: 에메랄드 그린 */
+  --primary:        #1D9E75;
+  --primary-deep:   #15785A;
+  --primary-light:  #E6F6F1;
+  --primary-pale:   #F0FAF6;
+
+  /* secondary: 소프트 퍼플 */
+  --secondary:      #7F77DD;
+  --secondary-light: #EEEDFA;
+
+  /* backward-compat ocean-* → 에메랄드 */
+  --ocean-deep:    #15785A;
+  --ocean-mid:     #1D9E75;
+  --ocean-light:   #E6F6F1;
+  --ocean-pale:    #F0FAF6;
+
+  --teal:          #1D9E75;
+  --teal-light:    #E6F6F1;
+  --coral:         #DC4E38;
+  --coral-light:   #FEF0ED;
+  --purple:        #7F77DD;
+  --purple-light:  #EEEDFA;
+  --amber:         #D97706;
+  --amber-light:   #FEF3C7;
+
+  /* 중성 그레이 */
+  --gray-50:       #F9FAFB;
+  --gray-100:      #F3F4F6;
+  --gray-200:      #E5E7EB;
+  --gray-400:      #9CA3AF;
+  --gray-600:      #6B7280;
+  --gray-800:      #374151;
+
+  --text:          #1F2937;
+  --text-muted:    #6B7280;
+  --text-light:    #9CA3AF;
+  --border:        rgba(0, 0, 0, 0.06);
+  --border-mid:    rgba(0, 0, 0, 0.11);
+
+  --radius:        10px;
+  --radius-lg:     16px;
+  --shadow-sm:     0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow:        0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-lg:     0 12px 40px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ── 공통 애니메이션 키프레임 ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes detailSlideIn {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(8px) scale(0.95); }
+}
+
+/* ── 리셋 & 베이스 ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: #FAFBFC;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── 공통 유틸리티 ── */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.text-teal { color: var(--teal); }
+.text-coral { color: var(--coral); }
+.text-ocean { color: var(--ocean-mid); }
+.fw-600 { font-weight: 600; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+
+/* ════════════════════════════════════════════════════════════════
+   Hero 섹션
+   ════════════════════════════════════════════════════════════════ */
+.site-hero {
+  flex-shrink: 0;
+  position: relative;
+  height: 164px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+/* 배경 이미지 레이어 (JS로 background-image 주입) */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0B5B45 0%, #1D9E75 60%, #2EC495 100%);
+  background-size: cover;
+  background-position: center 35%;
+  transform: scale(1.06);
+  filter: brightness(0.72);
+  transition: background-image 0.5s ease;
+}
+
+/* Glass Morphism 오버레이 */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(11,91,69,0.70) 0%,
+    rgba(29,158,117,0.45) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+/* 상단 내비 바 */
+.hero-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 4px;
+  font-size: 11px;
+}
+.hero-back {
+  color: rgba(255,255,255,0.80);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+.hero-back:hover { opacity: 0.6; }
+.hero-topbar-sep { opacity: 0.35; }
+.hero-topbar-title { opacity: 0.60; font-size: 11px; }
+
+/* 메인 콘텐츠 */
+.hero-body {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 20px 16px;
+  gap: 16px;
+}
+.hero-text-group { display: flex; flex-direction: column; gap: 3px; }
+.hero-eyebrow {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.65;
+}
+.hero-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
+}
+.hero-subline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.82;
+  margin-top: 1px;
+}
+.hero-sep { opacity: 0.4; }
+
+/* D-Day + 리조트 수 카드 */
+.hero-stats { display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+.hero-stat-dday,
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 14px;
+  padding: 9px 16px 8px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  gap: 1px;
+}
+.hero-dday-num {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.hero-dday-label,
+.hero-stat-label {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  opacity: 0.70;
+}
+.hero-stat-num {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+/* 탭 네비게이션 위 그림자 라인 */
+.site-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   탭 네비게이션
+   ════════════════════════════════════════════════════════════════ */
+.tab-nav {
+  flex-shrink: 0;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 2px;
+  z-index: 90;
+}
+.tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--ocean-mid);
+  border-bottom-color: var(--ocean-mid);
+  font-weight: 600;
+}
+.tab-icon { font-size: 14px; }
+
+/* ════════════════════════════════════════════════════════════════
+   탭 콘텐츠 영역
+   ════════════════════════════════════════════════════════════════ */
+.main-layout {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.tab-content {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: none;
+}
+.tab-content.active {
+  display: block;
+  animation: tabFadeIn 0.2s ease both;
+}
+.tab-content::-webkit-scrollbar { width: 6px; }
+.tab-content::-webkit-scrollbar-track { background: var(--gray-100); }
+.tab-content::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+.tab-content::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ── 버튼 press 효과 (공통) ── */
+.sort-btn:active,
+.pref-btn:active,
+.tab-btn:active,
+.card-detail-btn:active,
+.loc-map-btn:active,
+.prefs-toggle-btn:active,
+.memo-trigger-btn:active,
+.map-route-detail-btn:active,
+.price-summary-card:active,
+.resort-card:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.08s ease !important;
+}
+
+/* ── 토스트 알림 ── */
+.toast-msg {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  padding: 10px 20px;
+  background: var(--text);
+  color: white;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+  animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: none;
+}
+.toast-msg.toast-success { background: var(--primary); }
+.toast-msg.toast-error   { background: #DC2626; }
+.toast-msg.toast-out     { animation: toastOut 0.22s ease both; }
+
+/* ── 패널 리사이즈 핸들 ── */
+.resize-handle {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+  z-index: 20;
+  position: relative;
+}
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 40px;
+  background: var(--border-mid);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.resize-handle:hover::after,
+.resize-handle.dragging::after { opacity: 1; }
+.resize-handle:hover,
+.resize-handle.dragging { background: rgba(29,158,117,0.15); }
+
+/* 카드 탭: 분할 상태 아닐 때 핸들 숨김 */
+#tab-cards:not(.detail-open) .resize-handle { display: none; }
+
+/* ── 반응형 조정 ── */
+@media (max-width: 600px) {
+  .price-filter-wrap { margin-left: 0; }
+  .price-slider { width: 80px; }
+  .yt-empty-grid { grid-template-columns: 1fr; }
+  .price-summary-row { grid-template-columns: repeat(2, 1fr); }
+  .pros-cons { grid-template-columns: 1fr; }
+}
