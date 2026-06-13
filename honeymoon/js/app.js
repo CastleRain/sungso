@@ -161,6 +161,7 @@ function openDetailSheet(resortId) {
     body.innerHTML = renderResortDetail(resort);
     body.scrollTop = 0;
     _initNaverSection(resortId);
+    _initLeafletMap(resort);
     return;
   }
 
@@ -172,7 +173,10 @@ function openDetailSheet(resortId) {
   sheet.classList.remove('ds-closing');
   backdrop.classList.add('ds-open');
   // 다음 프레임에 열기 (트랜지션 트리거)
-  requestAnimationFrame(() => { sheet.classList.add('ds-open'); });
+  requestAnimationFrame(() => {
+    sheet.classList.add('ds-open');
+    _initLeafletMap(resort);
+  });
 
   // 카드 선택 하이라이트
   document.querySelectorAll('.resort-card').forEach(c => c.classList.remove('selected'));
@@ -837,6 +841,13 @@ function renderResortDetail(r) {
         </button>
       </div>
     </div>
+    ${r.coords ? `
+    <div class="ds-mini-map-wrap">
+      <div id="dsLeafletMap" class="ds-mini-map"></div>
+      <a class="ds-google-map-btn"
+         href="https://www.google.com/maps?q=${r.coords.lat},${r.coords.lon}"
+         target="_blank" rel="noopener">🗺️ 구글지도로 열기</a>
+    </div>` : ''}
   </div>
 
   <!-- 가격 -->
@@ -1155,6 +1166,22 @@ function renderNaverList(resortId) {
   }
 
   body.innerHTML = html;
+}
+
+// Leaflet 소형 지도 초기화 — 상세 시트 열릴 때 호출
+function _initLeafletMap(resort) {
+  if (!resort?.coords || !window.L) return;
+  setTimeout(() => {
+    const mapEl = document.getElementById('dsLeafletMap');
+    if (!mapEl || mapEl._leaflet_id) return;
+    const { lat, lon } = resort.coords;
+    const map = L.map(mapEl, { zoomControl: false, attributionControl: false })
+      .setView([lat, lon], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.circleMarker([lat, lon], { radius: 9, fillColor: '#FF6B9D', color: 'white', weight: 2.5, fillOpacity: 1 }).addTo(map);
+    L.circleMarker([4.1755, 73.5294], { radius: 6, fillColor: '#6B7280', color: 'white', weight: 2, fillOpacity: 1 }).addTo(map);
+    L.polyline([[4.1755, 73.5294], [lat, lon]], { color: '#FF6B9D', weight: 1.5, dashArray: '6,5', opacity: 0.65 }).addTo(map);
+  }, 120);
 }
 
 // 섹션 초기화 — 상세 시트 열릴 때 호출

@@ -77,7 +77,7 @@ window._minimapShow = () => setMapState('pill');
 
 // 상세 패널 내 "지도에서 보기" 클릭: 상세 닫고 full 지도 + 핀 강조
 window._minimapShowWithPin = (resortId) => {
-  window.closeCardDetail?.();
+  window.closeDetailSheet?.();
   setTimeout(() => {
     setMapState('full');
     document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active'));
