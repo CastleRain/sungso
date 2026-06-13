@@ -87,10 +87,12 @@ function renderCard(resort, sortKey, rank) {
     <div class="card-image-gradient"></div>
     ${resort.has_hammock ? '<div class="card-hammock-badge">🛏️ 해먹</div>' : ''}
     <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
-    ${rankBadge}
-    <div class="pick-badge-overlay" style="display:${pickLabel ? 'block' : 'none'}">${pickLabel}</div>
+    <div class="card-bl-badges">
+      ${rankBadge}
+      <div class="pick-badge-overlay" style="display:${pickLabel ? 'block' : 'none'}">${pickLabel}</div>
+      ${naverCnt ? `<div class="card-naver-badge">📝 ${naverCnt}</div>` : ''}
+    </div>
     ${memoCnt  ? `<div class="card-memo-badge">💬 ${memoCnt}</div>`  : ''}
-    ${naverCnt ? `<div class="card-naver-badge">📝 ${naverCnt}</div>` : ''}
   </div>
   <div class="card-body">
     <div class="card-name-ko">${resort.name_ko}</div>

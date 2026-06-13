@@ -407,7 +407,7 @@ function _renderMemoCenterItems() {
     const textPreview = (m.lastComment || '').slice(0, 45) + ((m.lastComment || '').length > 45 ? '…' : '');
     const authorAvatar = m.lastAuthor === '소희' ? '👩' : '🧑';
     return `
-<div class="mcd-item" onclick="window._memoCenterOpenResort('${resortId}')">
+<div class="mcd-item" data-action="memo-center-resort" data-rid="${resortId}">
   <div class="mcd-resort-row">
     <span class="mcd-resort-name">${m.resortName}</span>
     <span class="mcd-time">${timeStr}</span>
@@ -419,11 +419,11 @@ function _renderMemoCenterItems() {
   }).join('');
 }
 
-window._memoCenterOpenResort = function(resortId) {
+function _memoCenterOpenResort(resortId) {
   window._closeMemoCenter();
   openDetailSheet(resortId);
   setTimeout(() => window._openMemo(resortId), 320);
-};
+}
 
 // ── 메모 팝업 ──────────────────────────────────────────────────────
 let _memoResortId = null;
@@ -536,9 +536,9 @@ function renderGalleryContent(r, overrideUrls) {
     const galleryUrls = (urls && urls.length) ? urls : [hero];
     const mainUrl = hero || galleryUrls[0];
     const thumbs = galleryUrls.map((url, i) =>
-      `<div class="gallery-thumb${getFeaturedImage(r) === url ? ' active' : ''}" data-idx="${i}" data-url="${encodeURIComponent(url)}" onclick="window._galleryThumb(this,'${r.id}')">
+      `<div class="gallery-thumb${getFeaturedImage(r) === url ? ' active' : ''}" data-idx="${i}" data-url="${encodeURIComponent(url)}" data-action="gallery-thumb" data-rid="${r.id}">
         <img src="${url}" alt="${r.name_ko}" loading="lazy" onerror="this.parentElement.style.display='none'">
-        <div class="gallery-set-btn" onclick="event.stopPropagation();window._setFeatured('${r.id}',this.closest('.gallery-thumb').dataset.url)" title="대표 이미지로 설정">⭐</div>
+        <div class="gallery-set-btn" data-action="set-featured" data-rid="${r.id}" title="대표 이미지로 설정">⭐</div>
       </div>`
     ).join('');
     return `
@@ -555,7 +555,7 @@ function renderGalleryContent(r, overrideUrls) {
 function renderImageGallery(r) {
   return `<div class="gallery-outer" id="galleryOuter_${r.id}">
   ${renderGalleryContent(r)}
-  <button class="gallery-edit-btn" onclick="window._openImageEdit('${r.id}')" title="이미지 추가/삭제">🖼️ 편집</button>
+  <button class="gallery-edit-btn" data-action="open-img-edit" data-rid="${r.id}" title="이미지 추가/삭제">🖼️ 편집</button>
 </div>`;
 }
 
@@ -563,7 +563,7 @@ function renderImageGallery(r) {
 let _imgResortId = null;
 let _imgEditUrls = [];
 
-window._openImageEdit = async function(resortId) {
+async function _openImageEdit(resortId) {
   _imgResortId = resortId;
   const r = RESORTS.find(x => x.id === resortId);
   if (!r) return;
@@ -575,7 +575,7 @@ window._openImageEdit = async function(resortId) {
   _renderImgEditList();
   document.getElementById('imgEditPopup').style.display = 'flex';
   document.getElementById('imgEditBackdrop').style.display = 'block';
-};
+}
 
 window._closeImageEdit = function() {
   document.getElementById('imgEditPopup').style.display = 'none';
@@ -594,15 +594,15 @@ function _renderImgEditList() {
     <div class="img-edit-row">
       <img class="img-edit-thumb" src="${url}" onerror="this.style.opacity='0.2'" loading="lazy" alt="">
       <span class="img-edit-url" title="${url}">${url.length > 55 ? url.slice(0, 55) + '…' : url}</span>
-      <button class="img-edit-del" onclick="window._imgDel(${i})" title="삭제">×</button>
+      <button class="img-edit-del" data-action="img-del" data-idx="${i}" title="삭제">×</button>
     </div>
   `).join('');
 }
 
-window._imgDel = function(idx) {
+function _imgDel(idx) {
   _imgEditUrls.splice(idx, 1);
   _renderImgEditList();
-};
+}
 
 window._imgAdd = function() {
   const input = document.getElementById('imgAddInput');
@@ -625,7 +625,7 @@ window._imgSave = async function() {
     const outer = document.getElementById(`galleryOuter_${_imgResortId}`);
     if (r && outer) {
       outer.innerHTML = renderGalleryContent(r, _imgEditUrls)
-        + `<button class="gallery-edit-btn" onclick="window._openImageEdit('${_imgResortId}')" title="이미지 추가/삭제">🖼️ 편집</button>`;
+        + `<button class="gallery-edit-btn" data-action="open-img-edit" data-rid="${_imgResortId}" title="이미지 추가/삭제">🖼️ 편집</button>`;
     }
   } finally {
     btn.disabled = false;
@@ -634,7 +634,7 @@ window._imgSave = async function() {
   }
 };
 
-window._galleryThumb = function(el, resortId) {
+function _galleryThumb(el, resortId) {
   const url = decodeURIComponent(el.dataset.url || '');
   const main = document.getElementById(`galleryMainImg_${resortId}`);
   if (main && url) {
@@ -643,9 +643,9 @@ window._galleryThumb = function(el, resortId) {
   }
   el.closest('.gallery-thumbs')?.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-};
+}
 
-window._setFeatured = function(resortId, encodedUrl) {
+function _setFeatured(resortId, encodedUrl) {
   const url = decodeURIComponent(encodedUrl);
   try { localStorage.setItem('featured_img_' + resortId, url); } catch (_) {}
   const main = document.getElementById(`galleryMainImg_${resortId}`);
@@ -653,7 +653,7 @@ window._setFeatured = function(resortId, encodedUrl) {
   const cardImg = document.querySelector(`.resort-card[data-id="${resortId}"] .card-image img`);
   if (cardImg) cardImg.src = url;
   showToast('✓ 대표 이미지로 설정됨');
-};
+}
 
 function renderYoutubeSection(r) {
   const searchQuery = encodeURIComponent(`${r.name_ko} 몰디브 후기 브이로그`);
@@ -780,7 +780,7 @@ function renderResortDetail(r) {
   const hmTierClass = r.honeymoon_tier === '최상' ? 'good' : r.honeymoon_tier === '중간' ? 'ok' : 'weak';
 
   const pdfLinksHtml = r.pdfs.length
-    ? r.pdfs.map(p => `<button class="pdf-link-btn" onclick="openPdfFromDetail('${p.file}', '${p.label}')">📄 ${p.label}</button>`).join('')
+    ? r.pdfs.map(p => `<button class="pdf-link-btn" data-action="open-pdf" data-file="${p.file}" data-label="${p.label}">📄 ${p.label}</button>`).join('')
     : '<span style="color:var(--text-light);font-size:12px;">관련 PDF 없음</span>';
 
   return `
@@ -803,8 +803,8 @@ function renderResortDetail(r) {
         <div class="fit-score-num">${fitScore}%</div>
         <div class="fit-score-label">취향 적합도</div>
       </div>
-      <button class="pick-trigger-btn" onclick="window._openPickModal('${r.id}')">💗 Pick</button>
-      <button class="memo-trigger-btn" onclick="window._openMemo('${r.id}')">💬 메모${_getMemoCnt(r.id) ? ` ${_getMemoCnt(r.id)}` : ''}</button>
+      <button class="pick-trigger-btn" data-action="open-pick" data-rid="${r.id}">💗 Pick</button>
+      <button class="memo-trigger-btn" data-action="open-memo" data-rid="${r.id}">💬 메모${_getMemoCnt(r.id) ? ` ${_getMemoCnt(r.id)}` : ''}</button>
     </div>
   </div>
 
@@ -831,7 +831,7 @@ function renderResortDetail(r) {
             : '<span class="loc-type-badge loc-type-boat">🚤 스피드보트</span>'}
         </div>
         <div class="loc-access-desc">${getAccessDesc(r)}</div>
-        <button class="loc-map-btn" onclick="window._minimapShowWithPin('${r.id}')">
+        <button class="loc-map-btn" data-action="minimap-pin" data-rid="${r.id}">
           🗺️ 지도에서 보기
         </button>
       </div>
@@ -894,14 +894,10 @@ function renderResortDetail(r) {
     <div class="block-header naver-block-header">
       <span>📝 블로그 후기</span>
       <div class="naver-header-actions">
-        <button class="nsort-btn active" data-sort="sim"
-          onclick="window._naverSetSort('${r.id}','sim',this)">관련순</button>
-        <button class="nsort-btn" data-sort="date"
-          onclick="window._naverSetSort('${r.id}','date',this)">최신순</button>
-        <button class="naver-refresh-btn"
-          onclick="window._naverRefresh('${r.id}')">🔄 새로 가져오기</button>
-        <button class="naver-author-btn"
-          onclick="window._naverToggleAuthor(this)">👤 <span class="naver-author-label">${window._naverAuthor||'성우'}</span></button>
+        <button class="nsort-btn active" data-sort="sim" data-action="naver-sort" data-rid="${r.id}">관련순</button>
+        <button class="nsort-btn" data-sort="date" data-action="naver-sort" data-rid="${r.id}">최신순</button>
+        <button class="naver-refresh-btn" data-action="naver-refresh" data-rid="${r.id}">🔄 새로 가져오기</button>
+        <button class="naver-author-btn" data-action="naver-author">👤 <span class="naver-author-label">${window._naverAuthor||'성우'}</span></button>
       </div>
     </div>
     <div id="naverBody_${r.id}" class="naver-body">
@@ -918,13 +914,13 @@ function renderResortDetail(r) {
 }
 
 // PDF 탭으로 이동 + 파일 열기
-window.openPdfFromDetail = function(file, label) {
+function _openPdfFromDetail(file, label) {
   closeDetail();
   switchTab('pdf');
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent('open-pdf', { detail: { file, label } }));
   }, 150);
-};
+}
 
 // ── 초기화 ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -1000,6 +996,42 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('open-detail', (e) => openDetailSheet(e.detail.id));
+
+  // ── 이벤트 위임 ──────────────────────────────────────────────────
+  document.getElementById('detailSheetBody').addEventListener('click', e => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const a = el.dataset;
+    switch (a.action) {
+      case 'open-pick':     window._openPickModal(a.rid); break;
+      case 'open-memo':     window._openMemo(a.rid); break;
+      case 'minimap-pin':   window._minimapShowWithPin?.(a.rid); break;
+      case 'open-pdf':      _openPdfFromDetail(a.file, a.label); break;
+      case 'open-img-edit': _openImageEdit(a.rid); break;
+      case 'gallery-thumb': _galleryThumb(el, a.rid); break;
+      case 'set-featured':
+        e.stopPropagation();
+        _setFeatured(a.rid, el.closest('.gallery-thumb').dataset.url);
+        break;
+      case 'naver-fetch':   _naverFetch(a.rid); break;
+      case 'naver-refresh': _naverRefresh(a.rid); break;
+      case 'naver-sort':    _naverSetSort(a.rid, a.sort, el); break;
+      case 'naver-author':  _naverToggleAuthor(el); break;
+      case 'naver-pin':     _naverPin(a.rid, a.lh, a.pinned === 'true'); break;
+      case 'naver-hide':    _naverHide(a.rid, a.lh); break;
+      case 'naver-unhide':  _naverUnhide(a.rid, a.lh); break;
+    }
+  });
+
+  document.getElementById('imgEditList').addEventListener('click', e => {
+    const el = e.target.closest('[data-action="img-del"]');
+    if (el) _imgDel(parseInt(el.dataset.idx));
+  });
+
+  document.getElementById('memoCenterList').addEventListener('click', e => {
+    const el = e.target.closest('[data-action="memo-center-resort"]');
+    if (el) _memoCenterOpenResort(el.dataset.rid);
+  });
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -1074,12 +1106,11 @@ function _naverCardHtml(item, resortId, isPinned = false, isHidden = false) {
   <div class="nrv-actions">
     <a href="${item.link}" target="_blank" rel="noopener" class="nrv-link-btn">🔗 보기</a>
     ${isHidden
-      ? `<button class="nrv-unhide-btn" onclick="window._naverUnhide('${rid}','${lh}')">↩ 복구</button>`
-      : `<button class="nrv-pin-btn${isPinned ? ' active' : ''}"
-          onclick="window._naverPin('${rid}','${lh}',${isPinned})">
+      ? `<button class="nrv-unhide-btn" data-action="naver-unhide" data-rid="${rid}" data-lh="${lh}">↩ 복구</button>`
+      : `<button class="nrv-pin-btn${isPinned ? ' active' : ''}" data-action="naver-pin" data-rid="${rid}" data-lh="${lh}" data-pinned="${isPinned}">
           ${isPinned ? '📌 고정 해제' : '📌 고정'}
         </button>
-        <button class="nrv-hide-btn" onclick="window._naverHide('${rid}','${lh}')">🙈 숨김</button>`
+        <button class="nrv-hide-btn" data-action="naver-hide" data-rid="${rid}" data-lh="${lh}">🙈 숨김</button>`
     }
   </div>
 </div>`;
@@ -1101,7 +1132,7 @@ function renderNaverList(resortId) {
   }
 
   if (visible.length === 0 && hiddenItems.length === 0) {
-    html += `<div class="naver-empty">아직 가져온 후기가 없어요<br><button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">후기 가져오기</button></div>`;
+    html += `<div class="naver-empty">아직 가져온 후기가 없어요<br><button class="nrv-fetch-btn" data-action="naver-fetch" data-rid="${resortId}">후기 가져오기</button></div>`;
   } else if (visible.length === 0) {
     html += `<div class="naver-empty">모든 후기가 숨김 처리됐어요</div>`;
   } else {
@@ -1145,14 +1176,14 @@ async function _initNaverSection(resortId) {
   // 캐시 없으면 초기 빈 상태 표시 (prefs 구독 콜백이 이미 renderNaverList 호출)
   if (!cache) {
     body.innerHTML = `<div class="naver-empty">아직 가져온 후기가 없어요<br>
-      <button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">후기 가져오기</button>
+      <button class="nrv-fetch-btn" data-action="naver-fetch" data-rid="${resortId}">후기 가져오기</button>
     </div>`;
   }
 }
 
-// ── window 핸들러 ──────────────────────────────────────────────────
+// ── 네이버 핸들러 ──────────────────────────────────────────────────
 
-window._naverFetch = async function(resortId) {
+async function _naverFetch(resortId) {
   const body = document.getElementById(`naverBody_${resortId}`);
   if (!body) return;
   body.innerHTML = '<div class="naver-loading">⏳ 네이버에서 후기를 가져오는 중...</div>';
@@ -1164,35 +1195,35 @@ window._naverFetch = async function(resortId) {
     showToast('후기를 새로 가져왔어요 ✓');
   } catch (e) {
     body.innerHTML = `<div class="naver-error">후기를 불러오지 못했어요<br><small>${e.message}</small><br>
-      <button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">다시 시도</button></div>`;
+      <button class="nrv-fetch-btn" data-action="naver-fetch" data-rid="${resortId}">다시 시도</button></div>`;
     showToast('후기 가져오기 실패', 'error');
   }
-};
+}
 
-window._naverRefresh = async function(resortId) {
+async function _naverRefresh(resortId) {
   if (!confirm('네이버 블로그 후기를 다시 검색할까요?\n(핀/숨김 상태는 유지됩니다)')) return;
-  await window._naverFetch(resortId);
-};
+  await _naverFetch(resortId);
+}
 
-window._naverSetSort = function(resortId, sort, btn) {
+function _naverSetSort(resortId, sort, btn) {
   const block = document.getElementById(`naverBlock_${resortId}`);
   if (!block) return;
   block.querySelectorAll('.nsort-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   // 캐시된 결과를 클라이언트에서 재정렬 (API 재호출 없음)
   renderNaverList(resortId);
-};
+}
 
-window._naverToggleAuthor = function(btn) {
+function _naverToggleAuthor(btn) {
   window._naverAuthor = window._naverAuthor === '성우' ? '소희' : '성우';
   btn.querySelector('.naver-author-label').textContent = window._naverAuthor;
   // 열려있는 모든 author label 갱신
   document.querySelectorAll('.naver-author-label').forEach(el => {
     el.textContent = window._naverAuthor;
   });
-};
+}
 
-window._naverPin = async function(resortId, linkHash, isCurrentlyPinned) {
+async function _naverPin(resortId, linkHash, isCurrentlyPinned) {
   if (isCurrentlyPinned) {
     await unpinReview(resortId, linkHash).catch(e => showToast('고정 해제 실패: ' + e.message, 'error'));
   } else {
@@ -1203,13 +1234,13 @@ window._naverPin = async function(resortId, linkHash, isCurrentlyPinned) {
     await pinReview(resortId, item, window._naverAuthor || '성우')
       .catch(e => showToast('고정 실패: ' + e.message, 'error'));
   }
-};
+}
 
-window._naverUnpin = async function(resortId, linkHash) {
+async function _naverUnpin(resortId, linkHash) {
   await unpinReview(resortId, linkHash).catch(e => showToast('고정 해제 실패: ' + e.message, 'error'));
-};
+}
 
-window._naverHide = async function(resortId, linkHash) {
+async function _naverHide(resortId, linkHash) {
   const cache = window._naverCache[resortId];
   const prefs = window._naverPrefs[resortId] || {};
   const item  = (cache?.items || []).find(it => it.linkHash === linkHash)
@@ -1217,8 +1248,8 @@ window._naverHide = async function(resortId, linkHash) {
   if (!item) return;
   await hideReview(resortId, item, window._naverAuthor || '성우', '관련 없음')
     .catch(e => showToast('숨김 실패: ' + e.message, 'error'));
-};
+}
 
-window._naverUnhide = async function(resortId, linkHash) {
+async function _naverUnhide(resortId, linkHash) {
   await unhideReview(resortId, linkHash).catch(e => showToast('복구 실패: ' + e.message, 'error'));
-};
+}

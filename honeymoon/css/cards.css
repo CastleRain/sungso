@@ -332,10 +332,18 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* 큐레이션 순위 뱃지 (좌하단) — 프리미엄 컨설턴트 스타일 */
-.card-rank-badge {
+/* 좌하단 배지 묶음 (rank + pick + naver 겹침 방지) */
+.card-bl-badges {
   position: absolute;
   bottom: 10px; left: 10px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 5px;
+  align-items: flex-start;
+}
+
+/* 큐레이션 순위 뱃지 */
+.card-rank-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -475,9 +483,6 @@
 
 /* ── 카드 위 Pick 배지 오버레이 ── */
 .pick-badge-overlay {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
   background: rgba(29,158,117,0.90);
   color: white;
   font-size: 10px;
@@ -486,7 +491,6 @@
   padding: 3px 9px;
   pointer-events: none;
   white-space: nowrap;
-  max-width: calc(100% - 16px);
   overflow: hidden;
   text-overflow: ellipsis;
   backdrop-filter: blur(4px);
@@ -494,9 +498,6 @@
 
 /* ── 카드 네이버 배지 ── */
 .card-naver-badge {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
   background: rgba(0,0,0,0.52);
   color: white;
   font-size: 10px;
