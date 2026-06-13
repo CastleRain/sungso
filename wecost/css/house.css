@@ -5,7 +5,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 11px 0;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
   gap: 8px;
@@ -46,17 +46,17 @@
 .support-amt-inp {
   width: 130px;
   text-align: right;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 5px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--income);
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.support-amt-inp:focus { border-color: var(--income); box-shadow: 0 0 0 2px rgba(22,163,74,0.1); }
+.support-amt-inp:focus { border-color: var(--income); box-shadow: 0 0 0 3px rgba(46,204,113,0.15); }
 .support-amt-inp::placeholder { color: var(--text-muted); font-weight: 400; }
 
 /* 시나리오 프리셋 */
@@ -134,17 +134,17 @@
 .loan-amt-inp {
   width: 160px;
   text-align: right;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 6px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 10px;
   font-size: 15px;
   font-weight: 800;
   color: var(--loan);
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.loan-amt-inp:focus { border-color: var(--loan); }
+.loan-amt-inp:focus { border-color: var(--loan); box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
 .loan-won-lbl { font-size: 12px; color: var(--text-muted); min-width: 50px; }
 .add-loan-fields {
   display: flex;
@@ -159,12 +159,18 @@
 /* 대출 카드 */
 .loan-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
 .loan-card {
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--loan);
+  border: 1px solid rgba(108,99,255,0.07);
+  border-left: 4px solid var(--loan);
   border-radius: var(--radius-lg);
   padding: 16px;
   background: var(--surface);
   position: relative;
+  box-shadow: var(--shadow);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.loan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 .loan-card-hdr {
   display: flex;
@@ -178,7 +184,7 @@
   font-weight: 700;
   border: none;
   background: transparent;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 2px dashed var(--line);
   padding: 2px 4px;
   color: var(--text);
   outline: none;
@@ -216,8 +222,8 @@
   align-items: center;
   padding: 16px 20px;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--loan);
+  border: 1px solid rgba(108,99,255,0.07);
+  border-left: 4px solid var(--loan);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   margin-top: 4px;
@@ -234,16 +240,17 @@
 }
 .tl-limit-inp {
   width: 110px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 5px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
   font-size: 13px;
+  font-weight: 600;
   text-align: right;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.tl-limit-inp:focus { border-color: var(--loan); }
+.tl-limit-inp:focus { border-color: var(--loan); box-shadow: 0 0 0 3px rgba(139,92,246,0.12); }
 .tl-amount { font-size: 22px; font-weight: 900; color: var(--loan); }
 .tl-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .status-safe { background: var(--income-soft); color: var(--income); }

@@ -3,11 +3,12 @@
 /* 시작 체크리스트 */
 .checklist-card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--primary);
-  border-radius: var(--radius);
+  border: 1px solid rgba(108,99,255,0.10);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-lg);
   padding: 16px 20px;
   margin-bottom: 16px;
+  box-shadow: var(--shadow);
 }
 .checklist-hdr {
   display: flex;
@@ -23,8 +24,8 @@
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  padding: 8px 10px;
-  border-radius: 6px;
+  padding: 9px 12px;
+  border-radius: 12px;
   background: var(--surface-soft);
 }
 .cl-item.done   { color: var(--text-muted); opacity: 0.6; }
@@ -32,10 +33,10 @@
 .cl-icon  { font-size: 14px; flex-shrink: 0; }
 .cl-label { flex: 1; font-weight: 600; }
 .cl-btn {
-  font-size: 11px; padding: 3px 10px;
-  border: 1px solid var(--primary); border-radius: 4px;
-  background: none; cursor: pointer; color: var(--primary); font-weight: 600;
-  white-space: nowrap;
+  font-size: 11px; padding: 4px 12px;
+  border: 1.5px solid var(--primary); border-radius: 999px;
+  background: none; cursor: pointer; color: var(--primary); font-weight: 700;
+  white-space: nowrap; transition: all 0.15s;
 }
 .cl-btn:hover { background: var(--primary); color: #fff; }
 .checklist-done-msg {
@@ -111,7 +112,7 @@
 
 /* 미니 흐름바 (보조) */
 .flow-bar-mini { margin-top: 12px; }
-.flow-bar-mini .flow-bar { height: 10px; border-radius: 6px; }
+.flow-bar-mini .flow-bar { height: 10px; border-radius: 999px; }
 .flow-bar-mini .flow-seg { font-size: 0; }
 
 @media (max-width: 860px) {
@@ -140,28 +141,25 @@
 }
 .flow-bar {
   display: flex;
-  height: 36px;
-  border-radius: var(--radius);
+  height: 20px;
+  border-radius: 999px;
   overflow: hidden;
-  gap: 1px;
+  gap: 0;
   background: var(--line);
 }
 .flow-seg {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 0;
   white-space: nowrap;
   overflow: hidden;
   min-width: 0;
-  transition: width 0.5s ease;
-  padding: 0 4px;
+  transition: width 700ms cubic-bezier(.2,.8,.2,1);
 }
 .flow-seg.seg-saving   { background: var(--income); }
-.flow-seg.seg-extra    { background: #22c55e; }
-.flow-seg.seg-support  { background: #4ade80; }
+.flow-seg.seg-extra    { background: #52d98b; }
+.flow-seg.seg-support  { background: #86e8ac; }
 .flow-seg.seg-wedding  { background: var(--expense); }
 .flow-seg.seg-remain   { background: var(--house); }
 .flow-bar-legend {
@@ -186,9 +184,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  border-left: 3px solid var(--line);
+  padding: 11px 16px;
+  border-radius: 14px;
+  border-left: 4px solid var(--line);
   background: var(--surface-soft);
 }
 .upcoming-item.urg { border-left-color: var(--expense); background: var(--expense-soft); }
@@ -216,18 +214,18 @@
 .house-sim-lbl { flex: 1; color: var(--text-muted); font-size: 13px; }
 .house-sim-val { font-weight: 700; white-space: nowrap; }
 .house-target-inp {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 8px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 13px;
   font-size: 16px;
   font-weight: 700;
   width: 200px;
   text-align: right;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.house-target-inp:focus { border-color: var(--house); box-shadow: 0 0 0 3px rgba(15,118,110,0.08); }
+.house-target-inp:focus { border-color: var(--house); box-shadow: 0 0 0 3px rgba(52,152,219,0.12); }
 .house-target-row {
   display: flex;
   align-items: center;
@@ -241,10 +239,11 @@
   gap: 10px;
 }
 .sim-result-box {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px;
+  border: 1px solid rgba(108,99,255,0.07);
+  border-radius: 14px;
+  padding: 14px 12px;
   text-align: center;
+  box-shadow: var(--shadow);
 }
 .sim-result-box.r-loan   { border-color: var(--loan-soft);  background: var(--loan-soft); }
 .sim-result-box.r-house  { border-color: var(--house-soft); background: var(--house-soft); }

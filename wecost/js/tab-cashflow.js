@@ -81,20 +81,46 @@ export function renderCashflow(st) {
       data: {
         labels,
         datasets: [
-          { label: '소희', data: sD, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.05)', tension: 0.3, pointRadius: pts > 24 ? 0 : 3, borderWidth: 2 },
-          { label: '성우', data: wD, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.05)', tension: 0.3, pointRadius: pts > 24 ? 0 : 3, borderWidth: 2 },
-          { label: '합계', data: tD, borderColor: '#0f766e', backgroundColor: 'rgba(15,118,110,0.06)', tension: 0.3, pointRadius: pts > 24 ? 0 : 3, borderWidth: 2.5 },
+          { label: '소희', data: sD, borderColor: '#ec4899', backgroundColor: 'rgba(236,72,153,0.06)', tension: 0.4, pointRadius: pts > 24 ? 0 : 3, borderWidth: 2.5, fill: true },
+          { label: '성우', data: wD, borderColor: '#6c63ff', backgroundColor: 'rgba(108,99,255,0.06)', tension: 0.4, pointRadius: pts > 24 ? 0 : 3, borderWidth: 2.5, fill: true },
+          { label: '합계', data: tD, borderColor: '#2ecc71', backgroundColor: 'rgba(46,204,113,0.08)', tension: 0.4, pointRadius: pts > 24 ? 0 : 4, borderWidth: 3, fill: true },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
         plugins: {
-          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${won(ctx.raw)}` } },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#111827',
+            bodyColor: '#8b90a0',
+            borderColor: '#ececf4',
+            borderWidth: 1,
+            cornerRadius: 12,
+            padding: 10,
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${won(ctx.raw)}` },
+          },
+          legend: {
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle',
+              boxWidth: 8,
+              padding: 16,
+              font: { size: 12 },
+            },
+          },
         },
         scales: {
-          y: { ticks: { callback: v => won(v), font: { size: 10 } }, beginAtZero: true },
-          x: { ticks: { font: { size: 10 }, maxTicksLimit: 12 } },
+          y: {
+            ticks: { callback: v => won(v), font: { size: 10 } },
+            beginAtZero: true,
+            grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+          },
+          x: {
+            ticks: { font: { size: 10 }, maxTicksLimit: 12 },
+            grid: { display: false },
+          },
         },
       },
     });

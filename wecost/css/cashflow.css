@@ -3,12 +3,17 @@
 /* 합산 결과 카드 */
 .cf-summary-card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--income);
+  border: 1px solid rgba(108,99,255,0.07);
+  border-left: 4px solid var(--income);
   border-radius: var(--radius-lg);
-  padding: 18px 20px;
+  padding: 20px 22px;
   box-shadow: var(--shadow);
   margin-bottom: 16px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.cf-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 .cf-summary-top {
   display: flex;
@@ -39,12 +44,20 @@
 /* 개인 카드 */
 .person-card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(108,99,255,0.07);
+  border-top: 4px solid var(--primary);
   border-radius: var(--radius-lg);
-  padding: 18px 20px;
+  padding: 20px;
   box-shadow: var(--shadow);
   margin-bottom: 0;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
+.person-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.person-card.sohee-card { border-top-color: #ec4899; }
+.person-card.sunwo-card  { border-top-color: var(--primary); }
 .person-name {
   font-size: 14px;
   font-weight: 800;
@@ -67,9 +80,9 @@
 /* 결혼일 카드 */
 .wed-date-card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(108,99,255,0.07);
   border-radius: var(--radius-lg);
-  padding: 14px 20px;
+  padding: 16px 20px;
   box-shadow: var(--shadow);
   margin-bottom: 16px;
   display: flex;
@@ -79,15 +92,19 @@
 }
 .wed-date-lbl { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
 .wed-date-inp {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 7px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
   font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.wed-date-inp:focus { border-color: var(--primary); }
+.wed-date-inp:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.10);
+}
 .wed-months-lbl {
   font-size: 13px;
   font-weight: 700;
