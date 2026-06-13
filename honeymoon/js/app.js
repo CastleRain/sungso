@@ -88,6 +88,7 @@ function updateDDay() {
 const tabInited = new Set();
 
 function switchTab(tabId) {
+  localStorage.setItem('honeymoon_tab', tabId);
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
 
@@ -1032,6 +1033,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = e.target.closest('[data-action="memo-center-resort"]');
     if (el) _memoCenterOpenResort(el.dataset.rid);
   });
+
+  // ── 마지막 탭 복원 ───────────────────────────────────────────────
+  switchTab(localStorage.getItem('honeymoon_tab') || 'plan');
 });
 
 // ══════════════════════════════════════════════════════════════════

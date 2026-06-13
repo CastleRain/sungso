@@ -81,6 +81,7 @@ function rerender() {
 
 function showTab(name) {
   _currentTab = name;
+  localStorage.setItem('wecost_tab', name);
   document.querySelectorAll('.tab-page').forEach(el => {
     el.classList.add('hidden');
     el.classList.remove('active');
@@ -230,8 +231,8 @@ function setLoader(msg) {
 function hideLoader() {
   const screen = document.getElementById('loading-screen');
   if (screen) screen.classList.add('hidden');
-  // 첫 탭 표시
-  showTab('dashboard');
+  // 마지막 탭 복원
+  showTab(localStorage.getItem('wecost_tab') || 'dashboard');
 }
 
 function setSyncStatus(state) {
