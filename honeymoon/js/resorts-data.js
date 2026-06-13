@@ -174,34 +174,27 @@ export const RESORTS = [
       '몰디브 유일 한식당(Seoul House) 포함 9개 레스토랑',
       '두 섬 연결 독특한 구조 + 중앙 라군 최상급',
       '워터풀빌라 라군뷰에 해먹 있음',
-      'HB+ 예약 시 AI 무료 업그레이드 조건 (11/30 전 예약)',
+      'HB+ 예약 = 다이닝어라운드 AI 올인클루시브 자동 업그레이드',
       '허니문리조트 담당자 추천 1위',
     ],
     cons: [
       '2025년 오픈으로 온라인 후기 절대적 부족',
       '성수기 객실 빠른 마감',
-      '허니문리조트 단독 취급 (리얼몰디브 없음)',
-      '기본 플랜이 HB(조석식) — AI 업그레이드 별도 확인',
+      '허니문리조트 단독 취급 (리얼몰디브·투어민 없음)',
     ],
 
     agencies: {
       honeymoonresort: {
-        meal_plan: 'HB',
-        meal_plan_name: '조석식 (HB) — HB+ 업그레이드 시 AI 무료',
-        // 아나네아는 모든 빌라가 풀빌라. beach_4n = 비치풀빌라
-        beach_4n: 2829,       // 비치풀빌라 (HB)
-        beach_4n_disc: 2629,
-        water_4n: null,       // 일반 워터빌라 없음 (전부 풀빌라)
-        water_pool_4n: 2982,  // 워터풀빌라 (HB)
-        water_pool_4n_disc: 2782,
-        mix_4n: 2906,         // 비치풀2박+워터풀2박 (HB)
-        mix_4n_disc: 2706,
-        // HB+ → AI 업그레이드 시 (11/30 전 예약)
-        water_pool_4n_hbplus: 3322,
-        water_pool_4n_hbplus_disc: 3122,  // HB+ 가격으로 AI 이용
+        meal_plan: 'AI',
+        meal_plan_name: '조석식+(HB+) → 다이닝어라운드 올인클루시브(AI)',
+        // 아나네아는 모든 빌라가 풀빌라. HB+ 예약 = AI 자동 업그레이드
+        beach_4n: 3169,       // 비치풀빌라
+        water_4n: null,
+        water_pool_4n: 3322,  // 워터풀빌라
+        mix_4n: 3246,         // 비치풀2박+워터풀2박
         discount_per_person: 200,
-        discount_note: '6/19 이전 예약 시 1인 $200 할인 + HB+ → AI 무료 업그레이드 (11/30 전)',
-        promotions: ['HB+ → 다인어라운드 AI 무료 업그레이드 (11/30까지 예약 조건)'],
+        discount_note: '6/19 이전 예약 시 1인 $200 할인',
+        promotions: ['HB+ 예약 = 다이닝어라운드 올인클루시브 자동 업그레이드'],
         honeymoon_benefits: [
           '침대 장식 1회',
           '과일 바구니',
