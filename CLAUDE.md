@@ -200,4 +200,15 @@ Google Sheets CSV → Firebase Firestore 전환 + UI 전면 개편 (단일 파�
 - **집 탭 목표 집 가격 계산기:** 집 탭 최상단에 목표 집 가격 입력 → 가용현금 / 필요대출 / 월상환액 / 감당상태 즉시 표시. debounce 800ms → Firebase 저장.
 - **현금흐름 탭 placeholder 개선:** 4개 저축 입력칸에 구체적 예시 값 추가.
 
-**다음:** GitHub Pages 배포 후 브라우저 검증.
+### 2026-06-13~14 (honeymoon + 공통 편의 기능)
+
+- **PIN 잠금:** sungso 루트 첫 진입 시 4자리 PIN(0306) 입력. localStorage 30일 토큰. wecost·honeymoon 직접 URL 접근도 PIN 게이트로 리다이렉트.
+- **wecost UI 리디자인:** 라벤더 배경·보라 primary·둥근 카드(20px)·pill 버튼·캡슐 프로그레스바·카드 입장 애니메이션(stagger)·Chart.js 커스텀 툴팁.
+- **새로고침 탭 복원:** honeymoon·wecost 모두 마지막 방문 탭을 localStorage에 저장 → 새로고침 시 동일 탭 복귀.
+- **honeymoon 배지 겹침 수정:** 순위·Pick·블로그수 배지를 `.card-bl-badges` flex 컨테이너로 묶어 세로 적층.
+- **honeymoon 상세 패널 Leaflet 지도:** 리조트 상세 "위치 & 이동" 아래 200px Leaflet 지도 추가. 리조트 핀(핑크) + 말레공항 핀(회색) + 점선 경로. "구글지도로 열기" 링크 포함.
+- **지도에서 보기 버그 수정:** `closeCardDetail`(미존재) → `closeDetailSheet` 수정, Detail Sheet 닫힌 후 미니맵 정상 표시.
+- **USD/KRW 환율 토글:** `firebase-fx.js` 신규. open.er-api.com 실시간 조회 → `honeymoon_fx/usd_krw` 저장. 탭 네비 우측 위젯(환율 라벨 + ⟳ 새로고침 + USD↔KRW 토글). 카드·가격비교·상세 가격 전환.
+- **아나네아 가격 수정:** 허니문리조트 HB 기준 → HB+(AI 올인클루시브) 기준으로 교체. 비치풀$3,169 / 워터풀$3,322 / 믹스$3,246.
+
+**다음:** 리조트 데이터 추가 보완, wecost 브라우저 검증.

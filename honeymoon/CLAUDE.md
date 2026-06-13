@@ -274,6 +274,21 @@ resort_note_meta/{resortId}
 
 ---
 
+## Firebase (`firebase-fx.js`)
+
+**`honeymoon_fx/usd_krw`** — USD/KRW 환율
+
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| `rate` | number | 환율 (예: 1380) |
+| `fetchedAt` | serverTimestamp | 마지막 조회 시각 |
+
+- `open.er-api.com/v6/latest/USD` API로 무료 조회 (API 키 불필요)
+- 탭 네비 우측 FX 위젯에서 ⟳ 버튼 클릭 시 갱신, 1시간 이상 지나면 자동 갱신
+- `window._krwMode` / `window._fxRate` / `window._fmtUSD()` 전역으로 카드·가격표·상세 가격 전환
+
+---
+
 ## Firebase (`firebase-picks.js`)
 
 ### Firestore 컬렉션
@@ -458,3 +473,10 @@ DOM ID: `#ddayBadge`
 | 2026-06-12 | 메모 UX 개선: z-index 수정(5400), 메모 카운트 배지(카드/Pick슬롯/상세헤더), `resort_note_meta` 컬렉션 추가, 메모 알림 센터 드로어 추가 |
 | 2026-06-12 | 플랜 탭 1차: 커플 Top3 Pick 슬롯, 최종 후보, 리조트 확정, 기본 일정 자동 생성, Day 항목 추가/삭제 |
 | 2026-06-13 | 일정표 편집 UX 전면 개선: Day 카드 View/Edit 모드, 7종 항목 타입 시스템, 자동저장(800ms debounce), ↑↓ 순서변경, 미정 pill, Firebase 콜백 억제 |
+| 2026-06-13 | 새로고침 탭 복원: `honeymoon_tab` localStorage 저장 → 재방문 시 마지막 탭 복귀 |
+| 2026-06-13 | 배지 겹침 수정: 순위·Pick·블로그수 배지를 `.card-bl-badges` flex 컨테이너로 세로 적층 |
+| 2026-06-13 | 순위 배지 시각적 개선: 색상별 강조 → 단색 반투명 pill(rgba 0,0,0,0.32)로 통일 |
+| 2026-06-14 | 상세 패널 Leaflet 지도: "위치 & 이동" 아래 200px 지도, 리조트·공항 핀 + 점선 경로, 구글지도 링크 |
+| 2026-06-14 | 지도 버그 수정: `_minimapShowWithPin`의 `closeCardDetail`(미존재) → `closeDetailSheet` 수정 |
+| 2026-06-14 | USD/KRW 환율 토글: `firebase-fx.js` 신규, `honeymoon_fx/usd_krw` 컬렉션, 탭 네비 FX 위젯 |
+| 2026-06-14 | 아나네아 가격 수정: 허니문리조트 HB→AI(HB+) 기준, 비치풀$3,169·워터풀$3,322·믹스$3,246 |
