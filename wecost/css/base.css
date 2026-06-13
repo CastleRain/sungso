@@ -1,0 +1,135 @@
+/* ===== 토큰 & 리셋 ===== */
+:root {
+  /* 배경 / 서피스 */
+  --bg:           #f6f7f9;
+  --surface:      #ffffff;
+  --surface-soft: #f1f3f5;
+  --line:         #e5e7eb;
+
+  /* 텍스트 */
+  --text:         #171717;
+  --text-muted:   #6b7280;
+
+  /* 의미 색상 */
+  --primary:      #2563eb;
+  --primary-soft: #dbeafe;
+  --income:       #16a34a;
+  --income-soft:  #dcfce7;
+  --expense:      #dc2626;
+  --expense-soft: #fee2e2;
+  --warning:      #d97706;
+  --warning-soft: #fef3c7;
+  --house:        #0f766e;
+  --house-soft:   #ccfbf1;
+  --loan:         #7c3aed;
+  --loan-soft:    #ede9fe;
+
+  /* 기타 */
+  --radius:     8px;
+  --radius-lg:  12px;
+  --shadow:     0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --nav-w:      220px;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ===== 공통 유틸 ===== */
+.hidden { display: none !important; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.badge-success  { background: var(--income-soft);  color: var(--income); }
+.badge-warning  { background: var(--warning-soft); color: var(--warning); }
+.badge-danger   { background: var(--expense-soft); color: var(--expense); }
+.badge-neutral  { background: var(--surface-soft); color: var(--text-muted); }
+.badge-primary  { background: var(--primary-soft); color: var(--primary); }
+.badge-loan     { background: var(--loan-soft);    color: var(--loan); }
+.badge-house    { background: var(--house-soft);   color: var(--house); }
+
+/* ===== 타이포 ===== */
+.num-xl  { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.1; }
+.num-lg  { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.2; }
+.num-md  { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.num-sm  { font-size: 14px; font-weight: 700; }
+.label   { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.3px; text-transform: uppercase; }
+.hint    { font-size: 12px; color: var(--text-muted); }
+
+/* ===== 입력 공통 ===== */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+}
+.input-field {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 14px;
+  width: 100%;
+  background: var(--surface);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+.input-field::placeholder { color: var(--text-muted); }
+
+/* ===== 버튼 공통 ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover  { background: #1d4ed8; }
+.btn-ghost    { background: transparent; color: var(--text-muted); border: 1px solid var(--line); }
+.btn-ghost:hover    { border-color: var(--primary); color: var(--primary); }
+.btn-danger   { background: transparent; color: var(--expense); border: 1px solid var(--expense-soft); }
+.btn-danger:hover   { background: var(--expense-soft); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ===== 진행바 ===== */
+.prog-track { background: var(--line); border-radius: 6px; height: 8px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+
+/* ===== 스피너 ===== */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--line);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin-inline { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin-inline 0.7s linear infinite; }
+
+/* ===== 구분선 ===== */
+.divider { border: none; border-top: 1px solid var(--line); margin: 12px 0; }

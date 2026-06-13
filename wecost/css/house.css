@@ -1,0 +1,345 @@
+/* ===== 집 시뮬레이션 탭 ===== */
+
+/* 가용현금 계산 카드 */
+.cash-calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  gap: 8px;
+}
+.cash-calc-row:last-child { border-bottom: none; }
+.cash-calc-lbl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  flex: 1;
+}
+.cash-calc-lbl small { font-size: 11px; color: var(--text-muted); }
+.cash-calc-val { font-weight: 700; white-space: nowrap; }
+.v-pos { color: var(--income); }
+.v-neg { color: var(--expense); }
+.v-house { color: var(--house); font-size: 22px; font-weight: 900; }
+.cash-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 0;
+  margin-top: 4px;
+  border-top: 2px solid var(--line);
+  font-size: 15px;
+  font-weight: 700;
+}
+.toggle-chk { cursor: pointer; width: 15px; height: 15px; accent-color: var(--primary); }
+
+/* 부모님 지원금 입력 */
+.support-inp-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.support-amt-inp {
+  width: 130px;
+  text-align: right;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--income);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.support-amt-inp:focus { border-color: var(--income); box-shadow: 0 0 0 2px rgba(22,163,74,0.1); }
+.support-amt-inp::placeholder { color: var(--text-muted); font-weight: 400; }
+
+/* 시나리오 프리셋 */
+.scenario-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.preset-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 14px 12px;
+  text-align: center;
+  transition: all 0.15s;
+  background: var(--surface-soft);
+  cursor: default;
+}
+.preset-card:hover { border-color: var(--house); background: var(--house-soft); }
+.preset-house-price { font-size: 16px; font-weight: 900; color: var(--house); }
+.preset-loan-lbl    { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+.preset-monthly-val { font-size: 13px; font-weight: 700; color: var(--loan); margin-top: 5px; }
+.preset-detail      { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+/* 대출 추가 패널 */
+.add-loan-panel {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.add-loan-panel h4 { font-size: 13px; font-weight: 700; color: var(--loan); margin-bottom: 12px; }
+.loan-slider {
+  width: 100%;
+  accent-color: var(--loan);
+  cursor: pointer;
+}
+.loan-slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.loan-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+.loan-amt-inp {
+  width: 160px;
+  text-align: right;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--loan);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.loan-amt-inp:focus { border-color: var(--loan); }
+.loan-won-lbl { font-size: 12px; color: var(--text-muted); min-width: 50px; }
+.add-loan-fields {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+.add-loan-fields .inp-grp input,
+.add-loan-fields .inp-grp select { padding: 6px 8px; font-size: 12px; }
+
+/* 대출 카드 */
+.loan-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.loan-card {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--loan);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: var(--surface);
+  position: relative;
+}
+.loan-card-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.loan-name-inp {
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  border-bottom: 1px dashed var(--line);
+  padding: 2px 4px;
+  color: var(--text);
+  outline: none;
+  flex: 1;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.loan-name-inp:focus { border-bottom-color: var(--loan); }
+.loan-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.loan-result {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.loan-result-note { font-size: 11px; color: var(--text-muted); }
+.loan-result-val  { font-size: 16px; font-weight: 800; color: var(--loan); }
+.loan-enabled-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.loan-enabled-row input[type="checkbox"] { accent-color: var(--loan); width: 14px; height: 14px; cursor: pointer; }
+.loan-card.disabled-card { opacity: 0.5; }
+
+/* 합산 월 납입 바 */
+.total-loan-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--loan);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-top: 4px;
+  gap: 16px;
+}
+.tl-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tl-limit-inp {
+  width: 110px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 13px;
+  text-align: right;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.tl-limit-inp:focus { border-color: var(--loan); }
+.tl-amount { font-size: 22px; font-weight: 900; color: var(--loan); }
+.tl-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+.status-safe { background: var(--income-soft); color: var(--income); }
+.status-warn { background: var(--expense-soft); color: var(--expense); }
+.status-caution { background: var(--warning-soft); color: var(--warning); }
+
+/* 조정 항목 행 */
+.adj-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0 4px;
+}
+.add-btn {
+  font-size: 12px;
+  padding: 5px 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.add-btn.plus-btn:hover { border-color: var(--income);  color: var(--income); }
+.add-btn.minus-btn:hover { border-color: var(--expense); color: var(--expense); }
+.exp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+.exp-row:last-child { border-bottom: none; }
+.exp-sign-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: none;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.exp-sign-btn.plus  { color: var(--income);  border-color: var(--income); }
+.exp-sign-btn.plus:hover  { background: var(--income-soft); }
+.exp-sign-btn.minus { color: var(--expense); border-color: var(--expense); }
+.exp-sign-btn.minus:hover { background: var(--expense-soft); }
+.exp-inp-name {
+  flex: 1;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  padding: 4px 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: transparent;
+  outline: none;
+  min-width: 0;
+}
+.exp-inp-name:focus { border-bottom-color: var(--primary); }
+.exp-inp-amt {
+  width: 90px;
+  text-align: right;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.exp-inp-amt:focus { border-color: var(--primary); }
+.exp-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.exp-del-btn:hover { color: var(--expense); background: var(--expense-soft); }
+.exp-won-hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 52px;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.exp-won-hint.inc { color: var(--income); }
+.exp-won-hint.exp { color: var(--expense); }
+
+/* 시나리오 금리/기간 컨트롤 */
+.scenario-controls label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.scenario-controls strong { color: var(--text); }
+input[type="range"].rate-slider {
+  width: 120px;
+  accent-color: var(--loan);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .preset-grid { grid-template-columns: repeat(2, 1fr); }
+  .loan-form { grid-template-columns: 1fr 1fr; }
+  .total-loan-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+@media (max-width: 480px) {
+  .loan-form { grid-template-columns: 1fr; }
+}

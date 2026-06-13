@@ -1,0 +1,260 @@
+/* ===== 대시보드 탭 ===== */
+
+/* 시작 체크리스트 */
+.checklist-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.checklist-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.checklist-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.checklist-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.checklist-items { display: flex; flex-direction: column; gap: 8px; }
+.cl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--surface-soft);
+}
+.cl-item.done   { color: var(--text-muted); opacity: 0.6; }
+.cl-item.pending { background: var(--primary-soft); }
+.cl-icon  { font-size: 14px; flex-shrink: 0; }
+.cl-label { flex: 1; font-weight: 600; }
+.cl-btn {
+  font-size: 11px; padding: 3px 10px;
+  border: 1px solid var(--primary); border-radius: 4px;
+  background: none; cursor: pointer; color: var(--primary); font-weight: 600;
+  white-space: nowrap;
+}
+.cl-btn:hover { background: var(--primary); color: #fff; }
+.checklist-done-msg {
+  font-size: 13px; color: var(--income); font-weight: 600; text-align: center; padding: 4px 0;
+}
+
+/* 메트릭 카드 빈 상태 */
+.mc-value.pending {
+  font-size: 14px !important;
+  font-style: italic;
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* 현금흐름 계산식 */
+.flow-eq-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 4px 0 8px;
+}
+.flow-eq-block {
+  flex: 1;
+  min-width: 90px;
+  padding: 12px 10px;
+  background: var(--surface-soft);
+  border-radius: var(--radius);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.feq-income  { border-top: 3px solid var(--income); }
+.feq-expense { border-top: 3px solid var(--expense); }
+.feq-adjust  { border-top: 3px solid var(--warning); }
+.feq-result  {
+  border-top: 3px solid var(--house);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.feq-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.feq-val {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.feq-result .feq-val { font-size: 16px; color: var(--house); }
+.feq-btn {
+  font-size: 10px; padding: 3px 8px;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: none; cursor: pointer; color: var(--primary);
+  white-space: nowrap;
+}
+.feq-btn:hover { background: var(--primary-soft); }
+.flow-eq-op {
+  align-self: center;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+/* 미니 흐름바 (보조) */
+.flow-bar-mini { margin-top: 12px; }
+.flow-bar-mini .flow-bar { height: 10px; border-radius: 6px; }
+.flow-bar-mini .flow-seg { font-size: 0; }
+
+@media (max-width: 860px) {
+  .flow-eq-row { gap: 4px; }
+  .flow-eq-block { min-width: 70px; padding: 10px 6px; }
+  .feq-val { font-size: 12px; }
+  .feq-label { font-size: 9px; }
+  .flow-eq-op { font-size: 14px; }
+}
+@media (max-width: 600px) {
+  .flow-eq-row { flex-direction: column; gap: 0; }
+  .flow-eq-block { flex-direction: row; justify-content: space-between; min-width: unset; padding: 10px 12px; }
+  .feq-label { margin-bottom: 0; flex: 1; text-align: left; }
+  .feq-val   { margin-bottom: 0; margin-right: 8px; }
+  .flow-eq-op { text-align: center; padding: 2px 0; font-size: 12px; }
+  .flow-eq-block { border-top: none; border-left: 3px solid var(--line); }
+  .feq-income  { border-left-color: var(--income); }
+  .feq-expense { border-left-color: var(--expense); }
+  .feq-adjust  { border-left-color: var(--warning); }
+  .feq-result  { border-left-color: var(--house); }
+}
+
+/* 현금흐름 스택 바 */
+.flow-bar-wrap {
+  margin: 12px 0 16px;
+}
+.flow-bar {
+  display: flex;
+  height: 36px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  gap: 1px;
+  background: var(--line);
+}
+.flow-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
+  transition: width 0.5s ease;
+  padding: 0 4px;
+}
+.flow-seg.seg-saving   { background: var(--income); }
+.flow-seg.seg-extra    { background: #22c55e; }
+.flow-seg.seg-support  { background: #4ade80; }
+.flow-seg.seg-wedding  { background: var(--expense); }
+.flow-seg.seg-remain   { background: var(--house); }
+.flow-bar-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.flow-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.flow-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* 다음 결제 일정 */
+.upcoming-list { display: flex; flex-direction: column; gap: 8px; }
+.upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--line);
+  background: var(--surface-soft);
+}
+.upcoming-item.urg { border-left-color: var(--expense); background: var(--expense-soft); }
+.upcoming-item.soon { border-left-color: var(--warning); background: var(--warning-soft); }
+.upcoming-item.norm { border-left-color: var(--primary); background: var(--primary-soft); }
+.upcoming-dday { font-size: 13px; font-weight: 800; min-width: 50px; }
+.upcoming-dday.urg  { color: var(--expense); }
+.upcoming-dday.soon { color: var(--warning); }
+.upcoming-dday.norm { color: var(--primary); }
+.upcoming-name { flex: 1; font-size: 13px; font-weight: 600; }
+.upcoming-date { font-size: 11px; color: var(--text-muted); }
+.upcoming-amt  { font-size: 14px; font-weight: 800; white-space: nowrap; }
+.upcoming-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 16px; }
+
+/* 목표 집 가격 시뮬레이터 */
+.house-sim-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.house-sim-row:last-child { border-bottom: none; }
+.house-sim-lbl { flex: 1; color: var(--text-muted); font-size: 13px; }
+.house-sim-val { font-weight: 700; white-space: nowrap; }
+.house-target-inp {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  width: 200px;
+  text-align: right;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.house-target-inp:focus { border-color: var(--house); box-shadow: 0 0 0 3px rgba(15,118,110,0.08); }
+.house-target-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.house-target-row label { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.sim-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.sim-result-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  text-align: center;
+}
+.sim-result-box.r-loan   { border-color: var(--loan-soft);  background: var(--loan-soft); }
+.sim-result-box.r-house  { border-color: var(--house-soft); background: var(--house-soft); }
+.sim-result-lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+.sim-result-val { font-size: 20px; font-weight: 900; letter-spacing: -0.3px; }
+.sim-result-val.v-loan  { color: var(--loan); }
+.sim-result-val.v-house { color: var(--house); }
+.sim-result-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+@media (max-width: 768px) {
+  .sim-result-grid { grid-template-columns: 1fr; }
+  .house-target-inp { width: 140px; }
+}

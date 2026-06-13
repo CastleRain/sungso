@@ -127,12 +127,12 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 
 | 폴더 | URL | 데이터 소스 | 설명 |
 |---|---|---|---|
-| `wecost/` | `/sungso/wecost/` | Google Sheets CSV | 결혼 비용·저축·집 계획 3페이지 SPA |
+| `wecost/` | `/sungso/wecost/` | Firebase Firestore | 결혼 비용·저축·집 계획 4탭 재무 대시보드 |
 | `honeymoon/` | `/sungso/honeymoon/` | JS 하드코딩 + Firebase | 몰디브 12개 리조트 비교, 토너먼트, PDF 뷰어 |
 
 각 서브 프로젝트는 독립적인 `index.html` 보유. 세부 내용은 각 폴더의 `CLAUDE.md` 참조.
 
-**중요:** `wecost`는 Firebase를 쓰지 않고 Google Sheets를 CSV로 웹 게시해 데이터 소스로 사용. `honeymoon`은 리조트 데이터는 JS 하드코딩이지만, **댓글 메모·커플 picks·일정표는 Firebase Firestore 사용** (세부 컬렉션은 `honeymoon/CLAUDE.md` 참조).
+**중요:** `wecost`는 Google Sheets CSV에서 **Firebase Firestore로 마이그레이션 완료**. `honeymoon`은 리조트 데이터는 JS 하드코딩이지만, **댓글 메모·커플 picks·일정표는 Firebase Firestore 사용** (세부 컬렉션은 `honeymoon/CLAUDE.md` 참조).
 
 ---
 
@@ -176,3 +176,28 @@ honeymoon 앱 대규모 UX 개선 — 상세 내용은 `honeymoon/CLAUDE.md` 참
 - **플랜 탭 (`tab-plan.js`):** 커플 Top3 Pick 슬롯, 최종 후보 + 확정, "🏆 우리의 리조트" 히어로 카드, 기본 일정 8일 자동 생성
 - **일정표 편집 UX:** Day 카드 View/Edit 모드, 7종 항목 타입 시스템(항공/숙박/이동/식사/액티비티/휴식/메모), 자동저장(800ms debounce), ↑↓ 순서변경, 미정 pill, Firebase 콜백 억제
 - **새 Firebase 컬렉션:** `couplePicks/main` (pick + 확정), `itineraries/main` (세부일정), `resort_note_meta/{id}` (댓글 수 캐시)
+
+### 2026-06-13 (wecost 대규모 리팩토링 완료)
+
+Google Sheets CSV → Firebase Firestore 전환 + UI 전면 개편 (단일 파일 → CSS/JS 모듈 분리).
+
+- **파일 구조:** `index.html` 4탭 뼈대 + `css/` 6파일 + `js/` 8파일 (app.js, firebase.js, calc.js, utils.js, tab-*.js)
+- **Firebase 마이그레이션:** 5개 컬렉션 `onSnapshot` 실시간 구독 (`wecost_settings`, `wecost_items`, `wecost_savings`, `wecost_loans`, `wecost_adjustments`)
+- **4탭 UX:** 대시보드(결론 4카드+흐름바+일정+시뮬) / 현금흐름(저축 입력+누적 차트) / 결혼비용(요약+카테고리바+타임라인+테이블) / 집 시뮬레이션(가용현금+시나리오카드+대출 CRUD)
+- **재무 색상 시스템:** `--income`(녹), `--expense`(적), `--warning`(황), `--house`(청록), `--loan`(보라) 의미 기반 토큰
+- **즉시 반영:** 저축 입력 시 debounce 500ms → Firebase 저장, 동시에 로컬 computeAll() → 전 탭 재렌더
+
+**다음:** GitHub Pages 배포 후 브라우저 검증.
+
+### 2026-06-13 (wecost UX 개선 — "입력 → 계산 → 판단" 흐름 명확화)
+
+- **대시보드 시작 체크리스트:** 6개 항목(결혼일/소희저축/성우저축/결혼비용/목표집가격/대출조건) 미완료 시 카드 표시. 각 항목에 바로가기 버튼. 전부 완료 시 자동 숨김.
+- **메트릭 카드 빈 상태:** 저축 & 항목 0일 때 ₩0 대신 "계산 대기" + 원인 문구 표시.
+- **현금흐름 계산식 시각화:** 스택 바 → [부부저축] + [지원금] + [조정] − [결혼비용] = [집에 쓸 수 있는 현금] 계산식 블록으로 교체. 각 블록에 탭 바로가기 버튼. 미니 흐름바는 보조로 유지.
+- **결혼비용 항목 CRUD:** "+ 항목 추가" primary 버튼(상단 헤더) + 우측 슬라이드 드로어 UI. `addItem` / `updateItem` / `deleteItem` Firebase 연동 완료.
+- **결혼비용 빈 상태:** 항목 0개일 때 empty state + "샘플 항목 불러오기" 버튼(5개 일괄 추가).
+- **테이블 수정/삭제 버튼:** 각 행 우측에 수정(드로어 열림) / 삭제(confirm 후 deleteDoc) 버튼 추가.
+- **집 탭 목표 집 가격 계산기:** 집 탭 최상단에 목표 집 가격 입력 → 가용현금 / 필요대출 / 월상환액 / 감당상태 즉시 표시. debounce 800ms → Firebase 저장.
+- **현금흐름 탭 placeholder 개선:** 4개 저축 입력칸에 구체적 예시 값 추가.
+
+**다음:** GitHub Pages 배포 후 브라우저 검증.

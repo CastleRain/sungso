@@ -1,0 +1,102 @@
+/* ===== 현금흐름 탭 ===== */
+
+/* 합산 결과 카드 */
+.cf-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--income);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.cf-summary-top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.cf-total-val {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  color: var(--income);
+  line-height: 1;
+}
+.cf-total-sub { font-size: 13px; color: var(--text-muted); }
+.cf-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.cf-sg-item { text-align: center; }
+.cf-sg-lbl  { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+.cf-sg-val  { font-size: 16px; font-weight: 800; }
+
+/* 개인 카드 */
+.person-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 0;
+}
+.person-name {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.person-result {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.person-result-lbl { font-size: 12px; color: var(--text-muted); }
+.person-result-val { font-size: 18px; font-weight: 800; }
+
+/* 결혼일 카드 */
+.wed-date-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.wed-date-lbl { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.wed-date-inp {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.wed-date-inp:focus { border-color: var(--primary); }
+.wed-months-lbl {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* 차트 래퍼 */
+.chart-wrap { position: relative; height: 260px; }
+
+@media (max-width: 768px) {
+  .cf-summary-grid { grid-template-columns: 1fr 1fr; }
+}
