@@ -10,6 +10,10 @@ import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages, subscribeAllMetaCounts } from './firebase-notes.js';
 import { subscribePicks, setPick, removePick } from './firebase-picks.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
+import {
+  getNaverCache, refreshNaverBlog, subscribeReviewPrefs,
+  pinReview, unpinReview, hideReview, unhideReview, subscribeNaverMeta,
+} from './firebase-naver.js';
 
 // showToast를 window에도 노출 (tab-plan.js에서 사용)
 window._showToast = (msg, type, dur) => showToast(msg, type, dur);
@@ -146,16 +150,22 @@ function openDetailSheet(resortId) {
   const body    = document.getElementById('detailSheetBody');
   if (!sheet || !body) return;
 
+  // 이전 prefs 구독 해제
+  _naverPrefsUnsub?.();
+  _naverPrefsUnsub = null;
+
   // 이미 열려있으면 콘텐츠만 교체 (애니메이션 없이)
   const alreadyOpen = sheet.classList.contains('ds-open');
   if (alreadyOpen) {
     body.innerHTML = renderResortDetail(resort);
     body.scrollTop = 0;
+    _initNaverSection(resortId);
     return;
   }
 
   body.innerHTML = renderResortDetail(resort);
   body.scrollTop = 0;
+  _initNaverSection(resortId);
 
   if (_sheetCloseTimer) { clearTimeout(_sheetCloseTimer); _sheetCloseTimer = null; }
   sheet.classList.remove('ds-closing');
@@ -177,6 +187,9 @@ window.closeDetailSheet = function() {
   const sheet    = document.getElementById('detailSheet');
   const backdrop = document.getElementById('detailSheetBackdrop');
   if (!sheet) return;
+
+  _naverPrefsUnsub?.();
+  _naverPrefsUnsub = null;
 
   sheet.classList.add('ds-closing');
   backdrop.classList.remove('ds-open');
@@ -876,6 +889,26 @@ function renderResortDetail(r) {
     <div class="block-body">${renderYoutubeSection(r)}</div>
   </div>
 
+  <!-- 네이버 블로그 후기 -->
+  <div class="block naver-block" id="naverBlock_${r.id}">
+    <div class="block-header naver-block-header">
+      <span>📝 블로그 후기</span>
+      <div class="naver-header-actions">
+        <button class="nsort-btn active" data-sort="sim"
+          onclick="window._naverSetSort('${r.id}','sim',this)">관련순</button>
+        <button class="nsort-btn" data-sort="date"
+          onclick="window._naverSetSort('${r.id}','date',this)">최신순</button>
+        <button class="naver-refresh-btn"
+          onclick="window._naverRefresh('${r.id}')">🔄 새로 가져오기</button>
+        <button class="naver-author-btn"
+          onclick="window._naverToggleAuthor(this)">👤 <span class="naver-author-label">${window._naverAuthor||'성우'}</span></button>
+      </div>
+    </div>
+    <div id="naverBody_${r.id}" class="naver-body">
+      <div class="naver-loading">⏳ 후기 불러오는 중...</div>
+    </div>
+  </div>
+
   <!-- PDF -->
   <div class="block">
     <div class="block-header">관련 PDF 견적서</div>
@@ -909,6 +942,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window._currentPicks = picks;
     window._refreshCardPickBadges?.();
     if (window._pickModalResortId) window._openPickModal(window._pickModalResortId);
+  });
+
+  // ── 네이버 블로그 메타 구독 (카드 배지) ─────────────────────────
+  window._naverCache  = {};
+  window._naverPrefs  = {};
+  window._naverAuthor = '성우';
+  subscribeNaverMeta(meta => {
+    window._naverMeta = meta;
+    window._refreshNaverBadges?.();
   });
 
   // ── 전역 메모 메타 구독 (개수 배지 + 알림 센터) ─────────────────
@@ -959,3 +1001,219 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('open-detail', (e) => openDetailSheet(e.detail.id));
 });
+
+// ══════════════════════════════════════════════════════════════════
+// 네이버 블로그 후기 — 상태 + 함수들
+// ══════════════════════════════════════════════════════════════════
+
+let _naverPrefsUnsub = null;
+
+// YYYYMMDD → "2025.01.12" 포맷
+function _fmtPostdate(s) {
+  if (!s || s.length < 8) return s || '';
+  return `${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6,8)}`;
+}
+
+// Firestore Timestamp or Date → "yyyy.mm.dd HH:MM"
+function _fmtFetchedAt(ts) {
+  const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+  if (isNaN(d)) return '';
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// 캐시 + prefs 병합 → { visible: [...], hiddenItems: [...] }
+function _naverMerge(resortId) {
+  const cache = window._naverCache[resortId];
+  const prefs = window._naverPrefs[resortId] || { pinned: {}, hidden: {} };
+  const pinned = prefs.pinned || {};
+  const hidden = prefs.hidden || {};
+
+  // pinned 항목 (pinnedAt 오름차순)
+  const pinnedItems = Object.values(pinned).sort((a, b) => {
+    const ta = a.pinnedAt?.seconds || 0;
+    const tb = b.pinnedAt?.seconds || 0;
+    return ta - tb;
+  }).map(it => ({ ...it, _pinned: true }));
+
+  // cache 항목 중 pinned ∪ hidden에 없는 것
+  const pinnedSet = new Set(Object.keys(pinned));
+  const hiddenSet = new Set(Object.keys(hidden));
+  const cacheItems = (cache?.items || []).filter(it => !pinnedSet.has(it.linkHash) && !hiddenSet.has(it.linkHash));
+
+  // 숨긴 항목
+  const hiddenItems = Object.values(hidden).sort((a, b) => {
+    const ta = a.hiddenAt?.seconds || 0;
+    const tb = b.hiddenAt?.seconds || 0;
+    return ta - tb;
+  });
+
+  return { visible: [...pinnedItems, ...cacheItems], hiddenItems };
+}
+
+// 각 리뷰 카드 HTML 생성
+function _naverCardHtml(item, resortId, isPinned = false, isHidden = false) {
+  const lh  = item.linkHash || '';
+  const rid = resortId;
+  const esc = s => (s || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  return `
+<div class="nrv-card${isPinned ? ' is-pinned' : ''}${isHidden ? ' is-hidden' : ''}" data-lh="${lh}">
+  <div class="nrv-meta">
+    ${isPinned ? '<span class="nrv-pin-pill">📌 우리의 참고 후기</span>' : ''}
+    <span class="nrv-date">${_fmtPostdate(item.postdate)}</span>
+  </div>
+  <div class="nrv-title">${esc(item.title)}</div>
+  <div class="nrv-blogger">${esc(item.bloggername)}</div>
+  ${item.description ? `<div class="nrv-desc">${esc(item.description)}</div>` : ''}
+  <div class="nrv-actions">
+    <a href="${item.link}" target="_blank" rel="noopener" class="nrv-link-btn">🔗 보기</a>
+    ${isHidden
+      ? `<button class="nrv-unhide-btn" onclick="window._naverUnhide('${rid}','${lh}')">↩ 복구</button>`
+      : `<button class="nrv-pin-btn${isPinned ? ' active' : ''}"
+          onclick="window._naverPin('${rid}','${lh}',${isPinned})">
+          ${isPinned ? '📌 고정 해제' : '📌 고정'}
+        </button>
+        <button class="nrv-hide-btn" onclick="window._naverHide('${rid}','${lh}')">🙈 숨김</button>`
+    }
+  </div>
+</div>`;
+}
+
+// 후기 목록 렌더
+function renderNaverList(resortId) {
+  const body = document.getElementById(`naverBody_${resortId}`);
+  if (!body) return;
+
+  const cache = window._naverCache[resortId];
+  const { visible, hiddenItems } = _naverMerge(resortId);
+
+  let html = '';
+
+  // 마지막 업데이트 표시
+  if (cache?.fetchedAt) {
+    html += `<div class="naver-fetched-at">마지막 업데이트: ${_fmtFetchedAt(cache.fetchedAt)}</div>`;
+  }
+
+  if (visible.length === 0 && hiddenItems.length === 0) {
+    html += `<div class="naver-empty">아직 가져온 후기가 없어요<br><button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">후기 가져오기</button></div>`;
+  } else if (visible.length === 0) {
+    html += `<div class="naver-empty">모든 후기가 숨김 처리됐어요</div>`;
+  } else {
+    html += visible.map(it => _naverCardHtml(it, resortId, it._pinned || false, false)).join('');
+  }
+
+  // 숨긴 후기 토글
+  if (hiddenItems.length > 0) {
+    html += `
+<details class="naver-hidden-toggle">
+  <summary>숨긴 후기 ${hiddenItems.length}개 보기</summary>
+  <div class="naver-hidden-list">
+    ${hiddenItems.map(it => _naverCardHtml(it, resortId, false, true)).join('')}
+  </div>
+</details>`;
+  }
+
+  body.innerHTML = html;
+}
+
+// 섹션 초기화 — 상세 시트 열릴 때 호출
+async function _initNaverSection(resortId) {
+  window._naverPrefs[resortId] = window._naverPrefs[resortId] || { pinned: {}, hidden: {} };
+
+  // prefs 실시간 구독
+  _naverPrefsUnsub?.();
+  _naverPrefsUnsub = subscribeReviewPrefs(resortId, prefs => {
+    window._naverPrefs[resortId] = prefs;
+    renderNaverList(resortId);
+  });
+
+  const body = document.getElementById(`naverBody_${resortId}`);
+  if (!body) return;
+
+  // Firestore 캐시 확인
+  const cache = await getNaverCache(resortId).catch(() => null);
+  if (cache) {
+    window._naverCache[resortId] = cache;
+    renderNaverList(resortId);
+  } else {
+    body.innerHTML = `<div class="naver-empty">아직 가져온 후기가 없어요<br>
+      <button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">후기 가져오기</button>
+    </div>`;
+  }
+}
+
+// ── window 핸들러 ──────────────────────────────────────────────────
+
+window._naverFetch = async function(resortId) {
+  const body = document.getElementById(`naverBody_${resortId}`);
+  if (!body) return;
+  body.innerHTML = '<div class="naver-loading">⏳ 네이버에서 후기를 가져오는 중...</div>';
+  try {
+    const sort = document.querySelector(`#naverBlock_${resortId} .nsort-btn.active`)?.dataset?.sort || 'sim';
+    const data = await refreshNaverBlog(resortId, sort);
+    window._naverCache[resortId] = data;
+    renderNaverList(resortId);
+    showToast('후기를 새로 가져왔어요 ✓');
+  } catch (e) {
+    body.innerHTML = `<div class="naver-error">후기를 불러오지 못했어요<br><small>${e.message}</small><br>
+      <button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">다시 시도</button></div>`;
+    showToast('후기 가져오기 실패', 'error');
+  }
+};
+
+window._naverRefresh = async function(resortId) {
+  if (!confirm('네이버 블로그 후기를 다시 검색할까요?\n(핀/숨김 상태는 유지됩니다)')) return;
+  await window._naverFetch(resortId);
+};
+
+window._naverSetSort = function(resortId, sort, btn) {
+  const block = document.getElementById(`naverBlock_${resortId}`);
+  if (!block) return;
+  block.querySelectorAll('.nsort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 캐시가 있고 저장된 sort와 다르면 자동 재요청
+  const cache = window._naverCache[resortId];
+  if (cache && cache.sort !== sort) {
+    window._naverFetch(resortId);
+  }
+};
+
+window._naverToggleAuthor = function(btn) {
+  window._naverAuthor = window._naverAuthor === '성우' ? '소희' : '성우';
+  btn.querySelector('.naver-author-label').textContent = window._naverAuthor;
+  // 열려있는 모든 author label 갱신
+  document.querySelectorAll('.naver-author-label').forEach(el => {
+    el.textContent = window._naverAuthor;
+  });
+};
+
+window._naverPin = async function(resortId, linkHash, isCurrentlyPinned) {
+  if (isCurrentlyPinned) {
+    await unpinReview(resortId, linkHash).catch(e => showToast('고정 해제 실패: ' + e.message, 'error'));
+  } else {
+    const cache = window._naverCache[resortId];
+    const item  = (cache?.items || []).find(it => it.linkHash === linkHash)
+                  || Object.values(window._naverPrefs[resortId]?.hidden || {}).find(it => it.linkHash === linkHash);
+    if (!item) return;
+    await pinReview(resortId, item, window._naverAuthor || '성우')
+      .catch(e => showToast('고정 실패: ' + e.message, 'error'));
+  }
+};
+
+window._naverUnpin = async function(resortId, linkHash) {
+  await unpinReview(resortId, linkHash).catch(e => showToast('고정 해제 실패: ' + e.message, 'error'));
+};
+
+window._naverHide = async function(resortId, linkHash) {
+  const cache = window._naverCache[resortId];
+  const prefs = window._naverPrefs[resortId] || {};
+  const item  = (cache?.items || []).find(it => it.linkHash === linkHash)
+                || Object.values(prefs.pinned || {}).find(it => it.linkHash === linkHash);
+  if (!item) return;
+  await hideReview(resortId, item, window._naverAuthor || '성우', '관련 없음')
+    .catch(e => showToast('숨김 실패: ' + e.message, 'error'));
+};
+
+window._naverUnhide = async function(resortId, linkHash) {
+  await unhideReview(resortId, linkHash).catch(e => showToast('복구 실패: ' + e.message, 'error'));
+};

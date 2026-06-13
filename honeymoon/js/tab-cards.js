@@ -64,7 +64,8 @@ function renderCard(resort, sortKey, rank) {
   const fitScore = calcFitScore(resort);
   const fitClass = fitScore >= 80 ? 'fit-high' : fitScore >= 60 ? 'fit-mid' : 'fit-low';
   const pickLabel = getPickBadgeLabel(resort.id);
-  const memoCnt = window._memoMeta?.[resort.id]?.commentCount || 0;
+  const memoCnt  = window._memoMeta?.[resort.id]?.commentCount || 0;
+  const naverCnt = window._naverMeta?.[resort.id]?.count       || 0;
 
   const heroImg = getFeaturedImage(resort);
   const imgHtml = heroImg
@@ -88,7 +89,8 @@ function renderCard(resort, sortKey, rank) {
     <div class="card-transfer-badge">${getTransferLabel(resort)}</div>
     ${rankBadge}
     <div class="pick-badge-overlay" style="display:${pickLabel ? 'block' : 'none'}">${pickLabel}</div>
-    ${memoCnt ? `<div class="card-memo-badge">💬 ${memoCnt}</div>` : ''}
+    ${memoCnt  ? `<div class="card-memo-badge">💬 ${memoCnt}</div>`  : ''}
+    ${naverCnt ? `<div class="card-naver-badge">📝 ${naverCnt}</div>` : ''}
   </div>
   <div class="card-body">
     <div class="card-name-ko">${resort.name_ko}</div>
@@ -217,6 +219,22 @@ export function initCards(detailOpenFn) {
       if (overlay) {
         overlay.textContent    = label;
         overlay.style.display  = label ? 'block' : 'none';
+      }
+    });
+  };
+
+  window._refreshNaverBadges = () => {
+    document.querySelectorAll('.resort-card').forEach(card => {
+      const cnt = window._naverMeta?.[card.dataset.id]?.count || 0;
+      let badge = card.querySelector('.card-naver-badge');
+      if (cnt && !badge) {
+        badge = document.createElement('div');
+        badge.className = 'card-naver-badge';
+        card.querySelector('.card-image')?.appendChild(badge);
+      }
+      if (badge) {
+        badge.textContent    = `📝 ${cnt}`;
+        badge.style.display  = cnt ? '' : 'none';
       }
     });
   };
