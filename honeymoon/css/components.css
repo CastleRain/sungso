@@ -304,7 +304,7 @@
    메모 알림 센터 (탭 네비 우측 드로어)
    ════════════════════════════════════════════════════════════════ */
 .memo-notif-btn {
-  margin-left: auto;
+  margin-left: auto;  /* 탭 버튼들과 fx 위젯 사이를 왼쪽 공간으로 밀어줌 */
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -325,6 +325,59 @@
   border-color: var(--primary);
   color: var(--primary-deep);
 }
+
+/* ── FX 환율 위젯 (탭 네비 우측) ── */
+.fx-widget {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+.fx-rate-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.fx-refresh-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: transform .3s, border-color .15s;
+  flex-shrink: 0;
+}
+.fx-refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
+.fx-refresh-btn.spinning { animation: fxSpin .7s linear infinite; }
+@keyframes fxSpin { to { transform: rotate(360deg); } }
+.fx-toggle-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.fx-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }
+.fx-toggle-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+@media (max-width: 600px) {
+  .fx-rate-label { display: none; }
+}
+
 .memo-notif-count {
   display: inline-flex;
   align-items: center;

@@ -14,9 +14,27 @@ import {
   getNaverCache, refreshNaverBlog, subscribeReviewPrefs,
   pinReview, unpinReview, hideReview, unhideReview, subscribeNaverMeta,
 } from './firebase-naver.js';
+import { subscribeFx, fetchAndSaveFx, autoRefreshFx } from './firebase-fx.js';
 
 // showToast를 window에도 노출 (tab-plan.js에서 사용)
 window._showToast = (msg, type, dur) => showToast(msg, type, dur);
+
+// ── 환율 전역 상태 ─────────────────────────────────────────────────
+window._fxRate  = null;  // USD→KRW 환율 (숫자)
+window._krwMode = false; // true = 원화 표시 모드
+
+// 가격 포맷: 전역 모드에 따라 $X 또는 ₩X,XXX 반환
+window._fmtUSD = function(usd) {
+  if (usd == null) return null;
+  if (window._krwMode && window._fxRate) {
+    const krw = Math.round(usd * window._fxRate);
+    return '₩' + krw.toLocaleString();
+  }
+  return '$' + usd.toLocaleString();
+};
+window._fmtUnit = function() {
+  return window._krwMode ? '/인' : '/인';
+};
 
 function showToast(msg, type = 'success', duration = 2000) {
   const el = document.createElement('div');
@@ -749,6 +767,7 @@ function renderResortDetail(r) {
       ['mix_4n', '🔀 비치+워터 믹스 4박'],
       ['beach_4n', '🏖️ 비치빌라 4박'],
     ];
+    const fmt = window._fmtUSD || (v => '$' + v.toLocaleString());
     const rows = key_labels.filter(([k]) => ag[k] != null).map(([key, label]) => {
       const disc = ag[key + '_disc'];
       const base = ag[key];
@@ -757,8 +776,8 @@ function renderResortDetail(r) {
 <div class="prow">
   <span class="prow-label">${label}</span>
   <div class="prow-prices">
-    ${hasDiscount ? `<span class="prow-original">$${base.toLocaleString()}</span>` : ''}
-    <span class="prow-final${hasDiscount ? ' is-discount' : ''}">$${(hasDiscount ? disc : base).toLocaleString()}</span>
+    ${hasDiscount ? `<span class="prow-original">${fmt(base)}</span>` : ''}
+    <span class="prow-final${hasDiscount ? ' is-discount' : ''}">${fmt(hasDiscount ? disc : base)}</span>
     <span class="prow-unit">/인</span>
   </div>
 </div>`;
@@ -934,10 +953,66 @@ function _openPdfFromDetail(file, label) {
   }, 150);
 }
 
+// ── FX 위젯 ──────────────────────────────────────────────────────────
+function initFxWidget() {
+  const rateLabel  = document.getElementById('fxRateLabel');
+  const refreshBtn = document.getElementById('fxRefreshBtn');
+  const toggleBtn  = document.getElementById('fxToggleBtn');
+
+  function updateRateLabel(rate) {
+    if (rateLabel) rateLabel.textContent = `$1 = ₩${rate.toLocaleString()}`;
+  }
+
+  function applyToggle() {
+    if (toggleBtn) {
+      toggleBtn.textContent  = window._krwMode ? 'KRW' : 'USD';
+      toggleBtn.classList.toggle('active', window._krwMode);
+    }
+    // 열려있는 탭 재렌더
+    window._renderCards?.();
+    window._renderPriceTable?.();
+    if (window._currentDetailResortId) {
+      openDetailSheet(window._currentDetailResortId);
+    }
+  }
+
+  toggleBtn?.addEventListener('click', () => {
+    if (!window._fxRate) { showToast('환율 정보가 없어요. ⟳ 버튼으로 불러와주세요.', 'warn'); return; }
+    window._krwMode = !window._krwMode;
+    applyToggle();
+  });
+
+  refreshBtn?.addEventListener('click', async () => {
+    refreshBtn.classList.add('spinning');
+    try {
+      const rate = await fetchAndSaveFx();
+      window._fxRate = rate;
+      updateRateLabel(rate);
+      showToast(`환율 업데이트: $1 = ₩${rate.toLocaleString()}`, 'ok');
+      if (window._krwMode) applyToggle();
+    } catch (e) {
+      showToast('환율 불러오기 실패. 잠시 후 다시 시도해주세요.', 'error');
+    } finally {
+      refreshBtn.classList.remove('spinning');
+    }
+  });
+
+  // Firebase 구독 — 환율 변경 시 라벨 자동 갱신
+  subscribeFx(({ rate }) => {
+    window._fxRate = rate;
+    updateRateLabel(rate);
+    if (window._krwMode) applyToggle();
+  });
+
+  // 1시간 이상 지났으면 자동 갱신
+  autoRefreshFx();
+}
+
 // ── 초기화 ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updateDDay();
   setHeroBg();
+  initFxWidget();
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));

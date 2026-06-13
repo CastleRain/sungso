@@ -76,7 +76,7 @@ function renderSummaryCards(bests, mul, suffix) {
     return `<div class="price-summary-card${isActive ? ' active' : ''}" onclick="window._priceSortBy('${key}')">
       <div class="psc-icon">${icon}</div>
       <div class="psc-label">${short}</div>
-      <div class="psc-price">$${(b * mul).toLocaleString()}</div>
+      <div class="psc-price">${window._fmtUSD ? window._fmtUSD(b * mul) : '$' + (b * mul).toLocaleString()}</div>
       <div class="psc-suffix">${suffix} · 최저가</div>
       <div class="psc-resort">${resort?.name_ko || ''}</div>
     </div>`;
@@ -147,14 +147,15 @@ function renderTable() {
 
       const isColBest = resortBest === colBest;
 
+      const fmt = window._fmtUSD || (v => '$' + v.toLocaleString());
       const cells = prices.map(p => {
         const finalAmt = p.final * mul;
         const isBest = p.final === colBest;
         const discHtml = p.disc != null
-          ? `<span class="orig">$${(p.base * mul).toLocaleString()}</span> ` : '';
+          ? `<span class="orig">${fmt(p.base * mul)}</span> ` : '';
         return `<div class="price-cell-row">
           ${prices.length > 1 ? `<span class="ag-label">${p.agName}</span>` : ''}
-          ${discHtml}<span class="${isBest ? 'best-price' : ''}">$${finalAmt.toLocaleString()}</span>
+          ${discHtml}<span class="${isBest ? 'best-price' : ''}">${fmt(finalAmt)}</span>
           ${isBest ? '<span class="best-badge">최저</span>' : ''}
         </div>`;
       }).join('');
@@ -184,10 +185,11 @@ function renderTable() {
 </tr>`;
   }).join('');
 
+  const currLabel = (window._krwMode && window._fxRate) ? 'KRW' : 'USD';
   wrap.innerHTML = `
 ${renderSummaryCards(bests, mul, suffix)}
 <div class="table-meta">
-  💡 <b>${coupleMode ? '2인 합산' : '1인'} USD</b> · 할인 후 기준 · <span class="best-badge">최저</span> = 해당 항목 최저가 · 헤더·카드 클릭 시 정렬
+  💡 <b>${coupleMode ? '2인 합산' : '1인'} ${currLabel}</b> · 할인 후 기준 · <span class="best-badge">최저</span> = 해당 항목 최저가 · 헤더·카드 클릭 시 정렬
   <span class="tier-legend">
     <span class="tier-dot tier-best-dot"></span>최상
     <span class="tier-dot tier-mid-dot"></span>중간
@@ -220,6 +222,7 @@ ${renderSummaryCards(bests, mul, suffix)}
 
 export function initPrice(detailOpenFn) {
   onDetailOpen = detailOpenFn;
+  window._renderPriceTable = renderTable;
   renderTable();
 
   const toggle = document.getElementById('coupleToggle');

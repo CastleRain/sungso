@@ -119,7 +119,7 @@ function renderCard(resort, sortKey, rank) {
       <div class="card-price-label">${SORT_LABELS[sortKey]}</div>
       <div class="card-price-main">
         ${price != null
-          ? `<span class="card-price-value${isPriceBest ? ' price-best' : ''}">$${price.toLocaleString()}</span><span class="card-price-unit"> / 인</span>`
+          ? `<span class="card-price-value${isPriceBest ? ' price-best' : ''}">${(window._fmtUSD || (v => '$' + v.toLocaleString()))(price)}</span><span class="card-price-unit"> / 인</span>`
           : '<span class="price-na">해당 없음</span>'}
       </div>
     </div>
