@@ -121,16 +121,24 @@ export function subscribeReviewPrefs(resortId, cb) {
 }
 
 // ── 핀 저장 ───────────────────────────────────────────────────────
+// setDoc+merge:true 는 dot notation을 리터럴 필드명으로 처리하므로
+// updateDoc(dot notation)을 사용. 문서 없으면 setDoc으로 생성.
 export async function pinReview(resortId, item, pinnedBy = '성우') {
-  const lh = item.linkHash;
-  await setDoc(
-    doc(db, 'blog_review_prefs', resortId),
-    {
+  const lh  = item.linkHash;
+  const ref = doc(db, 'blog_review_prefs', resortId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    await updateDoc(ref, {
       [`pinned.${lh}`]: { ...item, pinnedBy, pinnedAt: serverTimestamp() },
       updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+    });
+  } else {
+    await setDoc(ref, {
+      pinned: { [lh]: { ...item, pinnedBy, pinnedAt: serverTimestamp() } },
+      hidden: {},
+      updatedAt: serverTimestamp(),
+    });
+  }
 }
 
 // ── 핀 해제 ───────────────────────────────────────────────────────
@@ -143,16 +151,22 @@ export async function unpinReview(resortId, linkHash) {
 
 // ── 숨김 (pinned에서도 동시 제거) ──────────────────────────────────
 export async function hideReview(resortId, item, hiddenBy = '소희', reason = '관련 없음') {
-  const lh = item.linkHash;
-  await setDoc(
-    doc(db, 'blog_review_prefs', resortId),
-    {
+  const lh  = item.linkHash;
+  const ref = doc(db, 'blog_review_prefs', resortId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    await updateDoc(ref, {
       [`hidden.${lh}`]: { ...item, hiddenBy, reason, hiddenAt: serverTimestamp() },
       [`pinned.${lh}`]: deleteField(),
       updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+    });
+  } else {
+    await setDoc(ref, {
+      pinned: {},
+      hidden: { [lh]: { ...item, hiddenBy, reason, hiddenAt: serverTimestamp() } },
+      updatedAt: serverTimestamp(),
+    });
+  }
 }
 
 // ── 숨김 복구 ─────────────────────────────────────────────────────
