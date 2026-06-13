@@ -1039,7 +1039,13 @@ function _naverMerge(resortId) {
   // cache 항목 중 pinned ∪ hidden에 없는 것
   const pinnedSet = new Set(Object.keys(pinned));
   const hiddenSet = new Set(Object.keys(hidden));
-  const cacheItems = (cache?.items || []).filter(it => !pinnedSet.has(it.linkHash) && !hiddenSet.has(it.linkHash));
+  let cacheItems = (cache?.items || []).filter(it => !pinnedSet.has(it.linkHash) && !hiddenSet.has(it.linkHash));
+
+  // 클라이언트 사이드 정렬: 최신순이면 postdate 내림차순 (API 재호출 없음)
+  const activeSort = document.querySelector(`#naverBlock_${resortId} .nsort-btn.active`)?.dataset?.sort || 'sim';
+  if (activeSort === 'date') {
+    cacheItems = [...cacheItems].sort((a, b) => (b.postdate || '').localeCompare(a.postdate || ''));
+  }
 
   // 숨긴 항목
   const hiddenItems = Object.values(hidden).sort((a, b) => {
@@ -1120,22 +1126,24 @@ function renderNaverList(resortId) {
 async function _initNaverSection(resortId) {
   window._naverPrefs[resortId] = window._naverPrefs[resortId] || { pinned: {}, hidden: {} };
 
-  // prefs 실시간 구독
+  const body = document.getElementById(`naverBody_${resortId}`);
+  if (!body) return;
+
+  // 캐시 먼저 로드한 뒤 prefs 구독 시작 (구독 콜백이 빈 캐시로 먼저 렌더하는 것 방지)
+  const cache = await getNaverCache(resortId).catch(() => null);
+  if (cache) {
+    window._naverCache[resortId] = cache;
+  }
+
+  // prefs 실시간 구독 — 이제부터 캐시가 준비된 상태로 렌더
   _naverPrefsUnsub?.();
   _naverPrefsUnsub = subscribeReviewPrefs(resortId, prefs => {
     window._naverPrefs[resortId] = prefs;
     renderNaverList(resortId);
   });
 
-  const body = document.getElementById(`naverBody_${resortId}`);
-  if (!body) return;
-
-  // Firestore 캐시 확인
-  const cache = await getNaverCache(resortId).catch(() => null);
-  if (cache) {
-    window._naverCache[resortId] = cache;
-    renderNaverList(resortId);
-  } else {
+  // 캐시 없으면 초기 빈 상태 표시 (prefs 구독 콜백이 이미 renderNaverList 호출)
+  if (!cache) {
     body.innerHTML = `<div class="naver-empty">아직 가져온 후기가 없어요<br>
       <button class="nrv-fetch-btn" onclick="window._naverFetch('${resortId}')">후기 가져오기</button>
     </div>`;
@@ -1171,11 +1179,8 @@ window._naverSetSort = function(resortId, sort, btn) {
   if (!block) return;
   block.querySelectorAll('.nsort-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // 캐시가 있고 저장된 sort와 다르면 자동 재요청
-  const cache = window._naverCache[resortId];
-  if (cache && cache.sort !== sort) {
-    window._naverFetch(resortId);
-  }
+  // 캐시된 결과를 클라이언트에서 재정렬 (API 재호출 없음)
+  renderNaverList(resortId);
 };
 
 window._naverToggleAuthor = function(btn) {
