@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PYEONG_TO_M2, parseRecommendationQuery, filterCatalogForRecommendation,
+  PYEONG_TO_M2, parseKoreanMoneyToManWon, parseRecommendationQuery, filterCatalogForRecommendation,
   aggregateRecommendationRecords,
 } from '../js/recommendation-core.mjs';
 
@@ -24,6 +24,26 @@ test('자연스러운 연결형 표현인 세대가 넘고도 초과로 읽는�
   const parsed = parseRecommendationQuery('서울에서 500세대가 넘고 6억 미만인 아파트', 2026);
   assert.equal(parsed.filters.minHouseholds, 500);
   assert.equal(parsed.filters.householdsOperator, 'gt');
+});
+
+test('소수 억·숫자 만원·한글 천만원 가격 표현을 같은 금액으로 읽는다', () => {
+  const queries = ['9.3억 미만', '9억 3000만원 미만', '9억 3,000만원 미만', '9억 3천만원 미만', '9억 3천 미만', '9억 3천5백만원 이하'];
+  const amounts = queries.map((query) => parseRecommendationQuery(query, 2026).filters.maxPriceManWon);
+  assert.deepEqual(amounts, [93000, 93000, 93000, 93000, 93000, 93500]);
+  const clause = parseRecommendationQuery('9억 3천만원 미만', 2026).clauses.find((item) => item.key === 'price');
+  assert.equal(clause.label, '9억 3,000만원 미만');
+});
+
+test('기록과 가격 필터도 억·만원 표현을 안전한 만원 단위로 바꾼다', () => {
+  assert.equal(parseKoreanMoneyToManWon('9억 3천만원'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('9억 3천'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('0억 3천5백만원'), 3500);
+  assert.equal(parseKoreanMoneyToManWon('9.3억'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('93,000만원'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('93000'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('930,000,000원'), 93000);
+  assert.equal(parseKoreanMoneyToManWon('9억abc'), null);
+  assert.equal(parseKoreanMoneyToManWon('잘못된 가격'), null);
 });
 
 test('세대수 초과와 준공연도 경계를 엄격하게 지킨다', () => {

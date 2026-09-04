@@ -745,13 +745,13 @@
 
 .hh-app.hh-v3 .recommendation-map-pane > .recommendation-map-overlay {
   position: absolute;
-  inset-block-start: 50%;
+  inset-block-start: calc(var(--hh-shell-gap) + 58px);
   inset-inline-start: 50%;
   z-index: var(--hh-z-map-ui);
   display: flex;
   width: min(390px, calc(100% - 32px));
-  min-height: 72px;
-  padding: var(--hh-space-5) var(--hh-space-6);
+  min-height: 56px;
+  padding: var(--hh-space-4) var(--hh-space-5);
   align-items: center;
   gap: var(--hh-space-5);
   border: 1px solid var(--hh-line-strong);
@@ -759,15 +759,20 @@
   color: var(--hh-text);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--hh-shadow-md);
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.hh-app.hh-v3 .recommendation-map-pane > .recommendation-map-overlay[hidden] {
+  display: none !important;
 }
 
 /* Beat the legacy map-first offsets: this surface is centered inside the
    actual map column, which already excludes the desktop result panel. */
 .hh-app.hh-v3 .recommendation-view .recommendation-results-section.map-first-shell .recommendation-map-pane > .recommendation-map-overlay {
-  inset-block: 50% auto;
+  inset-block: calc(var(--hh-shell-gap) + 58px) auto;
   inset-inline: 50% auto;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .hh-app.hh-v3 .recommendation-map-pane > .recommendation-map-overlay > i {

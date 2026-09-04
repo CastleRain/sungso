@@ -1007,6 +1007,12 @@
   background: var(--hh-surface-3);
 }
 
+.hh-app.hh-v3 .records-view-switcher-page {
+  position: relative;
+  inset: auto;
+  margin: 0 0 var(--hh-space-6);
+}
+
 .hh-app.hh-v3 .records-view-switcher > button {
   display: inline-flex;
   min-height: 38px;
@@ -1472,6 +1478,15 @@
   font-size: var(--hh-text-meta);
 }
 
+.hh-app.hh-v3 .supply-result-head > div:last-child,
+.hh-app.hh-v3 #markSupplySeen {
+  flex: 0 0 auto;
+}
+
+.hh-app.hh-v3 #markSupplySeen {
+  white-space: nowrap;
+}
+
 .hh-app.hh-v3 .supply-workspace {
   display: grid;
   min-width: 0;
@@ -1699,7 +1714,15 @@
 
 @media (max-width: 1279px) and (min-width: 1024px) {
   .hh-app.hh-v3 .supply-command {
-    grid-template-columns: minmax(220px, 1fr) auto auto;
+    grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(0, auto));
+  }
+
+  .hh-app.hh-v3 .supply-command > * {
+    min-width: 0;
+  }
+
+  .hh-app.hh-v3 .supply-command > .supply-search {
+    grid-column: 1 / -1;
   }
 
   .hh-app.hh-v3 .supply-workspace {
@@ -1791,21 +1814,23 @@
   }
 
   .hh-app.hh-v3 .supply-command {
-    display: flex;
-    margin-inline: calc(var(--hh-space-5) * -1);
-    padding-inline: var(--hh-space-5);
-    overflow-x: auto;
-    border-inline: 0;
-    border-radius: 0;
+    display: grid;
+    margin-inline: 0;
+    padding-inline: var(--hh-space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    border-inline: 1px solid var(--hh-line);
+    border-radius: var(--hh-radius-lg);
   }
 
   .hh-app.hh-v3 .supply-command > * {
-    min-width: 160px;
-    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
   }
 
-  .hh-app.hh-v3 .supply-command > .supply-search {
-    min-width: min(280px, 78vw);
+  .hh-app.hh-v3 .supply-command > .supply-search,
+  .hh-app.hh-v3 .supply-command > .supply-filter-group {
+    grid-column: 1 / -1;
   }
 
   .hh-app.hh-v3 .supply-command :where(button, select),
@@ -1846,6 +1871,15 @@
 }
 
 @media (max-width: 479px) {
+  .hh-app.hh-v3 .supply-command {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hh-app.hh-v3 .supply-command > .supply-search,
+  .hh-app.hh-v3 .supply-command > .supply-filter-group {
+    grid-column: auto;
+  }
+
   .hh-app.hh-v3 .complex-search-form {
     height: auto;
     min-height: 96px;
@@ -1904,6 +1938,7 @@
   z-index: calc(var(--hh-z-topbar) - 1);
   display: flex;
   width: 100%;
+  max-width: none;
   min-width: 0;
   min-height: var(--hh-chiprow-h);
   height: var(--hh-chiprow-h);
@@ -2181,19 +2216,25 @@
 }
 
 .hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head > div:last-child {
-  display: flex;
+  display: grid;
   min-width: 0;
   align-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--hh-space-3);
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: visible;
 }
 
-.hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head button,
-.hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head .portal-select {
+.hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head > div:last-child > button,
+.hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head > div:last-child > .portal-select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 40px;
-  flex: 0 0 auto;
   font-size: var(--hh-text-ui);
+}
+
+.hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-results-head .precise-commute-btn {
+  grid-column: 1 / -1;
 }
 
 .hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-result-grid {
@@ -2301,6 +2342,11 @@
   color: var(--hh-text);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--hh-shadow-md);
+  pointer-events: none;
+}
+
+.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-status :where(button, a, input, select) {
+  pointer-events: auto;
 }
 
 .hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-status .recommendation-status-copy {
@@ -2404,6 +2450,74 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.hh-app.hh-v3 .recommendation-composer .recommendation-primary-grid > .price-recommendation-field {
+  grid-column: 1 / -1;
+}
+
+.hh-app.hh-v3 .price-segmented-input {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(68px, 0.75fr) minmax(104px, 1.15fr) minmax(68px, 0.75fr);
+  gap: var(--hh-space-2);
+}
+
+.hh-app.hh-v3 .price-segmented-input > label {
+  position: relative;
+  display: block;
+  min-width: 0;
+  margin: 0;
+}
+
+.hh-app.hh-v3 .price-segmented-input input,
+.hh-app.hh-v3 .price-segmented-input select {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid var(--hh-line-strong);
+  border-radius: var(--hh-radius-md);
+  color: var(--hh-ink);
+  background: var(--hh-surface);
+  font-family: var(--hh-font-mono);
+  font-size: var(--hh-text-ui);
+  font-weight: 700;
+}
+
+.hh-app.hh-v3 .price-segmented-input input {
+  padding-inline: var(--hh-space-3) 26px;
+  text-align: end;
+}
+
+.hh-app.hh-v3 .price-segmented-input > label:nth-child(2) input {
+  padding-inline-end: 42px;
+}
+
+.hh-app.hh-v3 .price-segmented-input em {
+  position: absolute;
+  inset-inline-end: var(--hh-space-3);
+  inset-block-start: 50%;
+  color: var(--hh-text-muted);
+  font-size: var(--hh-text-meta);
+  font-style: normal;
+  font-weight: 700;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.hh-app.hh-v3 #recommendPriceReadable {
+  display: block;
+  min-height: 18px;
+  margin-block-start: var(--hh-space-2);
+  color: var(--hh-accent-pressed);
+  font-size: var(--hh-text-meta);
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.hh-app.hh-v3 .price-recommendation-field > .condition-range {
+  margin-block-start: var(--hh-space-2);
+}
+
 .hh-app.hh-v3 .recommendation-composer .recommendation-details {
   min-height: 0;
   overflow: auto;
@@ -2416,7 +2530,30 @@
   border-block-start: 1px solid var(--hh-line);
 }
 
+@media (min-width: 1024px) {
+  .hh-app.hh-v3 .recommendation-page.map-first-shell.filters-open {
+    grid-template-rows: 0 minmax(0, 1fr);
+  }
+
+  .hh-app.hh-v3 .recommendation-page.map-first-shell.filters-open > .recommendation-map-toolbar.map-toolbar.hh-chiprow {
+    min-height: 0;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
 @media (max-width: 1023px) {
+  .hh-app.hh-v3.hh-filter-is-open .hh-topbar {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .hh-app.hh-v3.hh-filter-is-open .hh-shell > .portal-header.hh-rail {
     display: none !important;
   }

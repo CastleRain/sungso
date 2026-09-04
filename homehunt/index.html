@@ -37,14 +37,14 @@
   <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/hh-tokens.css?v=3.0.0">
-  <link rel="stylesheet" href="./css/hh-base.css?v=3.0.0">
-  <link rel="stylesheet" href="./css/hh-shell.css?v=3.0.0">
-  <link rel="stylesheet" href="./css/hh-components.css?v=3.0.0">
-  <link rel="stylesheet" href="./css/hh-map.css?v=3.0.0">
-  <link rel="stylesheet" href="./css/hh-screens.css?v=3.0.0">
+  <link rel="stylesheet" href="./css/hh-tokens.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-base.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-shell.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-components.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-map.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-screens.css?v=3.0.1">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="3.0.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="3.0.1" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -111,9 +111,9 @@
           <div class="filter-section">
             <span class="filter-label">가격</span>
             <div class="range-inputs">
-              <label><span>최소</span><input id="filterPriceMin" inputmode="numeric" placeholder="0"><em>만원</em></label>
+              <label><span>최소 · 만원/억</span><input id="filterPriceMin" inputmode="text" placeholder="예: 6억"></label>
               <i>–</i>
-              <label><span>최대</span><input id="filterPriceMax" inputmode="numeric" placeholder="제한 없음"><em>만원</em></label>
+              <label><span>최대 · 만원/억</span><input id="filterPriceMax" inputmode="text" placeholder="예: 9억 3천"></label>
             </div>
           </div>
 
@@ -225,18 +225,18 @@
 
           <div class="recommendation-primary-grid">
             <div class="recommendation-field company-field primary-company"><div class="workplace-field-head"><span>출근 목적지 <em>최대 4곳 · 이 기기에만 저장</em></span><button class="outline-btn add-workplace-btn" id="confirmCompanyLocation" type="button" aria-haspopup="dialog" aria-controls="companyLocationModal"><i class="ti ti-plus" aria-hidden="true"></i><span>목적지 추가</span></button></div><div class="workplace-list" id="workplaceList" aria-label="저장한 출근 목적지"></div><input id="recommendCompany" type="hidden"><small id="recommendCompanyStatus" role="status" aria-live="polite">회사·학교 등 실제 목적지를 먼저 추가하세요.</small></div>
-            <div class="recommendation-field"><label for="recommendMaxPrice">최대 실거래가</label><div class="input-with-select compact-operator"><input id="recommendMaxPrice" type="number" min="0" step="0.1" value="6"><select id="recommendPriceOperator" aria-label="최대 가격 포함 방식"><option value="lt">억원 미만</option><option value="lte">억원 이하</option></select></div><input class="condition-range" id="recommendMaxPriceRange" type="range" min="0.5" max="50" step="0.5" value="6" aria-label="최대 실거래가 슬라이더"></div>
-            <div class="recommendation-field"><label for="recommendMinArea">최소 전용면적</label><div class="input-with-select compact-operator"><input id="recommendMinArea" type="number" min="0" step="0.1" value="20"><select id="recommendAreaOperator" aria-label="최소 전용면적 포함 방식"><option value="gte">평 이상</option><option value="gt">평 초과</option></select></div><input class="condition-range" id="recommendMinAreaRange" type="range" min="5" max="80" step="1" value="20" aria-label="최소 전용면적 평 슬라이더"><small id="recommendAreaMetric">전용 66.1㎡</small></div>
+            <div class="recommendation-field price-recommendation-field"><label for="recommendMaxPriceEok">최대 실거래가</label><div class="price-segmented-input"><label><input id="recommendMaxPriceEok" type="text" inputmode="decimal" pattern="[0-9.,억원]*" value="6" autocomplete="off" aria-label="최대 실거래가 억 단위" aria-describedby="recommendPriceReadable"><em>억</em></label><label><input id="recommendMaxPriceMan" type="text" inputmode="text" pattern="[0-9,천백십만원]*" value="0" autocomplete="off" aria-label="최대 실거래가 만원 단위" aria-describedby="recommendPriceReadable"><em>만원</em></label><select id="recommendPriceOperator" aria-label="최대 가격 포함 방식"><option value="lt">미만</option><option value="lte">이하</option></select></div><output id="recommendPriceReadable" for="recommendMaxPriceEok recommendMaxPriceMan recommendPriceOperator">6억원 미만</output><input class="condition-range" id="recommendMaxPriceRange" type="range" min="0.5" max="50" step="0.1" value="6" aria-label="최대 실거래가 슬라이더"></div>
+            <div class="recommendation-field"><label for="recommendMinArea">최소 전용면적</label><div class="input-with-select compact-operator"><input id="recommendMinArea" type="number" inputmode="decimal" min="0" max="100" step="0.1" value="20"><select id="recommendAreaOperator" aria-label="최소 전용면적 포함 방식"><option value="gte">평 이상</option><option value="gt">평 초과</option></select></div><input class="condition-range" id="recommendMinAreaRange" type="range" min="0" max="100" step="0.1" value="20" aria-label="최소 전용면적 평 슬라이더"><small id="recommendAreaMetric">전용 66.1㎡</small></div>
             <label class="recommendation-field"><span>기본 출근 방법</span><select id="recommendCommuteMode"><option value="transit" selected>버스·지하철</option><option value="car">자동차</option><option value="both">둘 중 빠른 경로</option></select></label>
-            <label class="recommendation-field"><span>최대 출근 시간</span><div class="input-unit"><input id="recommendCommuteMax" type="number" min="0" value="60"><em>분 이하</em></div><input class="condition-range" id="recommendCommuteMaxRange" type="range" min="10" max="180" step="5" value="60" aria-label="최대 출근 시간 슬라이더"></label>
+            <label class="recommendation-field"><span>최대 출근 시간</span><div class="input-unit"><input id="recommendCommuteMax" type="number" inputmode="numeric" min="0" max="180" step="1" value="60"><em>분 이하</em></div><input class="condition-range" id="recommendCommuteMaxRange" type="range" min="0" max="180" step="1" value="60" aria-label="최대 출근 시간 슬라이더"></label>
           </div>
 
           <details class="recommendation-details">
             <summary><span><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> 상세 조건 · 데이터 판정 근거</span><small>지역, 세대수, 연식, 실거래 기간, 출발 시각</small></summary>
             <div class="recommendation-form-grid secondary-fields">
               <fieldset class="recommendation-field region-fieldset"><legend>대상 지역</legend><div class="recommendation-checks"><label><input id="recommendSeoul" type="checkbox" checked> 서울</label><label><input id="recommendGyeonggi" type="checkbox" checked> 경기</label></div></fieldset>
-              <div class="recommendation-field"><label for="recommendHouseholds">최소 세대수</label><div class="input-with-select"><input id="recommendHouseholds" type="number" min="0" step="100" value="500"><select id="recommendHouseholdsOperator" aria-label="최소 세대수 포함 방식"><option value="gt" selected>초과</option><option value="gte">이상</option></select></div><input class="condition-range" id="recommendHouseholdsRange" type="range" min="0" max="5000" step="100" value="500" aria-label="최소 세대수 슬라이더"></div>
-              <label class="recommendation-field"><span>준공 후 최대</span><div class="input-unit"><input id="recommendMaxAge" type="number" min="0" max="80" value="20"><em>년 이내</em></div><input class="condition-range" id="recommendMaxAgeRange" type="range" min="0" max="60" step="1" value="20" aria-label="준공 후 최대 연수 슬라이더"></label>
+              <div class="recommendation-field"><label for="recommendHouseholds">최소 세대수</label><div class="input-with-select"><input id="recommendHouseholds" type="number" inputmode="numeric" min="0" max="10000" step="1" value="500"><select id="recommendHouseholdsOperator" aria-label="최소 세대수 포함 방식"><option value="gt" selected>초과</option><option value="gte">이상</option></select></div><input class="condition-range" id="recommendHouseholdsRange" type="range" min="0" max="10000" step="1" value="500" aria-label="최소 세대수 슬라이더"></div>
+              <label class="recommendation-field"><span>준공 후 최대</span><div class="input-unit"><input id="recommendMaxAge" type="number" inputmode="numeric" min="0" max="80" step="1" value="20"><em>년 이내</em></div><input class="condition-range" id="recommendMaxAgeRange" type="range" min="0" max="80" step="1" value="20" aria-label="준공 후 최대 연수 슬라이더"></label>
               <div class="recommendation-field route-quality-field"><span>대중교통 접근성 <em>실제 경로</em></span><strong>집→회사 전체 도보·환승 포함</strong><small>반경이나 역 직선거리로 합격을 추측하지 않습니다.</small><input id="recommendStationMin" type="hidden" value="0"><input id="recommendStationMax" type="hidden" value="0"></div>
               <label class="recommendation-field"><span>실거래 확인 기간</span><select id="recommendMonths"><option value="1">최근 1개월 · 빠름</option><option value="3" selected>최근 3개월 · 권장</option><option value="6">최근 6개월 · 넓게</option></select></label>
               <label class="recommendation-field"><span>평일 출근 출발</span><input id="recommendDepartureTime" type="time" value="08:00"><small>대중교통 경로 기준 시각</small></label>
@@ -272,7 +272,7 @@
                 <button class="is-active" id="recommendationLayerShortlist" type="button" data-recommendation-layer="shortlist" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-heart" aria-hidden="true"></i><span>관심</span></button>
                 <button class="is-active" id="recommendationLayerWorkplaces" type="button" data-recommendation-layer="workplaces" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-briefcase" aria-hidden="true"></i><span>목적지</span></button>
               </div>
-              <div class="recommendation-map-overlay" id="recommendationMapStatus"><i class="ti ti-map-search" aria-hidden="true"></i><div><strong>조건을 정하고 지도에서 후보를 찾아보세요</strong><small>검색 전에도 목적지와 다녀온 집을 한눈에 볼 수 있어요.</small></div></div>
+              <div class="recommendation-map-overlay" id="recommendationMapStatus" role="status" aria-live="polite" hidden><i class="ti ti-map-search" aria-hidden="true"></i><div><strong>후보를 지도에 연결하고 있어요</strong><small>조건에 맞는 단지를 묶어 표시합니다.</small></div></div>
               <div class="recommendation-map-legend" aria-label="지도 표시 설명"><span><i class="legend-dot cluster"></i>후보 원 숫자·가격</span><span title="검색 전에는 가격·면적 판정 전입니다"><i class="legend-dot apartment"></i>공식 단지 <small>가격·면적 조회 전</small></span><span><i class="legend-symbol visited">★</i>방문</span><span><i class="legend-symbol shortlisted">♥</i>관심</span><span title="현재 접수·예정 공고 중 위치를 확인한 최대 24곳"><i class="legend-symbol supply">⚑</i>분양 <small>접수·예정</small></span><span><i class="legend-symbol company">A–D</i>목적지</span><span><i class="legend-dot verified"></i>통근 충족</span><span><i class="legend-dot estimated"></i>경로 미확인</span><span><i class="legend-dot over-limit"></i>시간 초과</span></div>
             </div>
             <aside class="recommendation-list-pane results-sheet hh-panel" id="recommendationResultPanel" aria-label="맞춤 후보 결과" aria-hidden="true">
@@ -700,7 +700,7 @@
         </div>
         <div class="form-grid four-col">
           <label class="field"><span>거래 유형</span><select id="visitDealType"><option>매매</option><option>전세</option><option>월세</option></select></label>
-          <label class="field"><span>확인 가격(만원)</span><input id="visitPrice" inputmode="numeric" placeholder="85000"></label>
+          <label class="field"><span>확인 가격</span><input id="visitPrice" inputmode="text" placeholder="85,000만원 또는 8억 5천"></label>
           <label class="field"><span>전용면적(㎡)</span><input id="visitArea" inputmode="decimal" placeholder="84.97"></label>
           <label class="field"><span>층</span><input id="visitFloor" inputmode="numeric" placeholder="12"></label>
         </div>
@@ -873,10 +873,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./js/ui-kit.js?v=3.0.0" defer></script>
+  <script src="./js/ui-kit.js?v=3.0.1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=3.0.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=3.0.0"></script>
-  <script src="./js/navigation-v25.js?v=3.0.0" defer></script>
+  <script type="module" src="./js/app.js?v=3.0.1"></script>
+  <script type="module" src="./js/ui-shell.js?v=3.0.1"></script>
+  <script src="./js/navigation-v25.js?v=3.0.1" defer></script>
 </body>
 </html>

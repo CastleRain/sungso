@@ -29,7 +29,7 @@ export const APP_CONFIG = Object.freeze({
   apartmentHistoryEnabled: IS_LOCAL_RUNTIME,
   // UI and localhost API evolve independently. Keep appVersion as a backwards
   // compatible alias for code that still reads the API contract version.
-  uiVersion: '3.0.0',
+  uiVersion: '3.0.1',
   localApiContractVersion: '2.5.0',
   appVersion: '2.5.0',
 });

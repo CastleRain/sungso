@@ -1,4 +1,4 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=3.0.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=3.0.1';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
   clearImportedMarket, loadRecentComplexes, rememberComplex, loadComplexHistory, saveComplexHistory,
@@ -11,7 +11,7 @@ import { HomeMap } from './naver-map.js?v=2.5.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
   commuteDecision, commuteRank, haversineKm, isGeoPoint,
-} from './transport-core.mjs?v=3.0.0';
+} from './transport-core.mjs?v=3.0.1';
 import {
   evaluateCommuteBalance, expectedTransitProviderCalls, normalizeDestinations,
   quotaAwareCandidateCap,
@@ -32,8 +32,8 @@ import {
   classifyComplexFailure, describeComplexAvailability,
 } from './complex-availability-core.mjs?v=2.5.0';
 import {
-  PYEONG_TO_M2, parseRecommendationQuery, filterCatalogForRecommendation,
-} from './recommendation-core.mjs?v=3.0.0';
+  PYEONG_TO_M2, parseKoreanMoneyToManWon, parseRecommendationQuery, filterCatalogForRecommendation,
+} from './recommendation-core.mjs?v=3.0.1';
 import {
   companySearchStepMessage, decideCompanySearchNextStep,
 } from './company-search-core.mjs?v=2.5.0';
@@ -48,10 +48,10 @@ import {
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
-import { hhUI } from './ui-state.js?v=3.0.0';
+import { hhUI } from './ui-state.js?v=3.0.1';
 import {
   EVIDENCE_TIERS, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=3.0.0';
+} from './ui-format.js?v=3.0.1';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -117,6 +117,7 @@ const state = {
   companyPickerMapReady: false,
   companyPickerSelection: null,
   recommendationMapReady: false,
+  recommendationMapInitFailed: false,
   recommendationCatalogPreview: [],
   recommendationCatalogPreviewReady: false,
   recommendationCommuteEnriched: false,
@@ -267,6 +268,10 @@ function setTablerIcon(container, name) {
 function numberValue(value) {
   const parsed = Number(String(value || '').replace(/[^\d.-]/g, ''));
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function moneyValueManWon(value) {
+  return parseKoreanMoneyToManWon(value) ?? 0;
 }
 
 function versionIsOlder(current, required) {
@@ -605,8 +610,8 @@ function getMapFilters() {
     dealType,
     area,
     district: $('#filterDistrict').value,
-    minPrice: numberValue($('#filterPriceMin').value),
-    maxPrice: numberValue($('#filterPriceMax').value),
+    minPrice: moneyValueManWon($('#filterPriceMin').value),
+    maxPrice: moneyValueManWon($('#filterPriceMax').value),
     statuses,
     both: $('#visitedByBoth').checked,
   };
@@ -1880,7 +1885,7 @@ function readVisitForm() {
     visitDate: $('#visitDate').value,
     address: $('#visitAddress').value.trim(),
     dealType: $('#visitDealType').value,
-    askingPrice: numberValue($('#visitPrice').value),
+    askingPrice: moneyValueManWon($('#visitPrice').value),
     areaM2: numberValue($('#visitArea').value),
     floor: numberValue($('#visitFloor').value),
     builtYear: numberValue($('#visitBuiltYear').value),
@@ -1897,6 +1902,27 @@ function readVisitForm() {
     visitedBy: [$('#visitedSungwoo').checked ? '성우' : null, $('#visitedSohee').checked ? '소희' : null].filter(Boolean),
     updatedAt: new Date().toISOString(),
   };
+}
+
+function visitNumberError() {
+  const priceRaw = $('#visitPrice').value.trim();
+  if (priceRaw && parseKoreanMoneyToManWon(priceRaw) === null) return '확인 가격은 “85,000만원” 또는 “8억 5천만원”처럼 입력해주세요.';
+  const rules = [
+    ['visitArea', '전용면적', 0.1, 1000, false],
+    ['visitFloor', '층', -20, 200, true],
+    ['visitBuiltYear', '준공연도', 1900, new Date().getFullYear() + 10, true],
+    ['visitHouseholds', '세대수', 0, 100000, true],
+    ['visitWalkMinutes', '역 도보 시간', 0, 600, true],
+  ];
+  for (const [id, label, minimum, maximum, integer] of rules) {
+    const raw = $(`#${id}`).value.trim().replace(/,/g, '');
+    if (!raw) continue;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < minimum || value > maximum || (integer && !Number.isInteger(value))) {
+      return `${label} 입력값을 확인해주세요${integer ? ' · 정수로 입력합니다' : ''}.`;
+    }
+  }
+  return '';
 }
 
 function openVisitModal(visit = null, coords = null, address = '', isDraft = false) {
@@ -2002,6 +2028,8 @@ function persistVisits() {
 
 function saveVisitFromForm(event) {
   event.preventDefault();
+  const numericError = visitNumberError();
+  if (numericError) return showToast(numericError, 'error');
   const visit = readVisitForm();
   if (!visit.name || !visit.visitDate || !visit.address) return showToast('단지명·방문일·주소는 꼭 입력해주세요.', 'error');
   if (!visit.lat || !visit.lng) return showToast('주소로 위치를 찾거나 지도에서 위치를 찍어주세요.', 'error');
@@ -3886,7 +3914,8 @@ function readRecommendationForm() {
   if ($('#recommendSeoul').checked) regions.push('seoul');
   if ($('#recommendGyeonggi').checked) regions.push('gyeonggi');
   const commuteModes = commuteMode === 'both' ? ['car', 'transit'] : [commuteMode];
-  const commuteMaxMinutes = Math.max(0, Number($('#recommendCommuteMax').value) || 0);
+  const commuteMaxMinutes = boundedNumber($('#recommendCommuteMax').value, 0, 180, { integer: true });
+  const maxAgeYears = boundedNumber($('#recommendMaxAge').value, 0, 80, { integer: true });
   const commuteDepartureTime = /^\d{2}:\d{2}$/.test($('#recommendDepartureTime').value) ? $('#recommendDepartureTime').value : '08:00';
   const destinations = normalizeDestinations(state.workplaces.map((workplace) => ({
     ...workplace,
@@ -3898,15 +3927,15 @@ function readRecommendationForm() {
   return {
     queryText: $('#recommendQuery').value.trim(),
     regions,
-    minHouseholds: Math.max(0, Number($('#recommendHouseholds').value) || 0),
+    minHouseholds: boundedNumber($('#recommendHouseholds').value, 0, 10000, { integer: true }),
     householdsOperator: $('#recommendHouseholdsOperator').value === 'gt' ? 'gt' : 'gte',
-    maxPriceManWon: Math.max(0, Number($('#recommendMaxPrice').value) || 0) * 10000,
+    maxPriceManWon: readRecommendationPriceManWon(),
     priceOperator: $('#recommendPriceOperator').value === 'lte' ? 'lte' : 'lt',
-    minAreaM2: Math.max(0, Number($('#recommendMinArea').value) || 0) * PYEONG_TO_M2,
+    minAreaM2: boundedNumber($('#recommendMinArea').value, 0, 100) * PYEONG_TO_M2,
     areaOperator: $('#recommendAreaOperator').value === 'gt' ? 'gt' : 'gte',
     areaBasis: 'exclusive',
-    maxAgeYears: Math.max(0, Number($('#recommendMaxAge').value) || 0),
-    minBuiltYear: new Date().getFullYear() - Math.max(0, Number($('#recommendMaxAge').value) || 0),
+    maxAgeYears,
+    minBuiltYear: new Date().getFullYear() - maxAgeYears,
     stationWalkMin: Math.max(0, Number($('#recommendStationMin').value) || 0),
     stationWalkMax: Math.max(0, Number($('#recommendStationMax').value) || 0),
     destinations,
@@ -3925,7 +3954,7 @@ function writeRecommendationForm(filters = {}) {
   $('#recommendGyeonggi').checked = regions.includes('gyeonggi');
   if (Number(filters.minHouseholds) >= 0) $('#recommendHouseholds').value = filters.minHouseholds ?? 500;
   $('#recommendHouseholdsOperator').value = filters.householdsOperator === 'gte' ? 'gte' : 'gt';
-  if (Number(filters.maxPriceManWon) > 0) $('#recommendMaxPrice').value = Number(filters.maxPriceManWon) / 10000;
+  if (Number(filters.maxPriceManWon) > 0) writeRecommendationPrice(filters.maxPriceManWon);
   $('#recommendPriceOperator').value = filters.priceOperator === 'lte' ? 'lte' : 'lt';
   if (Number(filters.minAreaM2) > 0) $('#recommendMinArea').value = (Number(filters.minAreaM2) / PYEONG_TO_M2).toFixed(1).replace(/\.0$/, '');
   $('#recommendAreaOperator').value = filters.areaOperator === 'gt' ? 'gt' : 'gte';
@@ -3987,12 +4016,88 @@ function renderRecommendationChips(clauses = []) {
 }
 
 const RECOMMENDATION_RANGE_PAIRS = [
-  ['recommendMaxPrice', 'recommendMaxPriceRange'],
   ['recommendMinArea', 'recommendMinAreaRange'],
   ['recommendCommuteMax', 'recommendCommuteMaxRange'],
   ['recommendHouseholds', 'recommendHouseholdsRange'],
   ['recommendMaxAge', 'recommendMaxAgeRange'],
 ];
+
+function pricePartNumber(value) {
+  const normalized = String(value ?? '').trim();
+  if (!normalized) return 0;
+  if (/^\d+(?:,\d{3})*$/.test(normalized)) return Number(normalized.replace(/,/g, ''));
+  const parsed = parseKoreanMoneyToManWon(`0억 ${normalized.replace(/만원?$/, '')}만원`);
+  return parsed === null ? null : parsed;
+}
+
+function priceEokNumber(value) {
+  const normalized = String(value ?? '').trim().replace(/억(?:원)?$/, '').trim();
+  if (!normalized) return 0;
+  if (!/^\d+(?:,\d{3})*(?:\.\d+)?$/.test(normalized)) return null;
+  return Number(normalized.replace(/,/g, ''));
+}
+
+function boundedNumber(value, minimum, maximum, { integer = false } = {}) {
+  const parsed = Number(value);
+  const safe = Number.isFinite(parsed) ? parsed : minimum;
+  const bounded = Math.min(maximum, Math.max(minimum, safe));
+  return integer ? Math.round(bounded) : bounded;
+}
+
+function readRecommendationPriceParts() {
+  const eok = priceEokNumber($('#recommendMaxPriceEok')?.value);
+  const manWon = pricePartNumber($('#recommendMaxPriceMan')?.value);
+  const valid = eok !== null && manWon !== null;
+  return {
+    amountManWon: valid ? Math.max(0, Math.round(eok * 10000 + manWon)) : 0,
+    eokValid: eok !== null,
+    manWonValid: manWon !== null,
+    valid,
+  };
+}
+
+function readRecommendationPriceManWon() {
+  return readRecommendationPriceParts().amountManWon;
+}
+
+function updateRecommendationPriceLabel() {
+  const price = readRecommendationPriceParts();
+  const amount = price.amountManWon;
+  const eokInput = $('#recommendMaxPriceEok');
+  const manInput = $('#recommendMaxPriceMan');
+  if (eokInput) price.eokValid ? eokInput.removeAttribute('aria-invalid') : eokInput.setAttribute('aria-invalid', 'true');
+  if (manInput) price.manWonValid ? manInput.removeAttribute('aria-invalid') : manInput.setAttribute('aria-invalid', 'true');
+  const decimalEok = amount / 10000;
+  const range = $('#recommendMaxPriceRange');
+  const output = $('#recommendPriceReadable');
+  if (range && price.valid) {
+    range.value = String(Math.min(Number(range.max), Math.max(Number(range.min), decimalEok)));
+    updateRangeVisual(range);
+  }
+  if (output) {
+    const operator = $('#recommendPriceOperator')?.value === 'lte' ? '이하' : '미만';
+    output.textContent = !price.valid
+      ? '숫자 또는 3천·3천5백처럼 입력해주세요'
+      : amount ? `${formatPriceManwon(amount)} ${operator}` : '가격을 입력해주세요';
+  }
+  return amount;
+}
+
+function writeRecommendationPrice(amountManWon, { formatParts = true } = {}) {
+  const amount = Math.max(0, Math.round(Number(amountManWon) || 0));
+  const eok = Math.floor(amount / 10000);
+  const manWon = amount % 10000;
+  const eokInput = $('#recommendMaxPriceEok');
+  const manInput = $('#recommendMaxPriceMan');
+  if (eokInput) eokInput.value = formatParts ? eok.toLocaleString('ko-KR') : String(eok);
+  if (manInput) manInput.value = formatParts ? manWon.toLocaleString('ko-KR') : String(manWon);
+  updateRecommendationPriceLabel();
+}
+
+function normalizeRecommendationPriceParts() {
+  if (!readRecommendationPriceParts().valid) return updateRecommendationPriceLabel();
+  writeRecommendationPrice(readRecommendationPriceManWon());
+}
 
 function updateRangeVisual(range) {
   if (!range) return;
@@ -4003,6 +4108,7 @@ function updateRangeVisual(range) {
 }
 
 function syncRecommendationRanges() {
+  updateRecommendationPriceLabel();
   RECOMMENDATION_RANGE_PAIRS.forEach(([numberId, rangeId]) => {
     const number = $(`#${numberId}`);
     const range = $(`#${rangeId}`);
@@ -4016,6 +4122,17 @@ function syncRecommendationRanges() {
 }
 
 function bindRecommendationRanges() {
+  const priceRange = $('#recommendMaxPriceRange');
+  const priceInputs = [$('#recommendMaxPriceEok'), $('#recommendMaxPriceMan')].filter(Boolean);
+  priceRange?.addEventListener('input', () => {
+    writeRecommendationPrice(Math.round(Number(priceRange.value) * 10000));
+    handleRecommendationCriteriaChanged();
+  });
+  priceInputs.forEach((input) => {
+    input.addEventListener('input', () => updateRecommendationPriceLabel());
+    input.addEventListener('blur', normalizeRecommendationPriceParts);
+  });
+  updateRecommendationPriceLabel();
   RECOMMENDATION_RANGE_PAIRS.forEach(([numberId, rangeId]) => {
     const number = $(`#${numberId}`);
     const range = $(`#${rangeId}`);
@@ -4029,6 +4146,16 @@ function bindRecommendationRanges() {
       const value = Number(number.value);
       if (Number.isFinite(value)) range.value = String(Math.min(Number(range.max), Math.max(Number(range.min), value)));
       updateRangeVisual(range);
+    });
+    number.addEventListener('blur', () => {
+      const step = Number(number.step);
+      const value = boundedNumber(number.value, Number(number.min) || 0, Number(number.max) || Number.MAX_SAFE_INTEGER, {
+        integer: Number.isFinite(step) && step >= 1,
+      });
+      number.value = String(value);
+      range.value = String(value);
+      updateRangeVisual(range);
+      handleRecommendationCriteriaChanged();
     });
     updateRangeVisual(range);
   });
@@ -4079,7 +4206,7 @@ function recommendationChipLabels(filters) {
   const labels = [];
   labels.push({ label: filters.regions.map((item) => item === 'seoul' ? '서울' : '경기').join(' · ') || '지역 선택 필요' });
   labels.push({ label: `${Number(filters.minHouseholds).toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}` });
-  labels.push({ label: `${(filters.maxPriceManWon / 10000).toLocaleString('ko-KR')}억원 ${filters.priceOperator === 'lte' ? '이하' : '미만'}` });
+  labels.push({ label: `${formatPriceManwon(filters.maxPriceManWon)} ${filters.priceOperator === 'lte' ? '이하' : '미만'}` });
   labels.push({ label: `${formatAreaPair(filters.minAreaM2)} ${filters.areaOperator === 'gt' ? '초과' : '이상'}` });
   labels.push({ label: `${filters.maxAgeYears}년 이내` });
   if (filters.commuteMaxMinutes) labels.push({ label: `목적지 ${filters.destinations?.length || 0}곳 · 각 ${filters.commuteMaxMinutes}분 이하`, needsConfirmation: true });
@@ -4088,12 +4215,11 @@ function recommendationChipLabels(filters) {
 
 function recommendationSentence(filters) {
   const region = filters.regions.map((item) => item === 'seoul' ? '서울' : '경기').join('·') || '서울·경기';
-  const priceEok = Number(filters.maxPriceManWon || 0) / 10000;
   const areaPyeong = Number(filters.minAreaM2 || 0) / PYEONG_TO_M2;
   const commuteMode = filters.commuteModes.includes('car') && filters.commuteModes.includes('transit')
     ? '자동차 또는 대중교통'
     : filters.commuteModes.includes('transit') ? '버스·지하철' : '자동차';
-  return `${region}에서 ${Number(filters.minHouseholds || 0).toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}, 회사까지 ${commuteMode} ${filters.commuteMaxMinutes}분 이하, ${priceEok.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}억 ${filters.priceOperator === 'lte' ? '이하' : '미만'}, 전용 ${areaPyeong.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}평 ${filters.areaOperator === 'gt' ? '초과' : '이상'}, ${filters.maxAgeYears}년 이내 아파트`;
+  return `${region}에서 ${Number(filters.minHouseholds || 0).toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}, 회사까지 ${commuteMode} ${filters.commuteMaxMinutes}분 이하, ${formatPriceManwon(filters.maxPriceManWon)} ${filters.priceOperator === 'lte' ? '이하' : '미만'}, 전용 ${areaPyeong.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}평 ${filters.areaOperator === 'gt' ? '초과' : '이상'}, ${filters.maxAgeYears}년 이내 아파트`;
 }
 
 async function updateRecommendationPreview() {
@@ -4114,6 +4240,8 @@ async function updateRecommendationPreview() {
 
 function scheduleRecommendationPreview() {
   window.clearTimeout(recommendationPreviewTimer);
+  updateRecommendationPriceLabel();
+  if (!readRecommendationPriceParts().valid) return;
   const filters = readRecommendationForm();
   $('#recommendQuery').value = recommendationSentence(filters);
   renderRecommendationActiveFilters(filters);
@@ -4931,6 +5059,8 @@ async function ensureRecommendationMap() {
   }
   const container = $('#recommendationMap');
   if (!container || container.offsetParent === null) return null;
+  const retryingAfterFailure = state.recommendationMapInitFailed;
+  state.recommendationMapInitFailed = false;
   try {
     await recommendationMap.init(container, {
       cluster: true,
@@ -4960,15 +5090,31 @@ async function ensureRecommendationMap() {
       },
     });
     state.recommendationMapReady = true;
+    if (retryingAfterFailure) hideRecommendationMapStatus({ preserveMapError: false });
     return recommendationMap;
   } catch (_) {
-    const status = $('#recommendationMapStatus');
-    if (status) {
-      $('strong', status).textContent = '추천 지도를 불러오지 못했어요';
-      $('small', status).textContent = '네이버 지도 연결 상태를 확인해주세요.';
-    }
+    state.recommendationMapInitFailed = true;
+    showRecommendationMapError();
     return null;
   }
+}
+
+function showRecommendationMapError() {
+  const status = $('#recommendationMapStatus');
+  if (!status) return;
+  status.hidden = false;
+  $('strong', status).textContent = '추천 지도를 불러오지 못했어요';
+  $('small', status).textContent = '네이버 지도 연결 상태를 확인해주세요.';
+}
+
+function hideRecommendationMapStatus({ preserveMapError = true } = {}) {
+  const status = $('#recommendationMapStatus');
+  if (!status) return;
+  if (preserveMapError && state.recommendationMapInitFailed) {
+    showRecommendationMapError();
+    return;
+  }
+  status.hidden = true;
 }
 
 async function mapPool(items, concurrency, worker, onProgress = null) {
@@ -5267,6 +5413,7 @@ async function verifyTopRecommendationCommutes() {
     state.commuteVerificationRunning = false;
     button.disabled = false;
     $('span', button).textContent = '상위 후보 정밀 통근';
+    hideRecommendationMapStatus();
   }
 }
 
@@ -5324,11 +5471,7 @@ async function enrichRecommendationMapAndCommute(filters, destinations = []) {
     }
     renderRecommendationResults();
     await refreshRecommendationMapLayers({ candidateOverride: [], fit: true });
-    if (status) {
-      status.hidden = false;
-      $('strong', status).textContent = `${total.toLocaleString('ko-KR')}개 후보 · 지도를 그리기엔 범위가 넓어요`;
-      $('small', status).textContent = `가격·면적·연식 또는 지역을 좁혀 ${MAX_RECOMMENDATION_MAP_CANDIDATES.toLocaleString('ko-KR')}개 이하로 만들면 전체 후보를 지도와 통근에 연결합니다.`;
-    }
+    hideRecommendationMapStatus();
     return;
   }
   const progressStep = Math.max(10, Math.ceil(total / 12));
@@ -5358,6 +5501,7 @@ async function enrichRecommendationMapAndCommute(filters, destinations = []) {
   const mapped = sortedRecommendationResults().filter(isGeoPoint);
   await refreshRecommendationMapLayers({ candidateOverride: mapped, fit: true });
   await fetchCommuteQuota();
+  hideRecommendationMapStatus();
 }
 
 function setRecommendationStatus(kind, title, message, progress = null) {
@@ -5661,6 +5805,13 @@ async function pollRecommendationJob(jobId) {
 
 async function runRecommendation() {
   if (state.recommendationRunning) return;
+  const price = readRecommendationPriceParts();
+  updateRecommendationPriceLabel();
+  if (!price.valid) {
+    setRecommendationPanel('filters');
+    return setRecommendationStatus('error', '가격 입력 형식을 확인해주세요', '억·만원 칸에는 숫자 또는 3천·3천5백 같은 금액만 입력할 수 있습니다.');
+  }
+  hideRecommendationMapStatus();
   const filters = readRecommendationForm();
   const runToken = ++recommendationRunToken;
   window.clearTimeout(state.recommendationPollTimer);
@@ -5750,6 +5901,7 @@ async function cancelRecommendation(announce = true) {
   state.recommendationRunSnapshot = null;
   $('#recommendStepPrice').classList.remove('active');
   setRecommendationStatus('', announce ? '추천 조회를 취소했어요' : '새 조건으로 다시 시작합니다', '입력한 조건은 이 기기에 그대로 저장됩니다.');
+  hideRecommendationMapStatus();
   if (jobId) fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
 }
 
@@ -6322,28 +6474,12 @@ function renderRecommendationResults(meta = null) {
     const mapped = results.filter(isGeoPoint);
     await refreshRecommendationMapLayers({ candidateOverride: mapped });
   });
-  if (commuteRequired && state.recommendationCommuteEnriched) {
-    const mapStatus = $('#recommendationMapStatus');
-    mapStatus.hidden = false;
-    const mapStatusTitle = $('strong', mapStatus);
-    const mapStatusDetail = $('small', mapStatus);
-    if (activeScope === 'matched') {
-      mapStatusTitle.textContent = `${matchedCount.toLocaleString('ko-KR')}개 모든 목적지 충족 · ${verifiedCount.toLocaleString('ko-KR')}개 후보 검증`;
-      mapStatusDetail.textContent = verifiedCount
-        ? `모든 필수 목적지가 제한 시간 안인 곳만 표시합니다. 미확인 ${pendingCount}개와 초과 ${excludedCount}개는 결과 범위에서 따로 볼 수 있습니다.`
-        : '경로 키가 없어 기본 지도는 비어 있습니다. “경로 미확인만” 또는 “가격조건 전체”로 바꾸면 참고 후보를 볼 수 있습니다.';
-    } else if (activeScope === 'pending') {
-      mapStatusTitle.textContent = `${pendingCount.toLocaleString('ko-KR')}개 경로 미확인 · 충족 판정 아님`;
-      mapStatusDetail.textContent = '가중·최악 직선거리는 실제 이동시간이 아닙니다. 정밀 통근 버튼을 누른 후보만 판정합니다.';
-    } else {
-      mapStatusTitle.textContent = `${rawResults.length.toLocaleString('ko-KR')}개 가격조건 전체 · 모든 목적지 충족 ${matchedCount.toLocaleString('ko-KR')}개`;
-      mapStatusDetail.textContent = `초록만 실제 시간 충족입니다. 노랑 ${pendingCount}개는 미확인, 빨강 ${excludedCount}개는 시간 초과입니다.`;
-    }
-  }
+  if (commuteRequired && state.recommendationCommuteEnriched) hideRecommendationMapStatus();
 }
 
 function resetRecommendationForm() {
   if (state.recommendationRunning) void cancelRecommendation(false);
+  hideRecommendationMapStatus();
   companyGeocodeToken += 1;
   state.recommendationGeocodeToken += 1;
   state.recommendationResults = [];
@@ -6599,7 +6735,7 @@ function bindEvents() {
   });
   [
     'recommendSeoul', 'recommendGyeonggi', 'recommendHouseholds', 'recommendHouseholdsOperator',
-    'recommendMaxPrice', 'recommendPriceOperator', 'recommendMinArea', 'recommendAreaOperator', 'recommendMaxAge', 'recommendStationMin',
+    'recommendMaxPriceEok', 'recommendMaxPriceMan', 'recommendPriceOperator', 'recommendMinArea', 'recommendAreaOperator', 'recommendMaxAge', 'recommendStationMin',
     'recommendStationMax', 'recommendCommuteMode', 'recommendCommuteMax', 'recommendDepartureTime', 'recommendMonths',
   ].forEach((id) => $(`#${id}`).addEventListener(['SELECT', 'INPUT'].includes($(`#${id}`).tagName) ? 'input' : 'change', handleRecommendationCriteriaChanged));
   $$('[data-open-visit], #openVisitButton').forEach((button) => button.addEventListener('click', () => openVisitModal()));
