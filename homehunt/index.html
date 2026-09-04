@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f4c3a">
+  <title>우리집 레이더 · 성우 &amp; 소희</title>
+  <meta name="description" content="직접 본 아파트를 지도에 기록하고 국토부 실거래 흐름을 비교하는 둘만의 집 찾기 공간">
+  <meta property="og:title" content="우리집 레이더">
+  <meta property="og:description" content="보고 · 비교하고 · 결정하는 둘만의 집 찾기">
+  <meta property="og:image" content="https://castlerain.github.io/sungso/homehunt/assets/og-homehunt.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="우리집 레이더">
+  <meta name="twitter:description" content="보고 · 비교하고 · 결정하는 둘만의 집 찾기">
+  <meta name="twitter:image" content="https://castlerain.github.io/sungso/homehunt/assets/og-homehunt.png">
+  <script>
+  (function () {
+    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') return;
+    var key = 'sungso_pin_auth', maxAge = 30 * 24 * 60 * 60 * 1000;
+    try {
+      var saved = JSON.parse(localStorage.getItem(key) || 'null');
+      if (saved && Date.now() - saved.ts < maxAge) return;
+    } catch (_) {}
+    var target = location.pathname + location.search + location.hash;
+    location.replace('../?return=' + encodeURIComponent(target));
+  })();
+  </script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
+</head>
+<body class="hh-app" data-ui-library="tabler">
+  <header class="portal-header">
+    <a class="portal-brand" href="../" aria-label="sungso 홈으로 돌아가기">
+      <span class="brand-symbol" aria-hidden="true"><i class="ti ti-home-search"></i><span></span></span>
+      <span class="brand-copy"><strong>우리집 레이더</strong><small>성우와 소희의 아파트 탐색</small></span>
+    </a>
+
+    <nav class="portal-nav" aria-label="부동산 프로젝트 메뉴">
+      <button class="portal-nav-item active" type="button" data-view-target="recommend" aria-current="page"><i class="ti ti-adjustments-search" aria-hidden="true"></i><span>집 찾기</span></button>
+      <button class="portal-nav-item" id="recordsPrimaryNav" type="button" data-view-target="visits" data-nav-group="records"><i class="ti ti-notebook" aria-hidden="true"></i><span>내 기록</span></button>
+      <button class="portal-nav-item" type="button" data-view-target="market"><i class="ti ti-chart-line" aria-hidden="true"></i><span>실거래</span></button>
+      <button class="portal-nav-item supply-nav-item" type="button" data-view-target="supply"><i class="ti ti-building-community" aria-hidden="true"></i><span>분양·청약</span><em id="supplyNavBadge" hidden>0</em></button>
+      <button class="portal-nav-item secondary-nav-item" type="button" data-view-target="guide"><i class="ti ti-help-circle" aria-hidden="true"></i><span>사용 안내</span></button>
+      <button class="portal-nav-item secondary-nav-item" id="connectionsPrimaryNav" type="button" data-view-target="connections"><i class="ti ti-plug-connected" aria-hidden="true"></i><span>연결 상태</span><em class="v25-connection-indicator waiting" aria-hidden="true"></em></button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="header-guide-button" id="openGuide" type="button" data-view-target="guide" aria-label="사용 안내 보기"><i class="ti ti-help-circle" aria-hidden="true"></i><span class="mobile-action-label">안내</span></button>
+      <button class="connection-pill" id="mapConnectionPill" type="button" data-view-target="connections" aria-label="연결 상태 보기">
+        <span class="connection-dot waiting"></span><i class="ti ti-cloud-data-connection" aria-hidden="true"></i><span class="mobile-action-label" aria-hidden="true">연결</span><span class="connection-status-copy">지도 확인 중</span>
+      </button>
+      <button class="record-btn" id="openVisitButton" type="button" aria-label="집 기록하기"><i class="ti ti-plus" aria-hidden="true"></i><span>집 기록하기</span></button>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <section class="app-view map-view" id="view-map" data-view="map" hidden>
+      <div class="property-workspace map-first-shell">
+        <aside class="filter-panel filter-drawer" id="mapFilterPanel" aria-label="아파트 검색 조건" aria-hidden="true">
+          <div class="filter-title-row">
+            <div><p>RECORD FILTER</p><h1>내 기록 필터</h1><small>방문한 집과 후보</small></div>
+            <div class="filter-title-actions"><button class="reset-filter" id="resetFilters" type="button"><i class="ti ti-refresh" aria-hidden="true"></i>초기화</button><button class="mobile-filter-close" id="closeMobileFilters" type="button" aria-label="검색 조건 닫기"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+          </div>
+
+          <div class="filter-section">
+            <span class="filter-label">거래 유형</span>
+            <div class="choice-row" role="group" aria-label="거래 유형">
+              <button class="choice-chip active" type="button" data-filter-deal="매매">매매</button>
+              <button class="choice-chip" type="button" data-filter-deal="전세">전세</button>
+              <button class="choice-chip" type="button" data-filter-deal="월세">월세</button>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <label class="filter-label" for="filterDistrict">지역</label>
+            <input class="portal-select portal-search-input" id="filterDistrict" list="districtSuggestions" autocomplete="off" placeholder="전체 지역 · 예: 안양, 송파">
+            <datalist id="districtSuggestions"></datalist>
+          </div>
+
+          <div class="filter-section">
+            <span class="filter-label">가격</span>
+            <div class="range-inputs">
+              <label><span>최소</span><input id="filterPriceMin" inputmode="numeric" placeholder="0"><em>만원</em></label>
+              <i>–</i>
+              <label><span>최대</span><input id="filterPriceMax" inputmode="numeric" placeholder="제한 없음"><em>만원</em></label>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <span class="filter-label">전용면적</span>
+            <div class="stacked-choices" role="group" aria-label="전용면적">
+              <button class="choice-chip active" type="button" data-filter-area="all">전체</button>
+              <button class="choice-chip" type="button" data-filter-area="lt60">60㎡ 미만</button>
+              <button class="choice-chip" type="button" data-filter-area="60_85">60–85㎡</button>
+              <button class="choice-chip" type="button" data-filter-area="gte85">85㎡ 이상</button>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <span class="filter-label">판단 상태</span>
+            <div class="status-filter-list">
+              <label><input type="checkbox" value="관심" data-status-filter checked><span class="status-swatch interested"></span> 관심</label>
+              <label><input type="checkbox" value="재방문" data-status-filter checked><span class="status-swatch revisit"></span> 재방문</label>
+              <label><input type="checkbox" value="보류" data-status-filter checked><span class="status-swatch hold"></span> 보류</label>
+              <label><input type="checkbox" value="제외" data-status-filter><span class="status-swatch rejected"></span> 제외</label>
+            </div>
+          </div>
+
+          <div class="filter-section check-filter">
+            <label><input type="checkbox" id="visitedByBoth"><span></span> 둘이 함께 본 집만</label>
+          </div>
+
+          <div class="filter-footnote">
+            <strong>지도는 네이버 Maps</strong>
+            <p>매물 정보는 자동 수집하지 않으며, 직접 본 집과 공식 실거래만 다룹니다.</p>
+          </div>
+        </aside>
+        <button class="mobile-filter-backdrop" id="mobileFilterBackdrop" type="button" aria-label="검색 조건 닫기" hidden></button>
+
+        <section class="map-stage" aria-label="내 기록 지도 탐색">
+          <nav class="records-view-switcher records-view-switcher-map" aria-label="내 기록 보기 방식">
+            <button class="is-active" id="recordTabMap" type="button" data-view-target="map" data-record-mode="map" aria-pressed="true"><i class="ti ti-map-2" aria-hidden="true"></i><span>지도 보기</span></button>
+            <button id="recordTabList" type="button" data-view-target="visits" data-record-mode="list" aria-pressed="false"><i class="ti ti-list-details" aria-hidden="true"></i><span>목록 보기</span></button>
+            <button id="recordTabCompare" type="button" data-record-mode="compare" data-records-compare aria-haspopup="dialog" aria-controls="compareModal" aria-pressed="false"><i class="ti ti-columns-3" aria-hidden="true"></i><span>후보 비교</span></button>
+          </nav>
+          <div class="map-toolbar">
+            <form class="map-search" id="mapSearchForm">
+              <label class="sr-only" for="mapSearchInput">주소 또는 단지명 검색</label>
+              <i class="ti ti-search" aria-hidden="true"></i>
+              <input id="mapSearchInput" autocomplete="off" placeholder="주소·지역·단지명 자유 검색 (예: 안양 래미안)">
+              <button type="submit" aria-label="지도에서 검색"><i class="ti ti-arrow-right" aria-hidden="true"></i><span>검색</span></button>
+            </form>
+            <button class="map-tool-btn" id="moveCurrentLocation" type="button" title="현재 위치"><i class="ti ti-current-location" aria-hidden="true"></i><span>내 위치</span></button>
+            <button class="map-tool-btn mobile-filter-toggle" id="toggleMobileFilters" type="button" aria-controls="mapFilterPanel" aria-expanded="false" title="검색 조건"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>조건</span></button>
+            <div class="map-active-filter-chips" id="mapActiveFilterChips" aria-label="현재 방문 지도 조건"></div>
+            <button class="map-tool-btn map-results-toggle" id="toggleMapResults" type="button" aria-controls="mapResultPanel" aria-expanded="false" title="검색 결과"><i class="ti ti-list-details" aria-hidden="true"></i><span>결과</span><strong id="mapResultToggleCount">0</strong></button>
+          </div>
+          <div class="map-search-results" id="mapSearchResults" aria-live="polite"></div>
+          <div id="homeMap" aria-label="방문한 아파트와 후보 위치가 표시된 네이버 지도"></div>
+          <div class="map-status-card" id="mapStatusCard">
+            <span class="status-icon">N</span>
+            <div><strong>네이버 지도 연결 중</strong><small>Dynamic Map 인증을 확인하고 있어요.</small></div>
+          </div>
+          <button class="center-record-btn" id="recordMapCenter" type="button"><i class="ti ti-map-pin-plus" aria-hidden="true"></i><span>이 위치에 집 기록</span></button>
+          <div class="pin-mode-banner" id="pinModeBanner" hidden><i class="ti ti-map-pin" aria-hidden="true"></i><strong>지도에서 집 위치를 클릭하세요</strong><button type="button" id="cancelPinMode">취소</button></div>
+        </section>
+
+        <aside class="result-panel results-sheet" id="mapResultPanel" aria-label="방문 기록 목록" aria-hidden="true">
+          <div class="result-head">
+            <div><span>우리 기록</span><h2><strong id="resultCount">0</strong>개의 아파트</h2></div>
+            <div class="result-head-actions">
+              <button id="toggleResultSort" type="button"><i class="ti ti-arrows-sort" aria-hidden="true"></i><span>최근 방문순</span></button>
+              <button class="sheet-close-button" id="closeMapResults" type="button" aria-label="검색 결과 닫기"><i class="ti ti-x" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="property-list" id="propertyList"></div>
+          <div class="result-empty" id="propertyEmpty" hidden>
+            <div class="empty-house" aria-hidden="true"><i class="ti ti-home-search"></i></div>
+            <strong>조건에 맞는 기록이 없어요</strong>
+            <p>필터를 바꾸거나 다녀온 집을 새로 기록해보세요.</p>
+            <button type="button" data-open-visit>집 기록하기</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="app-view recommendation-view active" id="view-recommend" data-view="recommend">
+      <div class="page-wrap wide recommendation-page map-first-shell">
+        <div class="page-title-row recommendation-title-row compact-title-row">
+          <div><p class="page-eyebrow">BALANCED HOME MATCH</p><h1>여러 회사 사이, 우리 집 찾기</h1><span>최대 4개 목적지의 실제 통근과 예산 안의 아파트를 한 화면에서 비교합니다.</span></div>
+          <div class="recommendation-scope-badge"><i class="ti ti-building-community" aria-hidden="true"></i><span>공식 단지</span><strong>17,851</strong><small>서울 · 경기</small></div>
+        </div>
+
+        <div class="recommendation-map-toolbar map-toolbar" aria-label="맞춤 집 찾기 도구">
+          <button class="map-tool-btn recommendation-filter-toggle" id="toggleRecommendationFilters" type="button" aria-controls="recommendationFilterPanel" aria-expanded="false"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>조건</span></button>
+          <div class="recommendation-active-filters" id="recommendationActiveFilters" aria-label="현재 맞춤 조건"></div>
+          <button class="record-btn recommendation-submit" id="runRecommendation" type="button"><i class="ti ti-map-search" aria-hidden="true"></i><span>이 조건으로 찾기</span></button>
+          <button class="map-tool-btn recommendation-results-toggle" id="toggleRecommendationResults" type="button" aria-controls="recommendationResultPanel" aria-expanded="false"><i class="ti ti-list-details" aria-hidden="true"></i><span>후보</span><strong id="recommendationToolbarCount">0</strong></button>
+        </div>
+        <button class="recommendation-panel-backdrop" id="recommendationPanelBackdrop" type="button" aria-label="열린 패널 닫기" hidden></button>
+
+        <section class="recommendation-composer recommendation-command-deck filter-drawer" id="recommendationFilterPanel" aria-labelledby="recommendComposerTitle" aria-hidden="true">
+          <div class="filter-drawer-head"><div><span>SEARCH CONDITION</span><strong>우리 조건 설정</strong></div><button class="sheet-close-button" id="closeRecommendationFilters" type="button" aria-label="조건 닫기"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+          <div class="recommendation-command-row compact-command-row">
+            <details class="recommendation-natural-language">
+              <summary id="recommendComposerTitle"><i class="ti ti-message-dots" aria-hidden="true"></i><span>문장으로 조건 불러오기</span><small>선택 기능</small></summary>
+              <div class="recommendation-prompt-box">
+                <label class="sr-only" for="recommendQuery">원하는 집 조건</label>
+                <textarea id="recommendQuery" rows="2">서울·경기에서 500세대가 넘고, 회사까지 대중교통으로 1시간 안, 6억 미만, 전용 20평 이상, 20년 이내 아파트</textarea>
+                <button class="outline-btn" id="parseRecommendation" type="button"><i class="ti ti-wand" aria-hidden="true"></i><span>조건 적용</span></button>
+              </div>
+            </details>
+          </div>
+
+          <div class="recommendation-primary-grid">
+            <div class="recommendation-field company-field primary-company"><div class="workplace-field-head"><span>출근 목적지 <em>최대 4곳 · 이 기기에만 저장</em></span><button class="outline-btn add-workplace-btn" id="confirmCompanyLocation" type="button" aria-haspopup="dialog" aria-controls="companyLocationModal"><i class="ti ti-plus" aria-hidden="true"></i><span>목적지 추가</span></button></div><div class="workplace-list" id="workplaceList" aria-label="저장한 출근 목적지"></div><input id="recommendCompany" type="hidden"><small id="recommendCompanyStatus" role="status" aria-live="polite">회사·학교 등 실제 목적지를 먼저 추가하세요.</small></div>
+            <div class="recommendation-field"><label for="recommendMaxPrice">최대 실거래가</label><div class="input-with-select compact-operator"><input id="recommendMaxPrice" type="number" min="0" step="0.1" value="6"><select id="recommendPriceOperator" aria-label="최대 가격 포함 방식"><option value="lt">억원 미만</option><option value="lte">억원 이하</option></select></div><input class="condition-range" id="recommendMaxPriceRange" type="range" min="0.5" max="50" step="0.5" value="6" aria-label="최대 실거래가 슬라이더"></div>
+            <div class="recommendation-field"><label for="recommendMinArea">최소 전용면적</label><div class="input-with-select compact-operator"><input id="recommendMinArea" type="number" min="0" step="0.1" value="20"><select id="recommendAreaOperator" aria-label="최소 전용면적 포함 방식"><option value="gte">평 이상</option><option value="gt">평 초과</option></select></div><input class="condition-range" id="recommendMinAreaRange" type="range" min="5" max="80" step="1" value="20" aria-label="최소 전용면적 평 슬라이더"><small id="recommendAreaMetric">전용 66.1㎡</small></div>
+            <label class="recommendation-field"><span>기본 출근 방법</span><select id="recommendCommuteMode"><option value="transit" selected>버스·지하철</option><option value="car">자동차</option><option value="both">둘 중 빠른 경로</option></select></label>
+            <label class="recommendation-field"><span>최대 출근 시간</span><div class="input-unit"><input id="recommendCommuteMax" type="number" min="0" value="60"><em>분 미만</em></div><input class="condition-range" id="recommendCommuteMaxRange" type="range" min="10" max="180" step="5" value="60" aria-label="최대 출근 시간 슬라이더"></label>
+          </div>
+
+          <details class="recommendation-details">
+            <summary><span><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> 상세 조건 · 데이터 판정 근거</span><small>지역, 세대수, 연식, 실거래 기간, 출발 시각</small></summary>
+            <div class="recommendation-form-grid secondary-fields">
+              <fieldset class="recommendation-field region-fieldset"><legend>대상 지역</legend><div class="recommendation-checks"><label><input id="recommendSeoul" type="checkbox" checked> 서울</label><label><input id="recommendGyeonggi" type="checkbox" checked> 경기</label></div></fieldset>
+              <div class="recommendation-field"><label for="recommendHouseholds">최소 세대수</label><div class="input-with-select"><input id="recommendHouseholds" type="number" min="0" step="100" value="500"><select id="recommendHouseholdsOperator" aria-label="최소 세대수 포함 방식"><option value="gt" selected>초과</option><option value="gte">이상</option></select></div><input class="condition-range" id="recommendHouseholdsRange" type="range" min="0" max="5000" step="100" value="500" aria-label="최소 세대수 슬라이더"></div>
+              <label class="recommendation-field"><span>준공 후 최대</span><div class="input-unit"><input id="recommendMaxAge" type="number" min="0" max="80" value="20"><em>년 이내</em></div><input class="condition-range" id="recommendMaxAgeRange" type="range" min="0" max="60" step="1" value="20" aria-label="준공 후 최대 연수 슬라이더"></label>
+              <div class="recommendation-field route-quality-field"><span>대중교통 접근성 <em>실제 경로</em></span><strong>집→회사 전체 도보·환승 포함</strong><small>반경이나 역 직선거리로 합격을 추측하지 않습니다.</small><input id="recommendStationMin" type="hidden" value="0"><input id="recommendStationMax" type="hidden" value="0"></div>
+              <label class="recommendation-field"><span>실거래 확인 기간</span><select id="recommendMonths"><option value="1">최근 1개월 · 빠름</option><option value="3" selected>최근 3개월 · 권장</option><option value="6">최근 6개월 · 넓게</option></select></label>
+              <label class="recommendation-field"><span>평일 출근 출발</span><input id="recommendDepartureTime" type="time" value="08:00"><small>대중교통 경로 기준 시각</small></label>
+            </div>
+            <div class="recommendation-chips" id="recommendationChips" aria-live="polite"></div>
+            <aside class="recommendation-pipeline compact-pipeline" aria-label="추천 데이터 판정 단계">
+              <ol>
+                <li class="ready" id="recommendStepCatalog"><span><i class="ti ti-buildings" aria-hidden="true"></i></span><div><strong>규모 · 연식</strong><small id="recommendCatalogCount">후보 계산 전</small></div><em>공식</em></li>
+                <li id="recommendStepPrice"><span><i class="ti ti-chart-histogram" aria-hidden="true"></i></span><div><strong>가격 · 면적</strong><small>국토부 API 대기</small></div><em>실거래</em></li>
+                <li class="needs-data" id="recommendStepCommute"><span><i class="ti ti-route" aria-hidden="true"></i></span><div><strong>다중 목적지 통근</strong><small>실제 도보·환승까지 선택 후보만 정밀 검증</small></div><em>쿼터 보호</em></li>
+              </ol>
+              <div class="recommendation-truth-note"><strong>확정</strong><p>규모·연식·전용면적·실거래</p><strong>실제 경로 뒤 확정</strong><p>모든 목적지의 시간·총 도보·환승</p></div>
+            </aside>
+            <div class="recommendation-detail-actions"><button class="outline-btn" id="resetRecommendation" type="button"><i class="ti ti-restore" aria-hidden="true"></i><span>기본 조건으로</span></button></div>
+          </details>
+          <div class="filter-drawer-footer"><button class="record-btn" id="applyRecommendationFilters" type="button"><i class="ti ti-map-search" aria-hidden="true"></i><span>이 조건으로 지도에서 찾기</span></button></div>
+        </section>
+
+        <section class="recommendation-status" id="recommendationStatus" aria-live="polite">
+          <div class="recommendation-status-copy"><span class="recommendation-status-icon"><i class="ti ti-sparkles" aria-hidden="true"></i></span><div><strong id="recommendationStatusTitle">조건을 읽고 실제 후보를 찾아보세요</strong><p id="recommendationStatusMessage">첫 전체 조회는 수십 초에서 몇 분 걸릴 수 있지만, 월별 결과를 로컬 파일에 저장해 다음 조회부터 빨라집니다.</p></div></div>
+          <div class="recommendation-progress" id="recommendationProgress" hidden><span><i id="recommendationProgressBar"></i></span><small id="recommendationProgressLabel">준비 중</small></div>
+          <button class="outline-btn" id="cancelRecommendation" type="button" hidden><i class="ti ti-x" aria-hidden="true"></i><span>조회 취소</span></button>
+        </section>
+
+        <section class="recommendation-results-section map-first-shell" id="recommendationResultsSection">
+          <div class="recommendation-map-workspace map-first-shell">
+            <div class="recommendation-map-pane">
+              <div id="recommendationMap" role="region" aria-label="필터에 맞는 서울·경기 아파트 후보 지도"></div>
+              <div class="recommendation-layer-switcher" role="group" aria-label="지도 결과 레이어">
+                <button class="is-active" id="recommendationLayerApartments" type="button" data-recommendation-layer="apartments" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-buildings" aria-hidden="true"></i><span>단지</span></button>
+                <button class="is-active" id="recommendationLayerSupply" type="button" data-recommendation-layer="supply" aria-controls="recommendationMap" aria-pressed="true" title="현재 접수·예정 공고 중 위치를 확인한 최대 24곳"><i class="ti ti-building-community" aria-hidden="true"></i><span>분양</span></button>
+                <button class="is-active" id="recommendationLayerVisits" type="button" data-recommendation-layer="visits" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-map-pin-check" aria-hidden="true"></i><span>방문</span></button>
+                <button class="is-active" id="recommendationLayerShortlist" type="button" data-recommendation-layer="shortlist" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-heart" aria-hidden="true"></i><span>관심</span></button>
+                <button class="is-active" id="recommendationLayerWorkplaces" type="button" data-recommendation-layer="workplaces" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-briefcase" aria-hidden="true"></i><span>목적지</span></button>
+              </div>
+              <div class="recommendation-map-overlay" id="recommendationMapStatus"><i class="ti ti-map-search" aria-hidden="true"></i><div><strong>조건을 정하고 지도에서 후보를 찾아보세요</strong><small>검색 전에도 목적지와 다녀온 집을 한눈에 볼 수 있어요.</small></div></div>
+              <div class="recommendation-map-legend" aria-label="지도 표시 설명"><span><i class="legend-dot cluster"></i>후보 원 숫자·가격</span><span title="검색 전에는 가격·면적 판정 전입니다"><i class="legend-dot apartment"></i>공식 단지 <small>가격·면적 조회 전</small></span><span><i class="legend-symbol visited">★</i>방문</span><span><i class="legend-symbol shortlisted">♥</i>관심</span><span title="현재 접수·예정 공고 중 위치를 확인한 최대 24곳"><i class="legend-symbol supply">⚑</i>분양 <small>접수·예정</small></span><span><i class="legend-symbol company">A–D</i>목적지</span><span><i class="legend-dot verified"></i>통근 충족</span><span><i class="legend-dot estimated"></i>경로 미확인</span><span><i class="legend-dot over-limit"></i>시간 초과</span></div>
+            </div>
+            <aside class="recommendation-list-pane results-sheet" id="recommendationResultPanel" aria-label="맞춤 후보 결과" aria-hidden="true">
+              <div class="results-sheet-head"><div><span>SEARCH RESULT</span><strong>조건에 맞는 아파트</strong></div><button class="sheet-close-button" id="closeRecommendationResults" type="button" aria-label="후보 결과 닫기"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+              <div class="recommendation-decision-bar" id="recommendationDecisionBar" aria-live="polite">
+            <article><span id="decisionCandidateLabel">예산 후보</span><strong id="decisionAffordableCount">0</strong><small id="decisionCandidateDetail">실거래·면적 확인</small></article>
+            <article><span>정밀 검증</span><strong id="decisionVerifiedCount">0</strong><small id="decisionVerifiedDetail">아직 실행 전</small></article>
+            <article><span>통근 균형</span><strong id="decisionBestBalance">—</strong><small id="decisionWorstCommute">모든 목적지를 확인해야 계산</small></article>
+            <article class="quota-card"><span>대중교통 호출</span><strong id="decisionTransitQuota">확인 중</strong><small id="decisionTransitProvider">공급자 확인 중</small></article>
+              </div>
+              <div class="recommendation-composition" id="recommendationComposition" aria-label="예산 후보 구성">
+            <section><div class="composition-head"><span>후보 지역 구성</span><small>가격 조건을 통과한 단지</small></div><div class="composition-bars" id="recommendationRegionMix"></div></section>
+            <section><div class="composition-head"><span>실거래 가격대 구성</span><small id="recommendationPriceMixBasis">후보별 선택 평형 평균가</small></div><div class="composition-bars price-bars" id="recommendationPriceMix"></div></section>
+              </div>
+              <div class="recommendation-results-head">
+              <div><span>MAP-BASED SHORTLIST</span><h2><strong id="recommendationResultCount">0</strong><span id="recommendationResultLabel">개 가격·기본조건 후보</span></h2><p id="recommendationResultSummary"></p></div>
+            <div><button class="record-btn precise-commute-btn" id="verifyTopCommutes" type="button"><i class="ti ti-route-2" aria-hidden="true"></i><span>상위 후보 정밀 통근</span></button><button class="shortlist-count" id="showRecommendationShortlist" type="button" aria-pressed="false"><i class="ti ti-heart" aria-hidden="true"></i><span class="shortlist-label">관심 후보</span> <strong id="recommendationShortlistCount">0</strong><span class="shortlist-action">보기</span></button><select class="portal-select commute-scope-select" id="recommendationCommuteScope" aria-label="통근 판정 결과 범위"><option value="all">가격조건 전체</option><option value="matched">모든 목적지 충족</option><option value="pending">경로 미확인</option></select><select class="portal-select" id="recommendationSort" aria-label="맞춤 후보 정렬"><option value="commute">통근 균형순</option><option value="price">평균가격 낮은순</option><option value="recent">최근 준공순</option><option value="households">세대수 많은순</option></select></div>
+              </div>
+              <div class="recommendation-result-grid" id="recommendationResults"></div>
+              <button class="outline-btn recommendation-load-more" id="recommendationLoadMore" type="button" hidden>후보 더 보기</button>
+              <div class="recommendation-empty" id="recommendationEmpty" hidden><span><i class="ti ti-home-search" aria-hidden="true"></i></span><strong id="recommendationEmptyTitle">실제 거래로 확인된 후보가 없어요</strong><p id="recommendationEmptyMessage">조건을 몰래 완화하지 않았습니다. 기간을 늘리거나 예산·연식 조건을 하나씩 바꿔보세요.</p></div>
+              <p class="recommendation-disclaimer">추천 가격은 국토부에 신고된 과거 매매 실거래이며 현재 판매 중인 매물 호가나 계약 가능 가격이 아닙니다. 실제 계약 전 등기·권리·대출·정비계획을 별도로 확인하세요.</p>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view visits-view" id="view-visits" data-view="visits" hidden>
+      <div class="page-wrap">
+        <nav class="records-view-switcher records-view-switcher-page" aria-label="내 기록 보기 방식">
+          <button type="button" data-view-target="map" data-record-mode="map" aria-pressed="false"><i class="ti ti-map-2" aria-hidden="true"></i><span>지도 보기</span></button>
+          <button class="is-active" type="button" data-view-target="visits" data-record-mode="list" aria-pressed="true"><i class="ti ti-list-details" aria-hidden="true"></i><span>목록 보기</span></button>
+          <button type="button" data-record-mode="compare" data-records-compare aria-haspopup="dialog" aria-controls="compareModal" aria-pressed="false"><i class="ti ti-columns-3" aria-hidden="true"></i><span>후보 비교</span></button>
+        </nav>
+        <div class="page-title-row">
+          <div><p class="page-eyebrow">OUR HOME RECORDS</p><h1>내 기록</h1><span>방문한 집을 다시 찾고, 목록과 비교표로 다음 결정을 이어가요.</span></div>
+          <div class="page-actions">
+            <button class="outline-btn compare-archive-btn" id="openCompareFromArchive" type="button"><i class="ti ti-columns-3" aria-hidden="true"></i><span>후보 비교</span> <strong id="archiveCompareCount">0</strong>/3</button>
+            <button class="outline-btn" id="exportVisits" type="button"><i class="ti ti-download" aria-hidden="true"></i><span>기록 내보내기</span></button>
+            <button class="record-btn" type="button" data-open-visit><i class="ti ti-plus" aria-hidden="true"></i><span>집 기록하기</span></button>
+          </div>
+        </div>
+
+        <div class="archive-toolbar">
+          <label class="archive-search"><i class="ti ti-search" aria-hidden="true"></i><input id="archiveSearch" placeholder="지역·단지·메모·태그 자유 검색"></label>
+          <select id="archiveStatus" class="portal-select"><option value="">모든 상태</option><option>관심</option><option>재방문</option><option>보류</option><option>제외</option></select>
+          <select id="archiveSort" class="portal-select"><option value="visit-desc">최근 방문순</option><option value="price-asc">가격 낮은순</option><option value="price-desc">가격 높은순</option><option value="area-desc">면적 넓은순</option></select>
+        </div>
+
+        <div class="archive-layout">
+          <div class="archive-table-wrap">
+            <table class="archive-table">
+              <thead><tr><th>단지</th><th>방문일</th><th>거래/가격</th><th>면적·층</th><th>현장 판단</th><th><span class="sr-only">작업</span></th></tr></thead>
+              <tbody id="archiveTableBody"></tbody>
+            </table>
+            <div class="archive-empty" id="archiveEmpty" hidden><strong>아직 저장한 집이 없어요.</strong><p>지도에서 위치를 찾고 첫 방문 기록을 남겨보세요.</p><button id="resetArchiveFilters" type="button" hidden>검색 조건 지우기</button></div>
+          </div>
+          <aside class="archive-guide">
+            <h2>현장에서 확인할 것</h2>
+            <ul>
+              <li><span>01</span><div><strong>실제 동선</strong><p>역·마트·어린이집까지 직접 걸어보기</p></div></li>
+              <li><span>02</span><div><strong>소음과 채광</strong><p>창문을 열어보고 시간대별 방향 기록</p></div></li>
+              <li><span>03</span><div><strong>공용부 상태</strong><p>주차 폭, 엘리베이터, 분리수거장 확인</p></div></li>
+              <li><span>04</span><div><strong>실거래 비교</strong><p>호가와 최근 동일 평형 거래 차이 확인</p></div></li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-view supply-view" id="view-supply" data-view="supply" hidden>
+      <div class="supply-page page-wrap wide">
+        <header class="supply-hero">
+          <div class="supply-hero-copy">
+            <p class="page-eyebrow">SEOUL · GYEONGGI NEW HOME</p>
+            <h1>서울·경기 분양·청약</h1>
+            <span>청약홈·LH·SH의 공식 공고를 한곳에서 보고, 신혼희망타운과 신혼부부 특별공급을 놓치지 않게 챙겨요.</span>
+          </div>
+          <div class="supply-hero-actions">
+            <button class="outline-btn" id="refreshSupplyFeed" type="button"><i class="ti ti-refresh" aria-hidden="true"></i><span>공고 새로고침</span></button>
+            <button class="record-btn" id="openSupplyAlertSettings" type="button" aria-haspopup="dialog" aria-controls="supplyAlertModal"><i class="ti ti-bell-plus" aria-hidden="true"></i><span>알림 설정</span></button>
+          </div>
+        </header>
+
+        <nav class="supply-quick-nav" aria-label="분양·청약 빠른 메뉴">
+          <button class="is-active" type="button" data-supply-quick="all" aria-pressed="true"><i class="ti ti-building-community" aria-hidden="true"></i><span>전체 공고</span></button>
+          <button type="button" data-open-supply-match><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>내 조건</span></button>
+          <button type="button" data-supply-quick="favorite" aria-pressed="false"><i class="ti ti-bookmark" aria-hidden="true"></i><span>관심 공고</span></button>
+          <button type="button" data-guide-anchor="guideSubscriptionProfile"><i class="ti ti-clipboard-check" aria-hidden="true"></i><span>청약 준비도</span></button>
+          <button type="button" data-open-supply-alert><i class="ti ti-bell-cog" aria-hidden="true"></i><span>알림 설정</span></button>
+        </nav>
+
+        <section class="supply-source-strip" id="supplySourceStrip" aria-live="polite">
+          <div class="supply-source-main"><span class="supply-live-dot waiting"></span><strong id="supplySourceTitle">공식 공고를 확인하고 있어요</strong><small id="supplySourceMeta">청약홈·LH·SH 연결 상태를 확인합니다.</small></div>
+          <div class="supply-source-links"><a href="https://www.applyhome.co.kr/" target="_blank" rel="noopener noreferrer">청약홈</a><a href="https://apply.lh.or.kr/lhapply/apply/sc/list.do" target="_blank" rel="noopener noreferrer">LH 청약플러스</a><a href="https://www.i-sh.co.kr/app/lay2/program/S48T561C562/www/brd/m_244/list.do?multi_itm_seq=1" target="_blank" rel="noopener noreferrer">SH 공고</a><a href="https://www.gh.or.kr/gh/announcement-of-salerental001.do?mode=list" target="_blank" rel="noopener noreferrer">GH 공고</a><a href="https://www.gh.or.kr/gh/saleslease-notification.do" target="_blank" rel="noopener noreferrer">GH 문자알림</a></div>
+        </section>
+
+        <div class="supply-summary" aria-label="분양 공고 요약">
+          <article><span class="supply-summary-icon new"><i class="ti ti-sparkles" aria-hidden="true"></i></span><div><small>새로 올라온 공고</small><strong id="supplyNewCount">0</strong><em>마지막 확인 뒤</em></div></article>
+          <article><span class="supply-summary-icon open"><i class="ti ti-calendar-check" aria-hidden="true"></i></span><div><small>지금 접수 중</small><strong id="supplyOpenCount">0</strong><em>특별·일반공급 포함</em></div></article>
+          <article><span class="supply-summary-icon soon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></span><div><small>7일 안에 시작</small><strong id="supplySoonCount">0</strong><em>접수 예정</em></div></article>
+          <article><span class="supply-summary-icon newlywed"><i class="ti ti-hearts" aria-hidden="true"></i></span><div><small>신혼 대상 확인</small><strong id="supplyNewlywedCount">0</strong><em>공식 구조화 항목 기준</em></div></article>
+        </div>
+
+        <section class="supply-command" aria-label="분양 공고 검색 조건">
+          <label class="supply-search"><i class="ti ti-search" aria-hidden="true"></i><input id="supplySearch" autocomplete="off" placeholder="단지명·지역·사업주체 검색"></label>
+          <div class="supply-filter-group" role="group" aria-label="지역">
+            <button class="active" type="button" data-supply-region="all" aria-pressed="true">서울·경기</button>
+            <button type="button" data-supply-region="서울" aria-pressed="false">서울</button>
+            <button type="button" data-supply-region="경기" aria-pressed="false">경기</button>
+          </div>
+          <label class="supply-select-label"><span class="sr-only">접수 상태</span><select id="supplyStatusFilter"><option value="active">진행 중·예정·일정 확인</option><option value="open">접수 중</option><option value="upcoming">접수 예정</option><option value="recent">최근 공고 전체</option><option value="closed">접수 마감</option></select></label>
+          <label class="supply-select-label"><span class="sr-only">공급 유형</span><select id="supplyProgramFilter"><option value="all">모든 분양 유형</option><option value="sale">일반·공공분양</option><option value="newlywed">신혼부부 물량</option><option value="newlywed-town">신혼희망타운</option><option value="remaining">잔여·임의공급</option></select></label>
+          <button class="supply-favorite-filter" id="supplyFavoriteFilter" type="button" aria-pressed="false"><i class="ti ti-bookmark" aria-hidden="true"></i><span>관심만</span></button>
+          <button class="supply-match-filter" id="openSupplyMatchSettings" type="button" aria-haspopup="dialog" aria-controls="supplyMatchModal"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>내 조건</span></button>
+        </section>
+
+        <section class="supply-match-summary" id="supplyMatchSummary" aria-live="polite">
+          <div><i class="ti ti-filter-check" aria-hidden="true"></i><span><strong>추가 조건 없음</strong><small>동네·가격·면적·공급세대 조건을 설정하면 맞는 공고만 남겨요.</small></span></div>
+          <button type="button" data-open-supply-match>조건 설정</button>
+        </section>
+
+        <div class="supply-result-head">
+          <div><strong><span id="supplyResultCount">0</span>개 공고</strong><small id="supplyResultDescription">서울·경기 접수 중·예정 공고</small></div>
+          <div><button id="markSupplySeen" type="button"><i class="ti ti-checks" aria-hidden="true"></i><span>새 공고 확인 완료</span></button><select id="supplySort" aria-label="분양 공고 정렬"><option value="deadline">마감 가까운순</option><option value="newest">새 공고순</option><option value="price">분양가 낮은순</option><option value="units">공급세대 많은순</option></select></div>
+        </div>
+
+        <div class="supply-workspace">
+          <section class="supply-feed" id="supplyFeed" aria-live="polite" aria-busy="true">
+            <div class="supply-loading" id="supplyLoading"><span><i class="ti ti-loader-2" aria-hidden="true"></i></span><strong>서울·경기 공식 공고를 모으고 있어요</strong><p>일정과 신혼부부 공급 세대를 함께 확인합니다.</p></div>
+          </section>
+          <aside class="supply-detail" id="supplyDetail" aria-label="선택한 분양 공고 상세">
+            <div class="supply-detail-empty"><span><i class="ti ti-building-community" aria-hidden="true"></i></span><strong>공고를 선택해보세요</strong><p>특별공급 일정, 주택형, 분양가와 공식 공고 링크를 한눈에 볼 수 있어요.</p></div>
+          </aside>
+        </div>
+
+        <section class="supply-coverage-note">
+          <i class="ti ti-shield-check" aria-hidden="true"></i><div><strong>‘신혼 대상’은 공식 항목이 있을 때만 확정해요.</strong><p>신혼희망타운 코드 또는 주택형별 신혼부부 배정세대가 확인된 공고만 강조합니다. 실제 신청 가능 여부는 소득·자산·무주택·거주지 요건이 달라 반드시 모집공고문을 확인하세요.</p></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view market-view" id="view-market" data-view="market" hidden>
+      <div class="page-wrap wide">
+        <div class="page-title-row market-title-row">
+          <div><p class="page-eyebrow">실거래</p><h1>아파트 가격 한눈에 보기</h1><span>검색한 단지의 실제 계약가격을 면적별 평균으로 쉽게 보여드려요.</span></div>
+        </div>
+
+        <div class="complex-search-card">
+          <div class="complex-search-copy"><span>단지 검색</span><strong>서울·경기 아파트 실거래 찾기</strong><small>지역을 몰라도 단지명만 입력하세요. 단지를 고르면 매매·전세 가격을 정확한 전용면적별로 나누고, 한 번 찾은 이력은 이 브라우저에도 저장합니다.</small></div>
+          <form id="complexSearchForm" class="complex-search-form">
+            <label class="sr-only" for="complexRegion">시군구</label>
+            <select id="complexRegion" aria-label="검색 지역"><option value="">서울·경기 전체</option></select>
+            <label class="sr-only" for="complexSearchInput">아파트 단지명 또는 지역과 단지명</label>
+            <i class="ti ti-search" aria-hidden="true"></i><input id="complexSearchInput" placeholder="단지명 또는 지역 + 단지명 (예: 래미안, 안양 레미안)" autocomplete="off" aria-controls="complexSuggestionPanel" aria-expanded="false"><button id="complexSearchSubmit" type="submit"><i class="ti ti-search" aria-hidden="true"></i><span class="complex-submit-label">검색</span></button>
+          </form>
+          <div class="complex-quick-searches" id="complexQuickSearches" aria-label="단지 검색 예시"><span>검색 예시</span><button type="button" data-complex-example="래미안">래미안</button><button type="button" data-complex-example="안양 레미안">안양 레미안</button><button type="button" data-complex-example="래미안대치팰리스">래미안대치팰리스</button></div>
+          <div class="complex-suggestion-panel" id="complexSuggestionPanel" role="listbox" aria-label="서울·경기 아파트 검색 결과" hidden></div>
+          <div class="recent-complexes" id="recentComplexes"></div>
+          <div class="related-complexes" id="relatedComplexes" hidden></div>
+          <div class="complex-search-status" id="complexSearchStatus" role="status" aria-live="polite" hidden></div>
+        </div>
+
+        <article class="data-card complex-history-card" id="complexHistoryCard" hidden>
+          <div class="data-card-head complex-history-head">
+            <div><span>선택 단지</span><h2 id="complexHistoryTitle">단지 가격</h2><p id="complexHistoryAddress"></p><span class="complex-source-badge" id="complexSourceBadge">데이터 확인 전</span></div>
+            <div class="complex-controls">
+              <select class="portal-select" id="complexDealType" aria-label="단지 거래 유형"><option value="매매">매매</option><option value="전세">전세</option></select>
+              <select class="portal-select" id="complexAreaBand" aria-label="실제 전용면적"><option value="">전용면적 선택</option></select>
+              <select class="portal-select" id="complexHistoryMonths" aria-label="단지 실거래 조회 기간"><option value="12">최근 1년</option><option value="36">최근 3년</option><option value="60" selected>최근 5년</option></select>
+            </div>
+          </div>
+          <div class="complex-history-meta" id="complexHistoryMeta">최근 3년 요청 · 빈 달은 선을 끊어 표시합니다.</div>
+          <div class="complex-loading-state" id="complexLoadingState" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <div class="complex-loading-head">
+              <span class="complex-loading-spinner" aria-hidden="true"><i class="ti ti-loader-2"></i></span>
+              <div><strong id="complexLoadingTitle">실거래를 준비하고 있어요</strong><p id="complexLoadingMessage">검색한 단지와 저장된 가격부터 확인합니다.</p></div>
+              <span class="complex-loading-percent" id="complexLoadingPercent">0%</span>
+            </div>
+            <div class="complex-loading-track" aria-hidden="true"><span id="complexLoadingBar"></span></div>
+            <ol class="complex-loading-steps" id="complexLoadingSteps" aria-label="실거래 조회 진행 단계">
+              <li data-loading-step="catalog"><i class="ti ti-building-community" aria-hidden="true"></i><span>단지 확인</span></li>
+              <li data-loading-step="cache"><i class="ti ti-database-search" aria-hidden="true"></i><span>저장 가격</span></li>
+              <li data-loading-step="remote"><i class="ti ti-cloud-download" aria-hidden="true"></i><span>국토부 조회</span></li>
+              <li data-loading-step="render"><i class="ti ti-chart-line" aria-hidden="true"></i><span>결과 정리</span></li>
+            </ol>
+            <div class="complex-loading-filter" id="complexLoadingFilterState">매매 · 전용면적은 거래 확인 후 선택 · 최근 5년</div>
+            <div class="complex-loading-skeleton" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="visit-deal-gap" id="visitDealGap" hidden></div>
+          <div class="complex-empty-state" id="complexEmptyState" hidden>
+            <span class="complex-empty-icon" id="complexEmptyIcon" aria-hidden="true"><i class="ti ti-home-search"></i></span>
+            <div class="complex-empty-copy">
+              <span id="complexEmptyEyebrow">OFFICIAL COMPLEX FOUND</span>
+              <h3 id="complexEmptyTitle">단지는 찾았어요</h3>
+              <p id="complexEmptyMessage">가격 이력을 확인하고 있습니다.</p>
+              <div class="complex-empty-facts" id="complexEmptyFacts"></div>
+              <div class="complex-empty-actions">
+                <button class="record-btn" id="complexRetrySearch" type="button"><i class="ti ti-refresh" aria-hidden="true"></i><span>다시 확인</span></button>
+                <button class="outline-btn" id="complexTryDemo" type="button"><i class="ti ti-player-play" aria-hidden="true"></i><span>필터 동작 체험</span></button>
+                <button class="text-link-btn" id="complexOpenConnections" type="button">연결 상태 보기 →</button>
+              </div>
+              <small>동작 체험은 화면 반응을 확인하는 가상 데이터이며 실제 시세로 저장되지 않습니다.</small>
+            </div>
+          </div>
+          <div class="complex-history-layout" id="complexHistoryLayout"><div class="chart-wrap"><canvas id="complexHistoryChart" role="img" aria-label="선택 단지의 월별 평균 실거래가격 추이. 거래가 없는 달은 선이 끊어집니다."></canvas></div><div class="complex-latest" id="complexLatest"></div></div>
+        </article>
+
+        <nav class="market-subnav" role="tablist" aria-label="실거래 상세 보기">
+          <button class="is-active" id="marketTabSummary" type="button" role="tab" aria-selected="true" aria-controls="marketPanelSummary" data-market-tab="summary"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><span>단지 요약</span></button>
+          <button id="marketTabTrend" type="button" role="tab" aria-selected="false" aria-controls="marketPanelTrend" data-market-tab="trend" tabindex="-1"><i class="ti ti-chart-line" aria-hidden="true"></i><span>가격 흐름</span></button>
+          <button id="marketTabForecast" type="button" role="tab" aria-selected="false" aria-controls="marketPanelForecast" data-market-tab="forecast" tabindex="-1"><i class="ti ti-sparkles" aria-hidden="true"></i><span>예측·근거</span></button>
+        </nav>
+
+        <section class="market-panel is-active" id="marketPanelSummary" role="tabpanel" aria-labelledby="marketTabSummary" data-market-panel="summary">
+          <div class="market-context-banner" id="marketContextBanner" role="status" aria-live="polite">단지를 검색하면 요약·가격 흐름·예측이 모두 같은 검색 결과로 바뀝니다.</div>
+          <div class="market-filter-bar">
+            <label class="market-region-control"><span>지역</span><select class="portal-select" id="marketRegion" aria-label="현재 집계 파일이 제공하는 지역"></select></label>
+            <label class="market-deal-control"><span>거래 유형</span><select class="portal-select" id="marketDealType"><option value="매매">매매</option><option value="전세">전세</option></select></label>
+            <label class="market-area-control"><span>전용면적</span><select class="portal-select" id="marketAreaBand"><option value="all">전체 면적</option><option value="lt40">40㎡ 미만</option><option value="40_60">40–60㎡</option><option value="60_85" selected>60–85㎡</option><option value="85_102">85–102㎡</option><option value="gte102">102㎡ 이상</option></select></label>
+            <label><span>그래프 기준</span><select class="portal-select" id="marketUnit"><option value="p33">평균 평당가격</option><option value="total">평균 거래가격</option></select></label>
+            <div class="data-source-chip" id="marketSourceChip"><span></span><strong>데이터 확인 중</strong><small id="marketUpdatedAt">—</small></div>
+          </div>
+
+          <div class="market-kpi-row">
+            <article><span>최근월 평균 거래가격</span><strong id="kpiAverageTotal">—</strong><small id="kpiAverageMonth">—</small></article>
+            <article><span>평균 평당가격</span><strong id="kpiAverageP33">—</strong><small>1평(3.3㎡) 기준</small></article>
+            <article><span>전월 대비 평균 평당가</span><strong id="kpiMom">—</strong><small id="kpiMomNote">정확한 전월 비교</small></article>
+            <article><span>최근 거래량</span><strong id="kpiCount">—</strong><small id="kpiQuality">표본 확인 중</small></article>
+          </div>
+
+          <article class="data-card transaction-card market-summary-transactions">
+            <div class="data-card-head"><div><span>실제 계약</span><h2 id="transactionTitle">최근 개별 거래</h2></div><button id="showAllTransactions" type="button">더 보기</button></div>
+            <div class="transaction-list" id="transactionList"></div>
+          </article>
+        </section>
+
+        <section class="market-panel" id="marketPanelTrend" role="tabpanel" aria-labelledby="marketTabTrend" data-market-panel="trend" hidden>
+          <div class="market-grid">
+            <article class="data-card trend-card">
+              <div class="data-card-head"><div><span>가격 변화</span><h2 id="marketTrendTitle">월별 평균 실거래가격</h2></div><div class="chart-legend"><span><i class="actual"></i>실거래</span><span><i class="provisional"></i>최근월 잠정</span></div></div>
+              <div class="chart-wrap"><canvas id="marketTrendChart"></canvas></div>
+            </article>
+            <article class="data-card region-card">
+              <div class="data-card-head"><div><span>면적 비교</span><h2 id="regionComparisonTitle">선택 단지 면적별 평균</h2></div></div>
+              <div class="region-ranking" id="regionRanking"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="market-panel" id="marketPanelForecast" role="tabpanel" aria-labelledby="marketTabForecast" data-market-panel="forecast" hidden>
+          <article class="data-card forecast-card">
+            <div class="data-card-head"><div><span>참고 예측</span><h2 id="forecastTitle">6개월 평균 평당가 참고 전망</h2></div><span class="forecast-badge">참고용</span></div>
+            <div class="forecast-layout">
+              <div class="chart-wrap forecast-chart-wrap"><canvas id="forecastChart"></canvas></div>
+              <div class="forecast-explain" id="forecastExplain"></div>
+            </div>
+            <p class="model-disclaimer">최근 평균 평당가격의 흐름을 과거 거래로 다시 시험한 참고값입니다. 아직 신고가 끝나지 않은 최근 2개월은 빼며, 단순히 현재 가격이 유지된다고 보는 것보다 잘 맞지 않거나 거래가 적으면 예상 숫자를 표시하지 않습니다.</p>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view connections-view" id="view-connections" data-view="connections" hidden>
+      <div class="page-wrap connection-page">
+        <div class="page-title-row">
+          <div><p class="page-eyebrow">DATA CONNECTIONS</p><h1>연결 상태</h1><span>지도·매물 링크·실거래·개인 기록은 역할과 보안을 분리합니다.</span></div>
+        </div>
+
+        <div class="connection-grid">
+          <article class="connection-card" id="naverMapConnectionCard">
+            <div class="connection-card-top"><span class="service-logo naver-logo">N</span><span class="service-state checking" id="naverMapState">확인 중</span></div>
+            <h2>네이버 지도</h2><p>Dynamic Map과 주소 검색을 사용합니다. 브라우저에는 Client ID만 들어가며 Secret은 사용하지 않습니다.</p>
+            <ul><li id="naverSdkCheck">SDK 로드 확인 중</li><li id="naverReverseCheck">Reverse Geocoding 확인 중</li><li id="naverDomainCheck">등록 URL 확인 중</li><li id="lawDistrictCheck">서울·경기 법정동 대조표 확인 중</li><li class="connection-warning">운영 URL: castlerain.github.io 등록 필요</li></ul>
+            <a href="https://guide.ncloud-docs.com/docs/application-maps-app-vpc" target="_blank" rel="noopener noreferrer">공식 설정 문서 열기 →</a>
+            <a href="https://www.code.go.kr/stdcode/regCodeL.do" target="_blank" rel="noopener noreferrer">법정동 원본 보기 →</a>
+          </article>
+
+          <article class="connection-card">
+            <div class="connection-card-top"><span class="service-logo land-logo"><i class="ti ti-building-skyscraper" aria-hidden="true"></i></span><span class="service-state partial">검색 연결</span></div>
+            <h2>네이버 부동산</h2><p>공식 매물 조회 API는 제공되지 않아 매물을 복제하지 않습니다. 저장한 단지명으로 네이버 부동산 검색 화면을 엽니다.</p>
+            <ul><li>선택 단지 검색 링크 제공</li><li>매물 자동 수집·스크래핑 없음</li><li>가격 분석은 국토부 실거래 사용</li></ul>
+            <a href="https://m.land.naver.com/" target="_blank" rel="noopener noreferrer">네이버 부동산 열기 →</a>
+          </article>
+
+          <article class="connection-card" id="molitConnectionCard">
+            <div class="connection-card-top"><span class="service-logo molit-logo"><i class="ti ti-database-search" aria-hidden="true"></i></span><span class="service-state checking" id="molitState">로컬 확인 중</span></div>
+            <h2>국토부 아파트 실거래</h2><p>로컬 전용 서버가 Git에서 제외된 <code>homehunt/.env</code> 또는 실행 메모리의 서비스키로 매매·전월세를 조회합니다. 공개 코드와 브라우저 저장소에는 키를 남기지 않습니다.</p>
+            <ul><li id="localMarketServerCheck">로컬 실거래 서버 확인 중</li><li id="apartmentHistoryApiCheck">단지 이력 API 상태 확인 중</li><li>서울·경기 · 실제 전용면적별 가격</li><li>월 원자료와 단지 이력을 로컬 캐시</li></ul>
+            <div class="connection-button-row"><button type="button" id="openLocalKeySetup">로컬 키 연결</button><button type="button" id="openApiGuide">배포 연결 보기</button></div>
+            <details class="connection-advanced"><summary>수동 데이터 관리</summary><div class="connection-button-row"><label class="outline-btn file-btn" for="marketCsvInput"><i class="ti ti-file-import" aria-hidden="true"></i><span>국토부 CSV 가져오기</span></label><input id="marketCsvInput" type="file" accept=".csv,text/csv" hidden><button type="button" id="refreshMarketFile"><i class="ti ti-refresh" aria-hidden="true"></i><span>배포 데이터 다시 읽기</span></button></div><small>평소 단지 검색에는 필요하지 않습니다. 별도 집계 파일을 점검할 때만 사용하세요.</small></details>
+          </article>
+
+          <article class="connection-card" id="supplyConnectionCard">
+            <div class="connection-card-top"><span class="service-logo supply-logo"><i class="ti ti-bell-ringing" aria-hidden="true"></i></span><span class="service-state checking" id="supplyConnectionState">공고 파일 확인 중</span></div>
+            <h2>서울·경기 분양 공고</h2><p>청약홈 공식 API의 아파트·잔여세대·임의공급, LH 공공분양·신혼희망타운, SH 공식 RSS의 자체 공고를 같은 형식으로 모읍니다.</p>
+            <ul><li id="supplyApplyhomeCheck">청약홈 수집 상태 확인 중</li><li id="supplyLhCheck">LH 수집 상태 확인 중</li><li id="supplyShCheck">SH 공식 RSS 상태 확인 중</li><li>GH는 자동 수집이 허용된 실시간 피드가 없어 공고판·공식 문자알림으로 보완</li><li>신혼부부 신청 자격은 공고문 원문에서 최종 확인</li></ul>
+            <div class="connection-button-row"><button type="button" data-view-target="supply">분양·청약 열기</button><a href="https://www.data.go.kr/data/15098547/openapi.do" target="_blank" rel="noopener noreferrer">청약홈 API 신청</a><a href="https://www.data.go.kr/data/15058530/openapi.do" target="_blank" rel="noopener noreferrer">LH API 신청</a></div>
+          </article>
+
+          <article class="connection-card" id="commuteConnectionCard">
+            <div class="connection-card-top"><span class="service-logo commute-logo"><i class="ti ti-route" aria-hidden="true"></i></span><span class="service-state checking" id="commuteState">확인 중</span></div>
+            <h2>회사 통근 경로</h2><p>회사와 후보 주소는 네이버 지도에서 좌표로 확인합니다. 버스·지하철은 Kakao 광역 선별 또는 TMAP 출발시각 정밀 검증, 자동차는 NAVER Directions 5를 로컬 서버에서만 호출합니다.</p>
+            <ul><li id="companyGeocodeCheck">회사 주소 좌표 확인 대기</li><li id="transitRouteCheck">TMAP 대중교통 키 확인 중</li><li id="carRouteCheck">NAVER 자동차 경로 키 확인 중</li><li>미연결 값은 1시간 조건 충족으로 표시하지 않음</li></ul>
+            <div class="connection-button-row"><button type="button" data-open-local-key>경로 키 연결</button><a href="https://transit.tmapmobility.com/docs/routes/sub" target="_blank" rel="noopener noreferrer">TMAP 문서</a></div>
+          </article>
+
+          <article class="connection-card" id="apartmentCatalogConnectionCard">
+            <div class="connection-card-top"><span class="service-logo catalog-logo"><i class="ti ti-buildings" aria-hidden="true"></i></span><span class="service-state checking" id="apartmentCatalogState">확인 중</span></div>
+            <h2>서울·경기 아파트 단지 목록</h2><p>한국부동산원 공동주택 단지정보 중 서울·경기만 정적 검색 목록으로 사용합니다. 단지명·동네명·주소로 후보를 찾습니다.</p>
+            <ul><li id="apartmentCatalogCheck">공식 단지 목록 확인 중</li><li id="apartmentCatalogPublished">공식 목록 기준일 확인 중</li><li>레미안 → 래미안 표기 보정</li><li>같은 지역·같은 브랜드 유사 단지 추천</li></ul>
+            <a href="https://www.data.go.kr/data/15106861/fileData.do" target="_blank" rel="noopener noreferrer">공식 원본 보기 →</a>
+          </article>
+
+          <article class="connection-card privacy-card">
+            <div class="connection-card-top"><span class="service-logo privacy-logo"><i class="ti ti-shield-lock" aria-hidden="true"></i></span><span class="service-state local">이 기기 저장</span></div>
+            <h2>둘만의 방문 기록</h2><p>현재는 주소·메모를 공개 Firestore에 올리지 않고 이 브라우저에만 저장합니다. 실시간 공유는 별도 비공개 Firebase가 준비되면 연결합니다.</p>
+            <ul><li>브라우저 로컬 저장</li><li>JSON 백업·복원 가능</li><li>공개 저장소에 개인 주소 없음</li></ul>
+            <div class="connection-button-row"><button type="button" id="backupVisits">백업</button><label for="restoreVisits">복원</label><input id="restoreVisits" type="file" accept="application/json,.json" hidden></div>
+          </article>
+        </div>
+
+        <div class="security-note"><strong>Client Secret은 재발급해주세요.</strong><p>첨부 이미지에 Secret이 표시되었고, 네이버 공식 문서도 노출 시 재발급을 권합니다. 이 프로젝트에는 Client Secret을 저장하거나 사용하지 않았습니다.</p></div>
+      </div>
+    </section>
+
+    <section class="app-view guide-view" id="view-guide" data-view="guide" hidden>
+      <div class="page-wrap wide guide-page">
+        <header class="guide-hero">
+          <div><p class="page-eyebrow">START HERE</p><h1>우리집 레이더 사용 안내</h1><p>처음이라면 아래 순서대로 시작하세요. 집 찾기부터 내 기록, 실거래 확인, 분양·청약까지 한 흐름으로 이어집니다.</p></div>
+          <button class="record-btn" type="button" data-view-target="recommend"><i class="ti ti-radar-2" aria-hidden="true"></i><span>집 찾기 시작</span></button>
+        </header>
+
+        <nav class="guide-jump" aria-label="사용 안내 바로가기">
+          <a href="#guideQuickStart">처음 시작</a><a href="#guideFeatures">기능 안내</a><a href="#guidePhoneAlerts">휴대폰 알림</a><a href="#guideSubscriptionProfile">청약 준비도</a>
+        </nav>
+
+        <section class="guide-section" id="guideQuickStart">
+          <div class="guide-section-head"><span>01</span><div><h2>처음에는 이렇게 써보세요</h2><p>한 번에 모든 정보를 채울 필요는 없습니다.</p></div></div>
+          <ol class="guide-steps">
+            <li><span>1</span><div><strong>회사·자주 가는 곳 등록</strong><p>집 찾기에서 목적지를 1~4곳 고르고 주당 방문 횟수를 넣습니다.</p></div><button type="button" data-view-target="recommend">집 찾기</button></li>
+            <li><span>2</span><div><strong>예산과 생활 조건으로 후보 찾기</strong><p>가격·평수·연식·세대수와 실제 자동차·대중교통 시간을 함께 확인합니다.</p></div><button type="button" data-view-target="recommend">조건 입력</button></li>
+            <li><span>3</span><div><strong>현장에서 본 집 기록</strong><p>내 기록에서 방문 지도를 열거나 상단 + 버튼으로 가격·채광·소음·메모를 남깁니다.</p></div><button type="button" data-view-target="visits">내 기록</button></li>
+            <li><span>4</span><div><strong>실제 계약가격과 분양 확인</strong><p>같은 전용면적의 실거래 흐름을 보고, 새 분양은 관심 조건만 남깁니다.</p></div><span class="guide-step-actions"><button type="button" data-view-target="market">실거래</button><button type="button" data-view-target="supply">분양</button></span></li>
+          </ol>
+        </section>
+
+        <section class="guide-section" id="guideFeatures">
+          <div class="guide-section-head"><span>02</span><div><h2>화면별로 할 수 있는 일</h2><p>각 화면은 아래 역할만 맡도록 나누었습니다.</p></div></div>
+          <div class="guide-feature-grid">
+            <article><i class="ti ti-adjustments-search" aria-hidden="true"></i><div><h3>집 찾기</h3><p>여러 목적지의 이동시간과 예산·면적·세대수·연식을 조합해 아파트 후보를 지도에서 봅니다.</p></div><button type="button" data-view-target="recommend">열기</button></article>
+            <article><i class="ti ti-notebook" aria-hidden="true"></i><div><h3>내 기록</h3><p>실제로 방문한 집만 저장하고 지도·목록을 전환합니다. 방문일·가격·면적·둘의 평가를 보고 최대 3곳을 나란히 비교합니다.</p></div><button type="button" data-view-target="visits">열기</button></article>
+            <article><i class="ti ti-chart-line" aria-hidden="true"></i><div><h3>실거래</h3><p>단지와 전용면적을 고르면 국토부 실제 계약의 평균가격과 흐름을 확인합니다. 예측은 오차 검증을 통과한 경우만 참고로 표시합니다.</p></div><button type="button" data-view-target="market">열기</button></article>
+            <article><i class="ti ti-building-community" aria-hidden="true"></i><div><h3>분양·청약</h3><p>서울·경기 청약홈·LH·SH 공고 중 신혼 관련·동네·가격·면적·세대수 조건에 맞는 공고를 보고 알림을 설정합니다.</p></div><button type="button" data-view-target="supply">열기</button></article>
+            <article><i class="ti ti-help-circle" aria-hidden="true"></i><div><h3>사용 안내</h3><p>처음 시작 순서, 화면별 역할, 휴대폰 알림과 두 사람의 청약 준비도 입력 범위를 확인합니다.</p></div><button type="button" data-view-target="guide">열기</button></article>
+            <article><i class="ti ti-plug-connected" aria-hidden="true"></i><div><h3>연결 상태</h3><p>지도·실거래·분양·회사 검색·통근 API가 실제 연결됐는지 확인하고 로컬 키를 설정합니다.</p></div><button type="button" data-view-target="connections">열기</button></article>
+          </div>
+          <div class="guide-data-note"><i class="ti ti-shield-lock" aria-hidden="true"></i><div><strong>개인 기록과 청약 프로필은 이 브라우저에만 저장됩니다.</strong><p>방문 주소나 두 사람의 입력값을 공개 GitHub·공개 Firestore에 올리지 않습니다. 실제 자격과 가격은 공식 공고문·계약 전 서류로 다시 확인하세요.</p></div></div>
+        </section>
+
+        <section class="guide-section" id="guidePhoneAlerts">
+          <div class="guide-section-head"><span>03</span><div><h2>휴대폰으로 새 분양 알림 받기</h2><p>사이트를 닫아도 받으려면 현재는 Telegram 비공개 방이 가장 간단하고 안전합니다.</p></div></div>
+          <div class="guide-alert-layout">
+            <article class="guide-alert-primary"><div class="guide-alert-title"><span><i class="ti ti-brand-telegram" aria-hidden="true"></i></span><div><small>추천 방식</small><h3>Telegram 비공개 알림</h3></div><em>iPhone · Android</em></div><ol><li><strong>BotFather</strong>에서 새 봇을 만들고 토큰을 받습니다.</li><li>두 사람만 있는 비공개 그룹에 봇을 추가하고 메시지 하나를 보냅니다.</li><li><code>getUpdates</code>로 그룹의 <code>chat_id</code>를 확인합니다.</li><li>GitHub 저장소 Settings → Secrets에 <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>를 저장합니다.</li><li>필요하면 Settings → Variables에 <code>HOMEHUNT_ALERT_DISTRICTS</code> 등 지역·가격·면적·세대수·신혼 조건을 넣습니다.</li><li>예약 수집이 조건에 맞는 새 공고·중요 변경을 찾으면 두 휴대폰 Telegram으로 보냅니다.</li></ol><p><i class="ti ti-lock" aria-hidden="true"></i> 토큰과 chat ID는 페이지·코드·대화창에 붙여 넣지 말고 GitHub Secrets에만 넣으세요. 브라우저의 ‘내 조건’은 개인 기기 저장이라 Telegram 조건과 자동 동기화되지 않습니다.</p></article>
+            <div class="guide-alert-options"><article><span><i class="ti ti-browser-check" aria-hidden="true"></i></span><div><h3>브라우저 알림</h3><p>페이지가 열려 있을 때 즉시 확인하는 보조 알림입니다. 닫힌 뒤 도착은 보장하지 않습니다.</p><button type="button" data-open-supply-alert>알림 조건 열기</button></div></article><article><span><i class="ti ti-message" aria-hidden="true"></i></span><div><h3>GH 공식 문자</h3><p>경기주택도시공사 공고는 공식 문자알림도 함께 신청하면 누락 위험을 줄일 수 있습니다.</p><a href="https://www.gh.or.kr/gh/saleslease-notification.do" target="_blank" rel="noopener noreferrer">GH 문자 신청</a></div></article><article><span><i class="ti ti-device-mobile" aria-hidden="true"></i></span><div><h3>앱처럼 푸시</h3><p>향후 Firebase 인증·FCM을 붙이면 홈 화면 웹앱 푸시로 통합할 수 있습니다. 현재 공개 DB에는 기기 토큰을 저장하지 않습니다.</p></div></article></div>
+          </div>
+        </section>
+
+        <section class="guide-section subscription-profile-section" id="guideSubscriptionProfile">
+          <div class="guide-section-head"><span>04</span><div><h2>두 사람의 청약 준비도</h2><p>민영주택 일반공급의 기본 가점과 신혼 공급의 확인 항목을 자가입력으로 정리합니다.</p></div></div>
+          <div class="subscription-scope-grid" aria-label="청약 제도별 계산 범위"><div><strong>민영 일반공급</strong><span>자가입력 기본 가점 / 84점</span></div><div><strong>신혼부부 특별공급</strong><span>자격·우선순위 확인 항목</span></div><div><strong>신혼희망타운</strong><span>공고별 30%·60% 배점표 확인</span></div></div>
+          <div class="subscription-layout">
+            <form class="subscription-form" id="subscriptionProfileForm">
+              <div class="subscription-shared-grid">
+                <label><span>현재 관계</span><select id="subscriptionRelationship"><option value="unknown">확인 전</option><option value="planning">결혼 준비 중</option><option value="engaged">예비신혼 증빙 가능</option><option value="married">혼인신고 완료</option><option value="other">그 외</option></select></label>
+                <label><span>혼인기간 <em>신고 후</em></span><input id="subscriptionMarriageYears" type="number" min="0" max="80" step="0.1" inputmode="decimal" placeholder="해당 시"></label>
+                <label><span>세대 전체 무주택</span><select id="subscriptionHomeless"><option value="unknown">확인 전</option><option value="yes">예</option><option value="no">아니요·불확실</option></select></label>
+                <label><span>과거 특별공급 당첨</span><select id="subscriptionSpecialUsed"><option value="unknown">확인 전</option><option value="no">없음</option><option value="yes">있음·불확실</option></select></label>
+                <label><span>공고 기준 소득</span><select id="subscriptionIncome"><option value="unknown">아직 계산 전</option><option value="within">기준 이내 확인</option><option value="over">기준 초과 가능</option></select></label>
+                <label><span>공고 기준 자산</span><select id="subscriptionAsset"><option value="unknown">아직 계산 전</option><option value="within">기준 이내 확인</option><option value="over">기준 초과 가능</option></select></label>
+                <label><span>자녀 수</span><input id="subscriptionChildren" type="number" min="0" max="20" inputmode="numeric" placeholder="0"></label>
+                <label><span>신생아 요건</span><select id="subscriptionNewborn"><option value="unknown">확인 전</option><option value="no">해당 없음</option><option value="yes">해당 가능</option></select></label>
+              </div>
+              <div class="subscription-people-grid">
+                <fieldset><legend>성우</legend><label><span>무주택 기간</span><div><input id="subscriptionSeongwooNoHome" type="number" min="0" max="80" step="0.1" inputmode="decimal"><em>년</em></div></label><label><span>부양가족 수</span><div><input id="subscriptionSeongwooDependents" type="number" min="0" max="20" inputmode="numeric"><em>명</em></div></label><label><span>청약통장 가입</span><div><input id="subscriptionSeongwooAccount" type="number" min="0" max="1200" inputmode="numeric"><em>개월</em></div></label><label><span>납입 횟수</span><div><input id="subscriptionSeongwooPayments" type="number" min="0" max="1200" inputmode="numeric"><em>회</em></div></label></fieldset>
+                <fieldset><legend>소희</legend><label><span>무주택 기간</span><div><input id="subscriptionSoheeNoHome" type="number" min="0" max="80" step="0.1" inputmode="decimal"><em>년</em></div></label><label><span>부양가족 수</span><div><input id="subscriptionSoheeDependents" type="number" min="0" max="20" inputmode="numeric"><em>명</em></div></label><label><span>청약통장 가입</span><div><input id="subscriptionSoheeAccount" type="number" min="0" max="1200" inputmode="numeric"><em>개월</em></div></label><label><span>납입 횟수</span><div><input id="subscriptionSoheePayments" type="number" min="0" max="1200" inputmode="numeric"><em>회</em></div></label></fieldset>
+              </div>
+              <div class="subscription-form-actions"><button class="outline-btn" id="clearSubscriptionProfile" type="button">입력 지우기</button><button class="record-btn" type="submit"><i class="ti ti-calculator" aria-hidden="true"></i><span>준비도 계산·저장</span></button></div>
+            </form>
+            <aside class="subscription-result" id="subscriptionResult" aria-live="polite"></aside>
+          </div>
+          <div class="subscription-disclaimer"><i class="ti ti-alert-triangle" aria-hidden="true"></i><p><strong>당첨 확률은 표시하지 않습니다.</strong> 공급 비율(예: 50%·30%·10%)은 개인 확률이 아니며, 실제 경쟁자·주택형별 물량·순위·동점 추첨 자료가 없기 때문입니다. 기본 가점도 본인 통장과 자가입력 3항목의 참고 계산으로, 배우자 통장 가점·법정 부양가족·무주택 기산일·공고일 당시 규칙은 모집공고와 공식 계산기에서 다시 확인하세요.</p></div>
+          <div class="subscription-source-links"><span>최종 확인</span><a href="https://www.applyhome.co.kr/" target="_blank" rel="noopener noreferrer">청약홈</a><a href="https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A3%BC%ED%83%9D%EA%B3%B5%EA%B8%89%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99" target="_blank" rel="noopener noreferrer">주택공급 규칙</a><a href="https://www.myhome.go.kr/hws/portal/cont/selectNewlywedHopeTownView.do" target="_blank" rel="noopener noreferrer">신혼희망타운 안내</a></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <aside class="compare-tray" id="compareTray" aria-label="후보 비교함" aria-live="polite" hidden>
+    <div class="compare-tray-title"><span>COMPARE LIST</span><strong>후보 비교 <em id="compareTrayCount">0</em>/3</strong></div>
+    <div class="compare-tray-chips" id="compareTrayChips"></div>
+    <div class="compare-tray-actions"><button id="clearCompare" type="button"><i class="ti ti-trash" aria-hidden="true"></i><span>비우기</span></button><button id="openCompare" type="button"><i class="ti ti-columns-3" aria-hidden="true"></i><span>나란히 비교</span></button></div>
+  </aside>
+
+  <div class="modal-backdrop" id="visitModal" hidden>
+    <section class="visit-modal" role="dialog" aria-modal="true" aria-labelledby="visitModalTitle">
+      <header class="modal-head"><div><span>PROPERTY NOTE</span><h2 id="visitModalTitle">다녀온 집 기록</h2></div><button class="modal-close" id="closeVisitModal" type="button" aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <form id="visitForm">
+        <input type="hidden" id="visitId">
+        <input type="hidden" id="visitLat">
+        <input type="hidden" id="visitLng">
+        <div class="form-grid two-col">
+          <label class="field"><span>단지명 <em>필수</em></span><input id="visitName" required placeholder="예: 헬리오시티"></label>
+          <label class="field"><span>방문일 <em>필수</em></span><input id="visitDate" type="date" required></label>
+        </div>
+        <div class="field address-field">
+          <label for="visitAddress">주소 <em>필수</em></label>
+          <div class="address-control"><input id="visitAddress" required autocomplete="off" aria-describedby="coordinateStatus" placeholder="주소 또는 단지명 (예: 안양 래미안)"><button id="geocodeVisitAddress" type="button">주소·단지 찾기</button></div>
+          <div class="visit-address-results" id="visitAddressResults" aria-live="polite" hidden></div>
+          <small id="coordinateStatus">지도에서 직접 찍어도 됩니다.</small>
+        </div>
+        <div class="form-grid four-col">
+          <label class="field"><span>거래 유형</span><select id="visitDealType"><option>매매</option><option>전세</option><option>월세</option></select></label>
+          <label class="field"><span>확인 가격(만원)</span><input id="visitPrice" inputmode="numeric" placeholder="85000"></label>
+          <label class="field"><span>전용면적(㎡)</span><input id="visitArea" inputmode="decimal" placeholder="84.97"></label>
+          <label class="field"><span>층</span><input id="visitFloor" inputmode="numeric" placeholder="12"></label>
+        </div>
+        <div class="form-grid four-col">
+          <label class="field"><span>준공연도</span><input id="visitBuiltYear" inputmode="numeric" placeholder="2018"></label>
+          <label class="field"><span>세대수</span><input id="visitHouseholds" inputmode="numeric" placeholder="9510"></label>
+          <label class="field"><span>역 도보(분)</span><input id="visitWalkMinutes" inputmode="numeric" placeholder="8"></label>
+          <label class="field"><span>현장 판단</span><select id="visitStatus"><option>관심</option><option>재방문</option><option>보류</option><option>제외</option></select></label>
+        </div>
+        <div class="form-grid two-col">
+          <fieldset class="field fieldset"><legend>누가 봤나요?</legend><div class="inline-checks"><label><input id="visitedSungwoo" type="checkbox" checked> 성우</label><label><input id="visitedSohee" type="checkbox" checked> 소희</label></div></fieldset>
+          <label class="field"><span>방향 / 동·호 메모</span><input id="visitDirection" placeholder="남향 · 105동 (호수는 최소 기록 권장)"></label>
+        </div>
+        <div class="form-grid two-col">
+          <label class="field"><span>좋았던 점</span><textarea id="visitPros" rows="3" placeholder="동선, 채광, 구조 등"></textarea></label>
+          <label class="field"><span>걱정되는 점</span><textarea id="visitCons" rows="3" placeholder="소음, 주차, 수리비 등"></textarea></label>
+        </div>
+        <label class="field"><span>현장 메모</span><textarea id="visitMemo" rows="3" placeholder="중개사 설명, 다시 볼 것, 서로의 의견을 자유롭게 기록하세요."></textarea></label>
+        <label class="field"><span>태그</span><input id="visitTags" placeholder="역세권, 대단지, 올수리 (쉼표로 구분)"></label>
+        <div class="modal-actions"><button class="danger-text-btn" id="deleteVisit" type="button" hidden><i class="ti ti-trash" aria-hidden="true"></i><span>이 기록 삭제</span></button><span></span><button class="outline-btn" id="pickVisitOnMap" type="button"><i class="ti ti-map-pin" aria-hidden="true"></i><span>지도에서 위치 찍기</span></button><button class="record-btn" type="submit"><i class="ti ti-device-floppy" aria-hidden="true"></i><span>기록 저장</span></button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop compare-backdrop" id="compareModal" hidden>
+    <section class="compare-modal" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle">
+      <header class="modal-head"><div><span>FACT-BASED COMPARISON</span><h2 id="compareModalTitle">우리의 후보 비교</h2></div><button class="modal-close" id="closeCompareModal" type="button" aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <div class="compare-modal-body">
+        <div class="compare-principle"><strong>평점 없이, 저장한 사실만 비교합니다.</strong><p>확인 가격·같은 면적 환산·역 거리·연식과 현장 메모를 나란히 보고 둘의 다음 행동을 정해보세요.</p></div>
+        <div class="compare-empty" id="compareEmpty" hidden><span><i class="ti ti-home-search" aria-hidden="true"></i></span><strong>비교할 후보를 담아주세요.</strong><p>지도 카드나 다녀온 집 목록에서 최대 3곳까지 고를 수 있어요.</p><button id="compareGoMap" type="button">지도에서 후보 고르기</button></div>
+        <div id="compareContent" hidden>
+          <div class="compare-insights" id="compareInsights"></div>
+          <p class="compare-warning" id="compareWarning" hidden></p>
+          <div class="compare-table-wrap"><table class="compare-table"><thead id="compareTableHead"></thead><tbody id="compareTableBody"></tbody></table></div>
+          <p class="compare-disclaimer">3.3㎡ 환산은 저장한 확인 가격을 전용면적으로 단순 환산한 값입니다. 동·층·향·수리 상태와 계약 시점 차이는 실거래 화면에서 함께 확인하세요.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="apiGuideModal" hidden>
+    <section class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="apiGuideTitle">
+      <header class="modal-head"><div><span>OFFICIAL DATA SETUP</span><h2 id="apiGuideTitle">국토부 실거래 연결</h2></div><button class="modal-close" type="button" data-close-api-guide aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <ol class="setup-steps">
+        <li><span>1</span><div><strong>공공데이터포털 활용 신청</strong><p>아파트 매매(15126469)와 전월세(15126474) 실거래가 API를 모두 신청합니다.</p><a href="https://www.data.go.kr/data/15126469/openapi.do" target="_blank" rel="noopener noreferrer">매매 API 신청</a> · <a href="https://www.data.go.kr/data/15126474/openapi.do" target="_blank" rel="noopener noreferrer">전월세 API 신청</a></div></li>
+        <li><span>2</span><div><strong>비밀키를 두 곳에 등록</strong><p>GitHub Actions에는 <code>DATA_GO_KR_SERVICE_KEY</code>, Firebase Secret Manager에는 <code>MOLIT_SERVICE_KEY</code>로 저장합니다. 채팅이나 코드 파일에는 키를 붙여넣지 마세요.</p></div></li>
+        <li><span>3</span><div><strong>일일 집계 실행</strong><p>Actions의 “Update HomeHunt market data”를 수동 실행하면 이후 매일 자동으로 지역·단지 JSON이 갱신됩니다.</p></div></li>
+        <li><span>4</span><div><strong>첫 단지 검색 함수 배포</strong><p><code>firebase functions:secrets:set MOLIT_SERVICE_KEY</code> 후 <code>firebase deploy --only functions:apartmentHistory</code>를 실행합니다.</p></div></li>
+        <li><span>5</span><div><strong>서버 캐시 규칙 배포</strong><p><code>firebase deploy --only firestore:rules</code>로 실거래 캐시와 호출 제한 문서의 브라우저 쓰기를 막습니다.</p></div></li>
+      </ol>
+      <p class="guide-note">localhost에서는 로컬 서버에 키가 연결되면 국토부 실제 실거래를 즉시 사용합니다. GitHub Pages 배포본은 Firebase Function을 배포하기 전까지 저장된 공개 데이터와 명시된 UI 샘플만 표시합니다.</p>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="localKeyModal" hidden>
+    <section class="guide-modal local-key-modal" role="dialog" aria-modal="true" aria-labelledby="localKeyTitle">
+      <header class="modal-head"><div><span>LOCAL PRIVATE CONNECTION</span><h2 id="localKeyTitle">로컬 데이터·통근 키 연결</h2></div><button class="modal-close" type="button" data-close-local-key aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <form id="localKeyForm" class="local-key-form">
+        <div class="local-key-security"><span><i class="ti ti-key" aria-hidden="true"></i></span><div><strong>이 화면에 입력한 키는 서버 메모리에만 보관됩니다.</strong><p>재시작 후에도 자동 연결하려면 Git에서 제외된 <code>homehunt/.env</code>에 저장하세요. 브라우저·공개 코드·캐시에는 남기지 않습니다.</p></div></div>
+        <label class="field"><span>공공데이터포털 일반 인증키 <em>실거래 · 분양</em></span><input id="localServiceKey" type="password" autocomplete="off" spellcheck="false" placeholder="이미 연결했다면 비워두세요"><small>같은 키를 쓸 수 있지만 실거래·청약홈·LH 서비스는 각각 활용신청이 승인돼야 합니다.</small></label>
+        <details class="transport-key-details">
+          <summary>회사 통근 경로 키 연결 <small>선택</small></summary>
+          <div class="form-grid two-col">
+            <label class="field"><span>Kakao REST API 키 <em>대중교통 광역 검증</em></span><input id="localKakaoRestKey" type="password" autocomplete="off" spellcheck="false" placeholder="Kakao Developers REST API 키"></label>
+            <label class="field"><span>대중교통 공급자</span><select id="localTransitProvider"><option value="">현재 설정 유지</option><option value="auto">자동 · Kakao 우선</option><option value="kakao">Kakao만</option><option value="tmap">TMAP만</option></select></label>
+          </div>
+          <label class="field"><span>TMAP appKey <em>출발시각 정밀 검증</em></span><input id="localTmapKey" type="password" autocomplete="off" spellcheck="false" placeholder="SK Open API appKey"></label>
+          <div class="form-grid two-col">
+            <label class="field"><span>NAVER Maps Client ID <em>자동차</em></span><input id="localNaverClientId" autocomplete="off" spellcheck="false" value="jjk1t3dw7m"></label>
+            <label class="field"><span>NAVER Maps Client Secret <em>자동차</em></span><input id="localNaverClientSecret" type="password" autocomplete="off" spellcheck="false" placeholder="재발급한 Secret 권장"></label>
+          </div>
+          <p>Kakao는 넓은 후보를 현재시각 기준으로 확인하고, TMAP은 출발시각을 반영한 소수 최종 후보에 적합합니다. TMAP 무료 10건/일을 자동 소진하지 않으며 경로는 디스크에 남기지 않고 메모리에만 8시간 보관합니다.</p>
+        </details>
+        <details class="transport-key-details" id="placeSearchKeyDetails">
+          <summary>회사·건물명 검색 키 연결 <small>선택</small></summary>
+          <p>주소가 아닌 회사·상가·오피스텔·건물 이름을 찾는 NAVER API HUB의 <strong>지역 검색</strong> 전용 키입니다. 위 자동차 경로 키와 별도이며, 이 화면 입력은 메모리에서만 유지됩니다.</p>
+          <div class="form-grid two-col">
+            <label class="field"><span>NAVER API HUB Client ID <em>장소 검색</em></span><input id="localNaverPlaceClientId" type="password" autocomplete="off" spellcheck="false" placeholder="지역 검색 Application Client ID"></label>
+            <label class="field"><span>NAVER API HUB Client Secret <em>장소 검색</em></span><input id="localNaverPlaceClientSecret" type="password" autocomplete="off" spellcheck="false" placeholder="지역 검색 Application Client Secret"></label>
+          </div>
+          <p><a href="https://guide.ncloud-docs.com/docs/apihub-application" target="_blank" rel="noopener noreferrer">API HUB Application 만들기</a>에서 검색 API의 ‘지역’을 선택하세요. 키를 채팅이나 코드에 붙여넣지 말고 이 창에만 입력합니다.</p>
+        </details>
+        <p class="local-key-status" id="localKeyStatus">로컬 서버 주소: <code>127.0.0.1:8787</code></p>
+        <div class="local-key-command"><strong>.env 자동 로딩으로 서버 시작</strong><code>powershell -File homehunt/scripts/start-local-market.ps1</code></div>
+        <div class="modal-actions local-key-actions"><span></span><button class="outline-btn" type="button" data-close-local-key><i class="ti ti-x" aria-hidden="true"></i><span>취소</span></button><button class="record-btn" id="submitLocalKey" type="submit"><i class="ti ti-plug-connected" aria-hidden="true"></i><span>키 연결하기</span></button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="companyLocationModal" hidden>
+    <section class="guide-modal company-location-modal" role="dialog" aria-modal="true" aria-labelledby="companyLocationTitle" aria-describedby="companyLocationHelp">
+      <header class="modal-head"><div><span>COMMUTE DESTINATION</span><h2 id="companyLocationTitle">출근 목적지 추가</h2></div><button class="modal-close" type="button" data-close-company-location aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <div class="company-location-modal-body">
+        <p class="company-location-help" id="companyLocationHelp"><strong>회사 위치는 아파트로 추측하지 않습니다.</strong> 회사·건물·상가·오피스텔 이름이나 도로명·지번 주소로 찾고, 결과가 없으면 지도에서 직접 선택합니다.</p>
+        <form class="company-location-search" id="companyLocationSearchForm" role="search">
+          <label class="sr-only" for="companyLocationSearch">회사·건물·주소 검색</label>
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input id="companyLocationSearch" autocomplete="off" placeholder="예: 푸르지오시티3차, 아이파크, 정자일로 135">
+          <button class="record-btn" type="submit"><span>통합 검색</span></button>
+        </form>
+        <div class="company-search-capability" id="companySearchCapability" role="status">
+          <span><i class="ti ti-building-search" aria-hidden="true"></i><span id="companySearchCapabilityText">회사·건물명 검색 연결을 확인하고 있어요.</span></span>
+          <div class="company-search-capability-actions">
+            <button class="outline-btn" id="useCompanyPostcodeSearch" type="button"><i class="ti ti-building" aria-hidden="true"></i><span>건물 주소 찾기</span></button>
+            <button class="outline-btn" id="openPlaceSearchSettings" type="button"><i class="ti ti-plug-connected" aria-hidden="true"></i><span>상호·지점 API 연결</span></button>
+          </div>
+        </div>
+        <div class="company-location-search-results" id="companyLocationSearchResults" role="listbox" aria-label="회사·건물·주소 검색 결과" hidden></div>
+        <div class="company-picker-layout">
+          <div class="company-picker-map-wrap">
+            <div id="companyLocationMap" role="region" aria-label="회사 위치를 선택하는 네이버 지도"></div>
+            <div class="company-picker-tip"><i class="ti ti-hand-click" aria-hidden="true"></i><span>지도를 확대하고 회사 건물을 클릭해도 됩니다</span></div>
+            <section class="company-postcode-panel" id="companyPostcodePanel" role="dialog" aria-modal="true" aria-labelledby="companyPostcodeTitle" aria-describedby="companyPostcodeNote" tabindex="-1" hidden>
+              <header><div><strong id="companyPostcodeTitle">건물명·도로명 주소 찾기</strong><small id="companyPostcodeStatus">공식 주소 DB에서 검색합니다.</small></div><button type="button" id="closeCompanyPostcode" aria-label="건물 주소 검색 닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+              <div id="companyPostcodeEmbed"></div>
+              <p id="companyPostcodeNote">주소 DB에 등록된 건물명·법인명 결과입니다. 결과를 고르면 네이버 지도 좌표로 다시 확인합니다.</p>
+            </section>
+          </div>
+          <aside class="company-picker-selection" aria-live="polite">
+            <span>선택한 위치</span>
+            <strong id="companyPickerSelectionTitle">아직 선택하지 않았어요</strong>
+            <p id="companyPickerSelectionAddress">검색 결과 또는 지도 위 건물을 선택해주세요.</p>
+            <small id="companyPickerCoordinates">좌표를 선택해야 실제 통근 경로를 계산합니다.</small>
+            <label class="company-days-field"><span>일주일에 가는 날</span><select id="companyDaysPerWeek"><option value="5">주 5일</option><option value="4">주 4일</option><option value="3">주 3일</option><option value="2">주 2일</option><option value="1">주 1일</option></select></label>
+          </aside>
+        </div>
+        <p class="company-location-limit"><i class="ti ti-info-circle" aria-hidden="true"></i><span>공식 주소 DB는 등록 건물명·법인명을, 네이버 장소 API는 입점 상호·지점까지 찾습니다. 같은 이름이 많으면 동네나 역 이름을 함께 입력하세요.</span></p>
+        <div class="modal-actions company-location-actions"><span></span><button class="outline-btn" type="button" data-close-company-location><i class="ti ti-x" aria-hidden="true"></i><span>취소</span></button><button class="record-btn" id="applyCompanyLocation" type="button" disabled><i class="ti ti-map-pin-check" aria-hidden="true"></i><span>목적지에 추가</span></button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="supplyAlertModal" hidden>
+    <section class="guide-modal supply-alert-modal" role="dialog" aria-modal="true" aria-labelledby="supplyAlertTitle" aria-describedby="supplyAlertHelp">
+      <header class="modal-head"><div><span>NEW HOME ALERTS</span><h2 id="supplyAlertTitle">분양 알림 설정</h2></div><button class="modal-close" type="button" data-close-supply-alert aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <form id="supplyAlertForm" class="supply-alert-form">
+        <p class="supply-alert-help" id="supplyAlertHelp"><strong>이 브라우저에서 원하는 공고만 골라 알려드려요.</strong> 사이트를 열었을 때 새 공고를 비교하고, 알림 권한을 허용했다면 브라우저 알림도 표시합니다.</p>
+        <div class="supply-alert-permission" id="supplyNotificationStatus"><span><i class="ti ti-bell" aria-hidden="true"></i></span><div><strong>브라우저 알림 꺼짐</strong><p>버튼을 눌러야만 권한을 요청합니다.</p></div><button class="outline-btn" id="enableSupplyNotifications" type="button">브라우저 알림 켜기</button></div>
+        <div class="form-grid two-col">
+          <fieldset class="field fieldset"><legend>관심 지역</legend><div class="inline-checks"><label><input id="supplyAlertSeoul" type="checkbox" checked> 서울</label><label><input id="supplyAlertGyeonggi" type="checkbox" checked> 경기</label></div></fieldset>
+          <fieldset class="field fieldset"><legend>받을 변화</legend><div class="inline-checks wrap"><label><input id="supplyAlertNew" type="checkbox" checked> 새 공고</label><label><input id="supplyAlertChanged" type="checkbox" checked> 일정·가격 변경</label><label><input id="supplyAlertDeadline" type="checkbox" checked> 접수 D-3·D-1</label></div></fieldset>
+        </div>
+        <div class="form-grid two-col">
+          <label class="field"><span>신혼 관련</span><select id="supplyAlertNewlywed"><option value="highlight">모든 공고 · 신혼 물량 강조</option><option value="only">신혼부부·신혼희망타운만</option></select></label>
+          <label class="field"><span>최대 분양가 <em>선택</em></span><div class="input-unit"><input id="supplyAlertMaxPrice" type="number" min="0" step="0.1" placeholder="제한 없음"><em>억원 이하</em></div><small>가격이 공개되지 않은 공고는 제외하지 않습니다.</small></label>
+        </div>
+        <div class="supply-alert-limit"><i class="ti ti-brand-telegram" aria-hidden="true"></i><p><strong>사이트가 닫혀 있을 때는 Telegram 알림을 사용하세요.</strong> GitHub Secrets에 봇 토큰과 비공개 그룹 ID를, Repository Variables에 모바일용 맞춤 조건을 넣으면 예약 수집이 맞는 새 공고·중요 변경을 두 휴대폰으로 보냅니다. 브라우저 조건과는 자동 동기화되지 않습니다.</p></div>
+        <button class="supply-alert-guide-link" type="button" data-guide-anchor="guidePhoneAlerts"><i class="ti ti-help-circle" aria-hidden="true"></i><span>휴대폰 알림 설정 방법 보기</span></button>
+        <div class="modal-actions"><span></span><button class="outline-btn" type="button" data-close-supply-alert>취소</button><button class="record-btn" type="submit"><i class="ti ti-device-floppy" aria-hidden="true"></i><span>알림 조건 저장</span></button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="supplyMatchModal" hidden>
+    <section class="guide-modal supply-match-modal" role="dialog" aria-modal="true" aria-labelledby="supplyMatchTitle" aria-describedby="supplyMatchHelp">
+      <header class="modal-head"><div><span>MY SUPPLY FILTER</span><h2 id="supplyMatchTitle">내 분양 조건</h2></div><button class="modal-close" type="button" data-close-supply-match aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <form id="supplyMatchForm" class="supply-match-form">
+        <p id="supplyMatchHelp"><strong>조건이 공개된 공고만 정확히 비교합니다.</strong> 미공개 항목을 포함할지 직접 고를 수 있어 아직 가격·면적이 안 나온 사전공고도 놓치지 않습니다.</p>
+        <label class="field"><span>관심 동네 <em>쉼표로 여러 곳</em></span><input id="supplyMatchDistricts" autocomplete="off" placeholder="예: 성남, 하남, 송파, 광명"></label>
+        <div class="form-grid three-col supply-match-numbers">
+          <label class="field"><span>최대 분양가</span><div class="input-unit"><input id="supplyMatchMaxPrice" type="number" min="0" step="0.1" inputmode="decimal" placeholder="제한 없음"><em>억원</em></div></label>
+          <label class="field"><span>전용면적</span><div class="input-unit split"><input id="supplyMatchMinPyeong" type="number" min="0" step="0.1" inputmode="decimal" placeholder="최소"><em>~</em><input id="supplyMatchMaxPyeong" type="number" min="0" step="0.1" inputmode="decimal" placeholder="최대"><em>평</em></div></label>
+          <label class="field"><span>최소 공급세대</span><div class="input-unit"><input id="supplyMatchMinUnits" type="number" min="0" step="1" inputmode="numeric" placeholder="제한 없음"><em>세대</em></div></label>
+        </div>
+        <fieldset class="field fieldset supply-unknown-options"><legend>아직 숫자가 공개되지 않은 공고</legend><div class="inline-checks wrap"><label><input id="supplyMatchUnknownPrice" type="checkbox" checked> 가격 미공개 포함</label><label><input id="supplyMatchUnknownArea" type="checkbox" checked> 면적 미공개 포함</label><label><input id="supplyMatchUnknownUnits" type="checkbox" checked> 세대수 미공개 포함</label></div></fieldset>
+        <div class="supply-match-tip"><i class="ti ti-heart-handshake" aria-hidden="true"></i><p>신혼부부·신혼희망타운만 보고 싶다면 목록 위의 <strong>공급 유형</strong>에서 고르세요. 혼인·소득·자산·청약통장 사전점검은 <button type="button" data-guide-anchor="guideSubscriptionProfile">청약 준비도</button>에서 할 수 있습니다.</p></div>
+        <div class="modal-actions"><button class="outline-btn" id="resetSupplyMatch" type="button">조건 초기화</button><button class="outline-btn" type="button" data-close-supply-match>취소</button><button class="record-btn" type="submit"><i class="ti ti-filter-check" aria-hidden="true"></i><span>조건 적용</span></button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./js/ui-kit.js?v=2.5.0" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+  <script type="module" src="./js/app.js?v=2.5.0"></script>
+  <script src="./js/navigation-v25.js?v=2.5.0" defer></script>
+</body>
+</html>

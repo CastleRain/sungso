@@ -189,7 +189,7 @@ header .sub { margin-top: 10px; font-size: 15px; color: #bbb; }
 .dday-date { font-size: 13px; color: #ddd; }
 
 /* ── Project cards ── */
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; width: 100%; max-width: 560px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; width: 100%; max-width: 850px; }
 .card {
   background: white; border-radius: 22px; padding: 24px;
   text-decoration: none; color: inherit;
@@ -212,6 +212,11 @@ header .sub { margin-top: 10px; font-size: 15px; color: #bbb; }
 .card-cta-text { font-size: 13px; font-weight: 600; color: #FF85B3; }
 .card-cta-arrow { font-size: 15px; color: #FF85B3; transition: transform 0.18s; }
 .card:hover .card-cta-arrow { transform: translateX(5px); }
+.homehunt-badge { color: #47705b; background: #eef4ef; }
+.homehunt-cta { background: #f2f6f3; }
+.homehunt-cta .card-cta-text,
+.homehunt-cta .card-cta-arrow { color: #47705b; }
+.card:hover .homehunt-cta { background: #e5efe8; }
 
 /* ── Events section ── */
 .events-wrap { width: 100%; max-width: 560px; }

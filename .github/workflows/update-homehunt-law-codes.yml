@@ -1,0 +1,35 @@
+name: Update HomeHunt legal district codes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 18 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: homehunt-law-districts
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and validate official legal district codes
+        shell: pwsh
+        run: ./homehunt/scripts/update-law-districts.ps1
+      - name: Commit refreshed district mapping
+        shell: bash
+        run: |
+          if git diff --quiet -- homehunt/data/law-districts.json; then
+            echo "No district-code changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add homehunt/data/law-districts.json
+          git commit -m "data: refresh homehunt law districts"
+          git push

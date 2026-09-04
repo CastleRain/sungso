@@ -1,0 +1,116 @@
+name: Update HomeHunt supply notices
+
+on:
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: "Send eligible new/important-change alerts to Telegram"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # UTC 22:17/03:17/09:17 = KST 07:17/12:17/18:17
+    - cron: "17 3,9,22 * * *"
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: homehunt-supply-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Fetch official Applyhome, LH, and SH supply notices
+        env:
+          APPLYHOME_SERVICE_KEY: ${{ secrets.APPLYHOME_SERVICE_KEY }}
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: node homehunt/scripts/fetch-home-supply.mjs
+      - name: Summarize collection
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const data = JSON.parse(fs.readFileSync('homehunt/data/home-supply.json', 'utf8'));
+          const counts = data.changes?.counts || {};
+          const notices = Array.isArray(data.notices) ? data.notices : [];
+          const bySource = notices.reduce((result, notice) => {
+            const source = notice.source || 'unknown';
+            result[source] = (result[source] || 0) + 1;
+            return result;
+          }, {});
+          const sourceStatus = (Array.isArray(data.sources) ? data.sources : [])
+            .map((source) => `${source.label || source.id}: ${source.status || source.collectionStatus || 'unknown'}`)
+            .join(' · ') || '수집원 상태 없음';
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            `## HomeHunt 청약홈·LH·SH 분양 수집\n\n` +
+            `- 상태: ${data.coverage?.status || data.status}\n` +
+            `- 공급원: ${sourceStatus}\n` +
+            `- 서울·경기 공고: ${notices.length}건 (청약홈 ${bySource.applyhome || 0} · LH ${bySource.lh || 0} · SH ${bySource.sh || 0})\n` +
+            `- 신규 ${counts.new || 0} · 변경 ${counts.updated || 0} · 제외 ${counts.removed || 0}\n` +
+            `- 최초 기준선: ${data.changes?.baselineRun ? '예 (알림 억제)' : '아니오'}\n`);
+          NODE
+      - name: Preview Telegram alerts (manual safe default)
+        if: github.event_name == 'workflow_dispatch' && inputs.notify != true
+        env:
+          HOMEHUNT_ALERT_REGIONS: ${{ vars.HOMEHUNT_ALERT_REGIONS }}
+          HOMEHUNT_ALERT_DISTRICTS: ${{ vars.HOMEHUNT_ALERT_DISTRICTS }}
+          HOMEHUNT_ALERT_NEWLYWED_ONLY: ${{ vars.HOMEHUNT_ALERT_NEWLYWED_ONLY }}
+          HOMEHUNT_ALERT_MAX_PRICE_EOK: ${{ vars.HOMEHUNT_ALERT_MAX_PRICE_EOK }}
+          HOMEHUNT_ALERT_MIN_PYEONG: ${{ vars.HOMEHUNT_ALERT_MIN_PYEONG }}
+          HOMEHUNT_ALERT_MAX_PYEONG: ${{ vars.HOMEHUNT_ALERT_MAX_PYEONG }}
+          HOMEHUNT_ALERT_MIN_UNITS: ${{ vars.HOMEHUNT_ALERT_MIN_UNITS }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_PRICE: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_PRICE }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_AREA: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_AREA }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_UNITS: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_UNITS }}
+        run: node homehunt/scripts/send-supply-telegram.mjs --dry-run
+      - name: Send Telegram alerts
+        if: github.event_name == 'schedule' || inputs.notify == true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          HOMEHUNT_ALERT_REGIONS: ${{ vars.HOMEHUNT_ALERT_REGIONS }}
+          HOMEHUNT_ALERT_DISTRICTS: ${{ vars.HOMEHUNT_ALERT_DISTRICTS }}
+          HOMEHUNT_ALERT_NEWLYWED_ONLY: ${{ vars.HOMEHUNT_ALERT_NEWLYWED_ONLY }}
+          HOMEHUNT_ALERT_MAX_PRICE_EOK: ${{ vars.HOMEHUNT_ALERT_MAX_PRICE_EOK }}
+          HOMEHUNT_ALERT_MIN_PYEONG: ${{ vars.HOMEHUNT_ALERT_MIN_PYEONG }}
+          HOMEHUNT_ALERT_MAX_PYEONG: ${{ vars.HOMEHUNT_ALERT_MAX_PYEONG }}
+          HOMEHUNT_ALERT_MIN_UNITS: ${{ vars.HOMEHUNT_ALERT_MIN_UNITS }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_PRICE: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_PRICE }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_AREA: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_AREA }}
+          HOMEHUNT_ALERT_INCLUDE_UNKNOWN_UNITS: ${{ vars.HOMEHUNT_ALERT_INCLUDE_UNKNOWN_UNITS }}
+        run: node homehunt/scripts/send-supply-telegram.mjs --notify
+      - name: Commit refreshed public supply data
+        id: publish_data
+        shell: bash
+        run: |
+          if git diff --quiet -- homehunt/data/home-supply.json homehunt/data/supply-alert-ledger.json; then
+            echo "No supply-data changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --quiet -- homehunt/data/home-supply.json; then
+            data_changed=false
+          else
+            data_changed=true
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add homehunt/data/home-supply.json homehunt/data/supply-alert-ledger.json
+          git commit -m "data: refresh homehunt supply notices"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "changed=${data_changed}" >> "$GITHUB_OUTPUT"
+      - name: Request branch-based GitHub Pages rebuild
+        if: steps.publish_data.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds"

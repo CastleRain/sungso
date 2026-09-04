@@ -1,0 +1,34 @@
+{
+  "product": "HomeHunt",
+  "contractVersion": "2.5.0",
+  "capturedAtKst": "2026-09-04",
+  "captureUrl": "http://127.0.0.1:8000/homehunt/?ui=2.5.0-handoff",
+  "viewport": {
+    "width": 1146,
+    "height": 912,
+    "device": "desktop"
+  },
+  "stateNotes": [
+    "캡처는 현재 로컬 데이터 상태이며 데모 데이터를 삽입하지 않았다.",
+    "집 찾기에는 기존 관심 후보 1건이 있었고 내 기록에는 방문 기록이 없었다.",
+    "분양 피드는 공식 응답 0건 상태였다.",
+    "연결 상태 캡처에는 설정 여부만 있으며 비밀키 값은 없다.",
+    "모바일은 CSS 계약과 자동 테스트로 검증하며 이 폴더의 PNG는 모두 데스크톱 캡처다."
+  ],
+  "screenshots": [
+    { "file": "screenshots/01-house-finder-map.png", "view": "recommend", "state": "map" },
+    { "file": "screenshots/02-house-finder-filter.png", "view": "recommend", "state": "filter-open" },
+    { "file": "screenshots/03-house-finder-results.png", "view": "recommend", "state": "results-open" },
+    { "file": "screenshots/04-my-records-list.png", "view": "visits", "state": "empty-list" },
+    { "file": "screenshots/05-my-records-map.png", "view": "map", "state": "record-map" },
+    { "file": "screenshots/06-complex-market.png", "view": "market", "state": "summary" },
+    { "file": "screenshots/07-market-forecast.png", "view": "market", "state": "forecast-withheld" },
+    { "file": "screenshots/08-supply.png", "view": "supply", "state": "official-feed-empty" },
+    { "file": "screenshots/09-supply-match-modal.png", "view": "supply", "state": "match-modal" },
+    { "file": "screenshots/10-guide.png", "view": "guide", "state": "top" },
+    { "file": "screenshots/11-subscription-readiness.png", "view": "guide", "state": "subscription-profile" },
+    { "file": "screenshots/12-connections.png", "view": "connections", "state": "runtime-status" },
+    { "file": "screenshots/13-visit-record-modal.png", "view": "connections", "state": "visit-modal" },
+    { "file": "screenshots/14-destination-modal.png", "view": "recommend", "state": "destination-modal" }
+  ]
+}

@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Server-only HomeHunt state. Admin SDK calls bypass these rules.
+    match /homehunt_apartment_cache/{document} {
+      allow read, write: if false;
+    }
+    match /homehunt_molit_month_cache/{document} {
+      allow read, write: if false;
+    }
+    match /homehunt_api_limits/{document} {
+      allow read, write: if false;
+    }
+    match /server_api_limits/{document} {
+      allow read, write: if false;
+    }
+
+    // Naver blog results are written only by the Firebase Function.
+    match /naver_blog_cache/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /naver_blog_meta/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Existing couple-site collections. These remain public for compatibility
+    // until Firebase Authentication is introduced for the whole site.
+    match /events/{document} { allow read, write: if true; }
+    match /wecost_settings/{document} { allow read, write: if true; }
+    match /wecost_savings/{document} { allow read, write: if true; }
+    match /wecost_items/{document} { allow read, write: if true; }
+    match /wecost_loans/{document} { allow read, write: if true; }
+    match /wecost_adjustments/{document} { allow read, write: if true; }
+    match /honeymoon_fx/{document} { allow read, write: if true; }
+    match /blog_review_prefs/{document} { allow read, write: if true; }
+    match /resort_note_meta/{document} { allow read, write: if true; }
+    match /resort_images/{document} { allow read, write: if true; }
+    match /couplePicks/{document} { allow read, write: if true; }
+    match /itineraries/{document} { allow read, write: if true; }
+    match /resort_notes/{resortId}/comments/{commentId} { allow read, write: if true; }
+  }
+}

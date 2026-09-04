@@ -6,9 +6,6 @@ const https     = require('https');
 admin.initializeApp();
 const db = admin.firestore();
 
-const NAVER_CLIENT_ID     = 'SIUfSSP3KTI1ui7rzHSk';
-const NAVER_CLIENT_SECRET = 'kPSbNhWM3y';
-
 const RESORT_QUERIES = {
   cora_cora:    '코라코라 몰디브 후기',
   ananea:       '아나네아 몰디브 후기',
@@ -37,15 +34,44 @@ function stripHtml(str) {
   return (str || '').replace(/<[^>]*>/g, '').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
 }
 
+function allowedSiteOrigin(origin) {
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(origin || ''))) return origin;
+  if (origin === 'https://castlerain.github.io') return origin;
+  return null;
+}
+
+async function checkNaverBlogRateLimit(req) {
+  const day = new Date().toISOString().slice(0, 10);
+  const ip = req.ip || 'unknown';
+  const hash = require('crypto').createHash('sha256').update(String(ip)).digest('hex').slice(0, 24);
+  const limits = db.collection('server_api_limits');
+  const ipRef = limits.doc(`${day}_naver_ip_${hash}`);
+  const globalRef = limits.doc(`${day}_naver_global`);
+  return db.runTransaction(async (transaction) => {
+    const ipSnap = await transaction.get(ipRef);
+    const globalSnap = await transaction.get(globalRef);
+    const ipCount = Number(ipSnap.data()?.count || 0);
+    const globalCount = Number(globalSnap.data()?.count || 0);
+    if (ipCount >= 30 || globalCount >= 200) return false;
+    const updatedAt = new Date();
+    transaction.set(ipRef, { count: ipCount + 1, day, updatedAt }, { merge: true });
+    transaction.set(globalRef, { count: globalCount + 1, day, updatedAt }, { merge: true });
+    return true;
+  });
+}
+
 function fetchNaverApi(query, sort) {
   return new Promise((resolve, reject) => {
+    const clientId = String(process.env.NAVER_SEARCH_CLIENT_ID || '').trim();
+    const clientSecret = String(process.env.NAVER_SEARCH_CLIENT_SECRET || '').trim();
+    if (!clientId || !clientSecret) return reject(new Error('Naver Search secrets are not configured'));
     const params = new URLSearchParams({ query, display: '8', start: '1', sort });
     const options = {
       hostname: 'openapi.naver.com',
       path:     `/v1/search/blog?${params}`,
       headers: {
-        'X-Naver-Client-Id':     NAVER_CLIENT_ID,
-        'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
+        'X-Naver-Client-Id':     clientId,
+        'X-Naver-Client-Secret': clientSecret,
       },
     };
     const req = https.get(options, (res) => {
@@ -65,17 +91,22 @@ function fetchNaverApi(query, sort) {
   });
 }
 
-exports.naverBlogSearch = functions.https.onRequest(async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
+exports.naverBlogSearch = functions
+  .runWith({ secrets: ['NAVER_SEARCH_CLIENT_ID', 'NAVER_SEARCH_CLIENT_SECRET'] })
+  .https.onRequest(async (req, res) => {
+  const origin = allowedSiteOrigin(req.get('origin'));
+  if (origin) res.set('Access-Control-Allow-Origin', origin);
+  res.set('Vary', 'Origin');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    return res.status(204).send('');
+    return origin ? res.status(204).send('') : res.status(403).send('');
   }
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (!origin) return res.status(403).json({ error: 'Origin not allowed' });
 
   const { resortId, sort = 'sim' } = req.query;
 
@@ -89,6 +120,7 @@ exports.naverBlogSearch = functions.https.onRequest(async (req, res) => {
   const query = RESORT_QUERIES[resortId];
 
   try {
+    if (!(await checkNaverBlogRateLimit(req))) return res.status(429).json({ error: 'Daily search limit reached' });
     const rawItems = await fetchNaverApi(query, sort);
 
     const items = rawItems.map(item => ({
@@ -121,4 +153,12 @@ exports.naverBlogSearch = functions.https.onRequest(async (req, res) => {
     console.error('naverBlogSearch error:', err);
     return res.status(500).json({ error: err.message });
   }
-});
+  });
+
+// HomeHunt — official MOLIT apartment sale/rent history + Firestore cache.
+// The service key is stored in Firebase Secret Manager, never in browser code.
+const { createApartmentHistoryHandler } = require('./molit');
+
+exports.apartmentHistory = functions
+  .runWith({ timeoutSeconds: 540, memory: '512MB', secrets: ['MOLIT_SERVICE_KEY'] })
+  .https.onRequest(createApartmentHistoryHandler({ db }));

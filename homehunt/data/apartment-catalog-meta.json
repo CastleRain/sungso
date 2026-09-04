@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "name": "한국부동산원 전국 공동주택 단지정보 CSV",
+    "url": "https://www.data.go.kr/data/15106861/fileData.do",
+    "publishedDate": "2025-09-18",
+    "sourceFile": "homehunt-apartment-catalog.csv",
+    "sha256": "2fe472b92867b69644d368a89df2acd81a65004cfc01afff0a7e72021c7f2e0a",
+    "format": "CSV (UTF-8)",
+    "filter": "단지종류=1",
+    "regionReference": "law-districts.json",
+    "sourceRowCount": 307407,
+    "apartmentRowCount": 45920,
+    "catalogCount": 45920,
+    "skippedMissingIdentity": 0,
+    "fallbackRegionCount": 3262,
+    "duplicateRowCount": 0
+  }
+}
