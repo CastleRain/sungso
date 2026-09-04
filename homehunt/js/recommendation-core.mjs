@@ -111,7 +111,7 @@ export function parseRecommendationQuery(query, currentYear = new Date().getFull
     || text.match(/(?:회사|직장|출근)[^,.]{0,22}?(\d+)\s*분[^,.]{0,8}?(안|이내|미만)/);
   if (hour || minute) {
     filters.commuteMaxMinutes = hour ? Math.round(numeric(hour[1]) * 60) : numeric(minute[1]);
-    clauses.push({ key: 'commute', label: `회사 ${filters.commuteMaxMinutes}분 미만`, confidence: 'high' });
+    clauses.push({ key: 'commute', label: `회사 ${filters.commuteMaxMinutes}분 이하`, confidence: 'high' });
   }
   if (/차|자동차|자가용/.test(text)) filters.commuteModes.push('car');
   if (/지하철|대중교통/.test(text)) filters.commuteModes.push('transit');

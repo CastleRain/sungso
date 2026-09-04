@@ -2,9 +2,9 @@
 
 성우와 소희가 직접 본 아파트를 지도에 기록하고, 최대 4개 회사·주요 목적지 사이에서 서울·경기 아파트의 같은 전용면적 실거래와 조건 맞춤 후보를 확인하는 앱입니다. 화면은 GitHub Pages에 배포할 수 있고, 개발 중에는 로컬 실행기가 Git에서 제외된 `homehunt/.env`를 읽어 로컬 전용 서버에 실제 가격·장소·경로 조회 키를 전달합니다.
 
-현재 화면과 로컬 API의 계약 버전은 **2.5.0**입니다. 화면에 `서버 재시작 필요`가 보이면 실행 중인 이전 서버를 종료한 뒤 다시 시작합니다.
+현재 화면 버전은 **3.0.0**, 로컬 API 계약은 **2.5.0**입니다. 화면 디자인만 바꿀 때 서버 재시작을 요구하지 않도록 두 버전을 분리했습니다. `서버 재시작 필요`는 실행 중인 로컬 API 계약이 2.5.0보다 오래됐을 때만 표시합니다.
 
-UI는 **Tabler UI 1.4.0 + Tabler Icons 3.46.0**을 기반으로 하며, 기존 네이티브 폼과 데이터 로직을 유지한 채 `css/ui-kit.css`와 `js/ui-kit.js`에서 HomeHunt 전용 부동산 테마를 적용합니다.
+UI 3.0은 Claude 설계 문서의 구조를 실제 데이터 계약에 맞춰 보완한 **Data Navy 지도 중심 작업 공간**입니다. 데스크톱은 76px 메뉴 레일·상단 검색·숨김 필터·넓은 지도·폭 조절 결과 패널로 구성하고, 모바일은 지도를 유지한 채 결과를 하단 시트로 전환합니다. Tabler Icons와 기존 데이터/폼 계약은 유지하며 새 디자인은 `css/hh-*.css`, UI 상태·표시는 `js/ui-state.js`, `js/ui-format.js`, `js/ui-shell.js`가 담당합니다.
 
 현재 화면·기능·데이터 원리와 다음 고도화 기준은 [`docs/homehunt-2.5-handoff/README.md`](./docs/homehunt-2.5-handoff/README.md)에 캡처와 함께 정리되어 있습니다.
 
@@ -319,10 +319,19 @@ homehunt/
 ├─ index.html                    포털형 UI와 모달
 ├─ css/styles.css                데스크톱·모바일 반응형 스타일
 ├─ css/ui-kit.css                Tabler 기반 HomeHunt 디자인 시스템·반응형 보강
+├─ css/hh-tokens.css              UI 3.0 Data Navy 색·간격·크기 토큰
+├─ css/hh-base.css                UI 3.0 전역 표면·타이포·접근성 기본값
+├─ css/hh-shell.css               76px 레일·상단바·모바일 내비 셸
+├─ css/hh-components.css          칩·근거 배지·버튼·패널 공통 컴포넌트
+├─ css/hh-map.css                 지도·클러스터·가격 핀·결과 패널/시트
+├─ css/hh-screens.css             내 기록·실거래·분양·안내·연결 화면 어댑터
 ├─ js/app.js                     화면 상태와 방문/시장 기능
 ├─ js/supply-core.mjs             분양 공고 정규화·필터·상태·알림 판정
 ├─ js/subscription-readiness-core.mjs 자가입력 일반공급 점수·신혼 청약 준비도 계산
 ├─ js/ui-kit.js                  정적·동적 UI에 Tabler 컴포넌트 클래스·아이콘 연결
+├─ js/ui-state.js                선택·호버·레이어·필터·패널 UI 상태와 로컬 환경설정
+├─ js/ui-format.js               억·만원/㎡·평과 확정·추정·미확인·개인기록 표시 계약
+├─ js/ui-shell.js                화면 문맥·패널 폭 조절·모바일 결과 시트 연결
 ├─ js/naver-map.js               네이버 지도 어댑터
 ├─ js/apartment-search-core.mjs  전국 단지명 정규화·후보·유사 단지 검색
 ├─ js/complex-availability-core.mjs 단지 가격 서버 오류 분류·안내 문구

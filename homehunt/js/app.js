@@ -1,4 +1,4 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=2.5.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=3.0.0';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
   clearImportedMarket, loadRecentComplexes, rememberComplex, loadComplexHistory, saveComplexHistory,
@@ -11,7 +11,7 @@ import { HomeMap } from './naver-map.js?v=2.5.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
   commuteDecision, commuteRank, haversineKm, isGeoPoint,
-} from './transport-core.mjs?v=2.5.0';
+} from './transport-core.mjs?v=3.0.0';
 import {
   evaluateCommuteBalance, expectedTransitProviderCalls, normalizeDestinations,
   quotaAwareCandidateCap,
@@ -33,7 +33,7 @@ import {
 } from './complex-availability-core.mjs?v=2.5.0';
 import {
   PYEONG_TO_M2, parseRecommendationQuery, filterCatalogForRecommendation,
-} from './recommendation-core.mjs?v=2.5.0';
+} from './recommendation-core.mjs?v=3.0.0';
 import {
   companySearchStepMessage, decideCompanySearchNextStep,
 } from './company-search-core.mjs?v=2.5.0';
@@ -48,6 +48,10 @@ import {
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
+import { hhUI } from './ui-state.js?v=3.0.0';
+import {
+  EVIDENCE_TIERS, createEvidenceViewModel, renderValueText,
+} from './ui-format.js?v=3.0.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -88,6 +92,7 @@ const state = {
   recommendationCommuteScopeTouched: false,
   recommendationCommuteBlockedReason: '',
   recommendationVisibleCount: 50,
+  recommendationPanelCollapsed: false,
   recommendationRunSnapshot: null,
   shortlist: loadShortlist(),
   localMarketConnected: false,
@@ -131,6 +136,12 @@ const state = {
 const homeMap = new HomeMap(APP_CONFIG.naverMapClientId);
 const recommendationMap = new HomeMap(APP_CONFIG.naverMapClientId);
 const companyPickerMap = new HomeMap(APP_CONFIG.naverMapClientId);
+let recommendationLayoutFrame = 0;
+hhUI.subscribe((next, previous) => {
+  if (!previous || (next.panelWidth === previous.panelWidth && next.sheet === previous.sheet && next.panel === previous.panel)) return;
+  window.cancelAnimationFrame(recommendationLayoutFrame);
+  recommendationLayoutFrame = window.requestAnimationFrame(() => recommendationMap.resize());
+}, { immediate: false });
 let staticApartmentHistoryPromise;
 let lawDistrictsPromise;
 let apartmentCatalogPromise;
@@ -161,11 +172,77 @@ const RECOMMENDATION_LAYER_CONTROLS = Object.freeze({
   shortlist: 'recommendationLayerShortlist',
   workplaces: 'recommendationLayerWorkplaces',
 });
+const UI_LAYER_BY_RECOMMENDATION_LAYER = Object.freeze({
+  apartments: 'complex', supply: 'supply', visits: 'visited', shortlist: 'shortlist', workplaces: 'dest',
+});
 
 function createElement(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
   if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function scrollNode(node, { block = 'start', container = null, behavior = null } = {}) {
+  if (!(node instanceof HTMLElement)) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motion = behavior || (reduced ? 'auto' : 'smooth');
+  if (container instanceof HTMLElement) {
+    const nodeRect = node.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const relativeTop = container.scrollTop + nodeRect.top - containerRect.top;
+    let target = relativeTop;
+    if (block === 'center') target = relativeTop - ((container.clientHeight - nodeRect.height) / 2);
+    if (block === 'nearest') {
+      const visibleTop = container.scrollTop;
+      const visibleBottom = visibleTop + container.clientHeight;
+      const nodeBottom = relativeTop + nodeRect.height;
+      target = relativeTop < visibleTop
+        ? relativeTop
+        : nodeBottom > visibleBottom
+          ? nodeBottom - container.clientHeight
+          : visibleTop;
+    }
+    container.scrollTo({ top: Math.max(0, target), behavior: motion });
+    return;
+  }
+  const rect = node.getBoundingClientRect();
+  const offset = block === 'center' ? (window.innerHeight - rect.height) / 2 : 76;
+  window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - offset), behavior: motion });
+}
+
+function setEvidenceValue(element, value, tier, options = {}) {
+  if (!(element instanceof HTMLElement)) return element;
+  const model = createEvidenceViewModel(value, {
+    tier,
+    sourceKind: options.sourceKind,
+    derivation: options.derivation,
+    freshness: options.freshness,
+    decisionStatus: options.decisionStatus,
+    observedAt: options.observedAt,
+    reason: options.reason,
+  });
+  const rendered = renderValueText(model, {
+    format: options.format || 'text',
+    estimatedPrefix: options.estimatedPrefix,
+    reason: options.reason,
+  });
+  const separator = rendered.indexOf(' · ');
+  const valueText = separator >= 0 ? rendered.slice(separator + 3) : rendered;
+  const meta = EVIDENCE_TIERS[model.tier];
+  const badge = createElement('span', `hh-evidence-badge hh-evidence-badge--${model.tier}`, `${meta.icon} ${meta.label}`);
+  badge.setAttribute('aria-label', `증거 등급: ${meta.label}`);
+  const copy = createElement('span', 'hh-evidence-number', valueText);
+  element.classList.remove(...Object.keys(EVIDENCE_TIERS).map((name) => `hh-evidence-value--${name}`));
+  element.classList.add('hh-evidence-value', `hh-evidence-value--${model.tier}`);
+  element.dataset.tier = model.tier;
+  element.dataset.sourceKind = model.sourceKind;
+  element.dataset.derivation = model.derivation;
+  element.dataset.freshness = model.freshness;
+  element.dataset.decisionStatus = model.decisionStatus;
+  if (model.observedAt) element.dataset.observedAt = model.observedAt;
+  else delete element.dataset.observedAt;
+  element.replaceChildren(badge, copy);
   return element;
 }
 
@@ -245,9 +322,11 @@ function naverLandUrl(name) {
 let toastTimer;
 const modalOpeners = new Map();
 const MODAL_IDS = ['visitModal', 'compareModal', 'apiGuideModal', 'localKeyModal', 'companyLocationModal', 'supplyAlertModal', 'supplyMatchModal'];
+let recommendationFilterModalActive = false;
+let recommendationFilterPreviousOverflow = '';
 
 function setModalBackgroundInert(inert) {
-  ['.portal-header', '.portal-main', '#compareTray'].forEach((selector) => {
+  ['.hh-shell', '#compareTray', '#openVisitButton'].forEach((selector) => {
     const element = $(selector);
     if (element) element.toggleAttribute('inert', inert);
   });
@@ -275,7 +354,7 @@ function closeModalShell(modalId) {
   const anotherModalOpen = MODAL_IDS.some((id) => id !== modalId && !$(`#${id}`).hidden);
   if (!anotherModalOpen) {
     setModalBackgroundInert(false);
-    document.body.style.overflow = '';
+    document.body.style.overflow = recommendationFilterModalActive ? 'hidden' : '';
     const opener = modalOpeners.get(modalId);
     const focusTarget = opener?.isConnected && opener.getClientRects().length ? opener : $('.portal-nav-item.active');
     focusTarget?.focus();
@@ -564,7 +643,7 @@ function sortVisits(visits, sort = state.resultSort) {
 }
 
 function makePropertyCard(visit) {
-  const article = createElement('article', `property-card${visit.id === state.selectedVisitId ? ' selected' : ''}`);
+  const article = createElement('article', `property-card hh-card--visit${visit.id === state.selectedVisitId ? ' selected' : ''}`);
   article.dataset.visitId = visit.id;
   const main = createElement('button', 'property-card-button');
   main.type = 'button';
@@ -575,7 +654,11 @@ function makePropertyCard(visit) {
   top.append(createElement('span', 'property-visit-date', formatDate(visit.visitDate)));
   main.append(top, createElement('h3', '', visit.name), createElement('p', 'property-address', visit.address));
 
-  const price = createElement('div', 'property-price', formatPrice(visit.askingPrice));
+  const price = createElement('div', 'property-price');
+  setEvidenceValue(price, Number(visit.askingPrice) > 0 ? visit.askingPrice : null, Number(visit.askingPrice) > 0 ? 'personal' : 'unknown', {
+    format: 'price', sourceKind: 'visit-record', derivation: 'direct-entry', freshness: 'historical',
+    decisionStatus: Number(visit.askingPrice) > 0 ? 'recorded' : 'missing', observedAt: visit.visitDate, reason: '현장 확인가 미입력',
+  });
   price.append(createElement('small', '', visit.dealType));
   main.appendChild(price);
 
@@ -739,21 +822,81 @@ function setMobileFilters(open) {
   setMapPanel(open ? 'filters' : '');
 }
 
+function setRecommendationFilterDialog(open) {
+  const drawer = $('#recommendationFilterPanel');
+  const page = $('.recommendation-page');
+  const mobile = window.matchMedia('(max-width: 1023px)').matches;
+  const dialogOpen = Boolean(open && mobile && drawer && page);
+
+  if (dialogOpen) {
+    if (!recommendationFilterModalActive) recommendationFilterPreviousOverflow = document.body.style.overflow;
+    recommendationFilterModalActive = true;
+    drawer.setAttribute('role', 'dialog');
+    drawer.setAttribute('aria-modal', 'true');
+    drawer.setAttribute('tabindex', '-1');
+    const outside = [$('.hh-rail'), $('.hh-topbar'), $('#compareTray'), $('#openVisitButton'), ...[...page.children].filter((child) => child !== drawer && child.id !== 'recommendationPanelBackdrop')];
+    outside.filter(Boolean).forEach((element) => {
+      if (element.inert) return;
+      element.inert = true;
+      element.dataset.hhFilterInert = 'true';
+      element.dataset.hhFilterAriaHidden = element.hasAttribute('aria-hidden') ? element.getAttribute('aria-hidden') : '__missing__';
+      element.setAttribute('aria-hidden', 'true');
+    });
+    document.body.style.overflow = 'hidden';
+    window.requestAnimationFrame(() => {
+      if (!recommendationFilterModalActive || drawer.getAttribute('aria-hidden') === 'true') return;
+      ($('#closeRecommendationFilters') || drawer).focus();
+    });
+    return;
+  }
+
+  if (!recommendationFilterModalActive) return;
+  recommendationFilterModalActive = false;
+  drawer?.removeAttribute('role');
+  drawer?.removeAttribute('aria-modal');
+  drawer?.removeAttribute('tabindex');
+  $$('[data-hh-filter-inert="true"]').forEach((element) => {
+    element.inert = false;
+    if (element.dataset.hhFilterAriaHidden === '__missing__') element.removeAttribute('aria-hidden');
+    else element.setAttribute('aria-hidden', element.dataset.hhFilterAriaHidden || 'false');
+    delete element.dataset.hhFilterInert;
+    delete element.dataset.hhFilterAriaHidden;
+  });
+  if (!MODAL_IDS.some((id) => !$(`#${id}`)?.hidden)) document.body.style.overflow = recommendationFilterPreviousOverflow;
+  recommendationFilterPreviousOverflow = '';
+}
+
 function setRecommendationPanel(panel = '', { restoreFocus = false } = {}) {
   const page = $('.recommendation-page');
   const filterPanel = $('#recommendationFilterPanel');
   const resultPanel = $('#recommendationResultPanel');
   const next = panel === 'filters' || panel === 'results' ? panel : '';
   if (next) recommendationPanelOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  page?.classList.toggle('filters-open', next === 'filters');
-  page?.classList.toggle('results-open', next === 'results');
-  filterPanel?.setAttribute('aria-hidden', String(next !== 'filters'));
-  resultPanel?.setAttribute('aria-hidden', String(next !== 'results'));
-  if (filterPanel) filterPanel.inert = next !== 'filters';
-  if (resultPanel) resultPanel.inert = next !== 'results';
-  $('#toggleRecommendationFilters')?.setAttribute('aria-expanded', String(next === 'filters'));
-  $('#toggleRecommendationResults')?.setAttribute('aria-expanded', String(next === 'results'));
-  $('#recommendationPanelBackdrop').hidden = !next;
+  const persistentPanel = window.matchMedia('(min-width: 1024px)').matches;
+  if (next === 'results') state.recommendationPanelCollapsed = false;
+  const filterOpen = next === 'filters';
+  const resultsOpen = next === 'results'
+    || (persistentPanel && !filterOpen && state.currentView === 'recommend' && !state.recommendationPanelCollapsed);
+  hhUI.set({
+    panel: resultsOpen ? 'open' : 'collapsed',
+    filterDrawer: filterOpen,
+    ...(!persistentPanel && !resultsOpen ? { sheet: 'peek' } : {}),
+  });
+  page?.classList.toggle('filters-open', filterOpen);
+  page?.classList.toggle('results-open', resultsOpen);
+  page?.classList.toggle('results-collapsed', persistentPanel && state.recommendationPanelCollapsed);
+  filterPanel?.setAttribute('aria-hidden', String(!filterOpen));
+  resultPanel?.setAttribute('aria-hidden', String(!resultsOpen));
+  if (filterPanel) filterPanel.inert = !filterOpen;
+  if (resultPanel) resultPanel.inert = !resultsOpen;
+  setRecommendationFilterDialog(filterOpen);
+  $('#toggleRecommendationFilters')?.setAttribute('aria-expanded', String(filterOpen));
+  $('#toggleRecommendationResults')?.setAttribute('aria-expanded', String(resultsOpen));
+  $('#toggleRecommendationFilters')?.setAttribute('aria-label', filterOpen ? '집 찾기 조건 닫기' : '집 찾기 조건 열기');
+  $('#toggleRecommendationResults')?.setAttribute('aria-label', resultsOpen ? '후보 결과 접기' : '후보 결과 열기');
+  // The result sheet is intentionally non-modal so the map remains usable.
+  // Only the mobile filter drawer needs a blocking backdrop.
+  $('#recommendationPanelBackdrop').hidden = persistentPanel || !filterOpen;
   window.requestAnimationFrame(() => recommendationMap.resize());
   if (!next && restoreFocus && recommendationPanelOpener?.isConnected) recommendationPanelOpener.focus();
   if (!next) recommendationPanelOpener = null;
@@ -761,6 +904,7 @@ function setRecommendationPanel(panel = '', { restoreFocus = false } = {}) {
 
 function selectVisit(id, focusMap = false) {
   state.selectedVisitId = id;
+  hhUI.select({ kind: 'visit', id: String(id) });
   $$('.property-card').forEach((card) => card.classList.toggle('selected', card.dataset.visitId === id));
   if (focusMap) homeMap.focus(id);
   if (state.currentView === 'map') setMapPanel('results');
@@ -1108,7 +1252,7 @@ function makeSupplyCard(notice) {
   const favorite = state.supplyFavorites.includes(id);
   const newlywedUnits = supplyNewlywedUnits(notice);
   const location = supplyLocation(notice);
-  const card = createElement('article', `supply-card${state.supplySelectedId === id ? ' selected' : ''}`);
+  const card = createElement('article', `supply-card hh-card--supply${state.supplySelectedId === id ? ' selected' : ''}`);
   card.dataset.supplyId = id;
   const top = createElement('div', 'supply-card-top');
   const badges = createElement('div', 'supply-card-badges');
@@ -1129,10 +1273,7 @@ function makeSupplyCard(notice) {
     state.supplySelectedId = id;
     renderSupply();
     if (window.matchMedia('(max-width: 900px)').matches) {
-      window.requestAnimationFrame(() => $('#supplyDetail')?.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'start',
-      }));
+      window.requestAnimationFrame(() => scrollNode($('#supplyDetail')));
     }
   });
   main.append(top, createElement('h2', '', notice.title || '이름 없는 공식 공고'), createElement('p', 'supply-card-address', `${supplyRegionLabel(notice)}${location.district ? ` ${location.district}` : ''} · ${location.address || '공급 위치 공고문 확인'}`));
@@ -1141,10 +1282,21 @@ function makeSupplyCard(notice) {
   main.appendChild(scheduleRow);
   const facts = createElement('div', 'supply-card-facts');
   const maxPrice = supplyPrice(notice);
+  const units = Number(notice.totalUnits);
+  const unitsValue = createElement('span');
+  setEvidenceValue(unitsValue, units > 0 ? units : null, units > 0 ? 'verified' : 'unknown', {
+    format: (value) => `공급 ${Number(value).toLocaleString('ko-KR')}세대`, sourceKind: notice.source || 'official-supply',
+    derivation: 'official-field', freshness: notice.freshness || 'unknown', decisionStatus: units > 0 ? 'observed' : 'unknown', reason: '공급세대 공고문 확인',
+  });
+  const priceValue = createElement('span');
+  setEvidenceValue(priceValue, maxPrice, maxPrice ? 'verified' : 'unknown', {
+    format: (value) => `최고 ${formatPrice(value)}`, sourceKind: notice.source || 'official-supply',
+    derivation: 'official-max-price', freshness: notice.freshness || 'unknown', decisionStatus: maxPrice ? 'observed' : 'unknown', reason: '분양가 미공개 · 공고문 확인',
+  });
   facts.append(
-    createElement('span', '', `공급 ${Number(notice.totalUnits) > 0 ? `${Number(notice.totalUnits).toLocaleString('ko-KR')}세대` : '세대수 확인'}`),
+    unitsValue,
     createElement('span', '', supplyAreaRange(notice)),
-    createElement('span', '', maxPrice ? `최고 ${formatPriceManwon(maxPrice)}` : '가격 공고문 확인'),
+    priceValue,
   );
   main.appendChild(facts);
   const foot = createElement('div', 'supply-card-foot');
@@ -1636,13 +1788,19 @@ function resetSubscriptionProfile() {
 function goToGuideAnchor(anchorId) {
   MODAL_IDS.forEach((id) => closeModalShell(id));
   setView('guide');
-  window.setTimeout(() => document.getElementById(anchorId)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }), 60);
+  window.setTimeout(() => scrollNode(document.getElementById(anchorId)), 60);
 }
 
 function setView(view, persist = true) {
   const valid = ['map', 'recommend', 'visits', 'supply', 'market', 'connections', 'guide'].includes(view) ? view : 'recommend';
   const changed = state.currentView !== valid;
   state.currentView = valid;
+  const shellScreen = valid === 'recommend' ? 'finder' : ['map', 'visits'].includes(valid) ? 'records' : valid === 'connections' ? 'health' : valid;
+  document.body.dataset.hhScreen = shellScreen;
+  hhUI.set({
+    screen: shellScreen,
+    subview: valid === 'map' ? 'map' : valid === 'visits' ? 'list' : valid === 'market' ? state.marketPanel : 'default',
+  });
   $$('.portal-nav-item').forEach((button) => {
     const active = button.dataset.viewTarget === valid;
     button.classList.toggle('active', active);
@@ -1661,12 +1819,16 @@ function setView(view, persist = true) {
   if (valid === 'market') window.setTimeout(renderMarket, 20);
   if (valid === 'supply') window.setTimeout(() => ensureSupplyFeed(), 20);
   if (valid === 'guide') window.setTimeout(renderSubscriptionProfile, 20);
-  if (valid === 'recommend') window.setTimeout(async () => {
-    updateRecommendationPreview();
-    const map = await refreshRecommendationMapLayers();
-    map?.resize();
-  }, 20);
+  if (valid === 'recommend') {
+    setRecommendationPanel('');
+    window.setTimeout(async () => {
+      updateRecommendationPreview();
+      const map = await refreshRecommendationMapLayers();
+      map?.resize();
+    }, 20);
+  }
   if (valid === 'visits') renderArchive();
+  document.dispatchEvent(new CustomEvent('homehunt:viewchange', { detail: { view: valid, screen: shellScreen } }));
   if (changed) window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
@@ -2181,8 +2343,16 @@ function renderForecastExplain(forecast, contextLabel = '', areaM2 = null) {
       if (reason.includes('마지막 유효 거래월')) return '최근 실제 거래가 너무 오래됐어요.';
       return reason;
     });
-    root.append(createElement('strong', '', '지금은 예상가격을 보여드리지 않아요'), createElement('p', '', [...new Set(friendlyReasons)].join(' ')));
+    root.className = 'forecast-explain hh-forecast-hold';
+    const heldValue = createElement('div', 'hh-statblock hh-statblock--unknown');
+    setEvidenceValue(heldValue, null, 'unknown', {
+      format: 'text', sourceKind: 'forecast-model', derivation: 'quality-gate',
+      freshness: state.complexMeta?.partial ? 'partial' : 'fresh', decisionStatus: 'withheld',
+      reason: '지금은 예상가격을 보여드리지 않아요',
+    });
+    root.append(heldValue, createElement('p', '', [...new Set(friendlyReasons)].join(' ')));
     const held = document.createElement('dl');
+    held.className = 'hh-gate-list';
     [['사용 가능한 월', `${forecast.observations || 0}개월`], ['사용 거래', `${Number(forecast.transactionCount || 0).toLocaleString('ko-KR')}건`], ['마지막 거래 경과', forecast.staleMonths === null ? '자료 없음' : `${forecast.staleMonths}개월`]].forEach(([term, desc]) => held.append(createElement('dt', '', term), createElement('dd', '', desc)));
     root.appendChild(held);
     return;
@@ -2193,9 +2363,16 @@ function renderForecastExplain(forecast, contextLabel = '', areaM2 = null) {
   const estimatedTotal = hasExactArea ? last.point * exactArea / 3.3 : null;
   const estimatedLow = hasExactArea ? last.lower * exactArea / 3.3 : null;
   const estimatedHigh = hasExactArea ? last.upper * exactArea / 3.3 : null;
+  root.className = 'forecast-explain hh-forecast-ready';
+  const forecastValue = createElement('div', 'forecast-number');
+  setEvidenceValue(forecastValue, hasExactArea ? estimatedTotal : last.point, 'estimated', {
+    format: hasExactArea ? 'price' : (value) => `평당 ${formatPrice(value)}`,
+    sourceKind: 'molit-trade', derivation: 'damped-trend-forecast', freshness: 'reference',
+    decisionStatus: 'reference-only', observedAt: last.month,
+  });
   root.append(
     createElement('strong', '', `${last.month} 예상 ${hasExactArea ? '평균 거래가격' : '평균 평당가격'}`),
-    createElement('div', 'forecast-number', hasExactArea ? formatPrice(estimatedTotal) : formatP33(last.point)),
+    forecastValue,
   );
   const description = forecast.monthlyTrendPct >= 0 ? `최근 추세는 월 ${forecast.monthlyTrendPct.toFixed(2)}% 상승 방향입니다.` : `최근 추세는 월 ${Math.abs(forecast.monthlyTrendPct).toFixed(2)}% 하락 방향입니다.`;
   root.append(createElement('p', '', `${hasExactArea ? `${formatAreaPair(exactArea)} · ${formatP33(last.point)}. ` : ''}${contextLabel ? `${contextLabel}의 ` : ''}실제 거래가격을 1평(3.3㎡) 기준으로 환산해 평균낸 흐름입니다. ${description} 아직 신고가 끝나지 않은 최근 2개월은 계산에서 뺐습니다.`));
@@ -2212,7 +2389,7 @@ function renderForecastExplain(forecast, contextLabel = '', areaM2 = null) {
   [['예상 가능 범위', hasExactArea ? `${formatPrice(estimatedLow)} – ${formatPrice(estimatedHigh)}` : `${formatP33(last.lower)} – ${formatP33(last.upper)}`], ['평당으로 보면', `${formatP33(last.point)} · 1평≈3.3㎡`], ['과거 결과로 다시 확인', backtestLabel], ['가격 유지 가정과 비교', skillLabel], ['예상 범위 적중 기록', coverageLabel], ['거래가 있었던 달', `${forecast.observations}/${forecast.calendarSpanMonths}개월 · ${forecast.coveragePct.toFixed(0)}%`], ['계산에 사용한 거래', `${forecast.transactionCount.toLocaleString('ko-KR')}건`], ['신고 진행 중인 달 제외', `최근 ${forecast.incompleteMonths || 0}개월 · ${forecast.excludedIncompleteObservations || 0}개 관측 제외`], ['월별 가격 흔들림', `${forecast.residualVolatilityPct.toFixed(1)}%`], ['최근 6개월 거래량', `${forecast.recentVolume}건${Number.isFinite(forecast.volumeChangePct) ? ` · 이전 대비 ${forecast.volumeChangePct >= 0 ? '+' : ''}${forecast.volumeChangePct.toFixed(0)}%` : ''}`]].forEach(([term, desc]) => {
     list.append(createElement('dt', '', term), createElement('dd', '', desc));
   });
-  root.append(list, createElement('p', '', '예상 범위는 과거에 틀렸던 폭을 이용한 참고값이며 미래 가격을 보장하지 않습니다. 거래 건수와 최근 개별 거래도 함께 확인하세요.'));
+  root.append(list, createElement('p', 'hh-model-warning', 'AI 예측이 아니며 확률을 보장하지 않습니다. 금리·공급·정책은 반영하지 않았고, 예상 범위는 과거에 틀렸던 폭을 이용한 참고값입니다.'));
 }
 
 function selectedComplexMarketContext() {
@@ -2277,13 +2454,13 @@ function renderComplexAreaRanking(context) {
 function renderMarketEmpty() {
   setMarketControlsForContext(false);
   $('#marketContextBanner').textContent = '단지를 검색하면 단지·거래유형·정확한 전용면적에 맞춰 요약·차트·예측이 함께 바뀝니다.';
-  $('#kpiAverageTotal').textContent = '—';
-  $('#kpiAverageP33').textContent = '—';
+  setEvidenceValue($('#kpiAverageTotal'), null, 'unknown', { reason: '단지 검색 전', sourceKind: 'molit-trade' });
+  setEvidenceValue($('#kpiAverageP33'), null, 'unknown', { reason: '단지 검색 전', sourceKind: 'molit-trade' });
   $('#kpiAverageMonth').textContent = '단지 검색 전';
-  $('#kpiMom').textContent = '—';
-  $('#kpiMom').style.color = '';
+  setEvidenceValue($('#kpiMom'), null, 'unknown', { reason: '비교 전', sourceKind: 'molit-trade' });
+  $('#kpiMom').dataset.trend = 'unknown';
   $('#kpiMomNote').textContent = '단지를 먼저 검색해주세요';
-  $('#kpiCount').textContent = '—';
+  setEvidenceValue($('#kpiCount'), null, 'unknown', { reason: '표본 확인 전', sourceKind: 'molit-trade' });
   $('#kpiQuality').textContent = '표본 확인 전';
   $('#transactionTitle').textContent = '최근 개별 거래';
   $('#marketTrendTitle').textContent = '월별 평균 실거래가격';
@@ -2326,13 +2503,36 @@ function renderMarket() {
   $('#marketContextBanner').textContent = isComplex
     ? `${contextName}의 실제 거래를 기준으로 아래 모든 숫자와 그래프가 함께 바뀌었습니다.`
     : '아래 값은 선택한 지역·거래유형·면적대의 실제 거래를 평균낸 결과입니다.';
-  $('#kpiAverageTotal').textContent = latest ? formatPrice(latest.averageTotal) : '—';
-  $('#kpiAverageP33').textContent = latest ? formatP33(latest.averageP33) : '—';
+  setEvidenceValue($('#kpiAverageTotal'), latest?.averageTotal, latest ? 'verified' : 'unknown', {
+    format: 'price', sourceKind: 'molit-trade', derivation: 'arithmetic-mean',
+    freshness: context.summary.provisionalMonths ? 'provisional' : 'fresh', decisionStatus: latest ? 'observed' : 'unknown',
+    observedAt: latest?.month, reason: '거래 없음',
+  });
+  setEvidenceValue($('#kpiAverageP33'), latest?.averageP33, latest ? 'verified' : 'unknown', {
+    format: (value) => `평당 ${formatPrice(value)}`, sourceKind: 'molit-trade', derivation: 'arithmetic-mean-p33',
+    freshness: context.summary.provisionalMonths ? 'provisional' : 'fresh', decisionStatus: latest ? 'observed' : 'unknown',
+    observedAt: latest?.month, reason: '거래 없음',
+  });
   $('#kpiAverageMonth').textContent = latest ? `${latest.month}${context.summary.provisionalMonths ? ' · 최근월 잠정' : ''}` : '데이터 없음';
-  $('#kpiMom').textContent = latest?.mom ? `${latest.mom.pct >= 0 ? '+' : ''}${latest.mom.pct.toFixed(1)}%` : '—';
-  $('#kpiMom').style.color = latest?.mom?.pct > 0 ? '#e85d4a' : latest?.mom?.pct < 0 ? '#3178c6' : '';
+  const momDirection = !latest?.mom ? 'unknown' : latest.mom.pct > 0 ? 'up' : latest.mom.pct < 0 ? 'down' : 'flat';
+  const momLabel = !latest?.mom
+    ? null
+    : latest.mom.pct > 0
+      ? `▲ +${latest.mom.pct.toFixed(1)}%`
+      : latest.mom.pct < 0
+        ? `▼ ${latest.mom.pct.toFixed(1)}%`
+        : '변화 없음';
+  setEvidenceValue($('#kpiMom'), momLabel, latest?.mom ? 'verified' : 'unknown', {
+    format: 'text', sourceKind: 'molit-trade', derivation: 'month-over-month', freshness: 'fresh',
+    decisionStatus: latest?.mom ? 'observed' : 'unknown', reason: '비교 가능한 직전월 없음',
+  });
+  $('#kpiMom').dataset.trend = momDirection;
   $('#kpiMomNote').textContent = latest?.mom ? '직전 달 평균 평당가격과 비교' : '직전 달 거래 표본 없음';
-  $('#kpiCount').textContent = latest ? `${latest.count.toLocaleString('ko-KR')}건` : '—';
+  setEvidenceValue($('#kpiCount'), latest?.count, latest ? 'verified' : 'unknown', {
+    format: (value) => `${Number(value).toLocaleString('ko-KR')}건`, sourceKind: 'molit-trade',
+    derivation: 'sample-count', freshness: 'fresh', decisionStatus: latest ? 'observed' : 'unknown',
+    reason: '표본 없음',
+  });
   $('#kpiQuality').textContent = latest
     ? isComplex ? `선택 면적 · 전체 ${context.records.length.toLocaleString('ko-KR')}건` : `표본 ${latest.quality === 'high' ? '충분' : latest.quality === 'medium' ? '보통' : '적음'} · ${latest.complexCount}개 단지`
     : '표본 없음';
@@ -2723,7 +2923,7 @@ async function openMarketForVisit(visit) {
   await searchComplexMarket(null);
   if (isStaleIntent()) return;
   if (!$('#complexHistoryCard').hidden) {
-    $('#complexHistoryCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollNode($('#complexHistoryCard'));
   }
 }
 
@@ -2848,6 +3048,7 @@ function setMarketPanel(panelName, { focus = false } = {}) {
   const names = ['summary', 'trend', 'forecast'];
   const selected = names.includes(panelName) ? panelName : 'summary';
   state.marketPanel = selected;
+  if (state.currentView === 'market') hhUI.set({ subview: selected });
   $$('[data-market-tab]').forEach((button) => {
     const active = button.dataset.marketTab === selected;
     button.classList.toggle('is-active', active);
@@ -3581,26 +3782,38 @@ function renderVisitDealGap(exactRecords, area, dealType) {
   }
   const metrics = createElement('div', 'visit-deal-gap-metrics');
   const visitMarket = createElement('article');
-  visitMarket.append(createElement('span', '', '방문 당시 평균 실거래'), createElement('strong', '', formatPrice(baseline.averageManWon)), createElement('small', '', `${baseline.startDate}–${baseline.endDate} · ${baseline.sampleSize}건${baseline.method === 'symmetric-window-fallback' ? ' · ±90일 보완' : ''}`));
+  const visitMarketValue = createElement('strong');
+  setEvidenceValue(visitMarketValue, baseline.averageManWon, 'verified', { format: 'price', sourceKind: 'molit-trade', derivation: 'visit-window-mean', freshness: 'historical', decisionStatus: 'observed', observedAt: visit.visitDate });
+  visitMarket.append(createElement('span', '', '방문 당시 평균 실거래'), visitMarketValue, createElement('small', '', `${baseline.startDate}–${baseline.endDate} · ${baseline.sampleSize}건${baseline.method === 'symmetric-window-fallback' ? ' · ±90일 보완' : ''}`));
   const currentMarket = createElement('article');
   const currentConfidence = current.sparse || current.confidence === 'low'
     ? ' · 표본 적음 · 낮은 신뢰도'
     : '';
-  currentMarket.append(createElement('span', '', '현재 평균 실거래'), createElement('strong', '', formatPrice(current.averageManWon)), createElement('small', '', `${current.startDate}–${current.endDate} · ${current.sampleSize}건${currentConfidence}`));
+  const currentMarketValue = createElement('strong');
+  setEvidenceValue(currentMarketValue, current.averageManWon, 'verified', { format: 'price', sourceKind: 'molit-trade', derivation: 'recent-window-mean', freshness: 'fresh', decisionStatus: 'observed', observedAt: current.endDate });
+  currentMarket.append(createElement('span', '', '현재 평균 실거래'), currentMarketValue, createElement('small', '', `${current.startDate}–${current.endDate} · ${current.sampleSize}건${currentConfidence}`));
   const change = benchmark.marketChange;
   const marketChange = createElement('article', `deal-gap-result ${change.direction === 'up' ? 'higher' : change.direction === 'down' ? 'lower' : 'same'}`);
+  const marketChangeValue = createElement('strong');
+  setEvidenceValue(marketChangeValue, change.available ? (change.amountManWon === 0 ? '변화 없음' : `${change.amountManWon > 0 ? '▲ +' : '▼ −'}${formatPrice(Math.abs(change.amountManWon))}`) : null, change.available ? 'verified' : 'unknown', {
+    format: 'text', sourceKind: 'molit-trade', derivation: 'visit-to-current-difference', freshness: 'fresh', decisionStatus: change.available ? change.direction : 'withheld', reason: '계산 보류',
+  });
   marketChange.append(
     createElement('span', '', change.available ? '동일조건 시장 변화' : '방문 후 새 거래 없음'),
-    createElement('strong', '', change.available ? (change.amountManWon === 0 ? '변화 없음' : `${change.amountManWon > 0 ? '+' : '−'}${formatPrice(Math.abs(change.amountManWon))}`) : '계산 보류'),
+    marketChangeValue,
     createElement('small', '', change.available
       ? `${change.percent > 0 ? '+' : ''}${change.percent.toFixed(1)}%${change.sparse || change.confidence === 'low' ? ' · 표본 적음/낮은 신뢰도' : ''}`
       : '당시 확인가로 상승률을 대신 계산하지 않음'),
   );
   const asking = createElement('article', 'asking-gap');
   const askingGap = benchmark.askingVsVisitMarket;
+  const askingValue = createElement('strong');
+  setEvidenceValue(askingValue, askingPrice > 0 ? askingPrice : null, askingPrice > 0 ? 'personal' : 'unknown', {
+    format: 'price', sourceKind: 'visit-record', derivation: 'direct-entry', freshness: 'historical', decisionStatus: askingPrice > 0 ? 'recorded' : 'missing', observedAt: visit.visitDate, reason: '미입력',
+  });
   asking.append(
     createElement('span', '', '방문 당시 확인가'),
-    createElement('strong', '', askingPrice > 0 ? formatPrice(askingPrice) : '미입력'),
+    askingValue,
     createElement('small', '', askingGap.available ? `당시 실거래 대비 ${askingGap.percent > 0 ? '+' : ''}${askingGap.percent.toFixed(1)}% · 시장 변화와 별개` : `${visit.dealType} · ${formatAreaPair(visit.areaM2)}`),
   );
   metrics.append(visitMarket, currentMarket, marketChange, asking);
@@ -3869,7 +4082,7 @@ function recommendationChipLabels(filters) {
   labels.push({ label: `${(filters.maxPriceManWon / 10000).toLocaleString('ko-KR')}억원 ${filters.priceOperator === 'lte' ? '이하' : '미만'}` });
   labels.push({ label: `${formatAreaPair(filters.minAreaM2)} ${filters.areaOperator === 'gt' ? '초과' : '이상'}` });
   labels.push({ label: `${filters.maxAgeYears}년 이내` });
-  if (filters.commuteMaxMinutes) labels.push({ label: `목적지 ${filters.destinations?.length || 0}곳 · 각 ${filters.commuteMaxMinutes}분 미만`, needsConfirmation: true });
+  if (filters.commuteMaxMinutes) labels.push({ label: `목적지 ${filters.destinations?.length || 0}곳 · 각 ${filters.commuteMaxMinutes}분 이하`, needsConfirmation: true });
   return labels;
 }
 
@@ -3880,7 +4093,7 @@ function recommendationSentence(filters) {
   const commuteMode = filters.commuteModes.includes('car') && filters.commuteModes.includes('transit')
     ? '자동차 또는 대중교통'
     : filters.commuteModes.includes('transit') ? '버스·지하철' : '자동차';
-  return `${region}에서 ${Number(filters.minHouseholds || 0).toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}, 회사까지 ${commuteMode} ${filters.commuteMaxMinutes}분 미만, ${priceEok.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}억 ${filters.priceOperator === 'lte' ? '이하' : '미만'}, 전용 ${areaPyeong.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}평 ${filters.areaOperator === 'gt' ? '초과' : '이상'}, ${filters.maxAgeYears}년 이내 아파트`;
+  return `${region}에서 ${Number(filters.minHouseholds || 0).toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}, 회사까지 ${commuteMode} ${filters.commuteMaxMinutes}분 이하, ${priceEok.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}억 ${filters.priceOperator === 'lte' ? '이하' : '미만'}, 전용 ${areaPyeong.toLocaleString('ko-KR', { maximumFractionDigits: 1 })}평 ${filters.areaOperator === 'gt' ? '초과' : '이상'}, ${filters.maxAgeYears}년 이내 아파트`;
 }
 
 async function updateRecommendationPreview() {
@@ -4547,6 +4760,8 @@ function activateRecommendationLayer(layer) {
   else control.setAttribute('aria-pressed', 'true');
   control.classList?.add('active', 'is-active');
   control.closest?.('[data-recommendation-layer]')?.classList.add('active', 'is-active');
+  const uiLayer = UI_LAYER_BY_RECOMMENDATION_LAYER[layer];
+  if (uiLayer) hhUI.setLayer(uiLayer, true);
 }
 
 function sampleEvenly(items, count) {
@@ -4720,6 +4935,7 @@ async function ensureRecommendationMap() {
     await recommendationMap.init(container, {
       cluster: true,
       onCandidateSelect: (candidate) => {
+        hhUI.select({ kind: 'complex', id: String(candidate.catalogId || candidate.id) });
         setRecommendationPanel('results');
         const id = CSS.escape(String(candidate.catalogId || candidate.id));
         const ordered = sortedRecommendationResults();
@@ -4729,10 +4945,18 @@ async function ensureRecommendationMap() {
           renderRecommendationResults();
         }
         $$('.recommendation-card').forEach((card) => card.classList.toggle('is-map-selected', card.dataset.candidateId === String(candidate.catalogId || candidate.id)));
-        window.requestAnimationFrame(() => $(`.recommendation-card[data-candidate-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+        window.requestAnimationFrame(() => scrollNode(
+          $(`.recommendation-card[data-candidate-id="${id}"]`),
+          { block: 'nearest', container: $('#recommendationResultPanel') },
+        ));
       },
       onContextSelect: (record) => {
-        if (record.mapLayer === 'visits') state.selectedVisitId = record.id;
+        if (record.mapLayer === 'visits') {
+          state.selectedVisitId = record.id;
+          hhUI.select({ kind: 'visit', id: String(record.id) });
+        } else if (record.mapLayer === 'supply') {
+          hhUI.select({ kind: 'supply', id: String(record.id) });
+        }
       },
     });
     state.recommendationMapReady = true;
@@ -5224,13 +5448,13 @@ function updateLocalConnectionUi(health = null, error = null) {
   state.localMarketConnected = true;
   state.localMarketKeyConfigured = Boolean(health.keyConfigured);
   state.localMarketVersion = String(health.version || '');
-  state.localMarketOutdated = !state.localMarketVersion || versionIsOlder(state.localMarketVersion, APP_CONFIG.appVersion);
+  state.localMarketOutdated = !state.localMarketVersion || versionIsOlder(state.localMarketVersion, APP_CONFIG.localApiContractVersion);
   state.localHistoryMonthsMax = Number(health.limits?.historyMonthsMax) || (state.localMarketOutdated ? 24 : 60);
   state.localCommuteCandidateLimit = Number(health.limits?.commuteCandidatesPerSearch) || 10;
   stateBadge.textContent = state.localMarketOutdated ? '서버 재시작 필요' : health.keyConfigured ? '실거래 연결' : '키 연결 필요';
   stateBadge.className = `service-state ${health.keyConfigured && !state.localMarketOutdated ? 'connected' : 'partial'}`;
   serverCheck.textContent = state.localMarketOutdated
-    ? `실행 중 ${state.localMarketVersion || '이전 버전'} → 화면 ${APP_CONFIG.appVersion} · 서버를 한 번 재시작해주세요`
+    ? `실행 중 API ${state.localMarketVersion || '이전 버전'} → 필요 API ${APP_CONFIG.localApiContractVersion} · 서버를 한 번 재시작해주세요`
     : `로컬 서버 정상 · ${Number(health.catalogCount || 0).toLocaleString('ko-KR')}개 서울·경기 단지`;
   serverCheck.classList.toggle('connection-warning', state.localMarketOutdated);
   const keyConnectionLabel = health.keySource === 'environment' ? '.env/환경변수 자동 연결' : '메모리 연결';
@@ -5490,7 +5714,7 @@ async function runRecommendation() {
     setRecommendationStatus(
       'error',
       '화면 업데이트 적용을 위해 서버를 한 번 다시 켜주세요',
-      `브라우저 새로고침만으로는 바뀌지 않습니다. 기존 서버 창에서 Ctrl+C를 누른 뒤 homehunt/scripts/start-local-market.ps1을 다시 실행하세요. homehunt/.env에 둔 키는 자동으로 다시 읽고, 화면에서만 연결했던 키는 다시 입력해야 합니다. ${APP_CONFIG.appVersion} 기준으로 찾습니다.`,
+      `브라우저 새로고침만으로는 바뀌지 않습니다. 기존 서버 창에서 Ctrl+C를 누른 뒤 homehunt/scripts/start-local-market.ps1을 다시 실행하세요. homehunt/.env에 둔 키는 자동으로 다시 읽고, 화면에서만 연결했던 키는 다시 입력해야 합니다. 로컬 API ${APP_CONFIG.localApiContractVersion} 이상에서 찾습니다.`,
     );
     return;
   }
@@ -5810,7 +6034,8 @@ async function showRecommendationOnMap(candidate) {
     activateRecommendationLayer('apartments');
     await refreshRecommendationMapLayers({ candidateOverride: mappedSource });
     map.focusCandidate(mappedCandidate);
-    setRecommendationPanel('');
+    setRecommendationPanel('results');
+    if (window.matchMedia('(max-width: 1023px)').matches) hhUI.set({ sheet: 'peek' });
     showToast(`${candidate.name} 후보를 추천 지도에서 찾았어요.`);
   } catch (error) {
     showToast(error.message || '지도에서 위치를 찾지 못했습니다.', 'error');
@@ -5886,7 +6111,7 @@ function bindOpenMarketButton(button, record, kind = 'candidate') {
 }
 
 function makeRecommendationCard(candidate, index) {
-  const card = createElement('article', 'recommendation-card');
+  const card = createElement('article', 'recommendation-card hh-card--result');
   card.dataset.candidateId = String(candidate.catalogId || candidate.id || '');
   card.style.animationDelay = `${Math.min(index, 12) * 22}ms`;
   const top = createElement('div', 'recommendation-card-top');
@@ -5925,9 +6150,19 @@ function makeRecommendationCard(candidate, index) {
   const priceBasisLabel = averageAvailable
     ? `${savedContext ? '저장 당시' : '조회기간'} 평균 매매가`
     : '이전 계산 기준 가격 · 다시 검색하면 평균으로 갱신';
+  const priceValue = createElement('strong');
+  setEvidenceValue(priceValue, averageAvailable ? areaAveragePrice(area) : null, averageAvailable ? 'verified' : 'unknown', {
+    format: 'price',
+    sourceKind: 'molit-trade',
+    derivation: averageAvailable ? 'arithmetic-mean' : 'legacy-snapshot',
+    freshness: area.latestMonth === currentMonth ? 'provisional' : 'fresh',
+    decisionStatus: averageAvailable ? 'eligible' : 'refresh-required',
+    observedAt: area.latestMonth,
+    reason: '평균가를 다시 확인해주세요',
+  });
   price.append(
     createElement('span', '', `${formatAreaPair(area.areaM2)} · ${priceBasisLabel}`),
-    createElement('strong', '', formatPrice(areaAveragePrice(area))),
+    priceValue,
     createElement('small', '', `${latestMonthLabel} · 평균을 낸 거래 ${Number(area.count || 0)}건 · 가장 최근 ${formatPrice(area.latestPriceManWon)}`),
   );
   const facts = createElement('div', 'recommendation-facts');
@@ -5945,11 +6180,24 @@ function makeRecommendationCard(candidate, index) {
     : commute?.verified
     ? `${commute.mode === 'transit' ? '버스·지하철' : '자동차'} ${commute.durationMinutes}분${transitDetail} · ${commute.withinLimit ? '조건 충족' : routeFullyChecked ? '조건 초과' : '다른 수단 미확인'}`
     : Number.isFinite(Number(candidate.weightedDistanceKm)) ? `가중 직선거리 ${Number(candidate.weightedDistanceKm).toFixed(1)}km · 실제 시간 아님` : '목적지 경로 확인 필요';
+  const commuteValue = createElement('span', decision === 'matched' ? 'commute-ok' : decision === 'excluded' ? 'commute-over' : 'unknown');
+  const commuteTier = verification.final && !verification.stale
+    ? 'verified'
+    : verification.stage === 'screening' ? 'estimated' : 'unknown';
+  setEvidenceValue(commuteValue, commuteFact, commuteTier, {
+    format: 'text',
+    estimatedPrefix: '약',
+    sourceKind: verification.provider || 'route-unverified',
+    derivation: verification.stage === 'screening' ? 'broad-screening' : 'route-result',
+    freshness: verification.stale ? 'stale' : 'fresh',
+    decisionStatus: decision,
+    reason: commuteFact,
+  });
   facts.append(
     createElement('span', '', `${Number(candidate.households || 0).toLocaleString('ko-KR')}세대`),
     createElement('span', '', `${candidate.builtYear || '연도 미상'}년 · ${candidate.builtYear ? `${age}년차` : '확인 필요'}`),
     createElement('span', '', `${savedContext ? '저장 당시 예산 안' : '예산 내'} 실제 평형 ${(candidate.qualifyingAreas || []).length}개`),
-    createElement('span', decision === 'matched' ? 'commute-ok' : decision === 'excluded' ? 'commute-over' : 'unknown', commuteFact),
+    commuteValue,
   );
   const commuteMatrix = createElement('div', 'recommendation-commute-matrix');
   const evaluations = balance?.evaluations || activeRecommendationDestinations().map((destination) => ({ destination, verified: false, withinLimit: false }));
@@ -5988,6 +6236,16 @@ function makeRecommendationCard(candidate, index) {
   commuteButton.addEventListener('click', () => verifySingleRecommendationCommute(candidate, commuteButton));
   actions.append(mapButton, marketButton, commuteButton, shortlistButton, landLink);
   card.append(top, price, facts, commuteMatrix, areas, actions);
+  const candidateRef = { kind: 'complex', id: card.dataset.candidateId };
+  if (hhUI.get().selectedRef?.kind === candidateRef.kind && hhUI.get().selectedRef?.id === candidateRef.id) card.classList.add('is-map-selected');
+  card.addEventListener('mouseenter', () => hhUI.hover(candidateRef));
+  card.addEventListener('mouseleave', () => hhUI.hover(null));
+  const selectFromCard = (event) => {
+    if (event.target.closest('button, a, input, select, textarea')) return;
+    hhUI.select(candidateRef);
+    void showRecommendationOnMap(candidate);
+  };
+  card.addEventListener('click', selectFromCard);
   return card;
 }
 
@@ -6199,6 +6457,8 @@ function trapModalFocus(event, modal) {
 
 function bindEvents() {
   bindRecommendationRanges();
+  const desktopPanelQuery = window.matchMedia('(min-width: 1024px)');
+  desktopPanelQuery.addEventListener?.('change', () => setRecommendationPanel(''));
   document.addEventListener('click', (event) => {
     const button = event.target.closest?.('[data-open-market-complex]');
     if (!button || button.dataset.marketBound === 'true') return;
@@ -6208,8 +6468,13 @@ function bindEvents() {
     openMarketForRecord(target.record, target.kind);
   }, true);
   new Set(Object.keys(RECOMMENDATION_LAYER_CONTROLS).map(recommendationLayerControl).filter(Boolean)).forEach((control) => {
+    const recommendationLayer = Object.entries(RECOMMENDATION_LAYER_CONTROLS).find(([, id]) => id === control.id)?.[0];
+    const uiLayer = UI_LAYER_BY_RECOMMENDATION_LAYER[recommendationLayer];
     if (control.matches?.('input[type="checkbox"], input[type="radio"]')) {
-      control.addEventListener('change', () => void refreshRecommendationMapLayers());
+      control.addEventListener('change', () => {
+        if (uiLayer) hhUI.setLayer(uiLayer, control.checked);
+        void refreshRecommendationMapLayers();
+      });
       return;
     }
     control.addEventListener('click', () => {
@@ -6217,10 +6482,30 @@ function bindEvents() {
       control.setAttribute('aria-pressed', String(!active));
       control.classList.toggle('active', !active);
       control.classList.toggle('is-active', !active);
+      if (uiLayer) hhUI.setLayer(uiLayer, !active);
       void refreshRecommendationMapLayers();
     });
   });
   $$('[data-view-target]').forEach((button) => button.addEventListener('click', () => setView(button.dataset.viewTarget)));
+  $('#hhGlobalSearchForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const query = $('#hhGlobalSearchInput')?.value.trim() || '';
+    setView('market');
+    if (!query) {
+      $('#complexSearchInput')?.focus();
+      return;
+    }
+    $('#complexRegion').value = '';
+    $('#complexSearchInput').value = query;
+    invalidateComplexSearch();
+    setComplexStatus('서울·경기 공식 단지 후보를 찾고 있어요.');
+    try {
+      const matches = await showCatalogSuggestions(query, { announceEmpty: true });
+      if (matches.length) setComplexStatus(`공식 단지 후보 ${matches.length}개를 찾았어요. 정확한 단지를 선택해주세요.`);
+    } catch (_) {
+      setComplexStatus('서울·경기 단지 목록을 읽지 못했어요. 잠시 후 다시 시도해주세요.', true);
+    }
+  });
   $('#supplySearch').addEventListener('input', (event) => { state.supplyFilters.query = event.target.value.trim(); renderSupply(); });
   $$('[data-supply-region]').forEach((button) => button.addEventListener('click', () => {
     state.supplyFilters.region = button.dataset.supplyRegion || 'all';
@@ -6276,9 +6561,18 @@ function bindEvents() {
   });
   $('#closeRecommendationFilters').addEventListener('click', () => setRecommendationPanel('', { restoreFocus: true }));
   $('#toggleRecommendationResults').addEventListener('click', () => {
-    setRecommendationPanel($('.recommendation-page').classList.contains('results-open') ? '' : 'results');
+    const page = $('.recommendation-page');
+    if (window.matchMedia('(min-width: 1024px)').matches && page.classList.contains('results-open')) {
+      state.recommendationPanelCollapsed = true;
+      setRecommendationPanel('');
+      return;
+    }
+    setRecommendationPanel(page.classList.contains('results-open') ? '' : 'results');
   });
-  $('#closeRecommendationResults').addEventListener('click', () => setRecommendationPanel('', { restoreFocus: true }));
+  $('#closeRecommendationResults').addEventListener('click', () => {
+    if (window.matchMedia('(min-width: 1024px)').matches) state.recommendationPanelCollapsed = true;
+    setRecommendationPanel('', { restoreFocus: true });
+  });
   $('#recommendationPanelBackdrop').addEventListener('click', () => setRecommendationPanel('', { restoreFocus: true }));
   $('#verifyTopCommutes').addEventListener('click', verifyTopRecommendationCommutes);
   $('#cancelRecommendation').addEventListener('click', () => cancelRecommendation());
@@ -6507,7 +6801,7 @@ function bindEvents() {
   $('#complexTryDemo').addEventListener('click', startComplexInteractionDemo);
   $('#complexOpenConnections').addEventListener('click', () => {
     setView('connections');
-    window.setTimeout(() => $('#molitConnectionCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+    window.setTimeout(() => scrollNode($('#molitConnectionCard'), { block: 'center' }), 80);
   });
   $('#complexDealType').addEventListener('change', () => {
     if (!$('#complexLoadingState').hidden) {
@@ -6599,6 +6893,11 @@ function bindEvents() {
     if (event.key === 'Escape' && postcodePanel && !postcodePanel.hidden) {
       event.preventDefault();
       closeCompanyPostcodeSearch();
+      return;
+    }
+    const recommendationFilterDialog = $('#recommendationFilterPanel');
+    if (event.key === 'Tab' && recommendationFilterModalActive && recommendationFilterDialog?.getAttribute('aria-hidden') === 'false') {
+      trapModalFocus(event, recommendationFilterDialog);
       return;
     }
     const openModal = MODAL_IDS.map((id) => $(`#${id}`)).find((modal) => modal && !modal.hidden);

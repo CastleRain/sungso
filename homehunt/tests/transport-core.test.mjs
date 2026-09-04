@@ -10,7 +10,7 @@ test('computes straight-line distance without presenting it as a route duration'
   assert.ok(distance > 20 && distance < 25);
 });
 
-test('selects the fastest verified route and applies a strict minute limit', () => {
+test('selects the fastest verified route and includes the exact minute boundary', () => {
   const commute = bestCommuteResult([
     { mode: 'car', verified: true, durationMinutes: 61 },
     { mode: 'transit', verified: true, durationMinutes: 54 },
@@ -18,6 +18,8 @@ test('selects the fastest verified route and applies a strict minute limit', () 
   ], 60);
   assert.equal(commute.best.mode, 'transit');
   assert.equal(commute.best.withinLimit, true);
+  const exact = bestCommuteResult([{ mode: 'transit', verified: true, durationMinutes: 60 }], 60);
+  assert.equal(exact.best.withinLimit, true);
 });
 
 test('keeps verified matches, distance estimates, over-limit routes, and unknowns separate', () => {
