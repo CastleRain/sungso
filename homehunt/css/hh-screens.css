@@ -935,6 +935,383 @@
   }
 }
 
+/* 3.0.4 — fully themed interactive controls */
+.hh-app.hh-v3 button,
+.hh-app.hh-v3 [role="button"] {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--hh-font-sans);
+}
+
+.hh-app.hh-v3 select:not([multiple]) {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  padding-inline-end: 34px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c6b78' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+.hh-app.hh-v3 .input-with-select {
+  grid-template-columns: minmax(0, 1fr) 88px;
+}
+
+.hh-app.hh-v3 :where(input, select, textarea)[aria-invalid="true"] {
+  border-color: var(--hh-danger) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hh-danger) 14%, transparent) !important;
+}
+
+.hh-app.hh-v3 textarea {
+  resize: none;
+  field-sizing: content;
+}
+
+.hh-app.hh-v3 .condition-range.hh-range {
+  --hh-range-progress: 0%;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  display: block;
+  width: 100%;
+  height: 22px !important;
+  min-height: 22px !important;
+  margin-block: var(--hh-space-3) 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px;
+  outline: 0;
+  background: linear-gradient(90deg,
+    var(--hh-accent) 0 var(--hh-range-progress),
+    var(--hh-line-strong) var(--hh-range-progress) 100%) center / 100% 5px no-repeat !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.hh-app.hh-v3 .condition-range.hh-range::-webkit-slider-runnable-track {
+  height: 5px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.hh-app.hh-v3 .condition-range.hh-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-block-start: -6.5px;
+  border: 4px solid var(--hh-surface);
+  border-radius: 50%;
+  background: var(--hh-accent);
+  box-shadow: 0 0 0 1px var(--hh-accent), 0 3px 10px rgba(31, 94, 255, .24);
+}
+
+.hh-app.hh-v3 .condition-range.hh-range::-moz-range-track {
+  height: 5px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hh-line-strong);
+}
+
+.hh-app.hh-v3 .condition-range.hh-range::-moz-range-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--hh-accent);
+}
+
+.hh-app.hh-v3 .condition-range.hh-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 4px solid var(--hh-surface);
+  border-radius: 50%;
+  background: var(--hh-accent);
+  box-shadow: 0 0 0 1px var(--hh-accent), 0 3px 10px rgba(31, 94, 255, .24);
+}
+
+.hh-app.hh-v3 .condition-range.hh-range:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--hh-accent) 24%, transparent);
+  outline-offset: 2px;
+}
+
+.hh-app.hh-v3 .condition-range.hh-range:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.hh-app.hh-v3 .district-combobox {
+  position: relative;
+  min-width: 0;
+}
+
+.hh-app.hh-v3 .district-suggestion-list {
+  position: absolute;
+  inset: calc(100% + 6px) 0 auto;
+  z-index: 1200;
+  max-height: 248px;
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--hh-line-strong);
+  border-radius: var(--hh-radius-md);
+  background: color-mix(in srgb, var(--hh-surface) 96%, transparent);
+  box-shadow: var(--hh-shadow-lg);
+  backdrop-filter: blur(16px);
+}
+
+.hh-app.hh-v3 .district-suggestion-list[hidden] {
+  display: none;
+}
+
+.hh-app.hh-v3 .district-suggestion-list button {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 var(--hh-space-4);
+  align-items: center;
+  border: 0;
+  border-radius: var(--hh-radius-sm);
+  color: var(--hh-ink-2);
+  background: transparent;
+  font-size: var(--hh-text-ui);
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+}
+
+.hh-app.hh-v3 .district-suggestion-list button:hover,
+.hh-app.hh-v3 .district-suggestion-list button.is-active {
+  color: var(--hh-accent-pressed);
+  background: var(--hh-accent-soft);
+}
+
+.hh-app.hh-v3 .company-search-capability.has-error {
+  border-color: color-mix(in srgb, var(--hh-danger) 34%, var(--hh-line));
+  background: color-mix(in srgb, var(--hh-danger) 6%, var(--hh-surface));
+}
+
+.hh-app.hh-v3 .company-search-capability.has-error > span > .ti {
+  color: var(--hh-danger);
+}
+
+.hh-app.hh-v3 :where(.connection-advanced, .transport-key-details) > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hh-space-3);
+  list-style: none;
+}
+
+.hh-app.hh-v3 :where(.connection-advanced, .transport-key-details) > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hh-app.hh-v3 :where(.connection-advanced, .transport-key-details) > summary::after {
+  content: "";
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: 3px;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  opacity: .7;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 160ms ease;
+}
+
+.hh-app.hh-v3 :where(.connection-advanced, .transport-key-details)[open] > summary::after {
+  transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.hh-app.hh-v3 .map-info .map-info-action {
+  display: inline-flex;
+  min-height: 34px;
+  margin-block-start: 10px;
+  padding: 0 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--hh-accent) 32%, var(--hh-line));
+  border-radius: 9px;
+  color: var(--hh-accent-pressed);
+  background: var(--hh-accent-soft);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hh-app.hh-v3 .map-info .map-info-action:hover {
+  color: var(--hh-text-on-dark);
+  background: var(--hh-accent);
+}
+
+.hh-app.hh-v3 .confirm-backdrop {
+  z-index: 7600;
+  padding: var(--hh-space-5);
+}
+
+.hh-app.hh-v3 .confirm-modal {
+  display: grid;
+  width: min(420px, 100%);
+  padding: var(--hh-space-7);
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--hh-space-5);
+  border: 1px solid var(--hh-line);
+  border-radius: 22px;
+  color: var(--hh-ink);
+  background: var(--hh-surface);
+  box-shadow: 0 28px 80px rgba(11, 27, 43, .28);
+}
+
+.hh-app.hh-v3 .confirm-modal-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--hh-danger);
+  background: color-mix(in srgb, var(--hh-danger) 10%, var(--hh-surface));
+  font-size: 23px;
+}
+
+.hh-app.hh-v3 .confirm-modal-copy > span {
+  display: block;
+  margin-block-end: var(--hh-space-2);
+  color: var(--hh-danger);
+  font-family: var(--hh-font-mono);
+  font-size: var(--hh-text-caption);
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.hh-app.hh-v3 .confirm-modal-copy h2 {
+  margin: 0;
+  font-size: var(--hh-text-title);
+  line-height: 1.25;
+}
+
+.hh-app.hh-v3 .confirm-modal-copy p {
+  margin: var(--hh-space-3) 0 0;
+  color: var(--hh-text-muted);
+  font-size: var(--hh-text-body);
+  line-height: 1.6;
+}
+
+.hh-app.hh-v3 .confirm-modal-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hh-space-3);
+}
+
+.hh-app.hh-v3 .confirm-modal-actions button {
+  min-height: 44px;
+  border-radius: var(--hh-radius-md);
+  font-size: var(--hh-text-ui);
+  font-weight: 800;
+}
+
+.hh-app.hh-v3 .danger-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--hh-danger);
+  color: var(--hh-text-on-dark);
+  background: var(--hh-danger);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--hh-danger) 22%, transparent);
+  cursor: pointer;
+}
+
+.hh-app.hh-v3 .danger-action-btn:hover {
+  filter: brightness(.94);
+}
+
+.hh-app .flatpickr-calendar {
+  overflow: hidden;
+  border: 1px solid var(--hh-line-strong);
+  border-radius: 18px;
+  color: var(--hh-ink);
+  background: var(--hh-surface);
+  box-shadow: 0 22px 60px rgba(11, 27, 43, .22);
+  font-family: var(--hh-font-sans);
+}
+
+.hh-app .flatpickr-calendar::before,
+.hh-app .flatpickr-calendar::after {
+  display: none;
+}
+
+.hh-app .flatpickr-months,
+.hh-app .flatpickr-weekdays,
+.hh-app .flatpickr-days {
+  background: var(--hh-surface);
+}
+
+.hh-app .flatpickr-current-month,
+.hh-app .flatpickr-current-month input.cur-year,
+.hh-app .flatpickr-weekday {
+  color: var(--hh-ink-2);
+  font-family: var(--hh-font-sans);
+  font-weight: 800;
+}
+
+.hh-app .flatpickr-day {
+  border-radius: 10px;
+  color: var(--hh-ink-2);
+  font-weight: 650;
+}
+
+.hh-app .flatpickr-day:hover,
+.hh-app .flatpickr-day:focus {
+  border-color: var(--hh-accent-soft);
+  background: var(--hh-accent-soft);
+}
+
+.hh-app .flatpickr-day.selected,
+.hh-app .flatpickr-day.selected:hover,
+.hh-app .flatpickr-day.selected:focus {
+  border-color: var(--hh-accent);
+  color: var(--hh-text-on-dark);
+  background: var(--hh-accent);
+}
+
+.hh-app .flatpickr-time {
+  border-block-start: 1px solid var(--hh-line);
+}
+
+.hh-app .flatpickr-time input,
+.hh-app .flatpickr-time .flatpickr-am-pm {
+  color: var(--hh-ink);
+  background: var(--hh-surface);
+  font-family: var(--hh-font-mono);
+  font-weight: 800;
+}
+
+@media (min-width: 980px) {
+  .hh-app.hh-v3 .map-view .property-workspace.map-first-shell > .map-stage > .map-status-card {
+    bottom: calc(var(--map-first-gap) + 54px);
+  }
+}
+
+@media (max-width: 1279px) and (min-width: 1024px) {
+  .hh-app.hh-v3 .supply-command {
+    grid-template-columns: minmax(210px, 1.2fr) repeat(2, minmax(150px, 1fr)) auto auto;
+  }
+}
+
+@media (max-width: 479px) {
+  .hh-app.hh-v3 .confirm-modal {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding: var(--hh-space-5);
+  }
+
+  .hh-app.hh-v3 .confirm-modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+}
+
 /* Remaining current-screen adapters: records, market, supply, guide and health. */
 .hh-app.hh-v3 .portal-main > .app-view:not(.recommendation-view) > .page-wrap,
 .hh-app.hh-v3 .portal-main > .app-view:not(.recommendation-view) > .page-wrap.wide {
@@ -1714,7 +2091,7 @@
 
 @media (max-width: 1279px) and (min-width: 1024px) {
   .hh-app.hh-v3 .supply-command {
-    grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(0, auto));
+    grid-template-columns: minmax(210px, 1.2fr) repeat(2, minmax(150px, 1fr)) auto auto;
   }
 
   .hh-app.hh-v3 .supply-command > * {

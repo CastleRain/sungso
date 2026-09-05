@@ -11,7 +11,7 @@
 HomeHunt는 현재 매물 호가를 보여주는 네이버 부동산 복제 서비스가 아니다. 다음 세 종류의 정보를 의도적으로 분리한다.
 
 1. **공식 공개 정보**: 한국부동산원 공동주택 단지 목록, 국토교통부 아파트 매매·전월세 실거래, 청약홈·LH·SH 분양 공고
-2. **외부 지도·경로 결과**: NAVER 지도/주소/자동차 경로, NAVER API HUB 장소 검색, Kakao 또는 TMAP 대중교통 경로
+2. **외부 지도·경로 결과**: NAVER 지도/주소/자동차 경로, 기존 NAVER Developers 장소 검색, Kakao 또는 TMAP 대중교통 경로
 3. **두 사람의 개인 기록**: 방문한 집, 현장에서 확인한 가격과 메모, 회사·주요 목적지, 관심 후보, 청약 자가입력
 
 공식 거래와 개인이 현장에서 들은 호가는 서로 섞지 않는다. 회사 좌표와 방문 메모도 공개 데이터 파일에 넣지 않는다. 검색 결과가 부족하더라도 임의의 단지나 가격을 실제 데이터처럼 생성하지 않는다.
@@ -70,7 +70,7 @@ HomeHunt는 빌드가 필요한 프레임워크 앱이 아니라 HTML/CSS/JavaSc
 | 계속 추적할 단지 | 사용자가 공개 설정에 명시한 단지 | 예약 수집 단지 이력 | `config/tracked-apartments.json`, `data/apartment-history.json` | 개인 메모를 넣는 파일이 아님 |
 | 분양 공고 | 청약홈 APT/잔여/임의공급, LH 분양/신혼희망타운, SH 공식 RSS | 분양 목록·일정·조건 필터·알림 | `data/home-supply.json` | 공급원별 승인과 필드 제공 여부가 다름 |
 | 지도/주소 | NAVER Maps Web SDK | 지도, 주소 검색, 역지오코딩, 좌표 확정 | `js/naver-map.js` | 상호/회사명 POI 검색 API가 아님 |
-| 회사/건물명 | NAVER API HUB 지역 검색 + Kakao 우편번호 주소 DB 보조 | 회사·건물 후보 검색 | localhost `/api/place-search`, 브라우저 주소 모달 | 주소 DB는 입점 상호를 모두 보장하지 않음 |
+| 회사/건물명 | 기존 NAVER Developers 지역 검색 + Kakao 우편번호 주소 DB 보조 | 회사·건물 후보 검색 | localhost `/api/place-search`, 브라우저 주소 모달 | 기존 검색 키는 2027-06-30 전 API HUB 이관 필요; 주소 DB는 입점 상호를 모두 보장하지 않음 |
 | 자동차 경로 | NAVER Directions 5 | 후보→목적지 자동차 시간 | localhost `/api/commute*` | 실시간 상황과 호출 시점에 따라 달라짐 |
 | 대중교통 경로 | Kakao 대중교통 또는 TMAP 대중교통 | 광역 선별과 최종 통근 검증 | localhost `/api/commute*` | Kakao 결과에는 현재 구현상 출발시각 파라미터가 없음 |
 | 개인 방문·조건 | 사용자의 브라우저 입력 | 내 기록, 관심 후보, 목적지, 분양/청약 조건 | localStorage | 기기·브라우저별 데이터이며 자동 공유되지 않음 |
@@ -194,7 +194,7 @@ Firebase Function용 단지·월 캐시 컬렉션 설계가 존재하지만, 현
 회사 목적지는 다음 두 검색을 병렬로 실행한다.
 
 - NAVER Maps Geocoder의 주소 검색
-- localhost를 통한 NAVER API HUB 지역 검색의 회사·건물·상호 후보
+- localhost를 통한 기존 NAVER Developers 지역 검색의 회사·건물·상호 후보
 
 둘 다 결과가 없으면 Kakao 우편번호 주소 DB를 모달에 열고, 사용자가 고른 도로명/지번을 다시 NAVER 지도 좌표로 확인한다. 마지막 수단은 지도 직접 클릭이다.
 
@@ -567,7 +567,7 @@ z_t = log(월 평균 평당가격)
 |---|---|---|
 | `GET /api/health` | 키 값 없이 공급자 연결·버전·카탈로그·캐시·쿼터 상태 반환 | 현재 프런트와 서버 버전 비교에 사용 |
 | `POST /api/config` | 입력한 키를 현재 프로세스 메모리에 연결 | 디스크에 저장하지 않음, 서버 재시작 시 소실 |
-| `GET /api/place-search?query=` | NAVER API HUB 회사/건물 검색 | 2~100자, 메모리 5분 캐시 |
+| `GET /api/place-search?query=` | 기존 NAVER Developers 회사/건물 검색 | 2~100자, 메모리 5분 캐시 |
 | `GET /api/supply` | 공식 분양 스냅샷 또는 안전한 이전 캐시 | 3시간 캐시, 실패 후 15분 재시도 대기 |
 | `GET /api/apartment-history` | 서울·경기 단지 12~60개월 매매·전월세 | 지역코드 11/41만, 동명 후보는 409 |
 | `POST /api/recommendations` | 가격·기본조건 비동기 추천 시작 | 국토부 키 필요, 매매 자료 사용 |
@@ -621,7 +621,7 @@ z_t = log(월 평균 평당가격)
 | 방문 기록·관심·청약 자가입력 | 브라우저 로컬 저장 | 브라우저 로컬 저장 |
 | 주문형 단지 1/3/5년 실거래 | 국토부 키 연결 시 가능 | 현재 비활성 |
 | 조건 기반 전체 추천 | 국토부 키 연결 시 가능 | 현재 localhost 전용 |
-| 회사/건물명 지역 검색 | 별도 NAVER API HUB 키 연결 시 가능 | 현재 서버 함수 없음 |
+| 회사/건물명 지역 검색 | 기존 NAVER Developers 검색 키 연결 시 가능 | 현재 서버 함수 없음; 2027-06-30 전 API HUB 이관 필요 |
 | Kakao/TMAP/NAVER 실제 통근 | 키 연결 시 가능 | 현재 localhost 전용 |
 | 공개 지역 실거래 집계 | Actions가 파일을 채우면 가능 | Actions가 파일을 채우면 가능 |
 | 분양 공고 | 로컬 즉시 수집 또는 공개 파일 fallback | Actions가 만든 공개 파일 |

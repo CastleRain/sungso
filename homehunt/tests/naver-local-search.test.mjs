@@ -10,14 +10,14 @@ import {
   stripNaverMarkup,
 } from '../scripts/naver-local-search.mjs';
 
-const TEST_ID = 'not-a-real-api-hub-id';
-const TEST_SECRET = 'not-a-real-api-hub-secret';
+const TEST_ID = 'not-a-real-developers-id';
+const TEST_SECRET = 'not-a-real-developers-secret';
 
 function jsonResponse(payload, { ok = true, status = 200 } = {}) {
   return { ok, status, json: async () => payload };
 }
 
-test('builds the NAVER API HUB local search request without exposing credentials in the URL', () => {
+test('builds the NAVER Developers local search request without exposing credentials in the URL', () => {
   const request = buildNaverLocalSearchRequest({
     query: '  푸르지오시티3차  ',
     clientId: TEST_ID,
@@ -29,9 +29,9 @@ test('builds the NAVER API HUB local search request without exposing credentials
   assert.equal(url.searchParams.get('display'), '5');
   assert.equal(url.searchParams.get('start'), '1');
   assert.equal(url.searchParams.get('sort'), 'random');
-  assert.equal(url.searchParams.get('format'), 'json');
-  assert.equal(request.init.headers['x-ncp-apigw-api-key-id'], TEST_ID);
-  assert.equal(request.init.headers['x-ncp-apigw-api-key'], TEST_SECRET);
+  assert.equal(url.searchParams.has('format'), false);
+  assert.equal(request.init.headers['X-Naver-Client-Id'], TEST_ID);
+  assert.equal(request.init.headers['X-Naver-Client-Secret'], TEST_SECRET);
   assert.equal(request.url.includes(TEST_ID), false);
   assert.equal(request.url.includes(TEST_SECRET), false);
 });
@@ -47,7 +47,7 @@ test('normalizes WGS84 mapx/mapy and removes NAVER title markup', () => {
       mapy: '37.3671234',
     }],
   }), [{
-    source: 'naver-api-hub-local',
+    source: 'naver-developers-local',
     placeName: '정자동3차 푸르지오 시티 & 상가',
     category: '부동산>오피스텔',
     roadAddress: '경기도 성남시 분당구 정자일로 135',
@@ -57,7 +57,7 @@ test('normalizes WGS84 mapx/mapy and removes NAVER title markup', () => {
   }]);
 });
 
-test('normalizes fixed-point WGS84 coordinates returned by the live API HUB response', () => {
+test('normalizes fixed-point WGS84 coordinates returned by the NAVER Developers response', () => {
   assert.deepEqual(normalizeNaverLocalSearch({
     items: [{
       title: '<b>KT분당본사타워</b>',
@@ -68,7 +68,7 @@ test('normalizes fixed-point WGS84 coordinates returned by the live API HUB resp
       mapy: '373588408',
     }],
   }), [{
-    source: 'naver-api-hub-local',
+    source: 'naver-developers-local',
     placeName: 'KT분당본사타워',
     category: '기업',
     roadAddress: '경기도 성남시 분당구 불정로 90',
@@ -105,7 +105,8 @@ test('fetch wrapper maps data and redacts credentials from HTTP errors', async (
   const result = await fetchNaverLocalSearch(params, {
     fetchImpl: async (url, init) => {
       assert.equal(url.includes(TEST_SECRET), false);
-      assert.equal(init.headers['x-ncp-apigw-api-key-id'], TEST_ID);
+      assert.equal(init.headers['X-Naver-Client-Id'], TEST_ID);
+      assert.equal(init.headers['X-Naver-Client-Secret'], TEST_SECRET);
       return jsonResponse({ items: [{ title: '<b>테스트</b>', mapx: 127, mapy: 37 }] });
     },
   });

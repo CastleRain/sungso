@@ -517,3 +517,54 @@ test('provider HTTP errors carry status but do not echo credentials', async () =
     },
   );
 });
+
+test('maps Kakao disabled map service errors without exposing the provider body or REST key', async () => {
+  const providerMessage = `App(test) disabled OPEN_MAP_AND_LOCAL service. ${TEST_KAKAO_KEY}`;
+  await assert.rejects(
+    fetchKakaoPublicTransit(
+      {
+        origin: ORIGIN,
+        destination: DESTINATION,
+        restApiKey: TEST_KAKAO_KEY,
+      },
+      {
+        fetchImpl: async () => jsonResponse(
+          { errorType: 'NotAuthorizedError', message: providerMessage },
+          { ok: false, status: 403 },
+        ),
+      },
+    ),
+    (error) => {
+      assert.equal(error instanceof CommuteProviderError, true);
+      assert.equal(error.code, 'KAKAO_MAP_SERVICE_DISABLED');
+      assert.equal(error.httpStatus, 403);
+      assert.equal(error.message.includes(providerMessage), false);
+      assert.equal(error.message.includes(TEST_KAKAO_KEY), false);
+      assert.equal(JSON.stringify(error).includes(TEST_KAKAO_KEY), false);
+      return true;
+    },
+  );
+});
+
+test('keeps unrelated Kakao 403 responses as generic HTTP errors', async () => {
+  await assert.rejects(
+    fetchKakaoPublicTransit(
+      {
+        origin: ORIGIN,
+        destination: DESTINATION,
+        restApiKey: TEST_KAKAO_KEY,
+      },
+      {
+        fetchImpl: async () => jsonResponse(
+          { errorType: 'NotAuthorizedError', message: 'Another Kakao product is disabled.' },
+          { ok: false, status: 403 },
+        ),
+      },
+    ),
+    (error) => {
+      assert.equal(error.code, 'HTTP_ERROR');
+      assert.equal(error.httpStatus, 403);
+      return true;
+    },
+  );
+});

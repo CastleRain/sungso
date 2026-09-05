@@ -2,11 +2,11 @@
 
 성우와 소희가 직접 본 아파트를 지도에 기록하고, 최대 4개 회사·주요 목적지 사이에서 서울·경기 아파트의 같은 전용면적 실거래와 조건 맞춤 후보를 확인하는 앱입니다. 화면은 GitHub Pages에 배포할 수 있고, 개발 중에는 로컬 실행기가 Git에서 제외된 `homehunt/.env`를 읽어 로컬 전용 서버에 실제 가격·장소·경로 조회 키를 전달합니다.
 
-현재 화면 버전은 **3.0.1**, 로컬 API 계약은 **2.5.0**입니다. 화면 디자인만 바꿀 때 서버 재시작을 요구하지 않도록 두 버전을 분리했습니다. `서버 재시작 필요`는 실행 중인 로컬 API 계약이 2.5.0보다 오래됐을 때만 표시합니다.
+현재 화면 버전은 **3.0.4**, 로컬 API 계약은 **2.5.1**입니다. 화면 디자인만 바꿀 때 서버 재시작을 요구하지 않도록 두 버전을 분리했습니다. `서버 재시작 필요`는 실행 중인 로컬 API 계약이 2.5.1보다 오래됐을 때만 표시합니다.
 
 UI 3.0은 Claude 설계 문서의 구조를 실제 데이터 계약에 맞춰 보완한 **Data Navy 지도 중심 작업 공간**입니다. 데스크톱은 76px 메뉴 레일·상단 검색·숨김 필터·넓은 지도·폭 조절 결과 패널로 구성하고, 모바일은 지도를 유지한 채 결과를 하단 시트로 전환합니다. Tabler Icons와 기존 데이터/폼 계약은 유지하며 새 디자인은 `css/hh-*.css`, UI 상태·표시는 `js/ui-state.js`, `js/ui-format.js`, `js/ui-shell.js`가 담당합니다.
 
-현재 화면·기능·데이터 원리와 다음 고도화 기준은 [`docs/homehunt-2.5-handoff/README.md`](./docs/homehunt-2.5-handoff/README.md)에 캡처와 함께 정리되어 있습니다.
+UI 3.0의 출발점이 된 2.5 당시 화면·기능·데이터 원리는 [`docs/homehunt-2.5-handoff/README.md`](./docs/homehunt-2.5-handoff/README.md)에 역사적 캡처와 함께 보관되어 있습니다. 현재 운영 버전과 연결 상태는 이 README와 앱의 `연결 상태` 화면을 기준으로 봅니다.
 
 ## 처음 사용하는 순서
 
@@ -83,7 +83,7 @@ UI 3.0은 Claude 설계 문서의 구조를 실제 데이터 계약에 맞춰 �
   └─ 브라우저 → 관심 공고·읽음·알림 조건·청약 준비도 localStorage
 
 회사·주요 목적지 A~D
-  ├─ NAVER API HUB 지역 검색·NAVER Geocoding → 목적지 좌표 확인
+  ├─ NAVER Developers 지역 검색·NAVER Geocoding → 목적지 좌표 확인
   ├─ Kakao 대중교통 REST → 넓은 후보 선별
   │                         └─ .local/kakao-transit-usage.json 일일 원호출 장부
   ├─ TMAP 대중교통 요약 → 선택한 최종 후보의 출근시각 재검증
@@ -209,14 +209,16 @@ Firebase Cloud Messaging은 앱 안에서 기기별 조건 푸시를 제공할 �
 
 정확한 주소를 외울 필요 없이 도로명·지번 일부로 나온 후보를 고르거나 NAVER 지도에서 건물을 직접 찍어 좌표를 확정합니다. 지도에서 역지오코딩한 공식 건물·도로명은 입주 회사명과 다르게 보일 수 있지만 실제 경로에는 선택한 좌표를 사용합니다.
 
-현재 [Maps Web SDK의 Geocoder](https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Service.html)는 주소와 좌표 변환용입니다. 회사명·상호명은 [NAVER API HUB의 `지역 검색`](https://api.ncloud-docs.com/docs/naver-api-hub-search-local)을 별도 Application/키로 신청해 로컬 서버에서 조회합니다. 키가 없어도 [Kakao 우편번호 서비스](https://postcode.map.kakao.com/guide)의 공식 주소 DB를 모달 안에 열어 `KT` 같은 등록 건물명·법인명과 도로명·지번을 찾고, 선택 주소를 NAVER 지도 좌표로 다시 확인합니다. 입점 상호·지점까지 폭넓게 찾으려면 NAVER 지역 검색 키가 필요합니다.
+현재 [Maps Web SDK의 Geocoder](https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Service.html)는 주소와 좌표 변환용입니다. 회사명·상호명은 기존 [NAVER Developers `지역 검색`](https://developers.naver.com/docs/serviceapi/search/local/local.md) Application의 Client ID·Secret으로 로컬 서버에서 조회합니다. 키가 없어도 [Kakao 우편번호 서비스](https://postcode.map.kakao.com/guide)의 공식 주소 DB를 모달 안에 열어 `KT` 같은 등록 건물명·법인명과 도로명·지번을 찾고, 선택 주소를 NAVER 지도 좌표로 다시 확인합니다. 입점 상호·지점까지 폭넓게 찾으려면 NAVER 지역 검색 키가 필요합니다.
+
+NAVER의 [검색 API 이관 공지](https://developers.naver.com/notice/article/32530)에 따라 2026년 7월 30일 24:00까지 신청한 Developers 기존 키만 2027년 6월 30일까지 유예 지원됩니다. 현재 어댑터는 성우소희의 기존 Developers 키 계약(`openapi.naver.com`, `X-Naver-Client-*`)을 사용합니다. 2027년 6월 30일 전에는 NAVER API HUB용 엔드포인트·인증 헤더와 새 키로 이관해야 하며, 두 종류의 키는 서로 바꿔 쓸 수 없습니다.
 
 회사 위치 입력은 더 이상 아파트 카탈로그로 추측하지 않습니다. `KT`가 `정자KTe-편한세상`에 부분 일치하던 것처럼 회사명이 아파트명 일부와 우연히 겹치는 오인을 차단했습니다. 아파트 검색은 실거래·지도 화면의 전용 검색창에서 수행합니다.
 
 - 넓은 버스·지하철 선별: Kakao Developers REST API 키
 - 출근시각 최종 확인: TMAP 대중교통 API의 `appKey`
 - 자동차: NAVER Maps Directions 5의 Client ID와 Client Secret
-- 회사·건물명: NAVER API HUB 검색 API `지역 검색`의 별도 Client ID와 Client Secret
+- 회사·건물명: 기존 NAVER Developers 검색 API `지역 검색`의 별도 Client ID와 Client Secret
 
 재시작 후에도 자동 연결하려면 `homehunt/.env`에 저장합니다. HomeHunt의 `설정` → `경로 키 연결` 또는 목적지 위치 창의 `장소 검색 연결`에서 직접 입력한 값은 실행 중인 서버 메모리에만 남습니다. 장소 검색 환경변수는 `NAVER_LOCAL_SEARCH_CLIENT_ID`, `NAVER_LOCAL_SEARCH_CLIENT_SECRET`이고 대중교통 환경변수는 `KAKAO_REST_API_KEY`, `TMAP_APP_KEY`, `TRANSIT_PROVIDER`입니다.
 
@@ -362,7 +364,7 @@ homehunt/
 ├─ scripts/sh-supply-provider.mjs SH 공식 RSS EUC-KR 파싱·보수적 분양 분류
 ├─ scripts/commute-provider.mjs  Kakao·TMAP 대중교통, NAVER 자동차와 두 일일 장부
 ├─ scripts/commute-time.mjs      동일한 평일 출근시각 계산
-├─ scripts/naver-local-search.mjs NAVER API HUB 지역 검색 서버 어댑터
+├─ scripts/naver-local-search.mjs NAVER Developers 지역 검색 서버 어댑터
 ├─ scripts/recommendation-data-safety.mjs 실패 월이 있는 시군구 후보·거래 제외
 ├─ scripts/start-local-market.ps1 .env 자동 로딩·보안 입력 fallback·로컬 서버 실행
 ├─ scripts/fetch-market-data.mjs 국토부 수집·집계 작업

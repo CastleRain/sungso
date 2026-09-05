@@ -84,7 +84,7 @@
 - Ncloud 필수 API: `Dynamic Map`, `Geocoding`; 선택 API: `Reverse Geocoding` (지도 중심 주소 자동입력)
 - 로컬 실행기는 Git에서 제외된 `homehunt/.env`의 허용 항목만 읽고, 이미 설정된 프로세스 환경변수를 우선한다. 화면에서 입력한 값은 `.env`에 쓰지 않고 실행 중인 서버 메모리에만 둔다.
 - 로컬 환경변수: `MOLIT_SERVICE_KEY`, `NAVER_MAPS_CLIENT_ID`, `NAVER_MAPS_CLIENT_SECRET`, `NAVER_LOCAL_SEARCH_CLIENT_ID`, `NAVER_LOCAL_SEARCH_CLIENT_SECRET`, `KAKAO_REST_API_KEY`, `TMAP_APP_KEY`. 정책 값은 `TRANSIT_PROVIDER=auto|kakao|tmap`, `KAKAO_DAILY_LIMIT`(기본 1000), `TMAP_DAILY_LIMIT`(기본 10)이며 `HOMEHUNT_LOCAL_API_PORT`는 프런트와 함께 8787을 유지한다.
-- 회사명·업체명 POI 검색은 Maps 키 범위가 아니다. NAVER API HUB `지역 검색` 별도 Application의 Client ID/Secret을 `homehunt/.env` 또는 로컬 서버 실행 메모리에 연결한다. 추가 전에도 주소·등록 건물명 후보와 지도 직접 선택을 유지한다.
+- 회사명·업체명 POI 검색은 Maps 키 범위가 아니다. 현재는 2026-07-30 이전 신청한 NAVER Developers `지역 검색` Application의 Client ID/Secret을 `homehunt/.env` 또는 로컬 서버 실행 메모리에 연결한다. 이 기존 계약은 2027-06-30까지만 지원되므로 그 전에 NAVER API HUB용 엔드포인트·인증으로 이관한다. 키가 없어도 주소·등록 건물명 후보와 지도 직접 선택을 유지한다.
 - GitHub Actions secret: `DATA_GO_KR_SERVICE_KEY` 또는 청약홈 우선용 `APPLYHOME_SERVICE_KEY`. 같은 공공데이터 일반 인증키를 쓸 수 있지만 청약홈·LH 서비스는 각각 활용신청해야 한다.
 - Telegram Actions secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. 맞춤 지역·신혼·가격·평형·세대수는 비민감 `HOMEHUNT_ALERT_*` Repository Variables로 별도 설정하고 개인 주소·청약정보는 넣지 않는다.
 - Firebase Function secret: `MOLIT_SERVICE_KEY`
@@ -106,6 +106,19 @@ node --check functions/molit.js
 브라우저에서는 `http://localhost:8000/homehunt/`에서 네이버 지도 타일/저작권 표시, 주소 검색, 마커, 후보 비교 트레이·모달, 방문 기록→면적 맞춤 실거래, 매매↔전세, 기록 모달, 모바일 레이아웃을 확인한다.
 
 ## 진행 상황
+
+### 2026-09-05 — HomeHunt 3.0.4 API 실연결·전 컨트롤 테마화
+
+- `.env`의 비밀값을 출력하거나 브라우저에 전달하지 않고 로컬 API 2.5.1을 재시작해 국토부·NAVER 검색·NAVER Directions·Kakao·TMAP·분양 공급원 상태를 개별 진단
+- 국토부 래미안안양메가트리아 최근 12개월 매매·전월세 916건을 실호출해 누락 요청 0건을 확인하고, 화면에서 매매 84.7㎡ 290건과 전세 84.7㎡ 552건·59.7㎡ 158건 사이의 제목·평균가격·평당가격·거래량·최근 계약 즉시 재계산을 검증
+- NAVER Developers 지역 검색의 실제 엔드포인트·헤더 계약으로 어댑터를 바로잡아 `KT 분당본사` 상호·건물 후보 5건을 확인하고, 기존 Developers 키의 2027-06-30 종료 전 API HUB 이관 일정을 문서화
+- NAVER Directions 5 자동차 경로는 실제 34분·16.6km 응답을 확인하고, Kakao 대중교통은 키 오류가 아니라 앱의 `OPEN_MAP_AND_LOCAL` 서비스 비활성화임을 안전한 진단 코드로 구분
+- Kakao 실패 뒤 TMAP으로 자동 우회하지 않게 중단해 제한 10건을 한 건도 소비하지 않았고, 연결 상태에 공급자별 실제 진단과 남은 쿼터를 비밀값 없이 표시
+- 청약홈 3개 API는 승인 대기 HTTP 401, LH 분양·신혼희망타운은 권한 대기 HTTP 403, SH 공식 RSS는 연결 성공으로 공급원별 부분 상태를 구분하고 빈 공고를 정상 연결로 오인하지 않도록 유지
+- 네이티브 datalist·날짜/시간 선택기·confirm을 각각 테마형 검색 목록·Flatpickr 달력·접근 가능한 확인 모달로 교체하고, select·range·number·textarea·details·지도 정보창 버튼까지 같은 디자인 토큰으로 통일
+- 1280px 실제 브라우저에서 여섯 화면·기록 추가/수정/삭제·실거래 검색/필터/차트/예측을 확인하고 가로 넘침·지도 상태 겹침·콘솔 오류 0건, 기본 컨트롤 회귀 계약을 포함한 전체 자동 테스트 243개 통과
+
+**다음:** Kakao Developers 앱에서 카카오맵 사용 설정을 켜고 청약홈·LH 활용승인 후 해당 공급원만 재검증한다. TMAP은 Kakao 광역 선별 뒤 사용자가 선택한 소수 후보의 최종 확인에만 사용한다.
 
 ### 2026-09-05 — HomeHunt 3.0 Data Navy 지도 작업 공간
 

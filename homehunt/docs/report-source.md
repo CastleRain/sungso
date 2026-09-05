@@ -294,7 +294,7 @@ GitHub Pages는 정적 파일을 읽을 수 있지만 브라우저가 저장소�
 6. [NAVER Directions 5](https://guide.ncloud-docs.com/docs/maps-direction5-api) — 자동차 경로 기능과 인증. **공식·신뢰도 높음**, 대중교통 API가 아님.
 7. [NAVER Maps API 인증 개요](https://guide.ncloud-docs.com/docs/application-maps-app-vpc) — 지도 Application 등록과 Web Service URL. **공식·신뢰도 높음**.
 8. [NAVER Maps JavaScript 지오코딩](https://navermaps.github.io/maps.js.ncp/docs/tutorial-Geocoder-Geocoding.html) — 주소·좌표 변환. **공식·신뢰도 높음**.
-9. [NAVER API HUB 지역 검색](https://api.ncloud-docs.com/docs/naver-api-hub-search-local) — 회사·기관·건물·상호 후보 검색. **공식·신뢰도 높음**, 별도 Client ID/Secret 필요.
+9. [NAVER Developers 지역 검색](https://developers.naver.com/docs/serviceapi/search/local/local.md) — 회사·기관·건물·상호 후보 검색. **공식·신뢰도 높음**, Maps와 다른 기존 Developers Client ID/Secret 필요. [이관 공지](https://developers.naver.com/notice/article/32530)에 따라 2027-06-30 전에 NAVER API HUB로 옮겨야 한다.
 10. [Kakao 우편번호 서비스](https://postcode.map.kakao.com/guide) — 도로명·지번·등록 건물명 선택. **공식·신뢰도 높음**, 장소 POI 검색과는 다름.
 11. [ODsay API 정책 변경 공지](https://lab.odsay.com/community/noticeView?seq=370) 및 [호출 정책](https://lab.odsay.com/doc/totalPolicy) — 2026-08-20 Basic 일 30건. **공식·신뢰도 높음**, 유료 계약은 별도.
 12. [Google Routes 사용량·결제](https://developers.google.com/maps/documentation/routes/usage-and-billing), [Google Maps 서비스 약관](https://cloud.google.com/maps-platform/terms/maps-service-terms), [국가별 지원 범위](https://developers.google.com/maps/coverage?hl=ko) — Google 지도 외 표시 제약과 국내 대중교통 지원 검토 근거. **공식·신뢰도 높음**, 계약별 예외는 별도 법률 검토 필요.

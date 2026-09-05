@@ -15,7 +15,7 @@ test('generic company query does not fall through to apartments when place key i
 
   assert.equal(step.kind, 'place-search-key-required');
   assert.equal(step.shouldSearchApartmentCatalog, false);
-  assert.match(companySearchStepMessage(step), /NAVER API HUB/);
+  assert.match(companySearchStepMessage(step), /NAVER Developers/);
 });
 
 test('provider results always win without loading the apartment catalog', () => {

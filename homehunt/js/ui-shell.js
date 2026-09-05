@@ -1,4 +1,4 @@
-import { hhUI, clampPanelWidth } from './ui-state.js?v=3.0.1';
+import { hhUI, clampPanelWidth } from './ui-state.js?v=3.0.4';
 
 const VIEW_META = Object.freeze({
   recommend: { screen: 'finder', kicker: 'HOME FINDER', title: '집 찾기', placeholder: '단지명·동네 검색' },

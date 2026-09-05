@@ -1,4 +1,4 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=3.0.1';
+import { APP_CONFIG, REGIONS } from './config.js?v=3.0.4';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
   clearImportedMarket, loadRecentComplexes, rememberComplex, loadComplexHistory, saveComplexHistory,
@@ -7,7 +7,7 @@ import {
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
 } from './storage.js?v=2.5.0';
-import { HomeMap } from './naver-map.js?v=2.5.0';
+import { HomeMap } from './naver-map.js?v=3.0.4';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
   commuteDecision, commuteRank, haversineKm, isGeoPoint,
@@ -36,7 +36,7 @@ import {
 } from './recommendation-core.mjs?v=3.0.1';
 import {
   companySearchStepMessage, decideCompanySearchNextStep,
-} from './company-search-core.mjs?v=2.5.0';
+} from './company-search-core.mjs?v=2.5.1';
 import {
   candidateVerificationStatus, destinationFingerprint, historyWindowForVisit,
   reconcileShortlistFingerprints,
@@ -48,10 +48,10 @@ import {
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
-import { hhUI } from './ui-state.js?v=3.0.1';
+import { hhUI } from './ui-state.js?v=3.0.4';
 import {
   EVIDENCE_TIERS, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=3.0.1';
+} from './ui-format.js?v=3.0.4';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -107,13 +107,16 @@ const state = {
     transitProvider: '',
     transitProviderPreference: '',
     providers: { kakaoTransitConfigured: false, tmapTransitConfigured: false, naverDirectionsConfigured: false },
+    diagnostics: { transit: { kakao: null, tmap: null }, car: null },
   },
   placeSearchConfigured: false,
+  placeSearchDiagnostic: null,
   companyLocation: null,
   workplaces: [],
   activeWorkplaceId: null,
   commuteQuota: null,
   commuteVerificationRunning: false,
+  lastCommuteProviderIssues: [],
   companyPickerMapReady: false,
   companyPickerSelection: null,
   recommendationMapReady: false,
@@ -326,9 +329,12 @@ function naverLandUrl(name) {
 
 let toastTimer;
 const modalOpeners = new Map();
-const MODAL_IDS = ['visitModal', 'compareModal', 'apiGuideModal', 'localKeyModal', 'companyLocationModal', 'supplyAlertModal', 'supplyMatchModal'];
+const MODAL_IDS = ['visitModal', 'compareModal', 'apiGuideModal', 'localKeyModal', 'companyLocationModal', 'supplyAlertModal', 'supplyMatchModal', 'confirmModal'];
 let recommendationFilterModalActive = false;
 let recommendationFilterPreviousOverflow = '';
+let confirmationResolver = null;
+let districtSuggestionValues = [];
+let districtSuggestionActiveIndex = -1;
 
 function setModalBackgroundInert(inert) {
   ['.hh-shell', '#compareTray', '#openVisitButton'].forEach((selector) => {
@@ -341,6 +347,10 @@ function openModalShell(modalId, focusSelector) {
   const modal = $(`#${modalId}`);
   if (!modal) return;
   modalOpeners.set(modalId, document.activeElement instanceof HTMLElement ? document.activeElement : null);
+  MODAL_IDS.forEach((id) => {
+    const other = $(`#${id}`);
+    if (id !== modalId && other && !other.hidden) other.setAttribute('inert', '');
+  });
   modal.hidden = false;
   setModalBackgroundInert(true);
   document.body.style.overflow = 'hidden';
@@ -356,15 +366,40 @@ function closeModalShell(modalId) {
   const modal = $(`#${modalId}`);
   if (!modal || modal.hidden) return;
   modal.hidden = true;
-  const anotherModalOpen = MODAL_IDS.some((id) => id !== modalId && !$(`#${id}`).hidden);
+  const remainingModals = MODAL_IDS.map((id) => $(`#${id}`)).filter((item) => item && !item.hidden);
+  remainingModals.forEach((item) => item.removeAttribute('inert'));
+  const anotherModalOpen = remainingModals.length > 0;
   if (!anotherModalOpen) {
     setModalBackgroundInert(false);
     document.body.style.overflow = recommendationFilterModalActive ? 'hidden' : '';
-    const opener = modalOpeners.get(modalId);
-    const focusTarget = opener?.isConnected && opener.getClientRects().length ? opener : $('.portal-nav-item.active');
-    focusTarget?.focus();
   }
+  const opener = modalOpeners.get(modalId);
+  const focusTarget = opener?.isConnected && opener.getClientRects().length ? opener : anotherModalOpen
+    ? $('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])', remainingModals.at(-1))
+    : $('.portal-nav-item.active');
+  focusTarget?.focus();
   modalOpeners.delete(modalId);
+}
+
+function requestConfirmation({
+  title = '계속 진행할까요?',
+  message = '이 작업을 진행할지 한 번 더 확인해주세요.',
+  confirmLabel = '확인',
+} = {}) {
+  if (confirmationResolver) confirmationResolver(false);
+  $('#confirmModalTitle').textContent = title;
+  $('#confirmModalMessage').textContent = message;
+  $('span', $('#acceptConfirmModal')).textContent = confirmLabel;
+  openModalShell('confirmModal', '#cancelConfirmModal');
+  return new Promise((resolve) => { confirmationResolver = resolve; });
+}
+
+function closeConfirmation(accepted = false) {
+  if ($('#confirmModal').hidden) return;
+  closeModalShell('confirmModal');
+  const resolve = confirmationResolver;
+  confirmationResolver = null;
+  resolve?.(Boolean(accepted));
 }
 function showToast(message, type = 'info') {
   const toast = $('#toast');
@@ -592,14 +627,75 @@ function closeCompareModal() {
   closeModalShell('compareModal');
 }
 
-function populateRegionControls() {
-  const datalist = $('#districtSuggestions');
-  const values = [...new Set(REGIONS.flatMap((region) => [region.name, region.district]).filter(Boolean))];
-  datalist.replaceChildren(...values.map((value) => {
-    const option = document.createElement('option');
-    option.value = value;
-    return option;
+function closeDistrictSuggestions() {
+  const input = $('#filterDistrict');
+  const list = $('#districtSuggestions');
+  if (!input || !list) return;
+  list.hidden = true;
+  input.setAttribute('aria-expanded', 'false');
+  input.removeAttribute('aria-activedescendant');
+  districtSuggestionActiveIndex = -1;
+}
+
+function activateDistrictSuggestion(index) {
+  const input = $('#filterDistrict');
+  const buttons = $$('#districtSuggestions [role="option"]');
+  if (!buttons.length) return;
+  districtSuggestionActiveIndex = (index + buttons.length) % buttons.length;
+  buttons.forEach((button, buttonIndex) => {
+    const active = buttonIndex === districtSuggestionActiveIndex;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', String(active));
+  });
+  const active = buttons[districtSuggestionActiveIndex];
+  input.setAttribute('aria-activedescendant', active.id);
+  active.scrollIntoView({ block: 'nearest' });
+}
+
+function chooseDistrictSuggestion(value) {
+  const input = $('#filterDistrict');
+  input.value = value;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  closeDistrictSuggestions();
+  input.focus();
+}
+
+function renderDistrictSuggestions() {
+  const input = $('#filterDistrict');
+  const list = $('#districtSuggestions');
+  if (!input || !list) return;
+  const query = input.value.normalize('NFKC').trim().toLocaleLowerCase('ko-KR');
+  const matches = districtSuggestionValues
+    .filter((value) => !query || value.toLocaleLowerCase('ko-KR').includes(query))
+    .sort((left, right) => {
+      const leftStarts = query && left.toLocaleLowerCase('ko-KR').startsWith(query) ? 0 : 1;
+      const rightStarts = query && right.toLocaleLowerCase('ko-KR').startsWith(query) ? 0 : 1;
+      return leftStarts - rightStarts || left.localeCompare(right, 'ko-KR');
+    })
+    .slice(0, 8);
+  list.replaceChildren(...matches.map((value, index) => {
+    const button = createElement('button', '', value);
+    button.type = 'button';
+    button.id = `districtSuggestionOption${index}`;
+    button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', 'false');
+    button.addEventListener('click', () => chooseDistrictSuggestion(value));
+    return button;
   }));
+  districtSuggestionActiveIndex = -1;
+  const shouldOpen = matches.length > 0 && document.activeElement === input;
+  list.hidden = !shouldOpen;
+  input.setAttribute('aria-expanded', String(shouldOpen));
+  input.removeAttribute('aria-activedescendant');
+}
+
+function setDistrictSuggestionValues(values) {
+  districtSuggestionValues = [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))];
+  renderDistrictSuggestions();
+}
+
+function populateRegionControls() {
+  setDistrictSuggestionValues(REGIONS.flatMap((region) => [region.name, region.district]).filter(Boolean));
 }
 
 function getMapFilters() {
@@ -1837,13 +1933,21 @@ function setView(view, persist = true) {
   if (changed) window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
+function setPickerValue(id, value, format) {
+  const input = $(`#${id}`);
+  if (!input) return;
+  input.value = value;
+  if (input._flatpickr) input._flatpickr.setDate(value, false, format);
+}
+
 function resetVisitForm() {
   visitAddressSearchToken += 1;
   $('#visitForm').reset();
+  $$('[aria-invalid]', $('#visitForm')).forEach((field) => field.removeAttribute('aria-invalid'));
   $('#visitId').value = '';
   $('#visitLat').value = '';
   $('#visitLng').value = '';
-  $('#visitDate').value = todayString();
+  setPickerValue('visitDate', todayString(), 'Y-m-d');
   $('#visitedSungwoo').checked = true;
   $('#visitedSohee').checked = true;
   $('#deleteVisit').hidden = true;
@@ -1855,7 +1959,7 @@ function resetVisitForm() {
 function fillVisitForm(visit) {
   $('#visitId').value = visit.id || '';
   $('#visitName').value = visit.name || '';
-  $('#visitDate').value = visit.visitDate || todayString();
+  setPickerValue('visitDate', visit.visitDate || todayString(), 'Y-m-d');
   $('#visitAddress').value = visit.address || '';
   $('#visitDealType').value = visit.dealType || '매매';
   $('#visitPrice').value = visit.askingPrice || '';
@@ -2028,10 +2132,16 @@ function persistVisits() {
 
 function saveVisitFromForm(event) {
   event.preventDefault();
+  const requiredFields = [$('#visitName'), $('#visitDate'), $('#visitAddress')];
+  requiredFields.forEach((field) => field.setAttribute('aria-invalid', String(!field.value.trim())));
   const numericError = visitNumberError();
   if (numericError) return showToast(numericError, 'error');
   const visit = readVisitForm();
-  if (!visit.name || !visit.visitDate || !visit.address) return showToast('단지명·방문일·주소는 꼭 입력해주세요.', 'error');
+  if (!visit.name || !visit.visitDate || !visit.address || !/^\d{4}-\d{2}-\d{2}$/.test(visit.visitDate)) {
+    const firstInvalid = requiredFields.find((field) => field.getAttribute('aria-invalid') === 'true') || $('#visitDate');
+    firstInvalid.focus();
+    return showToast('단지명·방문일·주소는 꼭 입력해주세요.', 'error');
+  }
   if (!visit.lat || !visit.lng) return showToast('주소로 위치를 찾거나 지도에서 위치를 찍어주세요.', 'error');
   const index = state.visits.findIndex((item) => item.id === visit.id);
   if (index >= 0) state.visits[index] = visit;
@@ -2044,9 +2154,16 @@ function saveVisitFromForm(event) {
   showToast('방문 기록을 저장했어요.');
 }
 
-function deleteCurrentVisit() {
+async function deleteCurrentVisit() {
   const id = $('#visitId').value;
-  if (!id || !window.confirm('이 방문 기록을 삭제할까요?')) return;
+  if (!id) return;
+  const name = $('#visitName').value.trim() || '이 집';
+  const accepted = await requestConfirmation({
+    title: `${name} 기록을 삭제할까요?`,
+    message: '삭제한 방문 메모와 현장 정보는 이 기기에서 복구할 수 없습니다.',
+    confirmLabel: '기록 삭제',
+  });
+  if (!accepted) return;
   state.visits = state.visits.filter((visit) => visit.id !== id);
   persistVisits();
   closeVisitModal();
@@ -2826,11 +2943,7 @@ async function populateComplexRegions() {
   select.replaceChildren(placeholder, ...groups.values());
   if ([...select.options].some((option) => option.value === current)) select.value = current;
   const districtValues = [...new Set(searchableDistricts.flatMap((district) => [district.name, district.sigungu]).filter(Boolean))];
-  $('#districtSuggestions').replaceChildren(...districtValues.map((value) => {
-    const option = document.createElement('option');
-    option.value = value;
-    return option;
-  }));
+  setDistrictSuggestionValues(districtValues);
   const check = $('#lawDistrictCheck');
   check.classList.toggle('connection-warning', Boolean(payload.fallback));
   check.textContent = payload.fallback
@@ -3966,7 +4079,7 @@ function writeRecommendationForm(filters = {}) {
     $('#recommendCommuteMode').value = filters.commuteModes.includes('car') && filters.commuteModes.includes('transit')
       ? 'both' : filters.commuteModes[0] || 'both';
   }
-  if (/^\d{2}:\d{2}$/.test(String(filters.commuteDepartureTime || ''))) $('#recommendDepartureTime').value = filters.commuteDepartureTime;
+  if (/^\d{2}:\d{2}$/.test(String(filters.commuteDepartureTime || ''))) setPickerValue('recommendDepartureTime', filters.commuteDepartureTime, 'H:i');
   if ([1, 3, 6].includes(Number(filters.months))) $('#recommendMonths').value = String(filters.months);
   const legacyCompany = filters.companyAddress ? loadGeocodeResult(filters.companyAddress) : null;
   const rawDestinations = Array.isArray(filters.destinations) && filters.destinations.length
@@ -4104,7 +4217,7 @@ function updateRangeVisual(range) {
   const minimum = Number(range.min) || 0;
   const maximum = Number(range.max) || 100;
   const value = Math.min(maximum, Math.max(minimum, Number(range.value) || minimum));
-  range.style.setProperty('--range-progress', `${maximum > minimum ? (value - minimum) / (maximum - minimum) * 100 : 0}%`);
+  range.style.setProperty('--hh-range-progress', `${maximum > minimum ? (value - minimum) / (maximum - minimum) * 100 : 0}%`);
 }
 
 function syncRecommendationRanges() {
@@ -4449,27 +4562,41 @@ function updateCompanySearchCapability() {
   const label = $('#companySearchCapabilityText');
   const button = $('#openPlaceSearchSettings');
   if (!root || !label || !button) return;
-  const available = APP_CONFIG.localMarketEnabled && state.localMarketConnected && !state.localMarketOutdated && state.placeSearchConfigured;
-  root.classList.toggle('connected', available);
-  if (available) {
-    label.textContent = '네이버 상호·지점 검색 연결됨 · 공식 건물명 주소 검색도 가능';
+  const configured = APP_CONFIG.localMarketEnabled && state.localMarketConnected && !state.localMarketOutdated && state.placeSearchConfigured;
+  const diagnostic = configured ? state.placeSearchDiagnostic : null;
+  const verified = diagnostic?.state === 'verified';
+  const failed = diagnostic?.state === 'error';
+  root.classList.toggle('connected', verified);
+  root.classList.toggle('has-error', failed);
+  const actionLabel = $('span', button);
+  if (verified) {
+    label.textContent = '네이버 상호·지점 실제 검색 확인됨 · 공식 건물명 주소 검색도 가능';
     button.hidden = true;
     return;
   }
-  button.hidden = false;
+  button.hidden = configured && !failed;
+  if (actionLabel) actionLabel.textContent = failed ? '키·상태 확인' : '상호·지점 API 연결';
   if (!APP_CONFIG.localMarketEnabled) {
     label.textContent = '공식 건물명·주소 검색 가능 · 배포용 상호·지점 API는 준비 중';
   } else if (!state.localMarketConnected) {
     label.textContent = '공식 건물명·주소 검색 가능 · 서버를 켜면 입점 상호 API 연결 가능';
   } else if (state.localMarketOutdated) {
     label.textContent = '공식 건물명·주소 검색 가능 · 서버 재시작 후 입점 상호 API 연결 가능';
+  } else if (configured && failed) {
+    label.textContent = '네이버 장소 검색 키는 설정됐지만 최근 실제 호출에 실패했어요';
+  } else if (configured) {
+    label.textContent = '네이버 장소 검색 키 설정됨 · 첫 검색에서 실제 연결을 확인해요';
   } else {
     label.textContent = '공식 건물명·법인명 검색 가능 · 입점 상호·지점 API는 미연결';
   }
 }
 
+function isNaverLocalPlaceResult(result) {
+  return ['naver-developers-local', 'naver-api-hub-local'].includes(result?.source);
+}
+
 function companyResultSource(result) {
-  if (result.source === 'naver-api-hub-local') return '네이버 장소 검색';
+  if (isNaverLocalPlaceResult(result)) return '네이버 장소 검색';
   if (result.source === 'kakao-postcode') return '공식 주소 DB 건물명';
   if (result.source === 'official-apartment-catalog') return '공식 공동주택';
   return '네이버 주소 검색';
@@ -4500,15 +4627,24 @@ async function fetchCompanyPlaceResults(query) {
     if (!response.ok) {
       if (response.status === 503) {
         state.placeSearchConfigured = false;
-        updateCompanySearchCapability();
       }
+      state.placeSearchDiagnostic = {
+        state: 'error',
+        reasonCode: payload?.error?.code || payload?.code || 'PLACE_SEARCH_ERROR',
+        httpStatus: response.status,
+      };
+      updateCompanySearchCapability();
       return { status: response.status === 503 ? 'not-configured' : 'error', items: [] };
     }
+    state.placeSearchDiagnostic = { state: 'verified', reasonCode: null, httpStatus: response.status };
+    updateCompanySearchCapability();
     return {
       status: 'ok',
       items: Array.isArray(payload.items) ? payload.items.filter(isGeoPoint).slice(0, 5) : [],
     };
   } catch (_) {
+    state.placeSearchDiagnostic = { state: 'error', reasonCode: 'PLACE_SEARCH_NETWORK_ERROR', httpStatus: null };
+    updateCompanySearchCapability();
     return { status: 'error', items: [] };
   } finally {
     window.clearTimeout(timeout);
@@ -4687,7 +4823,7 @@ function renderCompanyLocationSearchResults(results, message = '') {
     button.dataset.lat = String(result.lat);
     button.dataset.lng = String(result.lng);
     const icon = createElement('span', 'company-location-result-icon');
-    setTablerIcon(icon, result.source === 'naver-api-hub-local' ? 'building-store' : 'map-pin');
+    setTablerIcon(icon, isNaverLocalPlaceResult(result) ? 'building-store' : 'map-pin');
     const copy = createElement('span', 'company-location-result-copy');
     const primary = companyLocationLabel(result) || companyLocationAddress(result) || '이름 없는 위치';
     const address = companyLocationAddress(result);
@@ -5185,7 +5321,27 @@ function recommendationCandidateId(candidate) {
   return String(candidate?.catalogId || candidate?.id || '');
 }
 
+function commuteProviderIssues(items = []) {
+  const issues = new Map();
+  items.forEach((item) => (item.routes || []).forEach((route) => {
+    if (route?.status !== 'error' && route?.status !== 'quota-exhausted') return;
+    const code = String(route.reasonCode || route.status || 'PROVIDER_ERROR');
+    if (!issues.has(code)) issues.set(code, { code, provider: String(route.provider || ''), httpStatus: route.httpStatus ?? null });
+  }));
+  return [...issues.values()];
+}
+
+function commuteProviderIssueMessage(issues = state.lastCommuteProviderIssues) {
+  if (issues.some((issue) => issue.code === 'KAKAO_MAP_SERVICE_DISABLED')) {
+    return 'Kakao 키는 확인됐지만 앱의 카카오맵 사용 설정이 꺼져 있습니다. Kakao Developers에서 카카오맵을 켠 뒤 다시 확인해주세요.';
+  }
+  if (issues.some((issue) => issue.code === 'DAILY_LIMIT')) return '오늘 사용할 수 있는 대중교통 경로 호출량을 모두 사용했습니다.';
+  if (issues.length) return '경로 공급자의 실제 응답을 확인하지 못했습니다. 연결 상태에서 최근 호출 결과를 확인해주세요.';
+  return '';
+}
+
 async function requestCommuteMatrix(selectedCandidates, filters, destinations, token, { transitProvider = '' } = {}) {
+  state.lastCommuteProviderIssues = [];
   const configuredModes = filters.commuteModes.filter((mode) => mode === 'transit'
     ? state.transportConfig.transitConfigured
     : mode === 'car' && state.transportConfig.carConfigured);
@@ -5220,6 +5376,7 @@ async function requestCommuteMatrix(selectedCandidates, filters, destinations, t
       state.commuteQuota = payload.quota ? { ...payload.quota, provider: payload.provider || payload.quota.provider } : state.commuteQuota;
       if (Array.isArray(payload.items)) items.push(...payload.items);
     }
+    state.lastCommuteProviderIssues = commuteProviderIssues(items);
     return items;
   }
   const items = [];
@@ -5235,6 +5392,7 @@ async function requestCommuteMatrix(selectedCandidates, filters, destinations, t
     const payload = await response.json().catch(() => ({}));
     items.push({ originId: recommendationCandidateId(candidate), destinationId: destination.id, routes: payload.routes || [] });
   });
+  state.lastCommuteProviderIssues = commuteProviderIssues(items);
   return items;
 }
 
@@ -5371,6 +5529,9 @@ async function verifyTopRecommendationCommutes() {
           transitProvider: 'kakao', verificationStage: 'screening',
         },
       );
+      if (state.lastCommuteProviderIssues.length) {
+        throw new Error(commuteProviderIssueMessage());
+      }
       const broadIds = new Set(selected.map((candidate) => String(candidate.catalogId || candidate.id)));
       const broadResults = state.recommendationResults.filter((candidate) => broadIds.has(String(candidate.catalogId || candidate.id)));
       const finalCandidates = [...broadResults]
@@ -5392,6 +5553,7 @@ async function verifyTopRecommendationCommutes() {
           },
         );
       }
+      if (state.lastCommuteProviderIssues.length) throw new Error(commuteProviderIssueMessage());
     } else {
       state.recommendationResults = await verifyRecommendationCommutes(
         selected, filters, state.recommendationGeocodeToken, destinations,
@@ -5399,6 +5561,7 @@ async function verifyTopRecommendationCommutes() {
           ? { verificationStage: 'final' }
           : { transitProvider: selectedProvider, verificationStage: 'final' },
       );
+      if (state.lastCommuteProviderIssues.length) throw new Error(commuteProviderIssueMessage());
     }
     state.recommendationCommuteEnriched = true;
     const matched = state.recommendationResults.filter((candidate) => candidateCommuteDecision(candidate) === 'matched').length;
@@ -5410,6 +5573,7 @@ async function verifyTopRecommendationCommutes() {
   } catch (error) {
     showToast(error.message || '정밀 통근 확인에 실패했습니다.', 'error');
   } finally {
+    await checkLocalMarketConnection();
     state.commuteVerificationRunning = false;
     button.disabled = false;
     $('span', button).textContent = '상위 후보 정밀 통근';
@@ -5439,6 +5603,7 @@ async function verifySingleRecommendationCommute(candidate, trigger = null) {
       [candidate], filters, state.recommendationGeocodeToken, destinations,
       transitProvider ? { transitProvider, verificationStage: 'final' } : { verificationStage: 'final' },
     );
+    if (state.lastCommuteProviderIssues.length) throw new Error(commuteProviderIssueMessage());
     state.recommendationCommuteEnriched = true;
     renderRecommendationResults();
     const refreshed = state.recommendationResults.find((item) => recommendationCandidateId(item) === recommendationCandidateId(candidate))
@@ -5448,6 +5613,7 @@ async function verifySingleRecommendationCommute(candidate, trigger = null) {
   } catch (error) {
     showToast(error.message || '이 집의 통근 경로를 확인하지 못했습니다.', 'error');
   } finally {
+    await checkLocalMarketConnection();
     state.commuteVerificationRunning = false;
     if (trigger?.isConnected) trigger.disabled = false;
   }
@@ -5537,6 +5703,15 @@ function setRecommendationStatus(kind, title, message, progress = null) {
   $('#runRecommendation').disabled = kind === 'running';
 }
 
+function routeDiagnosticLabel(providerLabel, diagnostic, configured) {
+  if (!configured) return `${providerLabel} 키 필요 · 실제 경로 미확인`;
+  if (diagnostic?.state === 'verified') return `${providerLabel} 실제 경로 확인됨`;
+  if (diagnostic?.reasonCode === 'KAKAO_MAP_SERVICE_DISABLED') return 'Kakao 키 정상 · 앱의 카카오맵 사용 설정을 켜주세요';
+  if (diagnostic?.state === 'reachable') return `${providerLabel} 응답 확인됨 · 이 구간은 경로 없음`;
+  if (diagnostic?.state === 'error') return `${providerLabel} 키 설정됨 · 최근 실제 호출 실패`;
+  return `${providerLabel} 키 설정됨 · 실제 경로 조회 전`;
+}
+
 function updateLocalConnectionUi(health = null, error = null) {
   const serverCheck = $('#localMarketServerCheck');
   const historyCheck = $('#apartmentHistoryApiCheck');
@@ -5546,6 +5721,7 @@ function updateLocalConnectionUi(health = null, error = null) {
   const carCheck = $('#carRouteCheck');
   if (!APP_CONFIG.localMarketEnabled) {
     state.placeSearchConfigured = false;
+    state.placeSearchDiagnostic = null;
     stateBadge.textContent = 'Firebase 전환 예정';
     stateBadge.className = 'service-state partial';
     serverCheck.textContent = '배포 화면 · 로컬 서버는 사용하지 않음';
@@ -5577,9 +5753,11 @@ function updateLocalConnectionUi(health = null, error = null) {
       transitProvider: '',
       transitProviderPreference: '',
       providers: { kakaoTransitConfigured: false, tmapTransitConfigured: false, naverDirectionsConfigured: false },
+      diagnostics: { transit: { kakao: null, tmap: null }, car: null },
     };
     state.commuteQuota = null;
     state.placeSearchConfigured = false;
+    state.placeSearchDiagnostic = null;
     if (commuteBadge) {
       commuteBadge.textContent = '서버 꺼짐';
       commuteBadge.className = 'service-state demo';
@@ -5616,6 +5794,7 @@ function updateLocalConnectionUi(health = null, error = null) {
       tmapTransitConfigured: Boolean(health.commute?.providers?.tmapTransitConfigured),
       naverDirectionsConfigured: Boolean(health.commute?.providers?.naverDirectionsConfigured),
     },
+    diagnostics: health.commute?.diagnostics || { transit: { kakao: null, tmap: null }, car: null },
   };
   state.commuteQuota = health.commute?.tmapQuota ? {
     provider: state.transportConfig.transitProvider,
@@ -5623,15 +5802,19 @@ function updateLocalConnectionUi(health = null, error = null) {
     tmap: health.commute.tmapQuota,
   } : state.commuteQuota;
   state.placeSearchConfigured = Boolean(health.placeSearch?.configured);
+  state.placeSearchDiagnostic = health.placeSearch?.diagnostic || null;
   if (commuteBadge) {
-    const count = Number(state.transportConfig.transitConfigured) + Number(state.transportConfig.carConfigured);
-    commuteBadge.textContent = count === 2 ? '2개 경로 연결' : count === 1 ? '1개 경로 연결' : '키 연결 필요';
-    commuteBadge.className = `service-state ${count === 2 ? 'connected' : 'partial'}`;
+    const configuredCount = Number(state.transportConfig.transitConfigured) + Number(state.transportConfig.carConfigured);
     const transitProviderLabel = state.transportConfig.transitProvider === 'kakao' ? 'Kakao' : state.transportConfig.transitProvider === 'tmap' ? 'TMAP' : '대중교통';
-    transitCheck.textContent = state.transportConfig.transitConfigured ? `${transitProviderLabel} 버스·지하철 실제 경로 연결` : 'Kakao REST 키 또는 TMAP appKey 필요 · 대중교통 미확인';
-    carCheck.textContent = state.transportConfig.carConfigured ? 'NAVER Directions 5 자동차 연결' : 'NAVER Client ID·Secret 필요 · 자동차 미확인';
-    transitCheck.classList.toggle('connection-warning', !state.transportConfig.transitConfigured);
-    carCheck.classList.toggle('connection-warning', !state.transportConfig.carConfigured);
+    const transitDiagnostic = state.transportConfig.diagnostics?.transit?.[state.transportConfig.transitProvider] || null;
+    const carDiagnostic = state.transportConfig.diagnostics?.car || null;
+    const verifiedCount = Number(transitDiagnostic?.state === 'verified') + Number(carDiagnostic?.state === 'verified');
+    commuteBadge.textContent = verifiedCount ? `${verifiedCount}개 실제 확인` : configuredCount ? `${configuredCount}개 키 설정` : '키 연결 필요';
+    commuteBadge.className = `service-state ${verifiedCount === 2 ? 'connected' : 'partial'}`;
+    transitCheck.textContent = routeDiagnosticLabel(`${transitProviderLabel} 버스·지하철`, transitDiagnostic, state.transportConfig.transitConfigured);
+    carCheck.textContent = routeDiagnosticLabel('NAVER Directions 5 자동차', carDiagnostic, state.transportConfig.carConfigured);
+    transitCheck.classList.toggle('connection-warning', !state.transportConfig.transitConfigured || transitDiagnostic?.state === 'error');
+    carCheck.classList.toggle('connection-warning', !state.transportConfig.carConfigured || carDiagnostic?.state === 'error');
   }
   updateCompanySearchCapability();
 }
@@ -5663,7 +5846,7 @@ function openLocalKeyModal(options = {}) {
     : '#localServiceKey';
   $('#localKeyStatus').textContent = state.localMarketConnected
     ? state.localMarketKeyConfigured
-      ? `국토부 키 연결됨 · 대중교통 ${state.transportConfig.transitConfigured ? '연결' : '미연결'} · 자동차 ${state.transportConfig.carConfigured ? '연결' : '미연결'} · 건물명 ${state.placeSearchConfigured ? '연결' : '미연결'}`
+      ? `국토부 키 연결됨 · 대중교통 ${state.transportConfig.transitConfigured ? '키 설정' : '미설정'} · 자동차 ${state.transportConfig.carConfigured ? '키 설정' : '미설정'} · 건물명 ${state.placeSearchConfigured ? '키 설정' : '미설정'}`
       : `로컬 서버는 켜져 있습니다. 필요한 실거래·통근·건물명 검색 키만 입력해주세요.${state.placeSearchConfigured ? ' 건물명 검색은 연결되어 있습니다.' : ''}`
     : '로컬 서버가 꺼져 있습니다. 아래 명령으로 먼저 시작해주세요.';
   $('#localKeyStatus').className = `local-key-status${state.localMarketConnected ? '' : ' error'}`;
@@ -5692,7 +5875,7 @@ async function connectLocalMarketKey(event) {
   const naverLocalClientId = $('#localNaverPlaceClientId').value.trim();
   const naverLocalClientSecret = $('#localNaverPlaceClientSecret').value.trim();
   if ((naverLocalClientId && !naverLocalClientSecret) || (!naverLocalClientId && naverLocalClientSecret)) {
-    $('#localKeyStatus').textContent = '회사·건물명 검색용 NAVER API HUB Client ID와 Secret을 함께 입력해주세요.';
+    $('#localKeyStatus').textContent = '회사·건물명 검색용 NAVER Developers Client ID와 Secret을 함께 입력해주세요.';
     $('#localKeyStatus').className = 'local-key-status error';
     return;
   }
@@ -6756,6 +6939,27 @@ function bindEvents() {
     renderPropertyList();
   }));
   ['filterDistrict', 'filterPriceMin', 'filterPriceMax', 'visitedByBoth'].forEach((id) => $(`#${id}`).addEventListener('input', renderPropertyList));
+  $('#filterDistrict').addEventListener('focus', renderDistrictSuggestions);
+  $('#filterDistrict').addEventListener('input', renderDistrictSuggestions);
+  $('#filterDistrict').addEventListener('keydown', (event) => {
+    const list = $('#districtSuggestions');
+    const options = $$('#districtSuggestions [role="option"]');
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (list.hidden) renderDistrictSuggestions();
+      activateDistrictSuggestion(event.key === 'ArrowDown' ? districtSuggestionActiveIndex + 1 : districtSuggestionActiveIndex - 1);
+      return;
+    }
+    if (event.key === 'Enter' && districtSuggestionActiveIndex >= 0 && options[districtSuggestionActiveIndex]) {
+      event.preventDefault();
+      chooseDistrictSuggestion(options[districtSuggestionActiveIndex].textContent);
+      return;
+    }
+    if (event.key === 'Escape') closeDistrictSuggestions();
+  });
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.district-combobox')) closeDistrictSuggestions();
+  });
   $$('[data-status-filter]').forEach((input) => input.addEventListener('change', renderPropertyList));
   $('#resetFilters').addEventListener('click', () => {
     $('#filterDistrict').value = '';
@@ -6802,7 +7006,13 @@ function bindEvents() {
   $('#closeVisitModal').addEventListener('click', closeVisitModal);
   $('#visitModal').addEventListener('click', (event) => { if (event.target === $('#visitModal')) closeVisitModal(); });
   $('#visitForm').addEventListener('submit', saveVisitFromForm);
+  ['visitName', 'visitDate', 'visitAddress'].forEach((id) => $(`#${id}`).addEventListener('input', (event) => {
+    if (event.currentTarget.value.trim()) event.currentTarget.removeAttribute('aria-invalid');
+  }));
   $('#deleteVisit').addEventListener('click', deleteCurrentVisit);
+  $('#cancelConfirmModal').addEventListener('click', () => closeConfirmation(false));
+  $('#acceptConfirmModal').addEventListener('click', () => closeConfirmation(true));
+  $('#confirmModal').addEventListener('click', (event) => { if (event.target === $('#confirmModal')) closeConfirmation(false); });
   $('#geocodeVisitAddress').addEventListener('click', geocodeIntoVisitForm);
   $('#visitAddress').addEventListener('input', () => {
     visitAddressSearchToken += 1;
@@ -7036,12 +7246,17 @@ function bindEvents() {
       trapModalFocus(event, recommendationFilterDialog);
       return;
     }
-    const openModal = MODAL_IDS.map((id) => $(`#${id}`)).find((modal) => modal && !modal.hidden);
+    const openModal = [...MODAL_IDS].reverse().map((id) => $(`#${id}`)).find((modal) => modal && !modal.hidden);
     if (event.key === 'Tab' && openModal) {
       trapModalFocus(event, openModal);
       return;
     }
     if (event.key !== 'Escape') return;
+    if (!$('#confirmModal').hidden) {
+      event.preventDefault();
+      closeConfirmation(false);
+      return;
+    }
     if (!$('#visitModal').hidden) closeVisitModal();
     if (!$('#compareModal').hidden) closeCompareModal();
     if (!$('#apiGuideModal').hidden) closeApiGuide();

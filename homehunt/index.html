@@ -32,19 +32,20 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.1.1/700.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
   <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/hh-tokens.css?v=3.0.1">
-  <link rel="stylesheet" href="./css/hh-base.css?v=3.0.1">
-  <link rel="stylesheet" href="./css/hh-shell.css?v=3.0.1">
-  <link rel="stylesheet" href="./css/hh-components.css?v=3.0.1">
-  <link rel="stylesheet" href="./css/hh-map.css?v=3.0.1">
-  <link rel="stylesheet" href="./css/hh-screens.css?v=3.0.1">
+  <link rel="stylesheet" href="./css/hh-tokens.css?v=3.0.4">
+  <link rel="stylesheet" href="./css/hh-base.css?v=3.0.4">
+  <link rel="stylesheet" href="./css/hh-shell.css?v=3.0.4">
+  <link rel="stylesheet" href="./css/hh-components.css?v=3.0.4">
+  <link rel="stylesheet" href="./css/hh-map.css?v=3.0.4">
+  <link rel="stylesheet" href="./css/hh-screens.css?v=3.0.4">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="3.0.1" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="3.0.4" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -104,8 +105,10 @@
 
           <div class="filter-section">
             <label class="filter-label" for="filterDistrict">지역</label>
-            <input class="portal-select portal-search-input" id="filterDistrict" list="districtSuggestions" autocomplete="off" placeholder="전체 지역 · 예: 안양, 송파">
-            <datalist id="districtSuggestions"></datalist>
+            <div class="district-combobox">
+              <input class="portal-select portal-search-input" id="filterDistrict" autocomplete="off" placeholder="전체 지역 · 예: 안양, 송파" role="combobox" aria-autocomplete="list" aria-controls="districtSuggestions" aria-expanded="false">
+              <div class="district-suggestion-list" id="districtSuggestions" role="listbox" aria-label="지역 추천" hidden></div>
+            </div>
           </div>
 
           <div class="filter-section">
@@ -239,7 +242,7 @@
               <label class="recommendation-field"><span>준공 후 최대</span><div class="input-unit"><input id="recommendMaxAge" type="number" inputmode="numeric" min="0" max="80" step="1" value="20"><em>년 이내</em></div><input class="condition-range" id="recommendMaxAgeRange" type="range" min="0" max="80" step="1" value="20" aria-label="준공 후 최대 연수 슬라이더"></label>
               <div class="recommendation-field route-quality-field"><span>대중교통 접근성 <em>실제 경로</em></span><strong>집→회사 전체 도보·환승 포함</strong><small>반경이나 역 직선거리로 합격을 추측하지 않습니다.</small><input id="recommendStationMin" type="hidden" value="0"><input id="recommendStationMax" type="hidden" value="0"></div>
               <label class="recommendation-field"><span>실거래 확인 기간</span><select id="recommendMonths"><option value="1">최근 1개월 · 빠름</option><option value="3" selected>최근 3개월 · 권장</option><option value="6">최근 6개월 · 넓게</option></select></label>
-              <label class="recommendation-field"><span>평일 출근 출발</span><input id="recommendDepartureTime" type="time" value="08:00"><small>대중교통 경로 기준 시각</small></label>
+              <label class="recommendation-field"><span>평일 출근 출발</span><input id="recommendDepartureTime" type="text" value="08:00" inputmode="numeric" autocomplete="off" placeholder="08:00" data-hh-time-picker><small>대중교통 경로 기준 시각</small></label>
             </div>
             <div class="recommendation-chips" id="recommendationChips" aria-live="polite"></div>
             <aside class="recommendation-pipeline compact-pipeline" aria-label="추천 데이터 판정 단계">
@@ -684,13 +687,13 @@
   <div class="modal-backdrop" id="visitModal" hidden>
     <section class="visit-modal" role="dialog" aria-modal="true" aria-labelledby="visitModalTitle">
       <header class="modal-head"><div><span>PROPERTY NOTE</span><h2 id="visitModalTitle">다녀온 집 기록</h2></div><button class="modal-close" id="closeVisitModal" type="button" aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
-      <form id="visitForm">
+      <form id="visitForm" novalidate>
         <input type="hidden" id="visitId">
         <input type="hidden" id="visitLat">
         <input type="hidden" id="visitLng">
         <div class="form-grid two-col">
           <label class="field"><span>단지명 <em>필수</em></span><input id="visitName" required placeholder="예: 헬리오시티"></label>
-          <label class="field"><span>방문일 <em>필수</em></span><input id="visitDate" type="date" required></label>
+          <label class="field"><span>방문일 <em>필수</em></span><input id="visitDate" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY-MM-DD" data-hh-date-picker required></label>
         </div>
         <div class="field address-field">
           <label for="visitAddress">주소 <em>필수</em></label>
@@ -776,12 +779,12 @@
         </details>
         <details class="transport-key-details" id="placeSearchKeyDetails">
           <summary>회사·건물명 검색 키 연결 <small>선택</small></summary>
-          <p>주소가 아닌 회사·상가·오피스텔·건물 이름을 찾는 NAVER API HUB의 <strong>지역 검색</strong> 전용 키입니다. 위 자동차 경로 키와 별도이며, 이 화면 입력은 메모리에서만 유지됩니다.</p>
+          <p>주소가 아닌 회사·상가·오피스텔·건물 이름을 찾는 NAVER Developers <strong>검색 API · 지역</strong> 전용 키입니다. 위 자동차 경로 키와 별도이며, 이 화면 입력은 메모리에서만 유지됩니다.</p>
           <div class="form-grid two-col">
-            <label class="field"><span>NAVER API HUB Client ID <em>장소 검색</em></span><input id="localNaverPlaceClientId" type="password" autocomplete="off" spellcheck="false" placeholder="지역 검색 Application Client ID"></label>
-            <label class="field"><span>NAVER API HUB Client Secret <em>장소 검색</em></span><input id="localNaverPlaceClientSecret" type="password" autocomplete="off" spellcheck="false" placeholder="지역 검색 Application Client Secret"></label>
+            <label class="field"><span>NAVER Search Client ID <em>장소 검색</em></span><input id="localNaverPlaceClientId" type="password" autocomplete="off" spellcheck="false" placeholder="Developers Application Client ID"></label>
+            <label class="field"><span>NAVER Search Client Secret <em>장소 검색</em></span><input id="localNaverPlaceClientSecret" type="password" autocomplete="off" spellcheck="false" placeholder="Developers Application Client Secret"></label>
           </div>
-          <p><a href="https://guide.ncloud-docs.com/docs/apihub-application" target="_blank" rel="noopener noreferrer">API HUB Application 만들기</a>에서 검색 API의 ‘지역’을 선택하세요. 키를 채팅이나 코드에 붙여넣지 말고 이 창에만 입력합니다.</p>
+          <p><a href="https://developers.naver.com/docs/serviceapi/search/local/local.md" target="_blank" rel="noopener noreferrer">NAVER 지역 검색 안내</a>에서 Application의 검색 API 활성화를 확인하세요. 키를 채팅이나 코드에 붙여넣지 말고 이 창에만 입력합니다.</p>
         </details>
         <p class="local-key-status" id="localKeyStatus">로컬 서버 주소: <code>127.0.0.1:8787</code></p>
         <div class="local-key-command"><strong>.env 자동 로딩으로 서버 시작</strong><code>powershell -File homehunt/scripts/start-local-market.ps1</code></div>
@@ -872,11 +875,28 @@
     </section>
   </div>
 
+  <div class="modal-backdrop confirm-backdrop" id="confirmModal" hidden>
+    <section class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
+      <span class="confirm-modal-icon" aria-hidden="true"><i class="ti ti-trash"></i></span>
+      <div class="confirm-modal-copy">
+        <span>PLEASE CONFIRM</span>
+        <h2 id="confirmModalTitle">기록을 삭제할까요?</h2>
+        <p id="confirmModalMessage">삭제한 기록은 이 기기에서 복구할 수 없습니다.</p>
+      </div>
+      <div class="confirm-modal-actions">
+        <button class="outline-btn" id="cancelConfirmModal" type="button">취소</button>
+        <button class="danger-action-btn" id="acceptConfirmModal" type="button"><i class="ti ti-trash" aria-hidden="true"></i><span>삭제</span></button>
+      </div>
+    </section>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./js/ui-kit.js?v=3.0.1" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
+  <script src="./js/ui-kit.js?v=3.0.4" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=3.0.1"></script>
-  <script type="module" src="./js/ui-shell.js?v=3.0.1"></script>
-  <script src="./js/navigation-v25.js?v=3.0.1" defer></script>
+  <script type="module" src="./js/app.js?v=3.0.4"></script>
+  <script type="module" src="./js/ui-shell.js?v=3.0.4"></script>
+  <script src="./js/navigation-v25.js?v=3.0.4" defer></script>
 </body>
 </html>

@@ -62,7 +62,7 @@ function contextMarkerContent(record, selected = false) {
 
 function marketAction(record, prefix) {
   if (contextLayer(record) === 'supply' || !record?.name) return '';
-  return `<button type="button" data-open-market-complex="${escapeHtml(mapRecordId(record, prefix))}">5년 실거래</button>`;
+  return `<button class="map-info-action" type="button" data-open-market-complex="${escapeHtml(mapRecordId(record, prefix))}"><i class="ti ti-chart-line" aria-hidden="true"></i><span>5년 실거래</span></button>`;
 }
 
 function contextInfoContent(record) {
