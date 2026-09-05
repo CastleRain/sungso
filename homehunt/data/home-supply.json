@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": 1,
-  "status": "awaiting_api_access",
+  "status": "partial",
   "complete": false,
   "source": "청약홈·LH·SH 공식 분양정보 통합",
   "sourceType": "official",
@@ -9,48 +9,142 @@
     {
       "id": "applyhome",
       "label": "한국부동산원 청약홈",
-      "status": "not_collected",
+      "status": "error",
+      "collectionStatus": "error",
       "generatedAt": null,
+      "lastSuccessfulAt": null,
+      "retainedStaleNoticeCount": 0,
+      "retainedHistoricalNoticeCount": 0,
       "endpoints": [
         {
           "category": "apt",
+          "label": "APT 분양",
           "detailEndpoint": "getAPTLttotPblancDetail",
           "modelEndpoint": "getAPTLttotPblancMdl",
-          "status": "not_collected"
+          "status": "error"
         },
         {
           "category": "remaining",
+          "label": "잔여세대",
           "detailEndpoint": "getRemndrLttotPblancDetail",
           "modelEndpoint": "getRemndrLttotPblancMdl",
-          "status": "not_collected"
+          "status": "error"
         },
         {
           "category": "optional",
+          "label": "임의공급",
           "detailEndpoint": "getOPTLttotPblancDetail",
           "modelEndpoint": "getOPTLttotPblancMdl",
-          "status": "not_collected"
+          "status": "error"
         }
       ],
       "coverage": {
-        "status": "not_collected",
+        "status": "error",
         "requestedEndpointCount": 3,
         "successfulEndpointCount": 0,
-        "failedEndpointCount": 0,
-        "errors": []
+        "failedEndpointCount": 3,
+        "endpoints": [
+          {
+            "category": "apt",
+            "label": "APT 분양",
+            "detailEndpoint": "getAPTLttotPblancDetail",
+            "modelEndpoint": "getAPTLttotPblancMdl",
+            "status": "error"
+          },
+          {
+            "category": "remaining",
+            "label": "잔여세대",
+            "detailEndpoint": "getRemndrLttotPblancDetail",
+            "modelEndpoint": "getRemndrLttotPblancMdl",
+            "status": "error"
+          },
+          {
+            "category": "optional",
+            "label": "임의공급",
+            "detailEndpoint": "getOPTLttotPblancDetail",
+            "modelEndpoint": "getOPTLttotPblancMdl",
+            "status": "error"
+          }
+        ],
+        "errors": [
+          {
+            "source": "applyhome",
+            "category": "apt",
+            "detailEndpoint": "getAPTLttotPblancDetail",
+            "modelEndpoint": "getAPTLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "applyhome",
+            "category": "remaining",
+            "detailEndpoint": "getRemndrLttotPblancDetail",
+            "modelEndpoint": "getRemndrLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "applyhome",
+            "category": "optional",
+            "detailEndpoint": "getOPTLttotPblancDetail",
+            "modelEndpoint": "getOPTLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          }
+        ]
       }
     },
     {
       "id": "lh",
       "label": "한국토지주택공사 청약플러스",
-      "status": "not_collected",
+      "status": "error",
+      "collectionStatus": "error",
       "generatedAt": null,
       "lastSuccessfulAt": null,
-      "queries": [],
+      "retainedStaleNoticeCount": 0,
+      "retainedHistoricalNoticeCount": 0,
+      "queries": [
+        {
+          "typeCode": "05",
+          "regionCode": "11",
+          "status": "error",
+          "pages": 0,
+          "rawCount": 0,
+          "reportedTotal": null
+        },
+        {
+          "typeCode": "05",
+          "regionCode": "41",
+          "status": "error",
+          "pages": 0,
+          "rawCount": 0,
+          "reportedTotal": null
+        },
+        {
+          "typeCode": "39",
+          "regionCode": "11",
+          "status": "error",
+          "pages": 0,
+          "rawCount": 0,
+          "reportedTotal": null
+        },
+        {
+          "typeCode": "39",
+          "regionCode": "41",
+          "status": "error",
+          "pages": 0,
+          "rawCount": 0,
+          "reportedTotal": null
+        }
+      ],
       "coverage": {
-        "status": "not_collected",
+        "status": "error",
         "requestedQueryCount": 4,
         "successfulQueryCount": 0,
-        "failedQueryCount": 0,
+        "failedQueryCount": 4,
         "requestCount": 0,
         "typeCodes": [
           "05",
@@ -61,45 +155,126 @@
           "41"
         ],
         "includeRental": false,
-        "queries": [],
-        "errors": []
+        "queries": [
+          {
+            "typeCode": "05",
+            "regionCode": "11",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "05",
+            "regionCode": "41",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "39",
+            "regionCode": "11",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "39",
+            "regionCode": "41",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          }
+        ],
+        "errors": [
+          {
+            "source": "lh",
+            "typeCode": "05",
+            "regionCode": "11",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "05",
+            "regionCode": "41",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "39",
+            "regionCode": "11",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "39",
+            "regionCode": "41",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          }
+        ]
       }
     },
     {
       "id": "sh",
       "label": "서울주택도시개발공사",
-      "status": "not_collected",
-      "generatedAt": null,
-      "lastSuccessfulAt": null,
+      "status": "ok",
+      "collectionStatus": "ok",
+      "generatedAt": "2026-09-05T00:07:24.606Z",
+      "lastSuccessfulAt": "2026-09-05T00:07:24.606Z",
+      "retainedStaleNoticeCount": 0,
+      "retainedHistoricalNoticeCount": 0,
       "feeds": [
         {
           "url": "https://www.i-sh.co.kr/main/lay2/program/S1T294C295/www/rss/rssNoticeWrite.do",
-          "status": "not_collected"
+          "status": "ok",
+          "rawItemCount": 29,
+          "includedNoticeCount": 0
         }
       ],
       "coverage": {
-        "status": "not_collected",
+        "status": "ok",
         "requestedFeedCount": 1,
-        "successfulFeedCount": 0,
+        "successfulFeedCount": 1,
         "failedFeedCount": 0,
-        "requestCount": 0,
-        "rawItemCount": 0,
+        "requestCount": 1,
+        "rawItemCount": 29,
         "includedNoticeCount": 0,
-        "excludedItemCount": 0,
+        "excludedItemCount": 29,
+        "excludedReasonCounts": {
+          "result-or-follow-up": 5,
+          "non-sale-topic": 15,
+          "unrelated": 9
+        },
+        "charset": "euc-kr",
+        "responseBytes": 489628,
         "feeds": [
           {
             "url": "https://www.i-sh.co.kr/main/lay2/program/S1T294C295/www/rss/rssNoticeWrite.do",
-            "status": "not_collected"
+            "status": "ok",
+            "rawItemCount": 29,
+            "includedNoticeCount": 0
           }
         ],
         "errors": []
       }
     }
   ],
-  "generatedAt": null,
-  "lastSuccessfulAt": null,
+  "generatedAt": "2026-09-05T00:07:24.606Z",
+  "lastSuccessfulAt": "2026-09-05T00:07:24.606Z",
+  "lastCompleteAt": null,
   "query": {
-    "noticeDateFrom": null,
+    "noticeDateFrom": "2024-09-05",
     "lookbackDays": 730,
     "regions": [
       "서울",
@@ -148,7 +323,7 @@
     ]
   },
   "coverage": {
-    "status": "not_collected",
+    "status": "partial",
     "totalNotices": 0,
     "freshNoticeCount": 0,
     "staleNoticeCount": 0,
@@ -162,36 +337,88 @@
         "label": "APT 분양",
         "detailEndpoint": "getAPTLttotPblancDetail",
         "modelEndpoint": "getAPTLttotPblancMdl",
-        "status": "not_collected"
+        "status": "error"
       },
       {
         "category": "remaining",
         "label": "잔여세대",
         "detailEndpoint": "getRemndrLttotPblancDetail",
         "modelEndpoint": "getRemndrLttotPblancMdl",
-        "status": "not_collected"
+        "status": "error"
       },
       {
         "category": "optional",
         "label": "임의공급",
         "detailEndpoint": "getOPTLttotPblancDetail",
         "modelEndpoint": "getOPTLttotPblancMdl",
-        "status": "not_collected"
+        "status": "error"
       }
     ],
     "sourceCoverage": {
       "applyhome": {
-        "status": "not_collected",
+        "status": "error",
         "requestedEndpointCount": 3,
         "successfulEndpointCount": 0,
-        "failedEndpointCount": 0,
-        "errors": []
+        "failedEndpointCount": 3,
+        "endpoints": [
+          {
+            "category": "apt",
+            "label": "APT 분양",
+            "detailEndpoint": "getAPTLttotPblancDetail",
+            "modelEndpoint": "getAPTLttotPblancMdl",
+            "status": "error"
+          },
+          {
+            "category": "remaining",
+            "label": "잔여세대",
+            "detailEndpoint": "getRemndrLttotPblancDetail",
+            "modelEndpoint": "getRemndrLttotPblancMdl",
+            "status": "error"
+          },
+          {
+            "category": "optional",
+            "label": "임의공급",
+            "detailEndpoint": "getOPTLttotPblancDetail",
+            "modelEndpoint": "getOPTLttotPblancMdl",
+            "status": "error"
+          }
+        ],
+        "errors": [
+          {
+            "source": "applyhome",
+            "category": "apt",
+            "detailEndpoint": "getAPTLttotPblancDetail",
+            "modelEndpoint": "getAPTLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "applyhome",
+            "category": "remaining",
+            "detailEndpoint": "getRemndrLttotPblancDetail",
+            "modelEndpoint": "getRemndrLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "applyhome",
+            "category": "optional",
+            "detailEndpoint": "getOPTLttotPblancDetail",
+            "modelEndpoint": "getOPTLttotPblancMdl",
+            "code": "APPLYHOME_FETCH_ERROR",
+            "httpStatus": null,
+            "message": "청약홈 공고 조회에 실패했습니다."
+          }
+        ]
       },
       "lh": {
-        "status": "not_collected",
+        "status": "error",
         "requestedQueryCount": 4,
         "successfulQueryCount": 0,
-        "failedQueryCount": 0,
+        "failedQueryCount": 4,
+        "requestCount": 0,
         "typeCodes": [
           "05",
           "39"
@@ -201,28 +428,162 @@
           "41"
         ],
         "includeRental": false,
-        "errors": []
+        "queries": [
+          {
+            "typeCode": "05",
+            "regionCode": "11",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "05",
+            "regionCode": "41",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "39",
+            "regionCode": "11",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          },
+          {
+            "typeCode": "39",
+            "regionCode": "41",
+            "status": "error",
+            "pages": 0,
+            "rawCount": 0,
+            "reportedTotal": null
+          }
+        ],
+        "errors": [
+          {
+            "source": "lh",
+            "typeCode": "05",
+            "regionCode": "11",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "05",
+            "regionCode": "41",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "39",
+            "regionCode": "11",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          },
+          {
+            "source": "lh",
+            "typeCode": "39",
+            "regionCode": "41",
+            "code": "MISSING_CREDENTIAL",
+            "httpStatus": null,
+            "message": "LH 공고 조회에 실패했습니다."
+          }
+        ]
       },
       "sh": {
-        "status": "not_collected",
+        "status": "ok",
         "requestedFeedCount": 1,
-        "successfulFeedCount": 0,
+        "successfulFeedCount": 1,
         "failedFeedCount": 0,
-        "requestCount": 0,
-        "rawItemCount": 0,
+        "requestCount": 1,
+        "rawItemCount": 29,
         "includedNoticeCount": 0,
-        "excludedItemCount": 0,
+        "excludedItemCount": 29,
+        "excludedReasonCounts": {
+          "result-or-follow-up": 5,
+          "non-sale-topic": 15,
+          "unrelated": 9
+        },
+        "charset": "euc-kr",
+        "responseBytes": 489628,
         "feeds": [
           {
             "url": "https://www.i-sh.co.kr/main/lay2/program/S1T294C295/www/rss/rssNoticeWrite.do",
-            "status": "not_collected"
+            "status": "ok",
+            "rawItemCount": 29,
+            "includedNoticeCount": 0
           }
         ],
         "errors": []
       }
     },
     "errors": [
-      "청약홈·LH 분양정보 API와 SH 공식 RSS를 아직 수집하지 않았습니다. API 활용신청·비밀키 연결 후 예약 수집에서 함께 갱신됩니다."
+      {
+        "source": "applyhome",
+        "category": "apt",
+        "detailEndpoint": "getAPTLttotPblancDetail",
+        "modelEndpoint": "getAPTLttotPblancMdl",
+        "code": "APPLYHOME_FETCH_ERROR",
+        "httpStatus": null,
+        "message": "청약홈 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "applyhome",
+        "category": "remaining",
+        "detailEndpoint": "getRemndrLttotPblancDetail",
+        "modelEndpoint": "getRemndrLttotPblancMdl",
+        "code": "APPLYHOME_FETCH_ERROR",
+        "httpStatus": null,
+        "message": "청약홈 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "applyhome",
+        "category": "optional",
+        "detailEndpoint": "getOPTLttotPblancDetail",
+        "modelEndpoint": "getOPTLttotPblancMdl",
+        "code": "APPLYHOME_FETCH_ERROR",
+        "httpStatus": null,
+        "message": "청약홈 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "lh",
+        "typeCode": "05",
+        "regionCode": "11",
+        "code": "MISSING_CREDENTIAL",
+        "httpStatus": null,
+        "message": "LH 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "lh",
+        "typeCode": "05",
+        "regionCode": "41",
+        "code": "MISSING_CREDENTIAL",
+        "httpStatus": null,
+        "message": "LH 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "lh",
+        "typeCode": "39",
+        "regionCode": "11",
+        "code": "MISSING_CREDENTIAL",
+        "httpStatus": null,
+        "message": "LH 공고 조회에 실패했습니다."
+      },
+      {
+        "source": "lh",
+        "typeCode": "39",
+        "regionCode": "41",
+        "code": "MISSING_CREDENTIAL",
+        "httpStatus": null,
+        "message": "LH 공고 조회에 실패했습니다."
+      }
     ]
   },
   "baseline": {
@@ -241,19 +602,21 @@
         "lastSuccessfulAt": null
       },
       "sh": {
-        "established": false,
-        "establishedAt": null,
-        "lastSuccessfulAt": null
+        "established": true,
+        "establishedAt": "2026-09-05T00:07:24.606Z",
+        "lastSuccessfulAt": "2026-09-05T00:07:24.606Z"
       }
     }
   },
   "changes": {
     "baselineRun": true,
-    "reason": "awaiting_first_successful_snapshot",
-    "suppressedSources": [],
+    "reason": "first_successful_snapshot",
+    "suppressedSources": [
+      "sh"
+    ],
     "comparedSources": [],
     "comparedToGeneratedAt": null,
-    "generatedAt": null,
+    "generatedAt": "2026-09-05T00:07:24.606Z",
     "new": [],
     "updated": [],
     "removed": [],
