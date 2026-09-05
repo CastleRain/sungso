@@ -230,8 +230,8 @@
       "label": "서울주택도시개발공사",
       "status": "ok",
       "collectionStatus": "ok",
-      "generatedAt": "2026-09-05T07:41:26.545Z",
-      "lastSuccessfulAt": "2026-09-05T07:41:26.545Z",
+      "generatedAt": "2026-09-05T12:44:18.520Z",
+      "lastSuccessfulAt": "2026-09-05T12:44:18.520Z",
       "retainedStaleNoticeCount": 0,
       "retainedHistoricalNoticeCount": 0,
       "feeds": [
@@ -270,8 +270,8 @@
       }
     }
   ],
-  "generatedAt": "2026-09-05T07:41:26.545Z",
-  "lastSuccessfulAt": "2026-09-05T07:41:26.545Z",
+  "generatedAt": "2026-09-05T12:44:18.520Z",
+  "lastSuccessfulAt": "2026-09-05T12:44:18.520Z",
   "lastCompleteAt": null,
   "query": {
     "noticeDateFrom": "2024-09-05",
@@ -604,7 +604,7 @@
       "sh": {
         "established": true,
         "establishedAt": "2026-09-05T00:07:24.606Z",
-        "lastSuccessfulAt": "2026-09-05T07:41:26.545Z"
+        "lastSuccessfulAt": "2026-09-05T12:44:18.520Z"
       }
     }
   },
@@ -615,8 +615,8 @@
     "comparedSources": [
       "sh"
     ],
-    "comparedToGeneratedAt": "2026-09-05T00:07:24.606Z",
-    "generatedAt": "2026-09-05T07:41:26.545Z",
+    "comparedToGeneratedAt": "2026-09-05T07:41:26.545Z",
+    "generatedAt": "2026-09-05T12:44:18.520Z",
     "new": [],
     "updated": [],
     "removed": [],
