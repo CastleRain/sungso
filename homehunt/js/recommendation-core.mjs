@@ -23,8 +23,49 @@ function operatorFromText(value, fallback = 'gte') {
   return fallback;
 }
 
+function koreanMoneyTailToManWon(value = '') {
+  const normalized = String(value).replace(/[\s,]/g, '');
+  if (!normalized) return 0;
+  if (/^\d+(?:\.\d+)?$/.test(normalized)) return numeric(normalized);
+  const multipliers = { 천: 1000, 백: 100, 십: 10 };
+  let total = 0;
+  let consumed = '';
+  const unitPattern = /(\d+(?:\.\d+)?)(천|백|십)/g;
+  for (const match of normalized.matchAll(unitPattern)) {
+    total += numeric(match[1]) * multipliers[match[2]];
+    consumed += match[0];
+  }
+  const remainder = normalized.replace(consumed, '');
+  return remainder && /^\d+(?:\.\d+)?$/.test(remainder) ? total + numeric(remainder) : total;
+}
+
 function moneyToManWon(eok, tail = '') {
-  return Math.round(numeric(eok) * 10000 + numeric(tail));
+  return Math.round(numeric(eok) * 10000 + koreanMoneyTailToManWon(tail));
+}
+
+export function parseKoreanMoneyToManWon(value) {
+  const raw = normalizeRecommendationText(value);
+  const won = raw.match(/^([\d,.]+)\s*원$/);
+  if (won) {
+    const amountWon = numeric(won[1], Number.NaN);
+    return Number.isFinite(amountWon) && amountWon >= 0 ? Math.round(amountWon / 10000) : null;
+  }
+  const text = raw.replace(/원\s*$/, '').trim();
+  if (!text) return null;
+  const eok = text.match(/^(\d+(?:\.\d+)?)\s*억(?:\s*([\d,.\s천백십]+?)(?:\s*만)?)?$/);
+  if (eok) return moneyToManWon(eok[1], eok[2]);
+  const manWon = text.match(/^([\d,.]+)\s*만?$/);
+  if (!manWon) return null;
+  const amount = numeric(manWon[1], Number.NaN);
+  return Number.isFinite(amount) && amount >= 0 ? Math.round(amount) : null;
+}
+
+function formatRecommendationMoney(amountManWon) {
+  const amount = Math.max(0, Math.round(Number(amountManWon) || 0));
+  const eok = Math.floor(amount / 10000);
+  const tail = amount % 10000;
+  if (!eok) return `${tail.toLocaleString('ko-KR')}만원`;
+  return tail ? `${eok.toLocaleString('ko-KR')}억 ${tail.toLocaleString('ko-KR')}만원` : `${eok.toLocaleString('ko-KR')}억원`;
 }
 
 export function parseRecommendationQuery(query, currentYear = new Date().getFullYear()) {
@@ -59,14 +100,17 @@ export function parseRecommendationQuery(query, currentYear = new Date().getFull
     clauses.push({ key: 'households', label: `${filters.minHouseholds.toLocaleString('ko-KR')}세대 ${filters.householdsOperator === 'gt' ? '초과' : '이상'}`, confidence: 'high' });
   }
 
-  const money = text.match(/(\d+(?:\.\d+)?)\s*억(?:\s*([\d,]+)\s*만(?:원)?)?/);
+  const money = text.match(/(\d+(?:\.\d+)?)\s*억/);
   if (money) {
-    const moneyTail = text.slice((money.index || 0) + money[0].length, (money.index || 0) + money[0].length + 12);
+    let moneyEnd = (money.index || 0) + money[0].length;
+    const amountTail = text.slice(moneyEnd).match(/^\s*([\d,.\s천백십]+?)(?:\s*만(?:원)?)?(?=\s*(?:미만|이하|이내|안쪽|초과|이상|,(?!\d)|$))/);
+    if (amountTail) moneyEnd += amountTail[0].length;
+    const moneyTail = text.slice(moneyEnd, moneyEnd + 12);
     const moneyOperator = moneyTail.match(/미만|이하|이내|안쪽|초과|이상/)?.[0] || '';
-    filters.maxPriceManWon = moneyToManWon(money[1], money[2]);
+    filters.maxPriceManWon = moneyToManWon(money[1], amountTail?.[1]);
     filters.priceOperator = operatorFromText(moneyOperator, 'lte');
     if (!['lt', 'lte'].includes(filters.priceOperator)) filters.priceOperator = 'lte';
-    clauses.push({ key: 'price', label: `${money[1]}억원 ${filters.priceOperator === 'lt' ? '미만' : '이하'}`, confidence: 'high' });
+    clauses.push({ key: 'price', label: `${formatRecommendationMoney(filters.maxPriceManWon)} ${filters.priceOperator === 'lt' ? '미만' : '이하'}`, confidence: 'high' });
   }
 
   const area = text.match(/(\d+(?:\.\d+)?)\s*평/);
@@ -111,7 +155,7 @@ export function parseRecommendationQuery(query, currentYear = new Date().getFull
     || text.match(/(?:회사|직장|출근)[^,.]{0,22}?(\d+)\s*분[^,.]{0,8}?(안|이내|미만)/);
   if (hour || minute) {
     filters.commuteMaxMinutes = hour ? Math.round(numeric(hour[1]) * 60) : numeric(minute[1]);
-    clauses.push({ key: 'commute', label: `회사 ${filters.commuteMaxMinutes}분 미만`, confidence: 'high' });
+    clauses.push({ key: 'commute', label: `회사 ${filters.commuteMaxMinutes}분 이하`, confidence: 'high' });
   }
   if (/차|자동차|자가용/.test(text)) filters.commuteModes.push('car');
   if (/지하철|대중교통/.test(text)) filters.commuteModes.push('transit');

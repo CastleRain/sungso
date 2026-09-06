@@ -88,7 +88,12 @@ test('local commute server exposes v2 quota, compatible single lookup, and dedup
 
     const health = await requestJson(baseUrl, '/api/health');
     assert.equal(health.status, 200);
-    assert.equal(health.body.version, '2.5.0');
+    assert.equal(health.body.version, '2.5.1');
+    assert.deepEqual(health.body.commute.diagnostics, {
+      transit: { kakao: null, tmap: null },
+      car: null,
+    });
+    assert.equal(health.body.placeSearch.diagnostic, null);
     assert.equal(health.body.supply.configured, false);
     assert.deepEqual(health.body.supply.providers, ['applyhome', 'lh', 'sh']);
     assert.deepEqual(health.body.supply.publicProviders, ['sh']);
@@ -312,6 +317,8 @@ test('Kakao local daily limit blocks single and batch requests before an upstrea
 
   try {
     await waitForStartup(child);
+    const before = await requestJson(baseUrl, '/api/commute/quota');
+    const usedBefore = before.body.kakao.used;
     const single = await requestJson(baseUrl, '/api/commute', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -349,13 +356,13 @@ test('Kakao local daily limit blocks single and batch requests before an upstrea
     assert.equal(batch.body.provider, 'kakao');
     assert.equal(batch.body.requiredTransitCalls, 1);
     assert.equal(batch.body.quota.limit, 0);
-    assert.equal(batch.body.quota.used, 0);
+    assert.equal(batch.body.quota.used, usedBefore);
     assert.equal(batch.body.quota.remaining, 0);
     assert.equal(JSON.stringify(batch.body).includes('fake-kakao-rest-key-123456'), false);
 
     const quota = await requestJson(baseUrl, '/api/commute/quota');
     assert.equal(quota.body.kakao.limit, 0);
-    assert.equal(quota.body.kakao.used, 0);
+    assert.equal(quota.body.kakao.used, usedBefore);
     assert.equal(quota.body.kakao.remaining, 0);
   } finally {
     await stopServer(child);

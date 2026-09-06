@@ -19,6 +19,7 @@ import {
   fetchTmapTransitSummary,
 } from './commute-provider.mjs';
 import { fetchNaverLocalSearch } from './naver-local-search.mjs';
+import { connectedHistoryMonthLoader } from './history-request-lifecycle.mjs';
 import { normalizeGeoPoint } from '../js/transport-core.mjs';
 import { nextWeekdaySearchDateTime } from './commute-time.mjs';
 import {
@@ -91,6 +92,23 @@ const placeSearchCache = new MemoryTtlCache({ ttlMs: 5 * 60 * 1000 });
 const tmapLedger = new TmapDailyLedger({ filePath: TMAP_LEDGER_FILE, limit: TMAP_DAILY_LIMIT });
 const kakaoLedger = new KakaoDailyLedger({ filePath: KAKAO_LEDGER_FILE, limit: KAKAO_DAILY_LIMIT });
 const transitGate = createConcurrencyGate(TRANSIT_CONCURRENCY);
+const providerDiagnostics = {
+  transit: { kakao: null, tmap: null },
+  car: null,
+  placeSearch: null,
+};
+
+function recordProviderDiagnostic(target, { state = 'reachable', reasonCode = null, httpStatus = null } = {}) {
+  const value = {
+    state,
+    reasonCode: reasonCode ? String(reasonCode) : null,
+    httpStatus: httpStatus !== null && Number.isFinite(Number(httpStatus)) ? Number(httpStatus) : null,
+    checkedAt: new Date().toISOString(),
+  };
+  if (target === 'kakao' || target === 'tmap') providerDiagnostics.transit[target] = value;
+  else providerDiagnostics[target] = value;
+  return value;
+}
 
 function parseNumberSetting(value, { fallback, minExclusive, maxExclusive }) {
   const parsed = Number(value);
@@ -627,8 +645,9 @@ async function handleHistory(url, res) {
       endMonth: range.endMonth,
       beforeRequest: waitForUpstreamSlot,
       concurrency: 3,
-      monthLoader: ({ lawdCd: monthLawdCd, dealYmd, type }) => loadMolitMonth(monthLawdCd, dealYmd, type),
+      monthLoader: connectedHistoryMonthLoader(res, ({ lawdCd: monthLawdCd, dealYmd, type }) => loadMolitMonth(monthLawdCd, dealYmd, type)),
     });
+    if (res.destroyed) return;
     if (payload.partial && !payload.records.length && stale) {
       return json(res, 200, {
         ...stale,
@@ -649,6 +668,7 @@ async function handleHistory(url, res) {
     }
     return json(res, 200, { ...payload, source: 'molit-live' });
   } catch (error) {
+    if (res.destroyed) return;
     if (error.code === 'AMBIGUOUS_APARTMENT') {
       return json(res, 409, errorPayload('AMBIGUOUS_APARTMENT', '같은 이름의 단지가 여러 곳입니다.', {
         candidates: error.candidates || [],
@@ -693,6 +713,7 @@ function failedRoute(provider, mode, error) {
     verified: false,
     status: error?.code === 'DAILY_LIMIT' ? 'quota-exhausted' : 'error',
     reasonCode: error?.code || 'PROVIDER_ERROR',
+    httpStatus: error?.httpStatus !== null && error?.httpStatus !== undefined && Number.isFinite(Number(error.httpStatus)) ? Number(error.httpStatus) : null,
     durationMinutes: null,
   };
 }
@@ -725,8 +746,17 @@ async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime
               },
             )
         ));
+        recordProviderDiagnostic(transitProvider, {
+          state: route?.verified ? 'verified' : 'reachable',
+          reasonCode: route?.reasonCode || null,
+        });
         routes.push(route);
       } catch (error) {
+        recordProviderDiagnostic(transitProvider, {
+          state: 'error',
+          reasonCode: error?.code || 'PROVIDER_ERROR',
+          httpStatus: error?.httpStatus ?? null,
+        });
         routes.push(failedRoute(`${transitProvider}-transit`, 'transit', error));
       }
     }
@@ -736,11 +766,21 @@ async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime
       routes.push({ provider: 'naver-directions5', mode: 'car', verified: false, status: 'not-configured', durationMinutes: null });
     } else {
       try {
-        routes.push(await fetchNaverDirections5(
+        const route = await fetchNaverDirections5(
           { origin, destination, clientId: naverMapsClientId, clientSecret: naverMapsClientSecret },
           { cache: commuteCache, cacheTtlMs: 20 * 60 * 1000 },
-        ));
+        );
+        recordProviderDiagnostic('car', {
+          state: route?.verified ? 'verified' : 'reachable',
+          reasonCode: route?.reasonCode || null,
+        });
+        routes.push(route);
       } catch (error) {
+        recordProviderDiagnostic('car', {
+          state: 'error',
+          reasonCode: error?.code || 'PROVIDER_ERROR',
+          httpStatus: error?.httpStatus ?? null,
+        });
         routes.push(failedRoute('naver-directions5', 'car', error));
       }
     }
@@ -993,7 +1033,7 @@ async function handlePlaceSearch(url, res) {
   if (!naverLocalSearchClientId || !naverLocalSearchClientSecret) {
     return json(res, 503, errorPayload(
       'NAVER_LOCAL_SEARCH_KEY_REQUIRED',
-      '회사·건물명 검색용 NAVER API HUB 지역 검색 키를 연결해주세요.',
+      '회사·건물명 검색용 NAVER Developers 지역 검색 키를 연결해주세요.',
     ));
   }
   const query = String(url.searchParams.get('query') || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
@@ -1008,8 +1048,14 @@ async function handlePlaceSearch(url, res) {
         clientSecret: naverLocalSearchClientSecret,
       })
     ));
-    return json(res, 200, { ok: true, query, items, source: 'naver-api-hub-local', cachedInMemory: true });
+    recordProviderDiagnostic('placeSearch', { state: 'verified' });
+    return json(res, 200, { ok: true, query, items, source: 'naver-developers-local', cachedInMemory: true });
   } catch (error) {
+    recordProviderDiagnostic('placeSearch', {
+      state: 'error',
+      reasonCode: error?.code || 'PLACE_SEARCH_ERROR',
+      httpStatus: error?.httpStatus ?? null,
+    });
     const status = error?.code === 'INVALID_QUERY' ? 400 : error?.code === 'TIMEOUT' ? 504 : 502;
     return json(res, status, errorPayload(
       error?.code === 'INVALID_QUERY' ? 'INVALID_PLACE_QUERY' : 'NAVER_LOCAL_SEARCH_UNAVAILABLE',
@@ -1048,12 +1094,17 @@ async function handler(req, res) {
           transit: `memory-only-${TRANSIT_CACHE_HOURS}-hours`,
           car: 'memory-only-20-minutes',
         },
+        diagnostics: {
+          transit: providerDiagnostics.transit,
+          car: providerDiagnostics.car,
+        },
         tmapQuota,
         kakaoQuota,
       },
       placeSearch: {
         configured: Boolean(naverLocalSearchClientId && naverLocalSearchClientSecret),
         cache: 'memory-only-5-minutes',
+        diagnostic: providerDiagnostics.placeSearch,
       },
       supply: {
         configured: Boolean(serviceKey),
@@ -1072,7 +1123,7 @@ async function handler(req, res) {
         transitConcurrency: TRANSIT_CONCURRENCY,
         transitCacheHours: TRANSIT_CACHE_HOURS,
       },
-      version: '2.5.0',
+      version: '2.5.1',
     });
   }
   if (req.method === 'GET' && url.pathname === '/api/commute/quota') {
@@ -1111,22 +1162,30 @@ async function handler(req, res) {
       return json(res, 400, errorPayload('NAVER_KEY_PAIR_REQUIRED', '네이버 Directions는 Client ID와 Secret을 함께 입력해주세요.'));
     }
     if ((nextNaverLocalId && !nextNaverLocalSecret) || (!nextNaverLocalId && nextNaverLocalSecret)) {
-      return json(res, 400, errorPayload('NAVER_LOCAL_KEY_PAIR_REQUIRED', 'NAVER API HUB 지역 검색은 Client ID와 Secret을 함께 입력해주세요.'));
+      return json(res, 400, errorPayload('NAVER_LOCAL_KEY_PAIR_REQUIRED', 'NAVER Developers 지역 검색은 Client ID와 Secret을 함께 입력해주세요.'));
     }
     if (nextKey) {
       serviceKey = nextKey;
       serviceKeySource = 'memory';
     }
-    if (nextTmapKey) tmapAppKey = nextTmapKey;
-    if (nextKakaoKey) kakaoRestApiKey = nextKakaoKey;
+    if (nextTmapKey) {
+      tmapAppKey = nextTmapKey;
+      providerDiagnostics.transit.tmap = null;
+    }
+    if (nextKakaoKey) {
+      kakaoRestApiKey = nextKakaoKey;
+      providerDiagnostics.transit.kakao = null;
+    }
     if (hasTransitProvider) transitProviderPreference = nextTransitProvider;
     if (nextNaverId && nextNaverSecret) {
       naverMapsClientId = nextNaverId;
       naverMapsClientSecret = nextNaverSecret;
+      providerDiagnostics.car = null;
     }
     if (nextNaverLocalId && nextNaverLocalSecret) {
       naverLocalSearchClientId = nextNaverLocalId;
       naverLocalSearchClientSecret = nextNaverLocalSecret;
+      providerDiagnostics.placeSearch = null;
     }
     commuteCache.clear();
     transitCache.clear();

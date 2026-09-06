@@ -83,16 +83,77 @@
     element.prepend(icon);
   }
 
+  function updateRangeVisual(input) {
+    const minimum = Number(input.min || 0);
+    const maximum = Number(input.max || 100);
+    const value = Number(input.value || minimum);
+    const progress = maximum > minimum
+      ? Math.max(0, Math.min(100, ((value - minimum) / (maximum - minimum)) * 100))
+      : 0;
+    input.style.setProperty('--hh-range-progress', `${progress}%`);
+  }
+
+  function enhanceRange(input) {
+    if (!(input instanceof HTMLInputElement) || input.type !== 'range') return;
+    if (!input.classList.contains('hh-range')) input.classList.add('hh-range');
+    updateRangeVisual(input);
+    if (input.dataset.hhRangeReady === 'true') return;
+    input.dataset.hhRangeReady = 'true';
+    input.addEventListener('input', () => updateRangeVisual(input));
+    input.addEventListener('change', () => updateRangeVisual(input));
+  }
+
+  function enhancePicker(input) {
+    if (!(input instanceof HTMLInputElement) || input.dataset.hhPickerReady === 'true') return;
+    if (typeof window.flatpickr !== 'function') return;
+    const timeOnly = input.hasAttribute('data-hh-time-picker');
+    const dateOnly = input.hasAttribute('data-hh-date-picker');
+    if (!timeOnly && !dateOnly) return;
+    input.dataset.hhPickerReady = 'true';
+    input.setAttribute('aria-haspopup', 'dialog');
+    input.setAttribute('aria-expanded', 'false');
+    window.flatpickr(input, {
+      locale: window.flatpickr.l10ns?.ko || 'ko',
+      allowInput: true,
+      disableMobile: true,
+      clickOpens: true,
+      dateFormat: timeOnly ? 'H:i' : 'Y-m-d',
+      enableTime: timeOnly,
+      noCalendar: timeOnly,
+      time_24hr: true,
+      minuteIncrement: timeOnly ? 5 : 1,
+      monthSelectorType: 'static',
+      onOpen: () => input.setAttribute('aria-expanded', 'true'),
+      onClose: () => input.setAttribute('aria-expanded', 'false'),
+    });
+  }
+
+  function enhanceTextarea(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement) || textarea.dataset.hhAutosizeReady === 'true') return;
+    textarea.dataset.hhAutosizeReady = 'true';
+    const resize = () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(240, Math.max(72, textarea.scrollHeight))}px`;
+    };
+    textarea.addEventListener('input', resize);
+    resize();
+  }
+
   function enhance(root) {
     buttonGroups.forEach(({ selector, classes }) => addClasses(root, selector, classes));
     addClasses(root, '.portal-nav-item', ['nav-link']);
-    addClasses(root, 'input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"])', ['form-control']);
+    // Flatpickr owns the layout of its generated numeric inputs. Decorating
+    // those internals as app form controls makes the month/time rows expand.
+    addClasses(root, 'input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.numInput)', ['form-control']);
     addClasses(root, 'textarea', ['form-control']);
     addClasses(root, 'select', ['form-select']);
     addClasses(root, 'input[type="checkbox"], input[type="radio"]', ['form-check-input']);
     addClasses(root, cardSelectors, ['card']);
     addClasses(root, badgeSelectors, ['badge']);
     addClasses(root, '.archive-table, .compare-table', ['table', 'table-vcenter']);
+    elements(root, 'input[type="range"]').forEach(enhanceRange);
+    elements(root, '[data-hh-date-picker], [data-hh-time-picker]').forEach(enhancePicker);
+    elements(root, 'textarea').forEach(enhanceTextarea);
     elements(root, '.choice-chip').forEach((button) => button.setAttribute('aria-pressed', String(button.classList.contains('active'))));
     iconRules.forEach(([selector, name]) => elements(root, selector).forEach((element) => ensureIcon(element, name)));
   }

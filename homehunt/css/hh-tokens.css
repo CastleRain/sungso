@@ -1,0 +1,201 @@
+/* HomeHunt 3.0 — Data Navy design tokens */
+:root {
+  color-scheme: light;
+
+  /* Brand and text */
+  --hh-ink: #0b1b2b;
+  --hh-ink-2: #173c5e;
+  --hh-ink-3: #243447;
+  --hh-text: #39485c;
+  --hh-text-mute: #55657a;
+  --hh-text-soft: #66768a;
+  --hh-text-faint: #66768a;
+  --hh-text-muted: var(--hh-text-mute);
+  --hh-text-on-dark: #ffffff;
+  --hh-text-on-accent: #ffffff;
+
+  /* Surfaces and rules */
+  --hh-surface: #ffffff;
+  --hh-surface-2: #f7f9fc;
+  --hh-surface-3: #f1f4f8;
+  --hh-canvas: #f4f6f9;
+  --hh-map-base: #e9eef3;
+  --hh-line: #e3e9f0;
+  --hh-line-strong: #cfd8e4;
+  --hh-line-soft: #eef2f7;
+  --hh-overlay: rgba(11, 27, 43, 0.48);
+
+  /* Action */
+  --hh-accent: #1f5eff;
+  --hh-accent-hover: #174fd8;
+  --hh-accent-press: #0b3fbf;
+  --hh-accent-pressed: var(--hh-accent-press);
+  --hh-accent-soft: #e8efff;
+  --hh-accent-line: #b9cdff;
+  --hh-accent-on-ink: #8fb8ff;
+
+  /* Evidence tiers */
+  --hh-verified: #0b7a5b;
+  --hh-verified-bg: #f1faf6;
+  --hh-verified-line: #cdebe0;
+  --hh-estimated: #b4780a;
+  --hh-estimated-text: #855804;
+  --hh-estimated-bg: #fff8e8;
+  --hh-estimated-line: #f3e0b0;
+  --hh-unknown: #66768a;
+  --hh-unknown-text: #53647a;
+  --hh-unknown-bg: #f6f8fa;
+  --hh-unknown-line: #c9d4e0;
+  --hh-personal: #0b1b2b;
+  --hh-personal-accent: #ffc247;
+  --hh-personal-bg: #fffdf6;
+  --hh-personal-line: #ead28e;
+
+  /* Domain colors */
+  --hh-cluster-1: #3d74ff;
+  --hh-cluster-2: #1f5eff;
+  --hh-cluster-3: #0b3fbf;
+  --hh-cluster-low: var(--hh-cluster-1);
+  --hh-cluster-mid: var(--hh-cluster-2);
+  --hh-cluster-high: var(--hh-cluster-3);
+  --hh-shortlist: #e0483e;
+  --hh-shortlist-text: #a92e26;
+  --hh-shortlist-bg: #fff1f0;
+  --hh-visited: #0b1b2b;
+  --hh-visited-mark: #ffc247;
+  --hh-dest: #0b1b2b;
+  --hh-supply: #7a4dd8;
+  --hh-supply-text: #6035b9;
+  --hh-supply-bg: #f3edff;
+  --hh-supply-line: #dcc9ff;
+  --hh-rise: #c0392b;
+  --hh-fall: #1352c4;
+  --hh-flat: #55657a;
+  --hh-danger: #c0392b;
+  --hh-danger-bg: #fff1f0;
+  --hh-ok: #12a47a;
+  --hh-warning: #9a6200;
+
+  /* Typography */
+  --hh-font-sans: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --hh-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono",
+    monospace;
+  --hh-fs-display: 26px;
+  --hh-fs-price-xl: 28px;
+  --hh-fs-price-l: 22px;
+  --hh-fs-price-m: 20px;
+  --hh-fs-title: 17px;
+  --hh-fs-subtitle: 15px;
+  --hh-fs-body: 14px;
+  --hh-fs-ui: 13px;
+  --hh-fs-meta: 12px;
+  --hh-fs-caption: 12px;
+  --hh-fs-mono-label: 12px;
+  --hh-text-display: var(--hh-fs-display);
+  --hh-text-price-xl: var(--hh-fs-price-xl);
+  --hh-text-price-lg: var(--hh-fs-price-l);
+  --hh-text-price-md: var(--hh-fs-price-m);
+  --hh-text-title: var(--hh-fs-title);
+  --hh-text-subtitle: var(--hh-fs-subtitle);
+  --hh-text-body: var(--hh-fs-body);
+  --hh-text-ui: var(--hh-fs-ui);
+  --hh-text-meta: var(--hh-fs-meta);
+  --hh-text-caption: var(--hh-fs-caption);
+  --hh-leading-tight: 1.22;
+  --hh-leading-title: 1.4;
+  --hh-leading-body: 1.6;
+  --hh-leading-ui: 1.45;
+
+  /* Spacing */
+  --hh-space-0: 2px;
+  --hh-space-1: 4px;
+  --hh-space-2: 6px;
+  --hh-space-3: 8px;
+  --hh-space-4: 10px;
+  --hh-space-5: 12px;
+  --hh-space-6: 14px;
+  --hh-space-7: 16px;
+  --hh-space-8: 20px;
+  --hh-space-9: 24px;
+  --hh-space-10: 20px;
+  --hh-space-12: 24px;
+  --hh-space-16: 32px;
+  --hh-space-gutter: 32px;
+
+  /* Shape, elevation, focus */
+  --hh-r-xs: 5px;
+  --hh-r-sm: 7px;
+  --hh-r-md: 9px;
+  --hh-r-lg: 12px;
+  --hh-r-xl: 14px;
+  --hh-r-full: 999px;
+  --hh-radius-xs: var(--hh-r-xs);
+  --hh-radius-sm: var(--hh-r-sm);
+  --hh-radius-md: var(--hh-r-md);
+  --hh-radius-lg: var(--hh-r-lg);
+  --hh-radius-xl: var(--hh-r-xl);
+  --hh-radius-pill: var(--hh-r-full);
+  --hh-sh-1: 0 5px 12px -6px rgba(11, 27, 43, 0.28);
+  --hh-sh-2: 0 8px 22px -14px rgba(11, 27, 43, 0.4);
+  --hh-sh-3: 0 16px 36px -18px rgba(11, 27, 43, 0.55);
+  --hh-sh-focus: 0 0 0 3px rgba(31, 94, 255, 0.32);
+  --hh-shadow-sm: var(--hh-sh-1);
+  --hh-shadow-md: var(--hh-sh-2);
+  --hh-shadow-lg: var(--hh-sh-3);
+  --hh-focus-ring: var(--hh-sh-focus);
+
+  /* Shell */
+  --hh-rail-w: 76px;
+  --hh-topbar-h: 60px;
+  --hh-chiprow-h: 52px;
+  --hh-panel-w: 404px;
+  --hh-panel-min-w: 360px;
+  --hh-panel-max-w: 560px;
+  --hh-drawer-w: 380px;
+  --hh-shell-gap: 14px;
+  --hh-control-h: 40px;
+  --hh-touch-target: 44px;
+  --hh-bottomnav-h: 64px;
+  --hh-sheet-peek: 96px;
+  --hh-sheet-half: 46vh;
+  --hh-sheet-full: 92dvh;
+
+  /* Motion */
+  --hh-dur-1: 120ms;
+  --hh-dur-2: 200ms;
+  --hh-dur-3: 280ms;
+  --hh-duration-fast: var(--hh-dur-1);
+  --hh-duration-base: var(--hh-dur-2);
+  --hh-duration-slow: var(--hh-dur-3);
+  --hh-ease: cubic-bezier(0.2, 0.8, 0.25, 1);
+
+  /* Layering */
+  --hh-z-map: 0;
+  --hh-z-marker: 10;
+  --hh-z-marker-sel: 20;
+  --hh-z-marker-selected: var(--hh-z-marker-sel);
+  --hh-z-map-ui: 30;
+  --hh-z-panel: 40;
+  --hh-z-topbar: 50;
+  --hh-z-rail: 60;
+  --hh-z-drawer: 70;
+  --hh-z-modal: 80;
+  --hh-z-toast: 90;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --hh-control-h: 44px;
+    --hh-shell-gap: 10px;
+    --hh-sheet-full: calc(100dvh - var(--hh-topbar-h));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hh-dur-1: 0ms;
+    --hh-dur-2: 0ms;
+    --hh-dur-3: 0ms;
+  }
+}

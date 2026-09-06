@@ -41,7 +41,7 @@ export function normalizeCommuteResult(result, maxMinutes) {
     ...(result || {}),
     verified,
     durationMinutes: verified ? durationMinutes : null,
-    withinLimit: verified ? durationMinutes < Number(maxMinutes) : false,
+    withinLimit: verified ? durationMinutes <= Number(maxMinutes) : false,
   };
 }
 

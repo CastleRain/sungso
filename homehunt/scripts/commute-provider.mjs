@@ -73,6 +73,17 @@ function queriedAt(now) {
   return new Date(Number.isFinite(timestamp) ? timestamp : Date.now()).toISOString();
 }
 
+function safeHttpErrorCode(provider, httpStatus, payload) {
+  if (provider !== 'kakao-transit' || httpStatus !== 403 || !payload || typeof payload !== 'object') {
+    return 'HTTP_ERROR';
+  }
+  const errorType = String(payload.errorType || '').trim();
+  const message = String(payload.message || '');
+  return errorType === 'NotAuthorizedError' && message.includes('OPEN_MAP_AND_LOCAL')
+    ? 'KAKAO_MAP_SERVICE_DISABLED'
+    : 'HTTP_ERROR';
+}
+
 function boundedTtl(ttlMs) {
   const parsed = Number(ttlMs);
   if (!Number.isFinite(parsed) || parsed <= 0) return 0;
@@ -558,10 +569,17 @@ async function requestJson(request, { fetchImpl, provider, timeoutMs = 15000 }) 
     });
   }
   if (!response.ok) {
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (_) {
+      // Provider error bodies are optional and never copied into our error.
+    }
+    const httpStatus = Number(response.status) || null;
     throw new CommuteProviderError(`${provider} returned HTTP ${response.status}`, {
       provider,
-      code: 'HTTP_ERROR',
-      httpStatus: Number(response.status) || null,
+      code: safeHttpErrorCode(provider, httpStatus, payload),
+      httpStatus,
     });
   }
   try {

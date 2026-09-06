@@ -1,6 +1,6 @@
 # HomeHunt API 키 발급·설정 가이드
 
-기준일: 2026-09-04
+기준일: 2026-09-05
 
 로컬 비밀값은 `homehunt/.env`에만 둔다. 이 파일은 저장소의 `.gitignore`에 포함되어 GitHub에 올라가지 않는다. 공개 예시는 `homehunt/.env.example`에 있다. Telegram처럼 GitHub Actions에서만 쓰는 값은 `.env`가 아니라 저장소의 Actions Secrets에 둔다.
 
@@ -11,8 +11,8 @@
 | `MOLIT_SERVICE_KEY` | 필수 | 아파트 매매·전월세 실거래, 청약홈·LH 분양 공고 | 공공데이터포털 |
 | `NAVER_MAPS_CLIENT_ID` | 자동차 사용 시 필수 | 로컬 서버의 Directions 5 인증 | NAVER Cloud Maps |
 | `NAVER_MAPS_CLIENT_SECRET` | 자동차 사용 시 필수 | 서버의 Directions 5 인증 | NAVER Cloud Maps |
-| `NAVER_LOCAL_SEARCH_CLIENT_ID` | 회사명 검색 시 필수 | 회사·상호·기관·지점명 검색 | NAVER API HUB |
-| `NAVER_LOCAL_SEARCH_CLIENT_SECRET` | 회사명 검색 시 필수 | NAVER API HUB 서버 인증 | NAVER API HUB |
+| `NAVER_LOCAL_SEARCH_CLIENT_ID` | 회사명 검색 시 필수 | 회사·상호·기관·지점명 검색 | NAVER Developers 기존 키 |
+| `NAVER_LOCAL_SEARCH_CLIENT_SECRET` | 회사명 검색 시 필수 | NAVER Developers 서버 인증 | NAVER Developers 기존 키 |
 | `KAKAO_REST_API_KEY` | 대중교통 권장 | 카카오 버스·지하철 경로 | Kakao Developers |
 | `KAKAO_DAILY_LIMIT` | 선택 | 로컬 Kakao 일일 원호출 상한(기본 1,000) | 로컬 설정 |
 | `TMAP_APP_KEY` | 대중교통 대체 | 출발시각 기반 버스·지하철 경로 | SK open API의 TMAP 대중교통 |
@@ -183,19 +183,18 @@ Firebase Cloud Messaging을 붙이면 로그인한 두 사람의 기기별 조�
 
 ## 5. NAVER 회사·상호·지점 검색 키
 
-이 키는 Maps 키와 다른 Application에서 발급한다. 인증 헤더 이름이 같아 보여도 서로 바꿔 쓸 수 없다.
+이 키는 Maps 키와 다른 NAVER Developers Application에서 발급한 기존 검색 API 키다. 현재 HomeHunt 어댑터는 `https://openapi.naver.com/v1/search/local.json`과 `X-Naver-Client-Id`, `X-Naver-Client-Secret` 헤더를 사용한다. NAVER Cloud Maps나 NAVER API HUB의 Client ID·Secret과 서로 바꿔 쓸 수 없다.
 
-1. NAVER Cloud 콘솔에서 `Menu → All Services → Application Services → NAVER API HUB`로 이동한다.
-2. 처음이면 `Subscription → 서비스 이용 신청`을 누르고 약관에 동의한다.
-3. `Application → Application 등록`을 누른다.
-4. API 선택에서 카테고리 `NAVER 검색`, API `지역`을 선택한다.
-5. `homehunt-local`처럼 영문·숫자·하이픈으로 앱 이름을 입력하고 완료한다.
-6. 앱 목록의 `인증 정보`에서 Client ID와 Client Secret을 복사한다.
-7. 각각 `NAVER_LOCAL_SEARCH_CLIENT_ID`, `NAVER_LOCAL_SEARCH_CLIENT_SECRET`에 넣는다.
+1. [NAVER Developers 내 애플리케이션](https://developers.naver.com/apps/)에서 기존 `성우소희` 앱을 연다.
+2. `API 설정`에서 `검색`이 사용 API로 선택되어 있는지 확인한다.
+3. 앱의 Client ID와 Client Secret을 각각 `NAVER_LOCAL_SEARCH_CLIENT_ID`, `NAVER_LOCAL_SEARCH_CLIENT_SECRET`에 넣는다.
+4. 로컬 서버를 재시작하고 연결 상태 또는 회사 위치 검색에서 실제 결과를 확인한다.
 
-공식 문서: [NAVER API HUB Application](https://guide.ncloud-docs.com/docs/apihub-application), [지역 검색 API](https://api.ncloud-docs.com/docs/naver-api-hub-search-local)
+공식 문서: [NAVER Developers 지역 검색 API](https://developers.naver.com/docs/serviceapi/search/local/local.md), [검색 API의 NAVER API HUB 이관 공지](https://developers.naver.com/notice/article/32530)
 
-이 키가 없어도 HomeHunt는 키가 필요 없는 공식 주소 DB로 등록 건물명·법인명을 찾고 NAVER 지도 좌표로 확인한다. 다만 건물에 입점한 상호, 매장, 세부 지점까지 폭넓게 찾으려면 NAVER API HUB 지역 검색이 필요하다.
+이관 공지에 따라 2026년 7월 30일 24:00까지 신청한 Developers 검색 API 기존 이용자는 2027년 6월 30일까지 현행 키를 사용할 수 있다. 2026년 7월 31일부터 Developers 신규 신청은 중단됐고, 유예 종료 뒤에는 NAVER API HUB만 지원된다. 따라서 2027년 6월 30일 전에 HomeHunt 어댑터를 API HUB 엔드포인트·인증 헤더로 바꾸고 API HUB에서 발급한 새 키로 이관해야 한다. 현재 두 인증 체계는 호환되지 않는다.
+
+이 키가 없어도 HomeHunt는 키가 필요 없는 공식 주소 DB로 등록 건물명·법인명을 찾고 NAVER 지도 좌표로 확인한다. 다만 건물에 입점한 상호, 매장, 세부 지점까지 폭넓게 찾으려면 NAVER 지역 검색이 필요하다.
 
 ## 6. Kakao 버스·지하철 경로 키
 
@@ -209,7 +208,7 @@ HomeHunt의 기본값 `TRANSIT_PROVIDER=auto`는 `KAKAO_REST_API_KEY`가 있으�
 
 공식 문서: [카카오맵 시작·이용 정책](https://developers.kakao.com/docs/ko/kakaomap/common), [대중교통 경로 API](https://developers.kakao.com/docs/ko/kakaomap/rest-api#route-public-transit), [공식 쿼터·요금](https://developers.kakao.com/docs/ko/getting-started/quota), [앱·REST API 키 설정](https://developers.kakao.com/docs/ko/app-setting/app#platform-key-rest-api-key)
 
-2026-09-04 공식 문서 기준 대중교통 경로의 무료 쿼터는 1,000건/일이며, 개발자 계정에서 카카오맵 API를 첫 번째로 활성화한 앱에만 무료 쿼터가 제공된다. 무료량을 넘겨 유료 API를 활성화하면 대중교통 경로는 10원/건이다. 정책과 요금은 바뀔 수 있으므로 배포 전 공식 쿼터 페이지를 다시 확인한다.
+2026-09-05 공식 문서 기준 대중교통 경로의 무료 쿼터는 1,000건/일이며, 개발자 계정에서 카카오맵 API를 첫 번째로 활성화한 앱에만 무료 쿼터가 제공된다. 무료량을 넘겨 유료 API를 활성화하면 대중교통 경로는 10원/건이다. 정책과 요금은 바뀔 수 있으므로 배포 전 공식 쿼터 페이지를 다시 확인한다.
 
 Kakao 대중교통 API는 여러 경로를 반환하며 HomeHunt는 `totalTime`이 가장 짧은 경로를 사용한다. 응답의 환승 수·요금과 `WALKING` 단계의 시간·거리를 합산한다. 공식 요청에는 출발 시각 파라미터가 없으므로, 사용자가 입력한 `08:00` 같은 시각에 맞춘 미래 시간표 조회라고 해석하면 안 된다.
 

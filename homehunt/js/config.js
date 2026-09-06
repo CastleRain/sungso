@@ -27,7 +27,11 @@ export const APP_CONFIG = Object.freeze({
   // Firebase Function and its secret are actually deployed. This prevents a
   // missing CORS response from being misreported as a user's network failure.
   apartmentHistoryEnabled: IS_LOCAL_RUNTIME,
-  appVersion: '2.5.0',
+  // UI and localhost API evolve independently. Keep appVersion as a backwards
+  // compatible alias for code that still reads the API contract version.
+  uiVersion: '4.2.1',
+  localApiContractVersion: '2.5.1',
+  appVersion: '2.5.1',
 });
 
 export const REGIONS = Object.freeze([

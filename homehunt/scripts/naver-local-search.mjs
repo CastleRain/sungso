@@ -1,4 +1,4 @@
-export const NAVER_LOCAL_SEARCH_ENDPOINT = 'https://naverapihub.apigw.ntruss.com/search/v1/local';
+export const NAVER_LOCAL_SEARCH_ENDPOINT = 'https://openapi.naver.com/v1/search/local.json';
 
 export class NaverLocalSearchError extends Error {
   constructor(message, { code = 'PLACE_SEARCH_ERROR', httpStatus = null, cause } = {}) {
@@ -76,7 +76,7 @@ export function normalizeNaverLocalSearch(payload) {
     if (seen.has(key)) return [];
     seen.add(key);
     return [{
-      source: 'naver-api-hub-local',
+      source: 'naver-developers-local',
       placeName,
       category: stripNaverMarkup(item?.category),
       roadAddress,
@@ -93,22 +93,21 @@ export function buildNaverLocalSearchRequest({
   clientSecret,
   endpoint = NAVER_LOCAL_SEARCH_ENDPOINT,
 }) {
-  const id = requiredCredential(clientId, 'NAVER API HUB Client ID');
-  const secret = requiredCredential(clientSecret, 'NAVER API HUB Client Secret');
+  const id = requiredCredential(clientId, 'NAVER Developers Client ID');
+  const secret = requiredCredential(clientSecret, 'NAVER Developers Client Secret');
   const url = new URL(endpoint);
   url.searchParams.set('query', normalizedQuery(query));
   url.searchParams.set('display', '5');
   url.searchParams.set('start', '1');
   url.searchParams.set('sort', 'random');
-  url.searchParams.set('format', 'json');
   return {
     url: url.toString(),
     init: {
       method: 'GET',
       headers: {
         accept: 'application/json',
-        'x-ncp-apigw-api-key-id': id,
-        'x-ncp-apigw-api-key': secret,
+        'X-Naver-Client-Id': id,
+        'X-Naver-Client-Secret': secret,
       },
     },
   };

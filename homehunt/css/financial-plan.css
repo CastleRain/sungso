@@ -1,0 +1,84 @@
+/* Candidate finance stays secondary until the user explicitly opens a plan. */
+.hh-funding-entry { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:12px 0; border-top:1px solid var(--hh-line); }
+.hh-funding-entry > div { display:grid; gap:3px; }
+.hh-funding-entry strong { color:var(--hh-ink); font-size:13px; }
+.hh-funding-entry span { color:var(--hh-text-mute); font-size:12px; }
+.hh-funding-button,.hh-funding-icon-button { appearance:none; border:1px solid var(--hh-line-strong); border-radius:8px; background:var(--hh-surface); color:var(--hh-ink-2); padding:10px 12px; font:600 12px/1.4 var(--hh-font-sans); text-decoration:none; cursor:pointer; min-height:40px; display:inline-flex; align-items:center; justify-content:center; }
+.hh-funding-button:hover { background:var(--hh-surface-2); border-color:var(--hh-accent); }
+.hh-funding-primary { background:var(--hh-accent); color:white; border-color:var(--hh-accent); }
+.hh-funding-primary:hover { background:var(--hh-accent-hover); color:white; }
+.hh-funding-dialog { width:min(960px,calc(100vw - 40px)); max-width:960px; max-height:calc(100dvh - 48px); box-sizing:border-box; margin:auto; padding:0; border:1px solid var(--hh-line); border-radius:18px; color:var(--hh-text); background:var(--hh-surface); box-shadow:0 18px 70px #0b1b2b33; overflow:auto; font-family:var(--hh-font-sans); }
+.hh-funding-dialog::backdrop { background:#0b1b2b85; }
+.hh-funding-header { position:sticky; top:0; z-index:2; display:flex; gap:16px; align-items:center; justify-content:space-between; padding:18px 22px; background:var(--hh-surface); border-bottom:1px solid var(--hh-line); }
+.hh-funding-header span { color:var(--hh-text-soft); font-size:12px; }
+.hh-funding-header h2 { margin:4px 0 0; font-size:19px; line-height:1.4; color:var(--hh-ink); word-break:keep-all; overflow-wrap:anywhere; }
+.hh-funding-icon-button { width:42px; height:42px; flex-shrink:0; font-size:24px; padding:0; }
+.hh-funding-connection { display:flex; gap:16px; align-items:center; justify-content:space-between; padding:14px 22px; background:var(--hh-surface-2); border-bottom:1px solid var(--hh-line); }
+.hh-funding-connection strong { font-size:13px; color:var(--hh-ink); }
+.hh-funding-connection p { margin:4px 0 0; color:var(--hh-text-mute); font-size:12px; line-height:1.6; }
+.hh-funding-connection a { flex-shrink:0; }
+.hh-funding-workspace { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); }
+.hh-funding-form { min-width:0; padding:22px; margin:0; }
+.hh-funding-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px 12px; }
+.hh-funding-field { min-width:0; display:flex; flex-direction:column; gap:6px; font-size:12px; font-weight:600; color:var(--hh-ink-3); }
+.hh-funding-input { display:flex; align-items:center; border:1px solid var(--hh-line-strong); border-radius:8px; background:var(--hh-surface); overflow:hidden; min-height:42px; }
+.hh-funding-input:focus-within { border-color:var(--hh-accent); box-shadow:0 0 0 3px var(--hh-accent-soft); }
+.hh-funding-input input { appearance:none; min-width:0; width:100%; border:0!important; padding:11px 10px!important; margin:0; background:transparent; box-shadow:none!important; outline:none!important; border-radius:0; font:500 13px/1.4 var(--hh-font-sans); color:var(--hh-ink); height:auto; }
+.hh-funding-input > span { padding-right:10px; white-space:nowrap; color:var(--hh-text-soft); font-size:11px; font-weight:400; }
+.hh-funding-field small { color:var(--hh-text-soft); font-size:11px; font-weight:400; line-height:1.5; }
+.hh-funding-details { border:0; border-top:1px solid var(--hh-line); border-radius:0; margin-top:20px; padding:0; background:none; }
+.hh-funding-details summary { list-style:none; cursor:pointer; color:var(--hh-ink); font-size:13px; font-weight:650; padding:15px 0; display:flex; gap:8px; align-items:center; }
+.hh-funding-details summary::-webkit-details-marker { display:none; }
+.hh-funding-details summary::after { content:'+'; margin-left:auto; font-size:18px; font-weight:400; }
+.hh-funding-details[open] summary::after { content:'−'; }
+.hh-funding-details summary span { color:var(--hh-text-mute); font-size:11px; font-weight:400; }
+.hh-funding-choice { border:0; margin:16px 0 0; padding:0; min-width:0; }
+.hh-funding-choice legend { font-size:12px; font-weight:600; margin-bottom:7px; color:var(--hh-ink-3); }
+.hh-funding-choice > div { display:flex; gap:6px; flex-wrap:wrap; }
+.hh-funding-choice label { position:relative; cursor:pointer; flex:1; min-width:0; }
+.hh-funding-choice input { position:absolute; opacity:0; width:1px; height:1px; padding:0; }
+.hh-funding-choice span { display:flex; min-height:42px; align-items:center; justify-content:center; border:1px solid var(--hh-line-strong); border-radius:8px; padding:8px; text-align:center; font-size:12px; color:var(--hh-text); }
+.hh-funding-choice input:checked + span { color:var(--hh-accent); background:var(--hh-accent-soft); border-color:var(--hh-accent-line); font-weight:650; }
+.hh-funding-choice input:focus-visible + span { outline:2px solid var(--hh-accent); outline-offset:2px; }
+.hh-funding-toggle { display:flex; align-items:center; gap:8px; min-height:44px; margin-top:9px; font-size:12px; cursor:pointer; }
+.hh-funding-toggle input { appearance:none; width:18px; height:18px; padding:0!important; min-width:18px; border:1px solid var(--hh-line-strong); border-radius:5px; margin:0; background:var(--hh-surface); display:grid; place-content:center; }
+.hh-funding-toggle input:checked { background:var(--hh-accent); border-color:var(--hh-accent); }
+.hh-funding-toggle input:checked::after { content:'✓'; color:white; font-size:13px; }
+.hh-funding-result { padding:22px; border-left:1px solid var(--hh-line); background:var(--hh-surface-2); min-width:0; }
+.hh-funding-verdict { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--hh-line); font-size:12px; }
+.hh-funding-verdict strong { color:var(--hh-text-mute); background:var(--hh-unknown-bg); padding:6px 10px; border-radius:6px; font-size:14px; }
+.hh-funding-verdict[data-funding-status="safe"] strong { color:var(--hh-verified); background:var(--hh-verified-bg); }
+.hh-funding-verdict[data-funding-status="caution"] strong { color:var(--hh-warning); background:var(--hh-estimated-bg); }
+.hh-funding-verdict[data-funding-status="over"] strong { color:var(--hh-danger); background:var(--hh-danger-bg); }
+.hh-funding-metrics { margin:0; display:grid; gap:0; }
+.hh-funding-metrics > div { display:flex; justify-content:space-between; gap:12px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--hh-line); }
+.hh-funding-metrics dt { color:var(--hh-text-mute); font-size:12px; }
+.hh-funding-metrics dd { color:var(--hh-ink); font-size:14px; font-weight:650; margin:0; text-align:right; overflow-wrap:anywhere; }
+.hh-funding-note,.hh-funding-price-basis { color:var(--hh-text-mute); font-size:12px; line-height:1.7; margin:12px 0; }
+.hh-funding-trade-note { margin:12px 22px 0; color:var(--hh-warning); }
+.hh-funding-notes { padding-left:16px; color:var(--hh-text-mute); font-size:12px; line-height:1.7; }
+.hh-funding-footer { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:12px; border-top:1px solid var(--hh-line); padding:16px 22px; }
+.hh-funding-footer p,.hh-funding-footer [role="status"] { font-size:11px; color:var(--hh-text-mute); margin:7px 0 0; line-height:1.6; }
+.hh-funding-saved { padding:0 22px 22px; }
+.hh-funding-comparison { min-width:0; }
+.hh-funding-comparison h3 { margin:0 0 8px; font-size:15px; color:var(--hh-ink); }
+.hh-funding-empty { border:1px dashed var(--hh-line-strong); border-radius:8px; padding:14px; color:var(--hh-text-mute); font-size:12px; line-height:1.7; }
+.hh-funding-table-wrap { max-width:100%; overflow:auto; border:1px solid var(--hh-line); border-radius:10px; }
+.hh-funding-comparison table { width:100%; min-width:500px; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+.hh-funding-comparison th,.hh-funding-comparison td { border-bottom:1px solid var(--hh-line); padding:11px; text-align:left; vertical-align:top; overflow-wrap:anywhere; color:var(--hh-text); }
+.hh-funding-comparison th { background:var(--hh-surface-2); font-weight:600; color:var(--hh-ink); }
+.hh-funding-comparison th:first-child { width:105px; }
+.hh-funding-comparison td button { margin:0 4px 4px 0; }
+@media(max-width:600px) {
+  .hh-funding-dialog { width:100%; max-width:100%; max-height:94dvh; margin:auto 0 0; border-radius:18px 18px 0 0; }
+  .hh-funding-header { padding:14px 16px; }
+  .hh-funding-header h2 { font-size:16px; }
+  .hh-funding-connection { padding:12px 16px; flex-wrap:wrap; gap:10px; }
+  .hh-funding-workspace { grid-template-columns:minmax(0,1fr); }
+  .hh-funding-form,.hh-funding-result { padding:16px; }
+  .hh-funding-result { border-left:0; border-top:1px solid var(--hh-line); }
+  .hh-funding-input input { font-size:16px; }
+  .hh-funding-footer { padding:14px 16px; }
+  .hh-funding-saved { padding:0 16px 16px; }
+  .hh-funding-choice span { padding:8px 5px; font-size:11px; }
+}

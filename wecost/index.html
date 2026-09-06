@@ -9,7 +9,7 @@
 (function(){
   var TOKEN_KEY='sungso_pin_auth', EXPIRE=30*24*60*60*1000;
   try{var s=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');if(s&&Date.now()-s.ts<EXPIRE)return;}catch(e){}
-  location.replace('../?return='+encodeURIComponent(location.pathname));
+  location.replace('../?return='+encodeURIComponent(location.pathname + location.search + location.hash));
 })();
 </script>
 <link rel="stylesheet" href="css/base.css">

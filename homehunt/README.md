@@ -2,19 +2,33 @@
 
 성우와 소희가 직접 본 아파트를 지도에 기록하고, 최대 4개 회사·주요 목적지 사이에서 서울·경기 아파트의 같은 전용면적 실거래와 조건 맞춤 후보를 확인하는 앱입니다. 화면은 GitHub Pages에 배포할 수 있고, 개발 중에는 로컬 실행기가 Git에서 제외된 `homehunt/.env`를 읽어 로컬 전용 서버에 실제 가격·장소·경로 조회 키를 전달합니다.
 
-현재 화면과 로컬 API의 계약 버전은 **2.5.0**입니다. 화면에 `서버 재시작 필요`가 보이면 실행 중인 이전 서버를 종료한 뒤 다시 시작합니다.
+현재 화면 버전은 **4.2.1**, 로컬 API 계약은 **2.5.1**입니다. 화면 디자인만 바꿀 때 서버 재시작을 요구하지 않도록 두 버전을 분리했습니다. `서버 재시작 필요`는 실행 중인 로컬 API 계약이 2.5.1보다 오래됐을 때만 표시합니다.
 
-UI는 **Tabler UI 1.4.0 + Tabler Icons 3.46.0**을 기반으로 하며, 기존 네이티브 폼과 데이터 로직을 유지한 채 `css/ui-kit.css`와 `js/ui-kit.js`에서 HomeHunt 전용 부동산 테마를 적용합니다.
+UI 4.2.1은 단지·분양·지역 숫자 핀을 같은 둥근 외곽선과 흰 배경으로 통일합니다. 검색 전 단지는 이름과 `조건 확인 전`, 분양은 확대 시 공고 이름과 `분양`을 표시합니다. 넓은 지도에서는 짧은 분양 핀으로 표시하고 선택·포커스·마우스 이동 시 이름을 펼치며, 긴 이름 전체는 상세에서 확인할 수 있습니다.
 
-현재 화면·기능·데이터 원리와 다음 고도화 기준은 [`docs/homehunt-2.5-handoff/README.md`](./docs/homehunt-2.5-handoff/README.md)에 캡처와 함께 정리되어 있습니다.
+UI 4.2는 집 찾기의 기본 정렬을 **입지 추천순**으로 바꿉니다. 회사 위치 없이 강남역·가까운 역의 직선거리, 세대수·연식·예산 충족을 점수로 비교하고 `강남 접근성 우선 / 역 접근성 우선`으로 비중을 바꿀 수 있습니다. 시군구별 후보 수를 지도와 목록에 함께 표시하며, 지역 선택은 지도·후보 목록에 동시에 적용됩니다. 좌표 확인은 지역 대표점 → 상위 40개 단지 → 선택 범위에서 20개씩 추가 확인 순서입니다. 점수는 확보된 자료에 따른 참고 순위이며 실제 이동시간이나 전체 후보 검증 완료를 뜻하지 않습니다. [추천 계산·지도 기준](docs/location-recommendations.md), [공식 역 자료](docs/rail-station-data.md)를 참고하세요.
+
+UI 4.1은 실거래 그래프를 **평균 총 거래가격** 기준으로 보여줍니다. 단지를 검색하면 모든 전용면적의 선택기간 평균·거래건수·최근 거래월 평균을 한꺼번에 비교하고, 면적 카드를 눌러 상세 가격 흐름과 실제 계약을 확인할 수 있습니다. 기간 전체 평균과 최근월 평균을 구분하며 평당가격은 보조 선택으로 제공합니다.
+
+집 찾기 슬라이더는 최대 1,000세대·30년·50평·20억원·출근 120분을 다룹니다. 세대수·연식·면적·가격은 더 큰 숫자도 직접 입력할 수 있으며 검색 조건과 저장값에 그대로 반영됩니다. 출근 시간 직접 입력은 기존 180분까지 지원합니다.
+
+UI 4.0은 기존 **Data Navy 지도 중심 작업 공간**에 `지금 확인 / 가격 후보 / 지역 범위`, 출처가 있는 후보 상세, 관심·방문·분양 3곳 판단 보드를 더했습니다. 실거래는 12개월을 먼저 조회한 뒤 기간을 확장하며 단계·경과시간·취소·재시도를 제공합니다. WeCost 공용 계산을 사용하는 개인 자금 시나리오는 명시적으로 입력한 값만 계산하고, 자동 재무 연결은 인증·가구 권한 준비 전까지 미연결 상태를 유지합니다.
+
+새 정보구조, 실제 연결 상태, 제공자 정책, 검증 결과, 실행·배포 설정과 다음 우선순위는 [4.0 리빌딩 결과](docs/rebuild-implementation.md)에 정리했습니다. 데스크톱 메뉴 레일·검색·지도·폭 조절 패널과 모바일 하단 시트는 유지하며, 새 기능은 `js/controllers/`, `js/*-service.mjs`, `providers/`로 분리했습니다.
+
+UI 3.0의 출발점이 된 2.5 당시 화면·기능·데이터 원리는 [`docs/homehunt-2.5-handoff/README.md`](./docs/homehunt-2.5-handoff/README.md)에 역사적 캡처와 함께 보관되어 있습니다. 현재 운영 버전과 연결 상태는 이 README와 앱의 `연결 상태` 화면을 기준으로 봅니다.
+
+## 배포
+
+현재 서비스는 [GitHub Pages](https://castlerain.github.io/sungso/homehunt/)의 `master / (root)`에서 배포합니다. 최신 화면·공개 데이터 배포와 localhost 전용 추천/통근 서버는 별개입니다. 실제 절차, 공개 기능 범위, 전체 검색을 휴대폰으로 옮기는 순서는 [배포 가이드](docs/deployment.md)를 참고하세요.
 
 ## 처음 사용하는 순서
 
-상단의 `사용 안내`를 열면 아래 여섯 기능과 데이터가 저장되는 위치를 한 화면에서 확인할 수 있습니다. 처음에는 전부 설정하려 하지 말고 `목적지 등록 → 집 찾기 → 방문 기록 → 실거래 확인` 순서로 시작하는 것이 가장 쉽습니다.
+상단의 `사용 안내`를 열면 아래 여섯 기능과 데이터가 저장되는 위치를 한 화면에서 확인할 수 있습니다. 처음에는 전부 설정하려 하지 말고 `조건 설정 → 지역·입지 비교 → 방문 기록 → 실거래 확인` 순서로 시작하는 것이 가장 쉽습니다.
 
-1. **집 찾기** — 회사·부모님 댁처럼 자주 가는 목적지를 최대 4곳 등록하고 예산·면적·세대수·연식 조건을 정합니다. 방문하지 않은 아파트까지 포함한 조건 후보를 지도에서 먼저 보고, 필요한 후보의 실제 통근 경로를 확인합니다.
+1. **집 찾기** — 예산·면적·세대수·연식 조건을 정하고 지역별 후보와 입지 점수를 비교합니다. 회사·부모님 댁처럼 자주 가는 목적지는 필요할 때 최대 4곳 등록합니다. 방문하지 않은 아파트까지 포함한 조건 후보를 지도에서 먼저 보고, 필요한 후보의 실제 통근 경로를 확인합니다.
 2. **내 기록** — 실제 방문한 집과 관심 후보를 지도·목록·비교 보기로 관리합니다. 현장에서 확인한 가격, 전용면적, 장단점과 메모를 저장하고 방문 당시와 이후 실거래를 이어서 봅니다.
-3. **실거래** — 단지와 정확한 전용면적을 고르면 실제 거래의 평균 가격·평당가격·거래량과 1·3·5년 흐름을 봅니다. 예측은 검증 조건을 통과한 경우에만 참고값으로 표시합니다.
+3. **실거래** — 단지를 검색해 모든 전용면적의 평균 총가격·거래건수를 비교하고 면적 카드를 눌러 1·3·5년 가격 흐름과 실제 계약을 봅니다. 평당가격은 보조 선택이며 예측은 검증 조건을 통과한 경우에만 참고값으로 표시합니다.
 4. **분양·청약** — 서울·경기의 청약홈·LH·SH 공고를 한데 모아 봅니다. 지역·동네·가격·면적·공급 세대수와 신혼 관련 조건을 저장하고 관심 공고만 추릴 수 있습니다.
 5. **사용 안내** — 처음 사용하는 순서, 여섯 메뉴의 역할, 데이터 의미와 저장 위치를 확인합니다.
 6. **연결 상태** — 지도·실거래·회사 검색·통근·분양 공급원이 실제로 연결됐는지 확인합니다. `확인 필요`나 `서버 재시작 필요`가 보이면 이 화면의 안내를 먼저 따릅니다.
@@ -37,6 +51,7 @@ UI는 **Tabler UI 1.4.0 + Tabler Icons 3.46.0**을 기반으로 하며, 기존 �
 - 기본 60개월 이력에서 신고 진행 중인 현재·직전월을 제외하고, 시간순 백테스트가 무변화 기준보다 5% 이상 나을 때만 보여주는 6개월 통계적 참고 예측
 - 국토부 CSV 수동 가져오기와 IndexedDB 저장
 - 자연어/직접 입력 조건으로 세대수·준공연도 후보를 줄이고, 전용면적별 실제 매매 산술평균으로 예산 판정
+- 최대 예산을 억·만원으로 나눠 `9억 3,000만원`처럼 정확히 입력하고, `9.3억`·`9억 3천만원`·`93,000만원` 표현도 같은 만원 단위로 해석
 - 국토부 호출 속도 제한, 실패 요청 재시도, 월 원자료 파일 캐시와 부분 실패 시 해당 시군구 후보 전체 제외
 - Git에서 제외된 `homehunt/.env` 자동 로딩, 프로세스 환경변수 우선 적용, 국토부 키 보안 입력 fallback
 - 관심 후보 로컬 저장·다시 보기, 지도 이동, 단지 최근 1·3·5년 실거래 연결
@@ -82,7 +97,7 @@ UI는 **Tabler UI 1.4.0 + Tabler Icons 3.46.0**을 기반으로 하며, 기존 �
   └─ 브라우저 → 관심 공고·읽음·알림 조건·청약 준비도 localStorage
 
 회사·주요 목적지 A~D
-  ├─ NAVER API HUB 지역 검색·NAVER Geocoding → 목적지 좌표 확인
+  ├─ NAVER Developers 지역 검색·NAVER Geocoding → 목적지 좌표 확인
   ├─ Kakao 대중교통 REST → 넓은 후보 선별
   │                         └─ .local/kakao-transit-usage.json 일일 원호출 장부
   ├─ TMAP 대중교통 요약 → 선택한 최종 후보의 출근시각 재검증
@@ -208,14 +223,16 @@ Firebase Cloud Messaging은 앱 안에서 기기별 조건 푸시를 제공할 �
 
 정확한 주소를 외울 필요 없이 도로명·지번 일부로 나온 후보를 고르거나 NAVER 지도에서 건물을 직접 찍어 좌표를 확정합니다. 지도에서 역지오코딩한 공식 건물·도로명은 입주 회사명과 다르게 보일 수 있지만 실제 경로에는 선택한 좌표를 사용합니다.
 
-현재 [Maps Web SDK의 Geocoder](https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Service.html)는 주소와 좌표 변환용입니다. 회사명·상호명은 [NAVER API HUB의 `지역 검색`](https://api.ncloud-docs.com/docs/naver-api-hub-search-local)을 별도 Application/키로 신청해 로컬 서버에서 조회합니다. 키가 없어도 [Kakao 우편번호 서비스](https://postcode.map.kakao.com/guide)의 공식 주소 DB를 모달 안에 열어 `KT` 같은 등록 건물명·법인명과 도로명·지번을 찾고, 선택 주소를 NAVER 지도 좌표로 다시 확인합니다. 입점 상호·지점까지 폭넓게 찾으려면 NAVER 지역 검색 키가 필요합니다.
+현재 [Maps Web SDK의 Geocoder](https://navermaps.github.io/maps.js.ncp/docs/naver.maps.Service.html)는 주소와 좌표 변환용입니다. 회사명·상호명은 기존 [NAVER Developers `지역 검색`](https://developers.naver.com/docs/serviceapi/search/local/local.md) Application의 Client ID·Secret으로 로컬 서버에서 조회합니다. 키가 없어도 [Kakao 우편번호 서비스](https://postcode.map.kakao.com/guide)의 공식 주소 DB를 모달 안에 열어 `KT` 같은 등록 건물명·법인명과 도로명·지번을 찾고, 선택 주소를 NAVER 지도 좌표로 다시 확인합니다. 입점 상호·지점까지 폭넓게 찾으려면 NAVER 지역 검색 키가 필요합니다.
+
+NAVER의 [검색 API 이관 공지](https://developers.naver.com/notice/article/32530)에 따라 2026년 7월 30일 24:00까지 신청한 Developers 기존 키만 2027년 6월 30일까지 유예 지원됩니다. 현재 어댑터는 성우소희의 기존 Developers 키 계약(`openapi.naver.com`, `X-Naver-Client-*`)을 사용합니다. 2027년 6월 30일 전에는 NAVER API HUB용 엔드포인트·인증 헤더와 새 키로 이관해야 하며, 두 종류의 키는 서로 바꿔 쓸 수 없습니다.
 
 회사 위치 입력은 더 이상 아파트 카탈로그로 추측하지 않습니다. `KT`가 `정자KTe-편한세상`에 부분 일치하던 것처럼 회사명이 아파트명 일부와 우연히 겹치는 오인을 차단했습니다. 아파트 검색은 실거래·지도 화면의 전용 검색창에서 수행합니다.
 
 - 넓은 버스·지하철 선별: Kakao Developers REST API 키
 - 출근시각 최종 확인: TMAP 대중교통 API의 `appKey`
 - 자동차: NAVER Maps Directions 5의 Client ID와 Client Secret
-- 회사·건물명: NAVER API HUB 검색 API `지역 검색`의 별도 Client ID와 Client Secret
+- 회사·건물명: 기존 NAVER Developers 검색 API `지역 검색`의 별도 Client ID와 Client Secret
 
 재시작 후에도 자동 연결하려면 `homehunt/.env`에 저장합니다. HomeHunt의 `설정` → `경로 키 연결` 또는 목적지 위치 창의 `장소 검색 연결`에서 직접 입력한 값은 실행 중인 서버 메모리에만 남습니다. 장소 검색 환경변수는 `NAVER_LOCAL_SEARCH_CLIENT_ID`, `NAVER_LOCAL_SEARCH_CLIENT_SECRET`이고 대중교통 환경변수는 `KAKAO_REST_API_KEY`, `TMAP_APP_KEY`, `TRANSIT_PROVIDER`입니다.
 
@@ -319,10 +336,19 @@ homehunt/
 ├─ index.html                    포털형 UI와 모달
 ├─ css/styles.css                데스크톱·모바일 반응형 스타일
 ├─ css/ui-kit.css                Tabler 기반 HomeHunt 디자인 시스템·반응형 보강
+├─ css/hh-tokens.css              UI 3.0 Data Navy 색·간격·크기 토큰
+├─ css/hh-base.css                UI 3.0 전역 표면·타이포·접근성 기본값
+├─ css/hh-shell.css               76px 레일·상단바·모바일 내비 셸
+├─ css/hh-components.css          칩·근거 배지·버튼·패널 공통 컴포넌트
+├─ css/hh-map.css                 지도·클러스터·가격 핀·결과 패널/시트
+├─ css/hh-screens.css             내 기록·실거래·분양·안내·연결 화면 어댑터
 ├─ js/app.js                     화면 상태와 방문/시장 기능
 ├─ js/supply-core.mjs             분양 공고 정규화·필터·상태·알림 판정
 ├─ js/subscription-readiness-core.mjs 자가입력 일반공급 점수·신혼 청약 준비도 계산
 ├─ js/ui-kit.js                  정적·동적 UI에 Tabler 컴포넌트 클래스·아이콘 연결
+├─ js/ui-state.js                선택·호버·레이어·필터·패널 UI 상태와 로컬 환경설정
+├─ js/ui-format.js               억·만원/㎡·평과 확정·추정·미확인·개인기록 표시 계약
+├─ js/ui-shell.js                화면 문맥·패널 폭 조절·모바일 결과 시트 연결
 ├─ js/naver-map.js               네이버 지도 어댑터
 ├─ js/apartment-search-core.mjs  전국 단지명 정규화·후보·유사 단지 검색
 ├─ js/complex-availability-core.mjs 단지 가격 서버 오류 분류·안내 문구
@@ -352,7 +378,7 @@ homehunt/
 ├─ scripts/sh-supply-provider.mjs SH 공식 RSS EUC-KR 파싱·보수적 분양 분류
 ├─ scripts/commute-provider.mjs  Kakao·TMAP 대중교통, NAVER 자동차와 두 일일 장부
 ├─ scripts/commute-time.mjs      동일한 평일 출근시각 계산
-├─ scripts/naver-local-search.mjs NAVER API HUB 지역 검색 서버 어댑터
+├─ scripts/naver-local-search.mjs NAVER Developers 지역 검색 서버 어댑터
 ├─ scripts/recommendation-data-safety.mjs 실패 월이 있는 시군구 후보·거래 제외
 ├─ scripts/start-local-market.ps1 .env 자동 로딩·보안 입력 fallback·로컬 서버 실행
 ├─ scripts/fetch-market-data.mjs 국토부 수집·집계 작업

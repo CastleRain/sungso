@@ -1,0 +1,330 @@
+/* HomeHunt 3.0 — scoped foundations and accessibility */
+.hh-app,
+.hh-app *,
+.hh-app *::before,
+.hh-app *::after {
+  box-sizing: border-box;
+}
+
+.hh-app {
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  color: var(--hh-text);
+  background: var(--hh-canvas);
+  font-family: var(--hh-font-sans);
+  font-size: var(--hh-text-body);
+  line-height: var(--hh-leading-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: anywhere;
+}
+
+/* Temporary palette bridge for v2 selectors while screens migrate to hh-* classes. */
+.hh-app.hh-v3 {
+  --navy: var(--hh-ink);
+  --forest: var(--hh-accent);
+  --forest-2: var(--hh-accent-pressed);
+  --mint: var(--hh-accent-soft);
+  --mint-2: var(--hh-accent-line);
+  --blue: var(--hh-accent);
+  --red: var(--hh-shortlist);
+  --orange: var(--hh-estimated);
+  --yellow: var(--hh-personal-accent);
+  --amber: var(--hh-estimated);
+  --gray-950: var(--hh-ink);
+  --gray-800: var(--hh-ink-3);
+  --gray-700: var(--hh-text);
+  --gray-650: var(--hh-text-muted);
+  --gray-600: var(--hh-text-soft);
+  --gray-550: var(--hh-text-soft);
+  --gray-500: var(--hh-text-soft);
+  --gray-400: #aebccd;
+  --gray-300: var(--hh-line-strong);
+  --gray-200: var(--hh-line);
+  --gray-100: var(--hh-surface-3);
+  --gray-50: var(--hh-surface-2);
+  --white: var(--hh-surface);
+  --surface: var(--hh-surface);
+  --surface-soft: var(--hh-surface-2);
+  --canvas: var(--hh-canvas);
+  --header-h: var(--hh-topbar-h);
+  --radius-card: var(--hh-radius-lg);
+  --shadow-card: var(--hh-shadow-sm);
+  --shadow-sm: var(--hh-shadow-sm);
+  --shadow-md: var(--hh-shadow-md);
+  --hh-brand: var(--hh-accent);
+  --hh-brand-strong: var(--hh-accent-pressed);
+  --hh-brand-soft: var(--hh-accent-soft);
+  --hh-ink-soft: var(--hh-text-muted);
+  --hh-focus: var(--hh-focus-ring);
+  --tblr-primary: var(--hh-accent);
+  --tblr-primary-rgb: 31, 94, 255;
+  --tblr-body-color: var(--hh-text);
+  --tblr-body-bg: var(--hh-surface);
+  --tblr-border-color: var(--hh-line);
+}
+
+/* Legacy view-enter keeps a transform after the animation and turns every
+   fixed drawer/sheet into a view-relative element. V3 owns transitions at
+   the component level, so the app view must remain an untransformed frame. */
+.hh-app.hh-v3 .app-view.active {
+  animation: none;
+  transform: none;
+}
+
+.hh-app.hh-v3 :where(p, span, small, label, button, input, select, textarea, a, li, dt, dd, th, td) {
+  font-size: max(12px, 1em);
+}
+
+.hh-app :where(button, input, select, textarea) {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.hh-app :where(button, [role="button"], summary, label[for], select) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hh-app :where(button, [role="button"]):not(:disabled) {
+  cursor: pointer;
+}
+
+.hh-app :where(button, input, select, textarea, a, [tabindex]):focus {
+  outline: none;
+}
+
+.hh-app :where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--hh-accent);
+  outline-offset: 2px;
+  box-shadow: var(--hh-focus-ring);
+}
+
+.hh-app :where(button, input, select, textarea):disabled,
+.hh-app [aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.hh-app :where(img, svg, video, canvas) {
+  display: block;
+  max-width: 100%;
+}
+
+.hh-app :where(h1, h2, h3, h4, p, ul, ol, dl, figure) {
+  margin-block: 0;
+}
+
+.hh-app :where(ul, ol)[class] {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.hh-app a {
+  color: var(--hh-accent-pressed);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.hh-app a:hover {
+  color: var(--hh-accent-hover);
+}
+
+.hh-heading-display,
+.hh-app h1 {
+  color: var(--hh-ink);
+  font-size: var(--hh-text-display);
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: var(--hh-leading-tight);
+}
+
+.hh-heading-title,
+.hh-app h2 {
+  color: var(--hh-ink);
+  font-size: var(--hh-text-title);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: var(--hh-leading-title);
+}
+
+.hh-heading-subtitle,
+.hh-app h3 {
+  color: var(--hh-ink-3);
+  font-size: var(--hh-text-subtitle);
+  font-weight: 700;
+  line-height: var(--hh-leading-title);
+}
+
+.hh-body {
+  font-size: var(--hh-text-body);
+  line-height: var(--hh-leading-body);
+}
+
+.hh-ui {
+  font-size: var(--hh-text-ui);
+  line-height: var(--hh-leading-ui);
+}
+
+.hh-meta,
+.hh-caption {
+  color: var(--hh-text-muted);
+  font-size: var(--hh-text-meta);
+  line-height: 1.5;
+}
+
+.hh-kicker {
+  color: var(--hh-text-muted);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.hh-num,
+.hh-unit,
+.hh-code,
+.hh-time {
+  font-family: var(--hh-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+.hh-unit {
+  margin-inline-start: 0.15em;
+  color: var(--hh-text-muted);
+  font-size: var(--hh-text-meta);
+  font-weight: 600;
+}
+
+.hh-price {
+  color: var(--hh-ink);
+  font-family: var(--hh-font-mono);
+  font-size: var(--hh-text-price-lg);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.hh-price--xl {
+  font-size: var(--hh-text-price-xl);
+}
+
+.hh-price--md {
+  font-size: var(--hh-text-price-md);
+}
+
+.hh-divider {
+  height: 1px;
+  border: 0;
+  background: var(--hh-line);
+}
+
+.hh-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--hh-space-8);
+}
+
+.hh-inline {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--hh-space-6);
+}
+
+.hh-wrap {
+  flex-wrap: wrap;
+}
+
+.hh-grow {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hh-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hh-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.hh-app [hidden],
+.hh-hidden {
+  display: none !important;
+}
+
+.hh-scroll-lock {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+.hh-scrollable {
+  overscroll-behavior: contain;
+  scrollbar-color: var(--hh-line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.hh-scrollable::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.hh-scrollable::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--hh-radius-pill);
+  background: var(--hh-line-strong);
+  background-clip: padding-box;
+}
+
+@media (max-width: 1023px) {
+  .hh-app {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .hh-heading-display,
+  .hh-app h1 {
+    font-size: 22px;
+  }
+
+  .hh-app :where(button, [role="button"], input, select, textarea) {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hh-app *,
+  .hh-app *::before,
+  .hh-app *::after {
+    scroll-behavior: auto !important;
+    animation-delay: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .hh-app :where(button, input, select, textarea, a, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

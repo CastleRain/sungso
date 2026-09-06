@@ -592,12 +592,13 @@ async function fetchJsonWithRetry(url, fetchImpl = fetch) {
       try {
         body = JSON.parse(bodyText);
       } catch (_) {
-        throw new ApplyhomeFetchError('응답이 JSON 형식이 아닙니다.');
+        throw new ApplyhomeFetchError('응답이 JSON 형식이 아닙니다.', { reasonCode: 'INVALID_JSON' });
       }
       if (!Array.isArray(body?.data)) {
         const providerMessage = cleanText(body?.msg || body?.message || body?.error);
         throw new ApplyhomeFetchError(providerMessage || '응답에 data 배열이 없습니다.', {
           providerCode: body?.code ?? null,
+          reasonCode: body?.code ? 'PROVIDER_REJECTION' : 'INVALID_SCHEMA',
         });
       }
       return body;
@@ -724,7 +725,7 @@ function safeApplyhomeSourceError(error, endpoint = null) {
     category: endpoint?.category || null,
     detailEndpoint: endpoint?.detail || null,
     modelEndpoint: endpoint?.model || null,
-    code: error instanceof ApplyhomeFetchError ? 'APPLYHOME_FETCH_ERROR' : 'UNEXPECTED_ERROR',
+    code: error instanceof ApplyhomeFetchError ? error.details?.reasonCode || 'APPLYHOME_FETCH_ERROR' : 'UNEXPECTED_ERROR',
     httpStatus: error instanceof ApplyhomeFetchError ? error.details?.status ?? null : null,
     message: '청약홈 공고 조회에 실패했습니다.',
   };
@@ -745,7 +746,7 @@ export async function collectApplyhomeSupplySource(options = {}) {
   const errors = [];
 
   if (!serviceKey) {
-    const missing = new ApplyhomeFetchError('청약홈 API 서비스 키가 없습니다.');
+    const missing = new ApplyhomeFetchError('청약홈 API 서비스 키가 없습니다.', { reasonCode: 'MISSING_CREDENTIAL' });
     for (const endpoint of APPLYHOME_ENDPOINTS) {
       const error = safeApplyhomeSourceError(missing, endpoint);
       errors.push(error);

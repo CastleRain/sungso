@@ -139,7 +139,7 @@ export function companySearchStepMessage(step, queryValue = '') {
     case 'apartment-catalog':
       return '주거 단지로 보여 공식 공동주택 목록을 보조 검색합니다.';
     case 'place-search-key-required':
-      return `${queryPrefix}NAVER API HUB 회사·건물명 검색 키를 연결하면 KT 같은 회사·상가·오피스텔을 더 넓게 찾을 수 있습니다. 아파트 후보로 대신 추측하지 않습니다.`;
+      return `${queryPrefix}NAVER Developers 회사·건물명 검색 키를 연결하면 KT 같은 회사·상가·오피스텔을 더 넓게 찾을 수 있습니다. 아파트 후보로 대신 추측하지 않습니다.`;
     case 'provider-error':
       return '장소·주소 검색 연결을 모두 확인하지 못했어요. 잠시 후 다시 시도하거나 지도에서 선택해주세요.';
     case 'place-search-error':

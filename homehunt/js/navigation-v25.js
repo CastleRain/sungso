@@ -67,6 +67,16 @@
     all.setAttribute('aria-pressed', String(!favoritesOnly));
   }
 
+  function scrollToNode(node) {
+    if (!(node instanceof HTMLElement)) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rect = node.getBoundingClientRect();
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + rect.top - 76),
+      behavior: reduced ? 'auto' : 'smooth',
+    });
+  }
+
   document.addEventListener('click', (event) => {
     const compare = event.target.closest?.('[data-records-compare]');
     if (compare) {
@@ -85,7 +95,7 @@
     } else if (source?.getAttribute('aria-pressed') === 'true') {
       source.click();
     }
-    document.querySelector('.supply-command')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    scrollToNode(document.querySelector('.supply-command'));
     window.setTimeout(syncSupplyQuickNav, 0);
   });
 

@@ -1,0 +1,49 @@
+.hh-v3 .market-area-overview { margin:20px 0 22px; padding:20px; border:1px solid #dce5f0; border-radius:16px; background:#fff; }
+.market-area-overview[hidden] { display:none!important; }
+.market-area-overview-head { display:flex; justify-content:space-between; align-items:start; gap:18px; margin-bottom:8px; }
+.market-area-overview-head h2 { margin:3px 0 7px; font-size:18px; color:#173453; }
+.market-area-overview-head p,.market-area-basis { margin:0; color:#596d85; font-size:12px; line-height:1.6; }
+.market-area-overview-head>div>span { color:#60758f; font-size:11px; font-weight:700; }
+.market-area-basis { margin-bottom:15px; }
+.market-area-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.hh-v3 button.market-area-option { display:flex; flex-direction:column; gap:11px; padding:14px; min-width:0; border:1px solid #dce5f0; border-radius:10px; background:#fff; color:#193452; text-align:left; font:inherit; box-shadow:none; cursor:pointer; }
+.hh-v3 button.market-area-option:hover,.hh-v3 button.market-area-option.is-selected { border-color:#628aff; background:#f5f8ff; }
+.market-area-option:focus-visible { outline:3px solid #789cff; outline-offset:2px; }
+.market-area-option-head { display:flex; justify-content:space-between; align-items:start; gap:8px; }
+.market-area-option-head>strong { font-size:12px; line-height:1.5; }
+.market-area-count { flex-shrink:0; color:#315997; font-size:11px; font-weight:700; }
+.market-area-price,.market-area-recent { display:flex; flex-direction:column; gap:3px; }
+.market-area-price>small,.market-area-recent>small { color:#64758b; font-size:11px; line-height:1.5; }
+.market-area-price>strong { font-size:21px; color:#163e7e; font-variant-numeric:tabular-nums; line-height:1.4; }
+.market-area-recent>span { font-size:14px; font-weight:650; color:#2c405a; }
+.market-area-option-foot { display:flex; flex-wrap:wrap; justify-content:space-between; gap:5px; margin-top:auto; padding-top:9px; border-top:1px solid #e6ecf5; font-size:11px; }
+.market-area-option-foot>small { font-size:10px; color:#738199; }
+.market-area-option-foot>span { color:#315eb0; }
+.hh-v3 #marketPanelTrend .market-grid.is-complex-price-view { grid-template-columns:minmax(0,1fr); }
+.hh-v3 #marketPanelTrend .market-grid.is-complex-price-view>.region-card { display:none; }
+.market-price-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:0 18px 16px; }
+.market-price-controls>label { display:flex; align-items:center; gap:9px; font-size:12px; color:#566d86; }
+.market-price-controls>label>span { white-space:nowrap; }
+.market-price-controls .portal-select { min-width:155px; }
+.market-total-summary { display:flex; flex-wrap:wrap; gap:12px 32px; padding:16px 18px; margin:0 18px 18px; background:#f4f7fc; border-radius:10px; }
+.market-total-summary>div { display:grid; gap:5px; }
+.market-total-summary small { color:#5c718a; font-size:12px; }
+.market-total-summary strong { color:#163e7e; font-size:24px; line-height:1.35; font-variant-numeric:tabular-nums; }
+.market-total-summary span { color:#5e7187; font-size:11px; }
+.market-total-summary[hidden] { display:none!important; }
+.market-chart-basis { margin:0 18px 14px; color:#61738a; font-size:12px; line-height:1.6; }
+@media(max-width:600px) {
+  .hh-v3 #marketPanelTrend .trend-card>.data-card-head { flex-wrap:wrap; gap:10px; }
+  .hh-v3 #marketPanelTrend .trend-card>.data-card-head>div:first-child { flex:1 0 100%; }
+  .hh-v3 #marketPanelTrend .trend-card .chart-legend { white-space:nowrap; }
+  .hh-v3 .market-area-overview { padding:15px 12px; border-radius:12px; }
+  .market-area-overview-head h2 { font-size:17px; }
+  .market-area-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .hh-v3 button.market-area-option { padding:11px 10px; gap:9px; }
+  .market-area-option-head { flex-direction:column; gap:3px; }
+  .market-area-price>strong { font-size:17px; }
+  .market-area-recent>span { font-size:13px; }
+  .market-total-summary { gap:15px; padding:13px; }
+  .market-total-summary>div { flex:1 0 42%; }
+  .market-total-summary strong { font-size:21px; }
+}
