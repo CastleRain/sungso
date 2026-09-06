@@ -72,7 +72,7 @@
             "category": "apt",
             "detailEndpoint": "getAPTLttotPblancDetail",
             "modelEndpoint": "getAPTLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           },
@@ -81,7 +81,7 @@
             "category": "remaining",
             "detailEndpoint": "getRemndrLttotPblancDetail",
             "modelEndpoint": "getRemndrLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           },
@@ -90,7 +90,7 @@
             "category": "optional",
             "detailEndpoint": "getOPTLttotPblancDetail",
             "modelEndpoint": "getOPTLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           }
@@ -230,8 +230,8 @@
       "label": "서울주택도시개발공사",
       "status": "ok",
       "collectionStatus": "ok",
-      "generatedAt": "2026-09-05T23:54:19.909Z",
-      "lastSuccessfulAt": "2026-09-05T23:54:19.909Z",
+      "generatedAt": "2026-09-06T07:55:42.843Z",
+      "lastSuccessfulAt": "2026-09-06T07:55:42.843Z",
       "retainedStaleNoticeCount": 0,
       "retainedHistoricalNoticeCount": 0,
       "feeds": [
@@ -270,8 +270,8 @@
       }
     }
   ],
-  "generatedAt": "2026-09-05T23:54:19.909Z",
-  "lastSuccessfulAt": "2026-09-05T23:54:19.909Z",
+  "generatedAt": "2026-09-06T07:55:42.843Z",
+  "lastSuccessfulAt": "2026-09-06T07:55:42.843Z",
   "lastCompleteAt": null,
   "query": {
     "noticeDateFrom": "2024-09-06",
@@ -389,7 +389,7 @@
             "category": "apt",
             "detailEndpoint": "getAPTLttotPblancDetail",
             "modelEndpoint": "getAPTLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           },
@@ -398,7 +398,7 @@
             "category": "remaining",
             "detailEndpoint": "getRemndrLttotPblancDetail",
             "modelEndpoint": "getRemndrLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           },
@@ -407,7 +407,7 @@
             "category": "optional",
             "detailEndpoint": "getOPTLttotPblancDetail",
             "modelEndpoint": "getOPTLttotPblancMdl",
-            "code": "APPLYHOME_FETCH_ERROR",
+            "code": "MISSING_CREDENTIAL",
             "httpStatus": null,
             "message": "청약홈 공고 조회에 실패했습니다."
           }
@@ -530,7 +530,7 @@
         "category": "apt",
         "detailEndpoint": "getAPTLttotPblancDetail",
         "modelEndpoint": "getAPTLttotPblancMdl",
-        "code": "APPLYHOME_FETCH_ERROR",
+        "code": "MISSING_CREDENTIAL",
         "httpStatus": null,
         "message": "청약홈 공고 조회에 실패했습니다."
       },
@@ -539,7 +539,7 @@
         "category": "remaining",
         "detailEndpoint": "getRemndrLttotPblancDetail",
         "modelEndpoint": "getRemndrLttotPblancMdl",
-        "code": "APPLYHOME_FETCH_ERROR",
+        "code": "MISSING_CREDENTIAL",
         "httpStatus": null,
         "message": "청약홈 공고 조회에 실패했습니다."
       },
@@ -548,7 +548,7 @@
         "category": "optional",
         "detailEndpoint": "getOPTLttotPblancDetail",
         "modelEndpoint": "getOPTLttotPblancMdl",
-        "code": "APPLYHOME_FETCH_ERROR",
+        "code": "MISSING_CREDENTIAL",
         "httpStatus": null,
         "message": "청약홈 공고 조회에 실패했습니다."
       },
@@ -604,7 +604,7 @@
       "sh": {
         "established": true,
         "establishedAt": "2026-09-05T00:07:24.606Z",
-        "lastSuccessfulAt": "2026-09-05T23:54:19.909Z"
+        "lastSuccessfulAt": "2026-09-06T07:55:42.843Z"
       }
     }
   },
@@ -615,8 +615,8 @@
     "comparedSources": [
       "sh"
     ],
-    "comparedToGeneratedAt": "2026-09-05T12:44:18.520Z",
-    "generatedAt": "2026-09-05T23:54:19.909Z",
+    "comparedToGeneratedAt": "2026-09-05T23:54:19.909Z",
+    "generatedAt": "2026-09-06T07:55:42.843Z",
     "new": [],
     "updated": [],
     "removed": [],
