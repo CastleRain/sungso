@@ -9,6 +9,27 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function regionLabel(record) {
+  return String(record.label || record.key).replace(/^(서울특별시|경기도)\s*/, '');
+}
+
+function regionWorldPixel(lat, lng, zoom) {
+  const size = 256 * 2 ** zoom;
+  const sine = Math.sin(Math.max(-85.05112878, Math.min(85.05112878, lat)) * Math.PI / 180);
+  return { x: (lng + 180) / 360 * size, y: (.5 - Math.log((1 + sine) / (1 - sine)) / (4 * Math.PI)) * size };
+}
+
+function summarizeRegionGroup(records, zoom) {
+  const ordered = [...records].sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  const lat = ordered.reduce((sum, record) => sum + record.lat, 0) / ordered.length;
+  const lng = ordered.reduce((sum, record) => sum + record.lng, 0) / ordered.length;
+  return {
+    key: ordered.map(record => record.key).join(','), records: ordered,
+    count: ordered.reduce((sum, record) => sum + record.count, 0), lat, lng,
+    ...regionWorldPixel(lat, lng, zoom),
+  };
+}
+
 function normalizeStatus(status) {
   return status === '재방문' ? 'revisit' : status === '보류' ? 'hold' : status === '제외' ? 'rejected' : 'interested';
 }
@@ -53,16 +74,26 @@ function contextMarkerLabel(record) {
   return record.name || '공식 단지';
 }
 
-function contextMarkerContent(record, selected = false) {
+function contextMarkerZIndex(record, selected = false) {
+  if (selected) return 300;
   const layer = contextLayer(record);
-  const label = layer === 'visits' ? '★ 방문' : layer === 'shortlist' ? '♥ 관심' : layer === 'supply' ? '⚑ 분양' : '단지';
-  const styleClass = layer === 'apartments' ? 'apartments apartment' : layer === 'shortlist' ? 'shortlist shortlisted' : layer;
-  return `<div class="map-price-marker recommendation-context-marker ${styleClass}${selected ? ' selected' : ''}" data-map-layer="${layer}"><span>${escapeHtml(label)}</span></div>`;
+  return layer === 'visits' ? 220 : layer === 'shortlist' ? 210 : layer === 'supply' ? 160 : 40;
+}
+
+function contextMarkerContent(record, selected = false, compact = false) {
+  const layer = contextLayer(record);
+  const label = layer === 'visits' ? '방문 기록' : layer === 'shortlist' ? '관심 후보' : layer === 'supply' ? '분양' : '조건 확인 전';
+  const name = record.name || record.title || (layer === 'supply' ? '분양 공고' : '공식 단지');
+  const description = `${name} · ${label} · 상세 보기`;
+  return `<div class="location-map-pill location-context-marker${compact && layer === 'supply' ? ' is-compact' : ''}${selected ? ' selected' : ''}" data-map-layer="${layer}" data-map-context="${escapeHtml(mapRecordId(record, 'context'))}" role="button" tabindex="0" aria-pressed="${selected}" aria-label="${escapeHtml(description)}" title="${escapeHtml(description)}"><strong class="location-marker-name">${escapeHtml(name)}</strong><small class="location-marker-kind">${escapeHtml(label)}</small></div>`;
 }
 
 function marketAction(record, prefix) {
-  if (contextLayer(record) === 'supply' || !record?.name) return '';
-  return `<button class="map-info-action" type="button" data-open-market-complex="${escapeHtml(mapRecordId(record, prefix))}"><i class="ti ti-chart-line" aria-hidden="true"></i><span>5년 실거래</span></button>`;
+  if (!record?.name && !record?.title) return '';
+  const id = escapeHtml(mapRecordId(record, prefix));
+  const market = contextLayer(record) === 'supply' ? '' : `<button class="map-info-action" type="button" data-open-market-complex="${id}"><i class="ti ti-chart-line" aria-hidden="true"></i><span>5년 실거래</span></button>`;
+  const evidence = `<button class="map-info-action" type="button" data-open-evidence-complex="${id}"><i class="ti ti-file-description" aria-hidden="true"></i><span>상세·근거</span></button>`;
+  return `<div class="map-info-actions">${market}${evidence}</div>`;
 }
 
 function contextInfoContent(record) {
@@ -139,7 +170,13 @@ export class HomeMap {
     this.companyMarkers = new Map();
     this.candidateRecords = [];
     this.candidateMarkers = [];
+    this.regionRecords = [];
+    this.regionMarkers = [];
+    this.regionSignature = '';
+    this.lastRegionZoom = null;
+    this.onRegionSelect = null;
     this.contextRecords = [];
+    this.lastContextZoom = null;
     this.contextMarkers = new Map();
     this.clusterEnabled = false;
     this.candidateSignature = '';
@@ -184,13 +221,16 @@ export class HomeMap {
         if (this.pickHandler) this.pickHandler({ lat: event.coord.y, lng: event.coord.x });
         else this.infoWindow?.close();
       });
-      if (this.clusterEnabled) {
-        naver.maps.Event.addListener(this.map, 'idle', () => {
-          const zoom = this.map.getZoom();
-          if (zoom === this.lastClusterZoom) return;
-          this.renderCandidateClusters();
-        });
-      }
+      naver.maps.Event.addListener(this.map, 'idle', () => {
+        const zoom = this.map.getZoom();
+        if (this.clusterEnabled && zoom !== this.lastClusterZoom) this.renderCandidateClusters();
+        if (zoom !== this.lastRegionZoom) this.renderRegionClusters();
+        if (zoom !== this.lastContextZoom) this.setContextRecords(this.contextRecords);
+      });
+      naver.maps.Event.addListener(this.map, 'zoom_changed', () => {
+        if (this.map.getZoom() !== this.lastRegionZoom) this.renderRegionClusters();
+      });
+      this.renderRegionClusters();
       this.onReady?.(this);
       return this;
     } catch (error) {
@@ -238,6 +278,7 @@ export class HomeMap {
 
   setContextRecords(records = [], { fit = false } = {}) {
     if (!this.map) return;
+    this.lastContextZoom = this.map.getZoom();
     const next = records.filter(isGeoPoint);
     const nextIds = new Set(next.map((record) => mapRecordId(record, 'context')));
     this.contextMarkers.forEach((entry, id) => {
@@ -250,7 +291,7 @@ export class HomeMap {
       const id = mapRecordId(record, 'context');
       const point = normalizeGeoPoint(record);
       const position = new naver.maps.LatLng(point.lat, point.lng);
-      const content = contextMarkerContent(record, id === this.selectedId);
+      const content = contextMarkerContent(record, id === this.selectedId, this.map.getZoom() < 12);
       let entry = this.contextMarkers.get(id);
       if (!entry) {
         const marker = new naver.maps.Marker({
@@ -258,7 +299,7 @@ export class HomeMap {
           position,
           title: contextMarkerLabel(record),
           icon: { content, anchor: new naver.maps.Point(0, 0) },
-          zIndex: contextLayer(record) === 'visits' ? 220 : contextLayer(record) === 'shortlist' ? 210 : contextLayer(record) === 'supply' ? 160 : 40,
+          zIndex: contextMarkerZIndex(record, id === this.selectedId),
         });
         naver.maps.Event.addListener(marker, 'click', () => this.selectContext(id, true));
         entry = { marker, record };
@@ -268,6 +309,7 @@ export class HomeMap {
         entry.marker.setPosition(position);
         entry.marker.setTitle(contextMarkerLabel(record));
         entry.marker.setIcon({ content, anchor: new naver.maps.Point(0, 0) });
+        entry.marker.setZIndex(contextMarkerZIndex(record, id === this.selectedId));
         entry.marker.setMap(this.map);
       }
     });
@@ -276,18 +318,47 @@ export class HomeMap {
   }
 
   clearContextRecords() {
+    if (this.contextMarkers.has(String(this.selectedId))) this.clearSelection();
     this.contextMarkers.forEach(({ marker }) => marker.setMap(null));
     this.contextMarkers.clear();
     this.contextRecords = [];
   }
 
+  clearSelection() {
+    const previousId = this.selectedId;
+    this.selectedId = null;
+    if (previousId === null || previousId === undefined) return;
+    const context = this.contextMarkers.get(String(previousId));
+    if (context) {
+      context.marker.setIcon({ content: contextMarkerContent(context.record, false, this.map.getZoom() < 12), anchor: new naver.maps.Point(0, 0) });
+      context.marker.setZIndex(contextMarkerZIndex(context.record));
+    }
+    const visit = this.markers.get(previousId);
+    if (visit) {
+      visit.marker.setIcon({ content: `<div class="map-price-marker ${normalizeStatus(visit.record.status)}" data-marker-id="${escapeHtml(previousId)}"><span>${escapeHtml(formatManwon(visit.record.askingPrice))}</span></div>`, anchor: new naver.maps.Point(0, 0) });
+      visit.marker.setZIndex(50);
+    }
+    const candidate = this.candidateMarkers.find(entry => entry.records.some(record => String(record.catalogId || record.id) === String(previousId)));
+    if (candidate) {
+      candidate.marker.setZIndex(candidate.records.length > 1 ? 80 : 100);
+      if (candidate.records.length === 1) {
+        const record = candidate.records[0];
+        const price = candidateAveragePrice(record);
+        candidate.marker.setIcon({ content: `<div class="recommendation-price-marker ${candidateRouteClass(record)}${record.isShortlisted ? ' shortlisted' : ''}">${record.isShortlisted ? '♥ ' : ''}${escapeHtml(price > 0 ? formatCompactPrice(price) : '가격 확인')}</div>`, anchor: new naver.maps.Point(0, 0) });
+      }
+    }
+    this.infoWindow?.close();
+  }
+
   selectContext(id, openInfo = false) {
     const entry = this.contextMarkers.get(String(id));
     if (!entry) return;
+    this.clearSelection();
     this.selectedId = String(id);
     this.contextMarkers.forEach(({ marker, record }, markerId) => {
+      marker.setZIndex(contextMarkerZIndex(record, markerId === this.selectedId));
       marker.setIcon({
-        content: contextMarkerContent(record, markerId === this.selectedId),
+        content: contextMarkerContent(record, markerId === this.selectedId, this.map.getZoom() < 12),
         anchor: new naver.maps.Point(0, 0),
       });
     });
@@ -299,6 +370,7 @@ export class HomeMap {
   }
 
   select(id, record = null, openInfo = false) {
+    this.clearSelection();
     this.selectedId = id;
     const entry = this.markers.get(id);
     const selected = record || entry?.record;
@@ -313,7 +385,7 @@ export class HomeMap {
     if (entry && selected) {
       this.map.morph(entry.marker.getPosition(), Math.max(this.map.getZoom(), 16));
       if (openInfo) {
-        this.infoWindow.setContent(`<div class="map-info"><span class="mi-status">${escapeHtml(selected.status)}</span><strong>${escapeHtml(selected.name)}</strong><p>${escapeHtml(formatPriceManwon(selected.askingPrice))} · ${escapeHtml(formatAreaPair(selected.areaM2))} · ${escapeHtml(selected.floor || '—')}층</p></div>`);
+        this.infoWindow.setContent(`<div class="map-info"><span class="mi-status">${escapeHtml(selected.status)}</span><strong>${escapeHtml(selected.name)}</strong><p>${escapeHtml(formatPriceManwon(selected.askingPrice))} · ${escapeHtml(formatAreaPair(selected.areaM2))} · ${escapeHtml(selected.floor || '—')}층</p>${marketAction({ ...selected, mapLayer: 'visits', mapRecordId: `context:visit:${selected.id}` }, 'context')}</div>`);
         this.infoWindow.open(this.map, entry.marker);
       }
     }
@@ -363,12 +435,93 @@ export class HomeMap {
   }
 
   clearCandidateMarkers() {
+    this.clearSelection();
+    this.setRegionRecords([]);
     this.detachCandidateMarkers();
     this.candidateRecords = [];
     this.candidateSignature = '';
     this.lastClusterZoom = null;
     this.selectedId = null;
     this.infoWindow?.close();
+  }
+
+  setRegionRecords(records = [], onSelect = null) {
+    const unique = new Map();
+    for (const record of Array.isArray(records) ? records : []) {
+      const point = normalizeGeoPoint(record);
+      const key = String(record?.key ?? '').trim();
+      const count = Number(record?.count);
+      if (!point || !key || !Number.isSafeInteger(count) || count <= 0) continue;
+      unique.set(key, { ...record, ...point, key, count });
+    }
+    this.regionRecords = [...unique.values()].sort((a, b) => a.key.localeCompare(b.key));
+    const signature = this.regionRecords.map(r => `${r.key}:${r.label}:${r.count}:${r.lat}:${r.lng}`).join('|');
+    this.onRegionSelect = onSelect;
+    if (signature === this.regionSignature && this.lastRegionZoom === this.map?.getZoom()) return;
+    this.regionSignature = signature;
+    this.renderRegionClusters();
+  }
+
+  regionGroups() {
+    if (!this.map || !this.regionRecords.length) return [];
+    const zoom = this.map.getZoom();
+    const groups = this.regionRecords.map(record => summarizeRegionGroup([record], zoom));
+    // Merge overlapping compact marker boxes rather than fixed geographic cells:
+    // adjacent districts on opposite cell boundaries must still form one group.
+    // World pixels make membership depend on zoom, without moving as the map pans.
+    while (groups.length > 1) {
+      let nearest = null;
+      for (let left = 0; left < groups.length - 1; left += 1) {
+        for (let right = left + 1; right < groups.length; right += 1) {
+          const dx = Math.abs(groups[left].x - groups[right].x);
+          const dy = Math.abs(groups[left].y - groups[right].y);
+          if (dx >= 132 || dy >= 44) continue;
+          const distance = (dx / 132) ** 2 + (dy / 44) ** 2;
+          if (!nearest || distance < nearest.distance) nearest = { left, right, distance };
+        }
+      }
+      if (!nearest) break;
+      const { left, right } = nearest;
+      groups[left] = summarizeRegionGroup([...groups[left].records, ...groups[right].records], zoom);
+      groups.splice(right, 1);
+    }
+    return groups;
+  }
+
+  renderRegionClusters() {
+    this.regionMarkers.forEach(marker => marker.setMap(null));
+    this.regionMarkers = [];
+    if (!this.map) return;
+    this.lastRegionZoom = this.map.getZoom();
+    for (const group of this.regionGroups()) {
+      const largest = [...group.records].sort((a, b) => b.count - a.count || a.key.localeCompare(b.key))[0];
+      const multiple = group.records.length > 1;
+      const label = `${regionLabel(largest)}${multiple ? ` 외 ${group.records.length - 1}지역` : ''}`;
+      const description = group.records.map(record => `${regionLabel(record)} ${record.count.toLocaleString('ko-KR')}곳`).join(', ');
+      const title = `${description} · 지역 대표 위치${multiple ? ' · 해당 지역 범위로 확대' : ' · 지역 후보 보기'}`;
+      const attribute = multiple ? `data-region-group="${escapeHtml(group.key)}"` : `data-region-key="${escapeHtml(group.key)}"`;
+      const content = `<div class="location-map-pill location-region-marker" role="button" tabindex="0" ${attribute} aria-label="${escapeHtml(title)}"><strong>${escapeHtml(label)}</strong><b>${group.count.toLocaleString('ko-KR')}</b><small>지역 대표 위치</small></div>`;
+      const marker = new naver.maps.Marker({ map: this.map, position: new naver.maps.LatLng(group.lat, group.lng), title, icon: { content, anchor: new naver.maps.Point(66, 22) }, zIndex: 220 });
+      naver.maps.Event.addListener(marker, 'click', () => this.focusRegionGroup(group.records.map(record => record.key)));
+      this.regionMarkers.push(marker);
+    }
+  }
+
+  focusRegionGroup(keys) {
+    if (!this.map) return false;
+    const requested = new Set((Array.isArray(keys) ? keys : String(keys || '').split(',')).map(key => String(key).trim()));
+    const records = this.regionRecords.filter(record => requested.has(record.key));
+    if (!records.length) return false;
+    if (records.length === 1) {
+      this.onRegionSelect?.(records[0]);
+      return true;
+    }
+    const bounds = new naver.maps.LatLngBounds();
+    records.forEach(record => bounds.extend(new naver.maps.LatLng(record.lat, record.lng)));
+    const samePoint = records.every(record => record.lat === records[0].lat && record.lng === records[0].lng);
+    if (samePoint) this.moveTo(records[0].lat, records[0].lng, Math.min(21, this.map.getZoom() + 2));
+    else this.map.fitBounds(bounds, { top: 70, right: 80, bottom: 70, left: 80 });
+    return true;
   }
 
   setCandidateRecords(records = [], { fit = false } = {}) {
@@ -450,6 +603,9 @@ export class HomeMap {
       naver.maps.Event.addListener(marker, 'click', () => {
         if (records.length > 1) {
           if (this.map.getZoom() >= 18) {
+            this.clearSelection();
+            this.selectedId = String(records[0].catalogId || records[0].id);
+            marker.setZIndex(180);
             const names = records.slice(0, 5).map((item) => escapeHtml(item.name)).join(' · ');
             this.infoWindow?.setContent(`<div class="map-info"><span class="mi-status">같은 위치 ${records.length}개 후보</span><strong>${names}</strong><p>목록에서 단지별 가격과 면적을 확인하세요.</p></div>`);
             this.infoWindow?.open(this.map, marker);
@@ -460,17 +616,7 @@ export class HomeMap {
           return;
         }
         const nextId = String(record.catalogId || record.id);
-        if (this.selectedId && this.selectedId !== nextId) {
-          const previous = this.candidateMarkers.find((item) => item.records.length === 1
-            && String(item.records[0].catalogId || item.records[0].id) === String(this.selectedId));
-          if (previous) {
-            const previousRecord = previous.records[0];
-            const previousClass = candidateRouteClass(previousRecord);
-            const previousPrice = candidateAveragePrice(previousRecord);
-            previous.marker.setZIndex(100);
-            previous.marker.setIcon({ content: `<div class="recommendation-price-marker ${previousClass}${previousRecord.isShortlisted ? ' shortlisted' : ''}">${previousRecord.isShortlisted ? '♥ ' : ''}${escapeHtml(previousPrice > 0 ? formatCompactPrice(previousPrice) : '가격 확인')}</div>`, anchor: new naver.maps.Point(0, 0) });
-          }
-        }
+        this.clearSelection();
         this.selectedId = nextId;
         marker.setZIndex(180);
         marker.setIcon({ content: `<div class="recommendation-price-marker ${routeClass}${record.isShortlisted ? ' shortlisted' : ''} selected">${record.isShortlisted ? '♥ ' : ''}${escapeHtml(Number.isFinite(lowest) ? formatCompactPrice(lowest) : '가격 확인')}</div>`, anchor: new naver.maps.Point(0, 0) });
@@ -486,6 +632,7 @@ export class HomeMap {
     const point = normalizeGeoPoint(record);
     if (!this.map || !point) return false;
     const id = String(record.catalogId || record.id);
+    this.clearSelection();
     this.selectedId = id;
     const position = new naver.maps.LatLng(point.lat, point.lng);
     if (typeof this.map.setZoom === 'function') this.map.setZoom(Math.max(16, this.map.getZoom()), false);

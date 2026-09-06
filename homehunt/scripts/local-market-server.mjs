@@ -19,6 +19,7 @@ import {
   fetchTmapTransitSummary,
 } from './commute-provider.mjs';
 import { fetchNaverLocalSearch } from './naver-local-search.mjs';
+import { connectedHistoryMonthLoader } from './history-request-lifecycle.mjs';
 import { normalizeGeoPoint } from '../js/transport-core.mjs';
 import { nextWeekdaySearchDateTime } from './commute-time.mjs';
 import {
@@ -644,8 +645,9 @@ async function handleHistory(url, res) {
       endMonth: range.endMonth,
       beforeRequest: waitForUpstreamSlot,
       concurrency: 3,
-      monthLoader: ({ lawdCd: monthLawdCd, dealYmd, type }) => loadMolitMonth(monthLawdCd, dealYmd, type),
+      monthLoader: connectedHistoryMonthLoader(res, ({ lawdCd: monthLawdCd, dealYmd, type }) => loadMolitMonth(monthLawdCd, dealYmd, type)),
     });
+    if (res.destroyed) return;
     if (payload.partial && !payload.records.length && stale) {
       return json(res, 200, {
         ...stale,
@@ -666,6 +668,7 @@ async function handleHistory(url, res) {
     }
     return json(res, 200, { ...payload, source: 'molit-live' });
   } catch (error) {
+    if (res.destroyed) return;
     if (error.code === 'AMBIGUOUS_APARTMENT') {
       return json(res, 409, errorPayload('AMBIGUOUS_APARTMENT', '같은 이름의 단지가 여러 곳입니다.', {
         candidates: error.candidates || [],

@@ -45,8 +45,9 @@ test('all active UI assets use the same cache-busting version', () => {
   const html = read('index.html');
   const config = read('js/config.js');
 
-  assert.match(html, /data-ui-version="3\.0\.4"/);
-  assert.match(html, /ui-kit\.js\?v=3\.0\.4/);
-  assert.match(html, /app\.js\?v=3\.0\.4/);
-  assert.match(config, /uiVersion:\s*'3\.0\.4'/);
+  const version = config.match(/uiVersion:\s*'([^']+)'/)[1];
+  assert.ok(html.includes(`data-ui-version="${version}"`));
+  assert.ok(html.includes(`ui-kit.js?v=${version}`));
+  assert.ok(html.includes(`app.js?v=${version}`));
+  assert.ok(html.includes(`ui-shell.js?v=${version}`));
 });

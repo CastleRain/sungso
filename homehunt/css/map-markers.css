@@ -1,0 +1,83 @@
+/* One surface for geographic counts, catalog previews and contextual records. */
+.hh-app.hh-v3 .location-map-pill {
+  --location-marker-color: #2d62c6;
+  --location-marker-tint: #edf4ff;
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 2px solid var(--location-marker-color);
+  border-radius: 22px;
+  background: #fff;
+  color: var(--location-marker-color);
+  box-shadow: 0 3px 12px #18345722;
+  font: 650 11px/1.35 Pretendard, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.location-map-pill::before {
+  content: "";
+  position: absolute;
+  inset: -3px 0;
+  border-radius: inherit;
+}
+.location-map-pill:focus-visible {
+  outline: 3px solid #82a5ef;
+  outline-offset: 3px;
+}
+.hh-app.hh-v3 .location-map-pill:is(:hover, .selected) {
+  background: var(--location-marker-tint);
+  box-shadow: 0 3px 12px #18345733;
+}
+.location-region-marker strong { font-size: 11px; }
+.location-region-marker b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.location-region-marker small { display: none; }
+.hh-app.hh-v3 .location-context-marker {
+  display: inline-flex;
+  min-width: 100px;
+  max-width: 230px;
+  transform: translate(-50%, -50%);
+}
+.location-context-marker .location-marker-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 750;
+}
+.location-context-marker .location-marker-kind {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 500;
+}
+.hh-app.hh-v3 .location-context-marker.is-compact:not(:hover, :focus-visible, .selected) {
+  min-width: 58px;
+  gap: 0;
+}
+.location-context-marker.is-compact:not(:hover, :focus-visible, .selected) .location-marker-name {
+  display: none;
+}
+.location-context-marker.is-compact:not(:hover, :focus-visible, .selected) .location-marker-kind {
+  font-size: 11px;
+  font-weight: 750;
+}
+.hh-app.hh-v3 .location-context-marker[data-map-layer=supply] {
+  --location-marker-color: #7250b5;
+  --location-marker-tint: #f3effc;
+}
+.hh-app.hh-v3 .location-context-marker[data-map-layer=visits] {
+  --location-marker-color: #147a61;
+  --location-marker-tint: #ebf7f1;
+}
+.hh-app.hh-v3 .location-context-marker[data-map-layer=shortlist] {
+  --location-marker-color: #b55073;
+  --location-marker-tint: #fceff4;
+}
+@media (max-width: 600px) {
+  .hh-app.hh-v3 .location-context-marker { max-width: 205px; }
+}

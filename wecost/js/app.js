@@ -232,7 +232,9 @@ function hideLoader() {
   const screen = document.getElementById('loading-screen');
   if (screen) screen.classList.add('hidden');
   // 마지막 탭 복원
-  showTab(localStorage.getItem('wecost_tab') || 'dashboard');
+  const linkedTab = new URLSearchParams(location.search).get('tab');
+  const restoredTab = linkedTab || localStorage.getItem('wecost_tab') || 'dashboard';
+  showTab(['dashboard', 'cashflow', 'wedding', 'house'].includes(restoredTab) ? restoredTab : 'dashboard');
 }
 
 function setSyncStatus(state) {

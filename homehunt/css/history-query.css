@@ -1,0 +1,27 @@
+/* Honest progress: an animated activity track carries no made-up completion percent. */
+.hh-app #complexLoadingState .complex-loading-track > span {
+  width: 32%;
+  transition: none;
+  animation: hh-history-activity 1.8s ease-in-out infinite;
+  background: var(--hh-primary, #254bc4);
+}
+.hh-app #complexLoadingState .complex-loading-steps { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.hh-app #complexLoadingState.is-refreshing .complex-loading-skeleton { display: none; }
+.hh-app .history-query-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.hh-app .history-query-elapsed { flex: 1; color: var(--hh-text-muted, #657083); font-size: 11px; font-variant-numeric: tabular-nums; }
+.hh-app .history-query-actions .record-btn { min-height: 40px; }
+.hh-app .history-query-details { margin: 8px 14px 12px; padding: 11px 12px; border: 1px solid var(--hh-border, #dfe4ed); border-radius: 12px; background: #f8faff; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.hh-app .history-query-details > p { margin: 0; }
+.hh-app .history-query-details summary { cursor: pointer; margin-top: 6px; color: #9b5b08; font-weight: 650; }
+.hh-app .history-query-details ul { padding-left: 18px; margin: 8px 0; max-height: 180px; overflow: auto; }
+.hh-app .history-query-details .record-btn { margin-top: 8px; min-height: 40px; }
+@keyframes hh-history-activity { from { transform: translateX(-100%); } to { transform: translateX(410%); } }
+@media (max-width: 600px) {
+  .hh-app #complexLoadingState .complex-loading-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hh-app #complexLoadingState .complex-loading-head { grid-template-columns: 28px minmax(0, 1fr); }
+  .hh-app #complexLoadingPercent { grid-column: 2; width: fit-content; font-size: 10px; }
+  .hh-app .history-query-details { margin-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hh-app #complexLoadingState .complex-loading-track > span { animation: none; width: 100%; opacity: .35; }
+}

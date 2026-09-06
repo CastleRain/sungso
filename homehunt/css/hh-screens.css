@@ -2831,6 +2831,24 @@
   grid-column: 1 / -1;
 }
 
+.hh-app.hh-v3 #recommendationFilterPanel .recommendation-filter-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-block: 12px 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 16px;
+}
+
+.hh-app.hh-v3 #recommendationFilterPanel .recommendation-primary-grid > .region-fieldset {
+  grid-column: 1 / -1;
+}
+
+.hh-app.hh-v3 #recommendationFilterPanel .recommendation-details {
+  overflow: visible;
+}
+
 .hh-app.hh-v3 .price-segmented-input {
   display: grid;
   width: 100%;
@@ -3132,16 +3150,28 @@
 
 @media (max-width: 479px) {
   .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-submit > span,
-  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle > span,
   .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-results-toggle > span {
     display: none;
   }
 
   .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-submit,
-  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle,
   .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-results-toggle {
     width: var(--hh-touch-target);
     padding-inline: 0;
+  }
+
+  .hh-app.hh-v3 #toggleRecommendationFilters {
+    width: auto;
+    padding-inline: 10px;
+    white-space: nowrap;
+  }
+
+  .hh-app.hh-v3 #toggleRecommendationFilters > span {
+    display: inline;
+  }
+
+  .hh-app.hh-v3.hh-filter-is-open #openVisitButton {
+    visibility: hidden;
   }
 
   .hh-app.hh-v3 .recommendation-list-pane.results-sheet > .recommendation-decision-bar {
@@ -3151,4 +3181,13 @@
   .hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-status p {
     display: none;
   }
+}
+.hh-app .recommendation-field .condition-range-limits {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: -3px;
+  color: var(--hh-text-muted, #60758f);
+  font-size: 10px;
+  line-height: 1.4;
 }
