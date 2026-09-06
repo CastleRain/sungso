@@ -28,13 +28,20 @@ test('supply screen, alert settings, and official application links remain wired
   assert.match(html, /id="supplyMatchMinUnits"/);
 });
 
-test('public initial supply snapshot is empty, explicit, and covers all official providers', async () => {
+test('public supply snapshot keeps its contract before and after scheduled collection', async () => {
   const snapshot = JSON.parse(await read('data/home-supply.json'));
 
-  assert.equal(snapshot.complete, false);
-  assert.deepEqual(snapshot.notices, []);
+  assert.equal(snapshot.schemaVersion, 1);
+  assert.equal(typeof snapshot.complete, 'boolean');
+  assert.ok(Array.isArray(snapshot.notices));
+  assert.equal(snapshot.coverage.totalNotices, snapshot.notices.length);
   assert.deepEqual(snapshot.sources.map(({ id }) => id).sort(), ['applyhome', 'lh', 'sh']);
-  assert.equal(snapshot.baseline.suppressInitialNotifications, true);
+  assert.equal(typeof snapshot.baseline.suppressInitialNotifications, 'boolean');
+  if (!snapshot.generatedAt) {
+    assert.equal(snapshot.complete, false);
+    assert.deepEqual(snapshot.notices, []);
+    assert.equal(snapshot.baseline.suppressInitialNotifications, true);
+  }
   assert.deepEqual(snapshot.query.regions, ['서울', '경기']);
   assert.deepEqual(snapshot.query.exclusions, [{
     source: 'lh',

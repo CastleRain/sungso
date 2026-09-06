@@ -374,10 +374,12 @@ test('한쪽만 성공한 첫 실행도 유효 JSON을 원자적으로 저장하
 
   assert.equal(snapshot.status, 'partial');
   assert.equal(snapshot.changes.baselineRun, true);
+  assert.equal(snapshot.baseline.suppressInitialNotifications, true);
   assert.deepEqual(snapshot.changes.new, []);
   assert.equal(snapshot.baseline.providers.applyhome.established, false);
   assert.equal(snapshot.baseline.providers.lh.established, true);
   assert.equal(snapshot.baseline.providers.sh.established, false);
+  assert.equal(persisted.baseline.suppressInitialNotifications, true);
   assert.equal(persisted.notices[0].id, oneLh.id);
   assert.equal(persisted.notices[0].source, 'lh');
 });
