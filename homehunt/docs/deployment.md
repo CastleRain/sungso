@@ -9,6 +9,8 @@
 
 2026-09-06에 GitHub API로 위 Pages 설정과 저장소 쓰기 권한을 확인했다. 이번 릴리스는 HomeHunt 4.2.1과 공용 재무 계산, WeCost 집 탭 연결을 포함한다. 신혼여행 앱·개인 IDE 설정 변경은 포함하지 않는다. master에 자동 수집된 최신 공개 JSON은 보존한다.
 
+**배포 확인:** 2026-09-06 11:52 KST에 릴리스 `0346b7420a33b5cb431039a023bc92c64dce31e2`의 [Pages 빌드·배포](https://github.com/CastleRain/sungso/actions/runs/34007580909)가 성공했다. 전체 자동 테스트 367개를 통과했고 공개 HTML 4.2.1, CSS·공용 모듈·역 데이터 HTTP 200, 네이버 지도와 단지 상세 연결, 390px 가로 넘침 없음·브라우저 오류 없음을 확인했다. 공개 실거래 데이터와 검색 서버의 미연결 상태도 화면에서 검증했다.
+
 GitHub Pages는 HTML·CSS·JavaScript를 제공하는 정적 호스팅이다. PC에서 실행 중인 Node 서버를 함께 실행해 주지 않는다. [GitHub 공식 설명](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 
 ## 지금 공개되는 것
