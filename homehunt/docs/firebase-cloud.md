@@ -6,6 +6,8 @@
 
 2026-09-08 확인 시 `sungso-358cb`는 Spark 무료 플랜이며 Firestore 위치는 서울(`asia-northeast3`)이다. Google 로그인과 실제 Pages·localhost 도메인 설정을 적용했다. **검색 서버 코드는 준비했지만 Functions는 배포하지 않았다.** 현재 공개 API 주소는 비워 두며, 로컬 검색은 기존 8787 서버를 사용한다. Functions 배포에는 Blaze 전환이 필요하고 요금제는 자동 변경하지 않는다. [Firebase 설명](https://firebase.google.com/docs/functions/faq-and-troubleshooting)
 
+**배포 확인:** 2026-09-08 KST, 릴리스 `5978806`의 [Pages 배포](https://github.com/CastleRain/sungso/actions/runs/34151237385)가 성공했다. 공개 4.4.0 HTML·클라우드 모듈·CSS는 HTTP 200이며 실제 화면에서 지도·저장 UI·온라인 검색 미배포 표시를 확인했다. 로컬 화면의 실제 Google 로그인·새로고침 유지·비공개 백업과 저장 전 교체 취소를 검증했고, 관리자 조회로 회사 조건 보존·경로/점수/공급자 좌표 미저장을 대조했다. 일반 테스트 694개, 실제 Firestore Emulator 보안 테스트 16개를 통과했으며 운영 Firebase의 무로그인 개인 기록·회원·경로 캐시 읽기는 모두 403이었다. 이번 작업의 실제 통근 원호출은 0회다.
+
 | 자료 | 저장 위치·재사용 |
 |---|---|
 | 회사명·입력 주소·비중·시간 제한·예산 | 로그인한 계정의 Firestore 백업 |

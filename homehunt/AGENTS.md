@@ -121,7 +121,9 @@ node --check functions/molit.js
 - 별도 Node 22 Firebase 코드베이스에 인증 API, Firestore 추천 작업·체크포인트·취소·재시도·24시간 만료, TMAP 8시간 경로 캐시와 원자적 일일 쿼터를 구현. Kakao/NAVER 완료 경로 저장은 차단하고 가격 월 자료는 재사용. MOLIT 응답 식별자 누락과 취소 뒤 페이지 조회·캐시 쓰기를 함께 수정.
 - 전체 자동 테스트와 실제 Firestore Emulator 보안 16개·클라우드 번들 검증 완료. 현재 Firebase는 Spark로 Functions 미배포이며, 무료 기록 저장과 PC 없이 가격·통근 검색이 가능한 상태를 구분. `docs/firebase-cloud.md`에 Pages/Firebase/Vercel 비교와 실행 절차를 정리.
 
-**다음:** Pages 4.4.0 배포를 확인하고, 검색 서버는 Blaze 전환 또는 Vercel 연결 선택 후 실제 제한·경로 캐시를 검증한다.
+- 릴리스 `5978806`의 Pages 4.4.0 배포 성공·공개 HTML/모듈/CSS 200·지도/저장 UI를 검증. 일반 테스트 694개와 Firestore 보안 16개 통과, 실제 운영 무로그인 접근 403, 390/430px 저장 화면 렌더 확인. 통근 원호출 추가 0회.
+
+**다음:** 검색 서버는 Blaze 전환 또는 Vercel 연결 선택 후 실제 제한·경로 캐시를 검증한다.
 
 ### 2026-09-08 — 가격 후보 0개 조회 장애 복구 (4.3.6)
 
