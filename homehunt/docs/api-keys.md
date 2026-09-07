@@ -210,9 +210,13 @@ HomeHunt의 기본값 `TRANSIT_PROVIDER=auto`는 `KAKAO_REST_API_KEY`가 있으�
 
 2026-09-05 공식 문서 기준 대중교통 경로의 무료 쿼터는 1,000건/일이며, 개발자 계정에서 카카오맵 API를 첫 번째로 활성화한 앱에만 무료 쿼터가 제공된다. 무료량을 넘겨 유료 API를 활성화하면 대중교통 경로는 10원/건이다. 정책과 요금은 바뀔 수 있으므로 배포 전 공식 쿼터 페이지를 다시 확인한다.
 
-Kakao 대중교통 API는 여러 경로를 반환하며 HomeHunt는 `totalTime`이 가장 짧은 경로를 사용한다. 응답의 환승 수·요금과 `WALKING` 단계의 시간·거리를 합산한다. 공식 요청에는 출발 시각 파라미터가 없으므로, 사용자가 입력한 `08:00` 같은 시각에 맞춘 미래 시간표 조회라고 해석하면 안 된다.
+Kakao 대중교통 API는 여러 경로를 반환하며 HomeHunt는 소요시간에 환승·도보·버스 부담을 반영해 경로를 비교한다. 응답의 환승 수·요금과 `WALKING` 단계의 시간·거리를 합산한다. 공식 요청에는 출발 시각 파라미터가 없으므로, 사용자가 입력한 `08:00` 같은 시각에 맞춘 미래 시간표 조회라고 해석하면 안 된다.
 
-HomeHunt는 캐시에 없는 실제 Kakao 원호출 시도만 KST 날짜별 `homehunt/.local/kakao-transit-usage.json`에 기록한다. 기본 `KAKAO_DAILY_LIMIT=1000`을 넘는 호출은 Kakao에 보내기 전에 차단한다. 이 로컬 장부에는 키나 API 응답 원문을 저장하지 않으며, Kakao Developers의 실제 계정 쿼터를 대체하지 않는다.
+HomeHunt는 실제 Kakao 원호출 시도만 KST 날짜별 `homehunt/.local/kakao-transit-usage.json`에 기록한다. 기본 `KAKAO_DAILY_LIMIT=1000`을 넘는 호출은 Kakao에 보내기 전에 차단한다. 새 키를 넣거나 서버를 재시작해도 장부를 초기화하지 않는다. 이 로컬 장부에는 키나 API 응답 원문을 저장하지 않으며, Kakao Developers의 실제 계정 쿼터를 대체하지 않는다.
+
+4.3.3부터 Kakao 단독으로 통근을 확인한다. 가격 후보 검색은 경로 API를 호출하지 않으며, 통근 확인 버튼은 한 번에 최대 10곳·신규 대중교통 요청 최대 30회를 계획한다. 회사가 3곳이면 10곳×3곳=30회, 회사가 5곳이면 6곳×5곳=30회까지다. 남은 쿼터가 작으면 완전한 회사별 경로를 확인할 수 있는 후보 수로 줄인다. 현재 화면에서 이미 확인을 시도한 후보는 묶음 조회에서 건너뛰고 개별 버튼으로 다시 확인할 수 있다. 서버는 배치에서 공급자 오류가 발생하면 대기 중인 후속 호출을 중단한다.
+
+Kakao 경로 결과와 파생 점수는 현재 화면에서만 일시적으로 사용한다. 완료한 경로를 디스크·브라우저 저장소·서버 캐시에 저장해 다음 검색에 재사용하지 않는다. 같은 시점에 진행 중인 동일 요청만 합치며, 새 검색·새로고침 후 다시 통근 확인을 실행하면 새 호출이 필요하다. 이는 [2026-08-20 Kakao 담당자의 경로 API 저장·일시 표시 답변](https://devtalk.kakao.com/t/local-api/151263)에 따른다. TMAP의 기존 8시간 캐시와 구분한다.
 
 ## 7. TMAP 버스·지하철 경로 키
 
@@ -230,9 +234,9 @@ HomeHunt는 캐시에 없는 실제 Kakao 원호출 시도만 KST 날짜별 `hom
 
 현재 공식 FREE 한도는 대중교통 요약정보 API 10건/일이다. 더 자주 사용하려면 종량제로 상품을 변경해야 하며, 현재 요약정보 API 단가는 0.55원/건이다. 요금과 한도는 변경될 수 있으므로 [공식 상품·요금](https://transit.tmapmobility.com/)을 최종 기준으로 확인한다.
 
-HomeHunt는 캐시에 없는 실제 TMAP 원호출만 서울 시간 날짜별로 `homehunt/.local/tmap-transit-usage.json`에 기록한다. `TMAP_DAILY_LIMIT`을 넘는 호출은 공급자에 보내기 전에 차단한다. 배치 요청은 출발지 최대 10개·도착지 최대 4개를 받지만, 중복 좌표를 제거한 뒤 필요한 원호출이 선택 공급자의 남은 일일 한도를 넘으면 전체 요청을 사전 차단한다.
+HomeHunt는 캐시에 없는 실제 TMAP 원호출만 서울 시간 날짜별로 `homehunt/.local/tmap-transit-usage.json`에 기록한다. `TMAP_DAILY_LIMIT`을 넘는 호출은 공급자에 보내기 전에 차단한다. 배치 요청은 출발지 최대 10개를 받으며 도착지 4개 제한은 없다. 중복 좌표를 제거한 뒤 필요한 원호출이 선택 공급자의 남은 일일 한도를 넘으면 전체 요청을 사전 차단한다.
 
-`TRANSIT_CACHE_HOURS`는 0보다 크고 24보다 작아야 하며 기본 8시간이다. `TRANSIT_CONCURRENCY` 기본값은 2다. 긴 캐시는 호출량을 아끼지만 교통 변경 반영이 늦어지므로 24시간 이상은 허용하지 않는다.
+TMAP에 적용하는 `TRANSIT_CACHE_HOURS`는 0보다 크고 24보다 작아야 하며 기본 8시간이다. Kakao에는 완료 응답 캐시를 적용하지 않는다. `TRANSIT_CONCURRENCY` 기본값은 2다.
 
 공급자 선택은 다음과 같다.
 
@@ -244,7 +248,7 @@ HomeHunt는 캐시에 없는 실제 TMAP 원호출만 서울 시간 날짜별로
 
 - `GET /api/commute/quota`: 현재 선택 공급자, 연결 여부, KST 기준 Kakao·TMAP 각각의 `date`·`used`·`limit`·`remaining` 반환
 - `POST /api/commute`: 기존 단일 출발지·도착지 조회 유지
-- `POST /api/commute/batch`: `origins` 최대 10개와 `destinations` 최대 4개를 받아 모든 조합을 조회하고 `originId`·`destinationId`·`routes`·`departureTime`으로 돌려줌. 요청 본문의 선택적 `transitProvider: "kakao" | "tmap"`으로 `auto` 기본 공급자를 한 요청에만 덮어쓸 수 있어, Kakao 광역 선별 뒤 TMAP 최종 후보 재검증을 서버 재시작 없이 수행함
+- `POST /api/commute/batch`: `origins` 최대 10개와 `destinations`의 조합을 조회하고 `originId`·`destinationId`·`routes`·`departureTime`으로 돌려줌. 요청 본문의 선택적 `transitProvider: "kakao" | "tmap"`으로 기본 공급자를 한 요청에만 덮어쓸 수 있음. Kakao 신규 원호출은 서버에서도 배치당 최대 30회로 제한
 
 배치 본문의 `maxTransitCalls`는 캐시에 없는 대중교통 원호출의 요청별 안전 상한이다. 서버는 같은 좌표·교통수단·출발시각 조합을 먼저 합치고, 예상 원호출이 이 값이나 선택된 Kakao·TMAP 공급자의 남은 로컬 일일 한도를 넘으면 공급자에 호출하기 전에 전체 배치를 거부한다.
 

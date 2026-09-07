@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const zlib = require('zlib');
+const { setTimeout: delay } = require('node:timers/promises');
 
 const ENDPOINTS = {
   sale: 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
@@ -201,8 +202,10 @@ function parseResponse(xml, type, lawdCd, pageNo = 1) {
   }).filter(Boolean);
 }
 
-async function fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeRequest) {
+async function fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeRequest, signal) {
+  signal?.throwIfAborted();
   if (typeof beforeRequest === 'function') await beforeRequest();
+  signal?.throwIfAborted();
   const url = new URL(ENDPOINTS[type]);
   url.searchParams.set('serviceKey', serviceKey);
   url.searchParams.set('LAWD_CD', lawdCd);
@@ -211,10 +214,12 @@ async function fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeReques
   url.searchParams.set('numOfRows', String(MONTH_PAGE_SIZE));
   const response = await fetch(url, {
     headers: { Accept: 'application/xml' },
-    signal: AbortSignal.timeout(28000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(28000)]) : AbortSignal.timeout(28000),
   });
+  signal?.throwIfAborted();
   if (!response.ok) throw new Error(`MOLIT HTTP ${response.status}`);
   const xml = await response.text();
+  signal?.throwIfAborted();
   const records = parseResponse(xml, type, lawdCd, pageNo);
   return {
     records,
@@ -223,14 +228,14 @@ async function fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeReques
   };
 }
 
-async function fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest) {
-  const first = await fetchPage(serviceKey, lawdCd, dealYmd, type, 1, beforeRequest);
+async function fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal) {
+  const first = await fetchPage(serviceKey, lawdCd, dealYmd, type, 1, beforeRequest, signal);
   const totalPages = Math.max(1, Math.ceil(first.totalCount / first.numOfRows));
   if (totalPages > 200) throw new Error('MOLIT pagination exceeded the safety limit');
 
   const pages = [first];
   for (let pageNo = 2; pageNo <= totalPages; pageNo += 1) {
-    pages.push(await fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeRequest));
+    pages.push(await fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeRequest, signal));
   }
 
   const records = pages.flatMap((page) => page.records);
@@ -343,34 +348,45 @@ async function writeMonthCache(db, ref, serviceKey, identity, result) {
   await batch.commit();
 }
 
-async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type }) {
+async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type, signal, beforeRequest }) {
+  signal?.throwIfAborted();
+  serviceKey = normalizeServiceKey(serviceKey);
+  lawdCd = String(lawdCd || '').trim();
+  dealYmd = String(dealYmd || '').trim();
+  if (!serviceKey) throw new Error('MOLIT service key is not configured');
+  if (!/^\d{5}$/.test(lawdCd) || !/^\d{6}$/.test(dealYmd) || !ENDPOINTS[type]) throw new Error('Invalid MOLIT month request');
   const identity = { lawdCd, dealYmd, type };
   const cacheId = `${lawdCd}_${dealYmd}_${type}`;
   const ref = db.collection('homehunt_molit_month_cache').doc(cacheId);
   let cached = null;
   try { cached = await readMonthCache(ref, serviceKey, identity); }
   catch (error) { console.warn('MOLIT month cache read failed:', cacheId, error.message); }
+  signal?.throwIfAborted();
 
   const ttl = monthCacheTtl(dealYmd);
   if (cached && Date.now() - cached.fetchedAtMs < ttl) {
-    return { records: cached.records, totalCount: cached.totalCount, source: 'cache', warning: null };
+    return { ...identity, records: cached.records, totalCount: cached.totalCount, source: 'cache', warning: null };
   }
 
   let lastError;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      const upstream = await fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type);
+      const upstream = await fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal);
+      signal?.throwIfAborted();
       try { await writeMonthCache(db, ref, serviceKey, identity, upstream); }
       catch (cacheError) { console.warn('MOLIT month cache write failed:', cacheId, cacheError.message); }
-      return { ...upstream, source: 'upstream', warning: null };
+      signal?.throwIfAborted();
+      return { ...identity, ...upstream, source: 'upstream', warning: null };
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
-      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, attempt * 500));
+      if (attempt < 2) await delay(attempt * 500, undefined, { signal });
     }
   }
 
   if (cached) {
     return {
+      ...identity,
       records: cached.records,
       totalCount: cached.totalCount,
       source: 'stale-cache',
@@ -746,7 +762,8 @@ function createApartmentHistoryHandler({ db }) {
   };
 }
 
-async function fetchMolitMonthDirect({ serviceKey, lawdCd, dealYmd, type = 'sale', beforeRequest = null }) {
+async function fetchMolitMonthDirect({ serviceKey, lawdCd, dealYmd, type = 'sale', beforeRequest = null, signal }) {
+  signal?.throwIfAborted();
   const normalizedKey = normalizeServiceKey(serviceKey);
   const normalizedLawdCd = String(lawdCd || '').trim();
   const normalizedDealYmd = String(dealYmd || '').trim();
@@ -757,10 +774,11 @@ async function fetchMolitMonthDirect({ serviceKey, lawdCd, dealYmd, type = 'sale
   let lastError;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      return await fetchMonthFromMolit(normalizedKey, normalizedLawdCd, normalizedDealYmd, type, beforeRequest);
+      return await fetchMonthFromMolit(normalizedKey, normalizedLawdCd, normalizedDealYmd, type, beforeRequest, signal);
     } catch (error) {
+      signal?.throwIfAborted();
       lastError = error;
-      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400));
+      if (attempt < 2) await delay(400, undefined, { signal });
     }
   }
   throw lastError || new Error('MOLIT upstream unavailable');
@@ -858,6 +876,7 @@ async function fetchApartmentHistoryDirect({
 }
 
 module.exports = {
+  loadMolitMonthWithFirestoreCache: loadMonth,
   createApartmentHistoryHandler,
   fetchApartmentHistoryDirect,
   fetchMolitMonthDirect,

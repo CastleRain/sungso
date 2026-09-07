@@ -1,4 +1,5 @@
 import { normalizeGeoPoint } from './transport-core.mjs?v=2.1.0';
+import { sanitizeHomehuntPersistence } from './recommendation-persistence-core.mjs';
 
 const VISITS_KEY = 'homehunt_visits_v1';
 const COMPARE_IDS_KEY = 'homehunt_compare_ids_v1';
@@ -16,10 +17,22 @@ const DB_STORE = 'datasets';
 function readJson(key, fallback = null) {
   try {
     const raw = localStorage.getItem(key);
-    return raw === null ? fallback : JSON.parse(raw);
+    if (raw === null) return fallback;
+    const value = JSON.parse(raw);
+    const safe = sanitizeHomehuntPersistence(value);
+    if (JSON.stringify(safe) !== JSON.stringify(value)) {
+      // Migrate old Kakao evidence without making a blocked storage write
+      // prevent the user from reading their cleaned personal/price records.
+      try { localStorage.setItem(key, JSON.stringify(safe)); } catch (_) { /* Read remains sanitized. */ }
+    }
+    return safe;
   } catch (_) {
     return fallback;
   }
+}
+
+function writeJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(sanitizeHomehuntPersistence(value)));
 }
 
 export function loadVisits() {
@@ -28,7 +41,7 @@ export function loadVisits() {
 }
 
 export function saveVisits(visits) {
-  localStorage.setItem(VISITS_KEY, JSON.stringify(visits));
+  writeJson(VISITS_KEY, visits);
 }
 
 export function loadCompareIds() {
@@ -37,7 +50,7 @@ export function loadCompareIds() {
 }
 
 export function saveCompareIds(ids) {
-  localStorage.setItem(COMPARE_IDS_KEY, JSON.stringify(Array.isArray(ids) ? ids : []));
+  writeJson(COMPARE_IDS_KEY, Array.isArray(ids) ? ids : []);
 }
 
 export function clearVisits() {
@@ -69,17 +82,18 @@ export function rememberComplex(complex) {
     return !sameUnresolvedSearch;
   });
   const next = [{ ...complex, searchedAt: new Date().toISOString() }, ...existing].slice(0, 12);
-  localStorage.setItem(RECENT_COMPLEXES_KEY, JSON.stringify(next));
+  writeJson(RECENT_COMPLEXES_KEY, next);
   return next;
 }
 
 export function loadShortlist() {
   const value = readJson(SHORTLIST_KEY, []);
-  return Array.isArray(value) ? value.map(({ commute, distanceKm, ...item }) => item) : [];
+  return Array.isArray(value) ? value.filter(item => item && typeof item === 'object' && !Array.isArray(item))
+    .map(({ commute, distanceKm, ...item }) => item) : [];
 }
 
 export function saveShortlist(items) {
-  localStorage.setItem(SHORTLIST_KEY, JSON.stringify(Array.isArray(items) ? items : []));
+  writeJson(SHORTLIST_KEY, Array.isArray(items) ? items : []);
 }
 
 export function loadRecommendationFilters() {
@@ -88,7 +102,7 @@ export function loadRecommendationFilters() {
 }
 
 export function saveRecommendationFilters(filters) {
-  localStorage.setItem(RECOMMENDATION_FILTERS_KEY, JSON.stringify(filters || {}));
+  writeJson(RECOMMENDATION_FILTERS_KEY, filters || {});
 }
 
 export function loadSupplyPreferences() {
@@ -140,7 +154,7 @@ export function saveSupplyPreferences(preferences) {
     notifyChanged: preferences?.notifyChanged !== false,
     notifyDeadline: preferences?.notifyDeadline !== false,
   };
-  localStorage.setItem(SUPPLY_PREFERENCES_KEY, JSON.stringify(value));
+  writeJson(SUPPLY_PREFERENCES_KEY, value);
   return value;
 }
 
@@ -151,7 +165,7 @@ export function loadSubscriptionProfile() {
 
 export function saveSubscriptionProfile(profile) {
   const value = profile && typeof profile === 'object' && !Array.isArray(profile) ? profile : {};
-  localStorage.setItem(SUBSCRIPTION_PROFILE_KEY, JSON.stringify(value));
+  writeJson(SUBSCRIPTION_PROFILE_KEY, value);
   return value;
 }
 
@@ -166,7 +180,7 @@ export function loadSupplyFavorites() {
 
 export function saveSupplyFavorites(ids) {
   const value = [...new Set((Array.isArray(ids) ? ids : []).map(String).filter(Boolean))].slice(0, 500);
-  localStorage.setItem(SUPPLY_FAVORITES_KEY, JSON.stringify(value));
+  writeJson(SUPPLY_FAVORITES_KEY, value);
   return value;
 }
 
@@ -194,7 +208,7 @@ export function saveSupplySeen(value = {}) {
     initializedAt: String(value.initializedAt || new Date().toISOString()),
     acknowledgedAt: String(value.acknowledgedAt || ''),
   };
-  localStorage.setItem(SUPPLY_SEEN_KEY, JSON.stringify(next));
+  writeJson(SUPPLY_SEEN_KEY, next);
   return next;
 }
 
@@ -226,12 +240,12 @@ export function saveGeocodeResult(query, result) {
     ...point,
     cachedAt: new Date().toISOString(),
   };
-  localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify([value, ...items].slice(0, 400)));
+  writeJson(GEOCODE_CACHE_KEY, [value, ...items].slice(0, 400));
   return value;
 }
 
 export function downloadJson(filename, value) {
-  const blob = new Blob([JSON.stringify(value, null, 2)], { type: 'application/json;charset=utf-8' });
+  const blob = new Blob([JSON.stringify(sanitizeHomehuntPersistence(value), null, 2)], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
@@ -258,7 +272,7 @@ export async function saveImportedMarket(summary) {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(DB_STORE, 'readwrite');
-    tx.objectStore(DB_STORE).put(summary, 'imported-summary');
+    tx.objectStore(DB_STORE).put(sanitizeHomehuntPersistence(summary), 'imported-summary');
     tx.oncomplete = () => { db.close(); resolve(); };
     tx.onerror = () => { db.close(); reject(tx.error); };
   });
@@ -268,15 +282,24 @@ export async function loadImportedMarket() {
   try {
     const db = await openDb();
     return await new Promise((resolve, reject) => {
-      const tx = db.transaction(DB_STORE, 'readonly');
-      const request = tx.objectStore(DB_STORE).get('imported-summary');
-      request.onsuccess = () => resolve(request.result || null);
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const store = tx.objectStore(DB_STORE);
+      const request = store.get('imported-summary');
+      request.onsuccess = () => resolve(sanitizeStoredDataset(request.result || null, store, 'imported-summary'));
       request.onerror = () => reject(request.error);
       tx.oncomplete = () => db.close();
     });
   } catch (_) {
     return null;
   }
+}
+
+function sanitizeStoredDataset(value, store, key) {
+  const safe = sanitizeHomehuntPersistence(value);
+  if (JSON.stringify(safe) !== JSON.stringify(value)) {
+    try { store.put(safe, key); } catch (_) { /* Return cleaned data even if migration cannot be written. */ }
+  }
+  return safe;
 }
 
 export async function clearImportedMarket() {
@@ -333,7 +356,7 @@ export async function saveComplexHistory(regionCode, query, payload, identity = 
   }
   const db = await openDb();
   const value = {
-    ...payload,
+    ...sanitizeHomehuntPersistence(payload),
     regionCode: String(regionCode),
     query: String(query),
     aptSeq: String(payload?.aptSeq || ''),
@@ -364,10 +387,12 @@ export async function loadComplexHistory(regionCode, query, identity = {}) {
   try {
     const db = await openDb();
     return await new Promise((resolve, reject) => {
-      const tx = db.transaction(DB_STORE, 'readonly');
-      const request = tx.objectStore(DB_STORE).get(complexCacheKey(regionCode, query, identity));
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const store = tx.objectStore(DB_STORE);
+      const key = complexCacheKey(regionCode, query, identity);
+      const request = store.get(key);
       request.onsuccess = () => {
-        const value = request.result || null;
+        const value = sanitizeStoredDataset(request.result || null, store, key);
         resolve(historyRangeMatches(value, identity) ? value : null);
       };
       request.onerror = () => reject(request.error);

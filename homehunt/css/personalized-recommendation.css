@@ -1,0 +1,53 @@
+.personalized-settings { display: grid; gap: 14px; padding: 14px; margin: 12px 0; border: 1px solid #dce5f0; border-radius: 12px; background: #f7f9fc; }
+.personalized-settings > div { display: grid; gap: 7px; min-width: 0; }
+.personalized-settings label, .personalized-settings small { font-size: 12px; line-height: 1.6; }
+.personalized-settings small { color: #52677e; }
+.personalized-settings select, .personalized-settings button { width: 100%; min-height: 36px; }
+.personalized-settings a { font-size: 12px; color: #255df4; }
+.personalized-budget-source { display: grid; gap: 7px; min-width: 0; margin: 6px 0 10px; }
+.personalized-budget-source > select[hidden] { display: none; }
+.personalized-budget-source small { font-size: 11px; line-height: 1.6; color: #52677e; overflow-wrap: anywhere; }
+.personalized-budget-source a { width: fit-content; font-size: 11px; color: #255df4; }
+.budget-source-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.hh-app .budget-source-toggle button { width: 100%; min-width: 0; min-height: 40px; height: auto; padding: 8px; border: 1px solid #cbd7e6; border-radius: 9px; background: #fff; color: #52677e; font: inherit; font-size: 12px; font-weight: 700; white-space: normal; }
+.hh-app .budget-source-toggle button[aria-pressed=true] { border-color: #255df4; background: #edf3ff; color: #194bbb; box-shadow: inset 0 0 0 1px #255df4; }
+.hh-app .budget-source-toggle button:focus-visible { outline: 2px solid #255df4; outline-offset: 2px; }
+.price-recommendation-field input[readonly] { background: #edf3ff; color: #194bbb; cursor: default; }
+.price-recommendation-field input[type=range]:disabled { opacity: 0.45; cursor: default; }
+.personalized-check { display: flex; align-items: start; gap: 8px; }
+.personalized-check input[type=checkbox] { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 3px; }
+.personalized-check span { flex: 1; }
+.hh-app .workplace-list { display: grid; grid-template-columns: minmax(0, 1fr); overflow-x: visible; }
+.hh-app .workplace-list .workplace-chip { width: 100%; min-width: 0; max-width: none; }
+.workplace-list .workplace-chip-main { flex: 1; min-width: 0; }
+.hh-app .workplace-chip-main strong { font-size: 11px; }
+.hh-app .workplace-chip-main small { font-size: 10px; }
+.workplace-weight-editor { display: flex; grid-column: 1 / -1; align-items: center; gap: 6px; padding: 5px 4px 3px 28px; font-size: 11px; color: #52677e; }
+.workplace-weight-editor label { white-space: nowrap; }
+.workplace-weight-editor input { width: 66px !important; min-width: 0; height: 32px; padding: 5px 7px; }
+.workplace-weight-editor output { margin-left: auto; }
+.company-days-field input { width: 100%; min-height: 40px; border: 1px solid #cbd7e6; border-radius: 8px; padding: 8px; }
+.company-days-field small { display: block; white-space: normal; line-height: 1.5; }
+.personalized-score-card { padding: 12px; margin: 9px 0; border: 1px solid #dce5f0; border-radius: 12px; background: #f7f9fc; }
+.personalized-score-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.personalized-score-head strong { color: #194bbb; font-size: 14px; }
+.personalized-score-card[data-decision=excluded] .personalized-score-head strong { color: #a23c24; }
+.personalized-score-card p, .personalized-score-card small { font-size: 12px; line-height: 1.7; margin: 7px 0 0; color: #52677e; }
+.personalized-score-card dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 10px; margin: 10px 0; font-size: 12px; }
+.personalized-score-card dd { margin: 0; text-align: right; }
+.personalized-score-card dt small { display: block; font-weight: 400; margin-top: 2px; }
+.personalized-route-row { padding: 7px 0; border-top: 1px solid #e1e8f1; margin-top: 7px; font-size: 12px; line-height: 1.7; }
+.parking-evidence-editor { padding: 9px 12px; border: 1px solid #dce5f0; border-radius: 10px; font-size: 12px; margin: 8px 0; }
+.parking-evidence-editor summary { cursor: pointer; line-height: 1.7; }
+.parking-evidence-editor form { display: grid; gap: 8px; padding-top: 8px; }
+.parking-evidence-editor label { display: grid; gap: 4px; }
+.parking-evidence-editor input, .parking-evidence-editor select { min-height: 36px; width: 100%; border: 1px solid #cbd7e6; border-radius: 7px; padding: 6px 8px; }
+.parking-evidence-editor small { color: #52677e; line-height: 1.6; }
+.personalized-summary { padding: 10px 12px; margin-bottom: 10px; border-radius: 10px; background: #f2f6ff; font-size: 12px; line-height: 1.7; }
+.commute-verification-gate { display: grid; gap: 10px; padding: 15px; margin: 14px 0; border: 1px solid #cbdaf2; border-radius: 12px; background: #f3f7ff; }
+.commute-verification-gate[hidden] { display: none; }
+.commute-verification-gate strong { font-size: 14px; color: #194bbb; }
+.commute-verification-gate p, .commute-verification-gate small { margin: 0; font-size: 12px; line-height: 1.7; color: #52677e; overflow-wrap: anywhere; }
+.hh-app .commute-verification-gate button { width: 100%; min-height: 42px; height: auto; white-space: normal; font-size: 12px; }
+.commute-verification-gate #commuteVerificationError { padding: 10px; border-radius: 8px; color: #8a3b22; background: #fff1e9; }
+.hh-v3 #recommendationResultPanel:not([data-decision-tab=candidates]) .commute-verification-gate { display: none; }

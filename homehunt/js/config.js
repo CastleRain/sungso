@@ -1,8 +1,23 @@
 const IS_LOCAL_RUNTIME = typeof window !== 'undefined'
   && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const LOCAL_MARKET_API = 'http://127.0.0.1:8787/api';
+// Set only after the authenticated API is deployed and verified. GitHub Pages
+// can already use Firebase Auth + private snapshots with this value empty.
+const CLOUD_API_BASE_URL = '';
+const ACTIVE_MARKET_API = IS_LOCAL_RUNTIME ? LOCAL_MARKET_API : CLOUD_API_BASE_URL;
 
 export const APP_CONFIG = Object.freeze({
+  isLocalRuntime: IS_LOCAL_RUNTIME,
+  cloudApiBaseUrl: CLOUD_API_BASE_URL,
+  cloudStorageEnabled: true,
+  firebaseConfig: Object.freeze({
+    apiKey: 'AIzaSyBz-P5ycMAjYZBV7hkcZDrmq28EAw7Hsp8',
+    authDomain: 'sungso-358cb.firebaseapp.com',
+    projectId: 'sungso-358cb',
+    storageBucket: 'sungso-358cb.firebasestorage.app',
+    messagingSenderId: '143797950443',
+    appId: '1:143797950443:web:95b0f616246d84aae3bae',
+  }),
   naverMapClientId: 'jjk1t3dw7m',
   marketSummaryUrl: './data/market-summary.json',
   apartmentHistoryStaticUrl: './data/apartment-history.json',
@@ -11,27 +26,27 @@ export const APP_CONFIG = Object.freeze({
   lawDistrictsUrl: './data/law-districts.json',
   supplyStaticUrl: './data/home-supply.json',
   supplyFeedUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/supply` : './data/home-supply.json',
-  apartmentHistoryUrl: IS_LOCAL_RUNTIME
-    ? `${LOCAL_MARKET_API}/apartment-history`
+  apartmentHistoryUrl: ACTIVE_MARKET_API
+    ? `${ACTIVE_MARKET_API}/apartment-history`
     : 'https://us-central1-sungso-358cb.cloudfunctions.net/apartmentHistory',
-  localMarketHealthUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/health` : '',
+  localMarketHealthUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/health` : '',
   localMarketConfigUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/config` : '',
-  recommendationUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/recommendations` : '',
-  commuteUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/commute` : '',
-  commuteBatchUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/commute/batch` : '',
-  commuteQuotaUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/commute/quota` : '',
-  placeSearchUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/place-search` : '',
-  localMarketEnabled: IS_LOCAL_RUNTIME,
+  recommendationUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/recommendations` : '',
+  commuteUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/commute` : '',
+  commuteBatchUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/commute/batch` : '',
+  commuteQuotaUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/commute/quota` : '',
+  placeSearchUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/place-search` : '',
+  localMarketEnabled: Boolean(ACTIVE_MARKET_API),
   apartmentHistoryMonths: 60,
   // The endpoint URL is kept for deployment, but requests stay off until the
   // Firebase Function and its secret are actually deployed. This prevents a
   // missing CORS response from being misreported as a user's network failure.
-  apartmentHistoryEnabled: IS_LOCAL_RUNTIME,
+  apartmentHistoryEnabled: Boolean(ACTIVE_MARKET_API),
   // UI and localhost API evolve independently. Keep appVersion as a backwards
   // compatible alias for code that still reads the API contract version.
-  uiVersion: '4.2.1',
-  localApiContractVersion: '2.5.1',
-  appVersion: '2.5.1',
+  uiVersion: '4.4.0',
+  localApiContractVersion: '2.6.3',
+  appVersion: '2.6.3',
 });
 
 export const REGIONS = Object.freeze([

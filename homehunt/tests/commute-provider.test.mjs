@@ -41,6 +41,11 @@ function jsonResponse(payload, { ok = true, status = 200 } = {}) {
   };
 }
 
+// Preserve the original public fields while allowing additive route evidence.
+function assertLegacyRouteFields(actual, expected) {
+  assert.deepEqual(Object.fromEntries(Object.keys(expected).map(key => [key, actual[key]])), expected);
+}
+
 function tmapPayload() {
   return {
     metaData: {
@@ -167,7 +172,7 @@ test('validates TMAP count, date-time, and credentials before a request can be s
 });
 
 test('normalizes TMAP seconds, walking, transfers, distance, and fare', () => {
-  assert.deepEqual(normalizeTmapTransitSummary(tmapPayload()), {
+  assertLegacyRouteFields(normalizeTmapTransitSummary(tmapPayload()), {
     provider: 'tmap-transit',
     mode: 'transit',
     verified: true,
@@ -186,7 +191,7 @@ test('normalizes TMAP seconds, walking, transfers, distance, and fare', () => {
 });
 
 test('returns an explicitly unavailable TMAP result instead of inventing a commute time', () => {
-  assert.deepEqual(
+  assertLegacyRouteFields(
     normalizeTmapTransitSummary({ metaData: { plan: { error: { id: '11' } } } }),
     {
       provider: 'tmap-transit',
@@ -221,7 +226,7 @@ test('builds Kakao public transit GET with WGS84 coordinates and the REST key on
 });
 
 test('selects the fastest Kakao route and normalizes transfer, fare, and summed walking steps', () => {
-  assert.deepEqual(normalizeKakaoPublicTransit(kakaoPayload()), {
+  assertLegacyRouteFields(normalizeKakaoPublicTransit(kakaoPayload()), {
     provider: 'kakao-transit',
     mode: 'transit',
     verified: true,
@@ -244,7 +249,7 @@ test('selects the fastest Kakao route and normalizes transfer, fare, and summed 
 });
 
 test('returns an explicitly unavailable Kakao result when no usable route exists', () => {
-  assert.deepEqual(normalizeKakaoPublicTransit({ status: 'NO_ROUTE', routes: [] }), {
+  assertLegacyRouteFields(normalizeKakaoPublicTransit({ status: 'NO_ROUTE', routes: [] }), {
     provider: 'kakao-transit',
     mode: 'transit',
     verified: false,
@@ -279,7 +284,7 @@ test('builds the documented NAVER Directions 5 GET with server credentials only 
 });
 
 test('normalizes NAVER Directions 5 millisecond duration and driving costs', () => {
-  assert.deepEqual(normalizeNaverDirections5(naverPayload()), {
+  assertLegacyRouteFields(normalizeNaverDirections5(naverPayload()), {
     provider: 'naver-directions5',
     mode: 'car',
     verified: true,
@@ -296,7 +301,7 @@ test('normalizes NAVER Directions 5 millisecond duration and driving costs', () 
 });
 
 test('returns an explicitly unavailable NAVER result when the provider reports no route', () => {
-  assert.deepEqual(normalizeNaverDirections5({ code: 1, message: 'no route' }), {
+  assertLegacyRouteFields(normalizeNaverDirections5({ code: 1, message: 'no route' }), {
     provider: 'naver-directions5',
     mode: 'car',
     verified: false,
@@ -363,7 +368,7 @@ test('TMAP fetch wrapper reserves only once and deduplicates identical cached re
   assert.equal(first.queriedAt, '2026-09-03T08:30:00.000Z');
 });
 
-test('Kakao fetch wrapper caches and deduplicates identical route requests', async () => {
+test('Kakao joins simultaneous exact requests but completed results are never cached or reused', async () => {
   let calls = 0;
   let reservations = 0;
   const timestamp = Date.UTC(2026, 8, 3, 8, 30);
@@ -400,6 +405,67 @@ test('Kakao fetch wrapper caches and deduplicates identical route requests', asy
   assert.strictEqual(first, second);
   assert.equal(first.durationMinutes, 46);
   assert.equal(first.queriedAt, '2026-09-03T08:30:00.000Z');
+  assert.equal(cache.size, 0);
+  assert.equal(cache.inflight.size, 0);
+  await fetchKakaoPublicTransit({ ...params, searchDateTime: '202609081730', origin: { ...ORIGIN, label: 'renamed house' },
+    destination: { ...DESTINATION, label: 'renamed company', weightPercent: 90 }, restApiKey: 'replacement-fixture-key' }, {
+    cache, now: () => timestamp, fetchImpl: async () => { calls += 1; return jsonResponse(kakaoPayload()); },
+    beforeRequest: async () => { reservations += 1; },
+  });
+  assert.equal(calls, 2);
+  assert.equal(reservations, 2);
+  assert.equal(cache.size, 0);
+});
+
+test('Kakao ignores previously completed cache entries and shares only the exact pending provider request', async () => {
+  const cache = new MemoryTtlCache();
+  const key = createCommuteCacheKey({ provider: 'kakao-transit', origin: ORIGIN, destination: DESTINATION, option: 'publictraffic' });
+  cache.set(key, { verified: true, durationMinutes: 1 });
+  assert.equal(createCommuteCacheKey({ provider: 'kakao-transit', origin: { ...ORIGIN, label: 'house' }, destination: { ...DESTINATION, weightPercent: 10 }, searchDateTime: '202609071700', option: 'publictraffic' }), key);
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  let calls = 0;
+  const options = { cache, fetchImpl: async () => { calls += 1; await gate; return jsonResponse(kakaoPayload()); } };
+  const params = { origin: ORIGIN, destination: DESTINATION, restApiKey: TEST_KAKAO_KEY };
+  const first = fetchKakaoPublicTransit(params, options);
+  const same = fetchKakaoPublicTransit({ ...params, searchDateTime: '202609090900', destination: { ...DESTINATION, label: 'changed label' } }, options);
+  const nearby = fetchKakaoPublicTransit({ ...params, origin: { ...ORIGIN, lat: ORIGIN.lat + .0001 } }, options);
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(calls, 2, 'a different origin must never inherit the first house route');
+  release();
+  const results = await Promise.all([first, same, nearby]);
+  assert.strictEqual(results[0], results[1]);
+  assert.equal(results[0].durationMinutes, 46, 'a completed old memory value cannot answer a live Kakao request');
+  assert.equal(cache.inflight.size, 0);
+});
+
+test('key rotation detaches old pending requests without erasing valid caches or letting old completion delete a new flight', async () => {
+  for (const method of ['getOrJoin', 'getOrLoad']) {
+    const cache = new MemoryTtlCache();
+    cache.set('retained-tmap-route', { durationMinutes: 30 });
+    let releaseOld;
+    let releaseNew;
+    const oldGate = new Promise(resolve => { releaseOld = resolve; });
+    const newGate = new Promise(resolve => { releaseNew = resolve; });
+    let loads = 0;
+    const old = cache[method]('request', async () => { loads += 1; await oldGate; return 'old credential response'; });
+    await Promise.resolve();
+    cache.clearInflight();
+    const current = cache[method]('request', async () => { loads += 1; await newGate; return 'new credential response'; });
+    await Promise.resolve();
+    releaseOld();
+    assert.equal(await old, 'old credential response');
+    assert.equal(cache.hasPending('request'), true);
+    assert.equal(cache.get('request'), undefined);
+    assert.deepEqual(cache.get('retained-tmap-route'), { durationMinutes: 30 });
+    const joined = cache[method]('request', () => { throw new Error('must join current credential request'); });
+    releaseNew();
+    assert.deepEqual(await Promise.all([current, joined]), ['new credential response', 'new credential response']);
+    assert.equal(loads, 2);
+    assert.equal(cache.hasPending('request'), false);
+    assert.equal(cache.get('request'), method === 'getOrLoad' ? 'new credential response' : undefined);
+  }
 });
 
 test('Kakao ledger defaults to 1,000 calls, persists counts only, and blocks before overflow', async () => {

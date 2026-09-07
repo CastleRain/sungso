@@ -1,5 +1,7 @@
 # HomeHunt 배포 방법과 공개 기능 범위
 
+> 2026-09-08: Google 로그인·무료 Firestore 개인 백업과 별도 검색 서버 코드를 추가했다. 현재 설정, 저장 정책, Firebase/Vercel 선택과 후속 배포 명령은 [클라우드 배포 문서](firebase-cloud.md)를 우선 참고한다. 아래 4.2.1 공개 검증은 이전 배포 이력이다.
+
 ## 현재 배포 경로
 
 - 저장소: [CastleRain/sungso](https://github.com/CastleRain/sungso)

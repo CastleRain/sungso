@@ -11,12 +11,15 @@ import {
 } from '../js/recommendation-core.mjs';
 import {
   KakaoDailyLedger,
+  CommuteProviderError,
   MemoryTtlCache,
   TmapDailyLedger,
+  TMAP_TRANSIT_CACHE_OPTION,
   createCommuteCacheKey,
   fetchKakaoPublicTransit,
   fetchNaverDirections5,
   fetchTmapTransitSummary,
+  sanitizeProviderErrorDetails,
 } from './commute-provider.mjs';
 import { fetchNaverLocalSearch } from './naver-local-search.mjs';
 import { connectedHistoryMonthLoader } from './history-request-lifecycle.mjs';
@@ -69,6 +72,7 @@ const TMAP_DAILY_LIMIT = parseIntegerSetting(process.env.TMAP_DAILY_LIMIT, { fal
 const KAKAO_DAILY_LIMIT = parseIntegerSetting(process.env.KAKAO_DAILY_LIMIT, { fallback: 1_000, min: 0, max: 1_000_000 });
 const TRANSIT_CONCURRENCY = parseIntegerSetting(process.env.TRANSIT_CONCURRENCY, { fallback: 2, min: 1, max: 10 });
 const TRANSIT_CACHE_TTL_MS = TRANSIT_CACHE_HOURS * 60 * 60 * 1000;
+const KAKAO_UPSTREAM_CALLS_PER_BATCH = 30;
 
 let serviceKey = String(process.env.MOLIT_SERVICE_KEY || '').trim();
 let serviceKeySource = serviceKey ? 'environment' : 'none';
@@ -98,12 +102,13 @@ const providerDiagnostics = {
   placeSearch: null,
 };
 
-function recordProviderDiagnostic(target, { state = 'reachable', reasonCode = null, httpStatus = null } = {}) {
+function recordProviderDiagnostic(target, { state = 'reachable', reasonCode = null, httpStatus = null, providerErrorCode = null, providerErrorCategory = null } = {}) {
   const value = {
     state,
     reasonCode: reasonCode ? String(reasonCode) : null,
     httpStatus: httpStatus !== null && Number.isFinite(Number(httpStatus)) ? Number(httpStatus) : null,
     checkedAt: new Date().toISOString(),
+    ...sanitizeProviderErrorDetails(target === 'tmap' ? 'tmap-transit' : target, { code: providerErrorCode, category: providerErrorCategory }),
   };
   if (target === 'kakao' || target === 'tmap') providerDiagnostics.transit[target] = value;
   else providerDiagnostics[target] = value;
@@ -715,11 +720,34 @@ function failedRoute(provider, mode, error) {
     reasonCode: error?.code || 'PROVIDER_ERROR',
     httpStatus: error?.httpStatus !== null && error?.httpStatus !== undefined && Number.isFinite(Number(error.httpStatus)) ? Number(error.httpStatus) : null,
     durationMinutes: null,
+    ...sanitizeProviderErrorDetails(provider, { code: error?.providerErrorCode, category: error?.providerErrorCategory }),
   };
 }
 
-async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime, transitProvider = selectedTransitProvider() }) {
+function createTransitBatchContext(maximumCalls) {
+  return { maximumCalls, actualTransitCalls: 0, aborted: false, queue: Promise.resolve(), transitRequests: new Map() };
+}
+
+async function reserveTransitUpstreamCall(ledger, batchContext) {
+  if (!batchContext) return ledger.reserve(1);
+  const pending = batchContext.queue.then(async () => {
+    if (batchContext.aborted) throw new CommuteProviderError('Remaining batch requests were stopped', { code: 'BATCH_ABORTED' });
+    if (batchContext.actualTransitCalls >= batchContext.maximumCalls) {
+      throw new CommuteProviderError('Batch upstream call limit reached', { code: 'BATCH_LIMIT' });
+    }
+    const quota = await ledger.reserve(1);
+    // Count only this batch's cache loader immediately before its fetch; a
+    // global ledger delta would incorrectly include concurrent other batches.
+    batchContext.actualTransitCalls += 1;
+    return quota;
+  });
+  batchContext.queue = pending.catch(() => {});
+  return pending;
+}
+
+async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime, transitProvider = selectedTransitProvider(), batchContext = null }) {
   const routes = [];
+  if (batchContext?.aborted) return modes.map(mode => failedRoute(mode === 'transit' ? `${transitProvider}-transit` : 'naver-directions5', mode, { code: 'BATCH_ABORTED' }));
   if (modes.includes('transit')) {
     if (transitProvider === 'kakao' && !kakaoRestApiKey) {
       routes.push(notConfiguredRoute('kakao-transit', 'transit'));
@@ -727,14 +755,32 @@ async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime
       routes.push(notConfiguredRoute('tmap-transit', 'transit'));
     } else {
       try {
-        const route = await transitGate(() => (
+        const requestGate = action => transitGate(async () => {
+          try {
+            const value = await action();
+            if (batchContext && !value?.verified && !/(?:^|_)NO_ROUTE$/.test(String(value?.reasonCode || ''))) batchContext.aborted = true;
+            return value;
+          } catch (error) {
+            if (batchContext) batchContext.aborted = true;
+            throw error;
+          }
+        });
+        // Register singleflight before entering the concurrency queue, so
+        // preflight and overlapping batches can see pending exact requests.
+        const route = await (
           transitProvider === 'kakao'
             ? fetchKakaoPublicTransit(
               { origin, destination, restApiKey: kakaoRestApiKey },
               {
-                cache: transitCache,
-                cacheTtlMs: TRANSIT_CACHE_TTL_MS,
-                beforeRequest: () => kakaoLedger.reserve(1),
+                // A single HTTP response can contain the same transit request
+                // under different destination IDs or requested mode sets. Its
+                // Promise lives only until this batch response is assembled.
+                cache: batchContext ? { getOrJoin(key, loader) {
+                  if (!batchContext.transitRequests.has(key)) batchContext.transitRequests.set(key, transitCache.getOrJoin(key, loader));
+                  return batchContext.transitRequests.get(key);
+                } } : transitCache,
+                requestGate,
+                beforeRequest: () => reserveTransitUpstreamCall(kakaoLedger, batchContext),
               },
             )
             : fetchTmapTransitSummary(
@@ -742,27 +788,33 @@ async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime
               {
                 cache: transitCache,
                 cacheTtlMs: TRANSIT_CACHE_TTL_MS,
-                beforeRequest: () => tmapLedger.reserve(1),
+                requestGate,
+                beforeRequest: () => reserveTransitUpstreamCall(tmapLedger, batchContext),
               },
             )
-        ));
+        );
         recordProviderDiagnostic(transitProvider, {
           state: route?.verified ? 'verified' : 'reachable',
           reasonCode: route?.reasonCode || null,
         });
-        routes.push(route);
+        routes.push(...(route.routes?.length ? route.routes.map(item => ({ ...item, queriedAt: route.queriedAt })) : [route]));
       } catch (error) {
-        recordProviderDiagnostic(transitProvider, {
+        if (batchContext) batchContext.aborted = true;
+        if (error?.code !== 'BATCH_ABORTED') recordProviderDiagnostic(transitProvider, {
           state: 'error',
           reasonCode: error?.code || 'PROVIDER_ERROR',
           httpStatus: error?.httpStatus ?? null,
+          providerErrorCode: error?.providerErrorCode,
+          providerErrorCategory: error?.providerErrorCategory,
         });
         routes.push(failedRoute(`${transitProvider}-transit`, 'transit', error));
       }
     }
   }
   if (modes.includes('car')) {
-    if (!naverMapsClientId || !naverMapsClientSecret) {
+    if (batchContext?.aborted) {
+      routes.push(failedRoute('naver-directions5', 'car', { code: 'BATCH_ABORTED' }));
+    } else if (!naverMapsClientId || !naverMapsClientSecret) {
       routes.push({ provider: 'naver-directions5', mode: 'car', verified: false, status: 'not-configured', durationMinutes: null });
     } else {
       try {
@@ -774,7 +826,7 @@ async function resolveCommuteRoutes({ origin, destination, modes, searchDateTime
           state: route?.verified ? 'verified' : 'reachable',
           reasonCode: route?.reasonCode || null,
         });
-        routes.push(route);
+        routes.push(...(route.routes?.length ? route.routes.map(item => ({ ...item, queriedAt: route.queriedAt })) : [route]));
       } catch (error) {
         recordProviderDiagnostic('car', {
           state: 'error',
@@ -799,7 +851,7 @@ function commuteResponse({ routes, departureTime, searchDateTime, transitProvide
       car: Boolean(naverMapsClientId && naverMapsClientSecret),
       transitProvider,
     },
-    cachePolicy: `transit-memory-only-${TRANSIT_CACHE_HOURS}-hours; car-memory-only-20-minutes`,
+    cachePolicy: `kakao-live-only/current-view; tmap-memory-only-${TRANSIT_CACHE_HOURS}-hours; car-memory-only-20-minutes`,
   };
 }
 
@@ -839,9 +891,10 @@ async function preflightBatchTransit(uniquePairs, maxTransitCalls, provider = se
         origin,
         destination,
         searchDateTime: provider === 'tmap' ? searchDateTime : '',
-        option: provider === 'tmap' ? 'summary' : 'publictraffic',
+        option: provider === 'tmap' ? TMAP_TRANSIT_CACHE_OPTION : 'publictraffic',
       });
-      if (!transitCache.hasOrPending(key)) missingKeys.add(key);
+      const reusable = provider === 'kakao' ? transitCache.hasPending(key) : transitCache.hasOrPending(key);
+      if (!reusable) missingKeys.add(key);
     });
   }
   const misses = missingKeys.size;
@@ -851,6 +904,7 @@ async function preflightBatchTransit(uniquePairs, maxTransitCalls, provider = se
     requiredUpstreamCalls: misses,
     maxTransitCalls,
     clientLimitAllowed: misses <= maxTransitCalls,
+    batchLimitAllowed: provider !== 'kakao' || misses <= KAKAO_UPSTREAM_CALLS_PER_BATCH,
     providerLimitAllowed: !quota || misses <= quota.remaining,
     quota,
   };
@@ -874,8 +928,8 @@ async function handleCommuteBatch(req, res) {
   if (!Array.isArray(body.origins) || !body.origins.length || body.origins.length > 10) {
     return json(res, 400, errorPayload('INVALID_ORIGINS', '출발지는 1~10개까지 입력해주세요.'));
   }
-  if (!Array.isArray(body.destinations) || !body.destinations.length || body.destinations.length > 4) {
-    return json(res, 400, errorPayload('INVALID_DESTINATIONS', '도착지는 1~4개까지 입력해주세요.'));
+  if (!Array.isArray(body.destinations) || !body.destinations.length) {
+    return json(res, 400, errorPayload('INVALID_DESTINATIONS', '도착지를 하나 이상 입력해주세요.'));
   }
   const cleanId = (value) => String(value ?? '').normalize('NFKC').trim();
   const validId = (value) => value.length >= 1 && value.length <= 128 && !/[\u0000-\u001f]/.test(value);
@@ -941,11 +995,12 @@ async function handleCommuteBatch(req, res) {
       reasonCode: error?.code || 'QUOTA_LEDGER_ERROR',
     }));
   }
-  if (!preflight.clientLimitAllowed) {
+  if (!preflight.clientLimitAllowed || !preflight.batchLimitAllowed) {
     return json(res, 429, errorPayload('TRANSIT_PREFLIGHT_LIMIT', '이 요청의 대중교통 원호출 안전 상한을 넘었습니다.', {
       provider: preflight.provider,
       requiredTransitCalls: preflight.requiredUpstreamCalls,
       maxTransitCalls,
+      maxUpstreamCallsPerBatch: transitProvider === 'kakao' ? KAKAO_UPSTREAM_CALLS_PER_BATCH : maxTransitCalls,
       quota: preflight.quota,
     }));
   }
@@ -959,6 +1014,7 @@ async function handleCommuteBatch(req, res) {
     }));
   }
 
+  const batchContext = createTransitBatchContext(Math.min(maxTransitCalls, transitProvider === 'kakao' ? KAKAO_UPSTREAM_CALLS_PER_BATCH : maxTransitCalls));
   const uniqueResults = await mapWithConcurrency(uniquePairs, TRANSIT_CONCURRENCY, async (pair) => ({
     identity: pair.identity,
     routes: await resolveCommuteRoutes({
@@ -967,6 +1023,7 @@ async function handleCommuteBatch(req, res) {
       modes: pair.modes,
       searchDateTime: pair.searchDateTime,
       transitProvider,
+      batchContext,
     }),
     departureTime: pair.departureTime,
   }));
@@ -989,6 +1046,9 @@ async function handleCommuteBatch(req, res) {
     uniquePairCount: uniquePairs.length,
     deduplicatedPairCount: pairs.length - uniquePairs.length,
     requiredTransitCalls: preflight.requiredUpstreamCalls,
+    actualTransitCalls: batchContext.actualTransitCalls,
+    abortedPairCount: uniqueResults.filter(item => item.routes.some(route => route.reasonCode === 'BATCH_ABORTED')).length,
+    cachePolicy: transitProvider === 'kakao' ? 'live-only/current-view' : `memory-only-${TRANSIT_CACHE_HOURS}-hours`,
   });
 }
 
@@ -1091,7 +1151,9 @@ async function handler(req, res) {
           naverDirectionsConfigured: Boolean(naverMapsClientId && naverMapsClientSecret),
         },
         cache: {
-          transit: `memory-only-${TRANSIT_CACHE_HOURS}-hours`,
+          transit: selectedTransitProvider() === 'kakao' ? 'live-only/current-view' : `memory-only-${TRANSIT_CACHE_HOURS}-hours`,
+          kakao: 'live-only/current-view',
+          tmap: `memory-only-${TRANSIT_CACHE_HOURS}-hours`,
           car: 'memory-only-20-minutes',
         },
         diagnostics: {
@@ -1120,10 +1182,11 @@ async function handler(req, res) {
         commuteCandidatesPerSearch: 10,
         tmapDailyLimit: TMAP_DAILY_LIMIT,
         kakaoDailyLimit: KAKAO_DAILY_LIMIT,
+        kakaoUpstreamCallsPerBatch: KAKAO_UPSTREAM_CALLS_PER_BATCH,
         transitConcurrency: TRANSIT_CONCURRENCY,
         transitCacheHours: TRANSIT_CACHE_HOURS,
       },
-      version: '2.5.1',
+      version: '2.6.3',
     });
   }
   if (req.method === 'GET' && url.pathname === '/api/commute/quota') {
@@ -1169,10 +1232,12 @@ async function handler(req, res) {
       serviceKeySource = 'memory';
     }
     if (nextTmapKey) {
+      if (nextTmapKey !== tmapAppKey) transitCache.clearInflight();
       tmapAppKey = nextTmapKey;
       providerDiagnostics.transit.tmap = null;
     }
     if (nextKakaoKey) {
+      if (nextKakaoKey !== kakaoRestApiKey) transitCache.clearInflight();
       kakaoRestApiKey = nextKakaoKey;
       providerDiagnostics.transit.kakao = null;
     }
@@ -1187,8 +1252,9 @@ async function handler(req, res) {
       naverLocalSearchClientSecret = nextNaverLocalSecret;
       providerDiagnostics.placeSearch = null;
     }
-    commuteCache.clear();
-    transitCache.clear();
+    // Key/provider changes never reset the persisted usage ledgers. Keep
+    // valid TMAP/NAVER cache entries; a changed transit key detaches only old
+    // pending requests. Kakao completed responses are not cached at all.
     placeSearchCache.clear();
     return json(res, 200, {
       ok: true,

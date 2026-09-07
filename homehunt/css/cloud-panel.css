@@ -1,0 +1,44 @@
+.cloud-panel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--hh-border, #dce3ed);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--hh-text, #17263c);
+}
+.cloud-panel h3, .cloud-panel p { margin: 0; overflow-wrap: anywhere; }
+.cloud-panel h3 { font-size: 17px; }
+.cloud-panel-description, .cloud-panel-account { font-size: 14px; line-height: 1.6; }
+.cloud-panel-actions { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.cloud-panel-actions button {
+  flex: 0 1 auto;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  padding: 10px 14px;
+  border: 1px solid #c9d6e9;
+  border-radius: 10px;
+  background: #f5f8ff;
+  color: #1e4fbb;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.cloud-panel-actions button:disabled { opacity: .5; cursor: default; }
+.cloud-panel-actions button:focus-visible { outline: 3px solid #285dff; outline-offset: 2px; }
+.cloud-panel-actions [data-cloud-action="save"] { background: #2457f5; color: #fff; border-color: #2457f5; }
+.cloud-panel-actions [hidden] { display: none; }
+.cloud-panel-status { min-height: 1.5em; font-size: 13px; line-height: 1.6; color: #27528b; }
+.cloud-panel-note { font-size: 12px; line-height: 1.7; color: #607086; }
+.cloud-panel-replacement { display: grid; gap: 12px; min-width: 0; padding: 14px; border: 1px solid #bdd0f1; border-radius: 12px; background: #f5f8ff; }
+.cloud-panel-replacement[hidden] { display: none; }
+.cloud-panel-replacement-summary { font-size: 13px; line-height: 1.7; }
+.cloud-panel-replacement [data-cloud-action="replace"] { color: #fff; background: #2457f5; border-color: #2457f5; }
+@media (max-width: 540px) {
+  .cloud-panel { padding: 16px; }
+  .cloud-panel-actions { flex-direction: column; }
+  .cloud-panel-actions button { width: 100%; }
+}

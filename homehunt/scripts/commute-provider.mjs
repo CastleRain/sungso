@@ -6,6 +6,10 @@ const HOUR_MS = 60 * MINUTE_MS;
 
 export const MAX_MEMORY_CACHE_TTL_MS = (24 * HOUR_MS) - 1;
 export const TMAP_TRANSIT_SUMMARY_ENDPOINT = 'https://apis.openapi.sk.com/transit/routes/sub';
+// The summary API accepts count 1..10 in one HTTP request:
+// https://transit.tmapmobility.com/docs/routes/sub
+export const TMAP_TRANSIT_DEFAULT_COUNT = 3;
+export const TMAP_TRANSIT_CACHE_OPTION = `summary:count=${TMAP_TRANSIT_DEFAULT_COUNT}`;
 export const KAKAO_PUBLIC_TRANSIT_ENDPOINT = 'https://dapi.kakao.com/v2/routing/publictraffic';
 export const NAVER_DIRECTIONS5_ENDPOINT = 'https://maps.apigw.ntruss.com/map-direction/v1/driving';
 export const TRANSIT_PROVIDER_VALUES = Object.freeze(['auto', 'kakao', 'tmap']);
@@ -20,12 +24,15 @@ const NAVER_ROUTE_OPTIONS = new Set([
 ]);
 
 export class CommuteProviderError extends Error {
-  constructor(message, { provider, code = 'PROVIDER_ERROR', httpStatus = null, cause } = {}) {
+  constructor(message, { provider, code = 'PROVIDER_ERROR', httpStatus = null, providerErrorCode = null, providerErrorCategory = null, cause } = {}) {
     super(message, cause === undefined ? undefined : { cause });
     this.name = 'CommuteProviderError';
     this.provider = provider || 'unknown';
     this.code = code;
     this.httpStatus = httpStatus;
+    const safeDetails = sanitizeProviderErrorDetails(provider, { code: providerErrorCode, category: providerErrorCategory });
+    this.providerErrorCode = safeDetails.providerErrorCode;
+    this.providerErrorCategory = safeDetails.providerErrorCategory;
   }
 }
 
@@ -55,9 +62,50 @@ function requiredKey(value, label) {
 }
 
 function asNonNegativeNumber(value) {
-  if (value === null || value === undefined || value === '') return null;
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  if (typeof value === 'string' && !value.trim()) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function countOrNull(value) {
+  const number = asNonNegativeNumber(value);
+  return Number.isSafeInteger(number) ? number : null;
+}
+
+function minutesOrNull(seconds) {
+  return seconds === null ? null : Math.ceil(seconds / 60);
+}
+
+function transitLegMetrics(legs, { mode, time, distance, requireWalkingStep = false }) {
+  const rows = Array.isArray(legs) ? legs : [];
+  const typed = rows.map(leg => ({ mode: String(mode(leg) || '').toUpperCase().replace(/^WALKING$/, 'WALK'),
+    seconds: asNonNegativeNumber(time(leg)), distance: asNonNegativeNumber(distance(leg)) }));
+  const completeTypes = typed.length > 0 && typed.every(leg => ['WALK', 'BUS', 'SUBWAY'].includes(leg.mode));
+  const sum = (type, field) => {
+    if (!completeTypes) return null;
+    const matching = typed.filter(leg => leg.mode === type);
+    // An omitted walking stage is not an explicit zero. Kakao does not
+    // guarantee that its returned steps include every access/egress walk.
+    if (requireWalkingStep && type === 'WALK' && !matching.length) return null;
+    return matching.every(leg => leg[field] !== null) ? matching.reduce((total, leg) => total + leg[field], 0) : null;
+  };
+  const busLegCount = completeTypes ? typed.filter(leg => leg.mode === 'BUS').length : null;
+  const subwayLegCount = completeTypes ? typed.filter(leg => leg.mode === 'SUBWAY').length : null;
+  const busSeconds = sum('BUS', 'seconds');
+  const subwaySeconds = sum('SUBWAY', 'seconds');
+  return {
+    walkSeconds: sum('WALK', 'seconds'), walkDistanceMeters: sum('WALK', 'distance'),
+    busMinutes: minutesOrNull(busSeconds), subwayMinutes: minutesOrNull(subwaySeconds),
+    busSeconds, subwaySeconds, busLegCount, subwayLegCount,
+    transitComposition: !completeTypes ? 'unknown' : busLegCount && subwayLegCount ? 'mixed' : busLegCount ? 'bus' : subwayLegCount ? 'subway' : 'unknown',
+  };
+}
+
+function unknownTransitMetrics() {
+  return { walkingMinutes: null, walkMinutes: null, transferCount: null,
+    busMinutes: null, subwayMinutes: null, busSeconds: null, subwaySeconds: null,
+    busLegCount: null, subwayLegCount: null, transitComposition: 'unknown' };
 }
 
 function compactCoordinate(value) {
@@ -73,7 +121,35 @@ function queriedAt(now) {
   return new Date(Number.isFinite(timestamp) ? timestamp : Date.now()).toISOString();
 }
 
+// Retain only exact machine codes, never arbitrary messages, URLs or response
+// bodies. A 403 by itself does not prove that a paid subscription is missing.
+const TMAP_ERROR_CODES = Object.freeze({
+  INVALID_API_KEY: 'TMAP_INVALID_API_KEY',
+  API_KEY_EXPIRED: 'TMAP_INVALID_API_KEY',
+  UNAUTHORIZED: 'TMAP_ACCESS_DENIED',
+  FORBIDDEN: 'TMAP_ACCESS_DENIED',
+  ACCESS_DENIED: 'TMAP_ACCESS_DENIED',
+  PERMISSION_DENIED: 'TMAP_ACCESS_DENIED',
+  API_NOT_SUBSCRIBED: 'TMAP_SUBSCRIPTION_REQUIRED',
+  SUBSCRIPTION_REQUIRED: 'TMAP_SUBSCRIPTION_REQUIRED',
+  QUOTA_EXCEEDED: 'TMAP_PROVIDER_LIMIT',
+  RATE_LIMIT_EXCEEDED: 'TMAP_PROVIDER_LIMIT',
+});
+
+export function sanitizeProviderErrorDetails(provider, details = {}) {
+  if (provider !== 'tmap-transit') return { providerErrorCode: null, providerErrorCategory: null };
+  return {
+    providerErrorCode: typeof details?.code === 'string' && Object.hasOwn(TMAP_ERROR_CODES, details.code) ? details.code : null,
+    providerErrorCategory: details?.category === 'gw' ? 'gw' : null,
+  };
+}
+
 function safeHttpErrorCode(provider, httpStatus, payload) {
+  if (provider === 'tmap-transit') {
+    const { providerErrorCode } = sanitizeProviderErrorDetails(provider, payload?.error);
+    if ([401, 403, 429].includes(httpStatus) && providerErrorCode) return TMAP_ERROR_CODES[providerErrorCode];
+    return 'HTTP_ERROR';
+  }
   if (provider !== 'kakao-transit' || httpStatus !== 403 || !payload || typeof payload !== 'object') {
     return 'HTTP_ERROR';
   }
@@ -238,6 +314,7 @@ export class MemoryTtlCache {
     this.now = now;
     this.entries = new Map();
     this.inflight = new Map();
+    this.inflightGeneration = 0;
   }
 
   get(key) {
@@ -267,6 +344,11 @@ export class MemoryTtlCache {
 
   clear() {
     this.entries.clear();
+    this.clearInflight();
+  }
+
+  clearInflight() {
+    this.inflightGeneration += 1;
     this.inflight.clear();
   }
 
@@ -279,16 +361,31 @@ export class MemoryTtlCache {
     return this.get(key) !== undefined || this.inflight.has(key);
   }
 
+  hasPending(key) { return this.inflight.has(key); }
+
+  // Live-only providers may join an ongoing request but may never read or
+  // write a completed response cache. Settling removes the shared promise.
+  getOrJoin(key, loader) {
+    if (typeof loader !== 'function') throw new TypeError('loader must be a function');
+    if (this.inflight.has(key)) return this.inflight.get(key);
+    const pending = Promise.resolve().then(loader).finally(() => {
+      if (this.inflight.get(key) === pending) this.inflight.delete(key);
+    });
+    this.inflight.set(key, pending);
+    return pending;
+  }
+
   async getOrLoad(key, loader, { ttlMs = this.ttlMs } = {}) {
     if (typeof loader !== 'function') throw new TypeError('loader must be a function');
     const cached = this.get(key);
     if (cached !== undefined) return cached;
     if (this.inflight.has(key)) return this.inflight.get(key);
 
+    const generation = this.inflightGeneration;
     const pending = Promise.resolve()
       .then(loader)
-      .then((value) => this.set(key, value, { ttlMs }))
-      .finally(() => this.inflight.delete(key));
+      .then((value) => generation === this.inflightGeneration ? this.set(key, value, { ttlMs }) : value)
+      .finally(() => { if (this.inflight.get(key) === pending) this.inflight.delete(key); });
     this.inflight.set(key, pending);
     return pending;
   }
@@ -303,7 +400,9 @@ export function createCommuteCacheKey({ provider, origin, destination, searchDat
     compactCoordinate(start.lat),
     compactCoordinate(goal.lng),
     compactCoordinate(goal.lat),
-    String(searchDateTime || 'now'),
+    // Kakao publictraffic has no departure-time input. A UI date/time or label
+    // change cannot change this provider request or consume another call.
+    String(provider === 'kakao-transit' ? 'now' : searchDateTime || 'now'),
     String(option || ''),
   ].join('|');
 }
@@ -313,7 +412,7 @@ export function buildTmapTransitSummaryRequest({
   destination,
   appKey,
   searchDateTime,
-  count = 1,
+  count = TMAP_TRANSIT_DEFAULT_COUNT,
   language = 0,
   endpoint = TMAP_TRANSIT_SUMMARY_ENDPOINT,
 }) {
@@ -362,6 +461,8 @@ function unavailableResult(provider, mode, reasonCode) {
     reasonCode,
     durationMinutes: null,
     distanceMeters: null,
+    ...unknownTransitMetrics(),
+    routes: [],
   };
 }
 
@@ -374,34 +475,30 @@ export function normalizeTmapTransitSummary(payload) {
     return unavailableResult('tmap-transit', 'transit', providerCode ? `TMAP_${providerCode}` : 'NO_ROUTE');
   }
 
-  const route = itineraries[0];
-  const durationSeconds = asNonNegativeNumber(route?.totalTime);
-  if (durationSeconds === null) {
+  const routes = itineraries.flatMap((route, routeIndex) => {
+    const durationSeconds = asNonNegativeNumber(route?.totalTime);
+    if (durationSeconds === null) return [];
+    const legs = transitLegMetrics(route.legs, { mode: leg => leg?.mode, time: leg => leg?.sectionTime, distance: leg => leg?.distance });
+    const walkSeconds = asNonNegativeNumber(route.totalWalkTime) ?? legs.walkSeconds;
+    const pathType = countOrNull(route.pathType);
+    return [{
+      provider: 'tmap-transit', mode: 'transit', verified: true, status: 'verified', routeIndex,
+      durationMinutes: Math.ceil(durationSeconds / 60), durationSeconds,
+      distanceMeters: asNonNegativeNumber(route.totalDistance), ...legs,
+      walkingMinutes: minutesOrNull(walkSeconds), walkMinutes: minutesOrNull(walkSeconds), walkSeconds,
+      walkDistanceMeters: asNonNegativeNumber(route.totalWalkDistance) ?? legs.walkDistanceMeters,
+      transferCount: countOrNull(route.transferCount), fareWon: asNonNegativeNumber(route?.fare?.regular?.totalFare),
+      pathType, transitComposition: legs.transitComposition !== 'unknown' ? legs.transitComposition : ({ 1: 'subway', 2: 'bus', 3: 'mixed' }[pathType] || 'unknown'),
+      requestedAt: metadata?.requestParameters?.reqDttm ?? null,
+    }];
+  });
+  if (!routes.length) {
     throw new CommuteProviderError('TMAP response did not include a valid totalTime', {
       provider: 'tmap-transit',
       code: 'INVALID_RESPONSE',
     });
   }
-  const walkSeconds = asNonNegativeNumber(route.totalWalkTime);
-  const transferCount = asNonNegativeNumber(route.transferCount);
-  const fareWon = asNonNegativeNumber(route?.fare?.regular?.totalFare);
-
-  return {
-    provider: 'tmap-transit',
-    mode: 'transit',
-    verified: true,
-    status: 'verified',
-    durationMinutes: Math.ceil(durationSeconds / 60),
-    durationSeconds,
-    distanceMeters: asNonNegativeNumber(route.totalDistance),
-    walkMinutes: walkSeconds === null ? null : Math.ceil(walkSeconds / 60),
-    walkSeconds,
-    transferCount,
-    fareWon,
-    pathType: asNonNegativeNumber(route.pathType),
-    routeCount: itineraries.length,
-    requestedAt: metadata?.requestParameters?.reqDttm ?? null,
-  };
+  return { ...routes[0], routeCount: itineraries.length, validRouteCount: routes.length, routes };
 }
 
 export function buildKakaoPublicTransitRequest({
@@ -446,35 +543,36 @@ export function normalizeKakaoPublicTransit(payload) {
     .sort((left, right) => left.durationSeconds - right.durationSeconds || left.index - right.index);
   if (!validRoutes.length) return unavailableResult('kakao-transit', 'transit', 'NO_ROUTE');
 
-  const best = validRoutes[0].route;
-  const properties = best.properties || {};
-  const walkingSteps = (Array.isArray(best.steps) ? best.steps : [])
-    .map((step) => step?.properties)
-    .filter((step) => String(step?.type || '').toUpperCase() === 'WALKING');
-  const walkSeconds = walkingSteps.reduce((sum, step) => sum + (asNonNegativeNumber(step?.time) ?? 0), 0);
-  const walkDistanceMeters = walkingSteps.reduce((sum, step) => sum + (asNonNegativeNumber(step?.distance) ?? 0), 0);
-  const fare = properties.fare || {};
-
-  return {
-    provider: 'kakao-transit',
-    mode: 'transit',
-    verified: true,
-    status: 'verified',
-    durationMinutes: Math.ceil(validRoutes[0].durationSeconds / 60),
-    durationSeconds: validRoutes[0].durationSeconds,
-    distanceMeters: asNonNegativeNumber(properties.totalDistance),
-    walkMinutes: Math.ceil(walkSeconds / 60),
-    walkSeconds,
-    walkDistanceMeters,
-    transferCount: asNonNegativeNumber(properties.transfers),
-    fareWon: asNonNegativeNumber(fare.value),
-    fareMinWon: asNonNegativeNumber(fare.min),
-    fareMaxWon: asNonNegativeNumber(fare.max),
-    routeType: typeof properties.type === 'string' ? properties.type : null,
-    routeCount: routes.length,
-    landingUrl: typeof payload?.properties?.landingURL === 'string' ? payload.properties.landingURL : null,
-    timeBasis: 'provider-default-no-departure-parameter',
-  };
+  const normalized = validRoutes.map(({ route, index, durationSeconds }) => {
+    const properties = route.properties || {};
+    const legs = transitLegMetrics(route.steps, { mode: step => step?.properties?.type, time: step => step?.properties?.time, distance: step => step?.properties?.distance, requireWalkingStep: true });
+    const walkSeconds = legs.walkSeconds;
+    const fare = properties.fare || {};
+    return {
+      provider: 'kakao-transit',
+      mode: 'transit',
+      verified: true,
+      status: 'verified',
+      routeIndex: index,
+      durationMinutes: Math.ceil(durationSeconds / 60),
+      durationSeconds,
+      distanceMeters: asNonNegativeNumber(properties.totalDistance),
+      ...legs,
+      walkingMinutes: minutesOrNull(walkSeconds), walkMinutes: minutesOrNull(walkSeconds),
+      walkSeconds,
+      walkingTimeSource: walkSeconds === null ? 'unavailable' : 'reported-walking-steps',
+      transferCount: countOrNull(properties.transfers),
+      fareWon: asNonNegativeNumber(fare.value),
+      fareMinWon: asNonNegativeNumber(fare.min),
+      fareMaxWon: asNonNegativeNumber(fare.max),
+      routeType: typeof properties.type === 'string' ? properties.type : null,
+      transitComposition: legs.transitComposition !== 'unknown' ? legs.transitComposition
+        : ({ BUS: 'bus', SUBWAY: 'subway', BUS_AND_SUBWAY: 'mixed' }[String(properties.type || '').toUpperCase()] || 'unknown'),
+      landingUrl: typeof payload?.properties?.landingURL === 'string' ? payload.properties.landingURL : null,
+      timeBasis: 'provider-default-no-departure-parameter',
+    };
+  });
+  return { ...normalized[0], routeCount: routes.length, validRouteCount: normalized.length, routes: normalized };
 }
 
 export function buildNaverDirections5Request({
@@ -519,77 +617,78 @@ export function normalizeNaverDirections5(payload, { option = 'traoptimal' } = {
     );
   }
 
-  const requestedRoutes = payload?.route?.[option];
-  const fallbackRoutes = requestedRoutes || Object.values(payload?.route || {}).find(Array.isArray);
-  const summary = Array.isArray(fallbackRoutes) ? fallbackRoutes[0]?.summary : null;
-  const durationMilliseconds = asNonNegativeNumber(summary?.duration);
-  if (durationMilliseconds === null) {
+  const options = [option, ...Object.keys(payload?.route || {}).filter(key => key !== option && NAVER_ROUTE_OPTIONS.has(key)).sort()];
+  const routes = options.flatMap(routeOption => (Array.isArray(payload?.route?.[routeOption]) ? payload.route[routeOption] : []).flatMap((route, routeIndex) => {
+    const summary = route?.summary;
+    const durationMilliseconds = asNonNegativeNumber(summary?.duration);
+    return durationMilliseconds === null ? [] : [{
+      provider: 'naver-directions5', mode: 'car', verified: true, status: 'verified', routeOption, routeIndex,
+      durationMinutes: Math.ceil(durationMilliseconds / MINUTE_MS), durationMilliseconds,
+      distanceMeters: asNonNegativeNumber(summary.distance), ...unknownTransitMetrics(),
+      departureAt: summary.departureTime ?? payload.currentDateTime ?? null,
+      tollFareWon: asNonNegativeNumber(summary.tollFare), taxiFareWon: asNonNegativeNumber(summary.taxiFare), fuelPriceWon: asNonNegativeNumber(summary.fuelPrice),
+    }];
+  }));
+  if (!routes.length) {
     throw new CommuteProviderError('NAVER response did not include a valid route duration', {
       provider: 'naver-directions5',
       code: 'INVALID_RESPONSE',
     });
   }
 
-  return {
-    provider: 'naver-directions5',
-    mode: 'car',
-    verified: true,
-    status: 'verified',
-    routeOption: option,
-    durationMinutes: Math.ceil(durationMilliseconds / MINUTE_MS),
-    durationMilliseconds,
-    distanceMeters: asNonNegativeNumber(summary.distance),
-    departureAt: summary.departureTime ?? payload.currentDateTime ?? null,
-    tollFareWon: asNonNegativeNumber(summary.tollFare),
-    taxiFareWon: asNonNegativeNumber(summary.taxiFare),
-    fuelPriceWon: asNonNegativeNumber(summary.fuelPrice),
-  };
+  return { ...routes[0], routeCount: routes.length, validRouteCount: routes.length, routes };
 }
 
 async function requestJson(request, { fetchImpl, provider, timeoutMs = 15000 }) {
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
-  let response;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    response = await fetchImpl(request.url, { ...request.init, signal: request.init?.signal || controller.signal });
-  } catch (cause) {
-    throw new CommuteProviderError(`${provider} request failed`, {
-      provider,
-      code: cause?.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR',
-      cause,
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
-  if (!response || typeof response.json !== 'function') {
-    throw new CommuteProviderError(`${provider} returned an invalid HTTP response`, {
-      provider,
-      code: 'INVALID_HTTP_RESPONSE',
-    });
-  }
-  if (!response.ok) {
+  let timedOut = false;
+  const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+  const externalSignal = request.init?.signal;
+  const externalAbort = () => controller.abort();
+  externalSignal?.addEventListener('abort', externalAbort, { once: true });
+  if (externalSignal?.aborted) controller.abort();
+  let rejectAbort;
+  const aborted = new Promise((_, reject) => {
+    rejectAbort = () => reject(new CommuteProviderError(`${provider} request aborted`, { provider, code: timedOut ? 'TIMEOUT' : 'ABORTED' }));
+    controller.signal.addEventListener('abort', rejectAbort, { once: true });
+    if (controller.signal.aborted) rejectAbort();
+  });
+  const operation = async () => {
+    let response;
+    try {
+      response = await fetchImpl(request.url, { ...request.init, signal: controller.signal });
+    } catch (cause) {
+      throw new CommuteProviderError(`${provider} request failed`, { provider, code: cause?.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK_ERROR', cause });
+    }
+    if (!response || typeof response.json !== 'function') {
+      throw new CommuteProviderError(`${provider} returned an invalid HTTP response`, { provider, code: 'INVALID_HTTP_RESPONSE' });
+    }
     let payload = null;
     try {
       payload = await response.json();
-    } catch (_) {
-      // Provider error bodies are optional and never copied into our error.
+    } catch (cause) {
+      // Error bodies are optional; their contents never enter a client error.
+      if (response.ok) throw new CommuteProviderError(`${provider} returned invalid JSON`, { provider, code: 'INVALID_JSON', cause });
     }
-    const httpStatus = Number(response.status) || null;
-    throw new CommuteProviderError(`${provider} returned HTTP ${response.status}`, {
-      provider,
-      code: safeHttpErrorCode(provider, httpStatus, payload),
-      httpStatus,
-    });
-  }
+    if (!response.ok) {
+      const httpStatus = Number(response.status) || null;
+      throw new CommuteProviderError(`${provider} returned HTTP ${httpStatus}`, {
+        provider, code: safeHttpErrorCode(provider, httpStatus, payload), httpStatus,
+        ...sanitizeProviderErrorDetails(provider, payload?.error),
+      });
+    }
+    return payload;
+  };
   try {
-    return await response.json();
-  } catch (cause) {
-    throw new CommuteProviderError(`${provider} returned invalid JSON`, {
-      provider,
-      code: 'INVALID_JSON',
-      cause,
-    });
+    // The same deadline covers headers and JSON body parsing, including a body
+    // reader that fails to cooperate with abort. Never cache its late result.
+    if (controller.signal.aborted) return await aborted;
+    return await Promise.race([aborted, operation()]);
+  } finally {
+    clearTimeout(timeout);
+    controller.signal.removeEventListener('abort', rejectAbort);
+    externalSignal?.removeEventListener('abort', externalAbort);
   }
 }
 
@@ -599,6 +698,8 @@ export async function fetchTmapTransitSummary(params, {
   cacheTtlMs = MAX_MEMORY_CACHE_TTL_MS,
   now = Date.now,
   beforeRequest,
+  requestGate = action => action(),
+  timeoutMs = 15000,
 } = {}) {
   const request = buildTmapTransitSummaryRequest(params);
   const cacheKey = createCommuteCacheKey({
@@ -606,15 +707,15 @@ export async function fetchTmapTransitSummary(params, {
     origin: params.origin,
     destination: params.destination,
     searchDateTime: params.searchDateTime,
-    option: 'summary',
+    option: `summary:count=${Number(params.count ?? TMAP_TRANSIT_DEFAULT_COUNT)}`,
   });
-  const load = async () => {
+  const load = () => requestGate(async () => {
     if (typeof beforeRequest === 'function') await beforeRequest();
     return {
-      ...normalizeTmapTransitSummary(await requestJson(request, { fetchImpl, provider: 'tmap-transit' })),
+      ...normalizeTmapTransitSummary(await requestJson(request, { fetchImpl, provider: 'tmap-transit', timeoutMs })),
       queriedAt: queriedAt(now),
     };
-  };
+  });
   return cache?.getOrLoad
     ? cache.getOrLoad(cacheKey, load, { ttlMs: cacheTtlMs })
     : load();
@@ -623,9 +724,10 @@ export async function fetchTmapTransitSummary(params, {
 export async function fetchKakaoPublicTransit(params, {
   fetchImpl = globalThis.fetch,
   cache = null,
-  cacheTtlMs = MAX_MEMORY_CACHE_TTL_MS,
   now = Date.now,
   beforeRequest,
+  requestGate = action => action(),
+  timeoutMs = 15000,
 } = {}) {
   const request = buildKakaoPublicTransitRequest(params);
   const cacheKey = createCommuteCacheKey({
@@ -634,15 +736,17 @@ export async function fetchKakaoPublicTransit(params, {
     destination: params.destination,
     option: 'publictraffic',
   });
-  const load = async () => {
+  const load = () => requestGate(async () => {
     if (typeof beforeRequest === 'function') await beforeRequest();
     return {
-      ...normalizeKakaoPublicTransit(await requestJson(request, { fetchImpl, provider: 'kakao-transit' })),
+      ...normalizeKakaoPublicTransit(await requestJson(request, { fetchImpl, provider: 'kakao-transit', timeoutMs })),
       queriedAt: queriedAt(now),
     };
-  };
-  return cache?.getOrLoad
-    ? cache.getOrLoad(cacheKey, load, { ttlMs: cacheTtlMs })
+  });
+  // Kakao Local route data is for the current display only, not later reuse:
+  // https://devtalk.kakao.com/t/local-api/151263
+  return cache?.getOrJoin
+    ? cache.getOrJoin(cacheKey, load)
     : load();
 }
 
@@ -651,6 +755,7 @@ export async function fetchNaverDirections5(params, {
   cache = null,
   cacheTtlMs = MAX_MEMORY_CACHE_TTL_MS,
   now = Date.now,
+  timeoutMs = 15000,
 } = {}) {
   const option = params.option || 'traoptimal';
   const request = buildNaverDirections5Request({ ...params, option });
@@ -662,7 +767,7 @@ export async function fetchNaverDirections5(params, {
   });
   const load = async () => ({
     ...normalizeNaverDirections5(
-      await requestJson(request, { fetchImpl, provider: 'naver-directions5' }),
+      await requestJson(request, { fetchImpl, provider: 'naver-directions5', timeoutMs }),
       { option },
     ),
     queriedAt: queriedAt(now),

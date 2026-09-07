@@ -88,7 +88,7 @@ test('local commute server exposes v2 quota, compatible single lookup, and dedup
 
     const health = await requestJson(baseUrl, '/api/health');
     assert.equal(health.status, 200);
-    assert.equal(health.body.version, '2.5.1');
+    assert.equal(health.body.version, '2.6.3');
     assert.deepEqual(health.body.commute.diagnostics, {
       transit: { kakao: null, tmap: null },
       car: null,
@@ -111,6 +111,8 @@ test('local commute server exposes v2 quota, compatible single lookup, and dedup
     assert.equal(health.body.commute.kakaoQuota.limit, 13);
     assert.equal(health.body.limits.transitCacheHours, 8);
     assert.equal(health.body.limits.transitConcurrency, 2);
+    assert.equal(health.body.limits.kakaoUpstreamCallsPerBatch, 30);
+    assert.equal(health.body.commute.cache.kakao, 'live-only/current-view');
 
     const quota = await requestJson(baseUrl, '/api/commute/quota');
     assert.equal(quota.status, 200);
@@ -173,6 +175,8 @@ test('local commute server exposes v2 quota, compatible single lookup, and dedup
     assert.equal(batch.body.uniquePairCount, 1);
     assert.equal(batch.body.deduplicatedPairCount, 1);
     assert.equal(batch.body.requiredTransitCalls, 0);
+    assert.equal(batch.body.actualTransitCalls, 0);
+    assert.equal(batch.body.abortedPairCount, 0);
     assert.equal(batch.body.quota.provider, 'tmap');
     assert.equal(batch.body.quota.transitConfigured, false);
     assert.equal(batch.body.quota.tmap.limit, 7);

@@ -4,7 +4,11 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { normalizeDestinations } from '../js/commute-balance-core.mjs';
 import { createCandidateLocationService } from '../js/candidate-location-service.mjs';
-import { rankLocationCandidates } from '../js/location-ranking-core.mjs';
+import { rankPersonalizedCandidates } from '../js/personalized-ranking-core.mjs';
+import { recommendationBudget, effectiveRecommendationDestinations, orderLocationVerificationQueue } from '../js/personalized-context-core.mjs';
+import { candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness } from '../js/recommendation-verification-core.mjs';
+import { commuteDecision } from '../js/transport-core.mjs';
+import { parkingForCandidate } from '../js/controllers/personalized-recommendation-ui.js';
 import { PYEONG_TO_M2 } from '../js/recommendation-core.mjs';
 
 const appSource = fs.readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
@@ -33,7 +37,7 @@ function refineHarness(overrides = {}) {
   };
   const sandbox = {
     state, $: () => ({ value: 'recommended' }), renderRecommendationResults() {},
-    rankedRecommendationSource: (rows) => rows,
+    orderLocationVerificationQueue, activeRecommendationDestinations: () => [],
     candidateRegionKey: (candidate) => candidate.regionCode,
     recommendationCandidateId: (candidate) => candidate.catalogId,
     addCandidateDestinationDistances: (candidate) => candidate,
@@ -129,6 +133,7 @@ test('an older map refresh cannot restore another region after a layer change, a
     recommendationMapCandidates: (rows) => rows, shortlistHas: () => false,
     recommendationMapContextRecords: () => [], normalizeDestinations: (destinations) => destinations,
     candidateRegionGroups: () => [], sortedRecommendationResults: () => [], selectRecommendationRegion() {},
+    activeRecommendationDestinations: () => [],
   };
   vm.createContext(sandbox);
   vm.runInContext(actualFunction('refreshRecommendationMapLayers'), sandbox);
@@ -174,28 +179,30 @@ test('district reference completion preserves newer apartment coordinates, route
   assert.equal(state.recommendationResults[0].locationReference.precision, 'district');
 });
 
-test('without workplaces, default commute time does not block price search, location enrichment or ranking', async () => {
+test('without workplaces, price search and location enrichment use Gangnam at 100% but await real routes for a score', async () => {
   const values = {
     recommendCommuteMode: 'transit', recommendCommuteMax: '60', recommendMaxAge: '20',
     recommendDepartureTime: '08:00', recommendQuery: '테스트 검색', recommendHouseholds: '500',
     recommendHouseholdsOperator: 'gte', recommendPriceOperator: 'lte', recommendMinArea: '20',
     recommendAreaOperator: 'gte', recommendStationMin: '0', recommendStationMax: '0', recommendMonths: '3',
     recommendationSort: 'recommended', recommendationCommuteScope: 'matched',
+    recommendBudgetSource: 'manual', recommendBudgetOverPct: '10', recommendParkingRatio: '1',
   };
   const nodes = new Map();
   const $ = (selector) => {
     if (!nodes.has(selector)) nodes.set(selector, { value: values[selector.replace(/^#/, '')] || '',
-      checked: ['#recommendSeoul', '#recommendGyeonggi'].includes(selector), textContent: '',
+      checked: ['#recommendSeoul', '#recommendGyeonggi', '#recommendPreferSubway', '#recommendExcludeFar', '#recommendRequireParking'].includes(selector), textContent: '',
       classList: { add() {}, remove() {}, toggle() {} }, replaceChildren() {} });
     return nodes.get(selector);
   };
   const state = { workplaces: [], recommendationGeocodeToken: 0, recommendationResults: [], shortlist: [],
-    recommendationRunning: false, localMarketOutdated: false, railStations: [], gangnamAnchor: null };
+    recommendationRunning: false, localMarketOutdated: false, railStations: [],
+    gangnamAnchor: { lat: 37.5, lng: 127 }, transportConfig: { providers: {} } };
   const candidates = [
     { catalogId: 'far', regionCode: '41135', regionName: '테스트 먼 지역', name: '먼 후보', address: '테스트 먼 주소 1' },
     { catalogId: 'near', regionCode: '11110', regionName: '테스트 가까운 지역', name: '가까운 후보', address: '테스트 가까운 주소 1' },
   ].map((candidate) => ({ ...candidate, households: 700, builtYear: 2020,
-    bestArea: { areaM2: 84, averagePriceManWon: 50000 } }));
+    bestArea: { areaM2: 84, averagePriceManWon: 50000, count: 3 }, priceVerified: true }));
   const calls = [];
   const geocodeCalls = [];
   const statuses = [];
@@ -205,7 +212,9 @@ test('without workplaces, default commute time does not block price search, loca
     $, state, recommendationRunToken: 0, locationRankingCache: null,
     APP_CONFIG: { recommendationUrl: 'fixture:recommendations', localApiContractVersion: 'fixture' },
     window: { clearTimeout() {}, setTimeout() { throw Error('Fixture job should complete without polling timer'); } },
-    structuredClone, normalizeDestinations, PYEONG_TO_M2, rankLocationCandidates,
+    structuredClone, normalizeDestinations, PYEONG_TO_M2, rankPersonalizedCandidates,
+    recommendationBudget, effectiveRecommendationDestinations, orderLocationVerificationQueue,
+    candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness, commuteDecision, parkingForCandidate,
     readRecommendationPriceParts: () => ({ valid: true }), readRecommendationPriceManWon: () => 60000,
     updateRecommendationPriceLabel() {}, hideRecommendationMapStatus() {}, setRecommendationPanel() {},
     recommendationMap: { clearCandidateMarkers() {} }, isGeoPoint: validPoint,
@@ -228,7 +237,6 @@ test('without workplaces, default commute time does not block price search, loca
         baseCandidateCount: candidates.length, totalResultCount: candidates.length }) };
     },
     renderRecommendationResults: () => { rendered = sandbox.sortedRecommendationResults(); },
-    filterRecommendationByCommute() { throw Error('No workplace must not filter candidates by a commute verdict'); },
     REGIONS: [{ code: '11110', center: [37.5, 127] }, { code: '41135', center: [37.2, 127] }],
     loadLawDistricts: async () => ({ districts: [{ code: '11110', name: '테스트 가까운 지역' }, { code: '41135', name: '테스트 먼 지역' }] }),
     loadRailStationData: async () => {
@@ -242,7 +250,9 @@ test('without workplaces, default commute time does not block price search, loca
     } }),
   };
   vm.createContext(sandbox);
-  for (const name of ['boundedNumber', 'readRecommendationForm', 'rankedRecommendationSource',
+  for (const name of ['boundedNumber', 'readRecommendationForm', 'activeRecommendationDestinations',
+    'recommendationVerificationStatus', 'candidateCommuteDecision',
+    'filterRecommendationByCommute', 'rankedRecommendationSource',
     'sortedRecommendationResults', 'refineCandidateLocations', 'enrichRecommendationMapAndCommute',
     'pollRecommendationJob', 'runRecommendation']) vm.runInContext(actualFunction(name), sandbox);
   // The app intentionally dispatches these asynchronously; retain the actual
@@ -260,13 +270,22 @@ test('without workplaces, default commute time does not block price search, loca
   assert.equal(statuses.some(([kind]) => kind === 'error'), false);
   assert.equal(state.recommendationResults.length, 2);
   assert.equal(savedFilters.commuteMaxMinutes, 60, 'Default time need not be manually set to zero');
-  assert.equal(savedFilters.destinations.length, 0);
-  assert.equal(state.recommendationRunSnapshot.destinations.length, 0);
+  assert.equal(savedFilters.destinations.length, 1);
+  assert.equal(savedFilters.destinations[0].id, 'default-gangnam');
+  assert.equal(savedFilters.destinations[0].label, '강남역');
+  assert.equal(savedFilters.destinations[0].normalizedWeightPercent, 100);
+  assert.equal(state.recommendationRunSnapshot.destinations.length, 1);
+  assert.equal(state.recommendationRunSnapshot.destinations[0].id, 'default-gangnam');
   assert.equal(state.recommendationRunning, false);
   assert.equal(state.recommendationLocationBusy, false);
   assert.equal(geocodeCalls.length, 2);
+  assert.equal($('#recommendationCommuteScope').value, 'matched');
+  assert.equal(rendered.length, 0, 'Unverified price candidates must not appear in the default confirmed list');
+  rendered = sandbox.sortedRecommendationResults({ scope: 'pending' });
+  assert.equal(rendered.length, 2, 'Pending price candidates remain available for review and route verification');
   assert.equal(rendered[0].catalogId, 'near');
-  assert.equal(rendered.every((candidate) => candidate.locationRecommendation.rankingEligible), true);
+  assert.ok(rendered.every((candidate) => candidate.personalizedRecommendation.decision === 'pending'));
+  assert.ok(rendered.every((candidate) => candidate.personalizedRecommendation.score === null), 'Geocoding and nearby stations cannot manufacture a confirmed commute score');
   assert.deepEqual(state.workplaces, []);
   for (const [id, value] of Object.entries(values).filter(([id]) => id.startsWith('recommend') && !id.startsWith('recommendation'))) {
     assert.equal($(`#${id}`).value, value, `Search must preserve the ${id} input`);
@@ -274,8 +293,14 @@ test('without workplaces, default commute time does not block price search, loca
   const body = JSON.parse(calls[0].body);
   assert.equal('destinations' in body, false);
   assert.equal('companyAddress' in body, false);
-  // Even a previously selected scope cannot hide price candidates when there
-  // are no destinations to evaluate.
+  assert.equal('workplaces' in body, false);
+  assert.equal('budgetSource' in body, false);
+  assert.equal(body.targetPriceManWon, 60000);
+  assert.equal(body.maxPriceManWon, 66000);
+  // Gangnam is now a required destination even without saved companies, so
+  // explicitly requesting confirmed commutes must hide these pending rows.
   $('#recommendationCommuteScope').value = 'matched';
+  assert.equal(sandbox.sortedRecommendationResults().length, 0);
+  $('#recommendationCommuteScope').value = 'pending';
   assert.equal(sandbox.sortedRecommendationResults().length, 2);
 });

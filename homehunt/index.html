@@ -38,21 +38,23 @@
   <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/hh-tokens.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-base.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-shell.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-components.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-map.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-screens.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/history-query.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/financial-plan.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/hh-evidence.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/location-discovery.css?v=4.2.1">
-  <link rel="stylesheet" href="./css/map-markers.css?v=4.2.1">
+  <link rel="stylesheet" href="./css/hh-tokens.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-base.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-shell.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/history-query.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/financial-plan.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-evidence.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/location-discovery.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/map-markers.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/personalized-recommendation.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/cloud-panel.css?v=4.4.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.2.1" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.4.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -208,7 +210,7 @@
     <section class="app-view recommendation-view active" id="view-recommend" data-view="recommend">
       <div class="page-wrap wide recommendation-page map-first-shell">
         <div class="page-title-row recommendation-title-row compact-title-row">
-          <div><p class="page-eyebrow">BALANCED HOME MATCH</p><h1>여러 회사 사이, 우리 집 찾기</h1><span>최대 4개 목적지의 실제 통근과 예산 안의 아파트를 한 화면에서 비교합니다.</span></div>
+          <div><p class="page-eyebrow">BALANCED HOME MATCH</p><h1>여러 회사 사이, 우리 집 찾기</h1><span>회사별 비중을 반영한 실제 통근과 목표가격 범위의 아파트를 한 화면에서 비교합니다.</span></div>
           <div class="recommendation-scope-badge"><i class="ti ti-building-community" aria-hidden="true"></i><span>공식 단지</span><strong>17,851</strong><small>서울 · 경기</small></div>
         </div>
 
@@ -238,13 +240,28 @@
             <fieldset class="recommendation-field region-fieldset"><legend>대상 지역</legend><div class="recommendation-checks"><label><input id="recommendSeoul" type="checkbox" checked> 서울</label><label><input id="recommendGyeonggi" type="checkbox" checked> 경기</label></div></fieldset>
             <div class="recommendation-field"><label for="recommendHouseholds">최소 세대수</label><div class="input-with-select"><input id="recommendHouseholds" type="number" inputmode="numeric" min="0" step="1" value="500"><select id="recommendHouseholdsOperator" aria-label="최소 세대수 포함 방식"><option value="gt" selected>초과</option><option value="gte">이상</option></select></div><input class="condition-range" id="recommendHouseholdsRange" type="range" min="0" max="1000" step="1" value="500" aria-label="최소 세대수 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0</span><span>1,000세대</span></small></div>
             <div class="recommendation-field"><label for="recommendMaxAge">준공 후 최대</label><div class="input-unit"><input id="recommendMaxAge" type="number" inputmode="numeric" min="0" step="1" value="20"><em>년 이내</em></div><input class="condition-range" id="recommendMaxAgeRange" type="range" min="0" max="30" step="1" value="20" aria-label="준공 후 최대 연수 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0</span><span>30년</span></small></div>
-            <div class="recommendation-field company-field primary-company"><div class="workplace-field-head"><span>출근 목적지 <em>최대 4곳 · 이 기기에만 저장</em></span><button class="outline-btn add-workplace-btn" id="confirmCompanyLocation" type="button" aria-haspopup="dialog" aria-controls="companyLocationModal"><i class="ti ti-plus" aria-hidden="true"></i><span>목적지 추가</span></button></div><div class="workplace-list" id="workplaceList" aria-label="저장한 출근 목적지"></div><input id="recommendCompany" type="hidden"><small id="recommendCompanyStatus" role="status" aria-live="polite">회사·학교 등 실제 목적지를 먼저 추가하세요.</small></div>
-            <div class="recommendation-field price-recommendation-field"><label for="recommendMaxPriceEok">최대 실거래가</label><div class="price-segmented-input"><label><input id="recommendMaxPriceEok" type="text" inputmode="decimal" pattern="[0-9.,억원]*" value="6" autocomplete="off" aria-label="최대 실거래가 억 단위" aria-describedby="recommendPriceReadable"><em>억</em></label><label><input id="recommendMaxPriceMan" type="text" inputmode="text" pattern="[0-9,천백십만원]*" value="0" autocomplete="off" aria-label="최대 실거래가 만원 단위" aria-describedby="recommendPriceReadable"><em>만원</em></label><select id="recommendPriceOperator" aria-label="최대 가격 포함 방식"><option value="lt">미만</option><option value="lte">이하</option></select></div><output id="recommendPriceReadable" for="recommendMaxPriceEok recommendMaxPriceMan recommendPriceOperator">6억원 미만</output><input class="condition-range" id="recommendMaxPriceRange" type="range" min="0.5" max="20" step="0.1" value="6" aria-label="최대 실거래가 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0.5억</span><span>20억</span></small></div>
+            <div class="recommendation-field company-field primary-company"><div class="workplace-field-head"><span>출근 목적지 <em>비중 조절 · 이 기기에만 저장</em></span><button class="outline-btn add-workplace-btn" id="confirmCompanyLocation" type="button" aria-haspopup="dialog" aria-controls="companyLocationModal"><i class="ti ti-plus" aria-hidden="true"></i><span>목적지 추가</span></button></div><div class="workplace-list" id="workplaceList" aria-label="저장한 출근 목적지"></div><input id="recommendCompany" type="hidden"><small id="recommendCompanyStatus" role="status" aria-live="polite">회사·학교 등 실제 목적지를 먼저 추가하세요.</small></div>
+            <div class="recommendation-field price-recommendation-field"><label for="recommendMaxPriceEok">목표집가격</label>
+              <div class="personalized-budget-source">
+                <select id="recommendBudgetSource" hidden aria-label="목표집가격 출처"><option value="manual">직접 입력</option><option value="wecost">WeCost 집 시뮬과 연동</option></select>
+                <div class="budget-source-toggle" role="group" aria-label="목표집가격 입력 방식">
+                  <button type="button" id="importWecostTarget" aria-pressed="false" aria-describedby="recommendBudgetSourceStatus">WeCost 금액 사용</button>
+                  <button type="button" id="useManualTarget" aria-pressed="true" aria-describedby="recommendBudgetSourceStatus">직접 입력</button>
+                </div>
+                <small id="recommendBudgetSourceStatus" role="status">직접 입력한 목표가격으로 비교합니다.</small>
+                <a href="../wecost/?tab=house" target="_blank" rel="noopener">WeCost 집 시뮬 열기 ↗</a>
+              </div><div class="price-segmented-input"><label><input id="recommendMaxPriceEok" type="text" inputmode="decimal" pattern="[0-9.,억원]*" value="6" autocomplete="off" aria-label="목표집가격 억 단위" aria-describedby="recommendPriceReadable"><em>억</em></label><label><input id="recommendMaxPriceMan" type="text" inputmode="text" pattern="[0-9,천백십만원]*" value="0" autocomplete="off" aria-label="목표집가격 만원 단위" aria-describedby="recommendPriceReadable"><em>만원</em></label><select id="recommendPriceOperator" hidden aria-label="목표가격 포함 방식"><option value="lt">미만</option><option value="lte">이하</option></select></div><output id="recommendPriceReadable" for="recommendMaxPriceEok recommendMaxPriceMan recommendPriceOperator">6억원 미만</output><input class="condition-range" id="recommendMaxPriceRange" type="range" min="0.5" max="20" step="0.1" value="6" aria-label="목표집가격 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0.5억</span><span>20억</span></small></div>
             <div class="recommendation-field"><label for="recommendMinArea">최소 전용면적</label><div class="input-with-select compact-operator"><input id="recommendMinArea" type="number" inputmode="decimal" min="0" step="0.1" value="20"><select id="recommendAreaOperator" aria-label="최소 전용면적 포함 방식"><option value="gte">평 이상</option><option value="gt">평 초과</option></select></div><input class="condition-range" id="recommendMinAreaRange" type="range" min="0" max="50" step="0.1" value="20" aria-label="최소 전용면적 평 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0</span><span>50평</span></small><small id="recommendAreaMetric">전용 66.1㎡</small></div>
-            <label class="recommendation-field"><span>기본 출근 방법</span><select id="recommendCommuteMode"><option value="transit" selected>버스·지하철</option><option value="car">자동차</option><option value="both">둘 중 빠른 경로</option></select></label>
+            <label class="recommendation-field"><span>기본 출근 방법</span><select id="recommendCommuteMode"><option value="transit" selected>버스·지하철</option><option value="car">자동차</option><option value="both">둘 중 부담이 적은 경로</option></select></label>
             <label class="recommendation-field"><span>최대 출근 시간</span><div class="input-unit"><input id="recommendCommuteMax" type="number" inputmode="numeric" min="0" max="180" step="1" value="60"><em>분 이하</em></div><input class="condition-range" id="recommendCommuteMaxRange" type="range" min="0" max="120" step="1" value="60" aria-label="최대 출근 시간 슬라이더"><small class="condition-range-limits" aria-hidden="true"><span>0</span><span>120분</span></small></label>
           </div>
 
+          <section class="personalized-settings" aria-label="우리 기준 추천 설정">
+            <div class="personalized-budget-tolerance"><label for="recommendBudgetOverPct">목표가격 초과 허용</label><div class="input-unit"><input id="recommendBudgetOverPct" type="number" min="0" max="100" step="1" value="10" inputmode="decimal"><em>%까지</em></div><small id="recommendBudgetCeiling">목표 안은 만점, 초과할수록 예산 점수가 낮아집니다.</small></div>
+            <label class="personalized-check"><input id="recommendPreferSubway" type="checkbox" checked><span>지하철 위주로 · 환승과 도보가 적은 경로 선호</span></label>
+            <label class="personalized-check"><input id="recommendExcludeFar" type="checkbox" checked><span>시간 제한을 켠 회사의 초과 후보는 기본 목록에서 제외</span></label>
+            <div class="personalized-parking-preference"><label for="recommendParkingRatio">주차 선호 · 세대당</label><div class="input-unit"><input id="recommendParkingRatio" type="number" min="0.1" max="5" step="0.1" value="1" inputmode="decimal"><em>대 이상</em></div><label class="personalized-check"><input id="recommendRequireParking" type="checkbox" checked><span>주차 불가로 확인된 단지는 제외</span></label><small>주차 미확인은 점수 보류으로 표시합니다. 후보에서 현장 확인값을 입력할 수 있어요.</small></div>
+          </section>
           <details class="recommendation-details">
             <summary><span><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> 조회 설정 · 데이터 판정 근거</span><small>실거래 기간, 출발 시각</small></summary>
             <div class="recommendation-form-grid secondary-fields">
@@ -285,7 +302,7 @@
                 <button class="is-active" id="recommendationLayerWorkplaces" type="button" data-recommendation-layer="workplaces" aria-controls="recommendationMap" aria-pressed="true"><i class="ti ti-briefcase" aria-hidden="true"></i><span>목적지</span></button>
               </div>
               <div class="recommendation-map-overlay" id="recommendationMapStatus" role="status" aria-live="polite" hidden><i class="ti ti-map-search" aria-hidden="true"></i><div><strong>후보를 지도에 연결하고 있어요</strong><small>조건에 맞는 단지를 묶어 표시합니다.</small></div></div>
-              <div class="recommendation-map-legend" aria-label="지도 표시 설명"><span><i class="legend-dot cluster"></i>후보 원 숫자·가격</span><span title="검색 전에는 가격·면적 판정 전입니다"><i class="legend-dot apartment"></i>공식 단지 <small>가격·면적 조회 전</small></span><span><i class="legend-symbol visited">★</i>방문</span><span><i class="legend-symbol shortlisted">♥</i>관심</span><span title="현재 접수·예정 공고 중 위치를 확인한 최대 24곳"><i class="legend-symbol supply">⚑</i>분양 <small>접수·예정</small></span><span><i class="legend-symbol company">A–D</i>목적지</span><span><i class="legend-dot verified"></i>통근 충족</span><span><i class="legend-dot estimated"></i>경로 미확인</span><span><i class="legend-dot over-limit"></i>시간 초과</span></div>
+              <div class="recommendation-map-legend" aria-label="지도 표시 설명"><span><i class="legend-dot cluster"></i>후보 원 숫자·가격</span><span title="검색 전에는 가격·면적 판정 전입니다"><i class="legend-dot apartment"></i>공식 단지 <small>가격·면적 조회 전</small></span><span><i class="legend-symbol visited">★</i>방문</span><span><i class="legend-symbol shortlisted">♥</i>관심</span><span title="현재 접수·예정 공고 중 위치를 확인한 최대 24곳"><i class="legend-symbol supply">⚑</i>분양 <small>접수·예정</small></span><span><i class="legend-symbol company">A…</i>목적지</span><span><i class="legend-dot verified"></i>통근 충족</span><span><i class="legend-dot estimated"></i>경로 미확인</span><span><i class="legend-dot over-limit"></i>시간 초과</span></div>
             </div>
             <aside class="recommendation-list-pane results-sheet hh-panel" id="recommendationResultPanel" aria-label="맞춤 후보 결과" aria-hidden="true">
               <div class="hh-panel-resize" id="recommendationPanelResize" role="separator" aria-label="후보 패널 너비 조절" aria-orientation="vertical" tabindex="0"></div>
@@ -307,17 +324,25 @@
             <section><div class="composition-head"><span>후보 지역 구성</span><small>가격 조건을 통과한 단지</small></div><div class="composition-bars" id="recommendationRegionMix"></div></section>
             <section><div class="composition-head"><span>실거래 가격대 구성</span><small id="recommendationPriceMixBasis">후보별 선택 평형 평균가</small></div><div class="composition-bars price-bars" id="recommendationPriceMix"></div></section>
               </div>
+              <section class="commute-verification-gate" id="commuteVerificationGate" aria-label="실제 통근 확인" hidden>
+                <strong id="commuteVerificationTitle"></strong>
+                <p id="commuteVerificationCopy"></p>
+                <p id="commuteVerificationError" role="status" hidden></p>
+                <button class="record-btn precise-commute-btn" id="verifyTopCommutes" type="button"><i class="ti ti-route-2" aria-hidden="true"></i><span>상위 후보 실제 통근 확인</span></button>
+                <button class="outline-btn" id="showPendingCommutes" type="button">통근 미확인 가격 후보 따로 보기</button>
+                <small id="commuteVerificationPlan">가격 검색은 경로 호출 0회 · 한 번에 최대 10곳/30회 · 현재 결과 중복 확인 없음. 실패한 후보는 카드에서 통근 재확인을 할 수 있습니다.</small>
+              </section>
               <section class="location-discovery" id="locationDiscovery" aria-label="후보 지역과 위치 확인" hidden>
-                <div class="location-overview-head"><h3 data-location-total></h3><select class="portal-select" id="recommendationSort" aria-label="맞춤 후보 정렬"><option value="recommended" selected>입지 추천순</option><option value="gangnam">강남 접근성 우선</option><option value="station">역 접근성 우선</option><option value="commute">회사 통근 균형순</option><option value="price">평균가격 낮은순</option><option value="recent">최근 준공순</option><option value="households">세대수 많은순</option></select></div>
+                <p class="personalized-summary" id="personalizedRecommendationSummary"></p><div class="location-overview-head"><h3 data-location-total></h3><select class="portal-select" id="recommendationSort" aria-label="맞춤 후보 정렬"><option value="recommended" selected>우리 기준 추천순</option><option value="commute">회사 통근 균형순</option><option value="price">평균가격 낮은순</option><option value="recent">최근 준공순</option><option value="households">세대수 많은순</option></select></div>
                 <label class="sr-only" for="recommendationRegionScope">후보 지역 좁히기</label><select class="portal-select" id="recommendationRegionScope"><option value="">전체 지역</option></select>
                 <div class="location-region-chips" data-location-regions></div>
                 <div class="location-discovery-actions"><button class="outline-btn" type="button" data-location-all>지역 모두 보기 →</button><button class="outline-btn" type="button" id="toggleRegionMap">지역별 숫자 지도</button></div>
                 <details class="location-data-details"><summary data-location-coverage>단지 위치 확인</summary><small data-location-status></small><button class="outline-btn" type="button" id="refineCandidateLocations">이 범위 상위 20곳 위치·역거리 확인</button></details>
               </section>
-              <details class="location-ranking-explain"><summary>추천 점수는 어떻게 계산하나요?</summary><p>기본 100점: 강남역 접근성 45 · 역 접근성 30 · 세대수 10 · 연식 10 · 예산 충족 5. 강남·역 우선 정렬에서는 해당 항목 비중을 높입니다. 회사 위치와 무관한 입지 참고 점수이며 회사 통근은 별도로 확인합니다.</p><p>좌표가 없으면 지역 대표점으로 넓게 선별하고 상위 후보 주소를 순차 확인합니다. 미확인 항목은 가점을 주지 않아 점수와 순위가 달라질 수 있습니다. 역·강남 거리는 직선거리이며 실제 도보·통근시간이 아닙니다.</p><p id="railStationSource">공식 역 좌표 자료 확인 중</p></details>
+              <details class="location-ranking-explain"><summary>추천 점수는 어떻게 계산하나요?</summary><p>100점 중 실제 통근 55 · 역 접근 10 · 규모 5 · 연식 10 · 주차 10 · 목표가격 10점입니다. 회사가 없으면 강남역 100%, 회사 등록 후에는 입력한 비중을 적용합니다. 시간 초과 제외를 켠 회사만 제한을 적용하고, 초과 허용 회사는 멀어도 비중만큼 통근 부담에 반영합니다. 비중이 있는 회사의 실제 경로를 확인해야 추천점수가 나옵니다.</p><p>통근 부담 = 실제 소요시간 + 도보시간×0.5 + 환승횟수×8 + 버스 부담입니다. 지하철 선호 시 버스시간의 25%를 더하고, 시간 자료가 없으면 버스 구간당 6분 또는 버스 이용 경로 8분을 더해 비교합니다. 이는 선호를 반영한 환산값이며 실제 이동시간과 구분합니다.</p><p>목표가격 이내는 예산 10점, 초과하면 허용 상한까지 점수가 줄어듭니다. 주차는 세대당 희망 대수에 가까울수록 가점입니다. 미확인 항목은 가점을 주거나 다른 항목에 점수를 옮기지 않습니다. 통근 미확인 후보는 생활·예산 참고점수만 표시하며 실제 경로 확인이 필요합니다.</p><p>좌표는 후보의 주소 확인 순서를 정하는 데 사용합니다. 역 접근 10점은 수록 역까지 직선거리 기준으로, 실제 출입구 보행시간을 뜻하지 않습니다.</p><p id="railStationSource">공식 역 좌표 자료 확인 중</p><a href="./docs/personalized-recommendations.md" target="_blank" rel="noopener">자세한 계산 기준과 예시 ↗</a></details>
               <div class="recommendation-results-head">
               <div><span>MAP-BASED SHORTLIST</span><h2><strong id="recommendationResultCount">0</strong><span id="recommendationResultLabel">개 가격·기본조건 후보</span></h2><p id="recommendationResultSummary"></p></div>
-            <div><details class="location-commute-controls"><summary>회사 통근 확인</summary><button class="record-btn precise-commute-btn" id="verifyTopCommutes" type="button"><i class="ti ti-route-2" aria-hidden="true"></i><span>상위 후보 정밀 통근</span></button></details><button class="shortlist-count" id="showRecommendationShortlist" type="button" aria-pressed="false"><i class="ti ti-heart" aria-hidden="true"></i><span class="shortlist-label">관심 후보</span> <strong id="recommendationShortlistCount">0</strong><span class="shortlist-action">보기</span></button><select class="portal-select commute-scope-select" id="recommendationCommuteScope" aria-label="통근 판정 결과 범위"><option value="all">가격조건 전체</option><option value="matched">모든 목적지 충족</option><option value="pending">경로 미확인</option></select></div>
+            <div><button class="shortlist-count" id="showRecommendationShortlist" type="button" aria-pressed="false"><i class="ti ti-heart" aria-hidden="true"></i><span class="shortlist-label">관심 후보</span> <strong id="recommendationShortlistCount">0</strong><span class="shortlist-action">보기</span></button><select class="portal-select commute-scope-select" id="recommendationCommuteScope" aria-label="통근 판정 결과 범위"><option value="matched">통근 조건 충족</option><option value="pending">통근 미확인 가격 후보</option><option value="all">가격 후보 전체 · 통근 미확인 포함</option><option value="excluded">조건 제외 사유 보기</option></select></div>
               </div>
               <div class="recommendation-result-grid" id="recommendationResults"></div>
               <button class="outline-btn recommendation-load-more" id="recommendationLoadMore" type="button" hidden>후보 더 보기</button>
@@ -582,6 +607,7 @@
           <div><p class="page-eyebrow">DATA CONNECTIONS</p><h1>연결 상태</h1><span>지도·매물 링크·실거래·개인 기록은 역할과 보안을 분리합니다.</span></div>
         </div>
 
+        <section id="homehuntCloudPanel" aria-label="개인 기록 클라우드 저장"></section>
         <div class="connection-grid">
           <article class="connection-card" id="naverMapConnectionCard">
             <div class="connection-card-top"><span class="service-logo naver-logo">N</span><span class="service-state checking" id="naverMapState">확인 중</span></div>
@@ -615,8 +641,8 @@
 
           <article class="connection-card" id="commuteConnectionCard">
             <div class="connection-card-top"><span class="service-logo commute-logo"><i class="ti ti-route" aria-hidden="true"></i></span><span class="service-state checking" id="commuteState">확인 중</span></div>
-            <h2>회사 통근 경로</h2><p>회사와 후보 주소는 네이버 지도에서 좌표로 확인합니다. 버스·지하철은 Kakao 광역 선별 또는 TMAP 출발시각 정밀 검증, 자동차는 NAVER Directions 5를 로컬 서버에서만 호출합니다.</p>
-            <ul><li id="companyGeocodeCheck">회사 주소 좌표 확인 대기</li><li id="transitRouteCheck">TMAP 대중교통 키 확인 중</li><li id="carRouteCheck">NAVER 자동차 경로 키 확인 중</li><li>미연결 값은 1시간 조건 충족으로 표시하지 않음</li></ul>
+            <h2>회사 통근 경로</h2><p>회사와 후보 주소는 네이버 지도에서 좌표로 확인합니다. 버스·지하철은 선택한 Kakao 또는 TMAP의 실제 경로, 자동차는 NAVER Directions 5를 로컬 서버에서만 호출합니다.</p>
+            <ul><li id="companyGeocodeCheck">회사 주소 좌표 확인 대기</li><li id="transitRouteCheck">대중교통 공급자 확인 중</li><li id="carRouteCheck">NAVER 자동차 경로 키 확인 중</li><li>미연결 값은 1시간 조건 충족으로 표시하지 않음</li></ul>
             <div class="connection-button-row"><button type="button" data-open-local-key>경로 키 연결</button><a href="https://transit.tmapmobility.com/docs/routes/sub" target="_blank" rel="noopener noreferrer">TMAP 문서</a></div>
           </article>
 
@@ -629,13 +655,13 @@
 
           <article class="connection-card privacy-card">
             <div class="connection-card-top"><span class="service-logo privacy-logo"><i class="ti ti-shield-lock" aria-hidden="true"></i></span><span class="service-state local">이 기기 저장</span></div>
-            <h2>둘만의 방문 기록</h2><p>현재는 주소·메모를 공개 Firestore에 올리지 않고 이 브라우저에만 저장합니다. 실시간 공유는 별도 비공개 Firebase가 준비되면 연결합니다.</p>
+            <h2>둘만의 방문 기록</h2><p>기본 기록은 이 브라우저에 저장합니다. 위에서 Google 로그인 후 저장을 누르면 허용된 본인 계정의 비공개 Firebase에 백업할 수 있습니다. 로그인만으로 저장하거나 덮어쓰지 않습니다.</p>
             <ul><li>브라우저 로컬 저장</li><li>JSON 백업·복원 가능</li><li>공개 저장소에 개인 주소 없음</li></ul>
             <div class="connection-button-row"><button type="button" id="backupVisits">백업</button><label for="restoreVisits">복원</label><input id="restoreVisits" type="file" accept="application/json,.json" hidden></div>
           </article>
         </div>
 
-        <div class="security-note"><strong>개인 정보와 공개 데이터를 구분해 보관해요.</strong><p>방문 기록과 자금 시나리오는 이 브라우저에 저장됩니다. WeCost 자동 연결은 두 사람의 로그인과 재무 읽기 권한이 준비된 뒤 사용할 수 있습니다.</p></div>
+        <div class="security-note"><strong>개인 정보와 공개 데이터를 구분해 보관해요.</strong><p>방문 기록과 자금 시나리오는 이 브라우저에 저장됩니다. WeCost에서는 선택한 목표집가격만 가져옵니다. 전체 재무자료 연결에는 두 사람의 로그인과 재무 읽기 권한이 필요합니다.</p></div>
       </div>
     </section>
 
@@ -802,7 +828,7 @@
         <details class="transport-key-details">
           <summary>회사 통근 경로 키 연결 <small>선택</small></summary>
           <div class="form-grid two-col">
-            <label class="field"><span>Kakao REST API 키 <em>대중교통 광역 검증</em></span><input id="localKakaoRestKey" type="password" autocomplete="off" spellcheck="false" placeholder="Kakao Developers REST API 키"></label>
+            <label class="field"><span>Kakao REST API 키 <em>버스·지하철 실제 경로</em></span><input id="localKakaoRestKey" type="password" autocomplete="off" spellcheck="false" placeholder="Kakao Developers REST API 키"></label>
             <label class="field"><span>대중교통 공급자</span><select id="localTransitProvider"><option value="">현재 설정 유지</option><option value="auto">자동 · Kakao 우선</option><option value="kakao">Kakao만</option><option value="tmap">TMAP만</option></select></label>
           </div>
           <label class="field"><span>TMAP appKey <em>출발시각 정밀 검증</em></span><input id="localTmapKey" type="password" autocomplete="off" spellcheck="false" placeholder="SK Open API appKey"></label>
@@ -810,7 +836,7 @@
             <label class="field"><span>NAVER Maps Client ID <em>자동차</em></span><input id="localNaverClientId" autocomplete="off" spellcheck="false" value="jjk1t3dw7m"></label>
             <label class="field"><span>NAVER Maps Client Secret <em>자동차</em></span><input id="localNaverClientSecret" type="password" autocomplete="off" spellcheck="false" placeholder="재발급한 Secret 권장"></label>
           </div>
-          <p>Kakao는 넓은 후보를 현재시각 기준으로 확인하고, TMAP은 출발시각을 반영한 소수 최종 후보에 적합합니다. TMAP 무료 10건/일을 자동 소진하지 않으며 경로는 디스크에 남기지 않고 메모리에만 8시간 보관합니다.</p>
+          <p>자동 선택은 Kakao를 우선하며, Kakao 결과만으로 실제 경로를 확인합니다. Kakao에는 입력한 출발시각이 반영되지 않습니다. TMAP을 명시적으로 선택하면 출발시각을 반영합니다. 가격 검색은 경로를 호출하지 않고, 통근 버튼 한 번에 최대 10개 후보·30개 대중교통 경로만 확인합니다. Kakao 경로는 현재 화면에서만 표시하며 저장 후보에 보관하지 않습니다.</p>
         </details>
         <details class="transport-key-details" id="placeSearchKeyDetails">
           <summary>회사·건물명 검색 키 연결 <small>선택</small></summary>
@@ -862,7 +888,11 @@
             <strong id="companyPickerSelectionTitle">아직 선택하지 않았어요</strong>
             <p id="companyPickerSelectionAddress">검색 결과 또는 지도 위 건물을 선택해주세요.</p>
             <small id="companyPickerCoordinates">좌표를 선택해야 실제 통근 경로를 계산합니다.</small>
-            <label class="company-days-field"><span>일주일에 가는 날</span><select id="companyDaysPerWeek"><option value="5">주 5일</option><option value="4">주 4일</option><option value="3">주 3일</option><option value="2">주 2일</option><option value="1">주 1일</option></select></label>
+            <label class="company-days-field"><span>추천에 반영할 비중</span><input id="companyWeightPercent" type="number" min="0" step="1" value="100" inputmode="decimal" aria-describedby="companyWeightHelp"><small id="companyWeightHelp">예: A 10 · B 50 · C 40. 합계가 100이 아니면 비율로 환산합니다.</small></label>
+            <label class="company-days-field"><span>이 회사 통근 목표시간</span><input id="companyMaxMinutes" type="number" min="1" max="180" step="1" value="60" inputmode="numeric"><small>분 · 시간 초과 허용 여부는 아래에서 선택하세요.</small></label>
+            <label class="personalized-check"><input id="companyEnforceTime" type="checkbox" checked><span>이 시간을 넘으면 후보에서 제외</span></label>
+            <small>끄면 멀어도 제외하지 않고 이 회사의 비중만큼 통근 부담을 점수에 반영합니다. 예: 광화문 10%는 초과 허용, 분당·판교 90%를 우선.</small>
+            <label class="company-days-field" hidden><span>일주일에 가는 날</span><select id="companyDaysPerWeek"><option value="5">주 5일</option><option value="4">주 4일</option><option value="3">주 3일</option><option value="2">주 2일</option><option value="1">주 1일</option></select></label>
           </aside>
         </div>
         <p class="company-location-limit"><i class="ti ti-info-circle" aria-hidden="true"></i><span>공식 주소 DB는 등록 건물명·법인명을, 네이버 장소 API는 입점 상호·지점까지 찾습니다. 같은 이름이 많으면 동네나 역 이름을 함께 입력하세요.</span></p>
@@ -940,10 +970,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.2.1" defer></script>
+  <script src="./js/ui-kit.js?v=4.4.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.2.1"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.2.1"></script>
-  <script src="./js/navigation-v25.js?v=4.2.1" defer></script>
+  <script type="module" src="./js/app.js?v=4.4.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.4.0"></script>
+  <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

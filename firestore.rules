@@ -2,6 +2,46 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function homehuntMember() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email is string
+        && exists(/databases/$(database)/documents/homehunt_members/$(request.auth.token.email.lower()))
+        && get(/databases/$(database)/documents/homehunt_members/$(request.auth.token.email.lower())).data.active == true;
+    }
+    function validHomehuntSnapshot(uid) {
+      let next = request.resource.data;
+      return next.keys().hasOnly(['snapshot', 'revision', 'updatedAt', 'updatedBy'])
+        && next.updatedBy == uid
+        && next.updatedAt is string && next.updatedAt.size() <= 30
+        && next.revision is int && next.revision > 0
+        && next.snapshot is map
+        && next.snapshot.keys().hasOnly(['schemaVersion', 'recommendationFilters', 'visits', 'shortlist', 'compareIds', 'supplyFavorites', 'parkingObservations'])
+        && next.snapshot.schemaVersion == 1
+        && next.snapshot.recommendationFilters is map
+        && next.snapshot.visits is list && next.snapshot.visits.size() <= 1000
+        && next.snapshot.shortlist is list && next.snapshot.shortlist.size() <= 1000
+        && next.snapshot.compareIds is list && next.snapshot.compareIds.size() <= 3
+        && next.snapshot.supplyFavorites is list && next.snapshot.supplyFavorites.size() <= 1000
+        && next.snapshot.parkingObservations is map;
+    }
+    // Free-plan per-account backup. Knowing the site access code never grants
+    // Firestore access; membership is seeded only through an administrator.
+    match /homehunt_user_snapshots/{uid} {
+      allow get: if homehuntMember() && request.auth.uid == uid;
+      allow list, delete: if false;
+      allow create: if homehuntMember() && request.auth.uid == uid
+        && validHomehuntSnapshot(uid) && request.resource.data.revision == 1;
+      allow update: if homehuntMember() && request.auth.uid == uid
+        && validHomehuntSnapshot(uid) && request.resource.data.revision == resource.data.revision + 1;
+    }
+    match /homehunt_members/{document} { allow read, write: if false; }
+    match /homehunt_households/{document=**} { allow read, write: if false; }
+    match /homehunt_route_cache/{document} { allow read, write: if false; }
+    match /homehunt_provider_usage/{document} { allow read, write: if false; }
+    match /homehunt_request_limits/{document} { allow read, write: if false; }
+    match /homehunt_jobs/{document=**} { allow read, write: if false; }
     // Server-only HomeHunt state. Admin SDK calls bypass these rules.
     match /homehunt_apartment_cache/{document} {
       allow read, write: if false;

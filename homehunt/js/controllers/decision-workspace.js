@@ -1,5 +1,6 @@
-import { decisionKey, decisionPrice, DECISION_KINDS, pruneDecisionKeys, regionalCoverage, searchBottleneck } from '../decision-core.mjs';
+import { decisionKey, decisionPrice, DECISION_KINDS, pruneDecisionKeys, regionalCoverage, searchBottleneck } from '../decision-core.mjs?v=4.3.0.1';
 import { formatPriceManwon, formatAreaPair } from '../display-format.mjs';
+import { destinationLetter } from '../personalized-context-core.mjs';
 import { renderDistrictList } from './location-discovery.js?v=4.2.0';
 
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
@@ -58,9 +59,9 @@ export function createDecisionWorkspace(api) {
     const actions = { filters: api.filters, connections: () => api.view('connections'), candidates: () => setTab('candidates'), compare: openCompare };
     const lead = actionCard(issue.title, issue.detail, { filters: '조건 설정하기', connections: '연결 상태 확인', candidates: '가격 후보 보기', compare: '판단 보드 열기' }[issue.action], actions[issue.action]);
     const dest = el('div', 'dw-destinations');
-    dest.append(el('span', '', `우리의 목적지 ${s.destinations.length}/4`));
-    s.destinations.forEach((d, i) => dest.append(button(`${String.fromCharCode(65 + i)} ${d.label || '목적지'} · ${d.maxMinutes || d.commuteMaxMinutes || '—'}분`, () => api.destination(d.id), 'dw-destination')));
-    if (s.destinations.length < 4) dest.append(button('+ 목적지', () => api.destination(), 'dw-destination'));
+    dest.append(el('span', '', `우리의 목적지 ${s.destinations.length}곳`));
+    s.destinations.forEach((d, i) => dest.append(button(`${destinationLetter(i)} ${d.label || '목적지'} · ${Number(d.normalizedWeightPercent || 0).toFixed(1)}% · ${d.maxMinutes || d.commuteMaxMinutes || '—'}분 ${d.required === false ? '목표 · 초과 허용' : '제한 · 초과 제외'}`, () => api.destination(d.id), 'dw-destination')));
+    dest.append(button('+ 목적지', () => api.destination(), 'dw-destination'));
     const recent = el('section', 'dw-recent-section');
     recent.append(el('h3', '', '이어서 검토할 집'));
     const saved = [...s.shortlist.slice(0, 3).map((record) => ({ kind: 'candidate', record })), ...s.visits.slice().sort((a, b) => String(b.visitDate).localeCompare(String(a.visitDate))).slice(0, 2).map((record) => ({ kind: 'visit', record }))];

@@ -25,7 +25,7 @@ export function renderLocationDiscovery(root, candidates, { selectedRegion = '',
   if (root.hidden) return;
   const groups = candidateRegionGroups(candidates);
   const selected = groups.find(g => g.key === selectedRegion);
-  root.querySelector('[data-location-total]').textContent = `${candidates.length.toLocaleString('ko-KR')}곳 · ${groups.length}개 시군구`;
+  root.querySelector('[data-location-total]').textContent = `가격 조건 ${candidates.length.toLocaleString('ko-KR')}곳 · ${groups.length}개 시군구`;
   const select = root.querySelector('#recommendationRegionScope');
   select.replaceChildren(...[{ key: '', label: '전체 지역', count: candidates.length }, ...groups].map(g => {
     const n = el('option', '', `${g.label} · ${g.count.toLocaleString('ko-KR')}곳`); n.value = g.key; return n;
@@ -80,7 +80,7 @@ export function createLocationScoreCard(candidate, { detailed = false } = {}) {
 
 export function renderDistrictList(root, candidates, onSelect) {
   const groups = candidateRegionGroups(candidates);
-  root.replaceChildren(el('h3', '', `어느 지역에 있나요? · ${groups.length}개 시군구`), el('p', '', '주소 기준 조건 후보 수입니다. 지역을 누르면 지도와 후보 목록을 함께 좁힙니다.'));
+  root.replaceChildren(el('h3', '', `어느 지역에 있나요? · ${groups.length}개 시군구`), el('p', '', '주소로 집계한 가격 조건 후보입니다. 통근 충족 수와 다릅니다. 지역을 누르면 지도와 후보 목록의 범위를 좁힙니다.'));
   for (const g of groups) {
     const b = el('button', 'location-district-row'); b.type = 'button';
     b.append(el('strong', '', g.label), el('b', '', `${g.count}곳`), el('small', '', `단지 좌표 ${g.mapped}곳 확인${g.minPrice ? ` · 평균 실거래 ${formatPriceManwon(g.minPrice)}부터` : ''}`));
