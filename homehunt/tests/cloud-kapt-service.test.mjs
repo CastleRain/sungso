@@ -170,3 +170,22 @@ test('database errors fail safely without bypassing the shared cache and calling
   assert.equal(h.calls.length, 0);
   assert.doesNotMatch(JSON.stringify(result), /SECRET-DATABASE/);
 });
+
+test('a previous unmatched verdict is recomputed from cached sources after identity logic changes without a cache flush', async () => {
+  const name = '가상칸타빌1';
+  const corrected = { ...catalog, name, aliases: ['가상칸타빌1단지', '가상칸타빌1단지 101동'] };
+  const h = fixture({ catalog: [{ ...corrected, aliases: ['가상칸타빌2단지'] }],
+    data: part => part === 'list' ? [{ ...listed, kaptName: name }] : part === 'basic'
+      ? { ...basic, kaptName: name } : { ...detail, kaptName: name } });
+  const previous = await h.service.complex({ catalogId: catalog.catalogId });
+  assert.equal(previous.status, 'unmatched');
+  const listPath = `${KAPT_CACHE_COLLECTION}/list-41135`;
+  const originalList = structuredClone(h.db.documents.get(listPath));
+  const updated = h.newService({ loadCatalog: async () => ({ apartments: [corrected] }) });
+  const result = await updated.complex({ catalogId: catalog.catalogId });
+  assert.equal(result.status, 'matched');
+  assert.equal(result.parking.totalSpaces, 650);
+  assert.deepEqual(h.calls, ['list', 'basic', 'detail']);
+  assert.deepEqual(h.db.documents.get(listPath), originalList, 'public list source and TTL stay untouched');
+  assert.equal(h.db.documents.size, 3, 'only source rows, never an unmatched verdict, are stored');
+});

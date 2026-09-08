@@ -745,6 +745,10 @@ test('the visible verification plan shows only the selected provider quota and h
   vm.runInContext(actualFunction('renderRecommendationDecisionBar'), context.sandbox);
   context.sandbox.renderRecommendationDecisionBar();
   assert.match(context.$('#commuteVerificationPlan').textContent, /Kakao 오늘 남은 968\/1,000회 \(로컬 기준\)/);
+  context.sandbox.APP_CONFIG.isLocalRuntime = false;
+  context.sandbox.renderRecommendationDecisionBar();
+  assert.match(context.$('#commuteVerificationPlan').textContent, /Kakao 오늘 남은 968\/1,000회 \(서버 공유 기준\)/);
+  assert.doesNotMatch(context.$('#commuteVerificationPlan').textContent, /로컬 기준/);
   context.state.commuteQuota.kakao.remaining = 0;
   context.sandbox.renderRecommendationDecisionBar();
   assert.match(context.$('#commuteVerificationPlan').textContent, /Kakao 오늘 남은 0\/1,000회/);

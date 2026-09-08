@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { buildMarketSummary, validateMarketSummary } from '../js/market-core.mjs';
+import { cloudSessionErrorMessage } from '../js/cloud-session.js';
 
 const app = fs.readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const publicSummary = JSON.parse(fs.readFileSync(new URL('../data/market-summary.json', import.meta.url), 'utf8'));
@@ -30,7 +31,7 @@ function node() {
   return value;
 }
 
-function harness({ summary = emptySummary, history = emptyHistory, local = false, enabled = false, fetcher } = {}) {
+function harness({ summary = emptySummary, history = emptyHistory, local = false, cloud = false, enabled = false, fetcher } = {}) {
   const nodes = new Map();
   const $ = selector => {
     if (!nodes.has(selector)) nodes.set(selector, node());
@@ -38,8 +39,9 @@ function harness({ summary = emptySummary, history = emptyHistory, local = false
   };
   const calls = [];
   const state = { marketSummary: null, staticApartmentHistoryMeta: null, placeSearchConfigured: true };
-  const sandbox = { state, $, validateMarketSummary,
-    APP_CONFIG: { localMarketEnabled: local, apartmentHistoryEnabled: enabled,
+  const sandbox = { state, $, validateMarketSummary, cloudSessionErrorMessage,
+    APP_CONFIG: { localMarketEnabled: local || cloud, isLocalRuntime: !cloud, apartmentHistoryEnabled: enabled,
+      localApiContractVersion: '2.9.0',
       marketSummaryUrl: 'fixture:summary', apartmentHistoryStaticUrl: 'fixture:history' },
     loadImportedMarket: async () => null, populateMarketRegions() {}, renderMarket() {}, updateCompanySearchCapability() {},
     fetch: async (url, options) => {
@@ -50,7 +52,7 @@ function harness({ summary = emptySummary, history = emptyHistory, local = false
   };
   vm.createContext(sandbox);
   vm.runInContext('let staticApartmentHistoryPromise;', sandbox);
-  for (const name of ['loadMarketSummary', 'updateMarketConnection', 'loadStaticApartmentHistory', 'updateLocalConnectionUi']) {
+  for (const name of ['versionIsOlder', 'routeDiagnosticLabel', 'loadMarketSummary', 'updateMarketConnection', 'loadStaticApartmentHistory', 'updateLocalConnectionUi']) {
     const match = app.match(new RegExp(`(?:async )?function ${name}\\([^]*?\\n\\}`));
     assert.ok(match, `Actual app function ${name} exists`);
     vm.runInContext(match[0], sandbox);
@@ -175,4 +177,40 @@ test('로컬 서버의 실제 연결 상태는 빈 공개 저장본 때문에 �
   assert.equal($('#apartmentHistoryApiCheck').textContent, '로컬 실제 연결 확인');
   assert.equal(calls.length, 1);
   assert.equal(calls.includes('fixture:history'), false);
+});
+
+test('온라인은 로그인 필요와 실제 서버 연결을 구분하고 없는 캐시 건수를 0으로 표시하지 않는다', async () => {
+  const { sandbox, $, state, calls } = harness({ cloud: true });
+  sandbox.updateLocalConnectionUi(null, { status: 401, code: 'CLOUD_AUTH_REQUIRED' });
+  assert.equal($('#molitState').textContent, '로그인 필요');
+  assert.match($('#localMarketServerCheck').textContent, /Google 로그인/);
+  assert.equal($('#commuteState').textContent, '로그인 필요');
+  assert.equal(state.localMarketConnected, false);
+  sandbox.updateLocalConnectionUi({ ok: true, runtime: 'render', version: '2.9.0', keyConfigured: true,
+    keySource: 'server-environment', catalogCount: 1000, limits: { historyMonthsMax: 60 },
+    commute: { transitConfigured: true, transitProvider: 'kakao', providers: { kakaoTransitConfigured: true } },
+    placeSearch: { configured: true } });
+  assert.equal(state.localMarketConnected, true);
+  assert.equal($('#molitState').textContent, '실거래 연결');
+  assert.match($('#localMarketServerCheck').textContent, /온라인 서버 정상/);
+  assert.match($('#apartmentHistoryApiCheck').textContent, /서버 비밀 설정 연결.*공공 월 자료 재사용/);
+  assert.doesNotMatch($('#apartmentHistoryApiCheck').textContent, /월 캐시 0개|로컬|\.env/);
+  assert.match($('#transitRouteCheck').textContent, /Kakao 버스·지하철 키 설정됨 · 실제 경로 조회 전/);
+  assert.doesNotMatch($('#commuteState').textContent, /실제 확인/);
+  await sandbox.loadMarketSummary();
+  assert.equal($('#molitState').textContent, '실거래 연결');
+  assert.equal(calls.length, 1);
+});
+
+test('로컬의 제공된 캐시 건수는 유지하고 온라인 연결 실패는 서버 미배포로 오인하지 않는다', () => {
+  const local = harness({ local: true });
+  local.sandbox.updateLocalConnectionUi({ ok: true, version: '2.9.0', keyConfigured: true,
+    keySource: 'environment', cache: { months: 22 } });
+  assert.match(local.$('#localMarketServerCheck').textContent, /로컬 서버 정상/);
+  assert.match(local.$('#apartmentHistoryApiCheck').textContent, /\.env\/환경변수 자동 연결.*월 캐시 22개/);
+  const cloud = harness({ cloud: true });
+  cloud.sandbox.updateLocalConnectionUi(null, new Error('offline'));
+  assert.equal(cloud.$('#molitState').textContent, '온라인 연결 확인');
+  assert.equal(cloud.state.localMarketConnected, false);
+  assert.doesNotMatch(cloud.$('#localMarketServerCheck').textContent, /로컬|시작 명령|미배포/);
 });

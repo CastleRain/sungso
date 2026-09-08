@@ -13,15 +13,17 @@ const actualFunction = name => {
 };
 const safe = value => normalizeCloudSnapshot(JSON.parse(JSON.stringify(value)));
 
-function configFor(hostname, api = '') {
+function configFor(hostname, api) {
   const context = vm.createContext({ window: { location: { hostname } } });
-  const source = config.replace("const CLOUD_API_BASE_URL = '';", `const CLOUD_API_BASE_URL = '${api}';`)
+  const declaration = /const CLOUD_API_BASE_URL = (['"])[^'"\r\n]*\1;/;
+  assert.match(config, declaration, 'The active endpoint declaration can be explicitly replaced by a fixture');
+  const source = (api === undefined ? config : config.replace(declaration, () => `const CLOUD_API_BASE_URL = ${JSON.stringify(api)};`))
     .replaceAll('export ', '');
   return vm.runInContext(`${source}\nAPP_CONFIG`, context);
 }
 
 test('Pages enables private Firebase storage while undeployed search endpoints remain disabled', () => {
-  const value = configFor('castlerain.github.io');
+  const value = configFor('castlerain.github.io', '');
   assert.equal(value.cloudStorageEnabled, true);
   assert.equal(value.firebaseConfig.projectId, 'sungso-358cb');
   assert.equal(value.isLocalRuntime, false);
@@ -46,6 +48,29 @@ test('a deployed cloud API activates all search endpoints without exposing the k
   assert.equal(value.localMarketConfigUrl, '');
   assert.equal(value.apartmentHistoryEnabled, true);
   assert.equal(value.supplyFeedUrl, './data/home-supply.json');
+});
+
+test('the shipped Pages configuration uses the verified Render API while localhost keeps its independent server', () => {
+  const value = configFor('castlerain.github.io');
+  const base = 'https://sungso-homehunt-api.onrender.com/api';
+  assert.equal(value.cloudApiBaseUrl, base);
+  assert.equal(value.localMarketEnabled, true);
+  assert.equal(value.apartmentHistoryEnabled, true);
+  for (const [field, route] of Object.entries({ recommendationUrl: '/recommendations', commuteUrl: '/commute',
+    commuteBatchUrl: '/commute/batch', commuteQuotaUrl: '/commute/quota', placeSearchUrl: '/place-search',
+    localMarketHealthUrl: '/health', apartmentHistoryUrl: '/apartment-history', officialComplexUrl: '/kapt/complex' })) {
+    assert.equal(value[field], `${base}${route}`);
+  }
+  assert.equal(value.localMarketConfigUrl, '');
+  assert.equal(value.supplyFeedUrl, './data/home-supply.json');
+  assert.equal(value.cloudStorageEnabled, true);
+  for (const hostname of ['localhost', '127.0.0.1']) {
+    const local = configFor(hostname);
+    assert.equal(local.isLocalRuntime, true);
+    assert.equal(local.apartmentHistoryUrl, 'http://127.0.0.1:8787/api/apartment-history');
+    assert.equal(local.officialComplexUrl, 'http://127.0.0.1:8787/api/kapt/complex');
+    assert.equal(local.localMarketConfigUrl, 'http://127.0.0.1:8787/api/config');
+  }
 });
 
 test('the actual app fetch boundary forwards only matching cloud API URLs to the token helper', async () => {

@@ -147,7 +147,18 @@ function samePhases(catalog, officialName) {
   const expected = catalogPhaseIdentity(catalog), actual = phaseIdentity(officialName);
   // An alias without a phase cannot erase a phase in the canonical catalog
   // name, and a combined registration cannot be assigned to one component.
-  return !expected.malformed && !actual.malformed && !expected.combined && !actual.combined && expected.signature === actual.signature;
+  if (expected.malformed || actual.malformed || expected.combined || actual.combined) return false;
+  if (expected.signature === actual.signature) return true;
+  // Some official canonical names end in a bare phase number ("칸타빌1")
+  // while their catalog aliases spell out "1단지". Only an EXACT canonical
+  // name with the same trailing number may use this alias-supplied phase.
+  // Do not broaden name variants, infer phases from arbitrary numbers, or
+  // permit a contradictory/multiple alias phase to erase phase safety.
+  const canonical = normalizeKaptName(catalog.name);
+  const suffix = /([0-9]+)$/.exec(canonical);
+  return !phaseIdentity(catalog.name).signature && !actual.signature
+    && canonical === normalizeKaptName(officialName) && expected.phases.length === 1
+    && Boolean(suffix) && Number(suffix[1]) === expected.phases[0].number;
 }
 function localNamePrefixes(catalog) {
   const province = text(catalog.regionCode).startsWith('11') ? ['서울', '서울특별시'] : [];

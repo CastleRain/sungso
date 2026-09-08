@@ -1,9 +1,9 @@
 const IS_LOCAL_RUNTIME = typeof window !== 'undefined'
   && ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const LOCAL_MARKET_API = 'http://127.0.0.1:8787/api';
-// Set only after the authenticated API is deployed and verified. GitHub Pages
-// can already use Firebase Auth + private snapshots with this value empty.
-const CLOUD_API_BASE_URL = '';
+// Public endpoint only. Provider keys stay on the authenticated Render server;
+// localhost continues to use its own API and private Firebase backups stay separate.
+const CLOUD_API_BASE_URL = 'https://sungso-homehunt-api.onrender.com/api';
 const ACTIVE_MARKET_API = IS_LOCAL_RUNTIME ? LOCAL_MARKET_API : CLOUD_API_BASE_URL;
 
 export const APP_CONFIG = Object.freeze({
@@ -39,13 +39,12 @@ export const APP_CONFIG = Object.freeze({
   officialComplexUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/kapt/complex` : '',
   localMarketEnabled: Boolean(ACTIVE_MARKET_API),
   apartmentHistoryMonths: 60,
-  // The endpoint URL is kept for deployment, but requests stay off until the
-  // Firebase Function and its secret are actually deployed. This prevents a
-  // missing CORS response from being misreported as a user's network failure.
+  // Live history uses the active server; an empty cloud URL disables online
+  // requests while preserving the public collected files and personal backups.
   apartmentHistoryEnabled: Boolean(ACTIVE_MARKET_API),
   // UI and localhost API evolve independently. Keep appVersion as a backwards
   // compatible alias for code that still reads the API contract version.
-  uiVersion: '4.13.0',
+  uiVersion: '4.13.1',
   localApiContractVersion: '2.9.0',
   appVersion: '2.9.0',
 });

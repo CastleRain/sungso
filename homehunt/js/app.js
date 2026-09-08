@@ -1,24 +1,24 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.13.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.13.0';
-import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.0';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.13.0';
-import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.0';
-import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.0';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.13.1';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.13.1';
+import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.13.1';
+import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
+import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.13.0';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.13.1';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.13.0';
-import { mountCloudPanel } from './cloud-panel.js?v=4.13.0';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.13.1';
+import { mountCloudPanel } from './cloud-panel.js?v=4.13.1';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.0';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.0';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.1';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.13.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.13.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.13.1';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.13.1';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -31,9 +31,9 @@ import {
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
 } from './storage.js?v=2.5.0';
-import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.13.0';
-import { createSupplyLocationService } from './supply-location-service.mjs?v=4.13.0';
-import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.13.0';
+import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.13.1';
+import { createSupplyLocationService } from './supply-location-service.mjs?v=4.13.1';
+import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.13.1';
 import { fetchHistoryProgressively, historyElapsedLabel, missingHistoryDetails, isCompleteHistoryPayload } from './history-query-service.mjs?v=4.4.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
@@ -79,7 +79,7 @@ import {
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.13.0';
+} from './ui-format.js?v=4.13.1';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -3704,7 +3704,9 @@ function renderComplexUnavailable(code = 'unavailable') {
     message: description.message,
     detail: code === 'not-deployed'
       ? '공식 단지 검색 정상 · 단지별 가격 서버 미배포'
-      : code === 'key-required' ? '로컬 서버 정상 · 키는 .env 또는 실행 메모리로 연결' : '공식 단지 선택 정보는 유지했습니다.',
+      : code === 'key-required' ? APP_CONFIG.isLocalRuntime === false
+        ? '온라인 서버 정상 · 운영 서버의 국토부 연결 설정 확인 필요'
+        : '로컬 서버 정상 · 키는 .env 또는 실행 메모리로 연결' : '공식 단지 선택 정보는 유지했습니다.',
   });
 }
 
@@ -6905,8 +6907,10 @@ function updateLocalConnectionUi(health = null, error = null) {
     : `${APP_CONFIG.isLocalRuntime === false ? '온라인 서버' : '로컬 서버'} 정상 · ${Number(health.catalogCount || 0).toLocaleString('ko-KR')}개 서울·경기 단지`;
   serverCheck.classList.toggle('connection-warning', state.localMarketOutdated);
   const keyConnectionLabel = APP_CONFIG.isLocalRuntime === false ? '서버 비밀 설정 연결' : health.keySource === 'environment' ? '.env/환경변수 자동 연결' : '메모리 연결';
+  const cacheLabel = Number.isSafeInteger(health.cache?.months) && health.cache.months >= 0
+    ? `월 캐시 ${health.cache.months.toLocaleString('ko-KR')}개` : '공공 월 자료 재사용';
   historyCheck.textContent = health.keyConfigured
-    ? `국토부 키 ${keyConnectionLabel} · 월 캐시 ${Number(health.cache?.months || 0).toLocaleString('ko-KR')}개${state.localMarketOutdated ? ` · 현재 최대 ${state.localHistoryMonthsMax / 12}년` : ' · 최대 5년'}`
+    ? `국토부 키 ${keyConnectionLabel} · ${cacheLabel}${state.localMarketOutdated ? ` · 현재 최대 ${state.localHistoryMonthsMax / 12}년` : ' · 최대 5년'}`
     : '국토부 키를 연결하면 실제 매매·전월세 조회 가능';
   historyCheck.classList.toggle('connection-warning', !health.keyConfigured || state.localMarketOutdated);
   state.transportConfig = {
@@ -7430,7 +7434,7 @@ function renderRecommendationDecisionBar() {
   const description = $('#commuteVerificationPlan');
   const quotaKnown = selectedQuota.available !== false && remaining !== null && remaining !== undefined && Number.isFinite(Number(remaining))
     && selectedQuota.limit !== null && selectedQuota.limit !== undefined && Number.isFinite(Number(selectedQuota.limit));
-  const quotaCopy = quotaKnown ? `${providerLabel} 오늘 남은 ${Number(remaining).toLocaleString('ko-KR')}/${Number(selectedQuota.limit).toLocaleString('ko-KR')}회 (로컬 기준). ` : `${providerLabel} 오늘 사용량 확인 필요. `;
+  const quotaCopy = quotaKnown ? `${providerLabel} 오늘 남은 ${Number(remaining).toLocaleString('ko-KR')}/${Number(selectedQuota.limit).toLocaleString('ko-KR')}회 (${APP_CONFIG.isLocalRuntime === false ? '서버 공유 기준' : '로컬 기준'}). ` : `${providerLabel} 오늘 사용량 확인 필요. `;
   if (description) description.textContent = `${quotaCopy}${plan.candidateCount}곳 × 대중교통 목적지 ${plan.callsPerCandidate}곳 = 최대 ${plan.maxNewTransitCalls}회입니다. 가격 검색·후보 다시 보기는 경로 호출 0회입니다.${provider === 'kakao' ? ' 입력한 출발시각은 Kakao 경로에 반영되지 않습니다.' : ''}`;
   const receipt = $('#commuteBatchReceipt');
   if (receipt) {
