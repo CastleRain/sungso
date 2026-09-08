@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { createMemoryFirestore } from './helpers/firestore-memory.mjs';
 import { createRecommendationJobService } from '../server/recommendation-jobs.mjs';
-import { recommendationMonthFailure } from '../scripts/recommendation-data-safety.mjs';
+import { recommendationMonthFailure, recommendationMonthEvidence } from '../scripts/recommendation-data-safety.mjs';
 const require = createRequire(import.meta.url);
 const { loadMolitMonthWithFirestoreCache, fetchMolitMonthDirect, fetchApartmentHistoryDirect } = require('../../functions/molit.js');
 const serviceKey = 'test-only-service-key';
@@ -28,10 +28,46 @@ test('actual Firestore month loader preserves request identity for the recommend
   assert.equal(recommendationMonthFailure({ status: 'fulfilled', value: live }, identity), null);
   assert.equal(live.records[0].amountManWon, 55000);
   assert.equal(live.source, 'upstream');
+  assert.ok(Number.isFinite(Date.parse(live.updatedAt)));
   const cached = await loadMolitMonthWithFirestoreCache({ db, serviceKey, ...identity });
   assert.equal(recommendationMonthFailure({ status: 'fulfilled', value: cached }, identity), null);
   assert.equal(cached.source, 'cache');
+  assert.equal(cached.updatedAt, live.updatedAt);
   assert.equal(calls, 1);
+});
+
+test('an upstream outage keeps signed expired monthly prices as provisional evidence with the original collection date', async t => {
+  const db = createMemoryFirestore();
+  const collectedAt = '2026-09-08T01:00:00.000Z';
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse(collectedAt) });
+  let unavailable = false;
+  mockFetch(t, async () => unavailable ? { ok: false, status: 503 } : response());
+  await loadMolitMonthWithFirestoreCache({ db, serviceKey, ...identity });
+  t.mock.timers.tick(2 * 24 * 60 * 60 * 1000);
+  unavailable = true;
+  const stale = await loadMolitMonthWithFirestoreCache({ db, serviceKey, ...identity });
+  assert.equal(stale.source, 'stale-cache');
+  assert.equal(stale.updatedAt, collectedAt);
+  assert.equal(stale.warning.staleCacheUsed, true);
+  assert.equal(recommendationMonthEvidence({ status: 'fulfilled', value: stale }, identity).status, 'stale');
+
+  const service = createRecommendationJobService({ db,
+    loadCatalog: async () => ({ apartments: [{ catalogId: 'test-home', regionCode: '41135', name: '검증아파트',
+      dong: '검증동', aliases: [], households: 500, builtYear: 2005 }] }),
+    loadMonth: request => loadMolitMonthWithFirestoreCache({ ...request, db, serviceKey }),
+    idFactory: () => 'signed-stale-month-job',
+  });
+  const user = { householdId: 'test-household', uid: 'test-user' };
+  const created = await service.create({ regions: ['gyeonggi'], months: 1, maxPriceManWon: 60000 }, user);
+  await service.advance(created.jobId, user);
+  const result = await service.advance(created.jobId, user);
+  assert.equal(result.status, 'complete');
+  assert.equal(result.failedRequestCount, 1);
+  assert.equal(result.staleRequestCount, 1);
+  assert.equal(result.resultCount, 1, 'a failed refresh must not erase a previously observed matching price');
+  assert.equal(result.results[0].bestArea.averagePriceManWon, 55000);
+  assert.equal(result.results[0].priceProvisional, true);
+  assert.equal(result.results[0].priceCoverage.sourceUpdatedAt, collectedAt);
 });
 
 test('cloud job aggregates the real signed Firestore month envelope rather than returning zero invalid months', async t => {

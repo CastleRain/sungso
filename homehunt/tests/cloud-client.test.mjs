@@ -119,7 +119,7 @@ test('account changes during token retrieval never send that old token to the AP
 
 test('API snapshots use normalized JSON and revision checks, with no Firestore fallback on failure', async () => {
   const f = sdkFixture(); const calls = [];
-  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', loadSdk: f.loadSdk,
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', snapshotTransport: 'api', loadSdk: f.loadSdk,
     fetchImpl: async (url, options) => { calls.push({ url, options }); return new Response(JSON.stringify({
       snapshot: personal(), revision: 1, updatedAt: '2026-09-08T00:00:00.000Z',
     })); } });
@@ -130,6 +130,32 @@ test('API snapshots use normalized JSON and revision checks, with no Firestore f
   const body = JSON.parse(calls[0].options.body);
   assert.equal(body.expectedRevision, 0); assert.ok(!('routes' in body.snapshot));
   assert.deepEqual(f.writes, []);
+});
+
+test('enabling the search server preserves existing UID backups and uses tokens only for searches', async () => {
+  const f = sdkFixture(); const calls = [];
+  const previous = createCloudSession({ firebaseConfig, loadSdk: f.loadSdk });
+  await previous.signIn();
+  await previous.saveSnapshot(personal(), 0);
+  previous.destroy();
+  const current = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', loadSdk: f.loadSdk,
+    fetchImpl: async (url, options) => { calls.push({ url, options }); return new Response('{}'); } });
+  await current.init();
+  assert.equal(current.getState().apiConfigured, true);
+  assert.equal(current.getState().transport, 'firestore');
+  assert.equal((await current.loadSnapshot()).revision, 1);
+  assert.equal((await current.saveSnapshot(personal(), 1)).revision, 2);
+  assert.equal(calls.length, 0);
+  assert.ok(f.reads.every(path => path === 'homehunt_user_snapshots/uid-a'));
+  assert.ok(f.writes.every(path => path === 'homehunt_user_snapshots/uid-a'));
+  await current.apiFetch('/health');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].options.headers.get('authorization'), 'Bearer synthetic-test-id-token');
+});
+
+test('household snapshot transport requires an explicit configured API', () => {
+  assert.throws(() => createCloudSession({ firebaseConfig, snapshotTransport: 'api' }), error => error.code === 'INVALID_SNAPSHOT_TRANSPORT');
+  assert.throws(() => createCloudSession({ firebaseConfig, snapshotTransport: 'unknown' }), error => error.code === 'INVALID_SNAPSHOT_TRANSPORT');
 });
 
 test('free Firestore adapter shares only the signed-in user path, uses online load and atomic revisions', async () => {

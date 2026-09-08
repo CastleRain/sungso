@@ -28,7 +28,7 @@ test('Pages enables private Firebase storage while undeployed search endpoints r
   assert.equal(value.cloudApiBaseUrl, '');
   assert.equal(value.localMarketEnabled, false);
   assert.equal(value.apartmentHistoryEnabled, false);
-  for (const field of ['recommendationUrl', 'commuteUrl', 'commuteBatchUrl', 'commuteQuotaUrl', 'placeSearchUrl', 'localMarketHealthUrl']) assert.equal(value[field], '');
+  for (const field of ['recommendationUrl', 'commuteUrl', 'commuteBatchUrl', 'commuteQuotaUrl', 'placeSearchUrl', 'localMarketHealthUrl', 'officialComplexUrl']) assert.equal(value[field], '');
 });
 
 test('localhost keeps working independently of Firebase authentication and remote API configuration', () => {
@@ -37,11 +37,12 @@ test('localhost keeps working independently of Firebase authentication and remot
   assert.equal(value.localMarketEnabled, true);
   assert.equal(value.recommendationUrl, 'http://127.0.0.1:8787/api/recommendations');
   assert.equal(value.localMarketConfigUrl, 'http://127.0.0.1:8787/api/config');
+  assert.equal(value.officialComplexUrl, 'http://127.0.0.1:8787/api/kapt/complex');
 });
 
 test('a deployed cloud API activates all search endpoints without exposing the key configuration endpoint', () => {
   const value = configFor('castlerain.github.io', 'https://deployed.example.test/api');
-  for (const field of ['recommendationUrl', 'commuteUrl', 'commuteBatchUrl', 'commuteQuotaUrl', 'placeSearchUrl', 'localMarketHealthUrl', 'apartmentHistoryUrl']) assert.ok(value[field].startsWith('https://deployed.example.test/api/'));
+  for (const field of ['recommendationUrl', 'commuteUrl', 'commuteBatchUrl', 'commuteQuotaUrl', 'placeSearchUrl', 'localMarketHealthUrl', 'apartmentHistoryUrl', 'officialComplexUrl']) assert.ok(value[field].startsWith('https://deployed.example.test/api/'));
   assert.equal(value.localMarketConfigUrl, '');
   assert.equal(value.apartmentHistoryEnabled, true);
   assert.equal(value.supplyFeedUrl, './data/home-supply.json');

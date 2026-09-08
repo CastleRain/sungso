@@ -54,12 +54,18 @@ export function cloudSessionErrorMessage(error) {
 
 /** Tokens remain inside Firebase Auth; neither state nor storage/export
  * helpers expose them. The caller passes only the public Firebase config. */
-export function createCloudSession({ apiBaseUrl = '', firebaseConfig = {}, loadSdk = firebaseSdk, fetchImpl = globalThis.fetch } = {}) {
+export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'firestore', firebaseConfig = {}, loadSdk = firebaseSdk, fetchImpl = globalThis.fetch } = {}) {
   const base = apiBase(apiBaseUrl);
+  // Enabling online search must not silently move existing personal backups
+  // into a different household collection. Shared snapshots require an explicit
+  // choice, independent of whether the search API has been deployed.
+  if (!['firestore', 'api'].includes(snapshotTransport) || snapshotTransport === 'api' && !base) {
+    throw new CloudSnapshotError('기록 저장 연결 설정을 확인해주세요.', 'INVALID_SNAPSHOT_TRANSPORT');
+  }
   const configured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.authDomain);
   let sdk; let auth; let user = null; let privateStore; let initializing; let unsubscribeAuth;
   let generation = 0;
-  let state = { configured, apiConfigured: Boolean(base), transport: base ? 'api' : 'firestore',
+  let state = { configured, apiConfigured: Boolean(base), transport: snapshotTransport,
     status: configured ? 'idle' : 'unconfigured', user: null, error: null };
   const listeners = new Set();
   const getState = () => ({ ...state, user: state.user ? { ...state.user } : null });
@@ -135,14 +141,14 @@ export function createCloudSession({ apiBaseUrl = '', firebaseConfig = {}, loadS
     },
     async signOut() { await init(); if (auth) await sdk.signOut(auth); },
     async loadSnapshot() {
-      if (base) return snapshotResponse(await apiFetch('/household/snapshot'));
+      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot'));
       await init();
       if (!privateStore) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
       return privateStore.load();
     },
     async saveSnapshot(snapshot, expectedRevision) {
       const safe = normalizeCloudSnapshot(snapshot);
-      if (base) return snapshotResponse(await apiFetch('/household/snapshot', {
+      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot', {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ snapshot: safe, expectedRevision }),
       }));
       await init();

@@ -67,6 +67,7 @@ function setup(overrides = {}) {
     },
     history: async () => { calls.push(['history']); return { ok: true }; },
     places: async () => { calls.push(['places']); return { ok: true }; },
+    officialComplex: async query => { calls.push(['facility', query]); return { ok: true, provider: 'kapt' }; },
     rateLimit: createApiRateLimit({ db, now: () => instant }),
     ...overrides,
   };
@@ -89,6 +90,7 @@ test('every data/API route requires a verified bearer token before any provider 
   const routes = [
     ['/api/health', 'GET'], ['/api/commute/quota', 'GET'], ['/api/commute', 'POST'], ['/api/commute/batch', 'POST'],
     ['/api/place-search?query=test', 'GET'], ['/api/apartment-history', 'GET'], ['/api/recommendations', 'POST'],
+    ['/api/kapt/complex?catalogId=fixture', 'GET'],
     ['/api/recommendations/known-job', 'GET'], ['/api/recommendations/known-job/advance', 'POST'],
     ['/api/recommendations/known-job/retry', 'POST'],
     ['/api/recommendations/known-job', 'DELETE'], ['/api/household/snapshot', 'GET'], ['/api/household/snapshot', 'PUT'],
@@ -297,4 +299,30 @@ test('transactional household rate limit allows only three simultaneous price jo
   assert.equal(rateRows[0][1].used, 3);
   env.advanceTime(60000);
   assert.equal((await env.request('/api/recommendations', { method: 'POST', body: priceFilters })).statusCode, 202);
+});
+
+test('official facility GET is authenticated, dispatched with catalog identity, and not a client mutation route', async () => {
+  const env = setup();
+  const result = await env.request('/api/kapt/complex?catalogId=official-fixture');
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.body.provider, 'kapt');
+  assert.deepEqual(env.calls, [['facility', { catalogId: 'official-fixture' }]]);
+  assert.equal((await env.request('/api/kapt/complex', { method: 'POST', body: { catalogId: 'official-fixture' } })).statusCode, 404);
+  assert.equal(env.calls.length, 1);
+  const disabled = setup({ officialComplex: undefined });
+  assert.equal((await disabled.request('/api/kapt/complex?catalogId=official-fixture')).body.code, 'KAPT_NOT_CONFIGURED');
+});
+
+test('facility reads have their own bounded shared-family quota without starving search or route controls', async () => {
+  const env = setup();
+  for (let index = 0; index < 900; index++) {
+    const result = await env.request('/api/kapt/complex?catalogId=fixture', { token: index % 2 ? 'owner-token' : 'partner-token' });
+    assert.equal(result.statusCode, 200, `facility ${index + 1}`);
+  }
+  assert.equal((await env.request('/api/kapt/complex?catalogId=fixture')).statusCode, 429);
+  assert.equal(env.calls.filter(call => call[0] === 'facility').length, 900);
+  assert.equal((await env.request('/api/commute/batch', { method: 'POST', body: {} })).statusCode, 200);
+  assert.equal((await env.request('/api/recommendations', { method: 'POST', body: priceFilters })).statusCode, 202);
+  env.advanceTime(60_000);
+  assert.equal((await env.request('/api/kapt/complex?catalogId=fixture')).statusCode, 200);
 });
