@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
   <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply-location.css?v=4.13.0">
+  <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
   <link rel="stylesheet" href="./css/hh-tokens.css?v=4.4.0">
@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.13.0">
+  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.13.1">
   <link rel="stylesheet" href="./css/history-query.css?v=4.4.0">
   <link rel="stylesheet" href="./css/financial-plan.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-evidence.css?v=4.4.0">
@@ -54,14 +54,14 @@
   <link rel="stylesheet" href="./css/map-markers.css?v=4.4.0">
   <link rel="stylesheet" href="./css/personalized-recommendation.css?v=4.4.0">
   <link rel="stylesheet" href="./css/cloud-panel.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/candidate-review.css?v=4.13.0">
-  <link rel="stylesheet" href="./css/recommendation-toolbar.css?v=4.13.0">
-  <link rel="stylesheet" href="./css/official-complex.css?v=4.13.0">
-  <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.0">
-  <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.0">
-  <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.0">
+  <link rel="stylesheet" href="./css/candidate-review.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/recommendation-toolbar.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/official-complex.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.13.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.13.1" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -308,7 +308,7 @@
         </section>
 
         <section class="recommendation-status" id="recommendationStatus" aria-live="polite">
-          <div class="recommendation-status-copy"><span class="recommendation-status-icon"><i class="ti ti-sparkles" aria-hidden="true"></i></span><div><strong id="recommendationStatusTitle">조건을 읽고 실제 후보를 찾아보세요</strong><p id="recommendationStatusMessage">첫 전체 조회는 수십 초에서 몇 분 걸릴 수 있지만, 월별 결과를 로컬 파일에 저장해 다음 조회부터 빨라집니다.</p></div></div>
+          <div class="recommendation-status-copy"><span class="recommendation-status-icon"><i class="ti ti-sparkles" aria-hidden="true"></i></span><div><strong id="recommendationStatusTitle">조건을 읽고 실제 후보를 찾아보세요</strong><p id="recommendationStatusMessage">첫 전체 조회는 수십 초에서 몇 분 걸릴 수 있지만, 확인한 공공 월 자료를 재사용해 다음 조회부터 빨라집니다.</p></div></div>
           <div class="recommendation-progress" id="recommendationProgress" hidden><span><i id="recommendationProgressBar"></i></span><small id="recommendationProgressLabel">준비 중</small></div>
           <button class="outline-btn" id="cancelRecommendation" type="button" hidden><i class="ti ti-x" aria-hidden="true"></i><span>조회 취소</span></button>
         </section>
@@ -657,10 +657,10 @@
           </article>
 
           <article class="connection-card" id="molitConnectionCard">
-            <div class="connection-card-top"><span class="service-logo molit-logo"><i class="ti ti-database-search" aria-hidden="true"></i></span><span class="service-state checking" id="molitState">로컬 확인 중</span></div>
-            <h2>국토부 아파트 실거래</h2><p>로컬 전용 서버가 Git에서 제외된 <code>homehunt/.env</code> 또는 실행 메모리의 서비스키로 매매·전월세를 조회합니다. 공개 코드와 브라우저 저장소에는 키를 남기지 않습니다.</p>
-            <ul><li id="localMarketServerCheck">로컬 실거래 서버 확인 중</li><li id="apartmentHistoryApiCheck">단지 이력 API 상태 확인 중</li><li>서울·경기 · 실제 전용면적별 가격</li><li>월 원자료와 단지 이력을 로컬 캐시</li></ul>
-            <div class="connection-button-row"><button type="button" id="openLocalKeySetup">로컬 키 연결</button><button type="button" id="openApiGuide">배포 연결 보기</button></div>
+            <div class="connection-card-top"><span class="service-logo molit-logo"><i class="ti ti-database-search" aria-hidden="true"></i></span><span class="service-state checking" id="molitState">연결 확인 중</span></div>
+            <h2>국토부 아파트 실거래</h2><p>온라인에서는 허용된 Google 계정으로 로그인해 실제 매매·전월세를 조회합니다. API 키는 검색 서버에만 보관하며, 로컬 실행은 이 컴퓨터의 서버를 사용합니다.</p>
+            <ul><li id="localMarketServerCheck">실거래 서버 확인 중</li><li id="apartmentHistoryApiCheck">단지 이력 API 상태 확인 중</li><li>서울·경기 · 실제 전용면적별 가격</li><li>확인한 공공 월 자료·단지 이력 재사용</li></ul>
+            <div class="connection-button-row"><button type="button" id="openLocalKeySetup">연결 확인</button><button type="button" id="openApiGuide">실거래 이용 안내</button></div>
             <details class="connection-advanced"><summary>수동 데이터 관리</summary><div class="connection-button-row"><label class="outline-btn file-btn" for="marketCsvInput"><i class="ti ti-file-import" aria-hidden="true"></i><span>국토부 CSV 가져오기</span></label><input id="marketCsvInput" type="file" accept=".csv,text/csv" hidden><button type="button" id="refreshMarketFile"><i class="ti ti-refresh" aria-hidden="true"></i><span>배포 데이터 다시 읽기</span></button></div><small>평소 단지 검색에는 필요하지 않습니다. 별도 집계 파일을 점검할 때만 사용하세요.</small></details>
           </article>
 
@@ -673,7 +673,7 @@
 
           <article class="connection-card" id="commuteConnectionCard">
             <div class="connection-card-top"><span class="service-logo commute-logo"><i class="ti ti-route" aria-hidden="true"></i></span><span class="service-state checking" id="commuteState">확인 중</span></div>
-            <h2>회사 통근 경로</h2><p>회사와 후보 주소는 네이버 지도에서 좌표로 확인합니다. 버스·지하철은 선택한 Kakao 또는 TMAP의 실제 경로, 자동차는 NAVER Directions 5를 로컬 서버에서만 호출합니다.</p>
+            <h2>회사 통근 경로</h2><p>회사와 후보 주소는 네이버 지도에서 좌표로 확인합니다. 통근 확인을 누르면 검색 서버가 버스·지하철은 선택한 Kakao 또는 TMAP으로, 자동차는 NAVER Directions 5로 조회합니다. Kakao·NAVER 경로는 현재 화면에서만 사용합니다.</p>
             <ul><li id="companyGeocodeCheck">회사 주소 좌표 확인 대기</li><li id="transitRouteCheck">대중교통 공급자 확인 중</li><li id="carRouteCheck">NAVER 자동차 경로 키 확인 중</li><li>미연결 값은 1시간 조건 충족으로 표시하지 않음</li></ul>
             <div class="connection-button-row"><button type="button" data-open-local-key>경로 키 연결</button><a href="https://transit.tmapmobility.com/docs/routes/sub" target="_blank" rel="noopener noreferrer">TMAP 문서</a></div>
           </article>
@@ -726,7 +726,7 @@
             <article><i class="ti ti-chart-line" aria-hidden="true"></i><div><h3>실거래</h3><p>단지와 전용면적을 고르면 국토부 실제 계약의 평균가격과 흐름을 확인합니다. 예측은 오차 검증을 통과한 경우만 참고로 표시합니다.</p></div><button type="button" data-view-target="market">열기</button></article>
             <article><i class="ti ti-building-community" aria-hidden="true"></i><div><h3>분양·청약</h3><p>서울·경기 청약홈·LH·SH 공고 중 신혼 관련·동네·가격·면적·세대수 조건에 맞는 공고를 보고 알림을 설정합니다.</p></div><button type="button" data-view-target="supply">열기</button></article>
             <article><i class="ti ti-help-circle" aria-hidden="true"></i><div><h3>사용 안내</h3><p>처음 시작 순서, 화면별 역할, 휴대폰 알림과 두 사람의 청약 준비도 입력 범위를 확인합니다.</p></div><button type="button" data-view-target="guide">열기</button></article>
-            <article><i class="ti ti-plug-connected" aria-hidden="true"></i><div><h3>연결 상태</h3><p>지도·실거래·분양·회사 검색·통근 API가 실제 연결됐는지 확인하고 로컬 키를 설정합니다.</p></div><button type="button" data-view-target="connections">열기</button></article>
+            <article><i class="ti ti-plug-connected" aria-hidden="true"></i><div><h3>연결 상태</h3><p>Google 로그인과 지도·실거래·분양·회사 검색·통근의 연결 상태를 확인합니다.</p></div><button type="button" data-view-target="connections">열기</button></article>
           </div>
           <div class="guide-data-note"><i class="ti ti-shield-lock" aria-hidden="true"></i><div><strong>개인 기록과 청약 프로필은 이 브라우저에만 저장됩니다.</strong><p>방문 주소나 두 사람의 입력값을 공개 GitHub·공개 Firestore에 올리지 않습니다. 실제 자격과 가격은 공식 공고문·계약 전 서류로 다시 확인하세요.</p></div></div>
         </section>
@@ -839,15 +839,13 @@
 
   <div class="modal-backdrop" id="apiGuideModal" hidden>
     <section class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="apiGuideTitle">
-      <header class="modal-head"><div><span>OFFICIAL DATA SETUP</span><h2 id="apiGuideTitle">국토부 실거래 연결</h2></div><button class="modal-close" type="button" data-close-api-guide aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <header class="modal-head"><div><span>OFFICIAL DATA</span><h2 id="apiGuideTitle">실거래 이용 안내</h2></div><button class="modal-close" type="button" data-close-api-guide aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
       <ol class="setup-steps">
-        <li><span>1</span><div><strong>공공데이터포털 활용 신청</strong><p>아파트 매매(15126469)와 전월세(15126474) 실거래가 API를 모두 신청합니다.</p><a href="https://www.data.go.kr/data/15126469/openapi.do" target="_blank" rel="noopener noreferrer">매매 API 신청</a> · <a href="https://www.data.go.kr/data/15126474/openapi.do" target="_blank" rel="noopener noreferrer">전월세 API 신청</a></div></li>
-        <li><span>2</span><div><strong>비밀키를 두 곳에 등록</strong><p>GitHub Actions에는 <code>DATA_GO_KR_SERVICE_KEY</code>, Firebase Secret Manager에는 <code>MOLIT_SERVICE_KEY</code>로 저장합니다. 채팅이나 코드 파일에는 키를 붙여넣지 마세요.</p></div></li>
-        <li><span>3</span><div><strong>일일 집계 실행</strong><p>Actions의 “Update HomeHunt market data”를 수동 실행하면 이후 매일 자동으로 지역·단지 JSON이 갱신됩니다.</p></div></li>
-        <li><span>4</span><div><strong>첫 단지 검색 함수 배포</strong><p><code>firebase functions:secrets:set MOLIT_SERVICE_KEY</code> 후 <code>firebase deploy --only functions:apartmentHistory</code>를 실행합니다.</p></div></li>
-        <li><span>5</span><div><strong>서버 캐시 규칙 배포</strong><p><code>firebase deploy --only firestore:rules</code>로 실거래 캐시와 호출 제한 문서의 브라우저 쓰기를 막습니다.</p></div></li>
+        <li><span>1</span><div><strong>온라인 검색은 Google 로그인 후</strong><p>연결 상태에서 허용된 계정으로 로그인하세요. 공개 실거래 집계·분양 공고와 이 기기에 저장한 기록은 로그인 전에도 볼 수 있습니다.</p></div></li>
+        <li><span>2</span><div><strong>조건으로 찾거나 단지별 가격 확인</strong><p>집 찾기에서 조건을 적용하거나 실거래에서 단지를 고르면 공식 매매·전월세 자료를 조회합니다. 확인한 공공 자료는 다음 조회에 재사용하며, 일부 월 조회가 실패해도 확인한 결과를 먼저 보여줍니다.</p></div></li>
+        <li><span>3</span><div><strong>통근은 필요한 후보부터 직접 확인</strong><p>가격 검색만으로 통근 경로를 호출하지 않습니다. 통근 확인 버튼 또는 직접 시작한 자동 확인이 회사별 경로를 조회하며, 실제 사용량과 오늘 남은 횟수를 표시합니다.</p></div></li>
       </ol>
-      <p class="guide-note">localhost에서는 로컬 서버에 키가 연결되면 국토부 실제 실거래를 즉시 사용합니다. GitHub Pages 배포본은 Firebase Function을 배포하기 전까지 저장된 공개 데이터와 명시된 UI 샘플만 표시합니다.</p>
+      <p class="guide-note">무료 온라인 서버는 오랜만에 접속하면 준비에 약 1분 걸릴 수 있습니다. 그동안 저장한 기록을 볼 수 있습니다. localhost에서는 이 컴퓨터의 서버를 사용하며, 클라우드 기록은 저장·복원을 눌렀을 때만 반영합니다.</p>
     </section>
   </div>
 
@@ -1002,10 +1000,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.13.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.13.1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.13.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.13.0"></script>
+  <script type="module" src="./js/app.js?v=4.13.1"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.13.1"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

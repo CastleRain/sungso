@@ -551,6 +551,38 @@ test('list-only absence and candidate-limit ambiguity carry the actual listing e
   }
 });
 
+test('an exact canonical bare phase number remains matchable when aliases expand the same number to a danji', async () => {
+  const house = { ...catalog, name: '가상칸타빌1', aliases: ['가상칸타빌1단지', '가상칸타빌1단지 101동'] };
+  const row = { ...listed, kaptName: house.name };
+  const source = { ...basic, kaptName: house.name };
+  const { provider, calls } = fixtureProvider({ handler: async part => response(envelope(part,
+    part === 'list' ? [row] : part === 'basic' ? source : detail)) });
+  const result = await provider.getComplexInfo(house);
+  assert.equal(result.status, 'matched');
+  assert.equal(result.matchMethod, 'legal-area-parcel-name');
+  assert.equal(result.parking.totalSpaces, 650);
+  assert.deepEqual(calls.map(call => call.part), ['list', 'basic', 'detail']);
+  const repeated = await provider.getComplexInfo(house);
+  assert.equal(repeated.cache.hit, true);
+  assert.equal(calls.length, 3);
+});
+
+test('canonical bare-number exception still rejects different phases, prefix variants, conflicting aliases and combined registrations', () => {
+  const house = { ...catalog, name: '가상칸타빌1', aliases: ['가상칸타빌1단지'] };
+  const row = { ...listed, kaptName: house.name }, source = { ...basic, kaptName: house.name };
+  for (const name of ['가상칸타빌2', '가상칸타빌', '서울가상칸타빌1', '가상칸타빌1,2단지']) {
+    assert.equal(matchKaptComplex(house, { ...source, kaptName: name }, { ...row, kaptName: name }), null, name);
+  }
+  for (const aliases of [['가상칸타빌2단지'], ['가상칸타빌1단지', '가상칸타빌2단지'], ['가상칸타빌1,2단지']]) {
+    assert.equal(matchKaptComplex({ ...house, aliases }, source, row), null, aliases.join(','));
+  }
+  assert.equal(matchKaptComplex({ ...house, name: '가상칸타빌', aliases: ['가상칸타빌1단지'] },
+    { ...source, kaptName: '가상칸타빌' }, { ...row, kaptName: '가상칸타빌' }), null);
+  assert.equal(matchKaptComplex(house, { ...source, kaptAddr: source.kaptAddr.replace('123-4', '999') }, row), null);
+  assert.equal(matchKaptComplex(house, { ...source, bjdCode: '1111012345' }, row), null);
+  assert.equal(matchKaptComplex(house, { ...source, kaptCode: 'A99999999' }, row), null);
+});
+
 test('a unique match also expires when an older rejected competing basic row expires', async () => {
   const start = Date.parse('2026-09-08T00:00:00Z');
   let now = start;

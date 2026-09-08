@@ -1,8 +1,7 @@
 import test, { before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { initializeApp, deleteApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { Firestore } from 'firebase-admin/firestore';
 import { createFirestoreMaintenance, MAINTENANCE_INTERVAL_MS, MAINTENANCE_COLLECTION } from '../../server/firestore-maintenance.mjs';
 import { createFirestoreProviderQuota } from '../../server/provider-quota.mjs';
 
@@ -11,22 +10,26 @@ import { createFirestoreProviderQuota } from '../../server/provider-quota.mjs';
 const emulator = process.env.FIRESTORE_EMULATOR_HOST;
 if (!emulator || !/^(?:127\.0\.0\.1|localhost):\d+$/.test(emulator)) throw new Error('A localhost Firestore emulator is required');
 const [host, portText] = emulator.split(':');
+const previousMetadataDetection = process.env.METADATA_SERVER_DETECTION;
+process.env.METADATA_SERVER_DETECTION = 'none';
 const projectId = 'demo-homehunt';
 const start = Date.parse('2026-09-08T01:00:00Z');
 const DAY = 86_400_000;
 const expired = () => new Date(start - 2 * DAY);
-let environment, app, db;
+let environment, db;
 
 before(async () => {
   environment = await initializeTestEnvironment({ projectId, firestore: { host, port: Number(portText) } });
-  app = initializeApp({ projectId, credential: {
-    getAccessToken: async () => ({ access_token: 'owner', expires_in: 3600 }),
-  } }, 'maintenance-emulator-only');
-  db = getFirestore(app);
-  db.settings({ host: emulator, ssl: false });
+  // The underlying Admin Firestore client explicitly uses insecure emulator
+  // transport and its synthetic owner header; there is no credential lookup.
+  db = new Firestore({ projectId, host: emulator, ssl: false, universeDomain: 'googleapis.com' });
 });
 beforeEach(async () => { await environment.clearFirestore(); });
-after(async () => { await db?.terminate(); await deleteApp(app); await environment?.cleanup(); });
+after(async () => {
+  await db?.terminate(); await environment?.cleanup();
+  if (previousMetadataDetection === undefined) delete process.env.METADATA_SERVER_DETECTION;
+  else process.env.METADATA_SERVER_DETECTION = previousMetadataDetection;
+});
 
 test('real emulator runs timestamp range queries and transactional chunk cleanup without a composite index', async () => {
   const job = db.doc('homehunt_jobs/expired-job');
