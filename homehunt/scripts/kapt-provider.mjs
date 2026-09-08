@@ -251,7 +251,7 @@ function resultShell(catalog) {
 function safeError(error, part) { return error instanceof KaptProviderError ? error.toJSON() : new KaptProviderError('UPSTREAM_ERROR', { part }).toJSON(); }
 
 export function createKaptProvider({
-  apiKey, getApiKey = null, cacheDir = null, serverCacheDir = cacheDir, fetchImpl = globalThis.fetch,
+  apiKey, getApiKey = null, cacheDir = null, serverCacheDir = cacheDir, persistentCache = null, fetchImpl = globalThis.fetch,
   now = () => Date.now(), timeoutMs = 15_000, listTtlMs = 7 * DAY_MS,
   detailTtlMs = DAY_MS, pageSize = 1000, maxPages = 20, maxBasicLookups = 5,
   minRequestGapMs = 200, maxConcurrency = 2,
@@ -328,12 +328,38 @@ export function createKaptProvider({
       && entry.fetchedAt <= timestamp() && Number.isFinite(entry.expiresAt) && entry.expiresAt > timestamp()
       && entry.expiresAt <= entry.fetchedAt + (key.startsWith('list-') ? listTtlMs : detailTtlMs) && Array.isArray(entry.items);
   }
+  function normalizeCacheEntry(entry, key, part, identity) {
+    if (!cacheValid(entry, key)) return null;
+    try {
+      const items = entry.items.map(row => whitelist(row, part));
+      if (part !== 'list' && (items.length !== 1 || items[0].kaptCode !== identity)) return null;
+      if (part === 'list' && (items.some(row => bjd(row.bjdCode).slice(0, 5) !== identity)
+        || new Set(items.map(row => row.kaptCode)).size !== items.length)) return null;
+      return { schemaVersion: CACHE_VERSION, key, fetchedAt: entry.fetchedAt, expiresAt: entry.expiresAt, items };
+    } catch { return null; }
+  }
   async function cached(part, identity, loader) {
     const key = `${part}-${identity}`;
     if (!/^(?:list-(?:11|41)\d{3}|(?:basic|detail)-[A-Za-z0-9]{4,30})$/.test(key)) throw new KaptProviderError('INVALID_CATALOG', { part });
     if (inflight.has(key)) return inflight.get(key);
     const task = (async () => {
       let entry = memory.get(key);
+      // Cloud and local runtimes share the exact same allowlist, identity and
+      // TTL checks. The adapter stores public source rows, never caller data.
+      if (persistentCache && !normalizeCacheEntry(entry, key, part, identity)) {
+        const result = await persistentCache.getOrLoad({ key,
+          validate: value => normalizeCacheEntry(value, key, part, identity),
+          load: async () => {
+            const items = await loader(), fetchedAt = timestamp();
+            return { schemaVersion: CACHE_VERSION, key, fetchedAt,
+              expiresAt: fetchedAt + (part === 'list' ? listTtlMs : detailTtlMs), items };
+          } });
+        entry = normalizeCacheEntry(result?.entry, key, part, identity);
+        if (!entry) throw new KaptProviderError('INVALID_RESPONSE', { part });
+        memory.set(key, entry);
+        if (result.hit) stats.cacheHits += 1;
+        return { items: entry.items, fetchedAt: entry.fetchedAt, expiresAt: entry.expiresAt, hit: Boolean(result.hit) };
+      }
       if (!cacheValid(entry, key) && serverCacheDir) {
         try { entry = JSON.parse(await readFile(join(serverCacheDir, `${key}.json`), 'utf8')); } catch { entry = null; }
       }

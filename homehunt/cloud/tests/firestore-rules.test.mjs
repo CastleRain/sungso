@@ -108,6 +108,7 @@ test('private server caches, quotas, jobs, job chunks, and household records are
   for (const path of [
     'homehunt_households/family-a/snapshots/main', 'homehunt_route_cache/route',
     'homehunt_provider_usage/kakao-transit_2026-09-08', 'homehunt_request_limits/limit',
+    'homehunt_kapt_source_cache/list-41135',
     'homehunt_jobs/job', 'homehunt_jobs/job/chunks/catalog_0',
     'homehunt_apartment_cache/apt', 'homehunt_molit_month_cache/month',
     'homehunt_molit_month_cache/month/chunks/0000', 'homehunt_api_limits/limit', 'server_api_limits/limit',

@@ -332,7 +332,7 @@ async function writeMonthCache(db, ref, serviceKey, identity, result) {
 
   if (Buffer.byteLength(encoded, 'utf8') <= MONTH_CACHE_INLINE_LIMIT) {
     await ref.set({ ...common, chunkCount: 0, recordsGzipBase64: encoded });
-    return;
+    return fetchedAt;
   }
 
   const chunks = [];
@@ -346,6 +346,7 @@ async function writeMonthCache(db, ref, serviceKey, identity, result) {
   });
   batch.set(ref, { ...common, chunkCount: chunks.length, recordsGzipBase64: '' });
   await batch.commit();
+  return fetchedAt;
 }
 
 async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type, signal, beforeRequest }) {
@@ -365,7 +366,8 @@ async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type, signal, before
 
   const ttl = monthCacheTtl(dealYmd);
   if (cached && Date.now() - cached.fetchedAtMs < ttl) {
-    return { ...identity, records: cached.records, totalCount: cached.totalCount, source: 'cache', warning: null };
+    return { ...identity, records: cached.records, totalCount: cached.totalCount,
+      updatedAt: cached.fetchedAt, source: 'cache', warning: null };
   }
 
   let lastError;
@@ -373,10 +375,11 @@ async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type, signal, before
     try {
       const upstream = await fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal);
       signal?.throwIfAborted();
-      try { await writeMonthCache(db, ref, serviceKey, identity, upstream); }
+      let updatedAt = new Date().toISOString();
+      try { updatedAt = await writeMonthCache(db, ref, serviceKey, identity, upstream); }
       catch (cacheError) { console.warn('MOLIT month cache write failed:', cacheId, cacheError.message); }
       signal?.throwIfAborted();
-      return { ...identity, ...upstream, source: 'upstream', warning: null };
+      return { ...identity, ...upstream, updatedAt, source: 'upstream', warning: null };
     } catch (error) {
       signal?.throwIfAborted();
       lastError = error;
@@ -389,6 +392,9 @@ async function loadMonth({ db, serviceKey, lawdCd, dealYmd, type, signal, before
       ...identity,
       records: cached.records,
       totalCount: cached.totalCount,
+      // Preserve the signed source timestamp. A stale fallback is evidence
+      // from its original collection date, never a newly refreshed price.
+      updatedAt: cached.fetchedAt,
       source: 'stale-cache',
       warning: {
         dealYmd,

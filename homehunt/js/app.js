@@ -1,24 +1,24 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.12.1';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.12.1';
-import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.12.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.12.1';
-import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.12.1';
-import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.12.1';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.12.1';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.12.2';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.12.2';
+import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.12.2';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.12.2';
+import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.12.2';
+import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.12.2';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.12.2';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.12.1';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.12.2';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.6.1';
-import { mountCloudPanel } from './cloud-panel.js?v=4.6.1';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.12.2';
+import { mountCloudPanel } from './cloud-panel.js?v=4.12.2';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.12.1';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.12.1';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.12.2';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.12.2';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.12.1';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.12.1';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.12.2';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.12.2';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -31,9 +31,9 @@ import {
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
 } from './storage.js?v=2.5.0';
-import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.12.1';
-import { createSupplyLocationService } from './supply-location-service.mjs?v=4.12.1';
-import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.12.1';
+import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.12.2';
+import { createSupplyLocationService } from './supply-location-service.mjs?v=4.12.2';
+import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.12.2';
 import { fetchHistoryProgressively, historyElapsedLabel, missingHistoryDetails, isCompleteHistoryPayload } from './history-query-service.mjs?v=4.4.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
@@ -79,7 +79,7 @@ import {
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.12.1';
+} from './ui-format.js?v=4.12.2';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -223,6 +223,8 @@ let railStationsPromise;
 let locationRankingCache;
 let officialComplexReady = false;
 let officialComplexRenderTimer = null;
+let officialComplexAuthSuspension = null;
+let officialComplexAuthTransition = 0;
 const officialComplexProgressViews = new WeakMap();
 const officialComplexClient = createOfficialComplexClient({
   url: APP_CONFIG.officialComplexUrl, fetchImpl: fetch,
@@ -236,12 +238,67 @@ const officialComplexClient = createOfficialComplexClient({
 });
 const officialComplexQueue = createOfficialComplexQueue({
   isFresh: candidate => officialComplexClient.isFresh(candidate),
-  load: (candidate, options) => officialComplexClient.load(candidate, options),
+  load: (candidate, options) => officialComplexMayLoad()
+    ? officialComplexClient.load(candidate, options)
+    : { status: 'unavailable', errors: [{ code: 'ACCESS_DENIED' }] },
   onProgress: () => {
     renderOfficialComplexProgress($('#recommendationOfficialProgress'));
     renderOfficialComplexProgress($('#candidateReviewOfficialProgress'));
   },
 });
+
+function officialComplexRequiresAuthentication() {
+  return Boolean(APP_CONFIG.officialComplexUrl) && APP_CONFIG.isLocalRuntime === false;
+}
+
+function officialComplexMayLoad() {
+  return !officialComplexRequiresAuthentication() || cloudSession.getState().status === 'signed-in';
+}
+
+function suspendOfficialComplexForAuthentication() {
+  if (!officialComplexAuthSuspension) {
+    officialComplexAuthSuspension = { resume: !officialComplexQueue.snapshot().paused };
+  }
+  officialComplexQueue.pause();
+}
+
+async function synchronizeOfficialComplexAuthentication() {
+  const transition = ++officialComplexAuthTransition;
+  if (!officialComplexRequiresAuthentication()) return;
+  if (!officialComplexMayLoad()) {
+    suspendOfficialComplexForAuthentication();
+    return;
+  }
+  const suspension = officialComplexAuthSuspension;
+  if (suspension) {
+    // Let an old authenticated request settle before retrying auth-interrupted
+    // work. Completed public facts stay in the client cache across sign-in.
+    await officialComplexQueue.whenIdle();
+    if (transition !== officialComplexAuthTransition || !officialComplexMayLoad()) return;
+    officialComplexAuthSuspension = null;
+    if (suspension.resume) officialComplexQueue.retry();
+  }
+  synchronizeOfficialComplexCandidates();
+}
+
+function setOfficialComplexPaused(paused) {
+  if (paused) {
+    if (officialComplexAuthSuspension) officialComplexAuthSuspension.resume = false;
+    return officialComplexQueue.pause();
+  }
+  if (!officialComplexMayLoad() || officialComplexAuthSuspension) {
+    suspendOfficialComplexForAuthentication();
+    officialComplexAuthSuspension.resume = true;
+    if (officialComplexMayLoad()) void synchronizeOfficialComplexAuthentication();
+    return;
+  }
+  return officialComplexQueue.resume();
+}
+
+function retryOfficialComplexCandidates() {
+  if (!officialComplexMayLoad() || officialComplexAuthSuspension) return setOfficialComplexPaused(false);
+  return officialComplexQueue.retry();
+}
 
 function flushOfficialComplexResults() {
   // Do not replace a card while a person is entering their own parking facts.
@@ -258,8 +315,8 @@ function renderOfficialComplexProgress(root) {
   let view = officialComplexProgressViews.get(root);
   if (!view) {
     view = createOfficialComplexProgress(root, {
-      onRetry: () => officialComplexQueue.retry(),
-      onPause: paused => paused ? officialComplexQueue.pause() : officialComplexQueue.resume(),
+      onRetry: retryOfficialComplexCandidates,
+      onPause: setOfficialComplexPaused,
     });
     officialComplexProgressViews.set(root, view);
   }
@@ -268,6 +325,11 @@ function renderOfficialComplexProgress(root) {
 
 function synchronizeOfficialComplexCandidates({ revalidate = false } = {}) {
   if (!officialComplexReady) return;
+  if (!officialComplexMayLoad()) {
+    suspendOfficialComplexForAuthentication();
+    return;
+  }
+  if (officialComplexAuthSuspension) return;
   // Saved homes come first; every price candidate follows, regardless of the
   // selected map region or commute tab. Only public catalog IDs are requested.
   // Repainting, sorting or changing map scope must not restart completed work.
@@ -5072,6 +5134,7 @@ function initializeCloudConnection() {
       const uid = next.user?.uid || null;
       if (APP_CONFIG.isLocalRuntime === false && APP_CONFIG.cloudApiBaseUrl && uid !== previousUid) {
         previousUid = uid;
+        void synchronizeOfficialComplexAuthentication();
         if (uid) void checkLocalMarketConnection();
         else {
           void cancelRecommendation(false);

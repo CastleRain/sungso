@@ -10,7 +10,7 @@ const knownError = error => error instanceof ApiError || error instanceof Recomm
   || error instanceof CloudSnapshotError || error instanceof CloudCommuteError;
 
 /** Platform-neutral authenticated handler: Firebase Functions and Vercel. */
-export function createHomehuntApi({ authenticate, jobs, household, commute, health, history, places, rateLimit = async () => {}, origins = DEFAULT_ORIGINS }) {
+export function createHomehuntApi({ authenticate, jobs, household, commute, health, history, places, officialComplex, rateLimit = async () => {}, origins = DEFAULT_ORIGINS }) {
   const allowed = new Set(origins);
   return async (req, res) => {
     res.setHeader('Cache-Control', 'private, no-store');
@@ -60,6 +60,10 @@ export function createHomehuntApi({ authenticate, jobs, household, commute, heal
       if (path === '/commute/batch' && req.method === 'POST') return send(200, await commute.batch(body));
       if (path === '/apartment-history' && req.method === 'GET') return send(200, await history(Object.fromEntries(url.searchParams)));
       if (path === '/place-search' && req.method === 'GET') return send(200, await places(url.searchParams.get('query')));
+      if (path === '/kapt/complex' && req.method === 'GET') {
+        if (!officialComplex) throw new ApiError('KAPT_NOT_CONFIGURED', '공식 시설정보 연결이 필요합니다.', 503);
+        return send(200, await officialComplex(Object.fromEntries(url.searchParams)));
+      }
       return send(404, { ok: false, code: 'NOT_FOUND', error: '지원하지 않는 요청입니다.' });
     } catch (error) {
       // Provider errors can include URLs/credentials. Only our typed errors have

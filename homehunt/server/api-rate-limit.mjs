@@ -5,8 +5,11 @@ export function createApiRateLimit({ db, now = Date.now }) {
   return async (context, path, method) => {
     if (method === 'GET' && ['/health', '/commute/quota', '/household/snapshot'].includes(path)) return;
     const minute = Math.floor(now() / 60000);
-    const kind = path === '/recommendations' ? 'create' : path === '/apartment-history' ? 'history' : 'other';
-    const limit = kind === 'create' ? 3 : kind === 'history' ? 6 : 60;
+    const kind = path === '/recommendations' ? 'create' : path === '/apartment-history' ? 'history'
+      : path === '/kapt/complex' && method === 'GET' ? 'facility' : 'other';
+    // A normal price result can contain 579 already-cached facilities. Keep
+    // their bounded read queue separate from job polling and route controls.
+    const limit = kind === 'create' ? 3 : kind === 'history' ? 6 : kind === 'facility' ? 900 : 60;
     const key = createHash('sha256').update(`${context.householdId}|${kind}|${minute}`).digest('hex');
     const ref = db.doc(`homehunt_request_limits/${key}`);
     await db.runTransaction(async tx => {

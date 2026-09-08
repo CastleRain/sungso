@@ -41,6 +41,7 @@ service cloud.firestore {
     match /homehunt_route_cache/{document} { allow read, write: if false; }
     match /homehunt_provider_usage/{document} { allow read, write: if false; }
     match /homehunt_request_limits/{document} { allow read, write: if false; }
+    match /homehunt_kapt_source_cache/{document} { allow read, write: if false; }
     match /homehunt_jobs/{document=**} { allow read, write: if false; }
     // Server-only HomeHunt state. Admin SDK calls bypass these rules.
     match /homehunt_apartment_cache/{document} {

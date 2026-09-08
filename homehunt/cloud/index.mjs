@@ -11,6 +11,7 @@ import { createHomehuntApi } from '../server/http-api.mjs';
 import { createRecommendationJobService } from '../server/recommendation-jobs.mjs';
 import { createHouseholdStore } from '../server/household-store.mjs';
 import { createCloudCommuteService } from '../server/commute-service.mjs';
+import { createCloudKaptService } from '../server/kapt-service.mjs';
 import { fetchNaverLocalSearch } from '../scripts/naver-local-search.mjs';
 import molit from '../../functions/molit.js';
 
@@ -29,15 +30,18 @@ function api() {
   // gate rejects missing identity, partial data and stale monthly fallbacks.
   const loadMonth = request => molit.loadMolitMonthWithFirestoreCache({ ...request, db, serviceKey: env.MOLIT_SERVICE_KEY });
   const commute = createCloudCommuteService({ db, env });
+  const kapt = createCloudKaptService({ db, env, loadCatalog });
   handler = createHomehuntApi({
     authenticate: createAuthGate({ auth: getAuth(), db }),
     rateLimit: createApiRateLimit({ db }),
     jobs: createRecommendationJobService({ db, loadCatalog, loadMonth }),
     household: createHouseholdStore({ db }), commute,
+    officialComplex: kapt.complex,
     health: async () => {
       const quota = await commute.quota();
       const catalog = await loadCatalog();
-      return { ok: true, version: '2.6.3', runtime: 'firebase', keyConfigured: Boolean(env.MOLIT_SERVICE_KEY), keySource: 'secret-manager',
+      return { ok: true, version: '2.9.0', runtime: 'firebase', keyConfigured: Boolean(env.MOLIT_SERVICE_KEY), keySource: 'secret-manager',
+        officialComplex: kapt.configuration(),
         commute: { ...commute.configuration(), kakaoQuota: quota.kakao, tmapQuota: quota.tmap },
         placeSearch: { configured: Boolean(env.NAVER_LOCAL_SEARCH_CLIENT_ID && env.NAVER_LOCAL_SEARCH_CLIENT_SECRET) },
         scope: '서울·경기', catalogCount: catalog.apartments?.length || 0,
