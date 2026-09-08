@@ -1,5 +1,5 @@
 import { normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
-import { cloudSessionErrorMessage } from './cloud-session.js';
+import { cloudSessionErrorMessage } from './cloud-session.js?v=4.12.2';
 
 export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot, onAuthChange = () => {} }) {
   if (!root || !session) throw new TypeError('Cloud panel root and session are required.');
