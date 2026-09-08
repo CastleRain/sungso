@@ -29,6 +29,10 @@ test('actual Firestore month loader preserves request identity for the recommend
   assert.equal(live.records[0].amountManWon, 55000);
   assert.equal(live.source, 'upstream');
   assert.ok(Number.isFinite(Date.parse(live.updatedAt)));
+  const sourceDocument = db.documents.get(`homehunt_molit_month_cache/${identity.lawdCd}_${identity.dealYmd}_${identity.type}`);
+  assert.ok(sourceDocument.expiresAt instanceof Date);
+  assert.ok(Math.abs(sourceDocument.expiresAt.getTime() - Date.parse(sourceDocument.fetchedAt) - 90 * 24 * 60 * 60 * 1000) < 1000,
+    'storage retention is separate from the signed original price timestamp');
   const cached = await loadMolitMonthWithFirestoreCache({ db, serviceKey, ...identity });
   assert.equal(recommendationMonthFailure({ status: 'fulfilled', value: cached }, identity), null);
   assert.equal(cached.source, 'cache');

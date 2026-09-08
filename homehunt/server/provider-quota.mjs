@@ -73,7 +73,10 @@ export function createFirestoreProviderQuota({ db, now = Date.now, limits = {} }
           if (!amount) return usage;
           const updatedAt = new Date(attempt.current).toISOString();
           const used = usage.used + amount;
-          transaction.set(attempt.ref, { schemaVersion: 1, provider: attempt.provider, date: attempt.date, used, updatedAt });
+          transaction.set(attempt.ref, { schemaVersion: 1, provider: attempt.provider, date: attempt.date, used, updatedAt,
+            // Ordinary bounded housekeeping may remove this old daily ledger;
+            // current and previous KST days are additionally protected there.
+            expiresAt: new Date(Date.parse(`${attempt.date}T00:00:00+09:00`) + 7 * 24 * HOUR_MS) });
           return { ...usage, used, remaining: Math.max(0, usage.limit - used), updatedAt };
         });
       } catch (error) {

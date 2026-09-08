@@ -16,7 +16,8 @@ test('shared daily provider counters survive adapter restarts and expose existin
   assert.equal((await restarted.getUsage('kakao-transit')).used, 30);
   assert.equal((await restarted.getUsage('tmap')).remaining, 10);
   const data = [...db.documents.values()][0];
-  assert.deepEqual(Object.keys(data).sort(), ['date', 'provider', 'schemaVersion', 'updatedAt', 'used']);
+  assert.deepEqual(Object.keys(data).sort(), ['date', 'expiresAt', 'provider', 'schemaVersion', 'updatedAt', 'used']);
+  assert.equal(data.expiresAt.toISOString(), '2026-09-14T15:00:00.000Z');
   assert.match([...db.documents.keys()][0], new RegExp(`^${PROVIDER_QUOTA_COLLECTION}/kakao-transit_2026-09-08$`));
 });
 

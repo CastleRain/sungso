@@ -6,5 +6,6 @@ functions/node_modules/
 !.env.example
 homehunt/.local/
 homehunt/cloud/lib/
+homehunt/render/lib/
 firebase-debug.log
 firestore-debug.log

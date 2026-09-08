@@ -1,0 +1,9 @@
+{
+  "name": "homehunt-render",
+  "private": true,
+  "main": "lib/index.cjs",
+  "engines": { "node": "22.x" },
+  "scripts": { "build": "node build.mjs", "start": "node lib/index.cjs" },
+  "dependencies": { "firebase-admin": "14.3.0" },
+  "devDependencies": { "esbuild": "0.28.2" }
+}

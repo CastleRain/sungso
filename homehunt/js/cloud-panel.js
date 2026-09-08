@@ -1,5 +1,5 @@
 import { normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
-import { cloudSessionErrorMessage } from './cloud-session.js?v=4.12.2';
+import { cloudSessionErrorMessage } from './cloud-session.js?v=4.13.0';
 
 export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot, onAuthChange = () => {} }) {
   if (!root || !session) throw new TypeError('Cloud panel root and session are required.');
@@ -13,6 +13,8 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
   const heading = element('h3', '', '내 기록 클라우드 저장');
   const intro = element('p', 'cloud-panel-description', '회사 비중·가격 조건, 방문·관심·직접 확인한 주차값을 저장하고 다른 기기에서 불러옵니다.');
   const account = element('p', 'cloud-panel-account');
+  const apiStatus = element('p', 'cloud-panel-note');
+  apiStatus.setAttribute('role', 'status'); apiStatus.setAttribute('aria-live', 'polite');
   const actions = element('div', 'cloud-panel-actions');
   const button = (label, action) => { const node = element('button', '', label); node.type = 'button'; node.dataset.cloudAction = action; return node; };
   const login = button('Google 로그인', 'login');
@@ -31,7 +33,7 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
   replacement.append(replacementSummary, replacementActions);
   const status = element('p', 'cloud-panel-status'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
   const detail = element('p', 'cloud-panel-note', '로그인만으로 기록을 바꾸지 않습니다. 불러오면 이 기기의 해당 기록을 교체합니다. 통근 경로·추천 점수는 저장하지 않습니다. 주소로 선택한 위치는 다시 확인합니다.');
-  root.replaceChildren(heading, intro, account, actions, replacement, status, detail);
+  root.replaceChildren(heading, intro, account, apiStatus, actions, replacement, status, detail);
   let state = session.getState(); let busy = false; let revision = null; let owner = state.user?.uid || null; let epoch = 0;
   let replacementRevision = null;
   const render = () => {
@@ -43,6 +45,10 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
     replace.disabled = cancelReplace.disabled = !signedIn || busy || replacementRevision === null;
     replacement.hidden = replacementRevision === null;
     root.setAttribute('aria-busy', String(busy));
+    apiStatus.hidden = !signedIn || !['waking', 'unavailable'].includes(state.apiStatus);
+    apiStatus.textContent = state.apiStatus === 'waking'
+      ? '검색 서버를 깨우고 있어요. 오랜만에 접속하면 약 1분 걸릴 수 있습니다. 저장한 기록은 바로 볼 수 있어요.'
+      : '검색 서버에 연결하지 못했어요. 잠시 후 다시 시도해주세요. 저장한 기록은 유지됩니다.';
     account.textContent = !state.configured ? '클라우드 저장 준비 중 · Firebase 연결 설정 필요'
       : signedIn ? `${state.user.displayName || state.user.email || 'Google 계정'} 로그인 · ${state.transport === 'firestore' ? '이 계정 전용 저장' : '가족 공간 저장'}`
         : state.status === 'loading' ? '로그인 상태 확인 중…' : state.error || 'Google 계정으로 로그인한 뒤 저장할 수 있습니다.';

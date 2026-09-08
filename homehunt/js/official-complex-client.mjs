@@ -54,7 +54,7 @@ export function normalizeOfficialComplexInfo(raw, catalogId) {
 }
 
 /** Public complex facts only: no localStorage, destinations or route evidence. */
-export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch, now = Date.now, onApplied = () => {} } = {}) {
+export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch, now = Date.now, onApplied = () => {}, timeoutMs = 60000 } = {}) {
   const entries = new Map();
   const inflight = new Map();
   function isFresh(candidate) {
@@ -85,7 +85,7 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
         try {
           const endpoint = new URL(url);
           endpoint.searchParams.set('catalogId', id);
-          const response = await fetchImpl(endpoint.href, { cache: 'no-store', signal: AbortSignal.timeout(60000) });
+          const response = await fetchImpl(endpoint.href, { cache: 'no-store', signal: AbortSignal.timeout(timeoutMs) });
           info = response.ok ? normalizeOfficialComplexInfo(await response.json(), id) : unavailable(id, 'UPSTREAM_ERROR');
         } catch (error) { info = unavailable(id, error?.name === 'TimeoutError' ? 'TIMEOUT' : 'NETWORK_ERROR'); }
       }
