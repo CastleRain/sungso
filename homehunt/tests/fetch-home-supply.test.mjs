@@ -8,11 +8,38 @@ import {
   APPLYHOME_ENDPOINTS,
   collectHomeSupply,
   normalizeApplyhomeNotice,
+  resolveSupplyServiceKeys,
 } from '../scripts/fetch-home-supply.mjs';
 import { normalizeLhNoticeForHomeSupply } from '../scripts/lh-supply-adapter.mjs';
 
 const NOW = new Date('2026-09-04T03:00:00.000Z');
 const GENERATED_AT = NOW.toISOString();
+
+test('수집 Secret의 빈 값은 공통 공공데이터 키로 대체한다', () => {
+  assert.deepEqual(resolveSupplyServiceKeys({}, {
+    DATA_GO_KR_SERVICE_KEY: 'shared%2Bkey',
+    APPLYHOME_SERVICE_KEY: '',
+    LH_SUPPLY_SERVICE_KEY: '   ',
+  }), { applyhome: 'shared+key', lh: 'shared+key' });
+});
+
+test('개별 공급원 키를 우선하고 모든 키가 비면 미설정으로 유지한다', () => {
+  const environment = {
+    DATA_GO_KR_SERVICE_KEY: 'shared',
+    APPLYHOME_SERVICE_KEY: 'applyhome',
+    LH_SUPPLY_SERVICE_KEY: 'lh',
+  };
+  assert.deepEqual(resolveSupplyServiceKeys({}, environment), { applyhome: 'applyhome', lh: 'lh' });
+  assert.deepEqual(resolveSupplyServiceKeys({ applyhomeServiceKey: 'explicit-applyhome', lhServiceKey: 'explicit-lh' }, environment),
+    { applyhome: 'explicit-applyhome', lh: 'explicit-lh' });
+  assert.deepEqual(resolveSupplyServiceKeys({}, {}), { applyhome: '', lh: '' });
+});
+
+test('LH는 비어 있는 공통 키를 건너뛰어 청약홈 키를 재사용한다', () => {
+  assert.deepEqual(resolveSupplyServiceKeys({}, {
+    DATA_GO_KR_SERVICE_KEY: '', APPLYHOME_SERVICE_KEY: 'applyhome', LH_SUPPLY_SERVICE_KEY: '',
+  }), { applyhome: 'applyhome', lh: 'applyhome' });
+});
 
 function applyhomeNotice(number, name = `청약홈 단지 ${number}`) {
   return normalizeApplyhomeNotice({
