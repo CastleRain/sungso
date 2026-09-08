@@ -67,6 +67,15 @@ export function decodeServiceKey(value) {
   }
 }
 
+export function resolveSupplyServiceKeys(options = {}, environment = process.env) {
+  const firstConfigured = (...values) => values.map(decodeServiceKey).find(Boolean) || '';
+  const shared = firstConfigured(options.serviceKey, environment.DATA_GO_KR_SERVICE_KEY);
+  return {
+    applyhome: firstConfigured(options.applyhomeServiceKey, environment.APPLYHOME_SERVICE_KEY, shared),
+    lh: firstConfigured(options.lhServiceKey, environment.LH_SUPPLY_SERVICE_KEY, shared, environment.APPLYHOME_SERVICE_KEY),
+  };
+}
+
 function cleanText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
@@ -1120,16 +1129,7 @@ export async function collectHomeSupply(options = {}) {
   const previous = Object.prototype.hasOwnProperty.call(options, 'previous')
     ? options.previous
     : await readPreviousSnapshot(options.outputPath || outputPath);
-  const sharedServiceKey = options.serviceKey ?? process.env.DATA_GO_KR_SERVICE_KEY;
-  const applyhomeServiceKey = decodeServiceKey(
-    options.applyhomeServiceKey ?? process.env.APPLYHOME_SERVICE_KEY ?? sharedServiceKey,
-  );
-  const lhServiceKey = decodeServiceKey(
-    options.lhServiceKey
-      ?? process.env.LH_SUPPLY_SERVICE_KEY
-      ?? sharedServiceKey
-      ?? process.env.APPLYHOME_SERVICE_KEY,
-  );
+  const { applyhome: applyhomeServiceKey, lh: lhServiceKey } = resolveSupplyServiceKeys(options);
   const collectApplyhomeSourceImpl = options.collectApplyhomeSourceImpl || collectApplyhomeSupplySource;
   const collectLhSourceImpl = options.collectLhSourceImpl || collectLhSupplySource;
   const collectShSourceImpl = options.collectShSourceImpl || collectShSupplySource;

@@ -2,11 +2,18 @@ name: Update HomeHunt market data
 
 on:
   workflow_dispatch:
+    inputs:
+      diagnostics_only:
+        description: "Check public API host connectivity without credentials or data collection"
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: "20 17 * * *"
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: homehunt-market-data
@@ -21,18 +28,44 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Diagnose public API connectivity without credentials
+        if: inputs.diagnostics_only == true
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import { lookup } from 'node:dns/promises';
+          for (const host of ['apis.data.go.kr', 'api.odcloud.kr']) {
+            try { console.log(host, JSON.stringify(await lookup(host, { all: true }))); }
+            catch (error) { console.log(host, error.code || 'DNS_FAILED'); }
+          }
+          NODE
+          for target in "4 https://apis.data.go.kr" "6 https://apis.data.go.kr" "4 http://apis.data.go.kr" "4 https://api.odcloud.kr"; do
+            read -r family url <<< "$target"
+            curl "-$family" --head --silent --show-error --connect-timeout 5 --max-time 8 --output /dev/null --write-out "$url IPv$family HTTP=%{http_code} connect=%{time_connect} TLS=%{time_appconnect}\n" "$url" || true
+          done
       - name: Fetch and aggregate MOLIT transactions
+        if: inputs.diagnostics_only != true
         env:
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
         run: node homehunt/scripts/fetch-market-data.mjs
       - name: Commit refreshed public aggregates
+        if: inputs.diagnostics_only != true
+        id: publish_data
         run: |
-          if git diff --quiet -- homehunt/data; then
+          if git diff --quiet -- homehunt/data/market-summary.json homehunt/data/apartment-history.json; then
             echo "No market-data changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add homehunt/data/market-summary.json homehunt/data/apartment-history.json
           git commit -m "data: refresh homehunt market cache"
-          git push
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Request branch-based GitHub Pages rebuild
+        if: steps.publish_data.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds"

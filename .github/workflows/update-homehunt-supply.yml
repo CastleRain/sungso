@@ -33,6 +33,7 @@ jobs:
         env:
           APPLYHOME_SERVICE_KEY: ${{ secrets.APPLYHOME_SERVICE_KEY }}
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          LH_SUPPLY_SERVICE_KEY: ${{ secrets.LH_SUPPLY_SERVICE_KEY }}
         run: node homehunt/scripts/fetch-home-supply.mjs
       - name: Summarize collection
         shell: bash
