@@ -107,7 +107,7 @@ export function createOfficialComplexQueue({ load, onProgress = () => {}, isFres
     settleWaiters();
   }
 
-  function replace(candidates) {
+  function replace(candidates, { revalidate = true } = {}) {
     const next = new Map();
     for (const candidate of Array.isArray(candidates) ? candidates : []) {
       const id = catalogId(candidate);
@@ -115,9 +115,10 @@ export function createOfficialComplexQueue({ load, onProgress = () => {}, isFres
       const existing = selected.get(id) || inflight.get(id);
       if (existing) {
         // Preserve completed overlap and a running request even if the caller
-        // supplies another area of the same apartment complex. A settled entry
-        // whose client cache expired rejoins the normal (non-forced) queue.
-        if (existing.phase === 'settled') {
+        // supplies another area of the same apartment complex. Rendering an
+        // applied result only synchronizes membership; explicit revalidation
+        // may requeue expired entries without resetting fresh or running work.
+        if (existing.phase === 'settled' && revalidate) {
           let fresh = false;
           try { fresh = isFresh(candidate) === true; } catch { /* Unknown freshness needs a normal cache-aware reload. */ }
           if (!fresh) { existing.phase = 'queued'; existing.outcome = null; existing.refresh = false; }

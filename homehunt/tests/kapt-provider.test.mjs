@@ -496,3 +496,76 @@ test('multiple equally verified variants stay ambiguous and do not fetch either 
   assert.equal(result.parkingEvidence, null);
   assert.equal(calls.filter(call => call.part === 'detail').length, 0);
 });
+
+test('a completed address mismatch retains basic/list expiry instead of becoming a five-minute retry', async () => {
+  const start = Date.parse('2026-09-08T00:00:00Z');
+  let now = start;
+  const { provider, calls } = fixtureProvider({ now: () => now });
+  const input = { ...catalog, address: catalog.address.replace('123-4', '999') };
+  const first = await provider.getComplexInfo(input);
+  assert.equal(first.status, 'unmatched');
+  assert.equal(first.matchIssue, 'address-mismatch');
+  assert.equal(first.cache.expiresAt, new Date(start + 86400000).toISOString());
+  assert.equal(first.cache.hit, false);
+  assert.equal(first.parkingEvidence, null);
+  now += 300001;
+  const repeated = await provider.getComplexInfo(input);
+  assert.equal(repeated.cache.hit, true);
+  assert.equal(repeated.cache.expiresAt, first.cache.expiresAt);
+  assert.deepEqual(calls.map(call => call.part), ['list', 'basic']);
+  now = start + 86400000;
+  const refreshed = await provider.getComplexInfo(input);
+  assert.equal(refreshed.cache.expiresAt, new Date(now + 86400000).toISOString());
+  assert.deepEqual(calls.map(call => call.part), ['list', 'basic', 'basic']);
+});
+
+test('ambiguous identity results expire with the earliest inspected basic row', async () => {
+  const start = Date.parse('2026-09-08T00:00:00Z');
+  let now = start;
+  const alternative = { ...listed, kaptCode: 'A10000002' };
+  const { provider, calls } = fixtureProvider({ now: () => now, handler: (part, url) => {
+    now += 1000;
+    return response(envelope(part, part === 'list' ? [listed, alternative] : { ...basic, kaptCode: url.searchParams.get('kaptCode') }));
+  } });
+  const first = await provider.getComplexInfo(catalog);
+  assert.equal(first.status, 'ambiguous');
+  assert.equal(first.cache.expiresAt, new Date(start + 2000 + 86400000).toISOString());
+  assert.equal(first.parkingEvidence, null);
+  const again = await provider.getComplexInfo(catalog);
+  assert.equal(again.cache.hit, true);
+  assert.equal(again.cache.expiresAt, first.cache.expiresAt);
+  assert.equal(calls.length, 3);
+});
+
+test('list-only absence and candidate-limit ambiguity carry the actual listing expiry', async () => {
+  const now = Date.parse('2026-09-08T00:00:00Z');
+  for (const capped of [false, true]) {
+    const rows = capped ? [listed, { ...listed, kaptCode: 'A10000002' }] : [];
+    const { provider, calls } = fixtureProvider({ now: () => now, maxBasicLookups: 1,
+      handler: part => response(envelope(part, rows)) });
+    const first = await provider.getComplexInfo(catalog);
+    assert.equal(first.status, capped ? 'ambiguous' : 'unmatched');
+    assert.equal(first.cache.expiresAt, new Date(now + 7 * 86400000).toISOString());
+    assert.equal((await provider.getComplexInfo(catalog)).cache.hit, true);
+    assert.equal(calls.length, 1);
+  }
+});
+
+test('a unique match also expires when an older rejected competing basic row expires', async () => {
+  const start = Date.parse('2026-09-08T00:00:00Z');
+  let now = start;
+  const other = { ...listed, kaptCode: 'A10000002' };
+  const address = catalog.address.replace('123-4', '999');
+  const { provider } = fixtureProvider({ now: () => now, handler: (part, url) => {
+    now += 1000;
+    const code = url.searchParams.get('kaptCode');
+    return response(envelope(part, part === 'list' ? [listed, other] : part === 'basic'
+      ? { ...basic, kaptCode: code, kaptAddr: code === other.kaptCode ? address : catalog.address }
+      : { ...detail, kaptCode: code }));
+  } });
+  await provider.getComplexInfo(catalog);
+  const second = await provider.getComplexInfo({ ...catalog, address });
+  assert.equal(second.status, 'matched');
+  assert.equal(second.kaptCode, other.kaptCode);
+  assert.equal(second.cache.expiresAt, new Date(start + 2000 + 86400000).toISOString());
+});

@@ -398,19 +398,25 @@ export function createKaptProvider({
     let list;
     try { list = await getDistrictList(catalog.regionCode); }
     catch (error) { return { ...output, status: 'unavailable', errors: [safeError(error, 'list')] }; }
+    // A negative or ambiguous identity check is a completed public-data result,
+    // too. Its lifetime is bounded by every row used to reach that conclusion.
+    const dependencies = [list];
+    const resultCache = () => ({ hit: dependencies.every(part => part.hit),
+      expiresAt: new Date(Math.min(...dependencies.map(part => part.expiresAt))).toISOString() });
     const inDong = list.items.filter(row => dongMatches(catalog, row));
     const related = inDong.map(row => relatedCombinedComplex(catalog, row)).filter(Boolean);
     const possible = inDong.filter(row => nameRelationship(catalog, row.kaptName));
     if (!possible.length) return { ...output,
       matchIssue: related.length ? 'combined-complex' : 'name-mismatch', relatedComplex: related.length === 1 ? related[0] : null,
-      cache: { hit: list.hit, expiresAt: new Date(list.expiresAt).toISOString() } };
-    if (possible.length > maxBasicLookups) return { ...output, status: 'ambiguous' };
+      cache: resultCache() };
+    if (possible.length > maxBasicLookups) return { ...output, status: 'ambiguous', cache: resultCache() };
     const matches = [];
     const failures = [];
     const mismatchIssues = [];
     for (const row of possible) {
       try {
         const basic = await getPart('basic', row.kaptCode);
+        dependencies.push(basic);
         const method = matchKaptComplex(catalog, basic.items[0], row);
         if (method) matches.push({ row, basic, method });
         else {
@@ -425,15 +431,17 @@ export function createKaptProvider({
         }
       } catch (error) { failures.push(safeError(error, 'basic')); }
     }
-    if (matches.length > 1) return { ...output, status: 'ambiguous', errors: failures };
+    if (matches.length > 1) return { ...output, status: 'ambiguous', errors: failures,
+      ...(failures.length ? {} : { cache: resultCache() }) };
     if (failures.length) return { ...output, status: 'unavailable', errors: failures };
     if (!matches.length) return { ...output, matchIssue: related.length ? 'combined-complex' : mismatchIssues[0] || 'insufficient-identity',
-      relatedComplex: related.length === 1 ? related[0] : null };
+      relatedComplex: related.length === 1 ? related[0] : null, cache: resultCache() };
     const { row, basic, method } = matches[0];
     const info = basic.items[0];
     let detail = null;
     try { detail = await getPart('detail', row.kaptCode); }
     catch (error) { failures.push(safeError(error, 'detail')); }
+    if (detail) dependencies.push(detail);
     const facts = detail?.items[0];
     const active = facts && text(facts.useYn).toUpperCase() === 'Y';
     const above = active ? count(facts.kaptdPcnt) : null;
@@ -458,7 +466,7 @@ export function createKaptProvider({
       undergroundEvChargers: active ? count(facts.undergroundElChargerCnt) : null,
       parking: { aboveGroundSpaces: above, belowGroundSpaces: below, totalSpaces, spacesPerHousehold: totalSpaces !== null && households !== null ? totalSpaces / households : null },
       parkingEvidence, errors: failures,
-      cache: { hit: list.hit && basic.hit && Boolean(detail?.hit), expiresAt: new Date(Math.min(list.expiresAt, basic.expiresAt, detail?.expiresAt ?? basic.expiresAt)).toISOString() },
+      cache: { ...resultCache(), hit: !failures.length && dependencies.every(part => part.hit) },
     };
   }
   return { getComplexInfo, getDistrictList, getStats: () => ({ ...stats,

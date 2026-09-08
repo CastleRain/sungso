@@ -14,16 +14,17 @@ const candidate = id => ({ catalogId: `c${id}`, name: `단지 ${id}`,
   routesByDestination: { privateOffice: [{ durationMinutes: 37 }] },
   commuteVerification: { stage: 'final' } });
 
-function harness(state, { url = 'http://localhost/api/kapt/complex' } = {}) {
+function harness(state, { url = 'http://localhost/api/kapt/complex', ttlMs = 3600000 } = {}) {
   const calls = [], timers = new Map();
-  let renders = 0, nextTimer = 0;
+  let renders = 0, nextTimer = 0, clock = Date.now();
   const sandbox = {
     state, APP_CONFIG: { officialComplexUrl: url }, locationRankingCache: { previous: true },
     document: { activeElement: null },
-    createOfficialComplexClient, createOfficialComplexQueue, WeakMap,
+    createOfficialComplexClient: options => createOfficialComplexClient({ ...options, now: () => clock }),
+    createOfficialComplexQueue, WeakMap,
     $: () => null,
     window: { setTimeout(callback) { timers.set(++nextTimer, callback); return nextTimer; } },
-    renderRecommendationResults: () => { renders++; },
+    renderRecommendationResults: () => { renders++; sandbox.control.sync(); },
     fetch: async input => {
       const endpoint = new URL(input);
       assert.equal(endpoint.pathname, '/api/kapt/complex');
@@ -33,7 +34,7 @@ function harness(state, { url = 'http://localhost/api/kapt/complex' } = {}) {
         status: 'matched', kaptCode: `KAPT${id}`, complexMatchConfirmed: true,
         observedAt: new Date().toISOString(), households: 500, heatingType: '지역난방', elevatorCount: 10,
         parking: { aboveGroundSpaces: 100, belowGroundSpaces: 500 },
-        cache: { expiresAt: new Date(Date.now() + 3600000).toISOString() } }) };
+        cache: { expiresAt: new Date(clock + ttlMs).toISOString() } }) };
     },
   };
   vm.createContext(sandbox);
@@ -41,7 +42,7 @@ function harness(state, { url = 'http://localhost/api/kapt/complex' } = {}) {
     globalThis.control = { ready() { officialComplexReady = true; synchronizeOfficialComplexCandidates(); },
       sync: synchronizeOfficialComplexCandidates, queue: officialComplexQueue, client: officialComplexClient };
   `, sandbox);
-  return { ...sandbox.control, calls, timers, sandbox, renders: () => renders };
+  return { ...sandbox.control, calls, timers, sandbox, renders: () => renders, advance: ms => { clock += ms; } };
 }
 
 test('startup enriches saved homes first and deduplicates matching visits without altering price or live routes', async () => {
@@ -113,4 +114,35 @@ test('incoming public facts do not replace a card while personal parking is bein
   context.sandbox.document.activeElement = null;
   const deferred = [...context.timers.values()][0]; context.timers.clear(); deferred();
   assert.equal(context.renders(), 1);
+});
+
+test('expired facility facts do not turn completed houses back into pending on repaint, sorting or scope changes', async () => {
+  const saved = candidate(1);
+  const state = { shortlist: [saved], visits: [], recommendationResults: [candidate(2)] };
+  const original = JSON.stringify(state);
+  const context = harness(state, { ttlMs: 1000 });
+  context.ready();
+  await context.queue.whenIdle();
+  const completed = context.queue.snapshot();
+  context.advance(2000);
+  assert.equal(context.client.isFresh(saved), false);
+  assert.equal(context.client.decorate(saved).officialComplexInfo, undefined, 'Expired facts are not displayed as current evidence');
+  for (let index = 0; index < 20; index++) {
+    context.sandbox.renderRecommendationResults();
+    context.sync();
+    await context.queue.whenIdle();
+    const callbacks = [...context.timers.values()]; context.timers.clear();
+    callbacks.forEach(callback => callback());
+    await context.queue.whenIdle();
+    assert.deepEqual(context.queue.snapshot(), completed, 'Completion stays stable, including after arrival-triggered repaint');
+  }
+  assert.equal(context.calls.length, 2, 'Background view updates make no new facility requests');
+  assert.equal(JSON.stringify(state), original, 'Price and live commute evidence stay intact');
+  context.sync({ revalidate: true });
+  await context.queue.whenIdle();
+  assert.equal(context.calls.length, 4, 'Explicit new-search synchronization refreshes expired facts once');
+  assert.equal(context.queue.snapshot().pending, 0);
+  context.sync({ revalidate: true });
+  await context.queue.whenIdle();
+  assert.equal(context.calls.length, 4, 'Fresh facts are still reused');
 });

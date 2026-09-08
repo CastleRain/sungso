@@ -338,3 +338,97 @@ test('HTTP failures, invalid DTOs, network and timeouts do not leak response bod
     assert.equal(client.decorate(candidate).parkingEvidence, undefined);
   }
 });
+
+test('normal unmatched and ambiguous responses without legacy TTL are not retried every five minutes', async () => {
+  for (const status of ['unmatched', 'ambiguous']) {
+    let now = T0;
+    let calls = 0;
+    const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => now,
+      fetchImpl: async () => { calls += 1; return response(dto({ status, complexMatchConfirmed: false, cache: { expiresAt: null } })); } });
+    const result = await client.load(candidate);
+    assert.equal(result.cache.expiresAt, new Date(T0 + 86400000).toISOString());
+    assert.equal(result.parkingEvidence, null);
+    now += 300001;
+    for (let render = 0; render < 20; render += 1) {
+      assert.equal(client.isFresh(candidate), true);
+      await client.load(candidate);
+    }
+    assert.equal(calls, 1);
+    now = T0 + 86400000;
+    assert.equal(client.isFresh(candidate), false);
+    await client.load(candidate);
+    assert.equal(calls, 2);
+  }
+});
+
+test('a response expiring during transport cannot cause immediate reloads or extend parking evidence', async () => {
+  let now = T0;
+  let calls = 0;
+  const pending = deferred();
+  const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => now,
+    fetchImpl: async () => {
+      calls += 1;
+      if (calls === 1) { await pending.promise; return response(dto({ cache: { expiresAt: new Date(T0 + 1000).toISOString() } })); }
+      return response(dto({ cache: { expiresAt: new Date(now + 3600000).toISOString() } }));
+    } });
+  const loading = client.load(candidate);
+  now += 1001;
+  pending.resolve();
+  const expired = await loading;
+  assert.equal(expired.status, 'unavailable');
+  assert.equal(expired.errors[0].code, 'INVALID_RESPONSE');
+  assert.equal(expired.parkingEvidence, null);
+  assert.equal(expired.households, undefined);
+  assert.equal(expired.cache.expiresAt, new Date(now + 300000).toISOString());
+  for (let render = 0; render < 20; render += 1) {
+    assert.equal(client.isFresh(candidate), true);
+    assert.equal(client.decorate(candidate).parkingEvidence, undefined);
+    await client.load(candidate);
+  }
+  assert.equal(calls, 1);
+  now += 300000;
+  assert.equal((await client.load(candidate)).status, 'matched');
+  assert.equal(calls, 2);
+});
+
+test('failed replies cannot borrow a long public-data expiry for their retry cooldown', async () => {
+  let now = T0;
+  let calls = 0;
+  const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => now,
+    fetchImpl: async () => { calls += 1; return response(dto({ status: 'unavailable', complexMatchConfirmed: false, errors: [{ code: 'TIMEOUT' }] })); } });
+  const info = await client.load(candidate);
+  assert.equal(info.cache.expiresAt, new Date(T0 + 300000).toISOString());
+  assert.equal(info.parkingEvidence, null);
+  now += 300000;
+  assert.equal(client.isFresh(candidate), false);
+  await client.load(candidate);
+  assert.equal(calls, 2);
+});
+
+test('partial lookup retry eligibility expires before still-valid basic facts', async () => {
+  let now = T0;
+  let calls = 0;
+  const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => now,
+    fetchImpl: async () => { calls += 1; return response(calls === 1 ? dto({ status: 'partial', parking: {}, errors: [{ code: 'NETWORK_ERROR', part: 'detail' }] }) : dto()); } });
+  const info = await client.load(candidate);
+  assert.equal(info.cache.expiresAt, new Date(T0 + 3600000).toISOString());
+  now += 300000;
+  assert.equal(client.isFresh(candidate), false);
+  assert.equal(client.decorate(candidate).officialComplexInfo.households, 500);
+  assert.equal(client.decorate(candidate).officialComplexInfo.cache.expiresAt, info.cache.expiresAt);
+  assert.equal((await client.load(candidate)).status, 'matched');
+  assert.equal(calls, 2);
+});
+
+test('throwing or rejected applied callbacks do not turn completed metadata into failed requests', async () => {
+  for (const reject of [false, true]) {
+    let calls = 0;
+    const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => T0,
+      fetchImpl: async () => { calls += 1; return response(dto()); },
+      onApplied: () => { if (reject) return Promise.reject(new Error('fixture render')); throw new Error('fixture render'); } });
+    assert.equal((await client.load(candidate)).status, 'matched');
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal((await client.load(candidate)).status, 'matched');
+    assert.equal(calls, 1);
+  }
+});

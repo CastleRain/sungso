@@ -27,7 +27,7 @@ function harness() {
     return nodes.get(key);
   };
   let form = structuredClone(filters);
-  const calls = { fetch: [], renders: [], statuses: [], panels: [], enrichment: [], timers: [], saved: 0 };
+  const calls = { fetch: [], renders: [], officialRevalidations: [], statuses: [], panels: [], enrichment: [], timers: [], saved: 0 };
   const state = { recommendationJobId: 'job-1', recommendationRunning: false, recommendationRetrying: false,
     commuteVerificationRunning: false, recommendationLocationBusy: false, recommendationGeocodeToken: 1,
     recommendationRunSnapshot: { filters: structuredClone(filters), destinations: structuredClone(filters.destinations) },
@@ -44,7 +44,7 @@ function harness() {
     APP_CONFIG: { recommendationUrl: 'fixture:jobs', isLocalRuntime: true },
     readRecommendationForm: () => structuredClone(form),
     setRecommendationPanel: value => calls.panels.push(value),
-    renderRecommendationResults: value => calls.renders.push(value),
+    renderRecommendationResults: (value, options) => { calls.renders.push(value); if (options?.revalidateOfficial) calls.officialRevalidations.push(state.recommendationResults); },
     setRecommendationStatus: (...args) => calls.statuses.push(args), hideRecommendationMapStatus() {},
     enrichRecommendationMapAndCommute: (...args) => calls.enrichment.push(args),
     reconcileCandidateRecommendationContext: candidate => ({ ...candidate, rebased: true }),
@@ -148,6 +148,16 @@ test('complete retry refreshes prices, preserves live routes, and removes IDs ab
   assert.equal(state.recommendationResults[0].lat, 37.5);
   assert.equal(state.recommendationResults[0].personalizedRecommendation, undefined);
   assert.equal(calls.enrichment.length, 0);
+  assert.equal(calls.officialRevalidations.length, 1, 'A completed explicit price retry revalidates facilities once');
+  assert.equal(calls.officialRevalidations[0], state.recommendationResults, 'Facility refresh sees the newly merged candidates');
+});
+
+test('a newly completed price search explicitly revalidates expired facility facts', async () => {
+  const { state, sandbox, calls } = harness();
+  sandbox.fetch = async () => response(complete([housing('C')]));
+  await sandbox.pollRecommendationJob('job-1');
+  assert.equal(calls.officialRevalidations.length, 1);
+  assert.equal(calls.officialRevalidations[0], state.recommendationResults);
 });
 
 for (const flag of ['recommendationRunning', 'commuteVerificationRunning', 'recommendationLocationBusy']) {

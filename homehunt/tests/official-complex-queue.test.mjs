@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createOfficialComplexQueue } from '../js/official-complex-queue.mjs';
+import { createOfficialComplexClient } from '../js/official-complex-client.mjs';
 
 const candidate = (id, extra = {}) => ({ catalogId: String(id), id: `price-${id}`, ...extra });
 const matched = () => ({ status: 'matched', complexMatchConfirmed: true, parkingEvidence: { sourceType: 'official', spacesPerHousehold: 1.3 }, errors: [] });
@@ -371,4 +372,65 @@ test('a throwing freshness check queues only that entry for a safe normal reload
   assert.doesNotThrow(() => queue.replace([candidate('a'), candidate('b')]));
   assert.equal((await queue.whenIdle()).matched, 2);
   assert.deepEqual(calls.slice(2), [{ id: 'a', refresh: false }]);
+});
+
+test('render-only replacement preserves expired outcomes and still loads newly added complexes', async () => {
+  const calls = [];
+  let checks = 0;
+  const queue = createOfficialComplexQueue({ concurrency: 1, isFresh: () => { checks += 1; return false; },
+    load: async item => {
+      calls.push(item.catalogId);
+      return { a: matched(), b: partial(), c: { status: 'unmatched' }, d: failed(), new: matched() }[item.catalogId];
+    } });
+  const inputs = ['a', 'b', 'c', 'd'].map(id => candidate(id));
+  queue.replace(inputs);
+  const settled = await queue.whenIdle();
+  for (let render = 0; render < 20; render += 1) {
+    queue.replace(inputs.map(item => ({ ...item })), { revalidate: false });
+    assert.deepEqual(await queue.whenIdle(), settled);
+  }
+  assert.equal(checks, 0);
+  assert.equal(calls.length, 4);
+  queue.replace([...inputs, candidate('new')], { revalidate: false });
+  assert.equal((await queue.whenIdle()).completed, 5);
+  assert.deepEqual(calls, ['a', 'b', 'c', 'd', 'new']);
+  queue.replace([...inputs, candidate('new')], { revalidate: true });
+  assert.equal((await queue.whenIdle()).completed, 5);
+  assert.equal(calls.length, 10);
+});
+
+test('579 finished public identity checks stay finished through five-minute expiry renders and applied callbacks', async () => {
+  let now = Date.parse('2026-09-08T00:00:00Z');
+  let calls = 0;
+  const inputs = Array.from({ length: 579 }, (_, id) => candidate(id));
+  let queue;
+  const client = createOfficialComplexClient({ url: 'http://localhost:8787/api/official-complex', now: () => now,
+    fetchImpl: async url => {
+      calls += 1;
+      const id = new URL(url).searchParams.get('catalogId');
+      return { ok: true, json: async () => ({ schemaVersion: 1, provider: 'kapt', catalogId: id,
+        status: 'unmatched', complexMatchConfirmed: false, errors: [], cache: { expiresAt: null } }) };
+    },
+    onApplied: () => { queue.replace(inputs, { revalidate: false }); },
+  });
+  queue = createOfficialComplexQueue({ load: client.load, isFresh: client.isFresh });
+  queue.replace(inputs);
+  assert.equal((await queue.whenIdle()).completed, 579);
+  now += 300001;
+  for (let render = 0; render < 20; render += 1) {
+    // Even a legacy caller requesting revalidation must reuse a completed
+    // negative match instead of treating it as a five-minute network failure.
+    queue.replace(inputs);
+    const result = await queue.whenIdle();
+    assert.equal(result.completed, 579);
+    assert.equal(result.pending, 0);
+  }
+  assert.equal(calls, 579);
+  now += 86400000;
+  queue.replace(inputs, { revalidate: false });
+  assert.equal((await queue.whenIdle()).completed, 579);
+  assert.equal(calls, 579);
+  queue.replace(inputs, { revalidate: true });
+  assert.equal((await queue.whenIdle()).completed, 579);
+  assert.equal(calls, 1158);
 });

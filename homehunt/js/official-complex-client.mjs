@@ -1,6 +1,7 @@
 import { normalizeOfficialParkingEvidence } from './parking-evidence-core.mjs?v=4.9.0';
 
 const DAY = 86400000;
+const RETRY_DELAY = 300000;
 const SOURCE = 'https://www.data.go.kr/data/15058453/openapi.do';
 const STATUSES = ['matched', 'partial', 'unmatched', 'ambiguous', 'unavailable'];
 const MATCH_ISSUES = ['combined-complex', 'household-mismatch', 'address-mismatch', 'name-mismatch', 'insufficient-identity'];
@@ -58,7 +59,7 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
   const inflight = new Map();
   function isFresh(candidate) {
     const entry = entries.get(String(candidate?.catalogId || ''));
-    return Boolean(entry && entry.expiresAt > now());
+    return Boolean(entry && entry.retryAt > now());
   }
   function decorate(candidate) {
     const entry = entries.get(String(candidate.catalogId || ''));
@@ -75,7 +76,7 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
     const id = String(candidate?.catalogId || '');
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return unavailable(id, 'INVALID_CATALOG');
     const existing = entries.get(id);
-    if (existing?.expiresAt > now() && (!refresh || existing.info.status === 'matched')) return existing.info;
+    if (existing?.retryAt > now() && (!refresh || existing.info.status === 'matched' && !existing.info.errors.length)) return existing.info;
     if (inflight.has(id)) return inflight.get(id);
     const request = (async () => {
       let info;
@@ -88,13 +89,27 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
           info = response.ok ? normalizeOfficialComplexInfo(await response.json(), id) : unavailable(id, 'UPSTREAM_ERROR');
         } catch (error) { info = unavailable(id, error?.name === 'TimeoutError' ? 'TIMEOUT' : 'NETWORK_ERROR'); }
       }
-      const expiry = Date.parse(info.cache?.expiresAt);
-      const expiresAt = Number.isFinite(expiry) ? Math.min(expiry, now() + DAY) : now() + 300000;
-      // Queue reuse, ranking freshness, and displayed evidence must observe the
-      // same effective TTL, including the one-day client cap and short errors.
+      const receivedAt = now();
+      let expiry = Date.parse(info.cache?.expiresAt);
+      if (info.status !== 'unavailable' && Number.isFinite(expiry) && expiry <= receivedAt) {
+        // A slow or clock-skewed response must not extend expired facts, nor
+        // become an immediately expired entry that triggers another request.
+        info = unavailable(id, 'INVALID_RESPONSE');
+        expiry = NaN;
+      }
+      const failed = info.status === 'unavailable';
+      const terminal = ['unmatched', 'ambiguous'].includes(info.status) && !info.errors.length;
+      // An older server may omit negative-match metadata. A completed public
+      // identity check is not a network failure: retain it for one day, while
+      // real failures receive only a short retry cooldown and no facility facts.
+      const expiresAt = failed ? receivedAt + RETRY_DELAY : Number.isFinite(expiry)
+        ? Math.min(expiry, receivedAt + DAY) : receivedAt + (terminal ? DAY : RETRY_DELAY);
+      // Partial facts can remain valid while a failed detail call is eligible
+      // for an explicit retry sooner. Retrying never extends their evidence TTL.
+      const retryAt = failed || info.errors.length ? Math.min(expiresAt, receivedAt + RETRY_DELAY) : expiresAt;
       info = { ...info, cache: { ...info.cache, expiresAt: new Date(expiresAt).toISOString() } };
-      entries.set(id, { info, expiresAt });
-      onApplied(info, candidate);
+      entries.set(id, { info, expiresAt, retryAt });
+      try { Promise.resolve(onApplied(info, candidate)).catch(() => {}); } catch { /* A render failure cannot invalidate a completed public lookup. */ }
       return info;
     })();
     inflight.set(id, request);

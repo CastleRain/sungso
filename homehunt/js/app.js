@@ -1,12 +1,12 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.12.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.12.0';
-import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.12.0';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.12.0';
-import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.12.0';
-import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.12.0';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.12.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.12.1';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.12.1';
+import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.12.1';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.12.1';
+import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.12.1';
+import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.12.1';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.12.1';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.12.0';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.12.1';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
@@ -14,11 +14,11 @@ import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js
 import { mountCloudPanel } from './cloud-panel.js?v=4.6.1';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.12.0';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.12.0';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.12.1';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.12.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.12.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.12.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.12.1';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.12.1';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -31,9 +31,9 @@ import {
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
 } from './storage.js?v=2.5.0';
-import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.12.0';
-import { createSupplyLocationService } from './supply-location-service.mjs?v=4.12.0';
-import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.12.0';
+import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.12.1';
+import { createSupplyLocationService } from './supply-location-service.mjs?v=4.12.1';
+import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.12.1';
 import { fetchHistoryProgressively, historyElapsedLabel, missingHistoryDetails, isCompleteHistoryPayload } from './history-query-service.mjs?v=4.4.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
@@ -79,7 +79,7 @@ import {
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.12.0';
+} from './ui-format.js?v=4.12.1';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -266,11 +266,13 @@ function renderOfficialComplexProgress(root) {
   view.render(officialComplexQueue.snapshot());
 }
 
-function synchronizeOfficialComplexCandidates() {
+function synchronizeOfficialComplexCandidates({ revalidate = false } = {}) {
   if (!officialComplexReady) return;
   // Saved homes come first; every price candidate follows, regardless of the
   // selected map region or commute tab. Only public catalog IDs are requested.
-  officialComplexQueue.replace([...state.shortlist, ...state.recommendationResults, ...state.visits]);
+  // Repainting, sorting or changing map scope must not restart completed work.
+  // Only startup and a newly completed price search revalidate expired facts.
+  officialComplexQueue.replace([...state.shortlist, ...state.recommendationResults, ...state.visits], { revalidate });
 }
 let lastRecommendationDestinations = [];
 let commuteAutoControl;
@@ -7077,7 +7079,7 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken) {
     $('#recommendStepPrice').classList.remove('active');
     $('#recommendStepPrice').classList.add('complete');
     state.recommendationMeta = payload;
-    renderRecommendationResults(wasRetrying ? null : payload);
+    renderRecommendationResults(wasRetrying ? null : payload, { revalidateOfficial: true });
     const snapshot = state.recommendationRunSnapshot;
     if (!wasRetrying) void enrichRecommendationMapAndCommute(snapshot?.filters || readRecommendationForm(), snapshot?.destinations || []);
     const failedCount = Number(payload.failedRequestCount || 0);
@@ -7854,9 +7856,9 @@ function renderCommuteVerificationGate({ rawCount, matchedCount, pendingCount, r
   pending.textContent = `통근 미확인 가격 후보 ${pendingCount.toLocaleString('ko-KR')}곳 따로 보기`;
 }
 
-function renderRecommendationResults(meta = null) {
+function renderRecommendationResults(meta = null, { revalidateOfficial = false } = {}) {
   if (meta) state.recommendationMeta = meta;
-  synchronizeOfficialComplexCandidates();
+  synchronizeOfficialComplexCandidates({ revalidate: revalidateOfficial });
   if (state.recommendationShowingShortlist) refreshShortlistCommuteFreshness();
   const displayMeta = state.recommendationRunning && !state.recommendationRetrying && !state.recommendationShowingShortlist ? null : meta || state.recommendationMeta;
   const matchedOnly = state.recommendationMapScope === 'matched';
@@ -8745,7 +8747,7 @@ async function init() {
   initializeCloudConnection();
   await checkLocalMarketConnection();
   officialComplexReady = true;
-  synchronizeOfficialComplexCandidates();
+  synchronizeOfficialComplexCandidates({ revalidate: true });
   refreshShortlistCommuteFreshness();
   if (state.shortlist.length) {
     state.recommendationShowingShortlist = true;
