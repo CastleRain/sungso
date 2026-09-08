@@ -1,0 +1,177 @@
+/* Compact map filters and their small, reversible editors. */
+.hh-app.hh-v3 .recommendation-view > .recommendation-page.map-first-shell { grid-template-rows: auto minmax(0, 1fr); }
+.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-map-toolbar.map-toolbar.hh-chiprow {
+  position: relative; display: grid; height: auto; min-height: 0; padding: 10px 14px; gap: 9px;
+  overflow: visible; background: #fff; border-bottom: 1px solid var(--hh-line);
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-heading { display: flex; min-width: 0; align-items: center; gap: 8px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind {
+  display: grid; flex: 0 0 auto; grid-template-columns: auto auto; align-items: center; column-gap: 5px; padding-right: 6px; color: var(--hh-ink); line-height: 1.35;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind > i { grid-row: span 2; font-size: 17px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind > strong { font-size: 12px; font-weight: 750; white-space: nowrap; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind > small { grid-column: 2; color: var(--hh-text-muted); font-size: 10px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle,
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-summary {
+  display: inline-flex; min-width: 0; height: auto; min-height: 38px; margin: 0; padding: 7px 10px; align-items: center; justify-content: center; gap: 5px;
+  border: 1px solid #d9e0e8; border-radius: 20px; background: #fff; color: var(--hh-ink-2); box-shadow: none;
+  font-family: inherit; font-size: 12px; font-weight: 650; line-height: 1.35; white-space: normal; word-break: keep-all; cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle { flex: 0 0 auto; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle > span { display: inline; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-active-filters {
+  display: flex; width: auto; min-width: 0; margin: 0; flex: 1 1 auto; flex-wrap: wrap; align-items: center; gap: 6px; overflow: visible;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-value {
+  display: block; min-width: 0; margin: 0; color: inherit; font-size: inherit; font-weight: inherit; line-height: inherit;
+  white-space: normal; word-break: keep-all; overflow-wrap: anywhere; overflow: visible; text-overflow: clip;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-chevron { flex: 0 0 auto; color: #8290a1; font-size: 14px; line-height: 1; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle:hover,
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-summary:hover { border-color: #8a9eb6; background: #f5f8fc; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-summary[aria-expanded="true"],
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle[aria-expanded="true"] { border-color: var(--hh-ink); background: var(--hh-ink); color: #fff; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-summary[aria-expanded="true"] .recommendation-condition-chevron { color: #dce6f3; transform: rotate(180deg); }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-bottom { display: flex; min-width: 0; align-items: center; gap: 12px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope { min-width: 0; flex: 0 0 auto; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons {
+  display: flex; min-width: 0; padding: 3px; gap: 3px; border: 1px solid #e0e6ee; border-radius: 11px; background: #f3f6fa;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons > button {
+  display: flex; min-width: 0; min-height: 30px; padding: 5px 10px; align-items: center; justify-content: center; gap: 5px;
+  border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--hh-ink-2); box-shadow: none;
+  font-family: inherit; font-size: 11px; font-weight: 650; line-height: 1.3; white-space: nowrap; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons > button[aria-pressed="true"] { color: #174dcc; border-color: #ccd9f4; background: #fff; box-shadow: 0 1px 3px rgb(29 59 113 / 6%); }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons > button:hover { background: #e9f0ff; }
+.hh-app.hh-v3 .recommendation-map-toolbar #matchedMapCandidateCount { min-width: 20px; padding: 1px 5px; border-radius: 10px; background: #e5edff; color: #2457c7; font-size: 10px; font-variant-numeric: tabular-nums; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-hint {
+  min-width: 0; margin: 0; flex: 1 1 auto; color: var(--hh-text-muted); font-size: 11px; line-height: 1.45; word-break: keep-all; overflow-wrap: anywhere;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions { display: flex; min-width: 0; margin-left: auto; flex: 0 0 auto; align-items: center; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions .map-tool-btn {
+  width: auto; height: auto; min-height: 36px; padding: 7px 11px; gap: 5px; border-color: #dce3ed; border-radius: 10px; background: #fff; color: var(--hh-ink-2); box-shadow: none; font-size: 11px; line-height: 1.35; white-space: nowrap;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions .map-tool-btn > span { display: inline; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search { padding-right: 12px; flex: 0 0 auto; border-right: 1px solid #e1e6ee; }
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search > button {
+  display: inline-flex; min-height: 36px; padding: 8px 12px; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid var(--hh-accent); border-radius: 10px; background: var(--hh-accent); color: #fff; font-family: inherit; font-size: 11px; font-weight: 700; line-height: 1.35; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar button:focus-visible,
+.hh-app.hh-v3 .recommendation-map-toolbar input:focus-visible,
+.hh-app.hh-v3 .recommendation-map-toolbar select:focus-visible { outline: 2px solid var(--hh-accent); outline-offset: 2px; }
+.hh-app.hh-v3 .recommendation-map-toolbar #runRecommendation[hidden],
+.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search[hidden],
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-popover[hidden],
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-popover [hidden] { display: none; }
+.hh-app.hh-v3 .recommendation-page.confirmed-map-only [data-recommendation-layer]:not([data-recommendation-layer="workplaces"]),
+.hh-app.hh-v3 .recommendation-page.confirmed-map-only #locationDiscovery,
+.hh-app.hh-v3 .recommendation-page.confirmed-map-only #recommendationPriceCoverage { display: none !important; }
+.hh-app.hh-v3:has(#recommendationQuickFilter:not([hidden])) > #openVisitButton.hh-mobile-record-fab { display: none; }
+
+/* The footer remains visible when a long editor needs to scroll. */
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-popover {
+  position: absolute; top: calc(100% + 8px); left: var(--rqf-left, 12px); z-index: 1100; display: flex; width: min(380px, calc(100vw - 100px));
+  max-height: calc(100dvh - 190px); min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid #d8e1ec; border-radius: 16px;
+  background: #fff; color: var(--hh-ink); box-shadow: 0 14px 40px rgb(17 35 58 / 18%), 0 3px 10px rgb(17 35 58 / 7%); font-family: inherit; font-size: 13px; line-height: 1.5;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-header { display: flex; padding: 12px 16px; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #edf0f5; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-header h3 { margin: 0; color: var(--hh-ink); font-size: 15px; font-weight: 750; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-close {
+  display: grid; width: 30px; height: 30px; padding: 0; place-items: center; border: 0; border-radius: 8px; background: #f3f6fa; color: #63748b; font-family: inherit; font-size: 23px; line-height: 1; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-body {
+  display: flex; min-height: 0; padding: 16px; flex: 1 1 auto; flex-direction: column; gap: 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-field { display: flex; min-width: 0; margin: 0; flex: 0 0 auto; flex-direction: column; gap: 5px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-label { color: #54657b; font-size: 11px; font-weight: 600; line-height: 1.4; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-value-row { display: flex; min-width: 0; min-height: 42px; align-items: center; gap: 8px; border: 1px solid #cfdae8; border-radius: 9px; background: #fff; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-value-row > input {
+  width: 100%; min-width: 0; height: 40px; margin: 0; padding: 8px 10px; flex: 1 1 auto; border: 0; border-radius: 9px; background: transparent; color: var(--hh-ink); box-shadow: none;
+  font-family: inherit; font-size: 15px; font-weight: 650; line-height: 1.4; font-variant-numeric: tabular-nums;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-value-row:has(input[readonly]) { background: #f1f5fb; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-value-row > input[readonly] { color: #5d7291; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-unit { padding-right: 12px; flex: 0 0 auto; color: #75849a; font-size: 12px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-field select {
+  width: 100%; min-width: 0; min-height: 40px; padding: 8px 34px 8px 11px; border: 1px solid #cfdae8; border-radius: 9px; color: var(--hh-ink); background-color: #fff; font-family: inherit; font-size: 13px;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-range { width: 100%; min-height: 24px; margin: 1px 0 -9px; padding: 0; accent-color: var(--hh-accent); cursor: pointer; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-range:disabled { opacity: .45; cursor: default; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-range-limits { display: flex; margin: 0; justify-content: space-between; color: #8390a3; font-size: 10px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-preset {
+  min-height: 32px; padding: 6px 10px; border: 1px solid #dce3ee; border-radius: 8px; background: #f7f9fc; color: #526781; font-family: inherit; font-size: 11px; font-weight: 600; line-height: 1.4; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-preset:hover { border-color: #b3c5e5; background: #edf3ff; color: #2457c7; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-source { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 3px; gap: 4px; border: 1px solid #e1e7f0; border-radius: 10px; background: #f3f6fa; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-source > button {
+  min-width: 0; min-height: 35px; padding: 7px 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #687b94; font-family: inherit; font-size: 12px; font-weight: 650; line-height: 1.4; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-source > button[aria-pressed="true"] { border-color: #cad8ee; background: #fff; color: #2457c7; box-shadow: 0 1px 3px rgb(35 60 100 / 6%); }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-check {
+  display: flex; min-height: 40px; margin: 0; padding: 10px 11px; flex: 0 0 auto; align-items: flex-start; gap: 9px; border: 1px solid #e1e7f0; border-radius: 9px; background: #f9fbfd; color: #455b78; font-size: 12px; line-height: 1.6; word-break: keep-all; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-check > input { width: 17px; height: 17px; margin: 1px 0 0; flex: 0 0 auto; accent-color: var(--hh-accent); }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-check:has(input:checked) { border-color: #cad9f4; background: #f2f6ff; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-destinations { display: flex; margin: 0; padding: 0; flex-direction: column; gap: 8px; list-style: none; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-destination {
+  display: flex; min-width: 0; padding: 11px 12px; flex-direction: column; gap: 4px; border: 1px solid #e1e7f0; border-radius: 10px; background: #f7f9fc; color: #59718f; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-destination > strong { color: #304963; font-size: 12px; font-weight: 650; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-link { min-height: 32px; padding: 4px 0; align-self: flex-start; border: 0; background: transparent; color: #2457c7; font-family: inherit; font-size: 12px; font-weight: 650; line-height: 1.5; cursor: pointer; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-source-hint,
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-error,
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-busy {
+  margin: 0; padding: 0 16px 14px; flex: 0 0 auto; color: #74859b; font-size: 11px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-error { color: #bb3434; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-busy { color: #8a621d; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-footer { display: grid; padding: 12px 16px; flex: 0 0 auto; grid-template-columns: 1fr 1.5fr; gap: 9px; border-top: 1px solid #edf0f5; background: #fff; }
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-footer > button {
+  min-width: 0; min-height: 40px; padding: 9px 12px; border: 1px solid #d5dfea; border-radius: 9px; background: #fff; color: #566d88; font-family: inherit; font-size: 13px; font-weight: 650; line-height: 1.4; cursor: pointer;
+}
+.hh-app.hh-v3 .recommendation-map-toolbar .rqf-footer > .rqf-apply { border-color: var(--hh-accent); background: var(--hh-accent); color: #fff; }
+.hh-app.hh-v3 .recommendation-map-toolbar button:disabled { opacity: .55; cursor: default; }
+
+@media (min-width: 1024px) {
+  .hh-app.hh-v3 .recommendation-view > .recommendation-page.map-first-shell.filters-open { grid-template-rows: 0 minmax(0, 1fr); }
+  .hh-app.hh-v3 .recommendation-page.map-first-shell.filters-open > .recommendation-map-toolbar.map-toolbar.hh-chiprow { height: 0; padding: 0; overflow: hidden; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-heading { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-active-filters { display: contents; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind { justify-content: center; }
+}
+@media (max-width: 767px) {
+  .hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-map-toolbar.map-toolbar.hh-chiprow {
+    padding: 8px max(12px, env(safe-area-inset-right, 0px)) 9px max(12px, env(safe-area-inset-left, 0px)); gap: 8px;
+  }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-heading { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-active-filters { display: contents; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind { padding: 0; justify-content: center; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind > strong { font-size: 11px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-market-kind > i { font-size: 15px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-condition-summary,
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-filter-toggle { width: 100%; min-height: 40px; padding: 6px 8px; gap: 4px; border-radius: 12px; font-size: 11px; line-height: 1.4; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-bottom { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope { grid-column: 1; grid-row: 1; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons { padding: 2px; gap: 2px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-buttons > button { min-height: 36px; padding: 5px 6px; flex: 1 1 auto; gap: 4px; font-size: 10px; white-space: normal; word-break: keep-all; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions { grid-column: 2; grid-row: 1; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions .map-tool-btn { min-height: 40px; padding: 6px 8px; gap: 4px; font-size: 10px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-actions .map-tool-btn > i { display: none; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-map-scope-hint { grid-column: 1 / -1; grid-row: 2; font-size: 10px; line-height: 1.4; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search { grid-column: 1 / -1; grid-row: 3; padding: 3px 0 0; border: 0; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search > button { width: 100%; min-height: 36px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .rqf-popover {
+    position: fixed; top: auto; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(74px + env(safe-area-inset-bottom, 0px)); left: max(12px, env(safe-area-inset-left, 0px));
+    width: auto; max-height: calc(100dvh - 142px - env(safe-area-inset-bottom, 0px)); border-radius: 18px;
+  }
+  .hh-app.hh-v3 .recommendation-map-toolbar .rqf-close { width: 36px; height: 36px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .rqf-value-row > input { font-size: 16px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .rqf-preset { min-height: 36px; }
+  .hh-app.hh-v3 .recommendation-map-toolbar .rqf-footer > button { min-height: 44px; }
+}

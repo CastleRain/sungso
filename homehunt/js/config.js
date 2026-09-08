@@ -36,6 +36,7 @@ export const APP_CONFIG = Object.freeze({
   commuteBatchUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/commute/batch` : '',
   commuteQuotaUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/commute/quota` : '',
   placeSearchUrl: ACTIVE_MARKET_API ? `${ACTIVE_MARKET_API}/place-search` : '',
+  officialComplexUrl: IS_LOCAL_RUNTIME ? `${LOCAL_MARKET_API}/kapt/complex` : '',
   localMarketEnabled: Boolean(ACTIVE_MARKET_API),
   apartmentHistoryMonths: 60,
   // The endpoint URL is kept for deployment, but requests stay off until the
@@ -44,9 +45,9 @@ export const APP_CONFIG = Object.freeze({
   apartmentHistoryEnabled: Boolean(ACTIVE_MARKET_API),
   // UI and localhost API evolve independently. Keep appVersion as a backwards
   // compatible alias for code that still reads the API contract version.
-  uiVersion: '4.4.0',
-  localApiContractVersion: '2.6.3',
-  appVersion: '2.6.3',
+  uiVersion: '4.12.1',
+  localApiContractVersion: '2.9.0',
+  appVersion: '2.9.0',
 });
 
 export const REGIONS = Object.freeze([

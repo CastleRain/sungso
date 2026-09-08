@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { createOfficialComplexClient } from '../js/official-complex-client.mjs';
 import { normalizeDestinations } from '../js/commute-balance-core.mjs';
 import { createCandidateLocationService } from '../js/candidate-location-service.mjs';
 import { rankPersonalizedCandidates } from '../js/personalized-ranking-core.mjs';
 import { recommendationBudget, effectiveRecommendationDestinations, orderLocationVerificationQueue } from '../js/personalized-context-core.mjs';
-import { candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness } from '../js/recommendation-verification-core.mjs';
+import { candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness, selectedCommuteProvider } from '../js/recommendation-verification-core.mjs';
+import { liveRecommendationSearchKey } from '../js/candidate-review-core.mjs';
 import { commuteDecision } from '../js/transport-core.mjs';
 import { parkingForCandidate } from '../js/controllers/personalized-recommendation-ui.js';
 import { PYEONG_TO_M2 } from '../js/recommendation-core.mjs';
@@ -213,8 +215,9 @@ test('without workplaces, price search and location enrichment use Gangnam at 10
     APP_CONFIG: { recommendationUrl: 'fixture:recommendations', localApiContractVersion: 'fixture' },
     window: { clearTimeout() {}, setTimeout() { throw Error('Fixture job should complete without polling timer'); } },
     structuredClone, normalizeDestinations, PYEONG_TO_M2, rankPersonalizedCandidates,
+    selectedCommuteProvider, liveRecommendationSearchKey,
     recommendationBudget, effectiveRecommendationDestinations, orderLocationVerificationQueue,
-    candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness, commuteDecision, parkingForCandidate,
+    candidateVerificationStatus, destinationFingerprint, commuteEvidenceFreshness, commuteDecision, parkingForCandidate, officialComplexClient: createOfficialComplexClient(),
     readRecommendationPriceParts: () => ({ valid: true }), readRecommendationPriceManWon: () => 60000,
     updateRecommendationPriceLabel() {}, hideRecommendationMapStatus() {}, setRecommendationPanel() {},
     recommendationMap: { clearCandidateMarkers() {} }, isGeoPoint: validPoint,
@@ -279,8 +282,10 @@ test('without workplaces, price search and location enrichment use Gangnam at 10
   assert.equal(state.recommendationRunning, false);
   assert.equal(state.recommendationLocationBusy, false);
   assert.equal(geocodeCalls.length, 2);
-  assert.equal($('#recommendationCommuteScope').value, 'matched');
-  assert.equal(rendered.length, 0, 'Unverified price candidates must not appear in the default confirmed list');
+  assert.equal($('#recommendationCommuteScope').value, 'all');
+  assert.equal(rendered.length, 2, 'The default price view shows known prices without asserting commute confirmation');
+  assert.ok(rendered.every(row => row.personalizedRecommendation.score === null));
+  assert.equal(sandbox.sortedRecommendationResults({ scope: 'matched' }).length, 0, 'Unverified prices still cannot appear in the explicitly confirmed list');
   rendered = sandbox.sortedRecommendationResults({ scope: 'pending' });
   assert.equal(rendered.length, 2, 'Pending price candidates remain available for review and route verification');
   assert.equal(rendered[0].catalogId, 'near');

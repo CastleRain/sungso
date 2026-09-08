@@ -1,5 +1,5 @@
-import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs';
-import { createUserSnapshotStore } from './cloud-firestore-store.js';
+import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
+import { createUserSnapshotStore } from './cloud-firestore-store.js?v=4.6.1';
 
 const FIREBASE_VERSION = '10.12.0';
 const APP_NAME = 'homehunt-private-cloud';

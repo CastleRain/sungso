@@ -26,13 +26,14 @@ export function createParkingEditor(candidate, onChange) {
   const evidence = parkingForCandidate(candidate);
   const root = el('details', 'parking-evidence-editor');
   const known = Number.isFinite(evidence.spacesPerHousehold);
+  const ratioLabel = known ? Number(evidence.spacesPerHousehold.toFixed(2)).toLocaleString('ko-KR') : '';
   root.append(el('summary', '', known
-    ? `주차 세대당 ${evidence.spacesPerHousehold}대 · ${evidence.sourceType === 'official' ? '공식 자료' : '사용자 확인'} · 수정`
+    ? `주차 세대당 ${ratioLabel}대 · ${evidence.sourceType === 'official' ? '공식 자료' : '사용자 확인'} · 수정`
     : '주차 정보 미확인 · 확인한 값 입력'));
   const form = el('form');
   const label = el('label', '', '세대당 주차대수');
   const input = el('input'); input.type = 'number'; input.min = '0'; input.step = '0.01'; input.inputMode = 'decimal';
-  input.value = known ? String(evidence.spacesPerHousehold) : ''; input.placeholder = '예: 1.2 · 주차 불가는 0';
+  input.value = known ? String(Number(evidence.spacesPerHousehold.toFixed(2))) : ''; input.placeholder = '예: 1.2 · 주차 불가는 0';
   label.append(input);
   const dateLabel = el('label', '', '확인일'); const date = el('input'); date.type = 'text'; date.placeholder = 'YYYY-MM-DD';
   date.value = String(evidence.observedAt || '').slice(0, 10); dateLabel.append(date);
@@ -58,7 +59,7 @@ export function createParkingEditor(candidate, onChange) {
     catch (_) { status.textContent = '이 브라우저에 저장하지 못했습니다. 저장 공간 설정을 확인해주세요.'; }
   });
   reset.addEventListener('click', () => { try { persist(null); } catch (_) { status.textContent = '확인값을 지우지 못했습니다.'; } });
-  form.append(label, dateLabel, el('small', '', '공식 주차정보 자동 연결 전입니다. 직접 확인한 값을 입력하면 이 기기에 저장합니다.'), save, reset, status);
+  form.append(label, dateLabel, el('small', '', '단지 상세에서 공식 주차정보를 확인할 수 있어요. 직접 입력한 확인값은 이 기기에 저장하고 공식 자료보다 우선 사용합니다. 확인값을 지우면 공식 자료로 돌아갑니다.'), save, reset, status);
   root.append(form); return root;
 }
 

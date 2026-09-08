@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
   <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/supply-location.css?v=4.12.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
   <link rel="stylesheet" href="./css/hh-tokens.css?v=4.4.0">
@@ -44,7 +45,7 @@
   <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.12.1">
   <link rel="stylesheet" href="./css/history-query.css?v=4.4.0">
   <link rel="stylesheet" href="./css/financial-plan.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-evidence.css?v=4.4.0">
@@ -53,8 +54,14 @@
   <link rel="stylesheet" href="./css/map-markers.css?v=4.4.0">
   <link rel="stylesheet" href="./css/personalized-recommendation.css?v=4.4.0">
   <link rel="stylesheet" href="./css/cloud-panel.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/candidate-review.css?v=4.12.1">
+  <link rel="stylesheet" href="./css/recommendation-toolbar.css?v=4.12.1">
+  <link rel="stylesheet" href="./css/official-complex.css?v=4.12.1">
+  <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.12.1">
+  <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.12.1">
+  <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.12.1">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.4.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.12.1" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -64,6 +71,7 @@
 
     <nav class="portal-nav hh-rail__nav" aria-label="부동산 프로젝트 메뉴">
       <button class="portal-nav-item hh-rail__item active" type="button" data-view-target="recommend" aria-current="page"><i class="ti ti-adjustments-search" aria-hidden="true"></i><span>집 찾기</span></button>
+      <button class="portal-nav-item hh-rail__item" type="button" data-view-target="candidates"><i class="ti ti-list-check" aria-hidden="true"></i><span>확인한 후보</span></button>
       <button class="portal-nav-item hh-rail__item" id="recordsPrimaryNav" type="button" data-view-target="visits" data-nav-group="records"><i class="ti ti-notebook" aria-hidden="true"></i><span>내 기록</span></button>
       <button class="portal-nav-item hh-rail__item" type="button" data-view-target="market"><i class="ti ti-chart-line" aria-hidden="true"></i><span>실거래</span></button>
       <button class="portal-nav-item hh-rail__item supply-nav-item" type="button" data-view-target="supply"><i class="ti ti-building-community" aria-hidden="true"></i><span>분양·청약</span><em id="supplyNavBadge" hidden>0</em></button>
@@ -215,10 +223,25 @@
         </div>
 
         <div class="recommendation-map-toolbar map-toolbar hh-chiprow" aria-label="맞춤 집 찾기 도구">
-          <button class="map-tool-btn recommendation-filter-toggle" id="toggleRecommendationFilters" type="button" aria-label="집 찾기 조건 열기" aria-controls="recommendationFilterPanel" aria-expanded="false"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>조건 변경</span></button>
-          <div class="recommendation-active-filters" id="recommendationActiveFilters" aria-label="현재 맞춤 조건"></div>
-          <button class="record-btn recommendation-submit" id="runRecommendation" type="button"><i class="ti ti-map-search" aria-hidden="true"></i><span>이 조건으로 찾기</span></button>
-          <button class="map-tool-btn recommendation-results-toggle" id="toggleRecommendationResults" type="button" aria-label="후보 결과 열기" aria-controls="recommendationResultPanel" aria-expanded="false"><i class="ti ti-list-details" aria-hidden="true"></i><span>후보</span><strong id="recommendationToolbarCount">0</strong></button>
+          <div class="recommendation-toolbar-heading">
+            <span class="recommendation-market-kind"><i class="ti ti-building" aria-hidden="true"></i><strong>아파트 · 매매</strong><small>실거래 기준</small></span>
+            <button class="map-tool-btn recommendation-filter-toggle" id="toggleRecommendationFilters" type="button" aria-label="집 찾기 조건 열기" aria-controls="recommendationFilterPanel" aria-expanded="false"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span>전체 조건</span></button>
+            <div class="recommendation-active-filters" id="recommendationActiveFilters" role="group" aria-label="집 찾기 빠른 조건"></div>
+          </div>
+          <div class="recommendation-toolbar-bottom">
+            <div class="recommendation-map-scope">
+              <div class="recommendation-map-scope-buttons" role="group" aria-label="지도 후보 범위">
+                <button id="showAllPriceMapCandidates" type="button" aria-controls="recommendationMap recommendationResults" aria-pressed="true">가격 후보 전체</button>
+                <button id="showMatchedMapCandidates" type="button" aria-controls="recommendationMap recommendationResults" aria-pressed="false"><span>통근 충족만</span><strong id="matchedMapCandidateCount">0</strong></button>
+              </div>
+            </div>
+            <p id="recommendationMapScopeHint" class="recommendation-map-scope-hint" role="status">관심 저장 없이 통근을 확인한 집만 지도에서 볼 수 있어요.</p>
+            <div id="quickFilterSearchPending" class="recommendation-ready-search" hidden><button id="runChangedRecommendation" type="button"><i class="ti ti-search" aria-hidden="true"></i><span>가격 후보 찾기</span></button></div>
+            <div class="recommendation-toolbar-actions">
+              <button class="map-tool-btn recommendation-results-toggle" id="toggleRecommendationResults" type="button" aria-label="확인한 후보 페이지 열기" aria-controls="view-candidates"><i class="ti ti-list-check" aria-hidden="true"></i><span>확인한 후보</span><strong id="recommendationToolbarCount">0</strong></button>
+            </div>
+          </div>
+          <button class="map-tool-btn recommendation-submit" id="runRecommendation" type="button" aria-label="검색 조건 확인" aria-controls="recommendationFilterPanel" aria-expanded="false" hidden><i class="ti ti-adjustments-search" aria-hidden="true"></i><span>검색 조건 확인</span></button>
         </div>
         <button class="recommendation-panel-backdrop" id="recommendationPanelBackdrop" type="button" aria-label="열린 패널 닫기" hidden></button>
 
@@ -312,6 +335,7 @@
                 <button id="decisionTabCandidates" type="button" role="tab" aria-selected="false" aria-controls="recommendationResults" tabindex="-1" data-decision-tab="candidates">가격 후보</button>
                 <button id="decisionTabRegions" type="button" role="tab" aria-selected="false" aria-controls="decisionRegions" tabindex="-1" data-decision-tab="regions">지역 범위</button>
               </nav>
+              <div id="recommendationOfficialProgress" hidden></div>
               <div id="decisionToday" role="tabpanel" aria-labelledby="decisionTabToday"></div>
               <div id="decisionRegions" role="tabpanel" aria-labelledby="decisionTabRegions" hidden></div>
               <div class="recommendation-decision-bar" id="recommendationDecisionBar" aria-live="polite">
@@ -324,11 +348,15 @@
             <section><div class="composition-head"><span>후보 지역 구성</span><small>가격 조건을 통과한 단지</small></div><div class="composition-bars" id="recommendationRegionMix"></div></section>
             <section><div class="composition-head"><span>실거래 가격대 구성</span><small id="recommendationPriceMixBasis">후보별 선택 평형 평균가</small></div><div class="composition-bars price-bars" id="recommendationPriceMix"></div></section>
               </div>
+              <section id="recommendationPriceCoverage" aria-label="가격 자료 확인 범위" hidden></section>
               <section class="commute-verification-gate" id="commuteVerificationGate" aria-label="실제 통근 확인" hidden>
                 <strong id="commuteVerificationTitle"></strong>
                 <p id="commuteVerificationCopy"></p>
                 <p id="commuteVerificationError" role="status" hidden></p>
+                <button class="outline-btn" id="openCheckedCandidates" type="button">통근 확인 결과 모아 보기</button>
+                <p class="commute-batch-receipt" id="commuteBatchReceipt" role="status" hidden></p>
                 <button class="record-btn precise-commute-btn" id="verifyTopCommutes" type="button"><i class="ti ti-route-2" aria-hidden="true"></i><span>상위 후보 실제 통근 확인</span></button>
+                <div id="recommendationCommuteAutoControl"></div>
                 <button class="outline-btn" id="showPendingCommutes" type="button">통근 미확인 가격 후보 따로 보기</button>
                 <small id="commuteVerificationPlan">가격 검색은 경로 호출 0회 · 한 번에 최대 10곳/30회 · 현재 결과 중복 확인 없음. 실패한 후보는 카드에서 통근 재확인을 할 수 있습니다.</small>
               </section>
@@ -353,6 +381,10 @@
           </div>
         </section>
       </div>
+    </section>
+
+    <section class="app-view candidate-review-view" id="view-candidates" data-view="candidates" hidden>
+      <div id="candidateReviewPage" class="page-wrap"></div>
     </section>
 
     <section class="app-view visits-view" id="view-visits" data-view="visits" hidden>
@@ -970,10 +1002,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.4.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.12.1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.4.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.4.0"></script>
+  <script type="module" src="./js/app.js?v=4.12.1"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.12.1"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

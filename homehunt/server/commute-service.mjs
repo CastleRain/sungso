@@ -4,6 +4,7 @@ import {
 } from '../scripts/commute-provider.mjs';
 import { normalizeGeoPoint } from '../js/transport-core.mjs';
 import { nextWeekdaySearchDateTime } from '../scripts/commute-time.mjs';
+import { runEarlyExitCommuteBatch } from '../scripts/commute-early-exit.mjs';
 import { createFirestoreRouteCache } from './route-cache.mjs';
 import { createFirestoreProviderQuota } from './provider-quota.mjs';
 
@@ -239,12 +240,16 @@ export function createCloudCommuteService({
     if (!Array.isArray(body.destinations) || !body.destinations.length || body.destinations.length > 8) fail('INVALID_DESTINATIONS', '도착지는 1~8개까지 입력해주세요.');
     const origins = body.origins.map(value => ({ id: cleanId(value?.id), point: pointOf(value) }));
     const destinations = body.destinations.map(value => ({ id: cleanId(value?.id), point: pointOf(value),
-      modes: modesOf(value?.modes), maxMinutes: Number(value?.maxMinutes), ...departure(value?.departureTime) }));
+      modes: modesOf(value?.modes), maxMinutes: Number(value?.maxMinutes),
+      required: value?.required !== false, weightPercent: Number(value?.weightPercent ?? value?.weight ?? 0),
+      ...departure(value?.departureTime) }));
     if ([...origins, ...destinations].some(value => !validId(value.id))) fail('INVALID_LOCATION_ID', '각 출발지와 도착지에 ID가 필요합니다.');
     if (new Set(origins.map(value => value.id)).size !== origins.length || new Set(destinations.map(value => value.id)).size !== destinations.length) fail('DUPLICATE_LOCATION_ID', '위치 ID는 중복될 수 없습니다.');
     if ([...origins, ...destinations].some(value => !value.point)) fail('INVALID_COORDINATES', '출발지와 도착지 좌표를 확인해주세요.');
     if (destinations.some(value => !value.modes.length)) fail('INVALID_MODES', '각 도착지의 교통수단을 선택해주세요.');
     if (destinations.some(value => !Number.isFinite(value.maxMinutes) || value.maxMinutes <= 0 || value.maxMinutes > 300)) fail('INVALID_MAX_MINUTES', '최대 통근 시간은 1~300분이어야 합니다.');
+    if (body.earlyExit === true && body.destinations.some(value => value?.required !== undefined && typeof value.required !== 'boolean')) fail('INVALID_REQUIRED_FLAG', '회사별 시간 제한 적용 여부를 확인해주세요.');
+    if (body.earlyExit === true && destinations.some(value => !Number.isFinite(value.weightPercent) || value.weightPercent < 0)) fail('INVALID_DESTINATION_WEIGHT', '회사별 비중은 0 이상의 숫자여야 합니다.');
     const maxTransitCalls = body.maxTransitCalls === undefined ? 10 : Number(body.maxTransitCalls);
     if (!Number.isInteger(maxTransitCalls) || maxTransitCalls < 0 || maxTransitCalls > MAX_TRANSIT_CALLS) fail('INVALID_MAX_TRANSIT_CALLS', '대중교통 호출 상한은 0~30의 정수여야 합니다.');
     const provider = providerFor(body.transitProvider);
@@ -295,10 +300,24 @@ export function createCloudCommuteService({
           resolved.set(pair.identity, await resolve(pair, provider, ctx));
         }
       }
-      try { await within(Promise.all([worker(), worker()]), ctx); }
-      catch (error) { if (error?.code !== 'BATCH_TIMEOUT') throw error; }
+      let earlyResult = null;
+      if (body.earlyExit === true) {
+        earlyResult = await runEarlyExitCommuteBatch({ pairs, destinations, concurrency: 2,
+          isAborted: () => ctx.aborted,
+          resolvePair: async pair => {
+            try { return await within(resolve(pair, provider, ctx), ctx); }
+            catch (error) {
+              if (error?.code !== 'BATCH_TIMEOUT') throw error;
+              return pair.modes.map(mode => failedRoute(mode === 'car' ? 'naver-directions5' : `${provider}-transit`, mode, { code: 'BATCH_TIMEOUT' }));
+            }
+          },
+        });
+      } else {
+        try { await within(Promise.all([worker(), worker()]), ctx); }
+        catch (error) { if (error?.code !== 'BATCH_TIMEOUT') throw error; }
+      }
       const routesFor = pair => resolved.get(pair.identity) || pair.modes.map(mode => failedRoute(mode === 'car' ? 'naver-directions5' : `${provider}-transit`, mode, { code: ctx.abortCode }));
-      const items = pairs.map(pair => ({ originId: pair.originId, destinationId: pair.destinationId,
+      const items = earlyResult?.items || pairs.map(pair => ({ originId: pair.originId, destinationId: pair.destinationId,
         routes: routesFor(pair), departureTime: pair.departureTime }));
       // Quota is ancillary after a timeout; never wait indefinitely for another
       // database call after the operation deadline has already elapsed.
@@ -310,7 +329,8 @@ export function createCloudCommuteService({
       return { ok: true, items, quota: usageAfter, provider, requestedPairCount: pairs.length,
         uniquePairCount: unique.length, deduplicatedPairCount: pairs.length - unique.length,
         requiredTransitCalls, actualTransitCalls: ctx.actualTransitCalls,
-        abortedPairCount: unique.filter(pair => routesFor(pair).some(route => ['BATCH_ABORTED', 'BATCH_TIMEOUT'].includes(route.reasonCode))).length,
+        abortedPairCount: earlyResult?.abortedPairCount ?? unique.filter(pair => routesFor(pair).some(route => ['BATCH_ABORTED', 'BATCH_TIMEOUT'].includes(route.reasonCode))).length,
+        ...(earlyResult ? { earlyExit: true, skippedPairCount: earlyResult.skippedPairCount, earlyExcludedOriginIds: earlyResult.earlyExcludedOriginIds } : {}),
         cachePolicy: provider === 'tmap' ? CACHE_POLICY : LIVE_POLICY };
     } finally { clearTimeout(ctx.timer); }
   }

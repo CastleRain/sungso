@@ -1,4 +1,8 @@
-// Cloud snapshots contain personal inputs and saved house references only.
+import { candidateReviewConditionSignature, candidateReviewConditionSummary } from './candidate-review-core.mjs?v=4.6.1';
+import { normalizePriceCoverage } from './price-coverage-core.mjs?v=4.6.1';
+
+// Cloud snapshots contain personal inputs, saved house references and explicitly
+// selected official price snapshots. Live commute evidence is never included.
 // Never copy a provider response, route, recommendation result, or financial DB
 // document into this schema. Use this same boundary in the browser and server.
 export const CLOUD_SNAPSHOT_VERSION = 1;
@@ -162,9 +166,69 @@ function favorite(input, label) {
     regionCode: string(20), regionName: string(120), dong: string(120),
     status: string(60), savedAt: date, memo: string(4000),
   });
-  // A saved selection is a house reference, not a saved price/route verdict.
-  // The UI re-fetches official facts and prices after loading it.
+  if (own(raw, 'review') && raw.review != null) {
+    result.review = reviewBookmarkMetadata(raw.review, `${label}.review`);
+    fields(raw, result, {
+      households: number({ integer: true }), builtYear: number({ min: 1800, max: 2200, integer: true }),
+      actualDealCount: number({ integer: true }), priceVerified: boolean, priceProvisional: boolean,
+      priceCoverage: normalizePriceCoverage,
+      dealType: enumeration(['매매', '전세', '월세']), pricingBasis: enumeration(['arithmetic-mean-v1']),
+      aliases: (value, key) => list(value, string(200), key, 100),
+      bestArea: reviewPriceArea,
+      areas: (value, key) => list(value, reviewPriceArea, key),
+      qualifyingAreas: (value, key) => list(value, reviewPriceArea, key),
+      areaSummaries: (value, key) => list(value, reviewPriceArea, key),
+    });
+    if (own(raw, 'priceCoverage')) {
+      result.priceCoverage = normalizePriceCoverage(raw.priceCoverage);
+      result.priceProvisional = raw.priceProvisional === true || result.priceCoverage.status !== 'complete';
+    }
+  }
+  // Legacy selections remain house references. A new explicit review bookmark
+  // retains its official price snapshot and user conditions, never route verdicts.
   return coordinateFields(raw, result);
+}
+
+function reviewPriceArea(input, label) {
+  const raw = record(input, label);
+  return fields(raw, {}, {
+    areaM2: number(), medianPriceManWon: number(), averagePriceManWon: number(),
+    latestPriceManWon: number(), minPriceManWon: number(), maxPriceManWon: number(),
+    count: number({ integer: true }), latestDay: number({ max: 31, integer: true }),
+    aptSeq: string(128), latestMonth: (value, key) => {
+      const result = text(value, 7, key);
+      if (result && !/^\d{4}-(0[1-9]|1[0-2])$/.test(result)) fail(`${key} 거래월이 올바르지 않습니다.`);
+      return result;
+    },
+  });
+}
+
+function reviewBookmarkMetadata(input, label) {
+  const raw = record(input, label);
+  if (raw.version !== 1 || raw.source !== 'user-selection') fail(`${label} 저장 형식이 올바르지 않습니다.`);
+  const savedAt = date(raw.savedAt, `${label}.savedAt`);
+  const signature = text(raw.conditionSignature, CLOUD_SNAPSHOT_MAX_BYTES, `${label}.conditionSignature`);
+  let snapshot = null;
+  if (signature) {
+    const prefix = 'review-conditions-v1:';
+    if (!signature.startsWith(prefix)) fail(`${label} 검색 조건 형식이 올바르지 않습니다.`);
+    let parsed;
+    try { parsed = JSON.parse(signature.slice(prefix.length)); }
+    catch (_) { fail(`${label} 검색 조건을 읽을 수 없습니다.`); }
+    record(parsed, `${label} 검색 조건`);
+    const filters = recommendationFilters({
+      ...record(parsed.filters, `${label} 검색 필터`), workplaces: parsed.workplaces,
+    });
+    // This ceiling is an official-price search input, not a route result.
+    fields(parsed.filters, filters, { maxPriceManWon: number({ integer: true }) });
+    const destinations = uniqueRecords(parsed.destinations, workplace, `${label} 목적지`);
+    snapshot = { filters, destinations };
+  }
+  // Parse and re-whitelist the canonical value instead of trusting a JSON string
+  // which could otherwise hide provider coordinates or computed route metrics.
+  return { version: 1, source: 'user-selection', savedAt,
+    conditionSignature: candidateReviewConditionSignature(snapshot),
+    conditionSummary: candidateReviewConditionSummary(snapshot) };
 }
 
 function parking(input = {}) {

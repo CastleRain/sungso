@@ -1,4 +1,5 @@
 // Decision views use source-qualified identities; a visit asking price is never a trade.
+import { normalizePriceCoverage, priceCoverageLabel } from './price-coverage-core.mjs?v=4.6.1';
 export const DECISION_KINDS = Object.freeze({ candidate: '관심 후보', visit: '방문 기록', supply: '분양 공고' });
 export function decisionKey(kind, record) {
   const id = kind === 'candidate' ? record?.catalogId || record?.id : record?.id;
@@ -15,7 +16,12 @@ export function decisionPrice(kind, record) {
     const prices = (record.homes || []).map((h) => positive(h.maxPriceManWon)).filter(Boolean);
     return { value: prices.length ? Math.max(...prices) : positive(record.maxPriceManWon), label: '공식 분양가 · 주택형별 최고', date: record.announcementDate || record.noticeDate || '', source: record.sourceLabel || record.source || '공식 모집공고' };
   }
-  return { value: positive(record.bestArea?.averagePriceManWon), label: record.savedAt ? '저장 당시 실거래 평균' : '조회기간 실거래 평균', date: record.bestArea?.latestMonth || '', source: '국토교통부' };
+  const coverage = normalizePriceCoverage(record.priceCoverage);
+  const provisional = record.priceProvisional === true || coverage.status !== 'complete';
+  return { value: positive(record.bestArea?.averagePriceManWon),
+    label: `${record.savedAt ? '저장 당시' : '조회기간'} 실거래 평균${provisional ? ' · 잠정' : ''}`,
+    date: record.bestArea?.latestMonth || '', source: '국토교통부',
+    provisional, coverageLabel: priceCoverageLabel(record) };
 }
 export function regionalCoverage(candidates = []) {
   const groups = new Map();

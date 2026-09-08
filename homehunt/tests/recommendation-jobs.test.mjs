@@ -148,7 +148,7 @@ test('same-month one-time retry succeeds without throwing away other successful 
   assert.ok(!JSON.stringify([...env.db.documents]).includes('never-store-this'));
 });
 
-test('a stale/partial month still fails after its single retry and excludes its whole district', async () => {
+test('a partial month still fails after its single retry while validated other months remain provisional', async () => {
   const calls = [];
   const env = setup({ loadCatalog: async () => ({ apartments: [apartment('41135'), apartment('41465')] }),
     loadMonth: async (task) => {
@@ -163,25 +163,34 @@ test('a stale/partial month still fails after its single retry and excludes its 
   assert.equal(done.status, 'complete');
   assert.equal(done.partial, true);
   assert.equal(done.failedRequestCount, 1);
-  assert.equal(done.resultCount, 1);
-  assert.equal(done.results[0].regionCode, '41465');
+  assert.equal(done.resultCount, 2);
+  const partial = done.results.find((item) => item.regionCode === '41135');
+  assert.equal(partial.priceProvisional, true);
+  assert.equal(partial.bestArea.count, 1);
+  assert.equal(partial.priceCoverage.completedMonthCount, 1);
+  assert.deepEqual(partial.priceCoverage.missingMonths, ['202608']);
   assert.deepEqual(done.incompleteDistrictCodes, ['41135']);
-  assert.equal(done.excludedIncompleteCandidateCount, 1);
-  assert.equal(done.excludedIncompleteRecordCount, 1);
+  assert.equal(done.excludedIncompleteCandidateCount, 0);
+  assert.equal(done.excludedIncompleteRecordCount, 0);
   assert.equal(done.failureSummary[0].count, 1);
   assert.equal(calls.length, 5);
   assert.ok(!JSON.stringify([...env.db.documents]).includes('secret-origin'));
 });
 
-test('total upstream failure is an error with failure counts, not a successful zero-candidate search', async () => {
+test('total upstream failure preserves base apartments as explicit price-pending entries', async () => {
   let calls = 0;
   const env = setup({ loadMonth: async () => { calls += 1; throw new Error('HTTP 403 SERVICE_KEY'); } });
   const created = await env.service.create(filters, owner);
   await env.service.advance(created.jobId, owner);
   const failed = await env.service.advance(created.jobId, owner);
-  assert.equal(failed.ok, false);
-  assert.equal(failed.status, 'error');
-  assert.equal(failed.code, 'MOLIT_UNAVAILABLE');
+  assert.equal(failed.ok, true);
+  assert.equal(failed.status, 'complete');
+  assert.equal(failed.partial, true);
+  assert.equal(failed.resultCount, 0);
+  assert.equal(failed.pendingPriceCandidateCount, 1);
+  assert.equal(failed.pendingPriceCandidates[0].priceVerified, false);
+  assert.equal(failed.pendingPriceCandidates[0].bestArea, undefined);
+  assert.equal(failed.retryAvailable, true);
   assert.equal(failed.failedRequestCount, 1);
   assert.equal(failed.failureSummary[0].reason, '서비스키 승인·인증 오류');
   assert.equal(calls, 2);
@@ -235,7 +244,7 @@ test('expired lease permits another instance to recover and fences the old late 
 test('another household cannot read, advance or cancel even if the job id is known', async () => {
   const env = setup();
   const created = await env.service.create(filters, owner);
-  for (const method of ['get', 'advance', 'cancel']) {
+  for (const method of ['get', 'advance', 'cancel', 'retry']) {
     await assert.rejects(env.service[method](created.jobId, stranger), { code: 'JOB_NOT_FOUND', status: 404 });
   }
   await assert.rejects(env.service.create(filters, {}), { code: 'UNAUTHORIZED', status: 401 });
@@ -246,7 +255,7 @@ test('job expires after 24 hours even before Firestore TTL physically deletes it
   const env = setup();
   const created = await env.service.create(filters, owner);
   env.setTime(initialTime + RECOMMENDATION_JOB_TTL_MS);
-  for (const method of ['get', 'advance', 'cancel']) {
+  for (const method of ['get', 'advance', 'cancel', 'retry']) {
     await assert.rejects(env.service[method](created.jobId, owner), { code: 'JOB_EXPIRED', status: 410 });
   }
   await assert.rejects(env.service.get(created.jobId, stranger), { code: 'JOB_NOT_FOUND', status: 404 });
@@ -308,4 +317,88 @@ test('untrusted region values, supply-area conditions, and document path ids are
   await assert.rejects(env.service.create({ ...filters, areaBasis: 'supply' }, owner), { code: 'INVALID_RECOMMENDATION' });
   await assert.rejects(env.service.get('../other', owner), { code: 'JOB_NOT_FOUND' });
   assert.equal(env.db.documents.size, 0);
+});
+
+
+test('explicit retry reuses saved successes, survives restart, and replaces stale samples without duplicates', async () => {
+  let recovered = false;
+  const calls = [];
+  const env = setup({ loadMonth: async (task) => {
+    calls.push(task.dealYmd);
+    const value = month(task, recovered ? 59000 : 50000);
+    if (task.dealYmd === '202608' && !recovered) return { ...value, updatedAt: '2026-09-01T00:00:00Z',
+      warning: { staleCacheUsed: true } };
+    return value;
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  await env.service.advance(created.jobId, owner);
+  const initial = await env.service.advance(created.jobId, owner);
+  assert.equal(initial.results[0].bestArea.count, 2);
+  assert.equal(initial.results[0].priceCoverage.status, 'stale');
+  assert.equal(initial.results[0].priceCoverage.sourceUpdatedAt, '2026-09-01T00:00:00Z');
+  assert.equal(initial.staleRequestCount, 1);
+  recovered = true;
+  const retry = await env.restart().retry(created.jobId, partner);
+  assert.equal(retry.jobId, initial.jobId);
+  assert.equal(retry.status, 'running');
+  assert.equal(retry.results[0].bestArea.count, 2, 'existing result remains available during retry');
+  await env.restart().retry(created.jobId, partner);
+  const done = await env.restart().advance(created.jobId, owner);
+  assert.equal(done.partial, false);
+  assert.equal(done.retryAvailable, false);
+  assert.equal(done.results[0].priceCoverage.status, 'complete');
+  assert.equal(done.results[0].bestArea.count, 2);
+  assert.equal(done.results[0].bestArea.averagePriceManWon, 54500);
+  assert.deepEqual(calls, ['202609', '202608', '202608', '202608']);
+  await env.service.retry(created.jobId, owner);
+  await env.service.advance(created.jobId, owner);
+  assert.equal(calls.length, 4);
+});
+
+test('a failing explicit retry retains earlier results and remains retryable', async () => {
+  const env = setup({ loadMonth: async (task) => {
+    if (task.dealYmd === '202608') throw new Error('fetch failed');
+    return month(task);
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  await env.service.advance(created.jobId, owner);
+  const before = await env.service.advance(created.jobId, owner);
+  await env.service.retry(created.jobId, owner);
+  const after = await env.service.advance(created.jobId, owner);
+  assert.deepEqual(after.results, before.results);
+  assert.equal(after.failedRequestCount, 1);
+  assert.equal(after.retryAvailable, true);
+  assert.equal(after.progress.retryCompleted, 1);
+  assert.equal(after.progress.completed, 2);
+});
+
+
+test('cancelling a manual retry retains published results and can resume only the unfinished refresh', async () => {
+  let pause = false;
+  const entered = deferred();
+  const release = deferred();
+  const env = setup({ loadMonth: async (task) => {
+    if (task.dealYmd === '202608') {
+      if (pause) { entered.resolve(); await release.promise; return month(task); }
+      throw new Error('fetch failed');
+    }
+    return month(task);
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  await env.service.advance(created.jobId, owner);
+  const initial = await env.service.advance(created.jobId, owner);
+  pause = true;
+  await env.service.retry(created.jobId, owner);
+  const worker = env.service.advance(created.jobId, owner);
+  await entered.promise;
+  const cancelled = await env.service.cancel(created.jobId, partner);
+  assert.equal(cancelled.status, 'cancelled');
+  assert.deepEqual(cancelled.results, initial.results);
+  assert.equal(cancelled.retryAvailable, true);
+  release.resolve();
+  await worker;
+  await env.service.retry(created.jobId, owner);
+  const completed = await env.service.advance(created.jobId, owner);
+  assert.equal(completed.results[0].bestArea.count, 2);
+  assert.equal(completed.failedRequestCount, 0);
 });

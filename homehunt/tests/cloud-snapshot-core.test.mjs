@@ -4,6 +4,7 @@ import {
   CLOUD_SNAPSHOT_MAX_BYTES, CLOUD_SNAPSHOT_LIST_LIMIT, CloudSnapshotError,
   cloudSnapshotByteLength, normalizeCloudSnapshot,
 } from '../js/cloud-snapshot-core.mjs';
+import { createCandidateReviewBookmark, compareBookmarkConditions } from '../js/candidate-review-core.mjs';
 
 const route = { provider: 'kakao', durationMinutes: 36, walkingMinutes: 6, transfers: 1 };
 const workplace = overrides => ({
@@ -70,6 +71,81 @@ test('all route providers and their nested/unknown fields are excluded', () => {
   }));
   const safe = normalizeCloudSnapshot({ shortlist: records });
   assert.deepEqual(safe.shortlist.map(item => Object.keys(item)), records.map(() => ['id', 'catalogId', 'name', 'needsLocationResolution']));
+});
+
+function reviewedHouse() {
+  const destinations = [workplace()];
+  const snapshot = { filters: {
+    regions: ['gyeonggi'], targetPriceManWon: 60000, maxPriceManWon: 66000,
+    manualTargetPriceManWon: 70000, maxOverBudgetPct: 10, budgetSource: 'wecost',
+    minHouseholds: 500, householdsOperator: 'gt', minAreaM2: 51.2, areaOperator: 'gte',
+    maxAgeYears: 30, commuteModes: ['transit'], commuteDepartureTime: '08:00',
+    commuteMaxMinutes: 60, requireParking: true, minParkingRatio: 1, workplaces: destinations,
+  }, destinations };
+  const area = { areaM2: 59.9, averagePriceManWon: 59000, count: 6,
+    latestMonth: '2026-08', latestDay: 12, aptSeq: '11111-111' };
+  const bookmark = createCandidateReviewBookmark({ catalogId: 'reviewed-1', name: '검토한 단지',
+    address: '테스트 주택 주소', households: 600, builtYear: 2015, priceVerified: true,
+    bestArea: area, areas: [area], qualifyingAreas: [area], actualDealCount: 6,
+  }, snapshot, { now: '2026-09-08T01:00:00.000Z' });
+  return { bookmark, snapshot };
+}
+
+test('explicit review bookmarks preserve official prices and same-condition identity through cloud round trips', () => {
+  const { bookmark, snapshot } = reviewedHouse();
+  const safe = normalizeCloudSnapshot({ shortlist: [bookmark] });
+  const restored = normalizeCloudSnapshot(JSON.parse(JSON.stringify(safe))).shortlist[0];
+  assert.deepEqual(restored.bestArea, bookmark.bestArea);
+  assert.deepEqual(restored.areas, bookmark.areas);
+  assert.equal(restored.households, 600);
+  assert.equal(restored.builtYear, 2015);
+  assert.equal(restored.priceVerified, true);
+  assert.deepEqual(restored.review, bookmark.review);
+  assert.equal(compareBookmarkConditions(restored, snapshot), 'same');
+  snapshot.destinations[0].required = false;
+  assert.equal(compareBookmarkConditions(restored, snapshot), 'changed');
+  assert.deepEqual(normalizeCloudSnapshot(safe), safe);
+});
+
+test('review cloud whitelist removes routes and pass flags even when hidden in a canonical conditions string', () => {
+  const { bookmark } = reviewedHouse();
+  bookmark.routesByDestination = { a: [route] };
+  bookmark.commutePassed = true;
+  bookmark.personalizedRecommendation = { totalScore: 90 };
+  bookmark.bestArea.routes = [route];
+  bookmark.bestArea.commutePassed = true;
+  bookmark.review.commutePassed = true;
+  bookmark.review.conditionSummary = '카카오 통근 36분 통과';
+  const prefix = 'review-conditions-v1:';
+  const parsed = JSON.parse(bookmark.review.conditionSignature.slice(prefix.length));
+  parsed.routes = [route];
+  parsed.filters.commutePassed = true;
+  parsed.filters.routes = [route];
+  for (const destination of [...parsed.destinations, ...parsed.workplaces]) {
+    destination.coordinateSource = 'manual'; destination.provider = 'kakao';
+    destination.lat = 37.912345; destination.lng = 127.912345;
+    destination.durationMinutes = 36; destination.commutePassed = true;
+  }
+  bookmark.review.conditionSignature = prefix + JSON.stringify(parsed);
+  const safe = normalizeCloudSnapshot({ shortlist: [bookmark] }).shortlist[0];
+  assert.doesNotMatch(JSON.stringify(safe), /commutePassed|routes|durationMinutes|totalScore|37\.912345|127\.912345|카카오 통근/);
+  assert.equal(safe.bestArea.averagePriceManWon, 59000);
+  assert.equal(safe.review.source, 'user-selection');
+});
+
+test('malformed review metadata is rejected and unknown conditions stay unknown', () => {
+  const { bookmark } = reviewedHouse();
+  for (const conditionSignature of ['not-conditions', 'review-conditions-v1:{',
+    'review-conditions-v1:{"filters":[],"workplaces":[],"destinations":[]}']) {
+    assert.throws(() => normalizeCloudSnapshot({ shortlist: [{ ...bookmark,
+      review: { ...bookmark.review, conditionSignature } }] }), invalid());
+  }
+  const empty = { ...bookmark, review: { ...bookmark.review, conditionSignature: '', conditionSummary: 'untrusted claim' } };
+  const restored = normalizeCloudSnapshot({ shortlist: [empty] }).shortlist[0];
+  assert.equal(restored.review.conditionSummary, '저장 당시 조건 없음');
+  assert.equal(compareBookmarkConditions(restored, reviewedHouse().snapshot), 'unknown');
+  assert.throws(() => normalizeCloudSnapshot({ shortlist: [{ ...bookmark,
+    bestArea: { ...bookmark.bestArea, averagePriceManWon: -1 } }] }), invalid());
 });
 
 test('legacy and provider coordinates are removed, preserving unresolved company inputs', () => {

@@ -1,4 +1,4 @@
-import { normalizeCloudSnapshot } from './cloud-snapshot-core.mjs';
+import { normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { cloudSessionErrorMessage } from './cloud-session.js';
 
 export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot, onAuthChange = () => {} }) {

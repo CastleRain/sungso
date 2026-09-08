@@ -1,12 +1,12 @@
 import { randomUUID, createHash } from 'node:crypto';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import {
-  aggregateRecommendationRecords,
   filterCatalogForRecommendation,
   normalizeRecommendationFilters,
 } from '../js/recommendation-core.mjs';
 import {
-  completeRecommendationScope,
+  buildRecommendationPriceResult,
+  recommendationMonthEvidence,
   recommendationMonthFailure,
 } from '../scripts/recommendation-data-safety.mjs';
 
@@ -152,12 +152,20 @@ function summary(failures) {
   return [...groups.values()];
 }
 
-function publicJob(job, results = []) {
+function publicJob(job, results = [], pendingPriceCandidates = []) {
   return {
     ok: job.status !== 'error', jobId: job.id, status: job.status, stage: job.stage,
     progress: { completed: job.completed, total: job.tasks.length, retryCompleted: job.retryCompleted, retryTotal: job.retryTotal },
     baseCandidateCount: job.baseCandidateCount, matchedTransactionCount: job.matchedTransactionCount,
     failedRequestCount: job.failures.length, failureSummary: summary(job.failures),
+    failedRequests: job.failures.map((failure) => ({ lawdCd: failure.lawdCd, dealYmd: failure.dealYmd,
+      type: failure.type, reason: failure.message })),
+    completedRequestCount: job.tasks.filter((task) => task.status === 'done').length,
+    staleRequestCount: job.tasks.filter((task) => task.evidenceStatus === 'stale').length,
+    partialPriceCandidateCount: Number(job.partialPriceCandidateCount || 0),
+    pendingPriceCandidateCount: Number(job.pendingPriceCandidateCount || 0), pendingPriceCandidates,
+    retryAvailable: FINAL.has(job.status) && job.tasks.some((task) => task.status === 'failed'
+      || job.resultBlob && task.status === 'retry'),
     partial: job.status === 'complete' && job.failures.length > 0,
     incompleteDistrictCodes: job.incompleteDistrictCodes,
     excludedIncompleteCandidateCount: job.excludedIncompleteCandidateCount,
@@ -196,7 +204,9 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
   };
   const ownsLease = (job, lease) => job.status === 'running' && job.lease?.token === lease.token
     && job.fence === lease.fence && epoch(job.lease.until) > clock() && epoch(job.expiresAt) > clock();
-  const reply = async (ref, job) => publicJob(job, job.status === 'complete' && job.resultBlob ? await readBlob(ref, job.resultBlob, MAX_RESULT_BYTES) : []);
+  const reply = async (ref, job) => publicJob(job,
+    job.resultBlob ? await readBlob(ref, job.resultBlob, MAX_RESULT_BYTES) : [],
+    job.pendingBlob ? await readBlob(ref, job.pendingBlob, MAX_RESULT_BYTES) : []);
   const read = async (id, context) => {
     const ref = refFor(id);
     return { ref, job: authorize(await ref.get(), context) };
@@ -284,21 +294,27 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     if (!ownsLease(before, lease)) return false;
     const task = before.tasks[index];
     const failure = recommendationMonthFailure(outcome, task);
-    const blob = failure ? null : encodeBlob(`task_${index}_${task.attempts + 1}_${lease.fence}`, outcome.value.records);
+    const evidence = recommendationMonthEvidence(outcome, task);
+    const blob = evidence.status === 'missing' ? null : encodeBlob(`task_${index}_${task.attempts + 1}_${lease.fence}`, evidence.records);
     return db.runTransaction(async (transaction) => {
       const job = authorize(await transaction.get(ref), context);
       if (!ownsLease(job, lease)) return false;
       const current = job.tasks[index];
       if (current.attempts !== task.attempts || !['pending', 'retry'].includes(current.status)) return false;
-      const retry = current.attempts === 1;
+      const retry = current.status === 'retry';
       const updated = { ...current, attempts: current.attempts + 1, status: failure ? retry ? 'failed' : 'retry' : 'done' };
-      if (blob) updated.blob = blob.meta;
+      if (blob) {
+        updated.blob = blob.meta;
+        updated.evidenceStatus = evidence.status;
+        updated.sourceUpdatedAt = evidence.sourceUpdatedAt;
+      }
       if (failure && retry) updated.failure = safeFailure(failure);
+      if (!failure) delete updated.failure;
       const tasks = job.tasks.map((item, taskIndex) => taskIndex === index ? updated : item);
       const next = { ...job, tasks, completed: job.completed + (retry ? 0 : 1),
         retryCompleted: job.retryCompleted + (retry ? 1 : 0),
         retryTotal: job.retryTotal + (failure && !retry ? 1 : 0),
-        failures: tasks.filter((item) => item.status === 'failed').map((item) => item.failure),
+        failures: tasks.filter((item) => item.status === 'failed' || item.status === 'retry' && item.failure).map((item) => item.failure),
         stage: tasks.some((item) => item.status === 'pending') ? 'actual-prices' : 'retrying',
         lease: { ...job.lease, until: new Date(clock() + RECOMMENDATION_JOB_LEASE_MS) },
         updatedAt: new Date(clock()).toISOString() };
@@ -315,26 +331,24 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     const candidates = await readBlob(ref, job.catalogBlob);
     const records = [];
     let recordBytes = 0;
-    for (const task of job.tasks.filter((item) => item.status === 'done')) {
+    for (const task of job.tasks.filter((item) => item.status === 'done' || item.evidenceStatus === 'stale' && item.blob)) {
       recordBytes += task.blob.rawBytes;
       if (recordBytes > MAX_JOB_RECORD_BYTES) fail('JOB_DATA_TOO_LARGE', '검색 자료가 너무 큽니다. 지역·기간 조건을 줄여주세요.', 413);
       const rows = await readBlob(ref, task.blob);
       for (const row of rows) records.push(row);
     }
-    if (!records.length && job.failures.length) fail('MOLIT_UNAVAILABLE', '국토부 실거래를 불러오지 못했습니다. 연결 상태를 확인하고 다시 검색해주세요.', 502);
-    const scope = completeRecommendationScope(candidates, records, job.failures);
-    const results = aggregateRecommendationRecords(scope.candidates, scope.records, job.filters, job.currentYear);
+    const analysis = buildRecommendationPriceResult(candidates, records, job.failures, job.tasks, job.filters,
+      job.currentYear, job.tasks.filter((task) => task.evidenceStatus === 'stale' && task.blob));
+    const { results, pendingPriceCandidates, ...counts } = analysis;
     const blob = encodeBlob(`results_${lease.fence}`, results, MAX_RESULT_BYTES);
+    const pendingBlob = encodeBlob(`pending_${lease.fence}`, pendingPriceCandidates, MAX_RESULT_BYTES);
     await db.runTransaction(async (transaction) => {
       const current = authorize(await transaction.get(ref), context);
       if (!ownsLease(current, lease)) return;
       writeBlob(transaction, ref, blob, current.expiresAt);
+      writeBlob(transaction, ref, pendingBlob, current.expiresAt);
       transaction.set(ref, { ...current, status: 'complete', stage: 'complete', lease: null,
-        resultBlob: blob.meta, totalResultCount: results.length,
-        matchedTransactionCount: results.reduce((sum, item) => sum + Number(item.actualDealCount || 0), 0),
-        incompleteDistrictCodes: scope.incompleteDistrictCodes,
-        excludedIncompleteCandidateCount: scope.excludedCandidateCount,
-        excludedIncompleteRecordCount: scope.excludedRecordCount,
+        resultBlob: blob.meta, pendingBlob: pendingBlob.meta, ...counts,
         updatedAt: new Date(clock()).toISOString() });
     });
   }
@@ -381,5 +395,19 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     return get(id, context);
   }
 
-  return Object.freeze({ create, get, advance, cancel });
+  async function retry(id, context) {
+    const ref = refFor(id);
+    await db.runTransaction(async (transaction) => {
+      const job = authorize(await transaction.get(ref), context);
+      const retryable = (task) => task.status === 'failed' || job.resultBlob && task.status === 'retry';
+      if (!FINAL.has(job.status) || !job.tasks.some(retryable)) return;
+      const tasks = job.tasks.map((task) => retryable(task) ? { ...task, status: 'retry' } : task);
+      transaction.set(ref, { ...job, tasks, status: 'running', stage: 'retrying', lease: null, fence: job.fence + 1,
+        retryCompleted: 0, retryTotal: tasks.filter((task) => task.status === 'retry').length,
+        error: '', errorCode: '', updatedAt: new Date(clock()).toISOString() });
+    });
+    return get(id, context);
+  }
+
+  return Object.freeze({ create, get, advance, cancel, retry });
 }

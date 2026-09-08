@@ -1,0 +1,25 @@
+.official-complex-progress { min-width: 0; margin: 12px 0; padding: 12px 14px; border: 1px solid #dbe6ef; border-radius: 11px; background: #f7fafc; }
+.official-complex-progress[hidden], .official-complex-progress [hidden] { display: none !important; }
+.official-complex-progress-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; }
+.official-complex-progress-heading strong { font-size: 13px; color: #19374f; }
+.official-complex-progress-count { color: #2557c6; font-size: 12px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.official-complex-progress progress { display: block; width: 100%; height: 6px; margin: 10px 0; border: 0; border-radius: 6px; overflow: hidden; accent-color: #2875d1; }
+.official-complex-progress progress::-webkit-progress-bar { background: #e0e8f2; }
+.official-complex-progress progress::-webkit-progress-value { background: #2875d1; }
+.official-complex-progress progress::-moz-progress-bar { background: #2875d1; }
+.official-complex-progress-counts, .official-complex-progress-note, .official-complex-progress-reason { margin: 5px 0 0; font-size: 11px; line-height: 1.65; color: #5a6e84; overflow-wrap: anywhere; }
+.official-complex-progress-counts { color: #314f6c; font-variant-numeric: tabular-nums; }
+.official-complex-progress-reason { color: #8b6120; }
+.official-complex-progress-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.official-complex-progress-actions button { min-height: 34px; max-width: 100%; padding: 7px 10px; border: 1px solid #cbd8e7; border-radius: 7px; background: #fff; color: #214a76; font: inherit; font-size: 11px; font-weight: 650; cursor: pointer; }
+.official-complex-progress-actions button:disabled { opacity: .6; cursor: wait; }
+.official-complex-progress-actions button:focus-visible { outline: 3px solid #adc7ff; outline-offset: 2px; }
+.candidate-review-official-status { color: #4d6c82; background: #eef4f8; }
+.candidate-review-official-status.matched { color: #126746; background: #edf8f2; }
+.candidate-review-official-status.partial { color: #856123; background: #fff8e8; }
+@media (max-width: 480px) {
+  .official-complex-progress { padding: 11px 12px; }
+  .official-complex-progress-heading { align-items: flex-start; }
+}
+
+.recommendation-official-facts { margin: 6px 0; font-size: 12px; line-height: 1.6; color: #4d6c82; overflow-wrap: anywhere; }

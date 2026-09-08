@@ -217,7 +217,7 @@ test('parking starts blank, stores an explicitly entered zero as evidence, and r
   const editor = createParkingEditor(candidate, () => { changed += 1; });
   assert.equal(editor.all('input')[0].value, '');
   assert.match(editor.all('summary')[0].textContent, /주차 정보 미확인/);
-  assert.match(editor.textContent, /공식 주차정보 자동 연결 전.*직접 확인한 값/);
+  assert.match(editor.textContent, /단지 상세에서 공식 주차정보.*직접 입력한 확인값.*공식 자료보다 우선/);
   editor.all('input')[0].value = '0'; editor.all('input')[1].value = '2025-01-01';
   editor.all('form')[0].dispatchEvent(new Event('submit', { cancelable: true }));
   assert.equal(changed, 1);

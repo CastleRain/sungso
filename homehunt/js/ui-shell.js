@@ -1,7 +1,8 @@
-import { hhUI, clampPanelWidth } from './ui-state.js?v=4.3.0.1';
+import { hhUI, clampPanelWidth } from './ui-state.js?v=4.4.0';
 
 const VIEW_META = Object.freeze({
   recommend: { screen: 'finder', kicker: 'HOME FINDER', title: '집 찾기', placeholder: '단지명·동네 검색' },
+  candidates: { screen: 'candidates', kicker: 'REVIEWED HOMES', title: '확인한 후보', placeholder: '단지명·동네 검색' },
   map: { screen: 'records', kicker: 'MY RECORDS', title: '내 기록 · 지도', placeholder: '단지명 검색 후 실거래 보기' },
   visits: { screen: 'records', kicker: 'MY RECORDS', title: '내 기록 · 목록', placeholder: '단지명 검색 후 실거래 보기' },
   market: { screen: 'market', kicker: 'ACTUAL DEALS', title: '실거래', placeholder: '서울·경기 단지명 검색' },

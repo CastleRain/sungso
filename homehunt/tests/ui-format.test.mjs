@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   createEvidenceViewModel,
+  evidenceTierMeta,
   formatArea,
   formatPrice,
   renderValue,
@@ -83,4 +84,39 @@ test('HTML 렌더는 값·메타데이터·추가 class의 삽입을 안전하�
   assert.match(html, /data-source-kind="visit&quot; onclick=&quot;bad"/);
   assert.match(html, /class="hh-value hh-value--personal safe-class"/);
   assert.match(html, /&lt;b&gt;성우 메모&lt;\/b&gt;/);
+});
+
+test('부분 수집·이전 자료의 실제 계약금액은 잠정 배지와 관측값 그대로 표시한다', () => {
+  for (const derivation of ['arithmetic-mean', 'latest-contract']) {
+    for (const freshness of ['provisional', 'stale']) {
+      for (const decisionStatus of ['review-required', 'provisional']) {
+        const model = createEvidenceViewModel(59_000, { tier: 'estimated', sourceKind: 'molit-trade',
+          derivation, freshness, decisionStatus, observedAt: '2026-08-31' });
+        const plain = renderValueText(model, { format: 'price', estimatedPrefix: '약' });
+        const html = renderValue(model, { format: 'price' });
+        assert.equal(evidenceTierMeta(model).label, '잠정');
+        assert.equal(plain, '◷ 잠정 · 5억 9,000만원');
+        assert.match(html, /aria-label="증거 등급: 잠정"/);
+        assert.match(html, /class="hh-value__text">5억 9,000만원<\/span>/);
+        assert.doesNotMatch(html, /예상|약 5억|증거 등급: 확정/);
+        assert.equal(model.tier, 'estimated', 'Incomplete coverage never becomes verified data');
+      }
+    }
+  }
+});
+
+test('공식실거래라도 미래 예측이나 일반 추정은 잠정 관측값 예외를 적용하지 않는다', () => {
+  const observed = { tier: 'estimated', sourceKind: 'molit-trade', derivation: 'arithmetic-mean',
+    freshness: 'provisional', decisionStatus: 'review-required' };
+  for (const override of [
+    { sourceKind: 'forecast' }, { derivation: 'forecast' }, { derivation: 'linear-regression' },
+    { freshness: 'future' }, { freshness: 'fresh' }, { decisionStatus: 'reference' },
+  ]) {
+    const model = createEvidenceViewModel(59_000, { ...observed, ...override });
+    assert.equal(evidenceTierMeta(model).label, '추정');
+    assert.match(renderValueText(model, { format: 'price' }), /추정 · 예상 5억 9,000만원/);
+    assert.match(renderValueText(model, { format: 'price', estimatedPrefix: '약' }), /추정 · 약 5억 9,000만원/);
+  }
+  assert.equal(evidenceTierMeta(createEvidenceViewModel(59_000, { ...observed, tier: 'verified' })).label, '확정');
+  assert.equal(evidenceTierMeta(createEvidenceViewModel(59_000, { ...observed, tier: 'unknown' })).label, '미확인');
 });

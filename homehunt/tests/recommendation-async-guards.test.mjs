@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { originFingerprint, selectedCommuteProvider, planCommuteVerification, commuteAttemptKey, recentCommuteAttempt, orderCommuteVerificationCandidates } from '../js/recommendation-verification-core.mjs';
+import { liveRecommendationSearchKey } from '../js/candidate-review-core.mjs';
 
 const app = fs.readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const actualFunction = name => {
@@ -18,7 +19,7 @@ const deferred = () => {
 const json = (payload, ok = true) => ({ ok, json: async () => payload });
 const candidate = { catalogId: 'A', lat: 37.5, lng: 127 };
 const destinations = [{ id: 'work', lat: 37.4, lng: 127.1, weight: 1, modes: ['transit'], maxMinutes: 60 }];
-const filters = { regions: ['11'], maxPriceManWon: 90000, minAreaM2: 60, commuteModes: ['transit'], commuteDepartureTime: '08:00', destinations };
+const filters = { regions: ['gyeonggi'], maxPriceManWon: 90000, minAreaM2: 60, commuteModes: ['transit'], commuteDepartureTime: '08:00', destinations };
 
 function harness(functions) {
   const nodes = new Map();
@@ -28,7 +29,7 @@ function harness(functions) {
       replaceChildren() {}, classList: { add() {}, remove() {}, toggle() {} } });
     return nodes.get(key);
   };
-  const calls = { fetch: [], toast: [], statuses: [], renders: 0, saves: 0, hides: 0, polls: [] };
+  const calls = { fetch: [], toast: [], statuses: [], renders: 0, saves: 0, hides: 0, polls: [], reviews: [], panels: [] };
   const state = {
     recommendationGeocodeToken: 1, recommendationRunning: false, recommendationJobId: '', recommendationPollTimer: 0,
     recommendationResults: [{ ...candidate }], shortlist: [{ ...candidate, memo: 'saved' }],
@@ -38,12 +39,12 @@ function harness(functions) {
     transportConfig: { transitConfigured: true, carConfigured: false, transitProvider: 'tmap', providers: { tmapTransitConfigured: true } },
   };
   const sandbox = {
-    state, $, structuredClone, originFingerprint, selectedCommuteProvider, planCommuteVerification, commuteAttemptKey, recentCommuteAttempt, orderCommuteVerificationCandidates, recommendationRunToken: 1, lastRecommendationDestinations: [],
+    state, $, structuredClone, originFingerprint, selectedCommuteProvider, planCommuteVerification, commuteAttemptKey, recentCommuteAttempt, orderCommuteVerificationCandidates, liveRecommendationSearchKey, recommendationRunToken: 1, lastRecommendationDestinations: [], candidateReview: null, decisionWorkspace: null, recommendationPriceCoverage: null,
     APP_CONFIG: { recommendationUrl: 'fixture:jobs', commuteBatchUrl: 'fixture:batch', commuteUrl: 'fixture:route', localApiContractVersion: 'fixture' },
     KAKAO_PUBLIC_TRANSIT_DAILY_BUDGET: 1000, MAX_KAKAO_SCREENING_CANDIDATES: 20,
     window: { clearTimeout() {}, setTimeout() { return 1; } },
     readRecommendationForm: () => structuredClone(filters), readRecommendationPriceParts: () => ({ valid: true }),
-    updateRecommendationPriceLabel() {}, setRecommendationPanel() {}, recommendationMap: { clearCandidateMarkers() {} },
+    updateRecommendationPriceLabel() {}, setRecommendationPanel: (...args) => calls.panels.push(args), recommendationMap: { clearCandidateMarkers() {} },
     isGeoPoint: point => Number.isFinite(point?.lat) && Number.isFinite(point?.lng),
     normalizeDestinations: rows => rows, recommendationCandidateId: row => String(row.catalogId || row.id),
     destinationFingerprint: rows => JSON.stringify(rows), evaluateCommuteBalance: () => ({ decision: 'matched' }),
@@ -61,6 +62,7 @@ function harness(functions) {
     showToast: (...args) => calls.toast.push(args), hideRecommendationMapStatus: () => { calls.hides += 1; },
     setRecommendationStatus: (...args) => calls.statuses.push(args),
     checkLocalMarketConnection: async () => ({ ok: true, keyConfigured: true }),
+    openLocalKeyModal() {}, openCandidateReview: mode => calls.reviews.push(mode),
     saveRecommendationFilters() {}, renderRecommendationChips() {}, recommendationChipLabels: () => [],
     refreshRecommendationMapLayers: async () => {}, enrichRecommendationMapAndCommute: async () => {},
     mapPool: async (items, concurrency, callback) => Promise.all(items.map(callback)),
@@ -75,7 +77,7 @@ function harness(functions) {
   return { state, sandbox, calls, $ };
 }
 
-const commuteFunctions = ['recommendationCommutePlan', 'rememberCommuteAttempt', 'requestCommuteMatrix', 'verifyRecommendationCommutes', 'verifyTopRecommendationCommutes', 'verifySingleRecommendationCommute'];
+const commuteFunctions = ['recommendationCommutePlan', 'rememberCommuteAttempt', 'beginCommuteBatch', 'recordCommuteBatchResponse', 'finishCommuteBatch', 'requestCommuteMatrix', 'verifyRecommendationCommutes', 'verifyTopRecommendationCommutes', 'verifySingleRecommendationCommute'];
 
 test('top verification cancelled while reading quota sends no route request or stale UI update', async () => {
   const { state, sandbox, calls } = harness(commuteFunctions);
@@ -100,6 +102,20 @@ test('address refinement that starts during quota lookup prevents a partial-pool
   await pending;
   assert.equal(calls.fetch.length, 0);
   assert.equal(state.commuteVerificationRunning, false);
+});
+
+test('a price search started during a single-candidate quota lookup prevents a stale paid route request', async () => {
+  const { state, sandbox, calls } = harness(commuteFunctions);
+  const quota = deferred();
+  sandbox.fetchCommuteQuota = () => quota.promise;
+  const pending = sandbox.verifySingleRecommendationCommute(candidate);
+  // Price preflight owns the UI before its health check increments the location token.
+  state.recommendationRunning = true;
+  quota.resolve({ provider: 'tmap', remaining: 10 });
+  await pending;
+  assert.equal(calls.fetch.length, 0);
+  assert.equal(state.commuteVerificationRunning, false);
+  assert.equal(state.currentCommuteBatch, undefined);
 });
 
 test('batch planning includes closer coordinates completed while quota lookup was pending', async () => {
@@ -261,7 +277,7 @@ test('changing criteria during a many-destination batch prevents sending any lat
   assert.equal(calls.fetch.length, 1);
 });
 
-test('starting a new price search invalidates and releases an older commute verification', async () => {
+test('a price-search click during a running commute preserves the active verification instead of clearing it', async () => {
   const { sandbox, state } = harness([...commuteFunctions, 'recommendationJobUrl', 'runRecommendation']);
   const route = deferred();
   const started = deferred();
@@ -273,12 +289,18 @@ test('starting a new price search invalidates and releases an older commute veri
   await started.promise;
   assert.equal(state.commuteVerificationRunning, true);
   state.commuteAttempts = new Map([['previous-search-attempt', { checkedAt: new Date().toISOString() }]]);
+  const attempts = state.commuteAttempts;
+  const results = state.recommendationResults;
   await sandbox.runRecommendation();
+  assert.equal(state.commuteVerificationRunning, true);
+  assert.equal(state.commuteAttempts, attempts);
+  assert.equal(state.recommendationResults, results);
+  assert.equal(state.recommendationJobId, '', 'No price job starts while a commute request owns the active view');
   route.resolve(json({ items: [] }));
   await old;
   assert.equal(state.commuteVerificationRunning, false);
-  assert.equal(state.commuteAttempts.size, 0, 'New price search starts a fresh request-status session without restoring Kakao routes');
-  assert.equal(state.recommendationJobId, 'new-price-job');
+  assert.equal(state.commuteAttempts, attempts);
+  assert.equal(state.recommendationJobId, '');
 });
 
 test('initial map enrichment with a new token releases any previous commute verification', async () => {
@@ -314,7 +336,143 @@ test('the single-route fallback also preserves newer issues when its stale calls
 });
 
 function jobHarness() {
-  return harness(['recommendationJobUrl', 'runRecommendation', 'cancelRecommendation']);
+  const context = harness(['recommendationJobUrl', 'runRecommendation', 'cancelRecommendation']);
+  context.state.recommendationCompletedAt = Date.now();
+  return context;
+}
+
+test('applying the same completed search keeps the current region, scope, selection, and view without a new job or reset', async () => {
+  const { sandbox, state, calls, $ } = jobHarness();
+  state.recommendationResults = [{ ...candidate, commuteBalance: { decision: 'matched' } }];
+  state.recommendationMeta = { resultCount: 1, failedRequestCount: 0 };
+  state.recommendationRunSnapshot.provider = 'tmap';
+  state.recommendationRegion = 'a-selected-region';
+  state.recommendationShowingShortlist = true;
+  state.recommendationMapMode = 'apartments';
+  state.currentView = 'recommend';
+  state.selectedRecommendationId = 'A';
+  $('#recommendationCommuteScope').value = 'pending';
+  state.commuteAttempts = new Map([['known-request', { checkedAt: new Date().toISOString() }]]);
+  const previousResults = state.recommendationResults;
+  const previousAttempts = state.commuteAttempts;
+  const previousToken = state.recommendationGeocodeToken;
+  let connectionChecks = 0;
+  sandbox.checkLocalMarketConnection = async () => { connectionChecks += 1; return { ok: true, keyConfigured: true }; };
+  await sandbox.runRecommendation();
+  assert.equal(calls.fetch.length, 0);
+  assert.equal(connectionChecks, 0);
+  assert.equal(state.recommendationResults, previousResults);
+  assert.equal(state.commuteAttempts, previousAttempts);
+  assert.equal(state.recommendationGeocodeToken, previousToken);
+  assert.equal(state.recommendationShowingShortlist, true);
+  assert.equal(state.recommendationRegion, 'a-selected-region');
+  assert.equal(state.recommendationMapMode, 'apartments');
+  assert.equal(state.currentView, 'recommend');
+  assert.equal(state.selectedRecommendationId, 'A');
+  assert.equal($('#recommendationCommuteScope').value, 'pending');
+  assert.deepEqual(calls.reviews, []);
+  assert.equal(calls.renders, 0, 'Keeping the same result must not rebuild cards or reset their current focus');
+  assert.deepEqual(calls.panels, [['']]);
+  assert.match(calls.toast.at(-1)[0], /추가 경로 호출은 0회/);
+});
+
+test('price evidence at least one day old is refreshed even when the current search conditions are unchanged', async () => {
+  const { sandbox, state, calls } = jobHarness();
+  state.recommendationMeta = { resultCount: 1, failedRequestCount: 0 };
+  state.recommendationRunSnapshot.provider = 'tmap';
+  state.recommendationCompletedAt = Date.now() - 24 * 60 * 60 * 1000;
+  sandbox.fetch = async (url, options) => {
+    calls.fetch.push({ url, method: options.method });
+    return json({ jobId: 'refresh-old-price-job' });
+  };
+  await sandbox.runRecommendation();
+  assert.deepEqual(calls.fetch, [{ url: 'fixture:jobs', method: 'POST' }]);
+  assert.equal(calls.reviews.length, 0);
+  assert.equal(calls.toast.length, 0);
+  assert.equal(state.recommendationJobId, 'refresh-old-price-job');
+});
+
+for (const [label, incompleteMeta] of [
+  ['partial results', { partial: true, failedRequestCount: 0 }],
+  ['failed month requests', { partial: false, failedRequestCount: 2 }],
+]) {
+  test(`the same conditions retry ${label} instead of indefinitely reopening incomplete price data`, async () => {
+    const { sandbox, state, calls } = jobHarness();
+    state.recommendationResults = [{ ...candidate, commuteBalance: { decision: 'matched' } }];
+    state.recommendationMeta = { resultCount: 1, ...incompleteMeta };
+    state.recommendationRunSnapshot.provider = 'tmap';
+    let connectionChecks = 0;
+    sandbox.checkLocalMarketConnection = async () => { connectionChecks += 1; return { ok: true, keyConfigured: true }; };
+    sandbox.fetch = async (url, options) => {
+      calls.fetch.push({ url, method: options.method });
+      return json({ jobId: 'retry-incomplete-price-job' });
+    };
+    await sandbox.runRecommendation();
+    assert.equal(connectionChecks, 1);
+    assert.deepEqual(calls.fetch, [{ url: 'fixture:jobs', method: 'POST' }]);
+    assert.equal(calls.reviews.length, 0);
+    assert.equal(calls.toast.length, 0, 'A retry must not claim that it reused a complete result');
+    assert.equal(state.recommendationJobId, 'retry-incomplete-price-job');
+    assert.equal(state.recommendationMeta, null);
+  });
+}
+
+for (const change of ['provider', 'price', 'company-coordinate', 'region']) {
+  test(`a changed ${change} starts a new search rather than reusing the previous in-view result`, async () => {
+    const { sandbox, state, calls } = jobHarness();
+    state.recommendationMeta = { resultCount: 1 };
+    state.recommendationRunSnapshot.provider = 'tmap';
+    state.commuteAttempts = new Map([['known-request', { checkedAt: new Date().toISOString() }]]);
+    const nextFilters = structuredClone(filters);
+    if (change === 'provider') {
+      state.transportConfig.transitProvider = 'kakao';
+      state.transportConfig.transitProviderPreference = 'kakao';
+    } else if (change === 'price') nextFilters.maxPriceManWon += 1000;
+    else if (change === 'company-coordinate') nextFilters.destinations[0].lat += 0.000001;
+    else nextFilters.regions = ['seoul'];
+    sandbox.readRecommendationForm = () => nextFilters;
+    sandbox.fetch = async (url, options) => {
+      calls.fetch.push({ url, method: options.method });
+      return json({ jobId: 'changed-condition-job' });
+    };
+    await sandbox.runRecommendation();
+    assert.deepEqual(calls.fetch, [{ url: 'fixture:jobs', method: 'POST' }]);
+    assert.equal(calls.reviews.length, 0);
+    assert.equal(state.recommendationResults.length, 0);
+    assert.equal(state.commuteAttempts.size, 0);
+    assert.equal(state.recommendationJobId, 'changed-condition-job');
+  });
+}
+
+for (const invalid of ['price-input', 'region', 'price', 'company-weight', 'company-coordinate', 'unavailable-server']) {
+  test(`a ${invalid} validation failure preserves existing candidates and attempt status`, async () => {
+    const { sandbox, state, calls } = jobHarness();
+    state.recommendationMeta = { resultCount: 1 };
+    state.commuteAttempts = new Map([['known-request', { checkedAt: new Date().toISOString() }]]);
+    const previousResults = state.recommendationResults;
+    const previousSnapshot = state.recommendationRunSnapshot;
+    const previousAttempts = state.commuteAttempts;
+    const previousToken = state.recommendationGeocodeToken;
+    const nextFilters = structuredClone(filters);
+    if (invalid === 'price-input') sandbox.readRecommendationPriceParts = () => ({ valid: false });
+    else if (invalid === 'region') nextFilters.regions = [];
+    else if (invalid === 'price') nextFilters.maxPriceManWon = 0;
+    else if (invalid === 'company-weight') nextFilters.destinations[0].weight = 0;
+    else if (invalid === 'company-coordinate') nextFilters.destinations[0].lat = null;
+    else {
+      nextFilters.maxPriceManWon += 1000;
+      sandbox.checkLocalMarketConnection = async () => ({ ok: false });
+    }
+    sandbox.readRecommendationForm = () => nextFilters;
+    await sandbox.runRecommendation();
+    assert.equal(calls.fetch.length, 0);
+    assert.equal(state.recommendationResults, previousResults);
+    assert.equal(state.recommendationRunSnapshot, previousSnapshot);
+    assert.equal(state.commuteAttempts, previousAttempts);
+    assert.equal(state.recommendationGeocodeToken, previousToken);
+    assert.equal(state.recommendationRunning, false);
+    assert.equal(calls.statuses.at(-1)[0], 'error');
+  });
 }
 
 test('a cancelled late job-creation response is deleted exactly once without polling or touching the new job', async () => {
@@ -409,17 +567,18 @@ test('the completed poll distinguishes missing price data from valid partial can
     const [kind, title, message] = calls.statuses.at(-1);
     assert.equal(state.recommendationRunning, false);
     assert.match(message, /월·시군구 조회 88건/);
-    assert.match(message, /불완전한 시군구의 후보는 제외/);
+    assert.match(message, /확인된 거래는 유지.*가격은 잠정/);
+    assert.match(message, /가격 확인 대기 단지를 따로 보고 미완료 자료만 이어서 조회/);
+    assert.doesNotMatch(message, /불완전한 시군구의 후보는 제외/);
     assert.equal($('small', $('#recommendStepPrice')).textContent, '일부 지역 실거래 확인 미완료');
     if (!results.length) {
       assert.equal(kind, 'error');
-      assert.match(title, /후보 판단을 보류/);
-      assert.match(message, /조건에 맞는 집이 없다는 뜻은 아닙니다/);
+      assert.match(title, /가격 확인을 기다리는 단지도 볼 수/);
       assert.doesNotMatch(message, /표시된 후보의 가격|통근.*버튼|누락분만/);
     } else {
       assert.equal(kind, 'success');
       assert.match(title, /1개 후보.*재확인/);
-      assert.match(message, /표시된 후보의 가격·면적은 실제 거래로 확인/);
+      assert.match(message, /확인된 거래는 유지/);
       assert.equal(state.recommendationResults, results);
     }
   }

@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { createOfficialComplexClient } from '../js/official-complex-client.mjs';
+import { createCommuteAutoRunner } from '../js/commute-auto-runner.mjs';
+import { liveRecommendationSearchKey } from '../js/candidate-review-core.mjs';
 import {
   evaluateCommuteBalance, expectedTransitProviderCalls, normalizeDestinations, quotaAwareCandidateCap,
 } from '../js/commute-balance-core.mjs';
@@ -54,11 +57,13 @@ function withMeasuredRoutes(candidate, times, now) {
 }
 
 const appFunctions = [
+  'automaticCommuteContextKey', 'getAutomaticCommuteContext', 'runAutomaticCommuteCandidate',
   'activeRecommendationDestinations', 'recommendationVerificationStatus',
   'candidateCommuteDecision', 'filterRecommendationByCommute', 'rankedRecommendationSource',
   'sortedRecommendationResults', 'renderCommuteVerificationGate', 'renderRecommendationResults',
-  'renderRecommendationStatusSummary',
+  'renderRecommendationStatusSummary', 'synchronizeOfficialComplexCandidates',
   'recommendationCandidateId', 'commuteProviderIssues', 'commuteProviderIssueMessage',
+  'beginCommuteBatch', 'recordCommuteBatchResponse', 'finishCommuteBatch',
   'requestCommuteMatrix', 'verifyRecommendationCommutes', 'recommendationCommutePlan', 'rememberCommuteAttempt', 'verifyTopRecommendationCommutes', 'verifySingleRecommendationCommute',
 ];
 
@@ -101,11 +106,11 @@ function harness(candidates = []) {
   const calls = { requests: [], toasts: [], cards: [], timers: new Map() };
   let timerSequence = 0;
   const sandbox = {
-    state, $, Date: AppDate, locationRankingCache: null, decisionWorkspace: null,
-    normalizeDestinations, evaluateCommuteBalance, destinationFingerprint, originFingerprint,
+    state, $, Date: AppDate, locationRankingCache: null, decisionWorkspace: null, candidateReview: null, recommendationPriceCoverage: null, officialComplexReady: false,
+    normalizeDestinations, evaluateCommuteBalance, destinationFingerprint, originFingerprint, liveRecommendationSearchKey,
     selectedCommuteProvider, planCommuteVerification, commuteAttemptKey, recentCommuteAttempt, orderCommuteVerificationCandidates,
     expectedTransitProviderCalls, quotaAwareCandidateCap, orderLocationVerificationQueue,
-    parkingForCandidate, isGeoPoint,
+    parkingForCandidate, isGeoPoint, officialComplexClient: createOfficialComplexClient(),
     // Inject the same clock into imported freshness functions and the app's cache.
     candidateVerificationStatus: (candidate, options) => candidateVerificationStatus(candidate, { ...options, now: clock.now }),
     commuteEvidenceFreshness: (candidate, options) => commuteEvidenceFreshness(candidate, { ...options, now: clock.now }),
@@ -125,7 +130,7 @@ function harness(candidates = []) {
     makeRecommendationCard: candidate => { calls.cards.push(candidate); return { candidate }; },
     showToast: (...args) => calls.toasts.push(args), saveShortlist() {},
     hideRecommendationMapStatus() {}, renderRecommendationDecisionBar() {},
-    renderRecommendationComposition() {}, renderLocationDiscovery() {}, selectRecommendationRegion() {},
+    renderRecommendationComposition() {}, renderLocationDiscovery() {}, selectRecommendationRegion() {}, renderRecommendationMapScope() {},
     refreshShortlistCommuteFreshness() {}, setRecommendationPanel() {},
     window: {
       requestAnimationFrame() {},
@@ -138,12 +143,13 @@ function harness(candidates = []) {
   return { state, sandbox, calls, filters, clock, $ };
 }
 
-function respondWithRoutes(context, getRoutes) {
+function respondWithRoutes(context, getRoutes, metadata = () => ({})) {
   context.sandbox.fetch = async (url, options) => {
     assert.equal(url, 'fixture:commute-batch');
     const body = JSON.parse(options.body);
     context.calls.requests.push(body);
     return { ok: true, json: async () => ({
+      ...metadata(body),
       items: body.origins.flatMap(origin => body.destinations.map(destination => ({
         originId: origin.id, destinationId: destination.id,
         routes: getRoutes(origin, destination),
@@ -152,7 +158,92 @@ function respondWithRoutes(context, getRoutes) {
   };
 }
 
-test('959 price candidates and three companies produce zero default matches and 959 explicit pending candidates', () => {
+test('automatic app verification applies partial exclusion and spends only actual calls within the chosen budget', async () => {
+  const context = harness(Array.from({ length: 5 }, (_, index) => priceCandidate(`auto${index}`, index)));
+  const { sandbox, state, calls, clock } = context;
+  let used = 0;
+  sandbox.fetchCommuteQuota = async () => ({ tmap: { remaining: 1000 - used } });
+  sandbox.fetch = async (url, options) => {
+    assert.equal(url, 'fixture:commute-batch');
+    const body = JSON.parse(options.body); calls.requests.push(body);
+    assert.equal(body.earlyExit, true);
+    assert.equal(body.origins.length, 1);
+    assert.equal(body.destinations[0].id, 'b', 'The largest required share is checked first');
+    const excluded = [1, 4].includes(calls.requests.length);
+    const selected = excluded ? body.destinations.slice(0, 1) : body.destinations;
+    used += selected.length;
+    return { ok: true, json: async () => ({ actualTransitCalls: selected.length,
+      skippedPairCount: excluded ? 2 : 0,
+      items: selected.map(destination => ({ originId: body.origins[0].id, destinationId: destination.id,
+        routes: [measuredRoute(excluded ? 90 : 35, clock.now)] })) }) };
+  };
+  const runner = createCommuteAutoRunner({ getContext: sandbox.getAutomaticCommuteContext,
+    runCandidate: sandbox.runAutomaticCommuteCandidate, onProgress: progress => { state.commuteAutoRunning = progress.running; } });
+  runner.start({ maxCalls: 10 });
+  await sandbox.verifyTopRecommendationCommutes();
+  assert.equal(calls.requests.length, 0, 'Manual lookup is locked from automatic start');
+  await runner.whenIdle();
+  const progress = runner.snapshot();
+  assert.equal(used, 8);
+  assert.equal(progress.reason, 'BUDGET_LIMIT');
+  assert.equal(progress.checked, 4);
+  assert.equal(progress.matched, 2);
+  assert.equal(progress.excluded, 2);
+  assert.equal(state.recommendationResults.length, 5);
+  assert.equal(state.recommendationCommuteEnriched, true, 'Automatic results must replace the not-yet-checked empty state');
+  assert.equal(state.lastCommuteBatch.skippedPairCount, 2);
+  assert.equal(calls.requests.length, 4);
+  const earlyExcluded = state.recommendationResults.filter(item => sandbox.candidateCommuteDecision(item) === 'excluded');
+  assert.equal(earlyExcluded.length, 2);
+  assert.ok(earlyExcluded.every(item => Object.keys(item.routesByDestination).length === 1));
+  assert.ok(earlyExcluded.every(item => item.bestArea.averagePriceManWon === 70000));
+});
+
+test('automatic app verification stops after a form change and never hides the already received result', async () => {
+  const context = harness([priceCandidate('first'), priceCandidate('next', 1)]);
+  const { sandbox, state, filters, calls, clock } = context;
+  sandbox.fetchCommuteQuota = async () => ({ tmap: { remaining: 100 } });
+  respondWithRoutes(context, () => [measuredRoute(35, clock.now)], () => {
+    filters.minAreaM2 = 100;
+    return { actualTransitCalls: 3 };
+  });
+  const runner = createCommuteAutoRunner({ getContext: sandbox.getAutomaticCommuteContext,
+    runCandidate: sandbox.runAutomaticCommuteCandidate });
+  runner.start({ maxCalls: 30 }); await runner.whenIdle();
+  assert.equal(calls.requests.length, 1);
+  assert.equal(runner.snapshot().reason, 'CONTEXT_CHANGED');
+  assert.equal(state.recommendationResults.length, 2);
+  assert.equal(state.recommendationResults.filter(item => item.routesByDestination).length, 1);
+});
+
+test('automatic verification does not adopt conditions changed during its initial quota request', async () => {
+  const context = harness([priceCandidate('wait')]);
+  let resolveQuota;
+  context.sandbox.fetchCommuteQuota = () => new Promise(resolve => { resolveQuota = resolve; });
+  const runner = createCommuteAutoRunner({ getContext: context.sandbox.getAutomaticCommuteContext,
+    runCandidate: context.sandbox.runAutomaticCommuteCandidate });
+  runner.start({ maxCalls: 30 });
+  await Promise.resolve();
+  context.filters.minAreaM2 = 100;
+  resolveQuota({ tmap: { remaining: 100 } });
+  await runner.whenIdle();
+  assert.equal(runner.snapshot().reason, 'CONTEXT_CHANGED');
+  assert.equal(context.calls.requests.length, 0);
+});
+
+test('disabling exclusion keeps automatic requests in full-company mode', async () => {
+  const context = harness([priceCandidate('soft')]);
+  context.filters.excludeFar = false;
+  context.sandbox.fetchCommuteQuota = async () => ({ tmap: { remaining: 100 } });
+  respondWithRoutes(context, () => [measuredRoute(90, context.clock.now)], () => ({ actualTransitCalls: 3 }));
+  const runner = createCommuteAutoRunner({ getContext: context.sandbox.getAutomaticCommuteContext,
+    runCandidate: context.sandbox.runAutomaticCommuteCandidate });
+  runner.start({ maxCalls: 3 }); await runner.whenIdle();
+  assert.equal(context.calls.requests[0].earlyExit, false);
+  assert.equal(Object.keys(context.state.recommendationResults[0].routesByDestination).length, 3);
+});
+
+test('the explicit confirmed scope excludes 959 unverified price candidates, which remain available in the pending scope', () => {
   const candidates = Array.from({ length: 959 }, (_, index) => priceCandidate(`P${index}`, index));
   const { sandbox, state, calls, $ } = harness(candidates);
   assert.equal(sandbox.sortedRecommendationResults().length, 0);
@@ -185,12 +276,12 @@ test('incomplete price data with zero candidates precedes every commute empty st
   for (const scope of ['matched', 'pending', 'all', 'excluded']) {
     $('#recommendationCommuteScope').value = scope;
     sandbox.renderRecommendationResults(meta);
-    assert.match($('#recommendationEmptyTitle').textContent, /실거래 자료가 누락.*판단을 보류/);
-    assert.match($('#recommendationEmptyMessage').textContent, /월·시군구 조회 88건.*불완전한 시군구의 후보를 제외/);
+    assert.match($('#recommendationEmptyTitle').textContent, /가격을 아직 판단할 수 없는 단지/);
+    assert.match($('#recommendationEmptyMessage').textContent, /미완료 월·지역 조회 88건/);
     assert.match($('#recommendationEmptyMessage').textContent, /조건에 맞는 집이 없다는 뜻은 아닙니다/);
-    assert.match($('#recommendationEmptyMessage').textContent, /연결 상태.*다시 찾기/);
+    assert.match($('#recommendationEmptyMessage').textContent, /가격 확인 대기.*단지 정보를 보고.*미완료 자료만 이어서 조회/);
     assert.doesNotMatch($('#recommendationEmptyMessage').textContent, /통근 확인 버튼|경로를 조회|모든 후보의 통근 경로가 확인/);
-    assert.match($('#recommendationResultSummary').textContent, /월·시군구 조회 미반영 88건/);
+    assert.match($('#recommendationResultSummary').textContent, /재확인할 월·지역 조회 88건/);
     assert.equal($('#commuteVerificationGate').hidden, true);
     assert.equal($('#verifyTopCommutes').disabled, true);
     assert.equal($('#decisionCandidateDetail').textContent, '가격 자료 확인 미완료');
@@ -198,7 +289,7 @@ test('incomplete price data with zero candidates precedes every commute empty st
   }
   state.recommendationCommuteEnriched = true;
   sandbox.renderRecommendationResults();
-  assert.match($('#recommendationEmptyTitle').textContent, /판단을 보류/);
+  assert.match($('#recommendationEmptyTitle').textContent, /가격을 아직 판단할 수 없는 단지/);
   assert.equal(calls.requests.length, 0);
 });
 
@@ -219,7 +310,7 @@ test('partial price results keep valid candidates available and preserve shortli
   sandbox.renderRecommendationResults({ baseCandidateCount: 4199, failedRequestCount: 88, partial: true });
   assert.equal($('#recommendationEmptyTitle').textContent, '아직 정밀 통근을 실행하지 않았어요');
   assert.equal($('#commuteVerificationGate').hidden, false);
-  assert.match($('#recommendationStatusMessage').textContent, /월·시군구 가격 조회 88건/);
+  assert.match($('#recommendationStatusMessage').textContent, /월·시군구 조회 88건.*확인된 거래는 유지.*가격은 잠정/);
   $('#recommendationCommuteScope').value = 'pending';
   sandbox.renderRecommendationResults();
   assert.equal($('#recommendationResults').children.length, 1);
@@ -304,7 +395,7 @@ test('top verification queries the pending pool even while the visible confirmed
   await sandbox.verifyTopRecommendationCommutes();
   assert.equal(calls.requests.length, 2);
   assert.equal(calls.requests[0].origins.length, 1);
-  assert.deepEqual(calls.requests[0].destinations.map(destination => destination.id), ['a', 'b', 'c']);
+  assert.deepEqual(calls.requests[0].destinations.map(destination => destination.id), ['b', 'c', 'a']);
   assert.equal(calls.requests.reduce((sum, body) => sum + body.maxTransitCalls, 0), 9);
   assert.equal(sandbox.sortedRecommendationResults().length, 3);
   assert.equal(sandbox.sortedRecommendationResults({ scope: 'pending' }).length, 956);
@@ -503,6 +594,73 @@ test('server-aborted unstarted origins stay eligible and are not recorded as fai
   assert.ok(plan.candidates.every(candidate => candidate.catalogId !== failedId));
 });
 
+test('the actual top action totals pilot and remaining responses as ten candidates and thirty upstream calls', async () => {
+  const context = harness(Array.from({ length: 15 }, (_, i) => priceCandidate(`receipt-${i}`, i)));
+  context.state.transportConfig.transitProvider = 'kakao';
+  respondWithRoutes(context,
+    () => [{ ...measuredRoute(30, context.clock.now), provider: 'kakao' }],
+    body => ({ actualTransitCalls: body.origins.length * body.destinations.length }));
+  await context.sandbox.verifyTopRecommendationCommutes();
+  assert.deepEqual(context.calls.requests.map(body => body.origins.length), [1, 9]);
+  const receipt = context.state.lastCommuteBatch;
+  assert.equal(receipt.plannedCandidateCount, 10);
+  assert.equal(receipt.candidateCount, 10);
+  assert.equal(receipt.destinationCount, 3);
+  assert.equal(receipt.actualTransitCalls, 30);
+  assert.equal(receipt.matched, 10);
+  assert.equal(receipt.excluded, 0);
+  assert.equal(receipt.pending, 0);
+  assert.equal(context.state.currentCommuteBatch, null);
+  vm.runInContext(actualFunction('renderRecommendationDecisionBar'), context.sandbox);
+  context.sandbox.renderRecommendationDecisionBar();
+  assert.match(context.$('#commuteBatchReceipt').textContent, /최근 확인 10곳.*실제 30회 사용.*충족 10/);
+});
+
+test('an explicitly reported zero upstream count stays zero when shared in-flight requests supply valid routes', async () => {
+  const context = harness([priceCandidate('shared-flight')]);
+  context.state.transportConfig.transitProvider = 'kakao';
+  respondWithRoutes(context,
+    () => [{ ...measuredRoute(30, context.clock.now), provider: 'kakao' }],
+    () => ({ actualTransitCalls: 0 }));
+  await context.sandbox.verifySingleRecommendationCommute(context.state.recommendationResults[0]);
+  assert.equal(context.calls.requests.length, 1);
+  assert.equal(context.state.lastCommuteBatch.actualTransitCalls, 0);
+  assert.equal(context.state.lastCommuteBatch.candidateCount, 1);
+  assert.equal(context.state.lastCommuteBatch.matched, 1);
+});
+
+test('a response without upstream usage never claims a free lookup', async () => {
+  const context = harness([priceCandidate('unknown-usage')]);
+  respondWithRoutes(context, () => [measuredRoute(30, context.clock.now)]);
+  await context.sandbox.verifySingleRecommendationCommute(context.state.recommendationResults[0]);
+  assert.equal(context.state.lastCommuteBatch.actualTransitCalls, null);
+  assert.equal(context.state.lastCommuteBatch.matched, 1);
+  vm.runInContext(actualFunction('renderRecommendationDecisionBar'), context.sandbox);
+  context.sandbox.renderRecommendationDecisionBar();
+  assert.match(context.$('#commuteBatchReceipt').textContent, /호출량 미확인/);
+  assert.doesNotMatch(context.$('#commuteBatchReceipt').textContent, /실제 0회/);
+});
+
+test('a partial batch receipt excludes unstarted origins and retains the actual call total', async () => {
+  const context = harness(Array.from({ length: 15 }, (_, i) => priceCandidate(`partial-receipt-${i}`, i)));
+  context.state.transportConfig.transitProvider = 'kakao';
+  let failedId;
+  respondWithRoutes(context, (origin, destination) => {
+    if (context.calls.requests.length === 1) return [{ ...measuredRoute(30, context.clock.now), provider: 'kakao' }];
+    failedId ||= origin.id;
+    return [{ mode: 'transit', provider: 'kakao', verified: false, status: 'error',
+      reasonCode: origin.id === failedId && destination.id === 'a' ? 'HTTP_ERROR' : 'BATCH_ABORTED' }];
+  }, () => ({ actualTransitCalls: context.calls.requests.length === 1 ? 3 : 1 }));
+  await context.sandbox.verifyTopRecommendationCommutes();
+  const receipt = context.state.lastCommuteBatch;
+  assert.equal(receipt.plannedCandidateCount, 10);
+  assert.equal(receipt.candidateCount, 2, 'Only the pilot and origin whose first pair actually ran belong to this receipt');
+  assert.equal(receipt.actualTransitCalls, 4);
+  assert.equal(receipt.matched, 1);
+  assert.equal(receipt.pending, 1);
+  assert.equal(context.state.commuteAttempts.size, 2);
+});
+
 test('button execution reduces to complete matrices when the selected quota is nearly exhausted', async () => {
   const context = harness(Array.from({ length: 15 }, (_, i) => priceCandidate(`quota-${i}`, i)));
   context.state.transportConfig.transitProvider = 'kakao';
@@ -528,8 +686,8 @@ test('the actual next-batch button shows its complete-matrix plan and current-vi
   const button = context.$('#verifyTopCommutes');
   assert.match(context.$('span', button).textContent, /다음 1곳.*최대 신규 3회/);
   assert.equal(button.disabled, false);
-  assert.match(context.$('#commuteVerificationPlan').textContent, /가격 검색은 경로 호출 0회/);
-  assert.match(context.$('#commuteVerificationPlan').textContent, /출발시각은 반영되지 않/);
+  assert.match(context.$('#commuteVerificationPlan').textContent, /가격 검색·후보 다시 보기는 경로 호출 0회/);
+  assert.match(context.$('#commuteVerificationPlan').textContent, /출발시각은 Kakao 경로에 반영되지 않/);
   assert.doesNotMatch(context.$('#commuteVerificationPlan').textContent, /캐시.*재사용/);
   assert.match(context.$('#decisionTransitProvider').textContent, /Kakao 단독/);
   context.state.commuteQuota.kakao.remaining = 2;
@@ -595,4 +753,73 @@ test('the visible verification plan shows only the selected provider quota and h
   assert.match(context.$('#commuteVerificationPlan').textContent, /Kakao 오늘 사용량 확인 필요/);
   assert.doesNotMatch(context.$('#commuteVerificationPlan').textContent, /남은 0|남은 9/);
   assert.equal(context.calls.requests.length, 0);
+});
+
+test('automatic verification retains the actual call receipt after a condition token changes without applying stale routes', async () => {
+  const context = harness([priceCandidate('shared'), priceCandidate('next', 1)]);
+  const { sandbox, state, calls, clock } = context;
+  sandbox.fetchCommuteQuota = async () => ({ tmap: { remaining: 100 } });
+  let deliverResponse, requestBody, signalRequest;
+  const requestStarted = new Promise(resolve => { signalRequest = resolve; });
+  sandbox.fetch = (url, options) => {
+    assert.equal(url, 'fixture:commute-batch');
+    requestBody = JSON.parse(options.body);
+    calls.requests.push(requestBody);
+    signalRequest();
+    return new Promise(resolve => { deliverResponse = resolve; });
+  };
+  const runner = createCommuteAutoRunner({ getContext: sandbox.getAutomaticCommuteContext,
+    runCandidate: sandbox.runAutomaticCommuteCandidate });
+  runner.start({ maxCalls: 30 });
+  await requestStarted;
+  const replacement = { ...priceCandidate(requestBody.origins[0].id), name: '변경한 조건의 새 후보' };
+  state.recommendationGeocodeToken += 1;
+  state.recommendationResults = [replacement, priceCandidate('new-condition-next', 2)];
+  deliverResponse({ ok: true, json: async () => ({ actualTransitCalls: 3,
+    items: requestBody.destinations.map(destination => ({ originId: requestBody.origins[0].id,
+      destinationId: destination.id, routes: [measuredRoute(35, clock.now)] })) }) });
+  await runner.whenIdle();
+  const progress = runner.snapshot();
+  assert.equal(calls.requests.length, 1, 'Changing conditions stops subsequent paid requests');
+  assert.equal(progress.running, false);
+  assert.equal(progress.checked, 1);
+  assert.equal(progress.actualCalls, 3, 'The old request still consumed three provider calls');
+  assert.equal(progress.remainingBudget, 27);
+  assert.equal(progress.usageUncertain, false);
+  assert.equal(state.lastCommuteBatch.actualTransitCalls, 3);
+  assert.equal(state.lastCommuteBatch.candidateCount, 1);
+  assert.equal(state.recommendationResults[0], replacement);
+  assert.ok(state.recommendationResults.every(candidate => !candidate.routesByDestination && !candidate.commuteVerification),
+    'Even a new candidate with the same catalog ID must not inherit the old condition routes');
+});
+
+test('automatic verification marks usage unknown when a request fails after the condition token changes', async () => {
+  const context = harness([priceCandidate('failed'), priceCandidate('next', 1)]);
+  const { sandbox, state, calls } = context;
+  sandbox.fetchCommuteQuota = async () => ({ tmap: { remaining: 100 } });
+  let failResponse, signalRequest;
+  const requestStarted = new Promise(resolve => { signalRequest = resolve; });
+  sandbox.fetch = (url, options) => {
+    assert.equal(url, 'fixture:commute-batch');
+    calls.requests.push(JSON.parse(options.body));
+    signalRequest();
+    return new Promise((resolve, reject) => { failResponse = reject; });
+  };
+  const runner = createCommuteAutoRunner({ getContext: sandbox.getAutomaticCommuteContext,
+    runCandidate: sandbox.runAutomaticCommuteCandidate });
+  runner.start({ maxCalls: 30 });
+  await requestStarted;
+  state.recommendationGeocodeToken += 1;
+  state.recommendationResults = [priceCandidate('replacement')];
+  failResponse(new Error('The server response was lost after dispatch'));
+  await runner.whenIdle();
+  const progress = runner.snapshot();
+  assert.equal(calls.requests.length, 1);
+  assert.equal(progress.running, false);
+  assert.equal(progress.reason, 'UNKNOWN_RECEIPT');
+  assert.equal(progress.usageUncertain, true);
+  assert.equal(progress.remainingBudget, null, 'Missing usage must not be presented as an untouched budget');
+  assert.equal(state.lastCommuteBatch.actualTransitCalls, null);
+  assert.equal(state.recommendationResults[0].catalogId, 'replacement');
+  assert.ok(state.recommendationResults.every(candidate => !candidate.routesByDestination && !candidate.commuteVerification));
 });

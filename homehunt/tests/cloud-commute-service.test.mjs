@@ -248,3 +248,91 @@ test('bounded batch timeout aborts active requests and leaves the remaining queu
   assert.equal(result.abortedPairCount, 15);
   assert.equal(result.quota, null);
 });
+
+function earlyBody(count = 10) {
+  const input = batchBody(count, 3);
+  input.earlyExit = true;
+  input.destinations.forEach((item, index) => { item.weightPercent = [40, 10, 50][index]; item.required = index !== 1; });
+  return input;
+}
+
+test('cloud early exit uses the same required-weight order and precise saved-call metadata', async () => {
+  const { service, requests, db } = setup();
+  const input = earlyBody();
+  input.destinations[2].maxMinutes = 30;
+  const result = await service.batch(input);
+  assert.equal(result.earlyExit, true);
+  assert.equal(result.actualTransitCalls, 10);
+  assert.equal(result.requiredTransitCalls, 30);
+  assert.equal(result.items.length, 10);
+  assert.equal(result.skippedPairCount, 20);
+  assert.equal(result.earlyExcludedOriginIds.length, 10);
+  assert.ok(result.items.every(item => item.destinationId === 'company-2'));
+  assert.ok(requests.every(item => Number(new URL(item.url).searchParams.get('end_y')) === input.destinations[2].lat));
+  assert.equal(result.quota.kakao.used, 10);
+  assert.ok([...db.documents.keys()].every(key => key.startsWith('homehunt_provider_usage/')));
+  assert.doesNotMatch(JSON.stringify([...db.documents.values()]), /duration|walking|transfers|earlyExcluded|37\.3/);
+});
+
+test('cloud early exit keeps optional overruns and checks an available alternate car mode', async () => {
+  const { service, requests } = setup();
+  const input = earlyBody(1);
+  input.destinations[1].maxMinutes = 20; // Optional 45-minute commute remains allowed.
+  input.destinations[2].maxMinutes = 40; // Transit 45 minutes, car 30 minutes.
+  input.destinations[2].modes = ['transit', 'car'];
+  const result = await service.batch(input);
+  assert.equal(result.items.length, 3);
+  assert.equal(result.actualTransitCalls, 3);
+  assert.equal(result.skippedPairCount, 0);
+  assert.equal(result.earlyExcludedOriginIds.length, 0);
+  assert.equal(requests.length, 4);
+});
+
+test('cloud early exit leaves a failed alternate mode uncertain and stops on provider error', async () => {
+  const { service } = setup({ fetchImpl: async url => url.includes('ntruss.com') ? json({}, 503) : json(kakao) });
+  const input = earlyBody(1);
+  input.destinations[2].maxMinutes = 40;
+  input.destinations[2].modes = ['transit', 'car'];
+  const result = await service.batch(input);
+  assert.equal(result.items.length, 1);
+  assert.equal(result.actualTransitCalls, 1);
+  assert.equal(result.skippedPairCount, 0);
+  assert.equal(result.earlyExcludedOriginIds.length, 0);
+  assert.equal(result.abortedPairCount, 2);
+  assert.ok(result.items[0].routes.some(route => route.mode === 'car' && !route.verified));
+});
+
+test('cloud early-exit errors and timeout omit untouched pairs without weakening the deadline', async () => {
+  let calls = 0;
+  let aborted = 0;
+  const { service } = setup({ batchTimeoutMs: 30, requestTimeoutMs: 1000,
+    fetchImpl: async (_url, init) => {
+      calls += 1;
+      return new Promise((_, reject) => init.signal.addEventListener('abort', () => { aborted += 1; reject(new Error('aborted')); }, { once: true }));
+    },
+  });
+  const start = Date.now();
+  const result = await service.batch(earlyBody(5));
+  assert.ok(Date.now() - start < 1000);
+  assert.equal(calls, 2);
+  assert.equal(aborted, 2);
+  assert.equal(result.items.length, 2);
+  assert.equal(result.actualTransitCalls, 2);
+  assert.equal(result.abortedPairCount, 13);
+  assert.equal(result.skippedPairCount, 0);
+  assert.equal(result.earlyExcludedOriginIds.length, 0);
+  assert.equal(result.quota, null);
+});
+
+test('cloud early exit cannot bypass the full-matrix quota preflight or accept invalid company flags', async () => {
+  const limited = setup({ env: { ...env, KAKAO_DAILY_LIMIT: '5' } });
+  await assert.rejects(limited.service.batch(earlyBody(2)), { code: 'KAKAO_DAILY_LIMIT' });
+  assert.equal(limited.requests.length, 0);
+  for (const [field, value, code] of [['required', 'false', 'INVALID_REQUIRED_FLAG'], ['weightPercent', -1, 'INVALID_DESTINATION_WEIGHT']]) {
+    const { service, requests } = setup();
+    const input = earlyBody(1);
+    input.destinations[0][field] = value;
+    await assert.rejects(service.batch(input), { code });
+    assert.equal(requests.length, 0);
+  }
+});

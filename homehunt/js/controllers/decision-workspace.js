@@ -1,7 +1,8 @@
-import { decisionKey, decisionPrice, DECISION_KINDS, pruneDecisionKeys, regionalCoverage, searchBottleneck } from '../decision-core.mjs?v=4.3.0.1';
+import { decisionKey, decisionPrice, DECISION_KINDS, pruneDecisionKeys, regionalCoverage, searchBottleneck } from '../decision-core.mjs?v=4.6.1';
 import { formatPriceManwon, formatAreaPair } from '../display-format.mjs';
 import { destinationLetter } from '../personalized-context-core.mjs';
 import { renderDistrictList } from './location-discovery.js?v=4.2.0';
+import { createOfficialComplexPanel } from './official-complex-panel.js?v=4.11.0';
 
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 const button = (label, action, cls = 'dw-button') => { const b = el('button', cls, label); b.type = 'button'; b.addEventListener('click', action); return b; };
@@ -13,6 +14,7 @@ export function createDecisionWorkspace(api) {
   const today = document.querySelector('#decisionToday');
   const regions = document.querySelector('#decisionRegions');
   let tab = 'today', selected = null, keys = [], lastCoverage = null, currentCoverage = null;
+  let detailRenderVersion = 0;
   try { const value = JSON.parse(localStorage.getItem(KEY) || '[]'); keys = Array.isArray(value) ? value.filter((x) => typeof x === 'string').slice(0, 3) : []; } catch { /* optional preference */ }
   const entries = () => {
     const s = api.state();
@@ -97,6 +99,8 @@ export function createDecisionWorkspace(api) {
     if (!selected) return;
     const { kind, record } = selected;
     const renderSelection = selected;
+    const renderVersion = ++detailRenderVersion;
+    const isCurrent = () => selected === renderSelection && detailRenderVersion === renderVersion;
     const root = document.querySelector('#decisionDetailBody');
     document.querySelector('#decisionDetailTitle').textContent = record.name || record.title || '후보 상세';
     const p = decisionPrice(kind, record);
@@ -107,14 +111,16 @@ export function createDecisionWorkspace(api) {
     if (kind === 'visit') actions.append(button('방문 기록 수정', () => { api.close('decisionDetailModal'); api.editVisit(record); }));
     if (kind === 'supply') actions.append(button('공고·신청 준비 확인', () => { api.close('decisionDetailModal'); api.supply(record); }));
     const context = el('div', 'dw-detail-context');
-    if (kind === 'candidate' && api.locationScore) context.append(api.locationScore(record));
+    const score = el('div', 'dw-detail-score');
+    if (kind === 'candidate' && api.locationScore) { score.append(api.locationScore(record)); context.append(score); }
     if (kind === 'candidate') {
       const status = api.verification(record);
       const balance = status.stage === 'screening' ? record.commuteScreening?.balance : record.commuteBalance;
       const route = el('section', 'dw-route'); route.append(el('h3', '', '목적지별 통근'), el('p', '', status.stale ? '목적지 조건 변경 · 이전 경로 재검증 필요' : status.final ? '실제 경로 확인 결과' : status.stage === 'screening' ? 'Kakao 1차 선별 · 최종 경로 확인 전' : '실제 경로 확인 전'));
       for (const e of balance?.evaluations || []) route.append(el('p', '', `${e.destination?.label || '목적지'} · ${e.verified ? `${e.durationMinutes}분 · 도보 ${e.walkingMinutes ?? '미확인'}분 · 환승 ${e.transferCount ?? '미확인'}회` : '미확인'}`));
       if (status.final && !status.stale) route.append(el('small', '', `가중 평균 ${balance?.weightedMeanMinutes ?? '—'}분 · 모든 필수 목적지 ${balance?.requiredFullyVerified ? '확인' : '일부 미확인'}`));
-      route.append(button(`이 후보 실제 통근 확인 · 목적지 ${api.state().destinations.length}곳`, async () => { await api.verify(record); if (selected === renderSelection) { selected = { kind, record: api.latestCandidate(record) }; renderDetail(); } }));
+      const calls = api.state().destinations.filter(d => d.modes?.includes('transit')).length;
+      route.append(button(`${status.final ? '통근 다시 조회' : '이 후보 통근 확인'} · 최대 신규 ${calls}회`, async () => { await api.verify(record); if (selected === renderSelection) { selected = { kind, record: api.latestCandidate(record) }; renderDetail(); } }));
       context.append(route);
     }
     intro.append(el('small', '', address(record)));
@@ -127,12 +133,27 @@ export function createDecisionWorkspace(api) {
       } catch { api.toast('자금 계획을 열지 못했습니다. 잠시 후 다시 시도해주세요.'); }
     }));
     const evidence = el('div', 'dw-detail-evidence'); evidence.textContent = '출처와 단지 근거를 정리하고 있어요.';
-    root.replaceChildren(intro, actions, context, financial, evidence);
+    const official = kind === 'candidate' ? createOfficialComplexPanel(record, {
+      load: api.loadOfficialComplex,
+      isCurrent,
+      onLoaded: async (info) => {
+        if (!isCurrent() || !info) return;
+        const latest = api.latestCandidate?.(record) || record;
+        const updated = { ...latest, officialComplexInfo: info };
+        renderSelection.record = updated;
+        if (api.locationScore) score.replaceChildren(api.locationScore(updated));
+        try {
+          const module = await import('./evidence-detail.js?v=4.9.0');
+          if (isCurrent()) evidence.innerHTML = module.renderCandidateEvidence(updated, { catalogMeta: api.state().catalogMeta });
+        } catch { /* The existing evidence remains visible if enhancement fails. */ }
+      },
+    }) : null;
+    root.replaceChildren(intro, actions, ...(official ? [official] : []), context, financial, evidence);
     try {
-      const module = await import('./evidence-detail.js?v=4.0.1');
-      if (selected !== renderSelection) return;
+      const module = await import('./evidence-detail.js?v=4.9.0');
+      if (!isCurrent()) return;
       if (kind === 'supply') module.mountSupplyDecisionSupport(evidence, record);
-      else evidence.innerHTML = module.renderCandidateEvidence(record, { catalogMeta: api.state().catalogMeta, personalRecord: kind === 'visit' ? record : null });
+      else evidence.innerHTML = module.renderCandidateEvidence(renderSelection.record, { catalogMeta: api.state().catalogMeta, personalRecord: kind === 'visit' ? record : null });
     } catch { evidence.textContent = '상세 근거를 읽지 못했습니다. 실거래 화면과 공식 공고에서 확인해주세요.'; }
   }
   function openDetail(kind, record) { selected = { kind, record }; renderDetail(); api.open('decisionDetailModal'); }

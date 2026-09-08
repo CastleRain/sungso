@@ -90,6 +90,7 @@ test('every data/API route requires a verified bearer token before any provider 
     ['/api/health', 'GET'], ['/api/commute/quota', 'GET'], ['/api/commute', 'POST'], ['/api/commute/batch', 'POST'],
     ['/api/place-search?query=test', 'GET'], ['/api/apartment-history', 'GET'], ['/api/recommendations', 'POST'],
     ['/api/recommendations/known-job', 'GET'], ['/api/recommendations/known-job/advance', 'POST'],
+    ['/api/recommendations/known-job/retry', 'POST'],
     ['/api/recommendations/known-job', 'DELETE'], ['/api/household/snapshot', 'GET'], ['/api/household/snapshot', 'PUT'],
   ];
   for (const [path, method] of routes) {
@@ -201,7 +202,7 @@ test('HTTP get/advance/cancel cannot access another household job with a guessed
   const env = setup();
   const created = await env.request('/api/recommendations', { method: 'POST', body: priceFilters });
   const path = `/api/recommendations/${created.body.jobId}`;
-  for (const [url, method] of [[path, 'GET'], [`${path}/advance`, 'POST'], [path, 'DELETE']]) {
+  for (const [url, method] of [[path, 'GET'], [`${path}/advance`, 'POST'], [`${path}/retry`, 'POST'], [path, 'DELETE']]) {
     const response = await env.request(url, { method, token: 'stranger-token', body: { householdId: 'family-a', uid: 'owner-id' } });
     assert.equal(response.statusCode, 404);
     assert.equal(response.body.code, 'JOB_NOT_FOUND');

@@ -10,6 +10,21 @@ export const EVIDENCE_TIERS = Object.freeze({
   personal: Object.freeze({ label: '개인 기록', icon: '★' }),
 });
 
+const PROVISIONAL_TRADE_TIER = Object.freeze({ label: '잠정', icon: '◷' });
+
+function isProvisionalObservedTrade(model) {
+  return model?.tier === 'estimated' && model.sourceKind === 'molit-trade'
+    && ['arithmetic-mean', 'latest-contract'].includes(model.derivation)
+    && ['provisional', 'stale'].includes(model.freshness)
+    && ['review-required', 'provisional'].includes(model.decisionStatus);
+}
+
+/** A partial observed trade is provisional evidence, never a forecast amount. */
+export function evidenceTierMeta(model) {
+  return isProvisionalObservedTrade(model) ? PROVISIONAL_TRADE_TIER
+    : EVIDENCE_TIERS[normalizeTier(model?.tier)];
+}
+
 function numeric(value) {
   if (typeof value === 'string' && !value.trim()) return NaN;
   const parsed = Number(String(value ?? '').replace(/,/g, ''));
@@ -180,7 +195,7 @@ function displayText(model, options) {
     formatted = '값 미정';
   }
   const text = safeText(formatted, '값 미정');
-  return model.tier === 'estimated'
+  return model.tier === 'estimated' && !isProvisionalObservedTrade(model)
     ? forceEstimatedPrefix(text, options.estimatedPrefix)
     : text;
 }
@@ -195,7 +210,7 @@ function displayText(model, options) {
 export function renderValue(value, tierOrOptions = {}, maybeOptions = {}) {
   const { model, options } = normalizeRenderArguments(value, tierOrOptions, maybeOptions);
   const tier = model.tier;
-  const tierMeta = EVIDENCE_TIERS[tier];
+  const tierMeta = evidenceTierMeta(model);
   const text = displayText(model, options);
   const plain = `${tierMeta.icon} ${tierMeta.label} · ${text}`;
   if (options.output === 'text' || options.as === 'text') return plain;

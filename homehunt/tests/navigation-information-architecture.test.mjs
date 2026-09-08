@@ -98,17 +98,17 @@ function mediaBlocks(css, maximumWidth = 760) {
   return blocks.join('\n');
 }
 
-test('데스크톱 전역 메뉴는 더보기 없이 여섯 사용자 목적만 노출한다', async () => {
+test('데스크톱 전역 메뉴는 확인한 후보를 포함한 일곱 사용자 목적을 노출한다', async () => {
   const html = await read('index.html');
   const nav = elementByClass(html, 'nav', 'portal-nav');
   assert.ok(nav, 'aria-label을 가진 .portal-nav 전역 메뉴가 필요합니다.');
 
   const entries = navEntries(nav);
-  assert.equal(entries.length, 6, '전역 메뉴는 중복·더보기 없이 정확히 6개여야 합니다.');
+  assert.equal(entries.length, 7, '전역 메뉴는 중복·더보기 없이 정확히 7개여야 합니다.');
   assert.deepEqual(entries.map(({ target }) => target), [
-    'recommend', 'visits', 'market', 'supply', 'guide', 'connections',
+    'recommend', 'candidates', 'visits', 'market', 'supply', 'guide', 'connections',
   ]);
-  const expectedLabels = ['집 찾기', '내 기록', '실거래', '분양·청약', '사용 안내', '연결 상태'];
+  const expectedLabels = ['집 찾기', '확인한 후보', '내 기록', '실거래', '분양·청약', '사용 안내', '연결 상태'];
   entries.forEach((entry, index) => {
     assert.ok(entry.label.includes(expectedLabels[index]), `${entry.target} 메뉴 이름은 '${expectedLabels[index]}'이어야 합니다.`);
   });

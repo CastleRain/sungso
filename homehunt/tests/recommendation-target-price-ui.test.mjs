@@ -6,7 +6,7 @@ import { parseRecommendationQuery, parseKoreanMoneyToManWon, PYEONG_TO_M2 } from
 import { recommendationBudget, effectiveRecommendationDestinations } from '../js/personalized-context-core.mjs';
 import { normalizeDestinations } from '../js/commute-balance-core.mjs';
 import { rankPersonalizedCandidates } from '../js/personalized-ranking-core.mjs';
-import { formatPriceManwon } from '../js/display-format.mjs';
+import { formatPriceManwon, formatCompactPrice } from '../js/display-format.mjs';
 import { createHomeTargetPriceBridge } from '../../shared/home-target-price.mjs';
 import { createWecostTargetPriceService } from '../js/wecost-target-price-service.mjs';
 
@@ -92,7 +92,7 @@ function harness({ sourceMode = 'manual', targetPriceWon = 600000000, serviceSta
     $, state, bridge, homeTargetPriceBridge: bridge, wecostTargetPriceService: serviceMock.service,
     wecostTargetState: serviceMock.service.getState(), lastRecommendationDestinations: [],
     window: new EventTarget(), document: Object.assign(new EventTarget(), { visibilityState: 'visible' }),
-    parseRecommendationQuery, parseKoreanMoneyToManWon, PYEONG_TO_M2, formatPriceManwon,
+    parseRecommendationQuery, parseKoreanMoneyToManWon, PYEONG_TO_M2, formatPriceManwon, formatCompactPrice,
     formatAreaPair: value => `${value}㎡`,
     recommendationBudget, effectiveRecommendationDestinations, normalizeDestinations,
     renderWorkplaces() {}, updateRecommendationAreaMetric() {}, syncRecommendationRanges() {}, renderRecommendationActiveFilters() {},

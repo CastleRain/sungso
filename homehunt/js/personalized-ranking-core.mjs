@@ -29,7 +29,7 @@ function parkingDimension(candidate, options) {
     maxScore: 10,
     status: provided ? evidence.status : 'unknown',
     desiredRatio,
-    label: provided ? `세대당 주차 ${ratio}대 · 희망 ${desiredRatio}대` : '세대당 주차 근거 미확인',
+    label: provided ? `세대당 주차 ${ratio.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}대 · 희망 ${desiredRatio.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}대` : '세대당 주차 근거 미확인',
     sourceType: provided ? evidence.sourceType : null,
     source: provided ? { name: evidence.sourceName || (evidence.sourceType === 'field' ? '현장 확인' : '공식 자료'), url: evidence.sourceUrl || '', observedAt: evidence.observedAt || null } : null,
   };

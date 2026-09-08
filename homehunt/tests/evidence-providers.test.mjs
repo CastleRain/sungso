@@ -121,3 +121,21 @@ test('visit evidence stays personal even with an official identity present', () 
   assert.match(html, /직접 본 장점/);
   assert.doesNotMatch(html, /data-tier="verified"/);
 });
+
+test('실제 후보 상세의 부분·이전 실거래 금액은 예상 가격으로 렌더되지 않는다', () => {
+  for (const status of ['partial', 'stale']) {
+    const fields = officialTradeEvidence({ priceVerified: true, priceProvisional: true,
+      priceCoverage: { status, completedMonthCount: 2, totalMonthCount: 3,
+        missingMonths: ['202609'], staleMonths: status === 'stale' ? ['202608'] : [],
+        sourceUpdatedAt: '2026-09-08T00:00:00.000Z' },
+      bestArea: { areaM2: 59.9, count: 4, averagePriceManWon: 58000,
+        latestPriceManWon: 59000, latestMonth: '2026-08', latestDay: 20 } });
+    const html = renderEvidenceFields(fields);
+    assert.equal((html.match(/증거 등급: 잠정/g) || []).length, 2);
+    assert.match(html, /hh-value__text">5억 8,000만원<\/span>/);
+    assert.match(html, /hh-value__text">5억 9,000만원<\/span>/);
+    assert.match(html, /누락 2026\.09/);
+    assert.doesNotMatch(html, /예상 5억|약 5억|증거 등급: 확정|증거 등급: 추정/);
+    if (status === 'stale') assert.match(html, /이전 자료 포함/);
+  }
+});

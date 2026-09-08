@@ -1,6 +1,8 @@
 # HomeHunt API 키 발급·설정 가이드
 
-기준일: 2026-09-05
+기준일: 2026-09-08
+
+K-apt 목록·기본/상세 서비스는 기존 `MOLIT_SERVICE_KEY`로 실제 호출을 확인했다. 새 키 추가 없이 로컬 UI 4.9/API 2.8에서 연결한다. 서비스별 활용신청은 필요하며, 정확한 신청 페이지·현재 API 버전·캐시 범위는 [공식 단지정보 연결](additional-property-data.md)을 따른다. Windows 로컬 실행기는 Node.js 24에서 `--use-system-ca`를 사용해 시스템 인증서를 신뢰하며 TLS 검증은 유지한다.
 
 로컬 비밀값은 `homehunt/.env`에만 둔다. 이 파일은 저장소의 `.gitignore`에 포함되어 GitHub에 올라가지 않는다. 공개 예시는 `homehunt/.env.example`에 있다. Telegram처럼 GitHub Actions에서만 쓰는 값은 `.env`가 아니라 저장소의 Actions Secrets에 둔다.
 

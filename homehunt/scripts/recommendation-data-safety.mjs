@@ -1,3 +1,5 @@
+import { aggregateRecommendationRecords } from '../js/recommendation-core.mjs';
+
 function normalizedTask(task = {}) {
   return {
     lawdCd: String(task.lawdCd || '').trim(),
@@ -47,23 +49,87 @@ export function recommendationMonthFailure(outcome, task) {
   return null;
 }
 
-export function completeRecommendationScope(candidates, records, failures) {
+export function recommendationMonthEvidence(outcome, task) {
+  const monthFailure = recommendationMonthFailure(outcome, task);
+  if (!monthFailure) return { status: 'complete', records: outcome.value.records, sourceUpdatedAt: outcome.value.updatedAt || null };
+  const value = outcome?.status === 'fulfilled' ? outcome.value : null;
+  const expected = normalizedTask(task);
+  const validStale = monthFailure.kind === 'partial' && value?.warning?.staleCacheUsed === true
+    && value.partial !== true && !(value.missingRequests || []).length
+    && Number.isFinite(Date.parse(String(value.updatedAt || '')))
+    && value.records.every((record) => String(record?.regionCode || '') === expected.lawdCd
+      && String(record?.month || '').replace('-', '') === expected.dealYmd);
+  return validStale ? { status: 'stale', records: value.records, sourceUpdatedAt: value.updatedAt }
+    : { status: 'missing', records: [], sourceUpdatedAt: null };
+}
+
+export function completeRecommendationScope(candidates, records, failures, staleTasks = []) {
   const incompleteDistrictCodes = [...new Set(
     (failures || [])
       .map((item) => String(item?.lawdCd || '').trim())
       .filter((code) => /^\d{5}$/.test(code)),
   )].sort();
-  const incomplete = new Set(incompleteDistrictCodes);
   const sourceCandidates = Array.isArray(candidates) ? candidates : [];
   const sourceRecords = Array.isArray(records) ? records : [];
-  const completeCandidates = sourceCandidates.filter((item) => !incomplete.has(String(item?.regionCode || '')));
-  const completeRecords = sourceRecords.filter((item) => !incomplete.has(String(item?.regionCode || '')));
+  const staleKeys = new Set(staleTasks.map(recommendationTaskKey));
+  const missingMonths = new Set((failures || []).map(recommendationTaskKey).filter((key) => !staleKeys.has(key)));
+  // A failed page/month is never used as price evidence, but another validated
+  // month in the same district remains useful. Do not discard that district.
+  const completeRecords = sourceRecords.filter((item) => !missingMonths.has(recommendationTaskKey({
+    lawdCd: item?.regionCode, dealYmd: String(item?.month || '').replace('-', ''), type: 'sale',
+  })));
 
   return {
-    candidates: completeCandidates,
+    candidates: sourceCandidates,
     records: completeRecords,
     incompleteDistrictCodes,
-    excludedCandidateCount: sourceCandidates.length - completeCandidates.length,
+    excludedCandidateCount: 0,
     excludedRecordCount: sourceRecords.length - completeRecords.length,
   };
+}
+
+export function recommendationTaskKey(task) {
+  const value = normalizedTask(task);
+  return `${value.lawdCd}|${value.dealYmd}|${value.type}`;
+}
+
+export function buildRecommendationPriceResult(candidates, records, failures, tasks, filters, currentYear, staleTasks = []) {
+  const scope = completeRecommendationScope(candidates, records, failures, staleTasks);
+  const byDistrict = new Map();
+  for (const task of tasks || []) {
+    const code = String(task.lawdCd || '');
+    if (!byDistrict.has(code)) byDistrict.set(code, new Set());
+    byDistrict.get(code).add(String(task.dealYmd || ''));
+  }
+  const coverageFor = (candidate) => {
+    const code = String(candidate.regionCode || '');
+    const stale = staleTasks.filter((task) => String(task.lawdCd) === code);
+    const staleMonths = [...new Set(stale.map((task) => String(task.dealYmd)))].sort();
+    const failedMonths = [...new Set((failures || []).filter((task) => String(task.lawdCd) === code)
+      .map((task) => String(task.dealYmd)))].sort();
+    const missingMonths = failedMonths.filter((month) => !staleMonths.includes(month));
+    const totalMonthCount = byDistrict.get(code)?.size || 0;
+    return { status: missingMonths.length ? 'partial' : staleMonths.length ? 'stale' : 'complete',
+      completedMonthCount: Math.max(0, totalMonthCount - failedMonths.length), totalMonthCount, missingMonths, staleMonths,
+      sourceUpdatedAt: stale.map((task) => task.sourceUpdatedAt).filter(Boolean).sort()[0] || null };
+  };
+  const results = aggregateRecommendationRecords(scope.candidates, scope.records, filters, currentYear).map((candidate) => {
+    const priceCoverage = coverageFor(candidate);
+    return { ...candidate, priceCoverage, priceProvisional: priceCoverage.status !== 'complete' };
+  });
+  const qualifying = new Set(results.map((item) => String(item.catalogId)));
+  const incomplete = new Set(scope.incompleteDistrictCodes);
+  const pendingPriceCandidates = scope.candidates.filter((candidate) => incomplete.has(String(candidate.regionCode))
+    && !qualifying.has(String(candidate.catalogId))).map((candidate) => ({
+    ...candidate, priceVerified: false, transportVerified: false, priceCoverage: coverageFor(candidate),
+    pricePendingReason: 'PRICE_DATA_INCOMPLETE',
+  }));
+  return { results, pendingPriceCandidates,
+    partialPriceCandidateCount: results.filter((candidate) => candidate.priceProvisional).length,
+    pendingPriceCandidateCount: pendingPriceCandidates.length,
+    incompleteDistrictCodes: scope.incompleteDistrictCodes,
+    excludedIncompleteCandidateCount: scope.excludedCandidateCount,
+    excludedIncompleteRecordCount: scope.excludedRecordCount,
+    matchedTransactionCount: results.reduce((sum, item) => sum + Number(item.actualDealCount || 0), 0),
+    totalResultCount: results.length };
 }

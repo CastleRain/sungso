@@ -48,10 +48,11 @@ export function createHomehuntApi({ authenticate, jobs, household, commute, heal
       if (path === '/household/snapshot' && req.method === 'GET') return send(200, await household.load(context));
       if (path === '/household/snapshot' && req.method === 'PUT') return send(200, await household.save(body.snapshot, body.expectedRevision, context));
       if (path === '/recommendations' && req.method === 'POST') return send(202, await jobs.create(body, context));
-      const job = /^\/recommendations\/([a-zA-Z0-9_-]{1,128})(\/advance)?$/.exec(path);
+      const job = /^\/recommendations\/([a-zA-Z0-9_-]{1,128})(\/advance|\/retry)?$/.exec(path);
       if (job) {
         if (!job[2] && req.method === 'GET') return send(200, await jobs.get(job[1], context));
-        if (job[2] && req.method === 'POST') return send(200, await jobs.advance(job[1], context));
+        if (job[2] === '/advance' && req.method === 'POST') return send(200, await jobs.advance(job[1], context));
+        if (job[2] === '/retry' && req.method === 'POST') return send(202, await jobs.retry(job[1], context));
         if (!job[2] && req.method === 'DELETE') return send(200, await jobs.cancel(job[1], context));
       }
       if (path === '/commute/quota' && req.method === 'GET') return send(200, await commute.quota());

@@ -8,6 +8,7 @@ import {
 } from '../scripts/commute-provider.mjs';
 import { normalizeGeoPoint } from '../js/transport-core.mjs';
 import { nextWeekdaySearchDateTime } from '../scripts/commute-time.mjs';
+import { runEarlyExitCommuteBatch } from '../scripts/commute-early-exit.mjs';
 
 const source = fs.readFileSync(new URL('../scripts/local-market-server.mjs', import.meta.url), 'utf8');
 const NOW = Date.parse('2026-09-07T07:00:00Z');
@@ -32,7 +33,7 @@ function harness({ limit = 1000, concurrency = 2, upstream = async () => { await
   const cache = new MemoryTtlCache({ now: () => NOW });
   let calls = 0;
   const sandbox = {
-    CommuteProviderError, normalizeGeoPoint, nextWeekdaySearchDateTime, createCommuteCacheKey,
+    CommuteProviderError, normalizeGeoPoint, nextWeekdaySearchDateTime, createCommuteCacheKey, runEarlyExitCommuteBatch,
     sanitizeProviderErrorDetails, TMAP_TRANSIT_CACHE_OPTION,
     KAKAO_UPSTREAM_CALLS_PER_BATCH: 30, TRANSIT_CONCURRENCY: concurrency, TRANSIT_CACHE_TTL_MS: 8 * 3600000,
     kakaoRestApiKey: 'fixture-key-before-change', tmapAppKey: '', naverMapsClientId: '', naverMapsClientSecret: '',
@@ -187,4 +188,92 @@ test('daily preflight rejects a complete matrix before spending any of an insuff
   assert.equal(result.body.requiredTransitCalls, 6);
   assert.equal(h.calls(), 0);
   assert.equal((await h.ledger.snapshot()).used, 0);
+});
+
+function earlyBody(originCount = 10) {
+  const input = batchBody(originCount, 3);
+  input.earlyExit = true;
+  input.destinations.forEach((target, index) => { target.weightPercent = [40, 10, 50][index]; target.required = index !== 1; });
+  return input;
+}
+
+function timedResponse(minutes) {
+  return { ok: true, status: 200, json: async () => ({ status: 'OK', routes: [{
+    properties: { totalTime: minutes * 60, transfers: 0, type: 'SUBWAY' },
+    steps: [{ properties: { type: 'WALKING', time: 300 } }, { properties: { type: 'SUBWAY', time: (minutes - 5) * 60 } }],
+  }] }) };
+}
+
+test('opt-in local batch prioritizes required company weight and saves the other twenty calls', async () => {
+  const endpoints = [];
+  const h = harness({ upstream: async url => { endpoints.push(new URL(url).searchParams.get('end_x')); await pause(); return timedResponse(80); } });
+  const input = earlyBody();
+  const result = await h.batch(input);
+  assert.equal(result.status, 200);
+  assert.equal(result.body.earlyExit, true);
+  assert.equal(result.body.items.length, 10);
+  assert.equal(result.body.actualTransitCalls, 10);
+  assert.equal(result.body.requiredTransitCalls, 30);
+  assert.equal(result.body.skippedPairCount, 20);
+  assert.equal(result.body.earlyExcludedOriginIds.length, 10);
+  assert.equal(result.body.abortedPairCount, 0);
+  assert.ok(result.body.items.every(item => item.destinationId === 'office-2'));
+  assert.ok(endpoints.every(value => Math.abs(Number(value) - input.destinations[2].lng) < 1e-7));
+  assert.equal((await h.ledger.snapshot()).used, 10);
+  assert.equal(h.cache.size, 0);
+});
+
+test('opt-in optional overruns and missing alternate mode never become early exclusions', async () => {
+  for (const optional of [true, false]) {
+    const h = harness({ upstream: async () => timedResponse(80) });
+    const input = earlyBody(1);
+    if (optional) input.destinations.forEach(item => { item.required = false; });
+    else input.destinations.forEach(item => { item.modes = ['transit', 'car']; });
+    const result = await h.batch(input);
+    assert.equal(result.status, 200);
+    assert.equal(result.body.actualTransitCalls, 3);
+    assert.equal(result.body.items.length, 3);
+    assert.equal(result.body.skippedPairCount, 0);
+    assert.equal(result.body.earlyExcludedOriginIds.length, 0);
+  }
+});
+
+test('opt-in provider error stops the batch without fake rows for untouched companies', async () => {
+  const h = harness({ upstream: async () => { await pause(); return response(false, 403); } });
+  const result = await h.batch(earlyBody());
+  assert.equal(result.status, 200);
+  assert.ok(h.calls() >= 1 && h.calls() <= 2);
+  assert.equal(result.body.actualTransitCalls, h.calls());
+  assert.equal(result.body.items.length, h.calls());
+  assert.equal(result.body.abortedPairCount, 30 - h.calls());
+  assert.equal(result.body.skippedPairCount, 0);
+  assert.equal(result.body.earlyExcludedOriginIds.length, 0);
+  assert.ok(result.body.items.every(item => item.routes.some(route => route.reasonCode !== 'BATCH_ABORTED')));
+});
+
+test('opt-in same-building origins preserve both decisions while sharing the one actual failed-time query', async () => {
+  const h = harness({ upstream: async () => timedResponse(80) });
+  const input = earlyBody(2);
+  input.origins[1] = { ...input.origins[0], id: 'same-building-another-area' };
+  const result = await h.batch(input);
+  assert.equal(result.body.actualTransitCalls, 1);
+  assert.equal(result.body.items.length, 2);
+  assert.equal(result.body.skippedPairCount, 4);
+  assert.equal(result.body.earlyExcludedOriginIds.length, 2);
+});
+
+test('opt-in cannot bypass the full-matrix preflight or submit ambiguous constraint types', async () => {
+  const limited = harness({ limit: 5 });
+  const denied = await limited.batch(earlyBody(2));
+  assert.equal(denied.status, 429);
+  assert.equal(limited.calls(), 0);
+  for (const [field, value, code] of [['required', 'false', 'INVALID_REQUIRED_FLAG'], ['weightPercent', -1, 'INVALID_DESTINATION_WEIGHT'], ['weightPercent', 'no', 'INVALID_DESTINATION_WEIGHT']]) {
+    const h = harness();
+    const input = earlyBody(1);
+    input.destinations[0][field] = value;
+    const result = await h.batch(input);
+    assert.equal(result.status, 400);
+    assert.equal(result.body.code, code);
+    assert.equal(h.calls(), 0);
+  }
 });
