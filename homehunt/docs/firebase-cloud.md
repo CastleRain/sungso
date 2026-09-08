@@ -2,6 +2,10 @@
 
 ## 현재 구성
 
+2026-09-08 추가 준비: K-apt 주차·난방·승강기 조회를 인증된 `/kapt/complex`에 연결하고 공식 원자료 Firestore 캐시(목록 7일·기본/상세 1일)를 구현했다. 클라우드 API 계약은 2.9.0이다. UI는 온라인 검색을 연결해도 기존 `homehunt_user_snapshots/{uid}` 개인 백업을 계속 사용하며, 가구 백업은 `snapshotTransport: 'api'`를 명시할 때만 사용한다. 로그인 전 시설 대기열은 호출하지 않고 로그인 후 이어가며 사용자의 일시정지를 보존한다.
+
+배포 사전 점검에서 프로젝트 결제가 비활성이고 기존 결제 계정 두 개가 모두 닫혀 있음을 확인했다. 사용자의 Blaze 연결을 기다리는 동안 공개 API 주소는 비워 두며, 키를 연결했다고 서버가 배포됐다고 표시하지 않는다.
+
 화면은 기존 [GitHub Pages](https://castlerain.github.io/sungso/homehunt/)에 유지한다. Firebase Authentication의 Google 로그인과 Firestore로 **허용 계정의 개인 기록 백업**을 제공한다. 기존 페이지 접근 코드는 서버 인증으로 사용하지 않는다.
 
 2026-09-08 확인 시 `sungso-358cb`는 Spark 무료 플랜이며 Firestore 위치는 서울(`asia-northeast3`)이다. Google 로그인과 실제 Pages·localhost 도메인 설정을 적용했다. **검색 서버 코드는 준비했지만 Functions는 배포하지 않았다.** 현재 공개 API 주소는 비워 두며, 로컬 검색은 기존 8787 서버를 사용한다. Functions 배포에는 Blaze 전환이 필요하고 요금제는 자동 변경하지 않는다. [Firebase 설명](https://firebase.google.com/docs/functions/faq-and-troubleshooting)
@@ -66,10 +70,12 @@ firebase deploy --only functions:homehunt --project sungso-358cb
 2. 무로그인 401·비회원 403·회원 health 200을 검증한다. 공급자 키 설정 여부와 실제 조회 성공은 구분한다.
 3. `js/config.js`의 `CLOUD_API_BASE_URL`을 검증한 주소로 채운다. 클라우드 로그인 토큰은 이 주소에만 보낸다. 원격 `/config` 키 입력 API는 제공하지 않는다.
 4. 실제 작은 가격 조회, 한 후보의 회사 경로 행렬, 같은 TMAP 재조회에서 원호출 0회, 새로고침·작업 이어하기를 검증한다. 현재 TMAP 키는 이전 실조회에서 인증 오류였으므로 유효 키 확인 전 실제 캐시 재사용 성공으로 표시하지 않는다.
-5. Firestore의 `homehunt_route_cache`, `homehunt_jobs`, 작업의 `chunks`, `homehunt_request_limits` 컬렉션 그룹에 `expiresAt` TTL 정책을 설정한다. TTL 삭제는 즉시 실행되지 않으므로 코드가 만료를 먼저 검사한다. [Firestore TTL](https://firebase.google.com/docs/firestore/ttl)
+5. Firestore의 `homehunt_route_cache`, `homehunt_jobs`, 작업의 `chunks`, `homehunt_request_limits`, `homehunt_kapt_source_cache` 컬렉션 그룹에 `expiresAt` TTL 정책을 설정한다. TTL 삭제는 즉시 실행되지 않으므로 코드가 만료를 먼저 검사한다. 호출 장부에는 만료 정책을 적용하지 않는다. [Firestore TTL](https://firebase.google.com/docs/firestore/ttl)
 6. 기존 Pages 절차로 정적 화면을 배포하고 휴대폰에서 로그인·검색·저장·복원을 확인한다.
 
 가격 검색은 Firestore 작업으로 저장하고 `/advance` 요청마다 최대 8개 월 자료를 처리한다. 모든 처리·체크포인트를 응답 전에 기다리며 작업은 24시간 유효하다. 창을 닫았을 때 무기한 백그라운드 실행하는 방식은 아니고, 작업 ID로 다시 요청하면 이어간다. 하나의 월은 40초 제한, 임대·fencing·취소·불완전 지역 제외가 적용된다.
+
+첫 통근 배포 시 로컬 호출을 먼저 중지한다. 현재 한국 날짜의 로컬 호출량을 클라우드 `homehunt_provider_usage`에 전환 표식과 함께 한 번 합산하고, 재실행은 이미 반영한 양 이후 증가분만 반영한다. 서로 독립적으로 사용한 로컬·클라우드 횟수는 `max`가 아니라 합산해야 하며, 지난 날짜 횟수는 이월하지 않는다. 활성화 이후 같은 키의 모든 호출은 하나의 장부를 사용하도록 전환하거나 로컬 원호출을 비활성화해야 한다.
 
 ## GitHub Pages와 Vercel 비교
 
