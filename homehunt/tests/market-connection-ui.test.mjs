@@ -7,6 +7,10 @@ import { buildMarketSummary, validateMarketSummary } from '../js/market-core.mjs
 const app = fs.readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
 const publicSummary = JSON.parse(fs.readFileSync(new URL('../data/market-summary.json', import.meta.url), 'utf8'));
 const publicHistory = JSON.parse(fs.readFileSync(new URL('../data/apartment-history.json', import.meta.url), 'utf8'));
+// Empty-state behavior must not depend on the current scheduled collection.
+// The shipped public artifacts are checked separately below.
+const emptySummary = { version: 1, source: 'not-connected', sourceType: 'empty', generatedAt: null, regions: [], months: [] };
+const emptyHistory = { version: 1, source: 'not-connected', generatedAt: null, apartments: [] };
 const trade = { apartmentName: '검증 단지', regionCode: '41171', regionName: '검증 지역',
   dealType: '매매', month: '2026-08', day: 10, areaM2: 84, amountManWon: 90000 };
 const collectedSummary = buildMarketSummary([trade], { source: '검증 공식 집계', sourceType: 'official', generatedAt: '2026-09-01T00:00:00Z' });
@@ -26,7 +30,7 @@ function node() {
   return value;
 }
 
-function harness({ summary = publicSummary, history = publicHistory, local = false, enabled = false, fetcher } = {}) {
+function harness({ summary = emptySummary, history = emptyHistory, local = false, enabled = false, fetcher } = {}) {
   const nodes = new Map();
   const $ = selector => {
     if (!nodes.has(selector)) nodes.set(selector, node());
@@ -54,7 +58,7 @@ function harness({ summary = publicSummary, history = publicHistory, local = fal
   return { sandbox, state, $, calls, nodes };
 }
 
-test('Pages의 실제 빈 공개 JSON은 수집 완료·공식 연결로 표시되지 않는다', async () => {
+test('Pages의 빈 공개 JSON 응답은 수집 완료·공식 연결로 표시되지 않는다', async () => {
   const { sandbox, state, $, calls } = harness();
   await sandbox.loadMarketSummary();
   assert.equal($('#molitState').textContent, '데이터 미수집');
@@ -67,6 +71,38 @@ test('Pages의 실제 빈 공개 JSON은 수집 완료·공식 연결로 표시�
   assert.equal(state.staticApartmentHistoryMeta.status, 'empty');
   assert.equal(calls.length, 2);
   assert.ok(calls.every(url => url.startsWith('fixture:summary') || url === 'fixture:history'));
+});
+
+test('배포된 공식 집계의 유효한 실제 행은 공식 연결로 표시하고 단지 이력은 별도로 판단한다', async () => {
+  assert.equal(publicSummary.sourceType, 'official');
+  assert.ok(publicSummary.source && publicSummary.source !== 'not-connected');
+  assert.ok(Number.isFinite(Date.parse(publicSummary.generatedAt)));
+  assert.equal(validateMarketSummary(publicSummary), true);
+  for (const region of publicSummary.regions) {
+    assert.match(String(region.code), /^(11|41)\d{3}$/);
+    assert.ok(Array.isArray(region.monthly));
+    for (const row of region.monthly) {
+      assert.match(row.month, /^\d{4}-(0[1-9]|1[0-2])$/);
+      assert.ok(Number.isSafeInteger(row.count) && row.count > 0);
+      assert.ok(Number.isFinite(row.averageTotal) && row.averageTotal >= 0);
+    }
+  }
+  assert.ok(Array.isArray(publicHistory.apartments));
+  for (const apartment of publicHistory.apartments) assert.ok(Array.isArray(apartment.transactions));
+  const historyCount = publicHistory.apartments.filter(apartment => apartment.transactions.length > 0).length;
+  if (historyCount) {
+    assert.notEqual(publicHistory.source, 'not-connected');
+    assert.ok(Number.isFinite(Date.parse(publicHistory.generatedAt)));
+  }
+  const { sandbox, state, $, calls } = harness({ summary: publicSummary, history: publicHistory });
+  await sandbox.loadMarketSummary();
+  assert.equal($('#molitState').textContent, '배포 공식 집계');
+  assert.equal($('#molitState').classList.contains('connected'), true);
+  assert.equal($('#marketSourceChip').classList.contains('official'), true);
+  assert.equal(state.staticApartmentHistoryMeta.status, historyCount ? 'ready' : 'empty');
+  assert.equal(state.staticApartmentHistoryMeta.apartmentCount, historyCount);
+  assert.match($('#apartmentHistoryApiCheck').textContent, /실시간 이력 API 미배포/);
+  assert.equal(calls.length, 2);
 });
 
 test('집계의 실제 행·출처 종류·기준일에 맞춰 공식·CSV·샘플·확인 필요 상태를 구분한다', () => {
