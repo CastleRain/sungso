@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: sungso-homehunt-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: master
+    buildCommand: npm ci --include=dev --prefix homehunt/render && npm run build --prefix homehunt/render
+    startCommand: npm start --prefix homehunt/render
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - homehunt/render/**
+        - homehunt/server/**
+        - homehunt/scripts/**
+        - homehunt/js/**
+        - homehunt/data/apartment-catalog-seoul-gyeonggi.json
+        - functions/molit.js
+        - shared/**
+        - render.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: FIREBASE_PROJECT_ID
+        value: sungso-358cb
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: HOMEHUNT_PROVIDER_CONFIG
+        sync: false

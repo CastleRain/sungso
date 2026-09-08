@@ -326,6 +326,9 @@ async function writeMonthCache(db, ref, serviceKey, identity, result) {
     recordCount: result.records.length,
     fetchedAt,
     updatedAt: new Date(),
+    // Storage retention only. Freshness still uses monthCacheTtl and the
+    // signed fetchedAt above; older signed prices remain provisional fallback.
+    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     encoding: 'gzip+base64+json',
     signature,
   };

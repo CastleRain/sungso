@@ -1,5 +1,6 @@
 import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { createUserSnapshotStore } from './cloud-firestore-store.js?v=4.6.1';
+import { createCloudApiReadiness } from './cloud-api-readiness.mjs?v=4.13.0';
 
 const FIREBASE_VERSION = '10.12.0';
 const APP_NAME = 'homehunt-private-cloud';
@@ -66,10 +67,14 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
   let sdk; let auth; let user = null; let privateStore; let initializing; let unsubscribeAuth;
   let generation = 0;
   let state = { configured, apiConfigured: Boolean(base), transport: snapshotTransport,
-    status: configured ? 'idle' : 'unconfigured', user: null, error: null };
+    status: configured ? 'idle' : 'unconfigured', user: null, error: null, apiStatus: 'idle' };
   const listeners = new Set();
   const getState = () => ({ ...state, user: state.user ? { ...state.user } : null });
   const publish = patch => { state = { ...state, ...patch }; for (const listener of listeners) listener(getState()); };
+  const readiness = base?.hostname.endsWith('.onrender.com') ? createCloudApiReadiness({
+    url: new URL('/healthz', base).href, fetchImpl,
+    onState: apiStatus => publish({ apiStatus }),
+  }) : null;
   const updateUser = next => {
     user = next || null; generation += 1;
     publish({ status: user ? 'signed-in' : 'signed-out', error: null,
@@ -104,11 +109,25 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
     await init();
     const caller = user; const epoch = generation;
     if (!caller) throw new CloudSnapshotError('온라인 검색과 저장에는 Google 로그인이 필요합니다.', 'CLOUD_AUTH_REQUIRED', 401);
+    if (readiness) {
+      try { await readiness.ensure(options.signal); }
+      catch (error) {
+        if (options.signal?.aborted) throw error;
+        throw new CloudSnapshotError('검색 서버를 준비하지 못했습니다. 잠시 후 다시 시도해주세요. 기존 기록은 유지됩니다.', 'CLOUD_SERVER_UNAVAILABLE', 503);
+      }
+    }
+    if (epoch !== generation || user !== caller) throw new CloudSnapshotError('로그인 계정이 바뀌었습니다. 다시 실행해주세요.', 'CLOUD_SESSION_CHANGED', 409);
+    if (options.signal?.aborted) throw options.signal.reason || new DOMException('Cancelled', 'AbortError');
     const token = await caller.getIdToken();
     if (epoch !== generation || user !== caller) throw new CloudSnapshotError('로그인 계정이 바뀌었습니다. 다시 실행해주세요.', 'CLOUD_SESSION_CHANGED', 409);
     const headers = new Headers(options.headers || {});
     headers.set('Authorization', `Bearer ${token}`);
-    const response = await fetchImpl(url, { ...options, headers, credentials: 'omit', redirect: 'error', cache: 'no-store' });
+    let response;
+    try {
+      response = await fetchImpl(url, { ...options, headers, credentials: 'omit', redirect: 'error', cache: 'no-store' });
+      if (response.status >= 500) readiness?.invalidate();
+      else readiness?.touch();
+    } catch (error) { readiness?.invalidate(); throw error; }
     if (epoch !== generation || user !== caller) throw new CloudSnapshotError('로그인 계정이 바뀌었습니다. 다시 실행해주세요.', 'CLOUD_SESSION_CHANGED', 409);
     if (response.status === 401) throw new CloudSnapshotError('Google 로그인을 다시 확인해주세요.', 'CLOUD_AUTH_REQUIRED', 401);
     return response;
@@ -155,6 +174,6 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
       if (!privateStore) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
       return privateStore.save(safe, expectedRevision);
     },
-    destroy() { unsubscribeAuth?.(); listeners.clear(); generation += 1; user = null; },
+    destroy() { unsubscribeAuth?.(); listeners.clear(); generation += 1; user = null; readiness?.reset(); },
   };
 }

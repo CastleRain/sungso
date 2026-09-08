@@ -93,6 +93,37 @@ test('only HTTPS or explicit local HTTP API configuration is allowed', () => {
   assert.equal(createCloudSession({ firebaseConfig, apiBaseUrl: 'http://localhost:8787/api' }).getState().apiConfigured, true);
 });
 
+test('Render wakes without tokens then sends each authenticated mutation exactly once', async () => {
+  const f = sdkFixture(); const calls = [];
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://homehunt.onrender.com/api', loadSdk: f.loadSdk,
+    fetchImpl: async (url, options) => { calls.push({ url, options }); return new Response('{"ok":true}'); } });
+  await assert.rejects(session.apiFetch('/commute', { method: 'POST' }), { status: 401 });
+  assert.equal(calls.length, 0);
+  await session.signIn();
+  await session.apiFetch('/commute', { method: 'POST', body: '{}' });
+  await session.apiFetch('/commute', { method: 'POST', body: '{}' });
+  assert.deepEqual(calls.map(call => new URL(call.url).pathname), ['/healthz', '/api/commute', '/api/commute']);
+  assert.equal(calls[0].options.headers, undefined); assert.equal(calls[0].options.method, 'GET');
+  assert.equal(calls[1].options.headers.get('Authorization'), 'Bearer synthetic-test-id-token');
+  assert.equal(session.getState().apiStatus, 'ready');
+});
+
+test('failed wake and logout during wake cannot send commute requests or old tokens', async () => {
+  const f = sdkFixture(); const calls = []; let release;
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://homehunt.onrender.com/api', loadSdk: f.loadSdk,
+    fetchImpl: (url, options) => { calls.push({ url, options }); return new Promise(resolve => { release = resolve; }); } });
+  await session.signIn(); const pending = session.apiFetch('/commute', { method: 'POST' }); await tick();
+  await session.signOut(); release(new Response('{"ok":true}'));
+  await assert.rejects(pending, { code: 'CLOUD_SESSION_CHANGED' });
+  assert.equal(calls.length, 1); assert.equal(f.tokenReads, 0);
+  session.destroy();
+  const broken = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://homehunt.onrender.com/api', loadSdk: f.loadSdk,
+    fetchImpl: async () => new Response('warming up', { status: 503 }) });
+  await broken.signIn();
+  await assert.rejects(broken.apiFetch('/commute', { method: 'POST' }), { code: 'CLOUD_SERVER_UNAVAILABLE' });
+  assert.equal(broken.getState().apiStatus, 'unavailable'); assert.equal(f.tokenReads, 0);
+});
+
 test('missing auth and expired server authentication yield useful errors without anonymous retries', async () => {
   const f = sdkFixture(); let calls = 0;
   const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', loadSdk: f.loadSdk,

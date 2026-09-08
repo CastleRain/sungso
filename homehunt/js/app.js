@@ -1,24 +1,24 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.12.2';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.12.2';
-import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.12.2';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.12.2';
-import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.12.2';
-import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.12.2';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.12.2';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.13.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.13.0';
+import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.0';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.13.0';
+import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.0';
+import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.0';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.0';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.12.2';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.13.0';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.12.2';
-import { mountCloudPanel } from './cloud-panel.js?v=4.12.2';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.13.0';
+import { mountCloudPanel } from './cloud-panel.js?v=4.13.0';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.12.2';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.12.2';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.0';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.0';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.12.2';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.12.2';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.13.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.13.0';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -31,9 +31,9 @@ import {
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
 } from './storage.js?v=2.5.0';
-import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.12.2';
-import { createSupplyLocationService } from './supply-location-service.mjs?v=4.12.2';
-import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.12.2';
+import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.13.0';
+import { createSupplyLocationService } from './supply-location-service.mjs?v=4.13.0';
+import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.13.0';
 import { fetchHistoryProgressively, historyElapsedLabel, missingHistoryDetails, isCompleteHistoryPayload } from './history-query-service.mjs?v=4.4.0';
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.5.0';
 import {
@@ -79,7 +79,7 @@ import {
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.12.2';
+} from './ui-format.js?v=4.13.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -228,6 +228,7 @@ let officialComplexAuthTransition = 0;
 const officialComplexProgressViews = new WeakMap();
 const officialComplexClient = createOfficialComplexClient({
   url: APP_CONFIG.officialComplexUrl, fetchImpl: fetch,
+  timeoutMs: APP_CONFIG.isLocalRuntime === false ? 180000 : 60000,
   onApplied: () => {
     locationRankingCache = null;
     // Public metadata can arrive for hundreds of homes. Keep the active view
@@ -5128,9 +5129,14 @@ function initializeCloudConnection() {
   const root = $('#homehuntCloudPanel');
   if (!root || cloudPanel) return;
   let previousUid = null;
+  let previousApiStatus = null;
   cloudPanel = mountCloudPanel({ root, session: cloudSession, captureSnapshot: captureCloudSnapshot,
     applySnapshot: applyCloudSnapshot,
     onAuthChange: next => {
+      if (next.apiStatus === 'waking' && previousApiStatus !== 'waking') {
+        showToast('검색 서버를 깨우고 있어요. 오랜만에 접속하면 약 1분 걸릴 수 있습니다.');
+      }
+      previousApiStatus = next.apiStatus;
       const uid = next.user?.uid || null;
       if (APP_CONFIG.isLocalRuntime === false && APP_CONFIG.cloudApiBaseUrl && uid !== previousUid) {
         previousUid = uid;
@@ -5535,7 +5541,7 @@ async function fetchCompanyPlaceResults(query) {
     return { status: 'not-configured', items: [] };
   }
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 9000);
+  const timeout = window.setTimeout(() => controller.abort(), APP_CONFIG.isLocalRuntime === false ? 120000 : 9000);
   try {
     const url = new URL(APP_CONFIG.placeSearchUrl);
     url.searchParams.set('query', query);
@@ -6949,7 +6955,7 @@ async function checkLocalMarketConnection() {
     return null;
   }
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 3500);
+  const timeout = window.setTimeout(() => controller.abort(), APP_CONFIG.isLocalRuntime === false ? 120000 : 3500);
   try {
     const response = await fetch(APP_CONFIG.localMarketHealthUrl, { cache: 'no-store', signal: controller.signal });
     const health = response.ok ? await response.json() : null;
@@ -8808,7 +8814,9 @@ async function init() {
   renderSubscriptionProfile();
   renderSupplyMatchSummary();
   initializeCloudConnection();
-  await checkLocalMarketConnection();
+  // Map controls and saved records remain usable while a free server wakes.
+  if (APP_CONFIG.isLocalRuntime === false) void checkLocalMarketConnection();
+  else await checkLocalMarketConnection();
   officialComplexReady = true;
   synchronizeOfficialComplexCandidates({ revalidate: true });
   refreshShortlistCommuteFreshness();
