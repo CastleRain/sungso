@@ -1,0 +1,75 @@
+.recommendation-price-coverage {
+  min-width: 0;
+  margin: 12px 16px;
+  padding: 14px;
+  border: 1px solid #e8c887;
+  border-radius: 12px;
+  background: #fffaf0;
+  color: #25374c;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.recommendation-price .price-coverage-note { display: block; margin-top: 6px; color: #865d16; line-height: 1.6; white-space: normal; }
+.recommendation-price-coverage[hidden], .recommendation-price-coverage [hidden] { display: none !important; }
+.recommendation-price-coverage p { margin: 0 0 8px; }
+.recommendation-price-coverage .price-coverage-heading { margin: 0 0 6px; color: #594218; font-size: 14px; line-height: 1.5; }
+.recommendation-price-coverage .price-coverage-metrics { color: #755520; font-weight: 700; }
+.recommendation-price-coverage .price-coverage-explanation,
+.recommendation-price-coverage .price-coverage-preservation { color: #627084; }
+.recommendation-price-coverage .price-coverage-actions { display: grid; gap: 8px; margin: 10px 0; }
+.recommendation-price-coverage button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #cbd7e6;
+  border-radius: 8px;
+  color: #234771;
+  background: #fff;
+  font: inherit;
+  font-weight: 650;
+  white-space: normal;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.recommendation-price-coverage button:hover { background: #f0f5ff; border-color: #adc2e2; }
+.recommendation-price-coverage button:disabled { opacity: .65; cursor: wait; }
+.recommendation-price-coverage button:focus-visible,
+.recommendation-price-coverage summary:focus-visible,
+.recommendation-price-coverage input:focus-visible { outline: 2px solid #245fff; outline-offset: 2px; }
+.recommendation-price-coverage .price-coverage-retry { border-color: #245fff; background: #245fff; color: #fff; }
+.recommendation-price-coverage .price-coverage-retry:hover { background: #194ada; }
+.recommendation-price-coverage .price-coverage-status { padding: 8px; border-radius: 6px; color: #7b3321; background: #ffebe2; }
+.recommendation-price-coverage details { min-width: 0; margin-top: 10px; border-top: 1px solid #e6dcc7; }
+.recommendation-price-coverage summary { padding: 11px 0; color: #304969; font-weight: 700; cursor: pointer; }
+.recommendation-price-coverage .price-coverage-failures ul { max-height: 220px; margin: 0; padding: 0 0 4px 20px; overflow-y: auto; }
+.recommendation-price-coverage .price-coverage-failures li { margin-bottom: 6px; }
+.recommendation-price-coverage .price-coverage-pending-note { color: #687283; }
+.recommendation-price-coverage .price-coverage-search { display: grid; min-width: 0; gap: 5px; margin: 10px 0; font-weight: 650; }
+.recommendation-price-coverage .price-coverage-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid #cbd7e6;
+  border-radius: 8px;
+  background: #fff;
+  color: #25374c;
+  font: inherit;
+}
+.recommendation-price-coverage .price-coverage-list-count { color: #687283; font-size: 11px; }
+.recommendation-price-coverage .price-coverage-pending-list { display: grid; min-width: 0; gap: 9px; }
+.recommendation-price-coverage .price-coverage-pending-card { min-width: 0; padding: 12px; border: 1px solid #e0e5ec; border-radius: 9px; background: #fff; }
+.recommendation-price-coverage .price-coverage-pending-name { display: block; margin-bottom: 4px; color: #182d45; font-size: 13px; }
+.recommendation-price-coverage .price-coverage-pending-address,
+.recommendation-price-coverage .price-coverage-pending-facts { color: #687283; font-size: 11px; }
+.recommendation-price-coverage .price-coverage-pending-badge { display: inline-block; margin-bottom: 7px; padding: 2px 7px; border-radius: 5px; color: #7e5b20; background: #fff1d6; font-size: 11px; font-weight: 700; }
+.recommendation-price-coverage .price-coverage-pending-period,
+.recommendation-price-coverage .price-coverage-pending-months { color: #687283; font-size: 11px; }
+.recommendation-price-coverage .price-coverage-market { width: 100%; min-height: 36px; font-size: 11px; }
+.recommendation-price-coverage .price-coverage-more { width: 100%; margin-top: 10px; }
+.recommendation-price-coverage .price-coverage-empty { padding: 12px 0; color: #687283; }
+@media (max-width: 479px) {
+  .recommendation-price-coverage { margin: 10px 12px; padding: 12px; }
+  .recommendation-price-coverage button { min-height: 44px; }
+}

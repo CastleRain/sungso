@@ -1,6 +1,6 @@
-import { formatPrice, renderValue } from '../ui-format.js';
-import { escapeEvidence as esc, evidenceField, positiveNumber } from '../../providers/evidence.mjs';
-import { officialComplexEvidence, officialTradeEvidence } from '../../providers/official/complex.mjs';
+import { formatPrice, renderValue } from '../ui-format.js?v=4.6.1';
+import { escapeEvidence as esc, evidenceField, positiveNumber } from '../../providers/evidence.mjs?v=4.6.1';
+import { officialComplexEvidence, officialTradeEvidence } from '../../providers/official/complex.mjs?v=4.9.0';
 import { portalComplexEvidence } from '../../providers/portal/index.mjs';
 import { officialApplicationLink, supplyApplicationChecklist, supplyPriceEvidence } from '../../providers/official/supply.mjs';
 

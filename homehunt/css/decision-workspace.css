@@ -28,7 +28,7 @@
 .dw-region-intro>small { display:block; padding:10px; background:#f0f5ff; font-size:12px; color:#315489; }
 .hh-v3 #recommendationResultPanel[data-decision-tab] .recommendation-decision-bar,
 .hh-v3 #recommendationResultPanel[data-decision-tab] .recommendation-composition { display:none; }
-.hh-v3 #recommendationResultPanel:not([data-decision-tab=candidates]) :is(.recommendation-results-head,.recommendation-result-grid,.recommendation-load-more,.recommendation-empty,.recommendation-disclaimer) { display:none; }
+.hh-v3 #recommendationResultPanel:not([data-decision-tab=candidates]) :is(#recommendationPriceCoverage,.recommendation-results-head,.recommendation-result-grid,.recommendation-load-more,.recommendation-empty,.recommendation-disclaimer) { display:none; }
 .hh-v3 #recommendationResultPanel[data-decision-tab=candidates] .recommendation-card { padding:16px; animation:none; }
 .hh-v3 .recommendation-card :is(.recommendation-commute-matrix,.recommendation-areas) { display:none; }
 .hh-v3 .recommendation-card .recommendation-facts { font-size:12px; }

@@ -1,4 +1,5 @@
 // Decision views use source-qualified identities; a visit asking price is never a trade.
+import { normalizePriceCoverage, priceCoverageLabel } from './price-coverage-core.mjs?v=4.6.1';
 export const DECISION_KINDS = Object.freeze({ candidate: '관심 후보', visit: '방문 기록', supply: '분양 공고' });
 export function decisionKey(kind, record) {
   const id = kind === 'candidate' ? record?.catalogId || record?.id : record?.id;
@@ -15,7 +16,12 @@ export function decisionPrice(kind, record) {
     const prices = (record.homes || []).map((h) => positive(h.maxPriceManWon)).filter(Boolean);
     return { value: prices.length ? Math.max(...prices) : positive(record.maxPriceManWon), label: '공식 분양가 · 주택형별 최고', date: record.announcementDate || record.noticeDate || '', source: record.sourceLabel || record.source || '공식 모집공고' };
   }
-  return { value: positive(record.bestArea?.averagePriceManWon), label: record.savedAt ? '저장 당시 실거래 평균' : '조회기간 실거래 평균', date: record.bestArea?.latestMonth || '', source: '국토교통부' };
+  const coverage = normalizePriceCoverage(record.priceCoverage);
+  const provisional = record.priceProvisional === true || coverage.status !== 'complete';
+  return { value: positive(record.bestArea?.averagePriceManWon),
+    label: `${record.savedAt ? '저장 당시' : '조회기간'} 실거래 평균${provisional ? ' · 잠정' : ''}`,
+    date: record.bestArea?.latestMonth || '', source: '국토교통부',
+    provisional, coverageLabel: priceCoverageLabel(record) };
 }
 export function regionalCoverage(candidates = []) {
   const groups = new Map();
@@ -33,7 +39,7 @@ export function regionalCoverage(candidates = []) {
   })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'ko'));
 }
 export function searchBottleneck({ meta, results = [], destinations = [], verifiedCount = 0 } = {}) {
-  if (!meta) return { title: '먼저 탐색 범위를 확인하세요', detail: '가격·면적·규모·연식 조건으로 공식 실거래를 조회하세요. 회사 위치 없이도 강남·역 접근성으로 비교할 수 있습니다.', action: 'filters' };
+  if (!meta) return { title: '먼저 탐색 범위를 확인하세요', detail: '목표가격·면적·규모·연식으로 후보를 찾고 실제 통근을 확인하세요. 회사 미등록 시에는 강남역 100%를 적용합니다.', action: 'filters' };
   if (Number(meta.failedRequestCount) > 0 && !results.length) return { title: '자료 누락으로 판단을 보류했어요', detail: '일부 지역의 월별 실거래가 완전하지 않습니다. 연결 상태 확인 후 재조회하세요.', action: 'connections' };
   if (!results.length && Number(meta.baseCandidateCount) === 0) return { title: '지역·세대수·연식에서 후보가 없어요', detail: '가격 조회 전 기본조건 단계입니다. 지역 범위, 세대수 또는 준공연도 중 하나를 바꿔보세요.', action: 'filters' };
   if (!results.length) return { title: '면적·가격을 확인한 후보가 없어요', detail: '기본조건 단지는 있지만 조회기간에 면적·가격 조건을 함께 통과한 거래가 없습니다. 면적·예산·조회기간을 하나씩 바꿔보세요.', action: 'filters' };

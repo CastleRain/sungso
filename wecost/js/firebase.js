@@ -7,6 +7,7 @@ import {
   getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs';
 
 const FIREBASE_CONFIG = {
   apiKey:            'AIzaSyBz-P5ycMAjYZBV7hkcZDrmq28EAw7Hsp8',
@@ -19,6 +20,7 @@ const FIREBASE_CONFIG = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
+let targetPriceWriteSequence = 0;
 
 // ===== 초기 기본값 =====
 
@@ -68,13 +70,16 @@ export function subscribeAll(onUpdate) {
     } else {
       snapshot.settings = snap.data();
     }
+    // Publish only the target already read by WeCost, never a new financial query.
+    // Optimistic pending writes are published by updateSettings after success.
+    if (!snap.metadata?.hasPendingWrites) homeTargetPriceBridge.publish(snapshot.settings?.targetHousePrice);
     if (snapshot.settings === null) readyCount++;
     else if (snapshot.settings !== null && readyCount < TOTAL) {
       // first time non-null
     }
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  });
+  }, () => { homeTargetPriceBridge.clear('wecost-unavailable'); });
 
   // savings
   const savingsRef = doc(db, 'wecost_savings', 'main');
@@ -118,10 +123,14 @@ export function subscribeAll(onUpdate) {
 // ===== settings =====
 
 export async function updateSettings(fields) {
+  const hasTarget = Object.prototype.hasOwnProperty.call(fields, 'targetHousePrice');
+  const targetPriceWon = fields.targetHousePrice;
+  const targetSequence = hasTarget ? ++targetPriceWriteSequence : null;
   await updateDoc(doc(db, 'wecost_settings', 'main'), {
     ...fields,
     updatedAt: serverTimestamp(),
   });
+  if (hasTarget && targetSequence === targetPriceWriteSequence) homeTargetPriceBridge.publish(targetPriceWon);
 }
 
 // ===== items (결혼비용) =====

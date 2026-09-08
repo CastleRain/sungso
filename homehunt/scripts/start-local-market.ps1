@@ -67,7 +67,7 @@ try {
     $env:MOLIT_SERVICE_KEY = $plainKey
     $promptedForMolitKey = $true
   }
-  & node $scriptPath
+  & node --use-system-ca $scriptPath
 } finally {
   if ($keyPointer -ne [IntPtr]::Zero) {
     [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($keyPointer)

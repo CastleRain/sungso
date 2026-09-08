@@ -14,6 +14,7 @@ export const PANEL_WIDTH_MAX = 560;
 
 export const UI_SCREENS = Object.freeze([
   'finder',
+  'candidates',
   'records',
   'market',
   'supply',

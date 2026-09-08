@@ -1,0 +1,24 @@
+.commute-auto-control { min-width: 0; margin: 12px 0; padding: 14px; border: 1px solid #c8d8ff; border-radius: 12px; background: #f5f8ff; }
+.commute-auto-control [hidden] { display: none !important; }
+.commute-auto-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; }
+.commute-auto-heading strong { color: #19468f; font-size: 13px; }
+.commute-auto-state { color: #466a9a; font-size: 11px; }
+.commute-auto-note, .commute-auto-counters, .commute-auto-reason { margin: 8px 0 0; font-size: 11px; line-height: 1.7; color: #526b89; overflow-wrap: anywhere; }
+.commute-auto-counters { color: #294f84; font-variant-numeric: tabular-nums; }
+.commute-auto-reason { color: #855d1c; }
+.commute-auto-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-top: 12px; }
+.commute-auto-actions label { display: flex; flex: 1 1 130px; flex-direction: column; gap: 4px; font-size: 11px; color: #506583; }
+.commute-auto-actions select, .commute-auto-actions button { min-height: 38px; border: 1px solid #b8cceb; border-radius: 8px; background: #fff; padding: 8px 10px; color: #244a7c; font: inherit; font-size: 12px; }
+.commute-auto-actions select { width: 100%; min-width: 0; }
+.commute-auto-actions button { cursor: pointer; font-weight: 700; }
+.commute-auto-actions .commute-auto-start { background: #245dff; border-color: #245dff; color: #fff; }
+.commute-auto-actions .commute-auto-stop { border-color: #c79881; color: #984222; }
+.commute-auto-actions button:disabled, .commute-auto-actions select:disabled { opacity: .6; cursor: default; }
+.commute-auto-actions button:focus-visible, .commute-auto-actions select:focus-visible { outline: 3px solid #aac5ff; outline-offset: 2px; }
+.commute-auto-hint { display: block; margin-top: 9px; color: #657a96; font-size: 10px; line-height: 1.6; }
+@media (max-width: 420px) {
+  .commute-auto-control { padding: 12px; }
+  .commute-auto-actions { gap: 7px; }
+  .commute-auto-actions label { flex-basis: 100%; }
+  .commute-auto-actions button { flex: 1; }
+}

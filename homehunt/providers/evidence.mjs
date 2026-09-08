@@ -1,4 +1,4 @@
-import { createEvidenceViewModel } from '../js/ui-format.js';
+import { createEvidenceViewModel } from '../js/ui-format.js?v=4.6.1';
 
 export function evidenceField(id, label, value, options = {}) {
   const available = value !== null && value !== undefined && value !== '';

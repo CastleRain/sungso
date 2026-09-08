@@ -1,8 +1,12 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
-  },
+  "functions": [
+    { "source": "functions", "runtime": "nodejs20", "codebase": "default" },
+    {
+      "source": "homehunt/cloud", "runtime": "nodejs22", "codebase": "homehunt",
+      "ignore": ["node_modules", ".git", ".env*", "*.log", "tests", "index.mjs", "build.mjs"],
+      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules"
   }

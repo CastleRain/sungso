@@ -1,5 +1,6 @@
 import { formatAreaPair, formatCompactPrice, formatPriceManwon } from './display-format.mjs?v=2.1.0';
 import { isGeoPoint, normalizeGeoPoint } from './transport-core.mjs?v=2.1.0';
+import { destinationLetter } from './personalized-context-core.mjs?v=4.3.0.1';
 
 let sdkPromise = null;
 
@@ -117,11 +118,12 @@ function candidatePriceLabel(record) {
 function candidateCommuteLabel(record) {
   const balance = record?.commuteBalance;
   if (balance?.decision === 'matched') {
-    return `모든 목적지 충족 · 평균 ${balance.weightedMeanMinutes ?? '—'}분`;
+    return `통근 조건 충족 · 가중 평균 ${balance.weightedMeanMinutes ?? '—'}분`;
   }
   if (balance?.decision === 'excluded') {
-    const worst = (balance.evaluations || []).filter((item) => item.verified).sort((a, b) => Number(b.ratio) - Number(a.ratio))[0];
-    return worst ? `${worst.destination?.label || '목적지'} ${worst.durationMinutes}분 · 제한 초과` : '하나 이상 목적지 제한 초과';
+    const blocking = (balance.evaluations || []).filter(item => item.decision === 'excluded' && item.routeRequired !== false);
+    const worst = blocking.sort((a, b) => Number(b.ratio) - Number(a.ratio))[0];
+    return worst ? `${worst.destination?.label || '목적지'} ${worst.durationMinutes == null ? '실제 경로 없음' : `${worst.durationMinutes}분 · 제한 초과`}` : '통근 조건 미충족';
   }
   const route = record?.commute?.best;
   return route?.verified
@@ -674,7 +676,7 @@ export class HomeMap {
     normalized.forEach(({ item, index, point }) => {
       const id = String(item.id || `destination-${index + 1}`);
       const position = new naver.maps.LatLng(point.lat, point.lng);
-      const letter = String.fromCharCode(65 + index);
+      const letter = destinationLetter(index);
       const color = colors[index % colors.length];
       const content = `<div class="recommendation-company-marker" style="--company-color:${color}" aria-label="목적지 ${letter}"><span>${letter}</span></div>`;
       let marker = this.companyMarkers.get(id);

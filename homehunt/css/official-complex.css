@@ -1,0 +1,29 @@
+.official-complex-panel {
+  margin: 18px 0; padding: 18px; min-width: 0;
+  border: 1px solid #dce5ef; border-radius: 14px; background: #f8fafc;
+  color: #152c46;
+}
+.official-complex-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.official-complex-panel h3 { margin: 0; font-size: 16px; font-weight: 750; }
+.official-complex-status { border-radius: 6px; padding: 4px 7px; background: #e8efff; color: #2159e8; font-size: 11px; white-space: nowrap; }
+.official-complex-message { margin: 10px 0; font-size: 13px; line-height: 1.55; }
+.official-complex-parking { display: block; margin: 10px 0 16px; color: #174ce0; font-size: 24px; }
+.official-complex-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin: 0 0 12px; }
+.official-complex-fields > div { min-width: 0; padding: 10px 0; border-top: 1px solid #e1e7ee; }
+.official-complex-fields dt { color: #60758c; font-size: 11px; margin-bottom: 4px; }
+.official-complex-fields dd { margin: 0; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.official-complex-fields dt { overflow-wrap: anywhere; line-height: 1.45; }
+.official-complex-facilities { min-width: 0; margin: 0 0 14px; border-top: 1px solid #e1e7ee; border-bottom: 1px solid #e1e7ee; }
+.official-complex-facilities summary { padding: 12px 0; font-size: 13px; font-weight: 650; cursor: pointer; }
+.official-complex-facilities p { margin: 0 0 12px; font-size: 13px; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; word-break: keep-all; }
+.official-complex-facilities-missing { margin: 0 0 14px; color: #60758c; font-size: 12px; }
+.official-complex-note, .official-complex-date { color: #60758c; font-size: 12px; line-height: 1.65; }
+.official-complex-note { margin: 12px 0 8px; }
+.official-complex-source { display: inline-block; color: #2859c4; font-size: 12px; overflow-wrap: anywhere; }
+.official-complex-panel > button { display: block; margin-top: 12px; }
+.official-complex-panel[data-status="unavailable"], .official-complex-panel[data-status="ambiguous"] { background: #fffbf2; border-color: #e8d8b2; }
+@media (max-width: 480px) {
+  .official-complex-panel { padding: 14px; margin: 14px 0; }
+  .official-complex-fields { column-gap: 12px; }
+  .official-complex-panel h3 { font-size: 15px; }
+}
