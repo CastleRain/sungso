@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-09T17:41:51.248Z",
-  "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+  "generatedAt": "2026-09-09T17:55:36.881Z",
+  "lastAttemptAt": "2026-09-09T17:55:36.881Z",
   "status": "ok",
   "collectionNote": "공식 공개 자료를 하루 한 번 확인합니다. 관측월·적용일과 확인시각은 다르며, 수집 실패 시 이전 자료의 기준일을 유지합니다.",
   "series": [
@@ -53,13 +53,13 @@
       ],
       "publishedAt": "2026-08-26",
       "dataUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202512/202609/BECBLA0302",
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11064110",
+      "publicationBasis": "bok_press_release_registered_at",
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastAttemptAt": "2026-09-09T17:55:36.881Z",
       "status": "ok",
       "statusReason": null,
-      "publicationNote": null,
-      "publicationBasis": "bok_press_release_registered_at",
-      "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11064110"
+      "publicationNote": null
     },
     {
       "id": "bok_base_rate",
@@ -172,13 +172,13 @@
           "value": 3
         }
       ],
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "publicationBasis": null,
+      "publicationSourceUrl": null,
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastAttemptAt": "2026-09-09T17:55:36.881Z",
       "status": "ok",
       "statusReason": null,
-      "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다.",
-      "publicationBasis": null,
-      "publicationSourceUrl": null
+      "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다."
     },
     {
       "id": "hf_bogeumjari_30",
@@ -193,6 +193,8 @@
       "value": 5.1,
       "observationDate": "2026-09-01",
       "publishedAt": "2026-09-01",
+      "publicationSourceUrl": "https://www.hf.go.kr/ko/sub01/sub01_01_04.do",
+      "publicationBasis": "hf_rate_table_disclosure_date",
       "history": [
         {
           "date": "2026-09",
@@ -225,33 +227,31 @@
           "value": 5.2
         }
       ],
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastAttemptAt": "2026-09-09T17:55:36.881Z",
       "status": "ok",
       "statusReason": null,
-      "publicationNote": null,
-      "publicationBasis": "hf_rate_table_disclosure_date",
-      "publicationSourceUrl": "https://www.hf.go.kr/ko/sub01/sub01_01_04.do"
+      "publicationNote": null
     }
   ],
   "sources": [
     {
       "id": "bok_mortgage",
       "status": "ok",
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastSuccessAt": "2026-09-09T17:55:36.881Z"
     },
     {
       "id": "bok_base",
       "status": "ok",
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastSuccessAt": "2026-09-09T17:55:36.881Z"
     },
     {
       "id": "hf_bogeumjari",
       "status": "ok",
-      "checkedAt": "2026-09-09T17:41:51.248Z",
-      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+      "checkedAt": "2026-09-09T17:55:36.881Z",
+      "lastSuccessAt": "2026-09-09T17:55:36.881Z"
     }
   ]
 }
