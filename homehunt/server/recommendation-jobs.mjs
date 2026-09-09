@@ -244,22 +244,46 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     const ref = recentRef(identity);
     const previous = (await ref.get()).data();
     const version = `${job.fence}:${job.resultBlob?.id || 'empty'}:${job.pendingBlob?.id || 'empty'}`;
-    if (previous?.jobId !== job.id || previous.archiveVersion === version
-      || previous.archiveFence > job.fence) return;
+    const promotion = job.recentPromotion;
+    const mayPromote = (pointer) => promotion && promotion.uid === identity.uid
+      && promotion.householdId === identity.householdId && job.uid === identity.uid
+      && pointer?.uid === identity.uid && pointer.householdId === identity.householdId
+      && pointer.jobId === promotion.jobId && epoch(pointer.expiresAt) > clock()
+      && (pointer.updatedAt || null) === promotion.updatedAt
+      && (pointer.selectionToken || null) === promotion.selectionToken
+      && (pointer.archiveVersion || null) === promotion.archiveVersion
+      && !job.failures.length && job.tasks.every(task => task.status === 'done' && task.evidenceStatus !== 'stale');
+    const sameJobArchive = (pointer) => pointer?.jobId === job.id
+      && pointer.archiveVersion !== version && !(pointer.archiveFence > job.fence);
+    if (!sameJobArchive(previous) && !mayPromote(previous)) return;
     const results = encodeBlob('latest_results', result.results, MAX_RESULT_BYTES);
     const pending = encodeBlob('latest_pending', result.pendingPriceCandidates, MAX_RESULT_BYTES);
     const expiresAt = new Date(epoch(job.updatedAt) + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS);
     const { results: ignoredResults, pendingPriceCandidates: ignoredPending, ...summary } = result;
     await db.runTransaction(async transaction => {
       const latest = (await transaction.get(ref)).data();
-      if (latest?.jobId !== job.id || latest.archiveVersion === version || latest.archiveFence > job.fence) return;
+      const promoting = mayPromote(latest);
+      if (!sameJobArchive(latest) && !promoting) return;
       const current = (await transaction.get(refFor(job.id))).data();
       if (current?.status !== 'complete' || current.fence !== job.fence
-        || current.resultBlob?.id !== job.resultBlob?.id || current.pendingBlob?.id !== job.pendingBlob?.id) return;
+        || current.resultBlob?.id !== job.resultBlob?.id || current.pendingBlob?.id !== job.pendingBlob?.id
+        || current.householdId !== identity.householdId) return;
+      const queryRef = promoting ? lookupRef(promotion.queryKey) : null;
+      const queryPointer = queryRef ? (await transaction.get(queryRef)).data() : null;
       writeBlob(transaction, ref, results, expiresAt);
       writeBlob(transaction, ref, pending, expiresAt);
-      transaction.set(ref, { ...latest, expiresAt, archiveUpdatedAt: job.updatedAt, archiveFence: job.fence, archiveVersion: version,
+      transaction.set(ref, { ...latest,
+        ...(promoting ? { schemaVersion: 1, ...identity, jobId: job.id,
+          updatedAt: job.updatedAt, selectionToken: randomUUID() } : {}),
+        expiresAt, archiveUpdatedAt: job.updatedAt, archiveFence: job.fence, archiveVersion: version,
         archive: summary, resultBlob: results.meta, pendingBlob: pending.meta });
+      // A pending enrichment never enters the shared query lookup. Promote it
+      // only if another tab/member has not selected a newer job for that query.
+      if (queryRef && (queryPointer?.jobId || null) === promotion.queryJobId
+          && (!queryPointer || queryPointer.householdId === identity.householdId)) {
+        transaction.set(queryRef, { schemaVersion: 1, householdId: identity.householdId,
+          jobId: job.id, expiresAt: job.expiresAt });
+      }
     });
   }
 
@@ -337,12 +361,17 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     const indexRef = lookupRef(key);
     const accountRef = recentRef(identity);
     const forceRefresh = rawFilters.refresh === true;
+    const keepRecent = forceRefresh && rawFilters.preserveRecent === true;
+    // Capture the selection before loading the catalog. A later search may
+    // finish creating while that await is pending, even at the same timestamp.
+    const startingRecent = keepRecent ? (await accountRef.get()).data() : null;
     const reusable = value => value?.householdId === identity.householdId && epoch(value.expiresAt) > clock()
       && ['running', 'complete'].includes(value.status);
     const remember = (transaction, job, previous) => {
       if (epoch(previous?.updatedAt) > time) return;
       transaction.set(accountRef, { schemaVersion: 1, ...identity, jobId: job.id,
-        updatedAt: new Date(time).toISOString(), expiresAt: new Date(time + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS) });
+        updatedAt: new Date(time).toISOString(), selectionToken: randomUUID(),
+        expiresAt: new Date(time + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS) });
     };
     if (!forceRefresh) {
       const reused = await db.runTransaction(async transaction => {
@@ -386,8 +415,8 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
       expiresAt: new Date(time + RECOMMENDATION_JOB_TTL_MS), lease: null, fence: 0, error: '', errorCode: '',
     };
     const saved = await db.runTransaction(async (transaction) => {
-      const pointer = !forceRefresh ? (await transaction.get(indexRef)).data() : null;
-      const existing = pointer && epoch(pointer.expiresAt) > clock()
+      const pointer = !forceRefresh || keepRecent ? (await transaction.get(indexRef)).data() : null;
+      const existing = !forceRefresh && pointer && epoch(pointer.expiresAt) > clock()
         ? (await transaction.get(refFor(pointer.jobId))).data() : null;
       if (reusable(existing)) {
         const previous = (await transaction.get(accountRef)).data();
@@ -396,11 +425,26 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
       }
       if ((await transaction.get(ref)).exists) fail('JOB_ID_CONFLICT', '검색 작업을 다시 시작해주세요.', 409);
       const previous = (await transaction.get(accountRef)).data();
+      let retainedRecent = false;
+      if (keepRecent && previous?.uid === identity.uid && previous.householdId === identity.householdId
+          && /^[a-zA-Z0-9_-]{1,128}$/.test(previous.jobId || '') && epoch(previous.expiresAt) > clock()) {
+        const previousJob = (await transaction.get(refFor(previous.jobId))).data();
+        retainedRecent = Boolean(previous.archive && previous.resultBlob
+          || previousJob?.householdId === identity.householdId && epoch(previousJob.expiresAt) > clock()
+            && (['running', 'complete'].includes(previousJob.status) || previousJob.resultBlob));
+      }
+      const next = retainedRecent ? { ...job, recentPromotion: {
+        ...identity, jobId: startingRecent?.jobId || '', updatedAt: startingRecent?.updatedAt || null,
+        selectionToken: startingRecent?.selectionToken || null, archiveVersion: startingRecent?.archiveVersion || null,
+        queryKey: key, queryJobId: pointer?.jobId || null,
+      } } : job;
       writeBlob(transaction, ref, catalogBlob, job.expiresAt);
-      transaction.set(ref, job);
-      transaction.set(indexRef, { schemaVersion: 1, householdId: identity.householdId, jobId: id, expiresAt: job.expiresAt });
-      remember(transaction, job, previous);
-      return job;
+      transaction.set(ref, next);
+      if (!retainedRecent) {
+        transaction.set(indexRef, { schemaVersion: 1, householdId: identity.householdId, jobId: id, expiresAt: job.expiresAt });
+        remember(transaction, job, previous);
+      }
+      return next;
     });
     const result = await preserveRecent(saved, await reply(refFor(saved.id), saved), context);
     return { ...result, reused: saved.id !== id };
@@ -586,7 +630,13 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     const ref = refFor(id);
     await db.runTransaction(async (transaction) => {
       const job = authorize(await transaction.get(ref), context);
-      if (FINAL.has(job.status)) return;
+      if (FINAL.has(job.status)) {
+        // A final advance may have finished aggregating but not yet published
+        // its replacement archive. Cancellation must still fence that writer.
+        if (job.status !== 'complete' || !job.recentPromotion || job.recentPromotion.uid !== context.uid) return;
+        const selected = (await transaction.get(recentRef(contextIdentity(context)))).data();
+        if (selected?.jobId === job.id) return;
+      }
       transaction.set(ref, { ...job, status: 'cancelled', stage: 'cancelled', fence: job.fence + 1,
         lease: null, updatedAt: new Date(clock()).toISOString() });
     });

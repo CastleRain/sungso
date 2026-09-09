@@ -72,3 +72,15 @@ test('supply quick view exports link at the current release before the app start
     + '\nexport const initialized = typeof buildSupplyQuickFilterView === "function" && Boolean(SUPPLY_QUICK_FILTER_LABELS.open);'));
   assert.equal(linked.initialized, true);
 });
+
+test('sales activity and bookmark refresh exports link under the current release before click handlers start', async () => {
+  for (const name of ['normalizeTransactionActivity', 'mergeSavedTransactionActivity', 'rankPersonalizedCandidates']) {
+    const row = importRows.find(row => row.names.includes(name));
+    assert.ok(row, name);
+    const url = new URL(row.path, new URL('js/app.js', root));
+    assert.equal(url.searchParams.get('v'), release, name);
+    const linked = await import(dataModule(row.statement.replace(row.path, url.href)
+      + `\nexport const initialized = typeof ${name} === "function";`));
+    assert.equal(linked.initialized, true);
+  }
+});

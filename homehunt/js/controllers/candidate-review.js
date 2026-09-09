@@ -1,7 +1,7 @@
 import { formatAreaPair, formatPriceManwon } from '../display-format.mjs';
 import { priceCoverageLabel } from '../price-coverage-core.mjs?v=4.6.1';
 import { matchedOfficialComplexInfo } from '../../providers/official/complex.mjs?v=4.10.0';
-import { parkingForCandidate } from './personalized-recommendation-ui.js?v=4.10.0';
+import { parkingForCandidate } from './personalized-recommendation-ui.js?v=4.18.0';
 import { officialComplexMatchNote } from '../official-complex-match-note.mjs?v=4.11.0';
 
 const MODES = ['matched', 'verified', 'saved'];

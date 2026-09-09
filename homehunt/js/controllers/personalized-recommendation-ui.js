@@ -83,7 +83,7 @@ export function createPersonalizedScoreCard(candidate, { detailed = false } = {}
   const b = r.commuteBalance;
   if (Number.isFinite(b?.weightedMeanMinutes)) root.append(el('p', '', `비중 반영 평균 ${metric(b.weightedMeanMinutes, '분')} · 환승·도보·버스 부담 반영 ${metric(r.weightedCostMinutes ?? b.weightedMeanCostMinutes, '분 상당')}`));
   if (r.gateReasons?.length) root.append(el('p', '', r.gateReasons.map(code => GATE_LABELS[code] || '근거 확인 필요').join(' · ')));
-  const labels = { commute: '회사 통근', station: '역 접근', households: '단지 규모', age: '연식', parking: '주차', budget: '목표가격' };
+  const labels = { commute: '회사 통근', station: '역 접근', households: '단지 규모', age: '연식', parking: '주차', budget: '목표가격', transactionActivity: '매매 활발도' };
   const dl = el('dl');
   for (const [key, d] of Object.entries(r.dimensions || {})) {
     const name = el('dt', '', labels[key] || d.label || key);
@@ -95,6 +95,15 @@ export function createPersonalizedScoreCard(candidate, { detailed = false } = {}
   }
   root.append(dl);
   if (!detailed && r.dimensions?.budget?.label) root.append(el('p', '', r.dimensions.budget.label));
+  if (!detailed && r.dimensions?.transactionActivity?.label) root.append(el('p', 'transaction-activity-note', r.dimensions.transactionActivity.label));
+  if (detailed && r.dimensions?.transactionActivity) {
+    const activity = r.dimensions.transactionActivity;
+    if (activity.status !== 'unknown' && activity.components) {
+      const breakdown = Object.values(activity.components).map(d => `${d.label} ${d.status === 'unknown' ? '미확인' : `${d.score.toFixed(1)}/${d.maxScore}점`}`);
+      root.append(el('p', 'transaction-activity-note', breakdown.join(' · ')));
+    }
+    root.append(el('small', 'transaction-activity-note', '매매 활발도는 단지 전체의 신고된 거래건수·세대수 대비 비율·거래 발생 월을 반영합니다. 향후 매도 속도나 가격 상승을 보장하는 점수는 아닙니다.'));
+  }
   if (detailed) (b?.evaluations || []).forEach((row, index) => {
     const d = row.destination; const line = el('div', 'personalized-route-row');
     const timeCondition = d?.required === false

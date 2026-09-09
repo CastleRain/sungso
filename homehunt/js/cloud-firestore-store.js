@@ -1,4 +1,4 @@
-import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
+import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.18.0';
 
 const conflict = currentRevision => {
   const error = new CloudSnapshotError('다른 기기에서 저장한 변경이 있습니다. 클라우드 기록을 먼저 불러와주세요.', 'CLOUD_SNAPSHOT_CONFLICT', 409);

@@ -21,7 +21,7 @@ export function createConfiguredHomehuntApi({ db, auth, env = {}, loadCatalog,
     health: async () => {
       const quota = await commute.quota();
       const catalog = await loadCatalog();
-      return { ok: true, version: '2.10.1', runtime, keyConfigured: Boolean(env.MOLIT_SERVICE_KEY), keySource,
+      return { ok: true, version: '2.11.0', runtime, keyConfigured: Boolean(env.MOLIT_SERVICE_KEY), keySource,
         officialComplex: kapt.configuration(),
         commute: { ...commute.configuration(), kakaoQuota: quota.kakao, tmapQuota: quota.tmap },
         placeSearch: { configured: Boolean(env.NAVER_LOCAL_SEARCH_CLIENT_ID && env.NAVER_LOCAL_SEARCH_CLIENT_SECRET) },
