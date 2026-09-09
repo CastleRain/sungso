@@ -1,8 +1,8 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.16.1';
-import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.16.1';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.16.1';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.17.0';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.17.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.17.0';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.16.1';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.17.0';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
 import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
@@ -15,14 +15,16 @@ import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js
 import { mountCloudPanel } from './cloud-panel.js?v=4.13.1';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.16.1';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.17.0';
 import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.16.1';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.16.1';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.17.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.17.0';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
+import { buildMarketOutlookContext } from './market-outlook-context.mjs?v=4.17.0';
+import { renderMarketForecastPanel } from './controllers/market-forecast-panel.js?v=4.17.0';
 import { buildForecastChartSeries } from './market-chart-series.mjs?v=4.4.0';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
@@ -47,8 +49,8 @@ import { buildVisitBenchmark } from './visit-benchmark-core.mjs?v=2.5.0';
 import {
   parseMolitCsv, buildMarketSummary, validateMarketSummary,
   getRegion, getSeries, withChanges, latestRegionComparison, getRecentTransactions,
-  fitDampedForecast, monthLabel, normalizeTransaction, bandFor,
-} from './market-core.mjs?v=2.5.0';
+  fitPriceOutlook, monthLabel, normalizeTransaction, bandFor,
+} from './market-core.mjs?v=4.17.0';
 import {
   MAX_COMPARE, pricePerP33, pruneCompareIds, buildComparisonHighlights,
 } from './comparison-core.mjs?v=2.5.0';
@@ -73,14 +75,14 @@ import {
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
   normalizeSupplyNotice, sortSupplyNotices, newlywedApplicationContext,
-} from './supply-core.mjs?v=4.16.1';
+} from './supply-core.mjs?v=4.17.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.16.1';
+} from './ui-format.js?v=4.17.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -2782,10 +2784,10 @@ function renderForecastChart(series, forecast, areaM2 = null) {
       { label: '실제 거래 평균', data: chart.actualValues, borderColor: '#0f4c3a', borderWidth: 2, pointRadius: 1.5, tension: .25 },
       { label: '참고 범위 하단', data: chart.lowerValues, borderColor: 'transparent', pointRadius: 0, fill: false },
       { label: '참고 범위 상단', data: chart.upperValues, borderColor: 'transparent', backgroundColor: 'rgba(49,120,198,.13)', pointRadius: 0, fill: '-1' },
-      { label: '참고 예측', data: chart.predictedValues, borderColor: '#3178c6', borderDash: [5,4], borderWidth: 2, pointRadius: 2, tension: .2 },
+      { label: forecast.modelKind === 'last-observation-carried-forward' ? '가격 유지 가정' : '추세 참고 전망', data: chart.predictedValues, borderColor: '#3178c6', borderDash: [5,4], borderWidth: 2, pointRadius: 2, tension: .2 },
     ] }, options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => context.parsed.y ? `${context.dataset.label} ${total ? formatPrice(context.parsed.y) : formatP33(context.parsed.y)}` : '' } } },
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 16, filter: (item) => item.datasetIndex === 0 || (item.datasetIndex === 3 && forecast.eligible) } }, tooltip: { callbacks: { label: (context) => context.parsed.y ? `${context.dataset.label} ${total ? formatPrice(context.parsed.y) : formatP33(context.parsed.y)}` : '' } } },
       scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 9, font: { size: 9 } } }, y: { title: { display: true, text: total ? '평균 거래가격 · 총액' : '평균 평당가격 · 3.3㎡ 기준' }, border: { display: false }, grid: { color: '#edf0ee' }, ticks: { font: { size: 10 }, callback: (value) => total ? formatCompactPrice(value) : `${Math.round(value).toLocaleString('ko-KR')}만` } } },
     },
   });
@@ -2827,69 +2829,6 @@ function renderTransactions(summary, regionCode, dealType, band) {
   renderTransactionRecords(getRecentTransactions(summary, regionCode, dealType, band));
 }
 
-function renderForecastExplain(forecast, contextLabel = '', areaM2 = null) {
-  const root = $('#forecastExplain');
-  root.replaceChildren();
-  if (!forecast.eligible) {
-    const friendlyReasons = (forecast.reasons || []).map((reason) => {
-      if (reason.includes('시계열 백테스트 원점')) return '과거 자료로 같은 기간 뒤의 가격을 되짚어 확인할 수 있는 구간이 충분하지 않아요.';
-      if (reason.includes('무변화 기준') || reason.includes('백테스트 MAE')) return '지금 가격이 그대로라고 보는 단순 계산보다 뚜렷하게 잘 맞지 않았어요.';
-      if (reason.includes('시간순 백테스트 평균 오차')) return '과거에 예상한 값과 실제 거래가격의 차이가 너무 컸어요.';
-      if (reason.includes('불확실성 구간 표본')) return '예상가격의 위아래 범위를 정할 만큼 과거 사례가 충분하지 않아요.';
-      if (reason.includes('유효한 월별 표본')) return '거래가 있었던 달이 아직 충분하지 않아요.';
-      if (reason.includes('관측 기간')) return '가격 흐름을 판단할 만큼 조회 기간이 길지 않아요.';
-      if (reason.includes('전체 거래 표본')) return '같은 면적의 실제 거래 건수가 아직 충분하지 않아요.';
-      if (reason.includes('마지막 유효 거래월')) return '최근 실제 거래가 너무 오래됐어요.';
-      return reason;
-    });
-    root.className = 'forecast-explain hh-forecast-hold';
-    const heldValue = createElement('div', 'hh-statblock hh-statblock--unknown');
-    setEvidenceValue(heldValue, null, 'unknown', {
-      format: 'text', sourceKind: 'forecast-model', derivation: 'quality-gate',
-      freshness: state.complexMeta?.partial ? 'partial' : 'fresh', decisionStatus: 'withheld',
-      reason: '지금은 예상가격을 보여드리지 않아요',
-    });
-    root.append(heldValue, createElement('p', '', [...new Set(friendlyReasons)].join(' ')));
-    const held = document.createElement('dl');
-    held.className = 'hh-gate-list';
-    [['사용 가능한 월', `${forecast.observations || 0}개월`], ['사용 거래', `${Number(forecast.transactionCount || 0).toLocaleString('ko-KR')}건`], ['마지막 거래 경과', forecast.staleMonths === null ? '자료 없음' : `${forecast.staleMonths}개월`]].forEach(([term, desc]) => held.append(createElement('dt', '', term), createElement('dd', '', desc)));
-    root.appendChild(held);
-    return;
-  }
-  const last = forecast.points.at(-1);
-  const exactArea = Number(areaM2);
-  const hasExactArea = Number.isFinite(exactArea) && exactArea > 0;
-  const estimatedTotal = hasExactArea ? last.point * exactArea / 3.3 : null;
-  const estimatedLow = hasExactArea ? last.lower * exactArea / 3.3 : null;
-  const estimatedHigh = hasExactArea ? last.upper * exactArea / 3.3 : null;
-  root.className = 'forecast-explain hh-forecast-ready';
-  const forecastValue = createElement('div', 'forecast-number');
-  setEvidenceValue(forecastValue, hasExactArea ? estimatedTotal : last.point, 'estimated', {
-    format: hasExactArea ? 'price' : (value) => `평당 ${formatPrice(value)}`,
-    sourceKind: 'molit-trade', derivation: 'damped-trend-forecast', freshness: 'reference',
-    decisionStatus: 'reference-only', observedAt: last.month,
-  });
-  root.append(
-    createElement('strong', '', `${last.month} 예상 ${hasExactArea ? '평균 거래가격' : '평균 평당가격'}`),
-    forecastValue,
-  );
-  const description = forecast.monthlyTrendPct >= 0 ? `최근 추세는 월 ${forecast.monthlyTrendPct.toFixed(2)}% 상승 방향입니다.` : `최근 추세는 월 ${Math.abs(forecast.monthlyTrendPct).toFixed(2)}% 하락 방향입니다.`;
-  root.append(createElement('p', '', `${hasExactArea ? `${formatAreaPair(exactArea)} · ${formatP33(last.point)}. ` : ''}${contextLabel ? `${contextLabel}의 ` : ''}실제 거래가격을 1평(3.3㎡) 기준으로 환산해 평균낸 흐름입니다. ${description} 아직 신고가 끝나지 않은 최근 2개월은 계산에서 뺐습니다.`));
-  const list = document.createElement('dl');
-  const backtestLabel = Number.isFinite(forecast.backtestMapePct)
-    ? `과거 ${forecast.backtestSamples}번 확인 · 평균 ${forecast.backtestMapePct.toFixed(1)}% 차이`
-    : `${forecast.backtestSamples || 0}회 · 표본 부족`;
-  const coverageLabel = Number.isFinite(forecast.referenceRangeEmpiricalCoveragePct)
-    ? `과거 ${forecast.referenceRangeEmpiricalCoveragePct.toFixed(0)}%가 범위 안 · 6개월 뒤 기준`
-    : '검증 표본 부족';
-  const skillLabel = Number.isFinite(forecast.baselineSkillPct)
-    ? `그대로 유지된다고 볼 때보다 ${forecast.baselineSkillPct.toFixed(1)}% 더 정확`
-    : '무변화 기준 비교 불가';
-  [['예상 가능 범위', hasExactArea ? `${formatPrice(estimatedLow)} – ${formatPrice(estimatedHigh)}` : `${formatP33(last.lower)} – ${formatP33(last.upper)}`], ['평당으로 보면', `${formatP33(last.point)} · 1평≈3.3㎡`], ['과거 결과로 다시 확인', backtestLabel], ['가격 유지 가정과 비교', skillLabel], ['예상 범위 적중 기록', coverageLabel], ['거래가 있었던 달', `${forecast.observations}/${forecast.calendarSpanMonths}개월 · ${forecast.coveragePct.toFixed(0)}%`], ['계산에 사용한 거래', `${forecast.transactionCount.toLocaleString('ko-KR')}건`], ['신고 진행 중인 달 제외', `최근 ${forecast.incompleteMonths || 0}개월 · ${forecast.excludedIncompleteObservations || 0}개 관측 제외`], ['월별 가격 흔들림', `${forecast.residualVolatilityPct.toFixed(1)}%`], ['최근 6개월 거래량', `${forecast.recentVolume}건${Number.isFinite(forecast.volumeChangePct) ? ` · 이전 대비 ${forecast.volumeChangePct >= 0 ? '+' : ''}${forecast.volumeChangePct.toFixed(0)}%` : ''}`]].forEach(([term, desc]) => {
-    list.append(createElement('dt', '', term), createElement('dd', '', desc));
-  });
-  root.append(list, createElement('p', 'hh-model-warning', 'AI 예측이 아니며 확률을 보장하지 않습니다. 금리·공급·정책은 반영하지 않았고, 예상 범위는 과거에 틀렸던 폭을 이용한 참고값입니다.'));
-}
 
 function selectedComplexMarketContext() {
   if (!state.complexRecords.length || !state.complexMeta) return null;
@@ -2910,10 +2849,16 @@ function selectedComplexMarketContext() {
     provisionalMonths: state.complexMeta.demo ? 0 : 2,
   });
   const regionCode = summary.regions[0]?.code || '';
+  const loadedRange = historyRangeFromPayload(state.complexMeta.loadedHistoryRange || state.complexMeta) || responseRange;
+  const outlook = buildMarketOutlookContext(state.complexRecords, {
+    dealType, areaM2: area, rangeStart: responseRange.rangeStart, rangeEnd: responseRange.rangeEnd,
+    loadedRangeStart: loadedRange.rangeStart, loadedRangeEnd: loadedRange.rangeEnd,
+    asOfMonthIndex: historyMonthIndex(seoulCurrentMonth()), partial: state.complexMeta.partial === true,
+  });
   return {
     mode: 'complex', summary, regionCode, dealType, band: 'all', area,
     records: [...records].sort((a, b) => b.monthIndex - a.monthIndex || b.day - a.day),
-    dealRecords, requestedMonths, responseRange, endMonthIndex,
+    dealRecords, requestedMonths, responseRange, endMonthIndex, outlook,
   };
 }
 
@@ -2979,7 +2924,9 @@ function renderMarketEmpty() {
   $('#transactionTitle').textContent = '최근 개별 거래';
   $('#marketTrendTitle').textContent = '월별 평균 실거래가격';
   $('#regionComparisonTitle').textContent = '선택 단지 면적별 평균';
-  $('#forecastTitle').textContent = '6개월 평균 평당가 참고 전망';
+  $('#forecastTitle').textContent = '실제 가격과 참고 전망';
+  $('#forecastReference').hidden = true;
+  $('#forecastReference').replaceChildren();
   const chip = $('#marketSourceChip');
   chip.classList.remove('official');
   $('strong', chip).textContent = '실제 단지를 검색해 주세요';
@@ -3076,16 +3023,48 @@ function renderMarket() {
   }
   renderTrendChart(series, unit, context.summary.provisionalMonths);
   if (!isComplex) renderRegionRanking(context.summary, context.dealType, context.band);
-  const forecast = state.complexMeta?.partial && isComplex
-    ? { eligible: false, reasons: ['일부 월의 거래를 받지 못해 예상가격 계산을 보류했습니다.'], observations: series.length, transactionCount: context.records.length, staleMonths: null }
-    : fitDampedForecast(series, isComplex ? {
-      windowMonths: Math.min(60, context.responseRange.months), minMonthlyCount: 1, minObservations: 12,
-      minSpanMonths: 18, minTransactions: 20, maxStaleMonths: 4, asOfMonthIndex: context.endMonthIndex,
-    } : {});
+  const outlookSeries = isComplex ? context.outlook.series : series;
+  const forecast = fitPriceOutlook(outlookSeries, isComplex ? {
+    windowMonths: 60, minMonthlyCount: 1, minObservations: 12,
+    minSpanMonths: 18, minTransactions: 20, maxStaleMonths: 4,
+    asOfMonthIndex: historyMonthIndex(seoulCurrentMonth()),
+  } : {});
+  if (isComplex && (state.complexMeta.partial || state.complexMeta.demo)) {
+    forecast.eligible = false;
+    forecast.points = [];
+    forecast.reasons = [state.complexMeta.demo
+      ? '화면 동작 예시 자료로 미래 가격을 계산하지 않습니다.'
+      : '일부 월의 자료를 받지 못했습니다. 받은 거래가격은 표시하고, 전망은 누락 자료 확인 후 계산합니다.'];
+  }
+  $('#forecastTitle').textContent = forecast.eligible
+    ? `${isComplex ? formatAreaPair(context.area) + ' · ' : ''}${forecast.points.at(-1).month} 참고 전망`
+    : `${isComplex ? formatAreaPair(context.area) + ' · ' : ''}실제 가격과 전망 조건`;
   renderForecastChart(series, forecast, isComplex ? context.area : null);
-  renderForecastExplain(forecast, contextName, isComplex ? context.area : null);
+  renderMarketForecastPanel($('#forecastExplain'), $('#forecastReference'), {
+    forecast, contextLabel: contextName, areaM2: isComplex ? context.area : null,
+    reference: isComplex && !state.complexMeta.demo ? context.outlook.reference : null,
+    trainingRange: isComplex ? context.outlook.trainingRange : null,
+    partial: isComplex && state.complexMeta.partial === true,
+    loading: isComplex && Boolean(state.complexLoadingStage),
+    onLoadHistory: isComplex && !state.complexMeta.demo ? loadForecastHistory : null,
+    onShowTrend: () => setMarketPanel('trend', { focus: true }), setEvidenceValue,
+  });
   if (isComplex) renderTransactionRecords(context.records);
   else renderTransactions(context.summary, context.regionCode, context.dealType, context.band);
+}
+
+async function loadForecastHistory() {
+  const meta = state.complexMeta;
+  if (!meta || state.complexLoadingStage) return;
+  const areaM2 = Number($('#complexAreaBand').value);
+  if (areaM2 > 0) state.pendingComplexPreference = { dealType: $('#complexDealType').value, areaM2 };
+  const candidate = meta.catalogCandidate || {
+    name: meta.query, address: meta.address, regionCode: meta.region?.code || '',
+    aptSeq: meta.aptSeq || '', dong: meta.dong || '',
+  };
+  state.complexHistoryMonths = 60;
+  $('#complexHistoryMonths').value = '60';
+  await searchComplexMarket(null, candidate, { panel: 'forecast' });
 }
 
 async function importMarketCsv(file) {
@@ -3973,7 +3952,7 @@ function showComplexCandidates(candidates, region) {
   element.appendChild(list);
 }
 
-async function searchComplexMarket(event, candidate = null) {
+async function searchComplexMarket(event, candidate = null, { panel = 'summary' } = {}) {
   event?.preventDefault?.();
   window.clearTimeout(complexSuggestionTimer);
   complexSuggestionTimer = null;
@@ -3989,6 +3968,7 @@ async function searchComplexMarket(event, candidate = null) {
   try {
   destroyChart('complex');
   beginComplexLoading(query, candidate);
+  if (panel !== 'summary') setMarketPanel(panel);
   setComplexStatus({ tone: 'loading', icon: '↻', title: '서울·경기 공식 단지에서 찾는 중', message: '지역을 몰라도 단지명과 주소를 함께 비교해 가장 가까운 후보를 찾습니다.' });
 
   if (!candidate) {
@@ -4434,6 +4414,20 @@ function populateComplexAreas() {
     const area = (Math.round(Number(record.areaM2) * 10) / 10).toFixed(1);
     counts.set(area, (counts.get(area) || 0) + 1);
   });
+  // Narrowing the visible chart must not switch its selected apartment size
+  // when the separately retained, validated history still contains that size.
+  const loadedRange = historyRangeFromPayload(state.complexMeta?.loadedHistoryRange || state.complexMeta);
+  if (current && Number(current) > 0 && !counts.has(current) && loadedRange) {
+    const loadedStart = historyMonthIndex(loadedRange.rangeStart);
+    const loadedEnd = Math.min(historyMonthIndex(loadedRange.rangeEnd), historyMonthIndex(seoulCurrentMonth()));
+    const hasEarlierTrade = state.complexRecords.some((record) => {
+      const index = historyMonthIndex(record.month);
+      return record.dealType === dealType
+        && (Math.round(Number(record.areaM2) * 10) / 10).toFixed(1) === current
+        && index >= loadedStart && index <= loadedEnd && index < startMonthIndex;
+    });
+    if (hasEarlierTrade) counts.set(current, 0);
+  }
   const areas = [...counts.entries()].sort((a, b) => Number(a[0]) - Number(b[0]));
   if (!areas.length) {
     const option = createElement('option', '', `${dealType} 거래 없음`);
@@ -4442,7 +4436,7 @@ function populateComplexAreas() {
     return;
   }
   select.replaceChildren(...areas.map(([area, count]) => {
-    const option = createElement('option', '', `${formatAreaPair(area)} · ${count}건`);
+    const option = createElement('option', '', `${formatAreaPair(area)} · ${count ? `${count}건` : '선택 기간 0건 · 이전 거래 있음'}`);
     option.value = area;
     return option;
   }));
@@ -8959,7 +8953,7 @@ function bindEvents() {
       populateComplexAreas();
       applyPendingComplexPreference();
       renderComplexHistory();
-      setComplexStatus({ tone: 'success', title: `${historyPeriodLabel(state.complexHistoryMonths)}로 바꿨어요`, message: '이미 확인한 자료에서 요약·가격 흐름·예측·최근 거래를 함께 다시 계산했습니다.' });
+      setComplexStatus({ tone: 'success', title: `${historyPeriodLabel(state.complexHistoryMonths)}로 바꿨어요`, message: '요약·가격 흐름·최근 거래의 조회기간을 바꿨습니다. 전망은 이미 받은 최대 5년 자료를 유지합니다.' });
       renderHistoryQueryDetails({ note: `${state.complexMeta.rangeStart}–${state.complexMeta.rangeEnd} 자료 · ${meta.sourceLabel} · 추가 조회 없이 기간 변경` });
       return;
     }
