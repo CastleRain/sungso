@@ -17,8 +17,10 @@ function database() {
   let queue = Promise.resolve();
   let largestDocument = 0;
   const hooks = { afterGet: null, failArchiveWrites: false };
+  const calls = { reads: [], writes: [], transactionWrites: [] };
   const snapshot = (ref) => ({ exists: documents.has(ref.path), data: () => structuredClone(documents.get(ref.path)) });
   const reference = (path) => ({ path, get: async () => {
+    calls.reads.push(path);
     const value = snapshot({ path });
     if (hooks.afterGet) await hooks.afterGet(path, value);
     return value;
@@ -32,18 +34,22 @@ function database() {
       return { docs };
     } }) }) });
   return {
-    documents, collection, hooks, get largestDocument() { return largestDocument; },
+    documents, collection, hooks, calls, get largestDocument() { return largestDocument; },
     runTransaction(action) {
       const pending = queue.then(async () => {
         const writes = [];
         const result = await action({
-          get: async (ref) => snapshot(ref),
+          get: async (ref) => { calls.reads.push(ref.path); return snapshot(ref); },
           set: (ref, value) => {
             if (hooks.failArchiveWrites && value.archive) throw new Error('private database write failure');
             writes.push([ref.path, structuredClone(value)]);
           },
         });
+        const transactionBytes = writes.reduce((total, [path, value]) => total + Buffer.byteLength(path) + Buffer.byteLength(JSON.stringify(value)), 0);
+        assert.ok(transactionBytes < 10 * 1024 * 1024, `Firestore transaction too large: ${transactionBytes}`);
+        calls.transactionWrites.push({ bytes: transactionBytes, paths: writes.map(([path]) => path) });
         for (const [path, value] of writes) {
+          calls.writes.push(path);
           const bytes = Buffer.byteLength(JSON.stringify(value));
           assert.ok(bytes < 1024 * 1024, `Firestore document too large: ${path} (${bytes})`);
           largestDocument = Math.max(largestDocument, bytes);
@@ -666,4 +672,62 @@ test('a newer retry archive survives an old pending archive writer even when tim
   const saved = (await env.service.recent(owner)).job;
   assert.deepEqual(saved.results, refreshed.results);
   assert.equal(saved.partial, false);
+});
+
+test('cached month progress uses a bounded number of durable job reads and writes', async context => {
+  const env = setup({ loadCatalog: async () => ({ apartments: [apartment('41135'), apartment('41465'), apartment('41463')] }) });
+  const created = await env.service.create({ ...filters, months: 3 }, owner);
+  env.db.calls.reads.length = 0;
+  env.db.calls.writes.length = 0;
+  const result = await env.service.advance(created.jobId, owner);
+  const reads = env.db.calls.reads.filter(path => path === `homehunt_jobs/${created.jobId}`).length;
+  const writes = env.db.calls.writes.filter(path => path === `homehunt_jobs/${created.jobId}`).length;
+  context.diagnostic(`8 cached months: ${reads} parent reads, ${writes} parent writes`);
+  assert.equal(result.status, 'running');
+  assert.equal(result.progress.completed, 8);
+  assert.equal(env.calls.length, 8);
+  assert.ok(reads <= 13, 'two-month checkpoints eliminate the previous 25 parent reads');
+  assert.ok(writes <= 6, 'two-month checkpoints eliminate the previous 10 parent writes');
+});
+
+test('an oversized later month preserves the successful earlier month of its checkpoint pair', async () => {
+  const noise = randomBytes(5 * 1024 * 1024).toString('base64');
+  const env = setup({ loadMonth: async task => {
+    const result = month(task);
+    if (task.dealYmd === '202608') result.records[0].sourceNote = noise;
+    return result;
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  const result = await env.service.advance(created.jobId, owner);
+  assert.equal(result.status, 'error');
+  assert.equal(result.code, 'JOB_DATA_TOO_LARGE');
+  const persisted = env.db.documents.get(`homehunt_jobs/${created.jobId}`);
+  assert.equal(persisted.completed, 1);
+  assert.equal(persisted.tasks[0].status, 'done');
+  assert.equal(persisted.tasks[1].status, 'pending');
+  assert.ok([...env.db.documents.keys()].some(path => path.includes('/chunks/task_0_')));
+  assert.ok(![...env.db.documents.keys()].some(path => path.includes('/chunks/task_1_')));
+});
+
+test('two individually valid five-MiB month blobs use separate bounded transactions and remain resumable', async () => {
+  const noise = randomBytes(4 * 1024 * 1024).toString('base64');
+  const env = setup({ loadMonth: async task => {
+    const result = month(task);
+    result.records[0].sourceNote = noise;
+    return result;
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  const completed = await env.service.advance(created.jobId, owner);
+  assert.equal(completed.status, 'complete');
+  assert.equal(completed.progress.completed, 2);
+  assert.equal(completed.results[0].bestArea.count, 2);
+  const transactions = env.db.calls.transactionWrites.filter(entry => entry.paths.some(path => /\/chunks\/task_/.test(path)));
+  assert.equal(transactions.length, 2, 'combined blobs exceed Firestore limits and must not share a transaction');
+  for (const transaction of transactions) {
+    assert.ok(transaction.bytes > 5 * 1024 * 1024, 'fixture exercises large but individually valid blobs');
+    assert.ok(transaction.bytes < 8 * 1024 * 1024, 'retain headroom under the ten-MiB Firestore cap');
+    const tasks = new Set(transaction.paths.flatMap(path => /\/chunks\/task_(\d+)_/.exec(path)?.[1] || []));
+    assert.equal(tasks.size, 1);
+  }
+  assert.deepEqual((await env.restart().get(created.jobId, partner)).results, completed.results);
 });

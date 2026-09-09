@@ -584,18 +584,41 @@ export const SUPPLY_QUICK_FILTER_LABELS = Object.freeze({
   newlywed: '신혼 대상 확인',
 });
 
-// Summary cards replace only the status constraint. Region, search, property
-// preferences and favorites remain in scope, so each count is its click result.
+// The general application window must not keep an expired newlywed special
+// application open. Missing applicant-specific dates remain unknown.
+export function newlywedApplicationContext(notice, now = new Date()) {
+  const today = kstDateKey(now);
+  const all = (Array.isArray(notice?.schedules) ? notice.schedules : []).filter((schedule) => schedule.kind === 'application')
+    .map((schedule) => ({ ...schedule, startDate: normalizeSupplyDate(schedule.startDate), endDate: normalizeSupplyDate(schedule.endDate || schedule.startDate) }))
+    .filter((schedule) => schedule.startDate || schedule.endDate);
+  const specific = all.filter((schedule) => /^(?:newlywed|nwwds)(?:-|$)/.test(text(schedule.audience).toLowerCase()) || /신혼/.test(text(schedule.label)));
+  const special = all.filter((schedule) => /^special(?:-|$)/.test(text(schedule.audience).toLowerCase()) || /특별공급/.test(text(schedule.label)));
+  const townSchedules = all.length ? all : applicationWindows(notice).map((window) => ({ ...window, kind: 'application', label: '신혼희망타운 접수' }));
+  const schedules = specific.length ? specific : notice?.program === 'newlywed-town' ? townSchedules : special;
+  if (['closed', 'cancelled'].includes(text(notice?.status).toLowerCase())) return { status: 'closed', schedules };
+  if (schedules.length) return { status: supplyStatusAtKst({ schedules }, now), schedules };
+  const noticeEnd = normalizeSupplyDate(notice?.closeDate || notice?.schedule?.noticeCloseDate);
+  const status = supplyStatusAtKst(notice, now) === 'closed' || (noticeEnd && noticeEnd < today) ? 'closed' : 'unknown';
+  return { status, schedules: [] };
+}
+
+// Region, search, property preferences and favorites remain in scope. Newlywed
+// cards also keep the chosen status, with closed notices excluded by default.
 export function buildSupplyQuickFilterView(notices = [], preferences = {}, options = {}) {
   const now = options.now || new Date();
   const quickFilter = Object.hasOwn(SUPPLY_QUICK_FILTER_LABELS, options.quickFilter || '') ? options.quickFilter : '';
   const scope = filterSupplyNotices(notices, { ...preferences, statuses: [], excludeClosed: false, unreadOnly: false }, now);
   const unreadIds = new Set(normalizedList(options.unreadIds));
+  const newlywedStatuses = normalizedList(preferences.statuses);
   const groups = {
     new: scope.filter((notice) => unreadIds.has(notice.id.toLowerCase())),
     open: scope.filter((notice) => supplyStatusAtKst(notice, now) === 'open'),
     soon: scope.filter((notice) => startsWithin7Days(notice, now)),
-    newlywed: scope.filter((notice) => notice.newlywedSupplyAvailable === true || notice.program === 'newlywed-town'),
+    newlywed: scope.filter((notice) => {
+      if (notice.newlywedSupplyAvailable !== true && notice.program !== 'newlywed-town') return false;
+      const { status } = newlywedApplicationContext(notice, now);
+      return newlywedStatuses.length ? newlywedStatuses.includes(status) : preferences.excludeClosed === false || status !== 'closed';
+    }),
   };
   return {
     quickFilter,

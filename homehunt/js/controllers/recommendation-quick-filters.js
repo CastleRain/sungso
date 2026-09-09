@@ -343,7 +343,7 @@ export function createRecommendationQuickFilters({ getValues, applyValues, openF
     const error = node('p', 'rqf-error');
     error.setAttribute('role', 'alert');
     error.hidden = true;
-    const busy = node('p', 'rqf-busy', '조회가 끝나면 조건을 적용할 수 있습니다.');
+    const busy = node('p', 'rqf-busy', '조건을 적용하고 있어요. 잠시만 기다려주세요.');
     busy.setAttribute('role', 'status');
     busy.hidden = true;
     const footer = node('footer', 'rqf-footer');

@@ -22,6 +22,9 @@ export const RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MONTH_TIMEOUT_MS = 40 * 1000;
 const CHUNK_BYTES = 400 * 1024;
 const MAX_ENCODED_BYTES = 6 * 1024 * 1024;
+// Firestore caps a transaction at 10 MiB. Leave room beyond the encoded chunk
+// data for the job document (up to 700 KiB), field/index and protocol overhead.
+const MAX_CHECKPOINT_ENCODED_BYTES = 7 * 1024 * 1024;
 const MAX_BLOB_BYTES = 32 * 1024 * 1024;
 const MAX_RESULT_BYTES = 24 * 1024 * 1024;
 const MAX_JOB_RECORD_BYTES = 64 * 1024 * 1024;
@@ -447,42 +450,73 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     }
   }
 
-  async function checkpoint(ref, context, lease, index, outcome) {
+  async function checkpoint(ref, context, lease, entries) {
     // Only the fetched public records are persisted; provider exceptions can
     // contain URLs/keys, so store a fixed failure category instead of messages.
-    const before = authorize(await ref.get(), context);
-    if (!ownsLease(before, lease)) return false;
-    const task = before.tasks[index];
-    const failure = recommendationMonthFailure(outcome, task);
-    const evidence = recommendationMonthEvidence(outcome, task);
-    const blob = evidence.status === 'missing' ? null : encodeBlob(`task_${index}_${task.attempts + 1}_${lease.fence}`, evidence.records);
-    return db.runTransaction(async (transaction) => {
-      const job = authorize(await transaction.get(ref), context);
-      if (!ownsLease(job, lease)) return false;
-      const current = job.tasks[index];
-      if (current.attempts !== task.attempts || !['pending', 'retry'].includes(current.status)) return false;
-      const retry = current.status === 'retry';
-      const updated = { ...current, attempts: current.attempts + 1, status: failure ? retry ? 'failed' : 'retry' : 'done' };
-      if (blob) {
-        updated.blob = blob.meta;
-        updated.evidenceStatus = evidence.status;
-        updated.sourceUpdatedAt = evidence.sourceUpdatedAt;
+    // Both already-fetched months share one atomic checkpoint. This avoids
+    // rereading and rewriting the entire job independently for every month.
+    // If preparing a later blob fails, preserve the earlier successful prefix.
+    const prepared = [];
+    let preparationError;
+    for (const { index, task, outcome } of entries) {
+      try {
+        const failure = recommendationMonthFailure(outcome, task);
+        const evidence = recommendationMonthEvidence(outcome, task);
+        const blob = evidence.status === 'missing' ? null : encodeBlob(`task_${index}_${task.attempts + 1}_${lease.fence}`, evidence.records);
+        prepared.push({ index, task, failure, evidence, blob });
+      } catch (error) { preparationError = error; break; }
+    }
+    if (!prepared.length) throw preparationError;
+    const groups = [];
+    for (const entry of prepared) {
+      const bytes = entry.blob?.chunks.reduce((total, data) => total + Buffer.byteLength(data), 0) || 0;
+      let group = groups.at(-1);
+      if (!group || group.bytes + bytes > MAX_CHECKPOINT_ENCODED_BYTES) {
+        group = { entries: [], bytes: 0 };
+        groups.push(group);
       }
-      if (failure && retry) updated.failure = safeFailure(failure);
-      if (!failure) delete updated.failure;
-      const tasks = job.tasks.map((item, taskIndex) => taskIndex === index ? updated : item);
-      const next = { ...job, tasks, completed: job.completed + (retry ? 0 : 1),
-        retryCompleted: job.retryCompleted + (retry ? 1 : 0),
-        retryTotal: job.retryTotal + (failure && !retry ? 1 : 0),
-        failures: tasks.filter((item) => item.status === 'failed' || item.status === 'retry' && item.failure).map((item) => item.failure),
-        stage: tasks.some((item) => item.status === 'pending') ? 'actual-prices' : 'retrying',
-        lease: { ...job.lease, until: new Date(clock() + RECOMMENDATION_JOB_LEASE_MS) },
-        updatedAt: new Date(clock()).toISOString() };
-      if (Buffer.byteLength(JSON.stringify(next)) > 700 * 1024) fail('JOB_DATA_TOO_LARGE', '검색 작업 자료가 너무 큽니다. 검색 범위를 줄여주세요.', 413);
-      if (blob) writeBlob(transaction, ref, blob, job.expiresAt);
-      transaction.set(ref, next);
-      return true;
-    });
+      group.entries.push(entry);
+      group.bytes += bytes;
+    }
+    // Large pairs fall back to individually fenced month commits. Small
+    // ordinary responses retain the lower read/write cost of a shared commit.
+    for (const group of groups) {
+      const committed = await db.runTransaction(async (transaction) => {
+        const job = authorize(await transaction.get(ref), context);
+        if (!ownsLease(job, lease)) return false;
+        const tasks = [...job.tasks];
+        let completed = job.completed, retryCompleted = job.retryCompleted, retryTotal = job.retryTotal;
+        for (const { index, task, failure, evidence, blob } of group.entries) {
+          const current = tasks[index];
+          if (current.attempts !== task.attempts || !['pending', 'retry'].includes(current.status)) return false;
+          const retry = current.status === 'retry';
+          const updated = { ...current, attempts: current.attempts + 1, status: failure ? retry ? 'failed' : 'retry' : 'done' };
+          if (blob) {
+            updated.blob = blob.meta;
+            updated.evidenceStatus = evidence.status;
+            updated.sourceUpdatedAt = evidence.sourceUpdatedAt;
+          }
+          if (failure && retry) updated.failure = safeFailure(failure);
+          if (!failure) delete updated.failure;
+          tasks[index] = updated;
+          completed += retry ? 0 : 1;
+          retryCompleted += retry ? 1 : 0;
+          retryTotal += failure && !retry ? 1 : 0;
+        }
+        const next = { ...job, tasks, completed, retryCompleted, retryTotal,
+          failures: tasks.filter((item) => item.status === 'failed' || item.status === 'retry' && item.failure).map((item) => item.failure),
+          stage: tasks.some((item) => item.status === 'pending') ? 'actual-prices' : 'retrying',
+          lease: { ...job.lease, until: new Date(clock() + RECOMMENDATION_JOB_LEASE_MS) },
+          updatedAt: new Date(clock()).toISOString() };
+        if (Buffer.byteLength(JSON.stringify(next)) > 700 * 1024) fail('JOB_DATA_TOO_LARGE', '검색 작업 자료가 너무 큽니다. 검색 범위를 줄여주세요.', 413);
+        for (const { blob } of group.entries) if (blob) writeBlob(transaction, ref, blob, job.expiresAt);
+        transaction.set(ref, next);
+        return true;
+      });
+      if (!committed) return false;
+    }
+    if (preparationError) throw preparationError;
+    return true;
   }
 
   async function finalize(ref, context, lease) {
@@ -529,11 +563,9 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
         if (!ownsLease(current, lease)) break;
         const group = indices.slice(start, start + RECOMMENDATION_JOB_CONCURRENCY);
         const outcomes = await Promise.all(group.map(index => loadTask(current.tasks[index])));
-        let active = true;
-        for (let index = 0; index < group.length; index++) {
-          if (!await checkpoint(ref, context, lease, group[index], outcomes[index])) { active = false; break; }
-        }
-        if (!active) break;
+        if (!await checkpoint(ref, context, lease, group.map((index, offset) => ({
+          index, task: current.tasks[index], outcome: outcomes[offset],
+        })))) break;
       }
       await finalize(ref, context, lease);
     } catch (error) {
