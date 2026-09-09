@@ -1,8 +1,8 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.16.0';
-import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.16.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.16.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.16.1';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.16.1';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.16.1';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.16.0';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.16.1';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
 import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
@@ -15,11 +15,11 @@ import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js
 import { mountCloudPanel } from './cloud-panel.js?v=4.13.1';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.16.0';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.16.1';
 import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.16.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.16.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.16.1';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.16.1';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -73,14 +73,14 @@ import {
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
   normalizeSupplyNotice, sortSupplyNotices, newlywedApplicationContext,
-} from './supply-core.mjs?v=4.16.0';
+} from './supply-core.mjs?v=4.16.1';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.16.0';
+} from './ui-format.js?v=4.16.1';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -598,7 +598,7 @@ function statusClass(status) {
 
 function naverLandUrl(name) {
   const cleaned = String(name || '').replace(/^예시\s*·\s*/, '').trim();
-  return `https://m.land.naver.com/search/result/${encodeURIComponent(cleaned)}`;
+  return `https://new.land.naver.com/search?sk=${encodeURIComponent(cleaned)}`;
 }
 
 let toastTimer;

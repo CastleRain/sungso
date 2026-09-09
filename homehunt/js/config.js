@@ -44,7 +44,7 @@ export const APP_CONFIG = Object.freeze({
   apartmentHistoryEnabled: Boolean(ACTIVE_MARKET_API),
   // UI and localhost API evolve independently. Keep appVersion as a backwards
   // compatible alias for code that still reads the API contract version.
-  uiVersion: '4.16.0',
+  uiVersion: '4.16.1',
   localApiContractVersion: '2.10.1',
   appVersion: '2.10.1',
 });

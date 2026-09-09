@@ -8,6 +8,30 @@ const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls)
 const button = (label, action, cls = 'dw-button') => { const b = el('button', cls, label); b.type = 'button'; b.addEventListener('click', action); return b; };
 const money = (n) => n == null ? '자료 없음' : formatPriceManwon(n);
 const address = (r) => r.address || (r.locations || []).map((l) => l.address).filter(Boolean).join(' / ') || [r.regionName, r.dong].filter(Boolean).join(' · ');
+function externalApartmentLinks(record) {
+  const name = String(record.name || '').replace(/^예시\s*·\s*/, '').trim();
+  const location = address(record).replace(/\s*·\s*/g, ' ').trim();
+  const mapQuery = [location, name && !location.includes(name) ? name : ''].filter(Boolean).join(' ');
+  if (!mapQuery) return null;
+  const links = el('nav', 'dw-external-links');
+  links.setAttribute('aria-label', '네이버에서 아파트 검색');
+  for (const [label, href] of [
+    ['네이버 지도', `https://map.naver.com/p/search/${encodeURIComponent(mapQuery)}`],
+    ['네이버 부동산', `https://new.land.naver.com/search?sk=${encodeURIComponent(name || location)}`],
+  ]) {
+    const link = el('a', 'dw-external-link', label);
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', `${label}에서 검색 (새 탭)`);
+    link.title = `${label}에서 ${name || location} 검색 · 새 탭`;
+    const arrow = el('span', '', '↗');
+    arrow.setAttribute('aria-hidden', 'true');
+    link.append(arrow);
+    links.append(link);
+  }
+  return links;
+}
 const KEY = 'homehunt_decision_keys_v1';
 export function createDecisionWorkspace(api) {
   const panel = document.querySelector('#recommendationResultPanel');
@@ -129,6 +153,7 @@ export function createDecisionWorkspace(api) {
       context.append(route);
     }
     intro.append(el('small', '', address(record)));
+    const externalLinks = kind === 'candidate' || kind === 'visit' ? externalApartmentLinks(record) : null;
     const financial = el('section', 'dw-finance-entry');
     financial.append(el('div', '', '자금 계획 · WeCost 연결 필요'), button('이 후보로 자금 계획 보기', async () => {
       try {
@@ -153,7 +178,7 @@ export function createDecisionWorkspace(api) {
         } catch { /* The existing evidence remains visible if enhancement fails. */ }
       },
     }) : null;
-    root.replaceChildren(intro, actions, ...(official ? [official] : []), context, financial, evidence);
+    root.replaceChildren(intro, ...(externalLinks ? [externalLinks] : []), actions, ...(official ? [official] : []), context, financial, evidence);
     try {
       const module = await import('./evidence-detail.js?v=4.9.0');
       if (!isCurrent()) return;

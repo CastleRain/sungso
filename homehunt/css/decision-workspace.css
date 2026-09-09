@@ -45,6 +45,10 @@
 .dw-detail-price { display:grid; gap:7px; }
 .dw-detail-price>strong { font-size:29px; color:#14335f; font-variant-numeric:tabular-nums; }
 .dw-detail-price>small { color:#65768b; font-size:12px; }
+.dw-external-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:16px; }
+.dw-external-link { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 8px; border:1px solid #b7dcca; border-radius:8px; background:#f1faf5; color:#12603f; font-size:13px; font-weight:700; text-decoration:none; }
+.dw-external-link:hover { background:#e2f5ea; border-color:#69b58a; color:#0b5032; }
+.dw-external-link>span { font-size:17px; line-height:1; }
 .dw-detail-actions { display:flex; flex-wrap:wrap; gap:7px; margin:20px 0; }
 .dw-route { padding:18px 0; border-top:1px solid #e2e8f1; }
 .dw-route p { color:#556b86; font-size:13px; line-height:1.6; margin:6px 0; }
