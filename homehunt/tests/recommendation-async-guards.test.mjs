@@ -73,6 +73,7 @@ function harness(functions) {
     },
   };
   vm.createContext(sandbox);
+  vm.runInContext(actualFunction('priceSearchSignature'), sandbox);
   functions.forEach(name => vm.runInContext(actualFunction(name), sandbox));
   return { state, sandbox, calls, $ };
 }

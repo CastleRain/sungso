@@ -91,7 +91,7 @@ test('every data/API route requires a verified bearer token before any provider 
     ['/api/health', 'GET'], ['/api/commute/quota', 'GET'], ['/api/commute', 'POST'], ['/api/commute/batch', 'POST'],
     ['/api/place-search?query=test', 'GET'], ['/api/apartment-history', 'GET'], ['/api/recommendations', 'POST'],
     ['/api/kapt/complex?catalogId=fixture', 'GET'],
-    ['/api/recommendations/known-job', 'GET'], ['/api/recommendations/known-job/advance', 'POST'],
+    ['/api/recommendations/recent', 'GET'], ['/api/recommendations/known-job', 'GET'], ['/api/recommendations/known-job/advance', 'POST'],
     ['/api/recommendations/known-job/retry', 'POST'],
     ['/api/recommendations/known-job', 'DELETE'], ['/api/household/snapshot', 'GET'], ['/api/household/snapshot', 'PUT'],
   ];
@@ -293,12 +293,26 @@ test('transactional household rate limit allows only three simultaneous price jo
   assert.equal(responses.filter((response) => response.statusCode === 202).length, 3);
   assert.equal(responses.filter((response) => response.statusCode === 429 && response.body.code === 'REQUEST_LIMIT').length, 3);
   const jobs = [...env.db.documents.entries()].filter(([path]) => /^homehunt_jobs\/[^/]+$/.test(path));
-  assert.equal(jobs.length, 3);
+  assert.equal(jobs.length, 1, 'identical admitted requests reuse one household price job');
   const rateRows = [...env.db.documents.entries()].filter(([path]) => path.startsWith('homehunt_request_limits/'));
   assert.equal(rateRows.length, 1);
   assert.equal(rateRows[0][1].used, 3);
   env.advanceTime(60000);
   assert.equal((await env.request('/api/recommendations', { method: 'POST', body: priceFilters })).statusCode, 202);
+});
+
+test('recent search dispatch uses verified account identity and never starts a price provider request', async () => {
+  const env = setup();
+  const created = await env.request('/api/recommendations', { method: 'POST', body: priceFilters });
+  const mine = await env.request('/api/recommendations/recent?uid=partner-id&householdId=family-b');
+  assert.equal(mine.statusCode, 200);
+  assert.equal(mine.body.job.jobId, created.body.jobId);
+  assert.equal(mine.body.job.advanceRequired, true);
+  for (const token of ['partner-token', 'stranger-token']) {
+    const other = await env.request('/api/recommendations/recent?uid=owner-id', { token });
+    assert.deepEqual(other.body, { ok: true, job: null });
+  }
+  assert.equal(env.calls.length, 0);
 });
 
 test('official facility GET is authenticated, dispatched with catalog identity, and not a client mutation route', async () => {

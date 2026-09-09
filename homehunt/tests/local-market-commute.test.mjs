@@ -88,7 +88,7 @@ test('local commute server exposes v2 quota, compatible single lookup, and dedup
 
     const health = await requestJson(baseUrl, '/api/health');
     assert.equal(health.status, 200);
-    assert.equal(health.body.version, '2.9.0');
+    assert.equal(health.body.version, '2.10.0');
     assert.deepEqual(health.body.commute.diagnostics, {
       transit: { kakao: null, tmap: null },
       car: null,

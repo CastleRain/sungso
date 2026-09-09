@@ -46,6 +46,11 @@ function refineHarness(overrides = {}) {
     isGeoPoint: validPoint, refreshRecommendationMapLayers: async () => {},
     candidateLocations: { enrichExactCandidates: async (rows) => ({ candidates: rows.map(located), cancelled: false }) },
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   vm.runInContext(actualFunction('refineCandidateLocations'), sandbox);
   return { state, sandbox };
@@ -137,6 +142,11 @@ test('an older map refresh cannot restore another region after a layer change, a
     candidateRegionGroups: () => [], sortedRecommendationResults: () => [], selectRecommendationRegion() {},
     activeRecommendationDestinations: () => [],
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   vm.runInContext(actualFunction('refreshRecommendationMapLayers'), sandbox);
   const older = sandbox.refreshRecommendationMapLayers({ fit: true, candidateOverride: [state.recommendationResults[0]] });
@@ -168,6 +178,11 @@ test('district reference completion preserves newer apartment coordinates, route
     refreshRecommendationMapLayers: async () => {}, refineCandidateLocations: async () => {},
     hideRecommendationMapStatus() {}, fetchCommuteQuota() {},
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   vm.runInContext(actualFunction('enrichRecommendationMapAndCommute'), sandbox);
   const pending = sandbox.enrichRecommendationMapAndCommute({});
@@ -252,6 +267,11 @@ test('without workplaces, price search and location enrichment use Gangnam at 10
       return { lat: address.includes('가까운') ? 37.5 : 37.2, lng: 127 };
     } }),
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   for (const name of ['boundedNumber', 'readRecommendationForm', 'activeRecommendationDestinations',
     'recommendationVerificationStatus', 'candidateCommuteDecision',

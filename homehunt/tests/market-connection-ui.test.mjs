@@ -41,7 +41,7 @@ function harness({ summary = emptySummary, history = emptyHistory, local = false
   const state = { marketSummary: null, staticApartmentHistoryMeta: null, placeSearchConfigured: true };
   const sandbox = { state, $, validateMarketSummary, cloudSessionErrorMessage,
     APP_CONFIG: { localMarketEnabled: local || cloud, isLocalRuntime: !cloud, apartmentHistoryEnabled: enabled,
-      localApiContractVersion: '2.9.0',
+      localApiContractVersion: '2.10.0',
       marketSummaryUrl: 'fixture:summary', apartmentHistoryStaticUrl: 'fixture:history' },
     loadImportedMarket: async () => null, populateMarketRegions() {}, renderMarket() {}, updateCompanySearchCapability() {},
     fetch: async (url, options) => {
@@ -186,7 +186,7 @@ test('온라인은 로그인 필요와 실제 서버 연결을 구분하고 없�
   assert.match($('#localMarketServerCheck').textContent, /Google 로그인/);
   assert.equal($('#commuteState').textContent, '로그인 필요');
   assert.equal(state.localMarketConnected, false);
-  sandbox.updateLocalConnectionUi({ ok: true, runtime: 'render', version: '2.9.0', keyConfigured: true,
+  sandbox.updateLocalConnectionUi({ ok: true, runtime: 'render', version: '2.10.0', keyConfigured: true,
     keySource: 'server-environment', catalogCount: 1000, limits: { historyMonthsMax: 60 },
     commute: { transitConfigured: true, transitProvider: 'kakao', providers: { kakaoTransitConfigured: true } },
     placeSearch: { configured: true } });
@@ -204,7 +204,7 @@ test('온라인은 로그인 필요와 실제 서버 연결을 구분하고 없�
 
 test('로컬의 제공된 캐시 건수는 유지하고 온라인 연결 실패는 서버 미배포로 오인하지 않는다', () => {
   const local = harness({ local: true });
-  local.sandbox.updateLocalConnectionUi({ ok: true, version: '2.9.0', keyConfigured: true,
+  local.sandbox.updateLocalConnectionUi({ ok: true, version: '2.10.0', keyConfigured: true,
     keySource: 'environment', cache: { months: 22 } });
   assert.match(local.$('#localMarketServerCheck').textContent, /로컬 서버 정상/);
   assert.match(local.$('#apartmentHistoryApiCheck').textContent, /\.env\/환경변수 자동 연결.*월 캐시 22개/);

@@ -17,6 +17,8 @@ export const RECOMMENDATION_JOB_TTL_MS = 24 * 60 * 60 * 1000;
 // The final chunk reads/aggregation therefore have a fresh six-minute lease.
 export const RECOMMENDATION_JOB_LEASE_MS = 6 * 60 * 1000;
 export const RECOMMENDATION_JOB_BATCH_SIZE = 8;
+export const RECOMMENDATION_JOB_CONCURRENCY = 2;
+export const RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MONTH_TIMEOUT_MS = 40 * 1000;
 const CHUNK_BYTES = 400 * 1024;
 const MAX_ENCODED_BYTES = 6 * 1024 * 1024;
@@ -73,7 +75,19 @@ function cleanFilters(raw, year) {
   }
   const normalized = normalizeRecommendationFilters(input, year);
   if (normalized.areaBasis === 'supply') fail('INVALID_RECOMMENDATION', '공급면적은 실거래로 판정할 수 없습니다. 전용면적을 선택해주세요.', 400);
-  return Object.fromEntries(PRICE_FIELDS.map((key) => [key, normalized[key]]));
+  const filters = Object.fromEntries(PRICE_FIELDS.map((key) => [key, normalized[key]]));
+  if (raw.districtCodes !== undefined) {
+    if (!Array.isArray(raw.districtCodes) || raw.districtCodes.length > 100
+      || raw.districtCodes.some(code => typeof code !== 'string' || !/^(11|41)\d{3}$/.test(code))) {
+      fail('INVALID_RECOMMENDATION', '검색할 서울·경기 시군구를 확인해주세요.', 400);
+    }
+    if (raw.districtCodes.length) filters.districtCodes = [...new Set(raw.districtCodes)];
+  }
+  return filters;
+}
+
+function lookupId(kind, value) {
+  return `${kind}_${createHash('sha256').update(JSON.stringify(value)).digest('hex')}`;
 }
 
 function searchMonths(count, time) {
@@ -104,13 +118,13 @@ function writeBlob(transaction, ref, blob, expiresAt) {
   });
 }
 
-async function readBlob(ref, meta, limit = MAX_BLOB_BYTES) {
+async function readBlob(ref, meta, limit = MAX_BLOB_BYTES, read = reference => reference.get()) {
   if (!meta || meta.encoding !== 'gzip-json-v1' || !/^[a-zA-Z0-9_-]+$/.test(meta.id || '')
     || !Number.isInteger(meta.chunks) || meta.chunks < 1 || meta.chunks > Math.ceil(MAX_ENCODED_BYTES / CHUNK_BYTES)
     || !Number.isInteger(meta.rawBytes) || meta.rawBytes < 0 || meta.rawBytes > limit) {
     fail('JOB_DATA_INVALID', '저장된 검색 자료를 확인할 수 없습니다. 다시 검색해주세요.', 500);
   }
-  const snapshots = await Promise.all(Array.from({ length: meta.chunks }, (_, index) => ref.collection('chunks').doc(`${meta.id}_${index}`).get()));
+  const snapshots = await Promise.all(Array.from({ length: meta.chunks }, (_, index) => read(ref.collection('chunks').doc(`${meta.id}_${index}`))));
   if (snapshots.some((snapshot) => !snapshot.exists)) fail('JOB_DATA_INVALID', '저장된 검색 자료 일부가 없습니다. 다시 검색해주세요.', 500);
   const encoded = snapshots.map((snapshot) => String(snapshot.data()?.data || '')).join('');
   if (Buffer.byteLength(encoded) > MAX_ENCODED_BYTES) fail('JOB_DATA_INVALID', '저장된 검색 자료의 크기가 올바르지 않습니다.', 500);
@@ -189,6 +203,8 @@ function publicJob(job, results = [], pendingPriceCandidates = []) {
 export function createRecommendationJobService({ db, loadCatalog, loadMonth, now = Date.now, idFactory = randomUUID } = {}) {
   if (!db?.runTransaction || typeof loadCatalog !== 'function' || typeof loadMonth !== 'function') throw new TypeError('db, loadCatalog and loadMonth are required');
   const clock = () => epoch(now());
+  const lookupRef = id => db.collection('homehunt_job_lookups').doc(id);
+  const recentRef = identity => lookupRef(lookupId('recent', [identity.householdId, identity.uid]));
   const refFor = (id) => {
     if (!/^[a-zA-Z0-9_-]{1,128}$/.test(String(id || ''))) fail('JOB_NOT_FOUND', '추천 작업을 찾지 못했습니다.', 404);
     return db.collection('homehunt_jobs').doc(id);
@@ -204,22 +220,153 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
   };
   const ownsLease = (job, lease) => job.status === 'running' && job.lease?.token === lease.token
     && job.fence === lease.fence && epoch(job.lease.until) > clock() && epoch(job.expiresAt) > clock();
-  const reply = async (ref, job) => publicJob(job,
-    job.resultBlob ? await readBlob(ref, job.resultBlob, MAX_RESULT_BYTES) : [],
-    job.pendingBlob ? await readBlob(ref, job.pendingBlob, MAX_RESULT_BYTES) : []);
+  const reply = async (ref, job) => {
+    const [results, pending] = await Promise.all([
+      job.resultBlob ? readBlob(ref, job.resultBlob, MAX_RESULT_BYTES) : [],
+      job.pendingBlob ? readBlob(ref, job.pendingBlob, MAX_RESULT_BYTES) : [],
+    ]);
+    return publicJob(job, results, pending);
+  };
   const read = async (id, context) => {
     const ref = refFor(id);
     return { ref, job: authorize(await ref.get(), context) };
   };
+
+  // A latest-result archive contains only the already-public price response.
+  // Raw monthly copies expire with their job after one day; one compact archive
+  // per account survives seven days without extending price freshness.
+  async function archiveRecent(job, result, context) {
+    if (job.status !== 'complete') return;
+    const identity = contextIdentity(context);
+    const ref = recentRef(identity);
+    const previous = (await ref.get()).data();
+    const version = `${job.fence}:${job.resultBlob?.id || 'empty'}:${job.pendingBlob?.id || 'empty'}`;
+    if (previous?.jobId !== job.id || previous.archiveVersion === version
+      || previous.archiveFence > job.fence) return;
+    const results = encodeBlob('latest_results', result.results, MAX_RESULT_BYTES);
+    const pending = encodeBlob('latest_pending', result.pendingPriceCandidates, MAX_RESULT_BYTES);
+    const expiresAt = new Date(epoch(job.updatedAt) + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS);
+    const { results: ignoredResults, pendingPriceCandidates: ignoredPending, ...summary } = result;
+    await db.runTransaction(async transaction => {
+      const latest = (await transaction.get(ref)).data();
+      if (latest?.jobId !== job.id || latest.archiveVersion === version || latest.archiveFence > job.fence) return;
+      const current = (await transaction.get(refFor(job.id))).data();
+      if (current?.status !== 'complete' || current.fence !== job.fence
+        || current.resultBlob?.id !== job.resultBlob?.id || current.pendingBlob?.id !== job.pendingBlob?.id) return;
+      writeBlob(transaction, ref, results, expiresAt);
+      writeBlob(transaction, ref, pending, expiresAt);
+      transaction.set(ref, { ...latest, expiresAt, archiveUpdatedAt: job.updatedAt, archiveFence: job.fence, archiveVersion: version,
+        archive: summary, resultBlob: results.meta, pendingBlob: pending.meta });
+    });
+  }
+
+  async function preserveRecent(job, result, context) {
+    try { await archiveRecent(job, result, context); }
+    catch (_) {
+      // A failed optional seven-day archive must not hide successfully fetched
+      // prices. The durable 24-hour job remains available for another attempt.
+      return { ...result, archiveWarning: '가격 결과는 확인됐지만 7일 보관 갱신이 지연되었습니다. 다시 열면 저장을 재시도합니다.' };
+    }
+    return result;
+  }
+
+  async function recent(context) {
+    const identity = contextIdentity(context);
+    const ref = recentRef(identity);
+    let pointer = (await ref.get()).data();
+    if (!pointer) {
+      // Existing deployments wrote jobs before latest pointers existed. This
+      // one-time, account-scoped bounded migration needs no composite index.
+      const collection = db.collection('homehunt_jobs');
+      if (typeof collection.where === 'function') {
+        const legacy = await collection.where('uid', '==', identity.uid).limit(50).get();
+        const jobs = legacy.docs.map(snapshot => snapshot.data()).filter(job => job.uid === identity.uid
+          && job.householdId === identity.householdId && epoch(job.expiresAt) > clock()
+          && (['running', 'complete'].includes(job.status) || job.resultBlob));
+        jobs.sort((left, right) => epoch(right.startedAt) - epoch(left.startedAt));
+        const latest = jobs[0];
+        pointer = await db.runTransaction(async transaction => {
+          const existing = (await transaction.get(ref)).data();
+          if (existing) return existing;
+          const next = { schemaVersion: 1, ...identity, jobId: latest?.id || '',
+            expiresAt: new Date(clock() + (latest ? RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS : RECOMMENDATION_JOB_TTL_MS)),
+            legacyRecoveryLimited: legacy.docs.length === 50 };
+          transaction.set(ref, next);
+          return next;
+        });
+      }
+    }
+    if (!pointer || pointer.householdId !== identity.householdId || pointer.uid !== identity.uid
+      || !pointer.jobId || epoch(pointer.expiresAt) <= clock()) return { ok: true, job: null };
+    try {
+      const { ref: jobRef, job } = await read(pointer.jobId, context);
+      if (job.status === 'cancelled' && !job.resultBlob || job.status === 'error' && !job.resultBlob) return { ok: true, job: null };
+      const result = await preserveRecent(job, await reply(jobRef, job), context);
+      return { ok: true, job: { ...result, stale: false, resumable: true,
+        legacyRecoveryLimited: Boolean(pointer.legacyRecoveryLimited) } };
+    } catch (error) {
+      if (!['JOB_NOT_FOUND', 'JOB_EXPIRED'].includes(error?.code)) throw error;
+    }
+    // Read metadata and fixed bounded chunk IDs at one Firestore snapshot so a
+    // simultaneous archive replacement cannot mix old metadata with new bytes.
+    return db.runTransaction(async transaction => {
+      const current = (await transaction.get(ref)).data();
+      if (!current?.archive || !current.resultBlob || current.householdId !== identity.householdId
+        || current.uid !== identity.uid || epoch(current.expiresAt) <= clock()) return { ok: true, job: null };
+      const [results, pendingPriceCandidates] = await Promise.all([
+        readBlob(ref, current.resultBlob, MAX_RESULT_BYTES, reference => transaction.get(reference)),
+        current.pendingBlob ? readBlob(ref, current.pendingBlob, MAX_RESULT_BYTES, reference => transaction.get(reference)) : [],
+      ]);
+      return { ok: true, job: { ...current.archive, results, pendingPriceCandidates,
+        stale: true, resumable: false, advanceRequired: false,
+        retentionExpiresAt: new Date(epoch(current.expiresAt)).toISOString() } };
+    });
+  }
 
   async function create(rawFilters, context) {
     const identity = contextIdentity(context);
     const time = clock();
     const currentYear = new Date(time + 9 * 60 * 60 * 1000).getUTCFullYear();
     const filters = cleanFilters(rawFilters, currentYear);
+    const key = lookupId('query', [identity.householdId, searchMonths(1, time)[0],
+      { ...filters, ...(filters.districtCodes ? { districtCodes: [...filters.districtCodes].sort() } : {}),
+        regions: [...filters.regions].sort() }]);
+    const indexRef = lookupRef(key);
+    const accountRef = recentRef(identity);
+    const forceRefresh = rawFilters.refresh === true;
+    const reusable = value => value?.householdId === identity.householdId && epoch(value.expiresAt) > clock()
+      && ['running', 'complete'].includes(value.status);
+    const remember = (transaction, job, previous) => {
+      if (epoch(previous?.updatedAt) > time) return;
+      transaction.set(accountRef, { schemaVersion: 1, ...identity, jobId: job.id,
+        updatedAt: new Date(time).toISOString(), expiresAt: new Date(time + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS) });
+    };
+    if (!forceRefresh) {
+      const reused = await db.runTransaction(async transaction => {
+        const pointer = (await transaction.get(indexRef)).data();
+        if (!pointer || epoch(pointer.expiresAt) <= clock()) return null;
+        const job = (await transaction.get(refFor(pointer.jobId))).data();
+        if (!reusable(job)) return null;
+        const previous = (await transaction.get(accountRef)).data();
+        if (previous?.jobId !== job.id) remember(transaction, job, previous);
+        return job;
+      });
+      if (reused) {
+        const result = await preserveRecent(reused, await reply(refFor(reused.id), reused), context);
+        return { ...result, reused: true };
+      }
+    }
     const catalog = await loadCatalog();
-    const candidates = filterCatalogForRecommendation(Array.isArray(catalog) ? catalog : catalog?.apartments, filters, currentYear);
-    const districtCodes = [...new Set(candidates.map((item) => String(item.regionCode)))].sort();
+    const apartments = Array.isArray(catalog) ? catalog : catalog?.apartments;
+    if (filters.districtCodes) {
+      const permitted = new Set((apartments || []).filter(item => filters.regions.includes(String(item.regionCode).startsWith('11') ? 'seoul' : 'gyeonggi'))
+        .map(item => String(item.regionCode)));
+      if (filters.districtCodes.some(code => !permitted.has(code))) fail('INVALID_RECOMMENDATION', '선택한 지역에 속한 공식 시군구를 확인해주세요.', 400);
+    }
+    const candidates = filterCatalogForRecommendation(apartments, filters, currentYear)
+      .filter(item => !filters.districtCodes || filters.districtCodes.includes(String(item.regionCode)));
+    const availableCodes = new Set(candidates.map((item) => String(item.regionCode)));
+    const districtCodes = filters.districtCodes ? filters.districtCodes.filter(code => availableCodes.has(code)) : [...availableCodes].sort();
     if (districtCodes.some((code) => !/^(11|41)\d{3}$/.test(code))) fail('JOB_DATA_INVALID', '공식 검색 지역 자료를 확인해주세요.', 500);
     const tasks = districtCodes.flatMap((lawdCd) => searchMonths(filters.months, time).map((dealYmd) => ({ lawdCd, dealYmd, type: 'sale', status: 'pending', attempts: 0 })));
     if (tasks.length > MAX_TASKS) fail('JOB_DATA_TOO_LARGE', '검색 지역·기간 조건을 줄여주세요.', 413);
@@ -235,17 +382,30 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
       startedAt: new Date(time).toISOString(), updatedAt: new Date(time).toISOString(),
       expiresAt: new Date(time + RECOMMENDATION_JOB_TTL_MS), lease: null, fence: 0, error: '', errorCode: '',
     };
-    await db.runTransaction(async (transaction) => {
+    const saved = await db.runTransaction(async (transaction) => {
+      const pointer = !forceRefresh ? (await transaction.get(indexRef)).data() : null;
+      const existing = pointer && epoch(pointer.expiresAt) > clock()
+        ? (await transaction.get(refFor(pointer.jobId))).data() : null;
+      if (reusable(existing)) {
+        const previous = (await transaction.get(accountRef)).data();
+        if (previous?.jobId !== existing.id) remember(transaction, existing, previous);
+        return existing;
+      }
       if ((await transaction.get(ref)).exists) fail('JOB_ID_CONFLICT', '검색 작업을 다시 시작해주세요.', 409);
+      const previous = (await transaction.get(accountRef)).data();
       writeBlob(transaction, ref, catalogBlob, job.expiresAt);
       transaction.set(ref, job);
+      transaction.set(indexRef, { schemaVersion: 1, householdId: identity.householdId, jobId: id, expiresAt: job.expiresAt });
+      remember(transaction, job, previous);
+      return job;
     });
-    return publicJob(job);
+    const result = await preserveRecent(saved, await reply(refFor(saved.id), saved), context);
+    return { ...result, reused: saved.id !== id };
   }
 
   async function get(id, context) {
     const { ref, job } = await read(id, context);
-    return reply(ref, job);
+    return preserveRecent(job, await reply(ref, job), context);
   }
 
   async function acquire(ref, context) {
@@ -331,11 +491,12 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     const candidates = await readBlob(ref, job.catalogBlob);
     const records = [];
     let recordBytes = 0;
-    for (const task of job.tasks.filter((item) => item.status === 'done' || item.evidenceStatus === 'stale' && item.blob)) {
-      recordBytes += task.blob.rawBytes;
-      if (recordBytes > MAX_JOB_RECORD_BYTES) fail('JOB_DATA_TOO_LARGE', '검색 자료가 너무 큽니다. 지역·기간 조건을 줄여주세요.', 413);
-      const rows = await readBlob(ref, task.blob);
-      for (const row of rows) records.push(row);
+    const completeTasks = job.tasks.filter((item) => item.status === 'done' || item.evidenceStatus === 'stale' && item.blob);
+    for (const task of completeTasks) recordBytes += task.blob.rawBytes;
+    if (recordBytes > MAX_JOB_RECORD_BYTES) fail('JOB_DATA_TOO_LARGE', '검색 자료가 너무 큽니다. 지역·기간 조건을 줄여주세요.', 413);
+    for (let start = 0; start < completeTasks.length; start += 4) {
+      const batches = await Promise.all(completeTasks.slice(start, start + 4).map(task => readBlob(ref, task.blob)));
+      for (const rows of batches) for (const row of rows) records.push(row);
     }
     const analysis = buildRecommendationPriceResult(candidates, records, job.failures, job.tasks, job.filters,
       job.currentYear, job.tasks.filter((task) => task.evidenceStatus === 'stale' && task.blob));
@@ -363,11 +524,16 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
         .filter(({ task }) => task.status === 'pending' || task.status === 'retry')
         .sort((left, right) => left.task.attempts - right.task.attempts || left.index - right.index)
         .slice(0, RECOMMENDATION_JOB_BATCH_SIZE).map(({ index }) => index);
-      for (const index of indices) {
+      for (let start = 0; start < indices.length; start += RECOMMENDATION_JOB_CONCURRENCY) {
         const current = authorize(await ref.get(), context);
         if (!ownsLease(current, lease)) break;
-        const outcome = await loadTask(current.tasks[index]);
-        if (!await checkpoint(ref, context, lease, index, outcome)) break;
+        const group = indices.slice(start, start + RECOMMENDATION_JOB_CONCURRENCY);
+        const outcomes = await Promise.all(group.map(index => loadTask(current.tasks[index])));
+        let active = true;
+        for (let index = 0; index < group.length; index++) {
+          if (!await checkpoint(ref, context, lease, group[index], outcomes[index])) { active = false; break; }
+        }
+        if (!active) break;
       }
       await finalize(ref, context, lease);
     } catch (error) {
@@ -409,5 +575,5 @@ export function createRecommendationJobService({ db, loadCatalog, loadMonth, now
     return get(id, context);
   }
 
-  return Object.freeze({ create, get, advance, cancel, retry });
+  return Object.freeze({ create, get, recent, advance, cancel, retry });
 }

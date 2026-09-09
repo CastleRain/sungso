@@ -10,6 +10,7 @@ const HOUR = 3_600_000;
 // deletion. Personal backups, memberships and household records are excluded.
 const TARGETS = Object.freeze([
   { name: 'homehunt_jobs', chunks: true, graceMs: HOUR },
+  { name: 'homehunt_job_lookups', chunks: true },
   { name: 'homehunt_request_limits' },
   { name: 'homehunt_kapt_source_cache' },
   { name: 'homehunt_route_cache' },

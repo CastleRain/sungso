@@ -98,3 +98,59 @@ test('actual local worker exposes all unpriced base candidates without zero or i
   assert.equal(result.failedRequestCount, 2);
   assert.ok(result.pendingPriceCandidates.every(candidate => candidate.priceVerified === false && candidate.bestArea === undefined));
 });
+
+test('local price scope only calls requested districts and preserves company-priority district order', async () => {
+  const calls = [];
+  const apartments = ['11110', '41135', '41465', '41220'].map(regionCode => ({
+    ...apt, catalogId: regionCode, regionCode,
+  }));
+  const env = harness(async (lawdCd, dealYmd) => {
+    calls.push(`${lawdCd}/${dealYmd}`);
+    return month(lawdCd, dealYmd);
+  }, apartments);
+  const job = await env.startRecommendationJob({ ...filters, regions: ['seoul', 'gyeonggi'],
+    districtCodes: ['41465', '41135', '41465'] });
+  await job.worker;
+  const result = plain(env.publicJob(job));
+  assert.deepEqual(calls, ['41465/202609', '41465/202608', '41135/202609', '41135/202608']);
+  assert.deepEqual(result.filters.districtCodes, ['41465', '41135']);
+  assert.equal(result.baseCandidateCount, 2);
+  assert.equal(result.resultCount, 2);
+  assert.ok(result.results.every(candidate => ['41465', '41135'].includes(candidate.regionCode)));
+});
+
+test('invalid, unknown, or out-of-province scope never starts local provider requests', async () => {
+  let calls = 0;
+  const env = harness(async () => { calls += 1; });
+  for (const districtCodes of [['11110'], ['41130'], ['bad'], '41135', [41135], null,
+    Array.from({ length: 101 }, () => '41135')]) {
+    await assert.rejects(() => env.startRecommendationJob({ ...filters, districtCodes }), /검색 범위/);
+  }
+  assert.equal(calls, 0);
+  assert.equal(env.jobs.size, 0);
+});
+
+test('empty optional district scope matches the cloud whole-region convention', async () => {
+  const calls = [];
+  const env = harness(async (lawdCd, dealYmd) => {
+    calls.push(lawdCd);
+    return month(lawdCd, dealYmd);
+  });
+  const job = await env.startRecommendationJob({ ...filters, districtCodes: [] });
+  await job.worker;
+  assert.equal(job.baseCandidateCount, 1);
+  assert.deepEqual(calls, ['41135', '41135']);
+  assert.equal(job.filters.districtCodes, undefined);
+});
+
+test('valid scoped district with no structural matches stays empty instead of widening', async () => {
+  const calls = [];
+  const env = harness(async (...args) => { calls.push(args); }, [apt,
+    { ...apt, catalogId: 'too-small', regionCode: '41465', households: 20 }]);
+  const job = await env.startRecommendationJob({ ...filters, districtCodes: ['41465'] });
+  await job.worker;
+  assert.equal(job.baseCandidateCount, 0);
+  assert.equal(job.status, 'complete');
+  assert.equal(job.results.length, 0);
+  assert.deepEqual(calls, []);
+});

@@ -138,6 +138,11 @@ function harness(candidates = []) {
       clearTimeout(id) { calls.timers.delete(id); },
     },
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   appFunctions.forEach(name => vm.runInContext(actualFunction(name), sandbox));
   return { state, sandbox, calls, filters, clock, $ };

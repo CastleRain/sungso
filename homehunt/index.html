@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply.css?v=4.14.0">
+  <link rel="stylesheet" href="./css/supply.css?v=4.15.0">
   <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
@@ -60,9 +60,10 @@
   <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
   <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
   <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
-  <link rel="stylesheet" href="./css/destination-editor.css?v=4.14.0">
+  <link rel="stylesheet" href="./css/destination-editor.css?v=4.15.0">
+  <link rel="stylesheet" href="./css/search-continuity.css?v=4.15.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.14.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.15.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -249,6 +250,13 @@
         <section class="recommendation-composer recommendation-command-deck filter-drawer hh-drawer hh-drawer--filter" id="recommendationFilterPanel" aria-labelledby="recommendationFilterTitle" aria-hidden="true">
           <div class="filter-drawer-head"><div><span>SEARCH CONDITION</span><strong id="recommendationFilterTitle">우리 조건 설정</strong></div><button class="sheet-close-button" id="closeRecommendationFilters" type="button" aria-label="조건 닫기"><i class="ti ti-x" aria-hidden="true"></i></button></div>
           <div class="recommendation-filter-body">
+          <div class="search-scope-controls">
+            <label for="recommendSearchScope">가격 조회 범위</label>
+            <select id="recommendSearchScope"><option value="nearby">회사 주변 8개 지역 먼저 · 빠르게</option><option value="all">선택한 서울·경기 전체 지역</option></select>
+            <small id="recommendSearchScopeHint">회사 비중에 따라 가까운 지역부터 살펴봅니다. 실제 통근 가능 시간은 경로 확인 뒤 판정해요.</small>
+            <label class="search-refresh-choice"><input id="recommendForceRefresh" type="checkbox"> 최신 가격 다시 조회 <small>체크하지 않으면 하루 이내 같은 검색을 재사용</small></label>
+          </div>
+
           <div class="recommendation-command-row compact-command-row">
             <details class="recommendation-natural-language">
               <summary id="recommendComposerTitle"><i class="ti ti-message-dots" aria-hidden="true"></i><span>문장으로 조건 불러오기</span><small>선택 기능</small></summary>
@@ -336,6 +344,7 @@
                 <button id="decisionTabCandidates" type="button" role="tab" aria-selected="false" aria-controls="recommendationResults" tabindex="-1" data-decision-tab="candidates">가격 후보</button>
                 <button id="decisionTabRegions" type="button" role="tab" aria-selected="false" aria-controls="decisionRegions" tabindex="-1" data-decision-tab="regions">지역 범위</button>
               </nav>
+              <section id="recommendationSearchContinuity" class="search-continuity" aria-label="계정 검색 이어 보기" hidden></section>
               <div id="recommendationOfficialProgress" hidden></div>
               <div id="decisionToday" role="tabpanel" aria-labelledby="decisionTabToday"></div>
               <div id="decisionRegions" role="tabpanel" aria-labelledby="decisionTabRegions" hidden></div>
@@ -1009,10 +1018,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.14.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.15.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.14.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.14.0"></script>
+  <script type="module" src="./js/app.js?v=4.15.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.15.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

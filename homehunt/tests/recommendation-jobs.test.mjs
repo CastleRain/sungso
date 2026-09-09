@@ -4,8 +4,10 @@ import { randomBytes } from 'node:crypto';
 import {
   createRecommendationJobService,
   RECOMMENDATION_JOB_BATCH_SIZE,
+  RECOMMENDATION_JOB_CONCURRENCY,
   RECOMMENDATION_JOB_LEASE_MS,
   RECOMMENDATION_JOB_TTL_MS,
+  RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS,
 } from '../server/recommendation-jobs.mjs';
 
 // Transactions serialize atomically and roll back writes on error. The service
@@ -14,17 +16,32 @@ function database() {
   const documents = new Map();
   let queue = Promise.resolve();
   let largestDocument = 0;
+  const hooks = { afterGet: null, failArchiveWrites: false };
   const snapshot = (ref) => ({ exists: documents.has(ref.path), data: () => structuredClone(documents.get(ref.path)) });
-  const reference = (path) => ({ path, get: async () => snapshot({ path }), collection: (name) => collection(`${path}/${name}`) });
-  const collection = (path) => ({ doc: (id) => reference(`${path}/${id}`) });
+  const reference = (path) => ({ path, get: async () => {
+    const value = snapshot({ path });
+    if (hooks.afterGet) await hooks.afterGet(path, value);
+    return value;
+  }, collection: (name) => collection(`${path}/${name}`) });
+  const collection = (path) => ({ doc: (id) => reference(`${path}/${id}`),
+    where: (field, operator, value) => ({ limit: count => ({ get: async () => {
+      assert.equal(operator, '==');
+      const docs = [...documents].filter(([key, row]) => key.startsWith(`${path}/`)
+        && key.split('/').length === path.split('/').length + 1 && row[field] === value)
+        .slice(0, count).map(([key]) => snapshot(reference(key)));
+      return { docs };
+    } }) }) });
   return {
-    documents, collection, get largestDocument() { return largestDocument; },
+    documents, collection, hooks, get largestDocument() { return largestDocument; },
     runTransaction(action) {
       const pending = queue.then(async () => {
         const writes = [];
         const result = await action({
           get: async (ref) => snapshot(ref),
-          set: (ref, value) => writes.push([ref.path, structuredClone(value)]),
+          set: (ref, value) => {
+            if (hooks.failArchiveWrites && value.archive) throw new Error('private database write failure');
+            writes.push([ref.path, structuredClone(value)]);
+          },
         });
         for (const [path, value] of writes) {
           const bytes = Buffer.byteLength(JSON.stringify(value));
@@ -198,24 +215,24 @@ test('total upstream failure preserves base apartments as explicit price-pending
   assert.equal(calls, 2);
 });
 
-test('overlapping advances run one worker and a cancelled worker cannot checkpoint or start another task', async () => {
+test('overlapping advances run one bounded pair and cancellation prevents checkpoints or a later pair', async () => {
   const entered = deferred();
   const response = deferred();
   let calls = 0;
   const env = setup({ loadMonth: async (task) => { calls += 1; entered.resolve(); await response.promise; return month(task); } });
-  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  const created = await env.service.create({ ...filters, months: 4 }, owner);
   const first = env.service.advance(created.jobId, owner);
   await entered.promise;
   const other = await env.restart().advance(created.jobId, partner);
   assert.equal(other.status, 'running');
-  assert.equal(calls, 1);
+  assert.equal(calls, RECOMMENDATION_JOB_CONCURRENCY);
   const cancelled = await env.restart().cancel(created.jobId, partner);
   assert.equal(cancelled.status, 'cancelled');
   response.resolve();
   const finished = await first;
   assert.equal(finished.status, 'cancelled');
   assert.equal(finished.progress.completed, 0);
-  assert.equal(calls, 1);
+  assert.equal(calls, RECOMMENDATION_JOB_CONCURRENCY);
   assert.ok(![...env.db.documents.keys()].some((path) => path.includes('/chunks/task_')));
 });
 
@@ -401,4 +418,252 @@ test('cancelling a manual retry retains published results and can resume only th
   const completed = await env.service.advance(created.jobId, owner);
   assert.equal(completed.results[0].bestArea.count, 2);
   assert.equal(completed.failedRequestCount, 0);
+});
+
+test('identical public price searches reuse a completed household job without catalog or month work', async () => {
+  const env = setup();
+  const created = await env.service.create(filters, owner);
+  const finished = await env.service.advance(created.jobId, owner);
+  const reused = await env.restart({ loadCatalog: () => { throw new Error('must reuse saved catalog'); } })
+    .create({ ...filters, companyAddress: 'private-new-office', destinations: [{ lat: 37, lng: 127 }] }, partner);
+  assert.equal(reused.jobId, created.jobId);
+  assert.equal(reused.reused, true);
+  assert.deepEqual(reused.results, finished.results);
+  assert.equal(env.calls.length, 1);
+  assert.equal((await env.service.recent(partner)).job.jobId, created.jobId);
+  assert.ok(!JSON.stringify([...env.db.documents]).includes('private-new-office'));
+});
+
+test('concurrent creation shares one durable job while each member remembers that search', async () => {
+  const entered = deferred();
+  const release = deferred();
+  let catalogCalls = 0;
+  const env = setup({ loadCatalog: async () => {
+    if (++catalogCalls === 2) entered.resolve();
+    await release.promise;
+    return { apartments: [apartment()] };
+  } });
+  const left = env.service.create(filters, owner);
+  const right = env.restart().create(filters, partner);
+  await entered.promise;
+  release.resolve();
+  const [a, b] = await Promise.all([left, right]);
+  assert.equal(a.jobId, b.jobId);
+  assert.equal([a, b].filter(result => result.reused).length, 1);
+  assert.equal([...env.db.documents.keys()].filter(path => /^homehunt_jobs\/[^/]+$/.test(path)).length, 1);
+  assert.equal((await env.service.recent(owner)).job.jobId, a.jobId);
+  assert.equal((await env.service.recent(partner)).job.jobId, a.jobId);
+  assert.equal(env.calls.length, 0);
+});
+
+test('recent search is account scoped, resumes after restart, and never advances provider work', async () => {
+  const env = setup();
+  assert.deepEqual(await env.service.recent(owner), { ok: true, job: null });
+  const created = await env.service.create(filters, owner);
+  const recent = await env.restart().recent(owner);
+  assert.equal(recent.job.jobId, created.jobId);
+  assert.equal(recent.job.status, 'running');
+  assert.equal(recent.job.stale, false);
+  assert.equal(recent.job.resumable, true);
+  assert.equal(recent.job.advanceRequired, true);
+  assert.deepEqual(await env.service.recent(partner), { ok: true, job: null });
+  assert.deepEqual(await env.service.recent(stranger), { ok: true, job: null });
+  assert.equal(env.calls.length, 0);
+  await assert.rejects(env.service.recent({}), { code: 'UNAUTHORIZED' });
+});
+
+test('compact latest price archive survives raw-job deletion with honest 24h freshness and seven-day retention', async () => {
+  const env = setup();
+  const created = await env.service.create(filters, owner);
+  const finished = await env.service.advance(created.jobId, owner);
+  env.setTime(initialTime + RECOMMENDATION_JOB_TTL_MS + 1);
+  for (const path of env.db.documents.keys()) if (path.startsWith('homehunt_jobs/')) env.db.documents.delete(path);
+  const recent = await env.restart().recent(owner);
+  assert.equal(recent.job.stale, true);
+  assert.equal(recent.job.resumable, false);
+  assert.equal(recent.job.advanceRequired, false);
+  assert.deepEqual(recent.job.results, finished.results);
+  assert.equal(recent.job.expiresAt, new Date(initialTime + RECOMMENDATION_JOB_TTL_MS).toISOString());
+  assert.equal(recent.job.retentionExpiresAt, new Date(initialTime + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS).toISOString());
+  assert.equal(env.calls.length, 1);
+  const archives = [...env.db.documents].filter(([path, value]) => path.startsWith('homehunt_job_lookups/recent_') && value.archive);
+  assert.equal(archives.length, 1);
+  assert.equal(archives[0][1].archive.tasks, undefined);
+  assert.equal(archives[0][1].archive.catalogBlob, undefined);
+  assert.equal(archives[0][1].archive.destinations, undefined);
+  env.setTime(initialTime + RECOMMENDATION_SEARCH_ARCHIVE_TTL_MS);
+  assert.deepEqual(await env.restart().recent(owner), { ok: true, job: null });
+});
+
+test('reopening a completed result does not rewrite its archive or extend source freshness', async () => {
+  const env = setup();
+  const created = await env.service.create(filters, owner);
+  await env.service.advance(created.jobId, owner);
+  const before = JSON.stringify([...env.db.documents]);
+  env.setTime(initialTime + 60 * 60 * 1000);
+  await env.restart().get(created.jobId, owner);
+  await env.restart().recent(owner);
+  await env.restart().create(filters, owner);
+  assert.equal(JSON.stringify([...env.db.documents]), before);
+  assert.equal(env.calls.length, 1);
+});
+
+test('explicit refresh creates a new job while cancel and failure never become reusable searches', async () => {
+  const env = setup();
+  const first = await env.service.create(filters, owner);
+  const refreshed = await env.service.create({ ...filters, refresh: true }, owner);
+  assert.notEqual(refreshed.jobId, first.jobId);
+  assert.equal(refreshed.reused, false);
+  assert.equal(refreshed.filters.refresh, undefined);
+  await env.service.cancel(refreshed.jobId, owner);
+  assert.deepEqual(await env.service.recent(owner), { ok: true, job: null });
+  const next = await env.service.create(filters, owner);
+  assert.notEqual(next.jobId, refreshed.jobId);
+  const raw = env.db.documents.get(`homehunt_jobs/${next.jobId}`);
+  raw.status = 'error';
+  const final = await env.service.create(filters, owner);
+  assert.notEqual(final.jobId, next.jobId);
+});
+
+test('expired price reuse creates a fresh job and KST month changes cannot reuse the old month set', async () => {
+  const env = setup({ time: Date.parse('2026-09-30T14:30:00Z') });
+  const created = await env.service.create(filters, owner);
+  env.setTime(Date.parse('2026-09-30T15:01:00Z'));
+  const next = await env.service.create(filters, owner);
+  assert.notEqual(next.jobId, created.jobId);
+  env.setTime(Date.parse('2026-09-30T15:01:00Z') + RECOMMENDATION_JOB_TTL_MS);
+  const expired = await env.service.create(filters, owner);
+  assert.notEqual(expired.jobId, next.jobId);
+  assert.equal(env.calls.length, 0);
+});
+
+test('district subset limits tasks, preserves district priority and canonicalizes equivalent reuse', async () => {
+  const env = setup({ loadCatalog: async () => ({ apartments: [apartment('41135'), apartment('41465'), apartment('41463')] }) });
+  const created = await env.service.create({ ...filters, months: 2, districtCodes: ['41465', '41135', '41465'] }, owner);
+  assert.equal(created.baseCandidateCount, 2);
+  assert.equal(created.progress.total, 4);
+  assert.deepEqual(created.filters.districtCodes, ['41465', '41135']);
+  await env.service.advance(created.jobId, owner);
+  assert.deepEqual(env.calls.map(task => task.lawdCd), ['41465', '41465', '41135', '41135']);
+  const reused = await env.service.create({ ...filters, months: 2, districtCodes: ['41135', '41465'] }, owner);
+  assert.equal(reused.jobId, created.jobId);
+  assert.equal(reused.reused, true);
+  const whole = await env.service.create({ ...filters, months: 2, districtCodes: [] }, owner);
+  assert.notEqual(whole.jobId, created.jobId);
+  assert.equal(whole.baseCandidateCount, 3);
+});
+
+test('unknown, out-of-region and malformed district subsets fail before any public month request', async () => {
+  const env = setup({ loadCatalog: async () => ({ apartments: [apartment('41135'), apartment('11110')] }) });
+  for (const districtCodes of [['11110'], ['41999'], ['private-company'], [41135], '41135', Array(101).fill('41135')]) {
+    await assert.rejects(env.service.create({ ...filters, districtCodes }, owner), { code: 'INVALID_RECOMMENDATION' });
+  }
+  assert.equal(env.calls.length, 0);
+  assert.equal(env.db.documents.size, 0);
+});
+
+test('pre-index searches migrate the latest matching UID and household without copying another account', async () => {
+  const env = setup();
+  const mine = await env.service.create(filters, owner);
+  await env.service.advance(mine.jobId, owner);
+  env.setTime(initialTime + 1000);
+  await env.service.create({ ...filters, refresh: true }, partner);
+  env.setTime(initialTime + 2000);
+  await env.service.create({ ...filters, refresh: true }, { ...owner, householdId: 'other-home' });
+  for (const path of env.db.documents.keys()) if (path.startsWith('homehunt_job_lookups/')) env.db.documents.delete(path);
+  const recent = await env.restart().recent(owner);
+  assert.equal(recent.job.jobId, mine.jobId);
+  assert.equal(recent.job.resultCount, 1);
+  assert.equal(recent.job.legacyRecoveryLimited, false);
+  assert.equal(env.calls.length, 1);
+});
+
+test('cancelled late results cannot overwrite a newer account search archive', async () => {
+  const entered = deferred();
+  const release = deferred();
+  const env = setup({ loadMonth: async task => { entered.resolve(); await release.promise; return month(task); } });
+  const older = await env.service.create(filters, owner);
+  const worker = env.service.advance(older.jobId, owner);
+  await entered.promise;
+  const newer = await env.service.create({ ...filters, maxPriceManWon: 70000 }, owner);
+  release.resolve();
+  await worker;
+  const latest = await env.service.recent(owner);
+  assert.equal(latest.job.jobId, newer.jobId);
+  assert.deepEqual(latest.job.results, []);
+  const archived = [...env.db.documents.values()].find(value => value.archive);
+  assert.equal(archived, undefined);
+});
+
+test('a slow older create cannot replace the account pointer of a later search', async () => {
+  const entered = deferred();
+  const release = deferred();
+  let count = 0;
+  const env = setup({ loadCatalog: async () => {
+    if (++count === 1) { entered.resolve(); await release.promise; }
+    return { apartments: [apartment()] };
+  } });
+  const old = env.service.create(filters, owner);
+  await entered.promise;
+  env.setTime(initialTime + 1000);
+  const latest = await env.service.create({ ...filters, maxPriceManWon: 70000 }, owner);
+  release.resolve();
+  const late = await old;
+  assert.notEqual(late.jobId, latest.jobId);
+  assert.equal((await env.service.recent(owner)).job.jobId, latest.jobId);
+  assert.equal(env.calls.length, 0);
+});
+
+test('archive failure never hides completed prices and reopening retries the optional archive', async () => {
+  const env = setup();
+  const created = await env.service.create(filters, owner);
+  env.db.hooks.failArchiveWrites = true;
+  const completed = await env.service.advance(created.jobId, owner);
+  assert.equal(completed.ok, true);
+  assert.equal(completed.status, 'complete');
+  assert.equal(completed.resultCount, 1);
+  assert.match(completed.archiveWarning, /7일 보관/);
+  assert.ok(!completed.archiveWarning.includes('private database'));
+  env.db.hooks.failArchiveWrites = false;
+  const reopened = await env.service.get(created.jobId, owner);
+  assert.equal(reopened.archiveWarning, undefined);
+  env.setTime(initialTime + RECOMMENDATION_JOB_TTL_MS + 1);
+  assert.deepEqual((await env.service.recent(owner)).job.results, completed.results);
+});
+
+test('a newer retry archive survives an old pending archive writer even when timestamps are equal', async () => {
+  let recovered = false;
+  const env = setup({ loadMonth: async task => {
+    if (!recovered && task.dealYmd === '202608') throw new Error('fetch failed');
+    return month(task, recovered ? 59000 : 50000);
+  } });
+  const created = await env.service.create({ ...filters, months: 2 }, owner);
+  env.db.hooks.failArchiveWrites = true;
+  await env.service.advance(created.jobId, owner);
+  const original = await env.service.advance(created.jobId, owner);
+  env.db.hooks.failArchiveWrites = false;
+  const entered = deferred();
+  const release = deferred();
+  let pause = true;
+  env.db.hooks.afterGet = async path => {
+    if (pause && /^homehunt_job_lookups\/recent_[^/]+$/.test(path)) {
+      pause = false;
+      entered.resolve();
+      await release.promise;
+    }
+  };
+  const oldRead = env.service.get(created.jobId, owner);
+  await entered.promise;
+  recovered = true;
+  await env.service.retry(created.jobId, owner);
+  const refreshed = await env.service.advance(created.jobId, owner);
+  assert.equal(original.updatedAt, refreshed.updatedAt, 'fence/blob version must distinguish same-millisecond revisions');
+  assert.equal(refreshed.results[0].bestArea.count, 2);
+  release.resolve();
+  await oldRead;
+  env.db.hooks.afterGet = null;
+  env.setTime(initialTime + RECOMMENDATION_JOB_TTL_MS + 1);
+  const saved = (await env.service.recent(owner)).job;
+  assert.deepEqual(saved.results, refreshed.results);
+  assert.equal(saved.partial, false);
 });

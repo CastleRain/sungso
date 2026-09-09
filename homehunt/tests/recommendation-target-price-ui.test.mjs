@@ -106,6 +106,11 @@ function harness({ sourceMode = 'manual', targetPriceWon = 600000000, serviceSta
       changes.push(structuredClone(sandbox.readRecommendationForm()));
     },
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   for (const name of ['boundedNumber', 'pricePartNumber', 'priceEokNumber', 'readRecommendationPriceParts',
     'readRecommendationPriceManWon', 'writeRecommendationPrice', 'readRecommendationForm', 'writeRecommendationForm',

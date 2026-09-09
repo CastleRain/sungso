@@ -1,4 +1,5 @@
 import { normalizeOfficialParkingEvidence } from './parking-evidence-core.mjs?v=4.9.0';
+import { createOfficialComplexStore } from './official-complex-store.mjs?v=4.15.0';
 
 const DAY = 86400000;
 const RETRY_DELAY = 300000;
@@ -53,10 +54,39 @@ export function normalizeOfficialComplexInfo(raw, catalogId) {
   return info;
 }
 
-/** Public complex facts only: no localStorage, destinations or route evidence. */
-export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch, now = Date.now, onApplied = () => {}, timeoutMs = 60000 } = {}) {
+/** Public complex facts only. Browser reuse never stores candidates, personal
+ * parking, destinations, provider coordinates or route evidence. */
+export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch, now = Date.now, onApplied = () => {},
+  timeoutMs = 60000, persistentStore = createOfficialComplexStore({ url }) } = {}) {
   const entries = new Map();
   const inflight = new Map();
+  let restoration;
+  function restore() {
+    if (restoration) return restoration;
+    restoration = (async () => {
+      let saved;
+      try { saved = await persistentStore?.load(); } catch { return 0; }
+      if (!Array.isArray(saved)) return 0;
+      const instant = now();
+      let restored = 0;
+      for (const row of saved.slice(-3000)) {
+        const id = String(row?.catalogId || '');
+        if (!/^[A-Za-z0-9_-]{1,64}$/.test(id) || row.schemaVersion !== 1
+          || !Number.isFinite(row.savedAt) || row.savedAt > instant
+          || !Number.isFinite(row.expiresAt) || row.expiresAt <= instant || row.expiresAt > row.savedAt + DAY
+          || !Number.isFinite(row.retryAt) || row.retryAt > row.expiresAt) continue;
+        const info = normalizeOfficialComplexInfo(row.info, id);
+        if (info.status === 'unavailable' || Date.parse(info.cache.expiresAt) !== row.expiresAt) continue;
+        // A partial response's retry time is independent of its surviving facts.
+        // Restoring a page cannot add another day to either clock.
+        entries.set(id, { info: { ...info, cache: { ...info.cache, hit: true } },
+          expiresAt: row.expiresAt, retryAt: row.retryAt });
+        restored += 1;
+      }
+      return restored;
+    })();
+    return restoration;
+  }
   function isFresh(candidate) {
     const entry = entries.get(String(candidate?.catalogId || ''));
     return Boolean(entry && entry.retryAt > now());
@@ -75,6 +105,7 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
   async function load(candidate, { refresh = false } = {}) {
     const id = String(candidate?.catalogId || '');
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return unavailable(id, 'INVALID_CATALOG');
+    if (persistentStore) await restore();
     const existing = entries.get(id);
     if (existing?.retryAt > now() && (!refresh || existing.info.status === 'matched' && !existing.info.errors.length)) return existing.info;
     if (inflight.has(id)) return inflight.get(id);
@@ -109,11 +140,17 @@ export function createOfficialComplexClient({ url, fetchImpl = globalThis.fetch,
       const retryAt = failed || info.errors.length ? Math.min(expiresAt, receivedAt + RETRY_DELAY) : expiresAt;
       info = { ...info, cache: { ...info.cache, expiresAt: new Date(expiresAt).toISOString() } };
       entries.set(id, { info, expiresAt, retryAt });
+      if (!failed) {
+        // `info` has already passed the public-field allowlist above. Never pass
+        // the candidate to storage; it can contain personal and live route data.
+        try { await persistentStore?.put({ schemaVersion: 1, catalogId: id, savedAt: receivedAt, info, expiresAt, retryAt }); }
+        catch { /* Optional browser storage cannot invalidate official facts. */ }
+      }
       try { Promise.resolve(onApplied(info, candidate)).catch(() => {}); } catch { /* A render failure cannot invalidate a completed public lookup. */ }
       return info;
     })();
     inflight.set(id, request);
     try { return await request; } finally { inflight.delete(id); }
   }
-  return { load, decorate, isFresh };
+  return { load, decorate, isFresh, restore };
 }

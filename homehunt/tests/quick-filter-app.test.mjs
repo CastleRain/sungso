@@ -87,6 +87,11 @@ function harness({ source = 'manual', linked = available() } = {}) {
     document: { visibilityState: 'visible', addEventListener() {} },
     homeTargetPriceBridge: { subscribe() {} },
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   for (const name of ['getRecommendationQuickValues', 'applyRecommendationQuickValues', 'openRecommendationFullFilter',
     'writeRecommendationPrice', 'updateTargetPriceConnection', 'initializeWecostTargetConnection']) {
