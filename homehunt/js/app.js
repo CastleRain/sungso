@@ -1,30 +1,31 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.17.0';
-import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.17.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.17.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.18.0';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.18.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.18.0';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.17.0';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.18.0';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.18.0';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.13.1';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.18.0';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.13.1';
-import { mountCloudPanel } from './cloud-panel.js?v=4.13.1';
-import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.18.0';
+import { mountCloudPanel } from './cloud-panel.js?v=4.18.0';
+import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.18.0';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.17.0';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.18.0';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.18.0';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.17.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.17.0';
-import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.18.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.18.0';
+import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey, mergeSavedTransactionActivity } from './candidate-review-core.mjs?v=4.18.0';
+import { normalizeTransactionActivity } from './transaction-activity-core.mjs?v=4.18.0';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
-import { buildMarketOutlookContext } from './market-outlook-context.mjs?v=4.17.0';
-import { renderMarketForecastPanel } from './controllers/market-forecast-panel.js?v=4.17.0';
+import { buildMarketOutlookContext } from './market-outlook-context.mjs?v=4.18.0';
+import { renderMarketForecastPanel } from './controllers/market-forecast-panel.js?v=4.18.0';
 import { buildForecastChartSeries } from './market-chart-series.mjs?v=4.4.0';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
@@ -50,7 +51,7 @@ import {
   parseMolitCsv, buildMarketSummary, validateMarketSummary,
   getRegion, getSeries, withChanges, latestRegionComparison, getRecentTransactions,
   fitPriceOutlook, monthLabel, normalizeTransaction, bandFor,
-} from './market-core.mjs?v=4.17.0';
+} from './market-core.mjs?v=4.18.0';
 import {
   MAX_COMPARE, pricePerP33, pruneCompareIds, buildComparisonHighlights,
 } from './comparison-core.mjs?v=2.5.0';
@@ -62,7 +63,7 @@ import {
 } from './complex-availability-core.mjs?v=2.5.0';
 import {
   PYEONG_TO_M2, parseKoreanMoneyToManWon, parseRecommendationQuery, filterCatalogForRecommendation,
-} from './recommendation-core.mjs?v=3.0.1';
+} from './recommendation-core.mjs?v=4.18.0';
 import {
   companySearchStepMessage, decideCompanySearchNextStep,
 } from './company-search-core.mjs?v=2.5.1';
@@ -75,14 +76,14 @@ import {
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
   normalizeSupplyNotice, sortSupplyNotices, newlywedApplicationContext,
-} from './supply-core.mjs?v=4.17.0';
+} from './supply-core.mjs?v=4.18.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.17.0';
+} from './ui-format.js?v=4.18.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -163,6 +164,8 @@ const state = {
   recommendationPanelCollapsed: false,
   recommendationRunSnapshot: null,
   recommendationRetrying: false,
+  recommendationActivityRefreshing: false,
+  recommendationActivityRefreshBackup: null,
   shortlist: loadShortlist(),
   localMarketConnected: false,
   localMarketKeyConfigured: false,
@@ -5204,6 +5207,11 @@ function initializeCloudConnection() {
         state.recommendationRecentJob = null;
         state.recommendationRestoreBusy = false;
         state.recommendationRestoreError = '';
+        // Account transitions discard refresh backups before any cancellation;
+        // a previous member's job must never be restored into the next session.
+        state.recommendationActivityRefreshBackup = null;
+        state.recommendationActivityRefreshing = false;
+        state.recommendationRetrying = false;
         if (changedAccount) {
           window.clearTimeout(state.recommendationPollTimer);
           recommendationRunToken += 1;
@@ -7301,9 +7309,10 @@ function renderRecommendationContinuity() {
   const meta = state.recommendationMeta;
   const recent = state.recommendationRecentJob;
   const remote = Boolean(APP_CONFIG.cloudApiBaseUrl && APP_CONFIG.isLocalRuntime === false);
-  root.hidden = !remote && !meta?.filters?.districtCodes?.length;
+  root.hidden = !remote && !meta;
   if (root.hidden) return;
-  const title = createElement('strong', '', !remote ? '회사 주변 지역의 가격 후보' : state.recommendationRestoreBusy ? '이전 검색을 불러오고 있어요'
+  const title = createElement('strong', '', state.recommendationActivityRefreshing ? '매매 활발도를 보강하고 있어요'
+    : !remote ? meta?.filters?.districtCodes?.length ? '회사 주변 지역의 가격 후보' : '현재 가격 후보 이어 보기' : state.recommendationRestoreBusy ? '이전 검색을 불러오고 있어요'
     : meta ? state.recommendationRestored ? '계정에 보관한 가격 후보' : '이 검색은 계정에 자동 보관됩니다'
     : recent ? '이전 검색이 남아 있어요' : '검색 결과 이어 보기');
   const message = createElement('p', '', state.recommendationRestoreError || (meta || recent
@@ -7311,7 +7320,7 @@ function renderRecommendationContinuity() {
     : '가격 후보를 찾으면 로그인한 계정에서 다시 열 수 있어요.'));
   const note = createElement('small', '', '주차·시설은 확인한 공공 자료를 재사용합니다. 다른 메뉴에서는 통근 결과도 유지되며, 페이지를 새로 열면 실제 통근은 다시 확인합니다.');
   const actions = createElement('div', 'search-continuity-actions');
-  const button = (label, callback) => { const node = createElement('button', 'outline-btn', label); node.type = 'button'; node.disabled = state.recommendationRunning || state.recommendationRestoreBusy || state.commuteVerificationRunning; node.addEventListener('click', callback); actions.append(node); };
+  const button = (label, callback) => { const node = createElement('button', 'outline-btn', label); node.type = 'button'; node.disabled = state.recommendationRunning || state.recommendationRestoreBusy || state.commuteVerificationRunning || state.commuteAutoRunning; node.addEventListener('click', callback); actions.append(node); return node; };
   if (state.recommendationRestoreError) button('이전 검색 다시 불러오기', () => { recommendationRecentCheckedUid = ''; void restoreRecentRecommendation(); });
   if (recent && recent.jobId !== meta?.jobId) button(recent.status === 'running' ? '중단된 검색 이어서 보기' : '이전 가격 조건으로 열기', () => applyRecentRecommendation(recent, { applyFilters: true }));
   if (state.recommendationJobId && !state.recommendationRunning && meta?.jobId === state.recommendationJobId && meta?.status === 'running'
@@ -7322,6 +7331,14 @@ function renderRecommendationContinuity() {
     if (meta.archiveWarning) message.append(` ${meta.archiveWarning}`);
     if (meta.stale || meta.resumable === false) message.append(' 보관본이므로 최신 가격을 다시 확인해주세요.');
     button('최신 가격 다시 조회', () => { setRecommendationPanel('filters'); $('#recommendForceRefresh').checked = true; });
+    if (state.recommendationResults.length && state.recommendationRunSnapshot) {
+      const missing = state.recommendationResults.filter(candidate => !normalizeTransactionActivity(candidate.transactionActivity)).length;
+      const activityButton = button(state.recommendationActivityRefreshing ? '매매 활발도 보강 중'
+        : missing ? `매매 활발도 보강 · 미확인 ${missing.toLocaleString('ko-KR')}곳` : '매매 활발도 다시 확인', () => { void refreshRecommendationActivity(); });
+      activityButton.id = 'refreshRecommendationActivity';
+      activityButton.disabled ||= state.recommendationLocationBusy || meta.status === 'running';
+      note.append(' 활발도 보강은 공공 월 자료를 재사용하며, 없는 자료만 조회합니다. 현재 후보와 통근을 보면서 기다릴 수 있어요.');
+    }
   }
   if (!meta?.filters?.districtCodes?.length) button('회사 주변부터 찾아보기', () => { $('#recommendSearchScope').value = 'nearby'; handleRecommendationCriteriaChanged(); setRecommendationPanel('filters'); });
   const codes = meta?.filters?.districtCodes || [];
@@ -7392,6 +7409,85 @@ function recommendationJobUrl(jobId) {
   return `${APP_CONFIG.recommendationUrl}/${encodeURIComponent(jobId)}`;
 }
 
+function mergeRecommendationActivityRefreshResults(previous, payload, previousMeta = {}) {
+  const fresh = payload.results;
+  const ids = new Set(fresh.map(candidate => String(candidate.catalogId || '')));
+  const pending = new Map((payload.pendingPriceCandidates || []).map(candidate => [String(candidate.catalogId || ''), candidate]));
+  const incomplete = new Set([...(payload.incompleteDistrictCodes || []), ...(payload.failedRequests || []).map(task => task.lawdCd)].map(String));
+  const failed = Number(payload.failedRequestCount || 0) > 0;
+  const retained = previous.filter(candidate => !ids.has(String(candidate.catalogId || '')) && failed
+    && (pending.has(String(candidate.catalogId || '')) || incomplete.has(String(candidate.regionCode || '')) || !incomplete.size))
+    .map(candidate => {
+      const partial = pending.get(String(candidate.catalogId || ''));
+      const activity = normalizeTransactionActivity(partial?.transactionActivity) || normalizeTransactionActivity(candidate.transactionActivity);
+      return { ...candidate, priceProvisional: true,
+        priceCoverage: { ...candidate.priceCoverage, ...partial?.priceCoverage, status: 'stale',
+          sourceUpdatedAt: candidate.priceCoverage?.sourceUpdatedAt || previousMeta.updatedAt || null },
+        ...(activity ? { transactionActivity: { ...activity, status: 'stale' } } : {}) };
+    });
+  return { results: mergeRetriedPriceResults(previous, [...fresh, ...retained]), retainedCount: retained.length };
+}
+
+async function refreshRecommendationActivity() {
+  if (state.recommendationRunning || state.commuteVerificationRunning || state.commuteAutoRunning
+    || state.recommendationLocationBusy || state.recommendationRestoreBusy) return;
+  const snapshot = state.recommendationRunSnapshot;
+  const meta = state.recommendationMeta;
+  if (!snapshot || !meta || meta.status === 'running' || !state.recommendationResults.length) return;
+  if (priceSearchSignature(snapshot.filters) !== priceSearchSignature(readRecommendationForm())) {
+    setRecommendationPanel('filters');
+    return setRecommendationStatus('', '현재 후보와 가격 조건이 달라요', '변경한 조건으로 먼저 검색한 뒤 매매 활발도를 보강해주세요. 기존 후보와 통근은 유지합니다.');
+  }
+  if (APP_CONFIG.isLocalRuntime === false && (!APP_CONFIG.localMarketEnabled || cloudSession.getState().status !== 'signed-in')) {
+    return setRecommendationStatus('error', '로그인과 검색 서버 연결을 확인해주세요', '기존 가격 후보와 통근은 그대로 유지합니다.');
+  }
+  if (state.localMarketOutdated) return setRecommendationStatus('error', '검색 서버 업데이트가 필요해요', '새 매매 활발도 자료를 받을 수 있도록 서버를 업데이트한 뒤 다시 눌러주세요. 기존 결과는 유지합니다.');
+  const runToken = ++recommendationRunToken;
+  const remote = Boolean(APP_CONFIG.isLocalRuntime === false && APP_CONFIG.cloudApiBaseUrl);
+  const requestUid = remote ? cloudSession.getState().user?.uid : null;
+  const backup = { jobId: state.recommendationJobId, meta, recent: state.recommendationRecentJob, uid: requestUid };
+  state.recommendationActivityRefreshBackup = backup;
+  state.recommendationActivityRefreshing = true;
+  state.recommendationRetrying = true;
+  state.recommendationRunning = true;
+  state.recommendationJobId = '';
+  window.clearTimeout(state.recommendationPollTimer);
+  renderRecommendationResults();
+  setRecommendationStatus('running', '매매 활발도와 가격 자료를 보강합니다', '공공 월 자료를 재사용하고 필요한 자료만 조회합니다. 현재 회사 조건·지역·후보·통근은 유지하며 통근 API는 호출하지 않습니다.');
+  try {
+    const priceFields = ['regions', 'minHouseholds', 'householdsOperator', 'maxPriceManWon', 'priceOperator',
+      'minAreaM2', 'areaOperator', 'areaBasis', 'maxAgeYears', 'minBuiltYear', 'months', 'districtCodes'];
+    const priceFilters = Object.fromEntries(priceFields.filter(key => snapshot.filters[key] !== undefined)
+      .map(key => [key, snapshot.filters[key]]));
+    const response = await fetch(APP_CONFIG.recommendationUrl, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...priceFilters, refresh: true, preserveRecent: true }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.jobId) throw new Error(payload.error || '매매 활발도 보강을 시작하지 못했습니다.');
+    if (runToken !== recommendationRunToken) {
+      // A preserveRecent refresh owns a new, unpublished job, even in the cloud.
+      if (!remote || requestUid === cloudSession.getState().user?.uid) {
+        void fetch(recommendationJobUrl(payload.jobId), { method: 'DELETE' }).catch(() => {});
+      }
+      return;
+    }
+    state.recommendationJobId = payload.jobId;
+    state.recommendationRecentJob = payload;
+    void pollRecommendationJob(payload.jobId, runToken, payload.status === 'complete' ? payload : null);
+  } catch (error) {
+    if (runToken !== recommendationRunToken) return;
+    state.recommendationJobId = backup.jobId;
+    state.recommendationMeta = backup.meta;
+    state.recommendationRecentJob = backup.recent;
+    state.recommendationRunning = false;
+    state.recommendationRetrying = false;
+    state.recommendationActivityRefreshing = false;
+    state.recommendationActivityRefreshBackup = null;
+    renderRecommendationResults();
+    setRecommendationStatus('error', '기존 후보와 통근을 유지했어요', error.message || '자료를 보강하지 못했습니다. 다시 시도해주세요.');
+  }
+}
+
 async function retryRecommendationFailures() {
   if (state.recommendationRunning || state.commuteVerificationRunning || state.recommendationLocationBusy) return;
   const meta = state.recommendationMeta;
@@ -7454,8 +7550,11 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken, i
     if (payload.status === 'running') {
       setRecommendationStatus(
         'running',
-        isRetrying ? '일시 실패한 지역만 다시 확인하고 있어요' : '서울·경기 실제 거래를 확인하고 있어요',
-        isRetrying
+        state.recommendationActivityRefreshing ? '매매 활발도와 가격 자료를 보강하고 있어요'
+          : isRetrying ? '일시 실패한 지역만 다시 확인하고 있어요' : '서울·경기 실제 거래를 확인하고 있어요',
+        state.recommendationActivityRefreshing
+          ? '공공 월 자료를 재사용하고 필요한 자료만 조회합니다. 기존 후보와 현재 확인한 통근은 유지하며 통근 API는 호출하지 않습니다.'
+          : isRetrying
           ? '국토부의 순간 호출 제한을 피하도록 실패한 월·지역만 간격을 두고 다시 요청합니다.'
           : `${Number(payload.baseCandidateCount || 0).toLocaleString('ko-KR')}개 1차 후보가 있는 지역의 월 자료를 조회합니다. 같은 월은 로컬 캐시를 재사용해요.`,
         visibleProgress,
@@ -7464,21 +7563,51 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken, i
       return;
     }
     const wasRetrying = state.recommendationRetrying;
+    const wasActivityRefreshing = state.recommendationActivityRefreshing;
     state.recommendationRunning = false;
     state.recommendationRetrying = false;
     if (payload.status === 'cancelled') {
+      if (wasActivityRefreshing) throw new Error('자료 보강이 중단됐습니다. 다시 시도할 수 있습니다.');
       renderRecommendationResults();
       setRecommendationStatus('', '추천 조회를 취소했어요', '입력한 조건과 기존 결과는 그대로 남아 있습니다.');
       return;
     }
     if (payload.status === 'error') throw new Error(payload.error || '추천 조회에 실패했습니다.');
+    const completeEmptyActivity = payload.results?.length === 0 && payload.resultCount === 0
+      && Number.isSafeInteger(payload.baseCandidateCount) && payload.baseCandidateCount >= 0
+      && payload.failedRequestCount === 0 && Number.isSafeInteger(payload.progress?.total)
+      && payload.progress.total >= 0 && payload.progress.completed === payload.progress.total
+      && Array.isArray(payload.pendingPriceCandidates)
+      && payload.pendingPriceCandidates.every(candidate => normalizeTransactionActivity(candidate?.transactionActivity));
+    if (wasActivityRefreshing && (payload.status !== 'complete' || !Array.isArray(payload.results)
+      || payload.results.some(candidate => !candidate?.catalogId || !normalizeTransactionActivity(candidate.transactionActivity))
+      || (payload.pendingPriceCandidates !== undefined && !Array.isArray(payload.pendingPriceCandidates))
+      || (!completeEmptyActivity && ![...payload.results, ...(payload.pendingPriceCandidates || [])].some(candidate => normalizeTransactionActivity(candidate?.transactionActivity))))) {
+      throw new Error('서버에서 매매 활발도 자료를 받지 못했습니다. 서버 업데이트 후 다시 시도해주세요.');
+    }
     const nextResults = Array.isArray(payload.results) ? payload.results : [];
-    state.recommendationResults = wasRetrying
-      ? mergeRetriedPriceResults(state.recommendationResults, nextResults) : nextResults;
+    const activityMerge = wasActivityRefreshing ? mergeRecommendationActivityRefreshResults(
+      state.recommendationResults, payload, state.recommendationActivityRefreshBackup?.meta) : null;
+    state.recommendationResults = activityMerge?.results || (wasRetrying
+      ? mergeRetriedPriceResults(state.recommendationResults, nextResults) : nextResults);
+    let activitySaveWarning = '';
+    if (wasActivityRefreshing) {
+      const nextShortlist = mergeSavedTransactionActivity(state.shortlist, [...nextResults, ...(payload.pendingPriceCandidates || [])]);
+      if (JSON.stringify(nextShortlist) !== JSON.stringify(state.shortlist)) {
+        state.shortlist = nextShortlist;
+        try { saveShortlist(state.shortlist); }
+        catch { activitySaveWarning = ' 이 기기의 관심 후보 저장에 실패했습니다. 현재 화면의 보강 결과는 유지합니다.'; }
+      }
+      state.recommendationActivityRefreshing = false;
+      state.recommendationActivityRefreshBackup = null;
+    }
     state.recommendationCompletedAt = Date.parse(payload.updatedAt) || Date.now();
     $('#recommendStepPrice').classList.remove('active');
     $('#recommendStepPrice').classList.add('complete');
-    state.recommendationMeta = payload;
+    state.recommendationMeta = activityMerge?.retainedCount ? { ...payload,
+      resultCount: state.recommendationResults.length,
+      partialPriceCandidateCount: state.recommendationResults.filter(candidate => candidate.priceProvisional).length,
+    } : payload;
     renderRecommendationResults(wasRetrying ? null : payload, { revalidateOfficial: true });
     const snapshot = state.recommendationRunSnapshot;
     if (!wasRetrying) void enrichRecommendationMapAndCommute(snapshot?.filters || readRecommendationForm(), snapshot?.destinations || []);
@@ -7487,6 +7616,11 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken, i
     if (failedCount) {
       $('#recommendStepPrice').classList.remove('complete');
       $('small', $('#recommendStepPrice')).textContent = '일부 지역 실거래 확인 미완료';
+    }
+    if (wasActivityRefreshing) {
+      setRecommendationStatus('success', `매매 활발도 보강 완료 · 가격 후보 ${state.recommendationResults.length.toLocaleString('ko-KR')}곳`,
+        `회사 조건·선택 지역·현재 확인한 통근은 유지했습니다. 통근 API 추가 호출은 없습니다.${failedCount ? ` 월·지역 ${failedCount.toLocaleString('ko-KR')}건은 재확인이 필요합니다.${activityMerge.retainedCount ? ` 이전 가격 후보 ${activityMerge.retainedCount.toLocaleString('ko-KR')}곳은 잠정 자료로 남겼습니다.` : ''}${APP_CONFIG.isLocalRuntime === false && APP_CONFIG.cloudApiBaseUrl ? ' 계정에는 이전 검색을 유지하므로 새로고침하면 이전 가격 결과가 열립니다. 미완료 자료를 다시 확인해주세요.' : ''}` : ''}${activitySaveWarning}`);
+      return;
     }
     setRecommendationStatus(
       incompleteWithoutCandidates ? 'error' : 'success',
@@ -7501,11 +7635,19 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken, i
     );
   } catch (error) {
     if (state.recommendationJobId !== jobId || runToken !== recommendationRunToken) return;
+    const backup = state.recommendationActivityRefreshBackup;
+    if (backup) {
+      state.recommendationJobId = backup.jobId;
+      state.recommendationMeta = backup.meta;
+      state.recommendationRecentJob = backup.recent;
+    }
     state.recommendationRunning = false;
     state.recommendationRetrying = false;
+    state.recommendationActivityRefreshing = false;
+    state.recommendationActivityRefreshBackup = null;
     $('#recommendStepPrice').classList.remove('active');
     renderRecommendationResults();
-    setRecommendationStatus('error', '실거래 조회를 완료하지 못했어요', `${error.message || '로컬 실거래 서버를 확인해주세요.'} 기존 결과는 유지합니다.`);
+    setRecommendationStatus('error', backup ? '기존 후보와 통근을 유지했어요' : '실거래 조회를 완료하지 못했어요', `${error.message || '로컬 실거래 서버를 확인해주세요.'} 기존 결과는 유지합니다.`);
   }
 }
 
@@ -7608,6 +7750,8 @@ async function runRecommendation() {
   state.recommendationResults = [];
   state.recommendationMeta = null;
   state.recommendationRetrying = false;
+  state.recommendationActivityRefreshing = false;
+  state.recommendationActivityRefreshBackup = null;
   state.recommendationMapScope = 'all';
   state.recommendationShowingShortlist = false;
   state.recommendationCommuteScopeTouched = false;
@@ -7655,16 +7799,26 @@ async function cancelRecommendation(announce = true) {
   window.clearTimeout(state.recommendationPollTimer);
   const jobId = state.recommendationJobId;
   const wasRetrying = state.recommendationRetrying;
-  state.recommendationJobId = '';
+  const backup = state.recommendationActivityRefreshBackup;
+  state.recommendationJobId = backup?.jobId || '';
+  if (backup) {
+    state.recommendationMeta = backup.meta;
+    state.recommendationRecentJob = backup.recent;
+  }
   state.recommendationRunning = false;
   state.recommendationRetrying = false;
+  state.recommendationActivityRefreshing = false;
+  state.recommendationActivityRefreshBackup = null;
   if (!wasRetrying) state.recommendationRunSnapshot = null;
+  if (backup) renderRecommendationResults();
   recommendationPriceCoverage?.render();
   $('#recommendStepPrice').classList.remove('active');
   setRecommendationStatus('', announce ? '추천 조회를 취소했어요' : '새 조건으로 다시 시작합니다', '입력한 조건은 이 기기에 그대로 저장됩니다.');
   hideRecommendationMapStatus();
-  // Cloud jobs may be shared with another tab: stop our polling, not their job.
-  if (jobId && (APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl)) fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
+  // Ordinary cloud jobs may be shared. An activity refresh is unpublished and
+  // owned by this request, so cancel it before it can replace the recent result.
+  if (jobId && (APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl
+    || backup && backup.uid === cloudSession.getState().user?.uid)) fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
 }
 
 function activeRecommendationDestinations() {
@@ -8294,7 +8448,7 @@ function renderRecommendationResults(meta = null, { revalidateOfficial = false }
   renderLocationDiscovery($('#locationDiscovery'), rawResults, { selectedRegion: state.recommendationRegion, busy: state.recommendationLocationBusy, status: state.recommendationLocationStatus, onRegion: selectRecommendationRegion, onAllRegions: () => decisionWorkspace?.setTab('regions') });
   $('#toggleRegionMap').textContent = state.recommendationMapMode === 'regions' ? '단지 위치 지도' : '지역별 숫자 지도';
   const results = sortedRecommendationResults();
-  $('#personalizedRecommendationSummary').textContent = '실제 통근 55 · 역 접근 10 · 규모 5 · 연식 10 · 주차 10 · 목표가격 10점. ' + (state.workplaces.length ? '회사별 입력 비중 적용.' : '회사 미등록: 강남역 100%.') + ' 경로 미확인은 추천점수 대기이며, 시간 제한을 켠 회사의 초과·주차 불가·검색 상한 초과는 기본 목록에서 제외합니다.';
+  $('#personalizedRecommendationSummary').textContent = '실제 통근 55 · 역 접근 10 · 규모 3 · 연식 7 · 주차 10 · 목표가격 10 · 매매 활발도 5점. ' + (state.workplaces.length ? '회사별 입력 비중 적용.' : '회사 미등록: 강남역 100%.') + ' 거래 빈도·세대수 대비 비율·꾸준함을 반영합니다. 경로 미확인은 추천점수 대기이며, 시간 제한을 켠 회사의 초과·주차 불가·검색 상한 초과는 기본 목록에서 제외합니다.';
   const visibleResults = results.slice(0, state.recommendationVisibleCount);
   $('.recommendation-page').classList.add('results-active');
   $('#recommendationResultCount').textContent = results.length.toLocaleString('ko-KR');
@@ -8318,7 +8472,7 @@ function renderRecommendationResults(meta = null, { revalidateOfficial = false }
     : state.recommendationRunning && !state.recommendationRetrying
     ? '월·시군구 실거래 자료를 확인하고 있습니다. 검색이 끝나면 가격 후보를 표시합니다.'
     : displayMeta
-    ? `규모·연식 1차 ${Number(displayMeta.baseCandidateCount || 0).toLocaleString('ko-KR')}곳 → 확인된 거래 기준 가격 후보 ${rawResults.length.toLocaleString('ko-KR')}곳${Number(displayMeta.partialPriceCandidateCount) ? ` (잠정 ${Number(displayMeta.partialPriceCandidateCount).toLocaleString('ko-KR')}곳 포함)` : ''}${commuteRequired ? ` · 통근 충족 ${matchedCount}곳 · 경로 미확인 ${pendingCount}곳 · 시간 초과 ${excludedCount}곳` : ''}${displayMeta.truncated ? ` · 총 ${totalResultCount.toLocaleString('ko-KR')}곳 중 일부 표시` : ''}${failedCount ? ` · 재확인할 월·지역 조회 ${failedCount.toLocaleString('ko-KR')}건` : ''}${state.recommendationRetrying ? ' · 미완료 자료만 갱신 중' : ''}`
+    ? `규모·연식 1차 ${Number(displayMeta.baseCandidateCount || 0).toLocaleString('ko-KR')}곳 → 확인된 거래 기준 가격 후보 ${rawResults.length.toLocaleString('ko-KR')}곳${Number(displayMeta.partialPriceCandidateCount) ? ` (잠정 ${Number(displayMeta.partialPriceCandidateCount).toLocaleString('ko-KR')}곳 포함)` : ''}${commuteRequired ? ` · 통근 충족 ${matchedCount}곳 · 경로 미확인 ${pendingCount}곳 · 시간 초과 ${excludedCount}곳` : ''}${displayMeta.truncated ? ` · 총 ${totalResultCount.toLocaleString('ko-KR')}곳 중 일부 표시` : ''}${failedCount ? ` · 재확인할 월·지역 조회 ${failedCount.toLocaleString('ko-KR')}건` : ''}${state.recommendationActivityRefreshing ? ' · 매매 활발도 보강 중' : state.recommendationRetrying ? ' · 미완료 자료만 갱신 중' : ''}`
     : '현재 결과를 선택한 기준으로 다시 정렬했습니다.';
   $('#recommendationResults').replaceChildren(...visibleResults.map(makeRecommendationCard));
   renderRecommendationDecisionBar();

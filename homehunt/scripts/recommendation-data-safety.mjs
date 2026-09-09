@@ -1,4 +1,5 @@
 import { aggregateRecommendationRecords } from '../js/recommendation-core.mjs';
+import { normalizeTransactionActivity } from '../js/transaction-activity-core.mjs';
 
 function normalizedTask(task = {}) {
   return {
@@ -98,6 +99,8 @@ export function buildRecommendationPriceResult(candidates, records, failures, ta
   const byDistrict = new Map();
   for (const task of tasks || []) {
     const code = String(task.lawdCd || '');
+    if (!/^\d{5}$/.test(code) || !/^\d{4}(0[1-9]|1[0-2])$/.test(String(task.dealYmd || ''))
+      || task.type && task.type !== 'sale') continue;
     if (!byDistrict.has(code)) byDistrict.set(code, new Set());
     byDistrict.get(code).add(String(task.dealYmd || ''));
   }
@@ -113,17 +116,45 @@ export function buildRecommendationPriceResult(candidates, records, failures, ta
       completedMonthCount: Math.max(0, totalMonthCount - failedMonths.length), totalMonthCount, missingMonths, staleMonths,
       sourceUpdatedAt: stale.map((task) => task.sourceUpdatedAt).filter(Boolean).sort()[0] || null };
   };
-  const results = aggregateRecommendationRecords(scope.candidates, scope.records, filters, currentYear).map((candidate) => {
+  const activityById = new Map();
+  const transactionActivityFor = (candidate, monthlyCounts = []) => {
+    const coverage = coverageFor(candidate);
+    const requested = [...(byDistrict.get(String(candidate.regionCode || '')) || [])].sort();
+    if (!requested.length) return null;
+    const values = new Map(monthlyCounts.map(row => [row.month, row.count]));
+    const toMonth = value => `${value.slice(0, 4)}-${value.slice(4)}`;
+    const observed = requested.filter(month => !coverage.missingMonths.includes(month));
+    const activity = normalizeTransactionActivity({
+      version: 1, scope: 'complex-sale', status: observed.length ? coverage.status : 'missing',
+      requestedMonths: requested.map(toMonth),
+      monthlyCounts: observed
+        .map(month => ({ month: toMonth(month), count: values.get(toMonth(month)) || 0 })),
+      sourceUpdatedAt: coverage.sourceUpdatedAt,
+    });
+    if (activity) activityById.set(String(candidate.catalogId), activity);
+    return activity;
+  };
+  // Raw task evidence should already match its requested month. Bound the
+  // aggregation explicitly as well so an unrelated month cannot inflate prices
+  // or activity while still appearing to have complete requested-month coverage.
+  const boundedRecords = byDistrict.size ? scope.records.filter(record =>
+    byDistrict.get(String(record?.regionCode || ''))?.has(String(record?.month || '').replace('-', ''))) : scope.records;
+  const results = aggregateRecommendationRecords(scope.candidates, boundedRecords, filters, currentYear,
+    { transactionActivityFor }).map((candidate) => {
     const priceCoverage = coverageFor(candidate);
     return { ...candidate, priceCoverage, priceProvisional: priceCoverage.status !== 'complete' };
   });
   const qualifying = new Set(results.map((item) => String(item.catalogId)));
   const incomplete = new Set(scope.incompleteDistrictCodes);
   const pendingPriceCandidates = scope.candidates.filter((candidate) => incomplete.has(String(candidate.regionCode))
-    && !qualifying.has(String(candidate.catalogId))).map((candidate) => ({
-    ...candidate, priceVerified: false, transportVerified: false, priceCoverage: coverageFor(candidate),
-    pricePendingReason: 'PRICE_DATA_INCOMPLETE',
-  }));
+    && !qualifying.has(String(candidate.catalogId))).map((candidate) => {
+    const transactionActivity = activityById.get(String(candidate.catalogId)) || transactionActivityFor(candidate);
+    return {
+      ...candidate, priceVerified: false, transportVerified: false, priceCoverage: coverageFor(candidate),
+      pricePendingReason: 'PRICE_DATA_INCOMPLETE',
+      ...(transactionActivity ? { transactionActivity } : {}),
+    };
+  });
   return { results, pendingPriceCandidates,
     partialPriceCandidateCount: results.filter((candidate) => candidate.priceProvisional).length,
     pendingPriceCandidateCount: pendingPriceCandidates.length,

@@ -1,5 +1,6 @@
-import { candidateReviewConditionSignature, candidateReviewConditionSummary } from './candidate-review-core.mjs?v=4.6.1';
+import { candidateReviewConditionSignature, candidateReviewConditionSummary } from './candidate-review-core.mjs?v=4.18.0';
 import { normalizePriceCoverage } from './price-coverage-core.mjs?v=4.6.1';
+import { normalizeTransactionActivity } from './transaction-activity-core.mjs';
 
 // Cloud snapshots contain personal inputs, saved house references and explicitly
 // selected official price snapshots. Live commute evidence is never included.
@@ -182,6 +183,10 @@ function favorite(input, label) {
     if (own(raw, 'priceCoverage')) {
       result.priceCoverage = normalizePriceCoverage(raw.priceCoverage);
       result.priceProvisional = raw.priceProvisional === true || result.priceCoverage.status !== 'complete';
+    }
+    if (own(raw, 'transactionActivity')) {
+      const activity = normalizeTransactionActivity(raw.transactionActivity);
+      if (activity) result.transactionActivity = activity;
     }
   }
   // Legacy selections remain house references. A new explicit review bookmark

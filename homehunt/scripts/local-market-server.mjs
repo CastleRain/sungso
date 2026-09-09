@@ -1264,7 +1264,7 @@ async function handler(req, res) {
         transitConcurrency: TRANSIT_CONCURRENCY,
         transitCacheHours: TRANSIT_CACHE_HOURS,
       },
-      version: '2.10.1',
+      version: '2.11.0',
     });
   }
   if (req.method === 'GET' && url.pathname === '/api/commute/quota') {

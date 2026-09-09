@@ -24,7 +24,7 @@ test('10/50/40 preference leads through weighted actual commute, with minimax on
   assert.equal(ranking.weightedCostMinutes, 29.5);
   assert.ok(ranking.worstRatio > result[1].personalizedRecommendation.worstRatio);
   assert.equal(Object.values(PERSONALIZED_SCORE_WEIGHTS).reduce((sum, value) => sum + value, 0), 100);
-  assert.equal(ranking.referenceScore, 45);
+  assert.equal(ranking.referenceScore, 40);
 });
 
 test('pending routes get facility reference points but never a confirmed total or a higher confirmed rank', () => {
@@ -38,7 +38,7 @@ test('pending routes get facility reference points but never a confirmed total o
   assert.equal(ranking.decision, 'pending');
   assert.equal(ranking.confirmed, false);
   assert.equal(ranking.score, null);
-  assert.equal(ranking.referenceScore, 45);
+  assert.equal(ranking.referenceScore, 40);
   assert.equal(ranking.dimensions.commute.score, 0);
 });
 
@@ -153,4 +153,51 @@ test('positive-weight soft routes need evidence while zero-weight soft routes le
   assert.equal(zero.decision, 'matched');
   assert.equal(zero.weightedMeanMinutes, 90);
   assert.ok(!zero.unknowns.some(label => label.startsWith('회사 A:')));
+});
+
+const salesActivity = counts => ({ version: 1, scope: 'complex-sale', status: 'complete',
+  requestedMonths: ['2026-06', '2026-07', '2026-08'],
+  monthlyCounts: counts.map((count, index) => ({ month: `2026-0${index + 6}`, count })), sourceUpdatedAt: null });
+
+test('otherwise equal homes with frequent sustained sales receive a higher total', () => {
+  const quiet = { ...candidate('quiet'), transactionActivity: salesActivity([1, 0, 0]) };
+  const active = { ...candidate('active'), transactionActivity: salesActivity([10, 10, 10]) };
+  const result = rankPersonalizedCandidates([quiet, active], { ...options, asOfMonth: '2026-09' });
+  assert.equal(result[0].catalogId, 'active');
+  assert.equal(result[0].personalizedRecommendation.dimensions.transactionActivity.score, 5);
+  assert.equal(result[0].personalizedRecommendation.dimensions.transactionActivity.maxScore, 5);
+  assert.ok(result[0].personalizedRecommendation.score > result[1].personalizedRecommendation.score);
+  assert.equal(result[0].personalizedRecommendation.referenceMaxScore, 45);
+});
+
+test('active sales cannot overrule a failed mandatory commute or budget ceiling', () => {
+  const far = { ...candidate('far', [95, 30, 30]), transactionActivity: salesActivity([100, 100, 100]) };
+  const affordable = candidate('near', [30, 30, 30]);
+  const over = { ...candidate('over'), transactionActivity: salesActivity([100, 100, 100]) };
+  over.bestArea.averagePriceManWon = 120001;
+  const result = rankPersonalizedCandidates([far, over, affordable], { ...options, asOfMonth: '2026-09' });
+  assert.equal(result[0].catalogId, 'near');
+  assert.ok(result.slice(1).every(row => row.personalizedRecommendation.decision === 'excluded'));
+});
+
+test('old price-only counts never masquerade as whole-apartment trading activity', () => {
+  const legacy = candidate('legacy');
+  legacy.actualDealCount = 9999;
+  legacy.bestArea.count = 1000;
+  const result = rankPersonalizedCandidates([legacy], options)[0].personalizedRecommendation;
+  assert.equal(result.dimensions.transactionActivity.status, 'unknown');
+  assert.equal(result.dimensions.transactionActivity.score, 0);
+  assert.equal(result.referenceScore, 40);
+  assert.equal(result.coveragePct, 95);
+});
+
+test('the confirmed score remains at most 100 and missing households cannot earn turnover points', () => {
+  const perfect = { ...candidate('perfect', [0, 0, 0]), transactionActivity: salesActivity([100, 100, 100]) };
+  const result = rankPersonalizedCandidates([perfect], { ...options, asOfMonth: '2026-09' })[0].personalizedRecommendation;
+  assert.ok(result.score <= 100);
+  assert.equal(result.referenceScore, 45);
+  const missing = { ...perfect, households: null };
+  const partial = rankPersonalizedCandidates([missing], { ...options, asOfMonth: '2026-09' })[0].personalizedRecommendation;
+  assert.equal(partial.dimensions.transactionActivity.knownMaxScore, 3);
+  assert.equal(partial.coveragePct, 95);
 });

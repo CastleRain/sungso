@@ -1,5 +1,5 @@
-import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.6.1';
-import { createUserSnapshotStore } from './cloud-firestore-store.js?v=4.6.1';
+import { CloudSnapshotError, normalizeCloudSnapshot } from './cloud-snapshot-core.mjs?v=4.18.0';
+import { createUserSnapshotStore } from './cloud-firestore-store.js?v=4.18.0';
 import { createCloudApiReadiness } from './cloud-api-readiness.mjs?v=4.13.0';
 
 const FIREBASE_VERSION = '10.12.0';

@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply.css?v=4.17.0">
+  <link rel="stylesheet" href="./css/supply.css?v=4.18.0">
   <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
@@ -45,11 +45,11 @@
   <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.17.0">
+  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.18.0">
   <link rel="stylesheet" href="./css/history-query.css?v=4.4.0">
   <link rel="stylesheet" href="./css/financial-plan.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-evidence.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.17.0">
+  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.18.0">
   <link rel="stylesheet" href="./css/location-discovery.css?v=4.4.0">
   <link rel="stylesheet" href="./css/map-markers.css?v=4.4.0">
   <link rel="stylesheet" href="./css/personalized-recommendation.css?v=4.4.0">
@@ -60,10 +60,10 @@
   <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
   <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
   <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
-  <link rel="stylesheet" href="./css/destination-editor.css?v=4.17.0">
-  <link rel="stylesheet" href="./css/search-continuity.css?v=4.17.0">
+  <link rel="stylesheet" href="./css/destination-editor.css?v=4.18.0">
+  <link rel="stylesheet" href="./css/search-continuity.css?v=4.18.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.17.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.18.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -378,7 +378,7 @@
                 <div class="location-discovery-actions"><button class="outline-btn" type="button" data-location-all>지역 모두 보기 →</button><button class="outline-btn" type="button" id="toggleRegionMap">지역별 숫자 지도</button></div>
                 <details class="location-data-details"><summary data-location-coverage>단지 위치 확인</summary><small data-location-status></small><button class="outline-btn" type="button" id="refineCandidateLocations">이 범위 상위 20곳 위치·역거리 확인</button></details>
               </section>
-              <details class="location-ranking-explain"><summary>추천 점수는 어떻게 계산하나요?</summary><p>100점 중 실제 통근 55 · 역 접근 10 · 규모 5 · 연식 10 · 주차 10 · 목표가격 10점입니다. 회사가 없으면 강남역 100%, 회사 등록 후에는 입력한 비중을 적용합니다. 시간 초과 제외를 켠 회사만 제한을 적용하고, 초과 허용 회사는 멀어도 비중만큼 통근 부담에 반영합니다. 비중이 있는 회사의 실제 경로를 확인해야 추천점수가 나옵니다.</p><p>통근 부담 = 실제 소요시간 + 도보시간×0.5 + 환승횟수×8 + 버스 부담입니다. 지하철 선호 시 버스시간의 25%를 더하고, 시간 자료가 없으면 버스 구간당 6분 또는 버스 이용 경로 8분을 더해 비교합니다. 이는 선호를 반영한 환산값이며 실제 이동시간과 구분합니다.</p><p>목표가격 이내는 예산 10점, 초과하면 허용 상한까지 점수가 줄어듭니다. 주차는 세대당 희망 대수에 가까울수록 가점입니다. 미확인 항목은 가점을 주거나 다른 항목에 점수를 옮기지 않습니다. 통근 미확인 후보는 생활·예산 참고점수만 표시하며 실제 경로 확인이 필요합니다.</p><p>좌표는 후보의 주소 확인 순서를 정하는 데 사용합니다. 역 접근 10점은 수록 역까지 직선거리 기준으로, 실제 출입구 보행시간을 뜻하지 않습니다.</p><p id="railStationSource">공식 역 좌표 자료 확인 중</p><a href="./docs/personalized-recommendations.md" target="_blank" rel="noopener">자세한 계산 기준과 예시 ↗</a></details>
+              <details class="location-ranking-explain"><summary>추천 점수는 어떻게 계산하나요?</summary><p>100점 중 실제 통근 55 · 역 접근 10 · 규모 3 · 연식 7 · 주차 10 · 목표가격 10 · 매매 활발도 5점입니다. 회사가 없으면 강남역 100%, 회사 등록 후에는 입력한 비중을 적용합니다. 시간 초과 제외를 켠 회사만 제한을 적용하고, 초과 허용 회사는 멀어도 비중만큼 통근 부담에 반영합니다. 비중이 있는 회사의 실제 경로를 확인해야 추천점수가 나옵니다.</p><p>통근 부담 = 실제 소요시간 + 도보시간×0.5 + 환승횟수×8 + 버스 부담입니다. 지하철 선호 시 버스시간의 25%를 더하고, 시간 자료가 없으면 버스 구간당 6분 또는 버스 이용 경로 8분을 더해 비교합니다. 이는 선호를 반영한 환산값이며 실제 이동시간과 구분합니다.</p><p>목표가격 이내는 예산 10점, 초과하면 허용 상한까지 점수가 줄어듭니다. 주차는 세대당 희망 대수에 가까울수록 가점입니다. 미확인 항목은 가점을 주거나 다른 항목에 점수를 옮기지 않습니다. 통근 미확인 후보는 생활·예산 참고점수만 표시하며 실제 경로 확인이 필요합니다.</p><p>좌표는 후보의 주소 확인 순서를 정하는 데 사용합니다. 역 접근 10점은 수록 역까지 직선거리 기준으로, 실제 출입구 보행시간을 뜻하지 않습니다.</p><p>매매 활발도 5점은 단지 전체의 월평균 매매건수 2점, 세대수 대비 거래 비율 2점, 여러 달에 걸친 거래 1점입니다. 면적·예산으로 거르기 전 거래를 사용하며, 누락·오래된 자료는 점수를 보류합니다. 최근월은 신고가 진행 중이고 향후 매도 속도를 뜻하지 않습니다.</p><p id="railStationSource">공식 역 좌표 자료 확인 중</p><a href="./docs/personalized-recommendations.md" target="_blank" rel="noopener">자세한 계산 기준과 예시 ↗</a></details>
               <div class="recommendation-results-head">
               <div><span>MAP-BASED SHORTLIST</span><h2><strong id="recommendationResultCount">0</strong><span id="recommendationResultLabel">개 가격·기본조건 후보</span></h2><p id="recommendationResultSummary"></p></div>
             <div><button class="shortlist-count" id="showRecommendationShortlist" type="button" aria-pressed="false"><i class="ti ti-heart" aria-hidden="true"></i><span class="shortlist-label">관심 후보</span> <strong id="recommendationShortlistCount">0</strong><span class="shortlist-action">보기</span></button><select class="portal-select commute-scope-select" id="recommendationCommuteScope" aria-label="통근 판정 결과 범위"><option value="matched">통근 조건 충족</option><option value="pending">통근 미확인 가격 후보</option><option value="all">가격 후보 전체 · 통근 미확인 포함</option><option value="excluded">조건 제외 사유 보기</option></select></div>
@@ -1021,10 +1021,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.17.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.18.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.17.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.17.0"></script>
+  <script type="module" src="./js/app.js?v=4.18.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.18.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

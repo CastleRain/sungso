@@ -45,20 +45,38 @@ function displayedDimensions(card) {
   return Object.fromEntries(nodes.filter((_, index) => index % 2 === 0).map((label, index) => [label.ownText, nodes[index * 2 + 1]]));
 }
 
+test('the sales score displays whole-complex counts, period and reporting status apart from area counts', t => {
+  browserFixture(t);
+  const candidate = ranked({ ...house(), transactionActivity: {
+    version: 1, scope: 'complex-sale', status: 'complete',
+    requestedMonths: ['2026-07', '2026-08', '2026-09'],
+    monthlyCounts: ['2026-07', '2026-08', '2026-09'].map(month => ({ month, count: 10 })),
+    sourceUpdatedAt: null,
+  } }, { asOfMonth: '2026-09' });
+  const compact = createPersonalizedScoreCard(candidate);
+  assert.equal(displayedDimensions(compact)['매매 활발도'].textContent, '5.0 / 5점');
+  assert.match(compact.textContent, /단지 전체 매매 .*3개월 30건/);
+  assert.match(compact.textContent, /2026-07~2026-09/);
+  assert.match(compact.textContent, /최근월 신고 진행 중/);
+  const detail = createPersonalizedScoreCard(candidate, { detailed: true });
+  assert.match(detail.textContent, /회전율 2.0\/2점/);
+  assert.match(detail.textContent, /매도 속도나 가격 상승을 보장하는 점수는 아닙니다/);
+});
+
 test('missing commute, station and parking evidence renders held scores instead of numerical zero', t => {
   browserFixture(t);
   const candidate = ranked(house());
   assert.equal(candidate.personalizedRecommendation.score, null);
   const card = createPersonalizedScoreCard(candidate);
   const dimensions = displayedDimensions(card);
-  for (const key of ['회사 통근', '역 접근', '주차']) {
+  for (const key of ['회사 통근', '역 접근', '주차', '매매 활발도']) {
     assert.equal(dimensions[key].textContent, '미확인 · 점수 보류');
     assert.equal(dimensions[key].dataset.status, 'unknown');
     assert.doesNotMatch(dimensions[key].textContent, /0\.0|0점/);
   }
   assert.equal(card.all('strong')[0].textContent, '추천 총점 보류');
   assert.match(card.children[0].textContent, /통근 미반영 · 생활·예산 참고 [\d.]+ \/ 45점/);
-  assert.match(dimensions['단지 규모'].textContent, /^4\.5 \/ 5점$/);
+  assert.match(dimensions['단지 규모'].textContent, /^2\.7 \/ 3점$/);
 });
 
 test('verified zero-point commute, distant station and explicit zero parking remain numerical scores', t => {

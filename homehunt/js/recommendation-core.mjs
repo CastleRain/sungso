@@ -264,28 +264,64 @@ export function matchTransactionToCatalog(record, index) {
   return nearbyYearMatches.length === 1 ? nearbyYearMatches[0] : null;
 }
 
-export function aggregateRecommendationRecords(apartments, records, rawFilters, currentYear = new Date().getFullYear()) {
+function recommendationSales(records) {
+  const identified = new Map();
+  const unidentified = [];
+  for (const raw of Array.isArray(records) ? records : []) {
+    if (!raw || raw.dealType !== '매매') continue;
+    const month = String(raw.month || '').replace(/^(\d{4})(\d{2})$/, '$1-$2');
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) continue;
+    const explicitId = ['string', 'number'].includes(typeof raw.id) ? String(raw.id).trim() : '';
+    const key = explicitId ? `${String(raw.regionCode || '')}|${month}|${explicitId}` : '';
+    const cancelled = Boolean(raw.cancelled || raw.cdealType || String(raw.cdealDay || '').trim()
+      || String(raw['해제사유발생일'] || '').trim() || String(raw['해제여부'] || '').trim() === 'O');
+    if (cancelled) {
+      // A cancellation of a known transaction also invalidates an earlier copy,
+      // regardless of row order. A later active copy cannot revive that ID.
+      if (key) identified.set(key, null);
+      continue;
+    }
+    const areaM2 = numeric(raw.areaM2), amountManWon = numeric(raw.amountManWon);
+    if (!(areaM2 > 0) || !(amountManWon > 0)) continue;
+    const record = raw.month === month && raw.areaM2 === areaM2 && raw.amountManWon === amountManWon
+      ? raw : { ...raw, month, areaM2, amountManWon };
+    if (key) {
+      if (identified.get(key) !== null) identified.set(key, record);
+    } else {
+      // Equal date/price/floor alone cannot prove two contracts are duplicates.
+      unidentified.push(record);
+    }
+  }
+  return [...identified.values()].filter(Boolean).concat(unidentified);
+}
+
+export function aggregateRecommendationRecords(apartments, records, rawFilters, currentYear = new Date().getFullYear(), {
+  transactionActivityFor,
+} = {}) {
   const filters = normalizeRecommendationFilters(rawFilters, currentYear);
   const basicCandidates = filterCatalogForRecommendation(apartments, filters, currentYear);
   const index = buildCatalogRecommendationIndex(basicCandidates);
   const grouped = new Map();
 
-  (records || []).forEach((record) => {
-    if (record.dealType !== '매매') return;
+  recommendationSales(records).forEach((record) => {
     const areaM2 = numeric(record.areaM2);
-    if (!compare(areaM2, filters.minAreaM2, filters.areaOperator)) return;
     const apartment = matchTransactionToCatalog(record, index);
     if (!apartment) return;
     const area = (Math.round(areaM2 * 10) / 10).toFixed(1);
     const id = String(apartment.catalogId);
-    if (!grouped.has(id)) grouped.set(id, { apartment, areas: new Map(), records: [] });
+    if (!grouped.has(id)) grouped.set(id, { apartment, areas: new Map(), records: [], activityMonths: new Map() });
     const group = grouped.get(id);
+    group.activityMonths.set(record.month, (group.activityMonths.get(record.month) || 0) + 1);
+    if (!compare(areaM2, filters.minAreaM2, filters.areaOperator)) return;
     if (!group.areas.has(area)) group.areas.set(area, []);
     group.areas.get(area).push(record);
     group.records.push(record);
   });
 
-  return [...grouped.values()].map(({ apartment, areas, records: matchedRecords }) => {
+  return [...grouped.values()].map(({ apartment, areas, records: matchedRecords, activityMonths }) => {
+    const transactionActivity = typeof transactionActivityFor === 'function'
+      ? transactionActivityFor(apartment, [...activityMonths].sort(([left], [right]) => left.localeCompare(right))
+        .map(([month, count]) => ({ month, count }))) : null;
     const areaStats = [...areas.entries()].map(([area, areaRecords]) => {
       const ordered = [...areaRecords].sort((a, b) => String(b.month).localeCompare(String(a.month)) || numeric(b.day) - numeric(a.day));
       const prices = ordered.map((record) => numeric(record.amountManWon)).filter(Boolean);
@@ -315,6 +351,7 @@ export function aggregateRecommendationRecords(apartments, records, rawFilters, 
       qualifyingAreas,
       bestArea,
       actualDealCount: matchedRecords.length,
+      ...(transactionActivity ? { transactionActivity } : {}),
       priceVerified: true,
       transportVerified: false,
     };

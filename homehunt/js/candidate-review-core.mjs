@@ -1,6 +1,7 @@
 import { sanitizePersistedRecommendationCandidate } from './recommendation-persistence-core.mjs';
 import { formatPriceManwon } from './display-format.mjs';
 import { normalizePriceCoverage } from './price-coverage-core.mjs?v=4.6.1';
+import { normalizeTransactionActivity } from './transaction-activity-core.mjs';
 
 const VERSION = 1;
 const PREFIX = 'review-conditions-v1:';
@@ -154,6 +155,10 @@ function safeHousing(candidate) {
   if (typeof raw.id === 'string' || typeof raw.id === 'number') result.id = String(raw.id);
   if (Array.isArray(raw.aliases)) result.aliases = raw.aliases.filter(item => typeof item === 'string').map(text);
   if (record(raw.bestArea)) result.bestArea = safeArea(raw.bestArea);
+  if (own(raw, 'transactionActivity')) {
+    const activity = normalizeTransactionActivity(raw.transactionActivity);
+    if (activity) result.transactionActivity = activity;
+  }
   if (own(raw, 'priceCoverage')) {
     result.priceCoverage = normalizePriceCoverage(raw.priceCoverage);
     result.priceProvisional = raw.priceProvisional === true || result.priceCoverage.status !== 'complete';
@@ -190,6 +195,33 @@ export function compareBookmarkConditions(bookmark, snapshot) {
     || typeof metadata.conditionSignature !== 'string' || !metadata.conditionSignature.startsWith(PREFIX)
     || !signature) return 'unknown';
   return metadata.conditionSignature === signature ? 'same' : 'changed';
+}
+
+/** Update only independently sourced public activity after an explicit refresh.
+ * A bookmark's prices, user notes and saved conditions are not refreshed by
+ * this merge. Live routes, scores and verdicts from `freshCandidates` never
+ * enter saved data. Conflicting or ambiguous identities retain the old facts.
+ */
+export function mergeSavedTransactionActivity(shortlist = [], freshCandidates = []) {
+  const catalogId = candidate => ['string', 'number'].includes(typeof candidate?.catalogId)
+    ? String(candidate.catalogId).trim() : '';
+  const freshById = new Map();
+  for (const candidate of Array.isArray(freshCandidates) ? freshCandidates : []) {
+    const key = catalogId(candidate);
+    const activity = normalizeTransactionActivity(candidate?.transactionActivity);
+    if (!key || !activity) continue;
+    if (!freshById.has(key)) freshById.set(key, []);
+    freshById.get(key).push({ candidate, activity });
+  }
+  return (Array.isArray(shortlist) ? shortlist : []).map(saved => {
+    const result = clone(saved);
+    if (!record(saved) || !catalogId(saved)) return result;
+    const matching = (freshById.get(catalogId(saved)) || []).filter(({ candidate }) =>
+      !['address', 'aptSeq'].some(key => text(saved[key]) && text(candidate[key])
+        && text(saved[key]) !== text(candidate[key])));
+    if (matching.length === 1) result.transactionActivity = clone(matching[0].activity);
+    return result;
+  });
 }
 
 /**

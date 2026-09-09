@@ -1,8 +1,9 @@
 import { evaluateCommuteBalance, normalizeDestinations } from './commute-balance-core.mjs';
 import { rankLocationCandidates } from './location-ranking-core.mjs';
 import { recommendationBudget } from './personalized-context-core.mjs';
+import { transactionActivityDimension } from './transaction-activity-core.mjs?v=4.18.0';
 
-export const PERSONALIZED_SCORE_WEIGHTS = Object.freeze({ commute: 55, station: 10, households: 5, age: 10, parking: 10, budget: 10 });
+export const PERSONALIZED_SCORE_WEIGHTS = Object.freeze({ commute: 55, station: 10, households: 3, age: 7, parking: 10, budget: 10, transactionActivity: 5 });
 
 function finite(value) {
   if (value === null || value === undefined || typeof value === 'boolean' || typeof value === 'string' && !value.trim()) return null;
@@ -95,10 +96,11 @@ export function rankPersonalizedCandidates(candidates = [], options = {}) {
         source: '실제 제공자 경로 + 입력한 목적지 비중·선호',
       },
       station: rescaleDimension(location.dimensions.station, 10),
-      households: rescaleDimension(location.dimensions.households, 5),
-      age: rescaleDimension(location.dimensions.age, 10),
+      households: rescaleDimension(location.dimensions.households, PERSONALIZED_SCORE_WEIGHTS.households),
+      age: rescaleDimension(location.dimensions.age, PERSONALIZED_SCORE_WEIGHTS.age),
       parking: parkingDimension(candidate, options),
       budget: budgetDimension(candidate, options),
+      transactionActivity: transactionActivityDimension(candidate, { asOfMonth: options.asOfMonth, maxScore: PERSONALIZED_SCORE_WEIGHTS.transactionActivity }),
     };
     const gateReasons = [];
     if (commuteBalance.decision === 'excluded') {
@@ -121,16 +123,16 @@ export function rankPersonalizedCandidates(candidates = [], options = {}) {
       if (evaluation.unresolvedModes.length && evaluation.decision === 'pending') unknowns.push(`${evaluation.destination.label}: 대체 교통수단 확인 전`);
     }
     return { ...candidate, personalizedRecommendation: {
-      version: 1, decision, confirmed: decision === 'matched',
+      version: 2, decision, confirmed: decision === 'matched',
       score: decision === 'matched' ? round(referenceScore + dimensions.commute.score) : null,
       referenceScore, referenceMaxScore: 45, maxScore: 100,
-      coveragePct: Object.values(dimensions).filter(dimension => dimension.status !== 'unknown').reduce((sum, dimension) => sum + dimension.maxScore, 0),
+      coveragePct: Object.values(dimensions).filter(dimension => dimension.status !== 'unknown').reduce((sum, dimension) => sum + (dimension.knownMaxScore ?? dimension.maxScore), 0),
       weightedCostMinutes: weightedCost,
       weightedMeanMinutes: commuteBalance.weightedMeanMinutes,
       worstRatio: commuteBalance.worstRatio,
       gateReasons, unknowns: [...new Set(unknowns)], dimensions, commuteBalance,
       destinations: destinations.map(({ id, label, weightPercent, normalizedWeightPercent, weightSource, required, maxMinutes }) => ({ id, label, weightPercent, normalizedWeightPercent, weightSource, required, maxMinutes })),
-      scoreMeaning: '통근55·역10·세대5·연식10·주차10·예산10의 입력 선호점수. 미확인 항목은 미확인으로 남기고 점수를 재분배하지 않습니다.',
+      scoreMeaning: '통근55·역10·세대3·연식7·주차10·예산10·거래활발도5의 입력 선호점수. 미확인 항목은 미확인으로 남기고 점수를 재분배하지 않습니다.',
       costFormula: '실제시간 + 도보×0.5 + 환승×8 + 지하철 선호 시 버스 부담; 실제 소요시간과 다른 선호 환산값',
     } };
   });

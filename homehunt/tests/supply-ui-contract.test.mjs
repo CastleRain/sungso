@@ -57,7 +57,7 @@ test('local and hosted supply feeds use their intended endpoints', async () => {
 
   assert.match(config, /supplyStaticUrl:\s*'\.\/data\/home-supply\.json'/);
   assert.match(config, /supplyFeedUrl:\s*IS_LOCAL_RUNTIME\s*\?\s*`\$\{LOCAL_MARKET_API\}\/supply`/);
-  assert.match(config, /appVersion:\s*'2\.10\.1'/);
+  assert.match(config, /appVersion:\s*'2\.11\.0'/);
 });
 
 test('scheduled collection refreshes branch-based GitHub Pages after data changes', async () => {
