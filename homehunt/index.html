@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply.css?v=4.15.0">
+  <link rel="stylesheet" href="./css/supply.css?v=4.16.0">
   <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
@@ -60,10 +60,10 @@
   <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
   <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
   <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
-  <link rel="stylesheet" href="./css/destination-editor.css?v=4.15.0">
-  <link rel="stylesheet" href="./css/search-continuity.css?v=4.15.0">
+  <link rel="stylesheet" href="./css/destination-editor.css?v=4.16.0">
+  <link rel="stylesheet" href="./css/search-continuity.css?v=4.16.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.15.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.16.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -341,13 +341,14 @@
               <div class="results-sheet-head"><div><span>OUR HOME WORKSPACE</span><strong>찾고, 확인하고, 결정하기</strong></div><button class="sheet-close-button" id="closeRecommendationResults" type="button" aria-label="후보 결과 패널 접기"><i class="ti ti-chevron-right" aria-hidden="true"></i></button></div>
               <nav class="dw-tabs" role="tablist" aria-label="탐색 작업 공간">
                 <button id="decisionTabToday" type="button" role="tab" aria-selected="true" aria-controls="decisionToday" data-decision-tab="today">지금 확인</button>
-                <button id="decisionTabCandidates" type="button" role="tab" aria-selected="false" aria-controls="recommendationResults" tabindex="-1" data-decision-tab="candidates">가격 후보</button>
+                <button id="decisionTabCandidates" type="button" role="tab" aria-selected="false" aria-controls="decisionCandidates" tabindex="-1" data-decision-tab="candidates">가격 후보</button>
                 <button id="decisionTabRegions" type="button" role="tab" aria-selected="false" aria-controls="decisionRegions" tabindex="-1" data-decision-tab="regions">지역 범위</button>
               </nav>
-              <section id="recommendationSearchContinuity" class="search-continuity" aria-label="계정 검색 이어 보기" hidden></section>
-              <div id="recommendationOfficialProgress" hidden></div>
               <div id="decisionToday" role="tabpanel" aria-labelledby="decisionTabToday"></div>
               <div id="decisionRegions" role="tabpanel" aria-labelledby="decisionTabRegions" hidden></div>
+              <div id="decisionCandidates" role="tabpanel" aria-labelledby="decisionTabCandidates" hidden>
+              <section id="recommendationSearchContinuity" class="search-continuity" aria-label="계정 검색 이어 보기" hidden></section>
+              <div id="recommendationOfficialProgress" hidden></div>
               <div class="recommendation-decision-bar" id="recommendationDecisionBar" aria-live="polite">
             <article><span id="decisionCandidateLabel">예산 후보</span><strong id="decisionAffordableCount">0</strong><small id="decisionCandidateDetail">실거래·면적 확인</small></article>
             <article><span>정밀 검증</span><strong id="decisionVerifiedCount">0</strong><small id="decisionVerifiedDetail">아직 실행 전</small></article>
@@ -386,6 +387,7 @@
               <button class="outline-btn recommendation-load-more" id="recommendationLoadMore" type="button" hidden>후보 더 보기</button>
               <div class="recommendation-empty" id="recommendationEmpty" hidden><span><i class="ti ti-home-search" aria-hidden="true"></i></span><strong id="recommendationEmptyTitle">실제 거래로 확인된 후보가 없어요</strong><p id="recommendationEmptyMessage">조건을 몰래 완화하지 않았습니다. 기간을 늘리거나 예산·연식 조건을 하나씩 바꿔보세요.</p></div>
               <p class="recommendation-disclaimer">추천 가격은 국토부에 신고된 과거 매매 실거래이며 현재 판매 중인 매물 호가나 계약 가능 가격이 아닙니다. 실제 계약 전 등기·권리·대출·정비계획을 별도로 확인하세요.</p>
+              </div>
               <button class="dw-button" type="button" data-open-decision-compare>판단 보드 0/3</button>
             </aside>
           </div>
@@ -474,7 +476,7 @@
           <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="soon" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon soon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>7일 안에 시작</small><strong id="supplySoonCount">0</strong><em>접수 예정</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
           <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="newlywed" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon newlywed"><i class="ti ti-hearts" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>신혼 대상 확인</small><strong id="supplyNewlywedCount">0</strong><em>공식 구조화 항목 기준</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
         </div>
-        <p class="supply-summary-help">카드를 눌러 골라보세요. 숫자는 아래 지역·검색 조건 기준이며, 접수 상태 전체에서 셉니다.</p>
+        <p class="supply-summary-help">카드를 눌러 골라보세요. 신혼 대상은 선택한 접수 상태를 따르며, 기본은 마감 제외입니다. 과거 공고는 접수 상태를 전체·마감으로 바꿔 확인하세요.</p>
         <div class="supply-quick-filter-status" id="supplyQuickFilterStatus" aria-live="polite" hidden><span id="supplyQuickFilterLabel"></span><button id="clearSupplyQuickFilter" type="button"><i class="ti ti-x" aria-hidden="true"></i>빠른 보기 해제</button></div>
 
         <section class="supply-command" aria-label="분양 공고 검색 조건">
@@ -1018,10 +1020,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.15.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.16.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.15.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.15.0"></script>
+  <script type="module" src="./js/app.js?v=4.16.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.16.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

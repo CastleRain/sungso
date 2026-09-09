@@ -13,6 +13,8 @@ export function createDecisionWorkspace(api) {
   const panel = document.querySelector('#recommendationResultPanel');
   const today = document.querySelector('#decisionToday');
   const regions = document.querySelector('#decisionRegions');
+  const candidatesPanel = document.querySelector('#decisionCandidates');
+  const tabButtons = [...document.querySelectorAll('button[data-decision-tab]')];
   let tab = 'today', selected = null, keys = [], lastCoverage = null, currentCoverage = null;
   let detailRenderVersion = 0;
   try { const value = JSON.parse(localStorage.getItem(KEY) || '[]'); keys = Array.isArray(value) ? value.filter((x) => typeof x === 'string').slice(0, 3) : []; } catch { /* optional preference */ }
@@ -30,10 +32,13 @@ export function createDecisionWorkspace(api) {
     return `${change.percent >= 0 ? '+' : ''}${change.percent.toFixed(1)}% · 방문 전후 같은 면적 평균 · ${entry.latest || '기준일 확인'}${change.confidence === 'low' ? ' · 표본 적음' : ''}`;
   }
   function setTab(value) {
+    const previous = tab;
     tab = ['today', 'candidates', 'regions'].includes(value) ? value : 'today';
     panel.dataset.decisionTab = tab;
     today.hidden = tab !== 'today'; regions.hidden = tab !== 'regions';
-    document.querySelectorAll('[data-decision-tab]').forEach((b) => { b.setAttribute('aria-selected', String(b.dataset.decisionTab === tab)); b.tabIndex = b.dataset.decisionTab === tab ? 0 : -1; });
+    candidatesPanel.hidden = tab !== 'candidates';
+    tabButtons.forEach((b) => { b.setAttribute('aria-selected', String(b.dataset.decisionTab === tab)); b.tabIndex = b.dataset.decisionTab === tab ? 0 : -1; });
+    if (previous !== tab) panel.scrollTop = 0;
     api.showResults();
   }
   function toggle(kind, record) {
@@ -203,9 +208,9 @@ export function createDecisionWorkspace(api) {
     import('../financial-plan.js?v=4.0.1').then((module) => { if (plans.isConnected) plans.append(module.renderFinancialComparison()); }).catch(() => {});
   }
   function openCompare() { renderCompare(); api.open('decisionCompareModal'); }
-  document.querySelectorAll('[data-decision-tab]').forEach((b) => {
+  tabButtons.forEach((b) => {
     b.addEventListener('click', () => setTab(b.dataset.decisionTab));
-    b.addEventListener('keydown', (e) => { const values = ['today', 'candidates', 'regions']; let index = values.indexOf(tab); if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return; e.preventDefault(); index = e.key === 'Home' ? 0 : e.key === 'End' ? 2 : (index + (e.key === 'ArrowRight' ? 1 : 2)) % 3; setTab(values[index]); document.querySelector(`[data-decision-tab="${values[index]}"]`).focus(); });
+    b.addEventListener('keydown', (e) => { const values = ['today', 'candidates', 'regions']; let index = values.indexOf(tab); if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return; e.preventDefault(); index = e.key === 'Home' ? 0 : e.key === 'End' ? 2 : (index + (e.key === 'ArrowRight' ? 1 : 2)) % 3; setTab(values[index]); tabButtons.find(button => button.dataset.decisionTab === values[index])?.focus(); });
   });
   document.querySelectorAll('[data-open-decision-compare]').forEach((b) => b.addEventListener('click', openCompare));
   document.querySelectorAll('[data-close-decision]').forEach((b) => b.addEventListener('click', () => api.close(b.dataset.closeDecision)));

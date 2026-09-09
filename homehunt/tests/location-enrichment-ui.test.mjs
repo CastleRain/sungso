@@ -47,6 +47,7 @@ function refineHarness(overrides = {}) {
     candidateLocations: { enrichExactCandidates: async (rows) => ({ candidates: rows.map(located), cancelled: false }) },
   };
   Object.assign(sandbox, {
+    decisionWorkspace: null,
     currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
     renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
     loadApartmentCatalog: async () => ({ apartments: [] }),
@@ -143,6 +144,7 @@ test('an older map refresh cannot restore another region after a layer change, a
     activeRecommendationDestinations: () => [],
   };
   Object.assign(sandbox, {
+    decisionWorkspace: null,
     currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
     renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
     loadApartmentCatalog: async () => ({ apartments: [] }),
@@ -179,6 +181,7 @@ test('district reference completion preserves newer apartment coordinates, route
     hideRecommendationMapStatus() {}, fetchCommuteQuota() {},
   };
   Object.assign(sandbox, {
+    decisionWorkspace: null,
     currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
     renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
     loadApartmentCatalog: async () => ({ apartments: [] }),
@@ -268,6 +271,7 @@ test('without workplaces, price search and location enrichment use Gangnam at 10
     } }),
   };
   Object.assign(sandbox, {
+    decisionWorkspace: null,
     currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
     renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
     loadApartmentCatalog: async () => ({ apartments: [] }),

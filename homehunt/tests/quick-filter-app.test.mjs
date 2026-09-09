@@ -62,6 +62,7 @@ function harness({ source = 'manual', linked = available() } = {}) {
       recommendationLocationBusy: false },
     $: selector => controls.get(selector.slice(1)) || null,
     recommendationQuickApplyPending: false,
+    recommendationRunToken: 1,
     recommendationQuickFilters: { close() {} },
     wecostTargetState: sharedService.getState(),
     wecostTargetPriceService: {
@@ -138,20 +139,47 @@ test('one quick-filter apply updates selected controls and invokes the criteria 
   assert.equal(h.sandbox.recommendationQuickApplyPending, false);
 });
 
-for (const flag of ['recommendationRunning', 'commuteVerificationRunning', 'recommendationLocationBusy', 'recommendationQuickApplyPending']) {
-  test(`quick-filter apply is blocked while ${flag} is active`, async () => {
+for (const flag of ['recommendationRunning', 'commuteVerificationRunning', 'recommendationLocationBusy']) {
+  test(`quick-filter apply can update conditions while ${flag} is active without starting another query`, async () => {
     const h = harness();
-    if (flag === 'recommendationQuickApplyPending') h.sandbox[flag] = true;
-    else h.sandbox.state[flag] = true;
-    const before = h.values();
-    await assert.rejects(h.apply({ recommendHouseholds: '500' }, 'households'), /진행 중인 조회/);
-    assert.deepEqual(h.values(), before);
-    assert.deepEqual(h.calls.writes, []);
-    assert.equal(h.calls.handler, 0);
+    h.sandbox.state[flag] = true;
+    await h.apply({ recommendHouseholds: '500' }, 'households');
+    assert.equal(h.controls.get('recommendHouseholds').value, '500');
+    assert.equal(h.calls.handler, 1);
     assert.equal(h.calls.previewCreated, 0);
     assert.equal(h.calls.search, 0);
   });
 }
+
+test('a simultaneous draft apply remains blocked without writing fields', async () => {
+  const h = harness();
+  h.sandbox.recommendationQuickApplyPending = true;
+  const before = h.values();
+  await assert.rejects(h.apply({ recommendHouseholds: '500' }, 'households'), /조건을 적용하고/);
+  assert.deepEqual(h.values(), before);
+  assert.equal(h.calls.handler, 0);
+});
+
+test('running status leaves filters, destination editing and cancel available while preventing duplicate search', () => {
+  const nodes = new Map();
+  const $ = key => {
+    if (!nodes.has(key)) nodes.set(key, { disabled: false, hidden: false, dataset: {}, style: {},
+      classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } } });
+    return nodes.get(key);
+  };
+  const controls = ['#recommendMaxAge', '#recommendSeoul', '#confirmCompanyLocation', '#recommendBudgetSource'].map($);
+  const linkedSlider = $('#recommendMaxPriceRange'); linkedSlider.disabled = true;
+  const context = vm.createContext({ $, $$: () => [...controls, linkedSlider] });
+  vm.runInContext(actualFunction('setRecommendationStatus'), context);
+  context.setRecommendationStatus('running', '조회 중', '조건 수정 가능', { completed: 1, total: 3 });
+  assert.equal($('#applyRecommendationFilters').disabled, true);
+  assert.equal($('#runRecommendation').disabled, false);
+  assert.equal($('#cancelRecommendation').hidden, false);
+  assert.ok(controls.every(control => !control.disabled));
+  assert.equal(linkedSlider.disabled, true);
+  context.setRecommendationStatus('', '조건 변경', '다시 검색');
+  assert.equal($('#applyRecommendationFilters').disabled, false);
+});
 
 test('manual to WeCost waits for the official single-field read, commits that amount and preserves the previous manual price', async () => {
   const h = harness();
@@ -248,16 +276,27 @@ test('an external condition edit during the awaited read prevents the old popup 
   assert.equal(h.calls.sharedEvents, 0);
 });
 
-test('a search starting during the awaited read blocks the draft commit and preserves the original fields', async () => {
+test('background verification starting during a budget read does not lock a still-current draft', async () => {
+  const h = harness();
+  const wait = deferred(); h.flow.preview = () => wait.promise;
+  const pending = h.apply({ recommendBudgetSource: 'wecost' }, 'price');
+  h.sandbox.state.commuteVerificationRunning = true;
+  wait.resolve(response());
+  await pending;
+  assert.equal(h.controls.get('recommendBudgetSource').value, 'wecost');
+  assert.equal(h.calls.handler, 1);
+  assert.equal(h.calls.search, 0);
+});
+
+test('a newer price search during a budget read keeps its conditions and discards the old draft', async () => {
   const h = harness();
   const wait = deferred(); h.flow.preview = () => wait.promise;
   const before = h.values();
   const pending = h.apply({ recommendBudgetSource: 'wecost' }, 'price');
-  h.sandbox.state.commuteVerificationRunning = true;
+  h.sandbox.recommendationRunToken += 1;
   wait.resolve(response());
   await assert.rejects(pending, /조건이나 조회 상태가 바뀌었습니다/);
   assert.deepEqual(h.values(), before);
-  assert.deepEqual(h.calls.writes, []);
   assert.equal(h.calls.handler, 0);
 });
 

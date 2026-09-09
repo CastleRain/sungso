@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, summarizeSupplyNotices } from '../js/supply-core.mjs';
+import { buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, summarizeSupplyNotices, newlywedApplicationContext } from '../js/supply-core.mjs';
 
 const now = new Date('2026-09-08T15:00:00Z'); // September 9 in Korea.
 const active = { regions: ['서울', '경기'], statuses: ['open', 'upcoming', 'unknown'], excludeClosed: true };
@@ -25,16 +25,77 @@ const feed = [
 ];
 const options = { now, unreadIds: ['closed', 'unknown', 'removed'] };
 
-test('each summary count equals its click result, including closed new and newlywed notices', () => {
+test('each summary count equals its click result and newlywed defaults to non-closed notices', () => {
   const ordinary = buildSupplyQuickFilterView(feed, active, options);
-  assert.deepEqual(ordinary.counts, { new: 2, open: 1, soon: 1, newlywed: 2 });
+  assert.deepEqual(ordinary.counts, { new: 2, open: 1, soon: 1, newlywed: 1 });
   assert.equal(ordinary.notices.length, 4);
   for (const key of Object.keys(SUPPLY_QUICK_FILTER_LABELS)) {
     const result = buildSupplyQuickFilterView(feed, active, { ...options, quickFilter: key });
     assert.equal(result.notices.length, ordinary.counts[key]);
   }
   assert.deepEqual(buildSupplyQuickFilterView(feed, active, { ...options, quickFilter: 'new' }).notices.map(({ id }) => id), ['closed', 'unknown']);
-  assert.deepEqual(buildSupplyQuickFilterView(feed, active, { ...options, quickFilter: 'newlywed' }).notices.map(({ id }) => id), ['open', 'closed']);
+  assert.deepEqual(buildSupplyQuickFilterView(feed, active, { ...options, quickFilter: 'newlywed' }).notices.map(({ id }) => id), ['open']);
+});
+
+test('newlywed archive requires an explicit All or Closed state and still matches its displayed count', () => {
+  for (const [preferences, ids] of [
+    [{}, ['open']],
+    [{ statuses: [], excludeClosed: false }, ['open', 'closed']],
+    [{ statuses: ['closed'], excludeClosed: false }, ['closed']],
+  ]) {
+    const view = buildSupplyQuickFilterView(feed, preferences, { ...options, quickFilter: 'newlywed' });
+    assert.deepEqual(view.notices.map(({ id }) => id), ids);
+    assert.equal(view.counts.newlywed, ids.length);
+  }
+});
+
+test('expired newlywed special application is not extended by open general application', () => {
+  const mixed = notice('mixed', { newlywedSupplyAvailable: true, schedules: [
+    { kind: 'application', audience: 'special-supply', label: '특별공급', startDate: '2026-09-08', endDate: '2026-09-08' },
+    { kind: 'application', audience: 'general', label: '일반공급', startDate: '2026-09-09', endDate: '2026-09-12' },
+  ] });
+  assert.equal(newlywedApplicationContext(mixed, now).status, 'closed');
+  assert.equal(newlywedApplicationContext(mixed, new Date('2026-09-08T14:59:59Z')).status, 'open');
+  assert.equal(buildSupplyQuickFilterView([mixed], active, { now, quickFilter: 'newlywed' }).notices.length, 0);
+  const archive = buildSupplyQuickFilterView([mixed], { statuses: ['closed'] }, { now, quickFilter: 'newlywed' });
+  assert.equal(archive.counts.newlywed, 1);
+  assert.deepEqual(newlywedApplicationContext(mixed, now).schedules.map(({ label }) => label), ['특별공급']);
+});
+
+test('specific newlywed dates take precedence over other special supply windows', () => {
+  const mixed = notice('specific', { newlywedSupplyAvailable: true, schedules: [
+    { kind: 'application', audience: 'newlywed', label: '신혼부부', startDate: '2026-09-08', endDate: '2026-09-08' },
+    { kind: 'application', audience: 'special-supply', label: '특별공급', startDate: '2026-09-10', endDate: '2026-09-12' },
+  ] });
+  const context = newlywedApplicationContext(mixed, now);
+  assert.equal(context.status, 'closed');
+  assert.equal(context.schedules.length, 1);
+  assert.equal(buildSupplyQuickFilterView([mixed], active, { now, quickFilter: 'newlywed' }).counts.newlywed, 0);
+});
+
+test('newlywed town applications apply to the town while absent dates remain unconfirmed', () => {
+  const town = notice('town', { program: 'newlywed-town' });
+  const missing = notice('missing', { newlywedSupplyAvailable: true, schedules: [] });
+  const onlyGeneral = notice('general-only', { newlywedSupplyAvailable: true, schedules: [
+    { kind: 'application', audience: 'general', label: '일반공급', startDate: '2026-09-09', endDate: '2026-09-09' },
+  ] });
+  assert.equal(newlywedApplicationContext(town, now).status, 'open');
+  assert.equal(newlywedApplicationContext({ ...town, schedules: [], applicationStartDate: '2026-09-09', applicationEndDate: '2026-09-09' }, now).status, 'open');
+  assert.equal(newlywedApplicationContext(missing, now).status, 'unknown');
+  assert.equal(newlywedApplicationContext(onlyGeneral, now).status, 'unknown');
+  assert.equal(buildSupplyQuickFilterView([town, missing, onlyGeneral], active, { now, quickFilter: 'newlywed' }).counts.newlywed, 3);
+  assert.equal(buildSupplyQuickFilterView([town, missing, onlyGeneral], { statuses: ['open'] }, { now, quickFilter: 'newlywed' }).counts.newlywed, 1);
+});
+
+test('official ended notice periods and cancellation are excluded without inventing application dates', () => {
+  const ended = notice('ended-lh', { source: 'lh', program: 'newlywed-town', schedules: [], closeDate: '2026-09-08' });
+  const ongoing = notice('ongoing-lh', { source: 'lh', program: 'newlywed-town', schedules: [], closeDate: '2026-09-12' });
+  const cancelled = notice('cancelled', { program: 'newlywed-town', status: 'cancelled' });
+  assert.equal(newlywedApplicationContext(ended, now).status, 'closed');
+  assert.equal(newlywedApplicationContext(ongoing, now).status, 'unknown');
+  assert.equal(newlywedApplicationContext(cancelled, now).status, 'closed');
+  const view = buildSupplyQuickFilterView([ended, ongoing, cancelled], active, { now, quickFilter: 'newlywed' });
+  assert.deepEqual(view.notices.map(({ id }) => id), ['ongoing-lh']);
 });
 
 test('summary scope preserves region, query, favorites, price, area and minimum supply', () => {
@@ -145,6 +206,32 @@ test('actual app renders selected state, matching counts, clear action and resto
   assert.equal($('#supplyQuickFilterStatus').hidden, true);
   assert.equal($('#supplyStatusFilter').value, 'closed');
   assert.ok(buttons.every(({ attributes }) => attributes['aria-pressed'] === 'false'));
+  const historical = buildSupplyQuickFilterView(feed, { statuses: ['closed'] }, { ...options, quickFilter: 'newlywed' });
+  context.renderSupplyQuickFilters(historical);
+  assert.equal($('#supplyStatusFilter').value, 'closed');
+  assert.equal($('#supplyNewlywedCount').textContent, '1');
+  assert.equal($('#supplyQuickFilterStatus').hidden, false);
+});
+
+test('actual status selector preserves newlywed quick view when opening historical notices', () => {
+  let handler;
+  const state = { supplyFilters: { quickFilter: 'newlywed', status: 'active', program: 'all', query: '용인' } };
+  let renders = 0;
+  const context = vm.createContext({ state, renderSupply: () => { renders += 1; },
+    $: () => ({ addEventListener(type, listener) { assert.equal(type, 'change'); handler = listener; } }),
+  });
+  const start = app.indexOf("$('#supplyStatusFilter').addEventListener('change'");
+  const end = app.indexOf("$('#supplyProgramFilter').addEventListener", start);
+  vm.runInContext(app.slice(start, end), context);
+  handler({ target: { value: 'recent' } });
+  assert.equal(state.supplyFilters.quickFilter, 'newlywed');
+  assert.equal(state.supplyFilters.status, 'recent');
+  handler({ target: { value: 'closed' } });
+  assert.equal(state.supplyFilters.quickFilter, 'newlywed');
+  assert.equal(state.supplyFilters.status, 'closed');
+  assert.equal(state.supplyFilters.query, '용인');
+  assert.equal(state.supplyFilters.program, 'all');
+  assert.equal(renders, 2);
 });
 
 test('summary controls use keyboard-accessible buttons and do not acknowledge new notices on selection', async () => {

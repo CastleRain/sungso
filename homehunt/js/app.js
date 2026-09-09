@@ -1,8 +1,8 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.15.0';
-import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.15.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.15.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.16.0';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.16.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.16.0';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.15.0';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.16.0';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
 import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
@@ -15,11 +15,11 @@ import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js
 import { mountCloudPanel } from './cloud-panel.js?v=4.13.1';
 import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.6.1';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.1';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.16.0';
 import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.15.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.15.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.16.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.16.0';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -72,15 +72,15 @@ import {
 } from './recommendation-verification-core.mjs?v=4.4.0';
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
-  normalizeSupplyNotice, sortSupplyNotices,
-} from './supply-core.mjs?v=4.15.0';
+  normalizeSupplyNotice, sortSupplyNotices, newlywedApplicationContext,
+} from './supply-core.mjs?v=4.16.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.15.0';
+} from './ui-format.js?v=4.16.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -389,8 +389,9 @@ async function runAutomaticCommuteCandidate(candidate, { callBudget } = {}) {
     || !expectedCalls || expectedCalls > callBudget) return { actualCalls: 0, decision: 'pending', error: true };
   state.commuteVerificationRunning = true;
   state.recommendationCommuteError = '';
-  beginCommuteBatch([candidate], destinations, provider);
+  const requestReceipt = beginCommuteBatch([candidate], destinations, provider);
   let error = false;
+  let finishedReceipt;
   try {
     await verifyRecommendationCommutes([candidate], filters, token, destinations,
       { transitProvider: provider, verificationStage: 'final', earlyExit: true });
@@ -403,12 +404,12 @@ async function runAutomaticCommuteCandidate(candidate, { callBudget } = {}) {
     error = true;
     if (token === state.recommendationGeocodeToken) state.recommendationCommuteError = `${failure.message || '통근 확인에 실패했습니다.'} 자동 확인을 멈췄습니다.`;
   } finally {
-    state.commuteVerificationRunning = false;
-    finishCommuteBatch();
+    if (token === state.recommendationGeocodeToken) state.commuteVerificationRunning = false;
+    finishedReceipt = finishCommuteBatch(requestReceipt, { contextChanged: token !== state.recommendationGeocodeToken });
     renderRecommendationResults();
   }
   const current = state.recommendationResults.find(item => recommendationCandidateId(item) === recommendationCandidateId(candidate));
-  return { actualCalls: state.lastCommuteBatch?.actualTransitCalls ?? null,
+  return { actualCalls: finishedReceipt?.actualTransitCalls ?? null,
     decision: current ? candidateCommuteDecision(current) : 'pending', error };
 }
 const wecostTargetPriceService = createWecostTargetPriceService();
@@ -1644,8 +1645,13 @@ function toggleSupplyFavorite(id) {
 
 function makeSupplyCard(notice) {
   const id = String(notice.id);
-  const status = supplyStatusMeta(notice);
-  const schedule = supplyPrimarySchedule(notice);
+  const newlywed = state.supplyFilters.quickFilter === 'newlywed' ? newlywedApplicationContext(notice, new Date()) : null;
+  const status = newlywed ? {
+    status: newlywed.status,
+    label: { open: '신혼 접수 중', upcoming: '신혼 접수 예정', closed: '신혼 접수 마감', unknown: '신혼 일정 확인' }[newlywed.status],
+    className: ['open', 'upcoming'].includes(newlywed.status) ? newlywed.status : '',
+  } : supplyStatusMeta(notice);
+  const schedule = supplyPrimarySchedule(newlywed ? { schedules: newlywed.schedules } : notice);
   const isUnread = (state.supplySeen?.unreadIds || []).includes(id);
   const favorite = state.supplyFavorites.includes(id);
   const newlywedUnits = supplyNewlywedUnits(notice);
@@ -1909,7 +1915,7 @@ function renderSupply() {
   const filtered = sortSupplyNotices(summary.notices, state.supplyFilters.sort, now);
   renderSupplyQuickFilters(summary);
   $('#supplyResultCount').textContent = filtered.length.toLocaleString('ko-KR');
-  $('#supplyResultDescription').textContent = `${state.supplyFilters.region === 'all' ? '서울·경기' : state.supplyFilters.region} · ${SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter] || $('#supplyStatusFilter').selectedOptions[0]?.textContent || '공고'}${state.supplyFilters.program !== 'all' ? ` · ${$('#supplyProgramFilter').selectedOptions[0]?.textContent}` : ''}`;
+  $('#supplyResultDescription').textContent = `${state.supplyFilters.region === 'all' ? '서울·경기' : state.supplyFilters.region} · ${SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter] || $('#supplyStatusFilter').selectedOptions[0]?.textContent || '공고'}${summary.quickFilter === 'newlywed' ? ` · ${$('#supplyStatusFilter').selectedOptions[0]?.textContent || '접수 상태'}` : ''}${state.supplyFilters.program !== 'all' ? ` · ${$('#supplyProgramFilter').selectedOptions[0]?.textContent}` : ''}`;
   renderSupplyMatchSummary();
   if (!filtered.length) {
     const shConnected = (state.supplyFeed?.sources || []).some((source) => String(source.id || '').toLowerCase() === 'sh' && ['ok', 'live', 'success'].includes(String(source.status || '').toLowerCase()));
@@ -1954,10 +1960,10 @@ function renderSupplyQuickFilters(summary) {
   const selected = Boolean(summary.quickFilter);
   $('#supplyQuickFilterStatus').hidden = !selected;
   $('#supplyQuickFilterLabel').textContent = selected ? `${SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter]}만 보기 · ${summary.notices.length.toLocaleString('ko-KR')}개` : '';
-  // Keep the previous status in state so dismissing a card restores it. A direct
-  // status selection exits quick view and becomes the new ordinary filter.
+  // Other cards temporarily replace status. Newlywed view keeps its status so
+  // historical notices require an explicit All/Closed selection.
   $('#supplyStatusFilter').value = summary.quickFilter === 'open' ? 'open'
-    : summary.quickFilter === 'soon' ? 'upcoming' : selected ? 'recent' : state.supplyFilters.status;
+    : summary.quickFilter === 'soon' ? 'upcoming' : selected && summary.quickFilter !== 'newlywed' ? 'recent' : state.supplyFilters.status;
 }
 
 function selectSupplyQuickFilter(key) {
@@ -4988,10 +4994,11 @@ function getRecommendationQuickValues() {
 }
 
 async function applyRecommendationQuickValues(patch, key, { isCurrent = () => true } = {}) {
-  if (recommendationQuickApplyPending || state.recommendationRunning || state.commuteVerificationRunning || state.recommendationLocationBusy) {
-    throw new Error('진행 중인 조회가 끝난 뒤 조건을 적용해주세요.');
+  if (recommendationQuickApplyPending) {
+    throw new Error('조건을 적용하고 있어요. 잠시 후 다시 시도해주세요.');
   }
   const before = getRecommendationQuickValues();
+  const priceRunAtOpen = recommendationRunToken;
   const signature = values => JSON.stringify(Object.entries(values).filter(([id]) => id !== 'budgetStatus'));
   const changes = Object.entries(patch).filter(([id, value]) => Object.hasOwn(before, id)
     && !['destinations', 'budgetStatus'].includes(id)
@@ -5011,8 +5018,7 @@ async function applyRecommendationQuickValues(patch, key, { isCurrent = () => tr
       linkedTarget = Math.round(result.snapshot.targetPriceWon / 10000);
       linkedSnapshot = result;
     }
-    if (!isCurrent() || signature(getRecommendationQuickValues()) !== signature(before)
-      || state.recommendationRunning || state.commuteVerificationRunning || state.recommendationLocationBusy) {
+    if (!isCurrent() || recommendationRunToken !== priceRunAtOpen || signature(getRecommendationQuickValues()) !== signature(before)) {
       throw new Error('다른 곳에서 조건이나 조회 상태가 바뀌었습니다. 조건을 다시 열어 확인해주세요.');
     }
     const previousManual = before.recommendBudgetSource === 'manual' ? readRecommendationPriceManWon() : state.manualTargetPriceManWon;
@@ -5448,7 +5454,7 @@ function renderWorkplaces() {
   }
   const addButton = $('#confirmCompanyLocation');
   if (addButton) {
-    addButton.disabled = state.recommendationRunning;
+    addButton.disabled = false;
     $('span', addButton).textContent = '목적지 추가';
   }
   decisionWorkspace?.render();
@@ -6156,7 +6162,7 @@ async function confirmCompanyLocation({ announce = true } = {}) {
     setCompanyLocationStatus('error', error.message || '회사 위치를 찾지 못했어요.');
     return null;
   } finally {
-    if (requestToken === companyGeocodeToken) $('#confirmCompanyLocation').disabled = state.recommendationRunning;
+    if (requestToken === companyGeocodeToken) $('#confirmCompanyLocation').disabled = false;
   }
 }
 
@@ -6555,6 +6561,7 @@ async function fetchCommuteQuota() {
     if (token !== state.recommendationGeocodeToken) return null;
     if (!response.ok) return null;
     state.commuteQuota = payload;
+    state.commuteQuotaNeedsRefresh = false;
     renderRecommendationDecisionBar();
     return payload;
   } catch (_) {
@@ -6613,6 +6620,7 @@ function beginCommuteBatch(candidates, destinations, provider) {
     actualTransitCalls: 0, skippedPairCount: 0, callCountKnown: true, attemptedIds: [],
     startedAt: new Date().toISOString(),
   };
+  return state.currentCommuteBatch;
 }
 
 function recordCommuteBatchResponse(payload, receipt = state.currentCommuteBatch) {
@@ -6626,23 +6634,30 @@ function recordCommuteBatchResponse(payload, receipt = state.currentCommuteBatch
       .map(item => String(item.originId))])];
 }
 
-function finishCommuteBatch() {
-  const receipt = state.currentCommuteBatch;
+function finishCommuteBatch(receipt = state.currentCommuteBatch, { contextChanged = false } = {}) {
   if (!receipt) return;
+  if (receipt.finishedReceipt) return receipt.finishedReceipt;
   const results = [...state.recommendationResults, ...state.shortlist];
   const counts = { matched: 0, excluded: 0, pending: 0 };
   receipt.attemptedIds.forEach(id => {
     const candidate = results.find(c => recommendationCandidateId(c) === id);
-    counts[candidate ? candidateCommuteDecision(candidate) : 'pending'] += 1;
+    counts[!contextChanged && candidate ? candidateCommuteDecision(candidate) : 'pending'] += 1;
   });
-  state.lastCommuteBatch = {
+  const finished = {
     provider: receipt.provider, candidateCount: receipt.attemptedIds.length,
     plannedCandidateCount: receipt.plannedCandidateCount, destinationCount: receipt.destinationCount,
     actualTransitCalls: receipt.callCountKnown ? receipt.actualTransitCalls : null,
     skippedPairCount: receipt.skippedPairCount || 0,
-    ...counts, finishedAt: new Date().toISOString(),
+    ...counts, contextChanged, startedAt: receipt.startedAt, finishedAt: new Date().toISOString(),
   };
-  state.currentCommuteBatch = null;
+  // Conditions may have changed while a paid request was already in flight.
+  // Complete that request's own receipt without clearing a newer active batch
+  // or treating its routes as evidence for the changed candidate conditions.
+  receipt.finishedReceipt = finished;
+  state.lastCommuteBatch = finished;
+  state.commuteBatchHistory = [finished, ...(state.commuteBatchHistory || [])].slice(0, 5);
+  if (state.currentCommuteBatch === receipt) state.currentCommuteBatch = null;
+  return finished;
 }
 
 async function requestCommuteMatrix(selectedCandidates, filters, destinations, token, { transitProvider = '', earlyExit = true } = {}) {
@@ -6683,8 +6698,9 @@ async function requestCommuteMatrix(selectedCandidates, filters, destinations, t
       });
       const payload = await response.json().catch(() => ({}));
       recordCommuteBatchResponse(payload, requestReceipt);
-      if (token !== state.recommendationGeocodeToken) return [];
+      if (token !== state.recommendationGeocodeToken) { state.commuteQuotaNeedsRefresh = true; return []; }
       state.commuteQuota = payload.quota ? { ...payload.quota, provider: payload.provider || payload.quota.provider } : state.commuteQuota;
+      if (payload.quota) state.commuteQuotaNeedsRefresh = false;
       if (!response.ok) throw new Error(payload.error || payload.message || '정밀 통근 경로를 확인하지 못했습니다.');
       if (Array.isArray(payload.items)) items.push(...payload.items);
       if (earlyExit) {
@@ -6713,7 +6729,7 @@ async function requestCommuteMatrix(selectedCandidates, filters, destinations, t
     });
     const payload = await response.json().catch(() => ({}));
     recordCommuteBatchResponse({ ...payload, items: [{ originId: recommendationCandidateId(candidate), routes: payload.routes || [] }] }, requestReceipt);
-    if (token !== state.recommendationGeocodeToken) return;
+    if (token !== state.recommendationGeocodeToken) { state.commuteQuotaNeedsRefresh = true; return; }
     items.push({ originId: recommendationCandidateId(candidate), destinationId: destination.id, routes: payload.routes || [] });
   });
   if (token !== state.recommendationGeocodeToken) return [];
@@ -6729,7 +6745,7 @@ async function verifyRecommendationCommutes(candidates, filters, token, destinat
   try {
     items = await requestCommuteMatrix(candidates, filters, destinations, token, options);
   } catch (error) {
-    if (requestReceipt) requestReceipt.callCountKnown = false;
+    if (requestReceipt) { requestReceipt.callCountKnown = false; state.commuteQuotaNeedsRefresh = true; }
     if (token === state.recommendationGeocodeToken) {
       candidates.forEach(candidate => rememberCommuteAttempt(candidate, destinations, provider));
     }
@@ -6810,7 +6826,7 @@ async function verifyTopRecommendationCommutes() {
   const providerLabel = carOnly ? 'NAVER' : plan.provider === 'kakao' ? 'Kakao' : 'TMAP';
   state.commuteVerificationRunning = true;
   state.recommendationCommuteError = '';
-  beginCommuteBatch(selected, destinations, plan.provider);
+  const requestReceipt = beginCommuteBatch(selected, destinations, plan.provider);
   const button = $('#verifyTopCommutes');
   button.disabled = true;
   $('span', button).textContent = `${providerLabel} ${selected.length}곳 확인 중`;
@@ -6843,13 +6859,13 @@ async function verifyTopRecommendationCommutes() {
       showToast(state.recommendationCommuteError, 'error');
     }
   } finally {
+    finishCommuteBatch(requestReceipt, { contextChanged: verificationToken !== state.recommendationGeocodeToken });
     if (verificationToken === state.recommendationGeocodeToken) {
       state.commuteVerificationRunning = false;
-      finishCommuteBatch();
       button.disabled = false;
       hideRecommendationMapStatus();
       renderRecommendationResults();
-    }
+    } else renderRecommendationDecisionBar();
   }
 }
 
@@ -6876,7 +6892,7 @@ async function verifySingleRecommendationCommute(candidate, trigger = null) {
   }).candidateCount) return showToast('남은 호출량으로 모든 회사 경로를 확인할 수 없어요. 사용량을 확인해주세요.', 'error');
   state.commuteVerificationRunning = true;
   state.recommendationCommuteError = '';
-  beginCommuteBatch([candidate], destinations, transitProvider || 'naver');
+  const requestReceipt = beginCommuteBatch([candidate], destinations, transitProvider || 'naver');
   if (trigger) {
     trigger.disabled = true;
     trigger.textContent = `${destinations.length}개 목적지 확인 중…`;
@@ -6900,12 +6916,12 @@ async function verifySingleRecommendationCommute(candidate, trigger = null) {
       showToast(state.recommendationCommuteError, 'error');
     }
   } finally {
+    finishCommuteBatch(requestReceipt, { contextChanged: verificationToken !== state.recommendationGeocodeToken });
     if (verificationToken === state.recommendationGeocodeToken) {
       state.commuteVerificationRunning = false;
-      finishCommuteBatch();
       if (trigger?.isConnected) trigger.disabled = false;
       renderRecommendationResults();
-    }
+    } else renderRecommendationDecisionBar();
   }
 }
 
@@ -7040,22 +7056,9 @@ function setRecommendationStatus(kind, title, message, progress = null) {
     $('#recommendationProgressLabel').textContent = `${completed.toLocaleString('ko-KR')} / ${total.toLocaleString('ko-KR')}개 ${progress.label || '월·지역 조회'}`;
   }
   $('#cancelRecommendation').hidden = kind !== 'running';
-  $('#runRecommendation').classList.toggle('is-loading', kind === 'running');
-  $('#runRecommendation').disabled = kind === 'running';
-  const composer = $('.recommendation-command-deck');
-  if (composer) {
-    $$('input, select, textarea, button', composer).forEach((control) => {
-      if (control.classList.contains('sheet-close-button')) return;
-      if (kind === 'running') {
-        if (control.dataset.recommendationWasDisabled === undefined) control.dataset.recommendationWasDisabled = String(control.disabled);
-        control.disabled = true;
-      } else if (control.dataset.recommendationWasDisabled !== undefined) {
-        control.disabled = control.dataset.recommendationWasDisabled === 'true';
-        delete control.dataset.recommendationWasDisabled;
-      }
-    });
-  }
-  $('#runRecommendation').disabled = kind === 'running';
+  // Condition editing stays available; only submitting the same active search waits.
+  $('#runRecommendation').disabled = false;
+  $('#applyRecommendationFilters').disabled = kind === 'running';
 }
 
 function routeDiagnosticLabel(providerLabel, diagnostic, configured) {
@@ -7572,9 +7575,10 @@ async function runRecommendation() {
   const runToken = ++recommendationRunToken;
   state.recommendationRestored = false;
   state.recommendationRunning = true;
+  decisionWorkspace?.setTab('candidates');
   renderRecommendationResults();
   void refreshRecommendationMapLayers();
-  setRecommendationStatus('running', '회사 위치와 연결 상태를 확인하고 있어요', '검색을 시작한 조건은 완료될 때까지 고정합니다.', { completed: 0, total: 1, label: '사전 확인' });
+  setRecommendationStatus('running', '회사 위치와 연결 상태를 확인하고 있어요', '검색 중에도 조건을 편집할 수 있어요. 조건을 적용하면 이전 조회를 멈추고 새 검색을 준비합니다.', { completed: 0, total: 1, label: '사전 확인' });
   const confirmedDestinations = normalizeDestinations(filters.destinations);
   lastRecommendationDestinations = confirmedDestinations;
   if (runToken !== recommendationRunToken) return;
@@ -7760,7 +7764,7 @@ function renderRecommendationDecisionBar() {
   const selectedQuota = quota[provider] || (String(quota.provider || '').includes(provider) ? quota : {});
   const providerLabel = provider === 'kakao' ? 'Kakao' : provider === 'tmap' ? 'TMAP' : '대중교통';
   const remaining = selectedQuota.remaining;
-  $('#decisionTransitQuota').textContent = remaining !== null && remaining !== undefined && Number.isFinite(Number(remaining))
+  $('#decisionTransitQuota').textContent = state.commuteQuotaNeedsRefresh ? '잔여량 갱신 필요' : remaining !== null && remaining !== undefined && Number.isFinite(Number(remaining))
     ? `${Number(remaining).toLocaleString('ko-KR')}건 남음` : '사용량 확인 필요';
   $('#decisionTransitProvider').textContent = provider === 'kakao'
     ? 'Kakao 단독 확인 · 출발시각 미반영'
@@ -7771,13 +7775,14 @@ function renderRecommendationDecisionBar() {
   const description = $('#commuteVerificationPlan');
   const quotaKnown = selectedQuota.available !== false && remaining !== null && remaining !== undefined && Number.isFinite(Number(remaining))
     && selectedQuota.limit !== null && selectedQuota.limit !== undefined && Number.isFinite(Number(selectedQuota.limit));
-  const quotaCopy = quotaKnown ? `${providerLabel} 오늘 남은 ${Number(remaining).toLocaleString('ko-KR')}/${Number(selectedQuota.limit).toLocaleString('ko-KR')}회 (${APP_CONFIG.isLocalRuntime === false ? '서버 공유 기준' : '로컬 기준'}). ` : `${providerLabel} 오늘 사용량 확인 필요. `;
+  const quotaCopy = state.commuteQuotaNeedsRefresh ? `${providerLabel} 잔여량 갱신이 필요합니다. 다음 통근 확인 전에 서버 사용량을 다시 확인합니다. `
+    : quotaKnown ? `${providerLabel} 오늘 남은 ${Number(remaining).toLocaleString('ko-KR')}/${Number(selectedQuota.limit).toLocaleString('ko-KR')}회 (${APP_CONFIG.isLocalRuntime === false ? '서버 공유 기준' : '로컬 기준'}). ` : `${providerLabel} 오늘 사용량 확인 필요. `;
   if (description) description.textContent = `${quotaCopy}${plan.candidateCount}곳 × 대중교통 목적지 ${plan.callsPerCandidate}곳 = 최대 ${plan.maxNewTransitCalls}회입니다. 가격 검색·후보 다시 보기는 경로 호출 0회입니다.${provider === 'kakao' ? ' 입력한 출발시각은 Kakao 경로에 반영되지 않습니다.' : ''}`;
   const receipt = $('#commuteBatchReceipt');
   if (receipt) {
     const batch = state.lastCommuteBatch;
     receipt.hidden = !batch;
-    if (batch) receipt.textContent = `최근 확인 ${batch.candidateCount}곳 · 실제 ${batch.actualTransitCalls === null ? '호출량 미확인' : `${batch.actualTransitCalls}회 사용`} · 충족 ${batch.matched} / 제외 ${batch.excluded} / 미확인 ${batch.pending}${batch.skippedPairCount ? ` · 탈락 확인 후 ${batch.skippedPairCount}개 경로 생략` : ''}`;
+    if (batch) receipt.textContent = `${batch.contextChanged ? '이전 조건에서 요청한' : '최근 확인'} ${batch.candidateCount}곳 · 실제 ${batch.actualTransitCalls === null ? '호출량 미확인' : `${batch.actualTransitCalls}회 사용`}${batch.contextChanged ? ' · 변경한 후보에는 통근 결과 미반영' : ` · 충족 ${batch.matched} / 제외 ${batch.excluded} / 미확인 ${batch.pending}`}${batch.skippedPairCount ? ` · 탈락 확인 후 ${batch.skippedPairCount}개 경로 생략` : ''}${batch.startedAt ? ` · ${new Date(batch.startedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 요청` : ''}`;
   }
   const checkedButton = $('#openCheckedCandidates');
   if (checkedButton) checkedButton.textContent = `통근 충족 ${state.recommendationResults.filter(c => candidateCommuteDecision(c) === 'matched').length}곳 모아 보기 · 전체 지역`;
@@ -8371,7 +8376,6 @@ function renderRecommendationResults(meta = null, { revalidateOfficial = false }
   candidateReview?.render();
   recommendationPriceCoverage?.render();
   renderRecommendationMapScope();
-  if (meta) decisionWorkspace?.setTab('candidates');
 }
 
 function resetRecommendationForm() {
@@ -8564,7 +8568,11 @@ function bindEvents() {
     selectSupplyQuickFilter('');
     $(`[data-supply-quick-filter="${previous}"]`)?.focus();
   });
-  $('#supplyStatusFilter').addEventListener('change', (event) => { state.supplyFilters.status = event.target.value; state.supplyFilters.quickFilter = ''; renderSupply(); });
+  $('#supplyStatusFilter').addEventListener('change', (event) => {
+    state.supplyFilters.status = event.target.value;
+    if (state.supplyFilters.quickFilter !== 'newlywed') state.supplyFilters.quickFilter = '';
+    renderSupply();
+  });
   $('#supplyProgramFilter').addEventListener('change', (event) => { state.supplyFilters.program = event.target.value; renderSupply(); });
   $('#supplySort').addEventListener('change', (event) => { state.supplyFilters.sort = event.target.value; renderSupply(); });
   $('#supplyFavoriteFilter').addEventListener('click', (event) => {
@@ -9071,7 +9079,7 @@ async function init() {
   recommendationQuickFilters = createRecommendationQuickFilters({
     getValues: getRecommendationQuickValues, applyValues: applyRecommendationQuickValues,
     openFull: openRecommendationFullFilter,
-    getBusy: () => recommendationQuickApplyPending || state.recommendationRunning || state.commuteVerificationRunning || state.recommendationLocationBusy,
+    getBusy: () => recommendationQuickApplyPending,
   });
   recommendationPriceCoverage = createRecommendationPriceCoverage({
     getState: () => ({ meta: state.recommendationShowingShortlist ? null : state.recommendationMeta,

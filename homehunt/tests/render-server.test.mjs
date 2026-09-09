@@ -97,7 +97,7 @@ test('the Node adapter preserves member authorization and private API CORS', asy
   assert.equal(allowed.headers.get('access-control-allow-origin'), origin);
   const data = await allowed.json();
   assert.equal(data.runtime, 'render');
-  assert.equal(data.version, '2.10.0');
+  assert.equal(data.version, '2.10.1');
   assert.equal(data.keySource, 'server-environment');
   assert.equal(data.keyConfigured, true);
   assert.doesNotMatch(JSON.stringify(data), /synthetic-provider|synthetic-kakao|owner@example/);

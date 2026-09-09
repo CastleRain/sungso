@@ -183,6 +183,89 @@ test('a stale matrix response cannot overwrite quota or provider issues from the
 });
 
 for (const mode of ['single', 'top']) {
+  test(`${mode} late usage receipt survives changed conditions without clearing a newer active batch`, async () => {
+    const { state, sandbox, calls } = harness(commuteFunctions);
+    const entered = deferred(), route = deferred();
+    sandbox.fetch = () => { entered.resolve(); return route.promise; };
+    const pending = mode === 'single' ? sandbox.verifySingleRecommendationCommute(candidate) : sandbox.verifyTopRecommendationCommutes();
+    await entered.promise;
+    const oldReceipt = state.currentCommuteBatch;
+    state.recommendationGeocodeToken += 1;
+    const replacement = [{ catalogId: 'B', commuteBalance: { decision: 'matched' } }];
+    state.recommendationResults = replacement;
+    const newerQuota = { provider: 'kakao', date: '2026-09-10', remaining: 2 };
+    state.commuteQuota = newerQuota;
+    const newerReceipt = sandbox.beginCommuteBatch(replacement, destinations, 'kakao');
+    state.commuteVerificationRunning = true;
+    route.resolve(json({ provider: 'tmap', actualTransitCalls: 3,
+      quota: { provider: 'tmap', date: '2026-09-09', remaining: 9 },
+      items: [{ originId: 'A', destinationId: 'work', routes: [{ verified: true, durationMinutes: 30 }] }] }));
+    await pending;
+    assert.equal(state.recommendationResults, replacement);
+    assert.equal(state.commuteQuota, newerQuota, 'a late previous-day/provider quota cannot replace current quota');
+    assert.equal(state.commuteQuotaNeedsRefresh, true);
+    assert.equal(state.commuteVerificationRunning, true);
+    assert.equal(state.currentCommuteBatch, newerReceipt);
+    assert.equal(state.lastCommuteBatch.actualTransitCalls, 3);
+    assert.equal(state.lastCommuteBatch.contextChanged, true);
+    assert.equal(state.lastCommuteBatch.pending, 1);
+    assert.equal(state.lastCommuteBatch.matched, 0);
+    assert.equal(state.lastCommuteBatch.startedAt, oldReceipt.startedAt);
+    assert.equal(state.commuteBatchHistory.length, 1);
+    assert.equal(calls.saves, 0);
+    sandbox.finishCommuteBatch(oldReceipt, { contextChanged: true });
+    assert.equal(state.commuteBatchHistory.length, 1, 'finishing an old receipt twice cannot count usage twice');
+    sandbox.recordCommuteBatchResponse({ actualTransitCalls: 0, items: [{ originId: 'B', routes: [] }] }, newerReceipt);
+    sandbox.finishCommuteBatch(newerReceipt);
+    assert.equal(state.lastCommuteBatch.actualTransitCalls, 0);
+    assert.equal(state.lastCommuteBatch.contextChanged, false);
+    assert.equal(state.currentCommuteBatch, null);
+    assert.equal(state.commuteBatchHistory[1].actualTransitCalls, 3);
+  });
+
+  test(`${mode} detached network failure records unknown usage instead of silently losing its receipt`, async () => {
+    const { state, sandbox } = harness(commuteFunctions);
+    const entered = deferred(), route = deferred();
+    sandbox.fetch = () => { entered.resolve(); return route.promise; };
+    const pending = mode === 'single' ? sandbox.verifySingleRecommendationCommute(candidate) : sandbox.verifyTopRecommendationCommutes();
+    await entered.promise;
+    state.recommendationGeocodeToken += 1;
+    state.commuteVerificationRunning = false;
+    route.reject(new Error('fixture unavailable'));
+    await pending;
+    assert.equal(state.lastCommuteBatch.actualTransitCalls, null);
+    assert.equal(state.lastCommuteBatch.contextChanged, true);
+    assert.equal(state.commuteQuotaNeedsRefresh, true);
+    assert.equal(state.currentCommuteBatch, null);
+  });
+}
+
+test('the next explicit quota read clears the late-usage warning without an automatic extra request', async () => {
+  const { state, sandbox, calls } = harness([...commuteFunctions, 'fetchCommuteQuota']);
+  sandbox.APP_CONFIG.commuteQuotaUrl = 'fixture:quota';
+  state.commuteQuotaNeedsRefresh = true;
+  sandbox.fetch = async url => { calls.fetch.push(url); return json({ provider: 'kakao', date: '2026-09-10', remaining: 997 }); };
+  assert.equal(calls.fetch.length, 0);
+  const quota = await sandbox.fetchCommuteQuota();
+  assert.equal(calls.fetch.length, 1);
+  assert.equal(state.commuteQuotaNeedsRefresh, false);
+  assert.equal(state.commuteQuota, quota);
+  assert.equal(quota.remaining, 997);
+});
+
+test('in-memory receipt history is bounded and contains neither routes nor company locations', () => {
+  const { state, sandbox } = harness(commuteFunctions);
+  for (let index = 0; index < 9; index++) {
+    const receipt = sandbox.beginCommuteBatch([candidate], destinations, 'kakao');
+    sandbox.recordCommuteBatchResponse({ actualTransitCalls: index, items: [{ originId: 'A', routes: [{ durationMinutes: 45, destination: 'private-office' }] }] }, receipt);
+    sandbox.finishCommuteBatch(receipt, { contextChanged: true });
+  }
+  assert.equal(state.commuteBatchHistory.length, 5);
+  assert.deepEqual(Array.from(state.commuteBatchHistory, receipt => receipt.actualTransitCalls), [8, 7, 6, 5, 4]);
+  assert.doesNotMatch(JSON.stringify(state.commuteBatchHistory), /private-office|durationMinutes|lat|lng|routes|destinations/);
+});
+
+for (const mode of ['single', 'top']) {
   test(`${mode} outer await cannot restore returned rows after another completion changed the token`, async () => {
     const { state, sandbox } = harness(commuteFunctions);
     sandbox.fetch = async () => json({ items: [{ originId: 'A', destinationId: 'work', routes: [] }] });
