@@ -47,7 +47,7 @@ export function createOfficialComplexProgress(root, { onRetry, onPause } = {}) {
   heading.append(title, summary);
   const progress = el('progress'); progress.setAttribute('aria-label', '공식 정보 조회한 단지 비율');
   const counts = el('p', 'official-complex-progress-counts');
-  const note = el('p', 'official-complex-progress-note', '저장한 집과 현재 가격 후보를 합쳐 단지별로 한 번씩 확인합니다. 완료된 항목은 화면을 움직여도 재조회하지 않습니다. 새 검색에서는 만료된 정보만 갱신하며, 확인 중에도 후보를 열어볼 수 있습니다.');
+  const note = el('p', 'official-complex-progress-note', '같은 브라우저에서 다시 들어오면 유효한 주차·난방·승강기 정보를 바로 불러옵니다. 저장한 집과 가격 후보의 없는 정보만 확인하고, 새 검색에서는 만료된 정보를 갱신합니다. 확인 중에도 후보를 열어볼 수 있습니다.');
   const reason = el('p', 'official-complex-progress-reason'); reason.setAttribute('role', 'status');
   const actions = el('div', 'official-complex-progress-actions');
   const pause = el('button'), retry = el('button'); pause.type = retry.type = 'button';

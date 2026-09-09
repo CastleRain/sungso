@@ -1,7 +1,8 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.14.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.13.1';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.15.0';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.15.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.15.0';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.13.1';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.15.0';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
 import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.13.1';
@@ -17,8 +18,8 @@ import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } fr
 import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.1';
 import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.14.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.14.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.15.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.15.0';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -72,14 +73,14 @@ import {
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
   normalizeSupplyNotice, sortSupplyNotices,
-} from './supply-core.mjs?v=4.14.0';
+} from './supply-core.mjs?v=4.15.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.14.0';
+} from './ui-format.js?v=4.15.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -145,6 +146,11 @@ const state = {
   railStations: [],
   gangnamAnchor: null,
   recommendationJobId: '',
+  recommendationRecentJob: null,
+  recommendationRestoreBusy: false,
+  recommendationRestoreError: '',
+  recommendationRestored: false,
+  searchDistrictCatalog: [],
   recommendationPollTimer: null,
   recommendationRunning: false,
   recommendationMeta: null,
@@ -4641,10 +4647,13 @@ function readRecommendationForm() {
     commuteModes,
     commuteDepartureTime,
     months: Math.max(1, Number($('#recommendMonths').value) || 3),
+    searchScope: $('#recommendSearchScope')?.value === 'all' ? 'all' : 'nearby',
+    districtCodes: currentCompanySearchScope(regions, destinations).districtCodes,
   };
 }
 
 function writeRecommendationForm(filters = {}) {
+  if ($('#recommendSearchScope')) $('#recommendSearchScope').value = filters.searchScope === 'nearby' ? 'nearby' : 'all';
   if (typeof filters.queryText === 'string') $('#recommendQuery').value = filters.queryText;
   const regions = filters.regions || ['seoul', 'gyeonggi'];
   $('#recommendSeoul').checked = regions.includes('seoul');
@@ -4877,6 +4886,11 @@ function bindRecommendationRanges() {
 }
 
 function renderRecommendationActiveFilters(filters = readRecommendationForm()) {
+  const scopeHint = $('#recommendSearchScopeHint');
+  if (scopeHint) {
+    const scope = currentCompanySearchScope(filters.regions, filters.destinations);
+    scopeHint.textContent = scope.explanation + (scope.districtCodes.length ? ` ${scope.districts.map(d => d.name).join(' · ')}` : '');
+  }
   const root = $('#recommendationActiveFilters');
   if (!root) return;
   const clauses = recommendationChipLabels(filters);
@@ -5073,8 +5087,18 @@ function scheduleRecommendationPreview() {
   recommendationPreviewTimer = window.setTimeout(updateRecommendationPreview, 180);
 }
 
+let companyScopeMemo;
+function currentCompanySearchScope(regions, destinations) {
+  if ($('#recommendSearchScope')?.value !== 'nearby') return { mode: 'all', districtCodes: [], explanation: '선택한 서울·경기 전체 지역을 조회합니다.' };
+  const key = JSON.stringify([regions, destinations, state.searchDistrictCatalog.length, state.railStations.length]);
+  if (companyScopeMemo?.key === key) return companyScopeMemo.value;
+  const value = buildCompanySearchScope({ regions, destinations, candidateCatalog: state.searchDistrictCatalog, railStations: state.railStations, limit: 8 });
+  companyScopeMemo = { key, value };
+  return value;
+}
+
 function priceSearchSignature(filters = {}) {
-  return JSON.stringify(['regions', 'minHouseholds', 'householdsOperator', 'maxPriceManWon', 'priceOperator', 'minAreaM2', 'areaOperator', 'areaBasis', 'minBuiltYear', 'maxAgeYears', 'months'].map(key => filters[key]));
+  return JSON.stringify(['regions', 'minHouseholds', 'householdsOperator', 'maxPriceManWon', 'priceOperator', 'minAreaM2', 'areaOperator', 'areaBasis', 'minBuiltYear', 'maxAgeYears', 'months', 'districtCodes'].map(key => Array.isArray(filters[key]) ? [...filters[key]].sort() : key === 'districtCodes' ? [] : filters[key]));
 }
 
 function updateTargetPriceConnection({ apply = false } = {}) {
@@ -5173,9 +5197,23 @@ function initializeCloudConnection() {
       previousApiStatus = next.apiStatus;
       const uid = next.user?.uid || null;
       if (APP_CONFIG.isLocalRuntime === false && APP_CONFIG.cloudApiBaseUrl && uid !== previousUid) {
+        const changedAccount = previousUid && uid !== previousUid;
         previousUid = uid;
+        recommendationRestoreEpoch += 1;
+        recommendationRecentCheckedUid = '';
+        state.recommendationRecentJob = null;
+        state.recommendationRestoreBusy = false;
+        state.recommendationRestoreError = '';
+        if (changedAccount) {
+          window.clearTimeout(state.recommendationPollTimer);
+          recommendationRunToken += 1;
+          state.recommendationJobId = ''; state.recommendationRunning = false;
+          state.recommendationResults = []; state.recommendationMeta = null; state.recommendationRunSnapshot = null;
+          state.recommendationRestored = false;
+          renderRecommendationResults();
+        }
         void synchronizeOfficialComplexAuthentication();
-        if (uid) void checkLocalMarketConnection();
+        if (uid) { void checkLocalMarketConnection(); void restoreRecentRecommendation(); }
         else {
           void cancelRecommendation(false);
           state.recommendationGeocodeToken += 1; state.commuteVerificationRunning = false;
@@ -5183,6 +5221,7 @@ function initializeCloudConnection() {
           updateLocalConnectionUi(null, new CloudSnapshotError('Google 로그인이 필요합니다.', 'CLOUD_AUTH_REQUIRED', 401));
           renderRecommendationResults();
         }
+        renderRecommendationContinuity();
       }
     },
   });
@@ -5231,7 +5270,9 @@ function initializeWecostTargetConnection() {
     if ($('#recommendBudgetSource').value !== 'wecost') return;
     updateTargetPriceConnection({ apply: true });
     updateRecommendationPriceLabel();
-    if (next.status !== 'loading' && targetChanged) handleRecommendationCriteriaChanged();
+    // A failed refresh must not replace a budget with zero and erase results.
+    if (next.status === 'available' && targetChanged) handleRecommendationCriteriaChanged();
+    if (next.status !== 'loading') void restoreRecentRecommendation();
   });
   // A local WeCost edit is only a refresh signal; the amount comes from Firebase.
   homeTargetPriceBridge.subscribe(next => {
@@ -7253,6 +7294,103 @@ async function connectLocalMarketKey(event) {
   }
 }
 
+let recommendationRestoreEpoch = 0;
+let recommendationRecentCheckedUid = '';
+let recommendationAppReady = false;
+
+function renderRecommendationContinuity() {
+  const root = $('#recommendationSearchContinuity');
+  if (!root) return;
+  const meta = state.recommendationMeta;
+  const recent = state.recommendationRecentJob;
+  const remote = Boolean(APP_CONFIG.cloudApiBaseUrl && APP_CONFIG.isLocalRuntime === false);
+  root.hidden = !remote && !meta?.filters?.districtCodes?.length;
+  if (root.hidden) return;
+  const title = createElement('strong', '', !remote ? '회사 주변 지역의 가격 후보' : state.recommendationRestoreBusy ? '이전 검색을 불러오고 있어요'
+    : meta ? state.recommendationRestored ? '계정에 보관한 가격 후보' : '이 검색은 계정에 자동 보관됩니다'
+    : recent ? '이전 검색이 남아 있어요' : '검색 결과 이어 보기');
+  const message = createElement('p', '', state.recommendationRestoreError || (meta || recent
+    ? `${Number((meta || recent).resultCount || 0).toLocaleString('ko-KR')}곳 · ${new Date((meta || recent).updatedAt || Date.now()).toLocaleString('ko-KR')} 기준.${remote ? ' 가격 결과는 최근 검색 1건을 7일 보관합니다.' : ' 로컬 서버에서 확인한 가격입니다.'}`
+    : '가격 후보를 찾으면 로그인한 계정에서 다시 열 수 있어요.'));
+  const note = createElement('small', '', '주차·시설은 확인한 공공 자료를 재사용합니다. 다른 메뉴에서는 통근 결과도 유지되며, 페이지를 새로 열면 실제 통근은 다시 확인합니다.');
+  const actions = createElement('div', 'search-continuity-actions');
+  const button = (label, callback) => { const node = createElement('button', 'outline-btn', label); node.type = 'button'; node.disabled = state.recommendationRunning || state.recommendationRestoreBusy || state.commuteVerificationRunning; node.addEventListener('click', callback); actions.append(node); };
+  if (state.recommendationRestoreError) button('이전 검색 다시 불러오기', () => { recommendationRecentCheckedUid = ''; void restoreRecentRecommendation(); });
+  if (recent && recent.jobId !== meta?.jobId) button(recent.status === 'running' ? '중단된 검색 이어서 보기' : '이전 가격 조건으로 열기', () => applyRecentRecommendation(recent, { applyFilters: true }));
+  if (state.recommendationJobId && !state.recommendationRunning && meta?.jobId === state.recommendationJobId && meta?.status === 'running'
+    && state.recommendationRunSnapshot && priceSearchSignature(state.recommendationRunSnapshot.filters) === priceSearchSignature(readRecommendationForm())) {
+    button('남은 가격 조회 이어하기', () => { state.recommendationRunning = true; renderRecommendationContinuity(); void pollRecommendationJob(state.recommendationJobId); });
+  }
+  if (meta) {
+    if (meta.archiveWarning) message.append(` ${meta.archiveWarning}`);
+    if (meta.stale || meta.resumable === false) message.append(' 보관본이므로 최신 가격을 다시 확인해주세요.');
+    button('최신 가격 다시 조회', () => { setRecommendationPanel('filters'); $('#recommendForceRefresh').checked = true; });
+  }
+  if (!meta?.filters?.districtCodes?.length) button('회사 주변부터 찾아보기', () => { $('#recommendSearchScope').value = 'nearby'; handleRecommendationCriteriaChanged(); setRecommendationPanel('filters'); });
+  const codes = meta?.filters?.districtCodes || [];
+  if (codes.length) {
+    const names = [...new Map(state.searchDistrictCatalog.filter(c => codes.includes(String(c.regionCode))).map(c => [String(c.regionCode), c.regionName])).values()];
+    root.replaceChildren(title, message, createElement('p', '', `일부 ${codes.length}개 지역: ${names.join(' · ')}. 통근 가능 지역으로 확정한 것은 아닙니다.`), note, actions);
+    button('전체 지역으로 넓혀 찾기', () => { $('#recommendSearchScope').value = 'all'; handleRecommendationCriteriaChanged(); setRecommendationPanel('filters'); });
+  } else root.replaceChildren(title, message, note, actions);
+}
+
+async function restoreRecentRecommendation() {
+  if (!recommendationAppReady || APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl) return;
+  const uid = cloudSession.getState().user?.uid;
+  if (!uid || recommendationRecentCheckedUid === uid || state.recommendationRestoreBusy || state.recommendationRunning || state.recommendationMeta) return;
+  if ($('#recommendBudgetSource')?.value === 'wecost' && wecostTargetState?.status === 'loading') return;
+  const epoch = recommendationRestoreEpoch;
+  const runToken = recommendationRunToken;
+  const filtersKey = priceSearchSignature(readRecommendationForm());
+  recommendationRecentCheckedUid = uid;
+  state.recommendationRestoreBusy = true; state.recommendationRestoreError = '';
+  renderRecommendationContinuity();
+  try {
+    const response = await fetch(`${APP_CONFIG.recommendationUrl}/recent`, { cache: 'no-store' });
+    const data = await response.json();
+    if (!response.ok) throw new Error('이전 검색을 불러오지 못했어요. 연결이 회복되면 다시 시도할 수 있습니다.');
+    if (epoch !== recommendationRestoreEpoch || uid !== cloudSession.getState().user?.uid || runToken !== recommendationRunToken) return;
+    state.recommendationRecentJob = data.job || null;
+    if (data.job && !state.recommendationMeta && filtersKey === priceSearchSignature(readRecommendationForm())
+      && priceSearchSignature(data.job.filters) === filtersKey) await applyRecentRecommendation(data.job);
+  } catch (error) {
+    if (epoch === recommendationRestoreEpoch && uid === cloudSession.getState().user?.uid && runToken === recommendationRunToken) state.recommendationRestoreError = error.message;
+  } finally {
+    if (epoch === recommendationRestoreEpoch) { state.recommendationRestoreBusy = false; renderRecommendationContinuity(); }
+  }
+}
+
+async function applyRecentRecommendation(job, { applyFilters = false } = {}) {
+  if (!job?.jobId || state.recommendationRunning || state.commuteVerificationRunning) return;
+  if (applyFilters) {
+    const current = readRecommendationForm();
+    const priceUnchanged = current.maxPriceManWon === job.filters.maxPriceManWon;
+    writeRecommendationForm({ ...current, ...job.filters,
+      searchScope: job.filters.districtCodes?.length ? 'nearby' : 'all',
+      ...(priceUnchanged ? {} : { budgetSource: 'manual', targetPriceManWon: job.filters.maxPriceManWon, manualTargetPriceManWon: job.filters.maxPriceManWon, maxOverBudgetPct: 0 }),
+    });
+    saveRecommendationFilters(readRecommendationForm());
+    updateTargetPriceConnection();
+    scheduleRecommendationPreview();
+  }
+  const filters = { ...readRecommendationForm(), ...job.filters };
+  const runToken = ++recommendationRunToken;
+  state.recommendationRunSnapshot = { filters, destinations: normalizeDestinations(filters.destinations), provider: selectedCommuteProvider(state.transportConfig, state.commuteQuota || {}) };
+  state.recommendationJobId = job.jobId;
+  state.recommendationRestored = true;
+  state.recommendationShowingShortlist = false;
+  state.recommendationMapScope = 'all'; state.recommendationRegion = ''; state.recommendationMapMode = 'regions';
+  $('#recommendationCommuteScope').value = 'all';
+  if (job.status === 'running') {
+    state.recommendationMeta = job;
+    state.recommendationResults = Array.isArray(job.results) ? job.results : [];
+    renderRecommendationResults(job);
+    setRecommendationStatus('', '이어서 조회할 검색이 있어요', `${job.progress?.completed || 0}/${job.progress?.total || 0}개 월·지역 자료 확인. 남은 가격 조회 이어하기를 누르면 계속합니다.`);
+  } else await pollRecommendationJob(job.jobId, runToken, job);
+  renderRecommendationContinuity();
+}
+
 function recommendationJobUrl(jobId) {
   return `${APP_CONFIG.recommendationUrl}/${encodeURIComponent(jobId)}`;
 }
@@ -7281,7 +7419,7 @@ async function retryRecommendationFailures() {
       ? '이 조회의 이어하기 기간이 지났습니다. 현재 결과는 유지되며, 조건 변경에서 새 검색을 시작할 수 있습니다.'
       : payload.error || '미완료 자료를 다시 조회하지 못했습니다.');
     if (runToken !== recommendationRunToken || state.recommendationJobId !== jobId) {
-      if (state.recommendationJobId !== jobId) void fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
+      if (state.recommendationJobId !== jobId && (APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl)) void fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
       return;
     }
     void pollRecommendationJob(jobId);
@@ -7294,16 +7432,17 @@ async function retryRecommendationFailures() {
   }
 }
 
-async function pollRecommendationJob(jobId, runToken = recommendationRunToken) {
+async function pollRecommendationJob(jobId, runToken = recommendationRunToken, initialPayload = null) {
   if (!jobId || state.recommendationJobId !== jobId || runToken !== recommendationRunToken) return;
   try {
     const remoteAdvance = Boolean(APP_CONFIG.cloudApiBaseUrl && !APP_CONFIG.isLocalRuntime);
-    const response = await fetch(`${recommendationJobUrl(jobId)}${remoteAdvance ? '/advance' : ''}`, {
+    const response = initialPayload ? null : await fetch(`${recommendationJobUrl(jobId)}${remoteAdvance ? '/advance' : ''}`, {
       method: remoteAdvance ? 'POST' : 'GET', cache: 'no-store',
     });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || '추천 진행 상태를 읽지 못했습니다.');
+    const payload = initialPayload || await response.json().catch(() => ({}));
+    if (response && !response.ok) throw new Error(payload.error || '추천 진행 상태를 읽지 못했습니다.');
     if (state.recommendationJobId !== jobId || runToken !== recommendationRunToken) return;
+    state.recommendationRecentJob = payload;
     const progress = payload.progress || { completed: 0, total: 1 };
     const isRetrying = payload.stage === 'retrying';
     const visibleProgress = isRetrying
@@ -7339,7 +7478,7 @@ async function pollRecommendationJob(jobId, runToken = recommendationRunToken) {
     const nextResults = Array.isArray(payload.results) ? payload.results : [];
     state.recommendationResults = wasRetrying
       ? mergeRetriedPriceResults(state.recommendationResults, nextResults) : nextResults;
-    state.recommendationCompletedAt = Date.now();
+    state.recommendationCompletedAt = Date.parse(payload.updatedAt) || Date.now();
     $('#recommendStepPrice').classList.remove('active');
     $('#recommendStepPrice').classList.add('complete');
     state.recommendationMeta = payload;
@@ -7414,13 +7553,16 @@ async function runRecommendation() {
     return setRecommendationStatus('error', '목적지 좌표를 다시 확인해주세요', '각 목적지 카드를 열어 검색 결과를 고르거나 지도에서 건물을 선택해주세요.');
   }
   const provider = selectedCommuteProvider(state.transportConfig, state.commuteQuota || {});
+  const forceRefresh = $('#recommendForceRefresh')?.checked === true;
   const currentSnapshot = { filters, destinations: normalizeDestinations(filters.destinations) };
   // Reopening the current view is not a new provider query or a persisted route cache.
   // Only a successfully completed price search may take this path.
-  if (state.recommendationMeta && !state.recommendationMeta.partial
+  if (!forceRefresh && state.recommendationMeta && !state.recommendationMeta.partial
     && !Number(state.recommendationMeta.failedRequestCount || 0)
     && Date.now() - Number(state.recommendationCompletedAt || 0) < 24 * 60 * 60 * 1000
     && state.recommendationResults.length && state.recommendationRunSnapshot
+    && state.recommendationMeta.status !== 'running'
+    && priceSearchSignature(state.recommendationRunSnapshot.filters) === priceSearchSignature(filters)
     && liveRecommendationSearchKey(state.recommendationRunSnapshot, state.recommendationRunSnapshot.provider || provider)
       === liveRecommendationSearchKey(currentSnapshot, provider)) {
     setRecommendationPanel('');
@@ -7428,6 +7570,7 @@ async function runRecommendation() {
     return;
   }
   const runToken = ++recommendationRunToken;
+  state.recommendationRestored = false;
   state.recommendationRunning = true;
   renderRecommendationResults();
   void refreshRecommendationMapLayers();
@@ -7488,16 +7631,18 @@ async function runRecommendation() {
   try {
     const { companyAddress, destinations, workplaces, budgetSource, ...serverFilters } = filters;
     const response = await fetch(APP_CONFIG.recommendationUrl, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(serverFilters),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...serverFilters, ...(forceRefresh ? { refresh: true } : {}) }),
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || '추천 조회를 시작하지 못했습니다.');
     if (runToken !== recommendationRunToken) {
-      if (payload.jobId) fetch(recommendationJobUrl(payload.jobId), { method: 'DELETE' }).catch(() => {});
+      if (payload.jobId && (APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl)) fetch(recommendationJobUrl(payload.jobId), { method: 'DELETE' }).catch(() => {});
       return;
     }
     state.recommendationJobId = payload.jobId;
-    pollRecommendationJob(payload.jobId);
+    state.recommendationRecentJob = payload;
+    if ($('#recommendForceRefresh')) $('#recommendForceRefresh').checked = false;
+    pollRecommendationJob(payload.jobId, runToken, payload.status === 'complete' ? payload : null);
   } catch (error) {
     if (runToken !== recommendationRunToken) return;
     state.recommendationRunning = false;
@@ -7520,7 +7665,8 @@ async function cancelRecommendation(announce = true) {
   $('#recommendStepPrice').classList.remove('active');
   setRecommendationStatus('', announce ? '추천 조회를 취소했어요' : '새 조건으로 다시 시작합니다', '입력한 조건은 이 기기에 그대로 저장됩니다.');
   hideRecommendationMapStatus();
-  if (jobId) fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
+  // Cloud jobs may be shared with another tab: stop our polling, not their job.
+  if (jobId && (APP_CONFIG.isLocalRuntime !== false || !APP_CONFIG.cloudApiBaseUrl)) fetch(recommendationJobUrl(jobId), { method: 'DELETE' }).catch(() => {});
 }
 
 function activeRecommendationDestinations() {
@@ -8122,6 +8268,7 @@ function renderCommuteVerificationGate({ rawCount, matchedCount, pendingCount, r
 
 function renderRecommendationResults(meta = null, { revalidateOfficial = false } = {}) {
   if (meta) state.recommendationMeta = meta;
+  renderRecommendationContinuity();
   synchronizeOfficialComplexCandidates({ revalidate: revalidateOfficial });
   if (state.recommendationShowingShortlist) refreshShortlistCommuteFreshness();
   const displayMeta = state.recommendationRunning && !state.recommendationRetrying && !state.recommendationShowingShortlist ? null : meta || state.recommendationMeta;
@@ -8527,7 +8674,7 @@ function bindEvents() {
   [
     'recommendSeoul', 'recommendGyeonggi', 'recommendHouseholds', 'recommendHouseholdsOperator',
     'recommendMaxPriceEok', 'recommendMaxPriceMan', 'recommendPriceOperator', 'recommendMinArea', 'recommendAreaOperator', 'recommendMaxAge', 'recommendStationMin',
-    'recommendStationMax', 'recommendCommuteMode', 'recommendCommuteMax', 'recommendDepartureTime', 'recommendMonths',
+    'recommendStationMax', 'recommendCommuteMode', 'recommendCommuteMax', 'recommendDepartureTime', 'recommendMonths', 'recommendSearchScope',
     'recommendBudgetOverPct', 'recommendPreferSubway', 'recommendExcludeFar', 'recommendParkingRatio', 'recommendRequireParking',
   ].forEach((id) => $(`#${id}`).addEventListener(['SELECT', 'INPUT'].includes($(`#${id}`).tagName) ? 'input' : 'change', handleRecommendationCriteriaChanged));
   $$('[data-open-visit], #openVisitButton').forEach((button) => button.addEventListener('click', () => openVisitModal()));
@@ -9017,6 +9164,7 @@ async function init() {
   await populateComplexRegions();
   restoreRecommendationForm();
   await loadRailStationData();
+  state.searchDistrictCatalog = (await loadApartmentCatalog()).apartments || [];
   lastRecommendationDestinations = readRecommendationForm().destinations;
   updateTargetPriceConnection({ apply: true });
   initializeWecostTargetConnection();
@@ -9030,6 +9178,7 @@ async function init() {
   // Map controls and saved records remain usable while a free server wakes.
   if (APP_CONFIG.isLocalRuntime === false) void checkLocalMarketConnection();
   else await checkLocalMarketConnection();
+  await officialComplexClient.restore();
   officialComplexReady = true;
   synchronizeOfficialComplexCandidates({ revalidate: true });
   refreshShortlistCommuteFreshness();
@@ -9038,6 +9187,8 @@ async function init() {
     renderRecommendationResults();
   }
   bindEvents();
+  recommendationAppReady = true;
+  void restoreRecentRecommendation();
   await loadMarketSummary();
   loadApartmentCatalogMeta();
 

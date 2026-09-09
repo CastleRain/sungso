@@ -120,6 +120,20 @@ test('expired jobs within the one-hour grace and signed monthly caches before re
   assert.ok(db.documents.has('homehunt_molit_month_cache/legacy-no-expiry'), 'legacy documents need an explicit bounded migration, not a full scan');
 });
 
+test('latest search archives expire with their chunks while active account archives remain bounded', async () => {
+  const db = database();
+  db.documents.set('homehunt_job_lookups/query_old', { expiresAt: old(), jobId: 'expired' });
+  db.documents.set('homehunt_job_lookups/recent_old', { expiresAt: old(), archive: { resultCount: 1 } });
+  db.documents.set('homehunt_job_lookups/recent_old/chunks/latest_results_0', { data: 'public-price' });
+  db.documents.set('homehunt_job_lookups/recent_current', { expiresAt: new Date(start + DAY), archive: { resultCount: 1 } });
+  db.documents.set('homehunt_job_lookups/recent_current/chunks/latest_results_0', { data: 'public-price' });
+  const result = await createFirestoreMaintenance({ db, now: () => start }).runIfDue();
+  assert.equal(result.ok, true);
+  assert.equal(result.deletes, 3);
+  assert.ok(!db.documents.has('homehunt_job_lookups/recent_old'));
+  assert.ok(db.documents.has('homehunt_job_lookups/recent_current/chunks/latest_results_0'));
+});
+
 test('today and previous KST day ledgers remain even with incorrect expiresAt; old canonical ledger alone is removed', async () => {
   const db = database();
   const ledger = date => ({ schemaVersion: 1, date, provider: 'kakao-transit', used: 363,

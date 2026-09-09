@@ -598,8 +598,22 @@ async function startRecommendationJob(rawFilters) {
   const catalog = await loadCatalog();
   const filters = normalizeRecommendationFilters(rawFilters);
   if (filters.areaBasis === 'supply') throw new Error('공급면적 기준은 공식 실거래로 판정할 수 없습니다. 전용면적을 선택해주세요.');
-  const basicCandidates = filterCatalogForRecommendation(catalog.apartments, filters);
-  const districtCodes = [...new Set(basicCandidates.map((item) => String(item.regionCode)))].sort();
+  const requestedCodes = rawFilters?.districtCodes;
+  if (requestedCodes !== undefined) {
+    const catalogCodes = new Set(catalog.apartments.map(item => String(item.regionCode)));
+    if (!Array.isArray(requestedCodes) || requestedCodes.length > 100
+        || requestedCodes.some(code => typeof code !== 'string' || !/^(11|41)\d{3}$/.test(code)
+          || !catalogCodes.has(code) || !filters.regions.includes(code.startsWith('11') ? 'seoul' : 'gyeonggi'))) {
+      throw new Error('선택한 서울·경기 시군구 검색 범위를 확인해주세요.');
+    }
+    if (requestedCodes.length) filters.districtCodes = [...new Set(requestedCodes)];
+  }
+  const requestedScope = filters.districtCodes ? new Set(filters.districtCodes) : null;
+  const basicCandidates = filterCatalogForRecommendation(catalog.apartments, filters)
+    .filter(candidate => !requestedScope || requestedScope.has(String(candidate.regionCode)));
+  const availableCodes = new Set(basicCandidates.map(item => String(item.regionCode)));
+  const districtCodes = filters.districtCodes
+    ? filters.districtCodes.filter(code => availableCodes.has(code)) : [...availableCodes].sort();
   const months = requestedMonths(filters.months);
   const tasks = districtCodes.flatMap((lawdCd) => months.map((dealYmd) => ({ lawdCd, dealYmd, type: 'sale' })));
   const id = crypto.randomUUID();
@@ -1250,7 +1264,7 @@ async function handler(req, res) {
         transitConcurrency: TRANSIT_CONCURRENCY,
         transitCacheHours: TRANSIT_CACHE_HOURS,
       },
-      version: '2.9.0',
+      version: '2.10.0',
     });
   }
   if (req.method === 'GET' && url.pathname === '/api/commute/quota') {

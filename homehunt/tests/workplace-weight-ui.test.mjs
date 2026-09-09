@@ -83,6 +83,11 @@ function harness(workplaces = []) {
     setPickerValue: (id, value) => { $(`#${id}`).value = value; },
     handleRecommendationCriteriaChanged: () => saves.push(JSON.stringify(sandbox.readRecommendationForm())),
   };
+  Object.assign(sandbox, {
+    currentCompanySearchScope: () => ({ mode: 'all', districtCodes: [] }),
+    renderRecommendationContinuity() {}, restoreRecentRecommendation: async () => {},
+    loadApartmentCatalog: async () => ({ apartments: [] }),
+  });
   vm.createContext(sandbox);
   for (const name of ['boundedNumber', 'readSelectedCommuteModes', 'companyLocationAddress',
     'companyLocationLabel', 'readRecommendationForm', 'writeRecommendationForm', 'renderWorkplaces',

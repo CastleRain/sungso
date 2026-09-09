@@ -1,0 +1,13 @@
+.search-continuity { margin: 14px; padding: 14px; background: #f5f8ff; border: 1px solid #d4dfff; border-radius: 12px; color: #214777; overflow-wrap: anywhere; }
+.search-continuity[hidden] { display: none; }
+.search-continuity strong { font-size: 14px; }
+.search-continuity p { margin: 8px 0; font-size: 12px; line-height: 1.7; }
+.search-continuity small { display: block; color: #607491; line-height: 1.65; }
+.search-continuity-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.search-continuity-actions button { flex: 1 1 140px; white-space: normal; min-height: 38px; }
+.search-scope-controls { display: grid; gap: 8px; padding: 12px 16px; background: #f5f8ff; border-top: 1px solid #d4dfff; }
+.search-scope-controls > label { font-weight: 700; font-size: 12px; }
+.search-scope-controls select { min-width: 0; width: 100%; min-height: 38px; border: 1px solid #cbd8eb; border-radius: 9px; padding: 7px; background: white; }
+.search-scope-controls small { color: #607491; font-size: 11px; line-height: 1.6; }
+.search-refresh-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.search-refresh-choice small { flex-basis: 100%; font-weight: 400; }
