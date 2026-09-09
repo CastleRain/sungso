@@ -1,4 +1,4 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.13.1';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.14.0';
 import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.13.1';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
 import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.13.1';
@@ -17,8 +17,8 @@ import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } fr
 import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.13.1';
 import { createCandidateReview } from './controllers/candidate-review.js?v=4.13.1';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.13.1';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.13.1';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.14.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.14.0';
 import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey } from './candidate-review-core.mjs?v=4.6.1';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
@@ -70,16 +70,16 @@ import {
   orderCommuteVerificationCandidates,
 } from './recommendation-verification-core.mjs?v=4.4.0';
 import {
-  filterSupplyNotices, matchesAlertPreferences, noticeStatusAtKst,
-  normalizeSupplyNotice, sortSupplyNotices, summarizeSupplyNotices,
-} from './supply-core.mjs?v=2.5.0';
+  buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
+  normalizeSupplyNotice, sortSupplyNotices,
+} from './supply-core.mjs?v=4.14.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
 import { hhUI } from './ui-state.js?v=4.4.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.13.1';
+} from './ui-format.js?v=4.14.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -175,6 +175,7 @@ const state = {
   companyLocation: null,
   workplaces: [],
   activeWorkplaceId: null,
+  companyDestinationDraft: null,
   commuteQuota: null,
   commuteVerificationRunning: false,
   commuteAttempts: new Map(),
@@ -198,7 +199,7 @@ const state = {
   supplyPreferences: loadSupplyPreferences(),
   supplySeen: loadSupplySeen(),
   subscriptionProfile: normalizeSubscriptionProfile(loadSubscriptionProfile() || {}),
-  supplyFilters: { query: '', region: 'all', status: 'active', program: 'all', favoritesOnly: false, sort: 'deadline' },
+  supplyFilters: { query: '', region: 'all', status: 'active', program: 'all', favoritesOnly: false, sort: 'deadline', quickFilter: '' },
 };
 
 const homeMap = new HomeMap(APP_CONFIG.naverMapClientId);
@@ -1406,7 +1407,6 @@ function renderSupplyUnreadBadge() {
   const badge = $('#supplyNavBadge');
   badge.hidden = count === 0;
   badge.textContent = count > 99 ? '99+' : String(count);
-  $('#supplyNewCount').textContent = count.toLocaleString('ko-KR');
 }
 
 function setSupplyConnection(payload, error = null) {
@@ -1896,15 +1896,14 @@ function supplyFilterInput() {
 function renderSupply() {
   const root = $('#supplyFeed');
   const notices = state.supplyFeed?.notices || [];
-  let filtered = filterSupplyNotices(notices, supplyFilterInput(), new Date());
-  if (state.supplyFilters.favoritesOnly) filtered = filtered.filter((notice) => state.supplyFavorites.includes(String(notice.id)));
-  filtered = sortSupplyNotices(filtered, state.supplyFilters.sort, new Date());
-  const summary = summarizeSupplyNotices(notices, new Date());
-  $('#supplyOpenCount').textContent = Number(summary.open ?? notices.filter((notice) => supplyStatusMeta(notice).status === 'open').length).toLocaleString('ko-KR');
-  $('#supplySoonCount').textContent = Number(summary.soon ?? summary.upcomingWithin7 ?? summary.openingWithin7Days ?? notices.filter((notice) => supplyStatusMeta(notice).status === 'upcoming' && /^D-[1-7]$/.test(supplyDDay(supplyPrimarySchedule(notice)))).length).toLocaleString('ko-KR');
-  $('#supplyNewlywedCount').textContent = Number(summary.newlywed ?? notices.filter(supplyIsNewlywed).length).toLocaleString('ko-KR');
+  const now = new Date();
+  const summary = buildSupplyQuickFilterView(notices, supplyFilterInput(), {
+    quickFilter: state.supplyFilters.quickFilter, unreadIds: state.supplySeen?.unreadIds || [], now,
+  });
+  const filtered = sortSupplyNotices(summary.notices, state.supplyFilters.sort, now);
+  renderSupplyQuickFilters(summary);
   $('#supplyResultCount').textContent = filtered.length.toLocaleString('ko-KR');
-  $('#supplyResultDescription').textContent = `${state.supplyFilters.region === 'all' ? '서울·경기' : state.supplyFilters.region} · ${$('#supplyStatusFilter').selectedOptions[0]?.textContent || '공고'}${state.supplyFilters.program !== 'all' ? ` · ${$('#supplyProgramFilter').selectedOptions[0]?.textContent}` : ''}`;
+  $('#supplyResultDescription').textContent = `${state.supplyFilters.region === 'all' ? '서울·경기' : state.supplyFilters.region} · ${SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter] || $('#supplyStatusFilter').selectedOptions[0]?.textContent || '공고'}${state.supplyFilters.program !== 'all' ? ` · ${$('#supplyProgramFilter').selectedOptions[0]?.textContent}` : ''}`;
   renderSupplyMatchSummary();
   if (!filtered.length) {
     const shConnected = (state.supplyFeed?.sources || []).some((source) => String(source.id || '').toLowerCase() === 'sh' && ['ok', 'live', 'success'].includes(String(source.status || '').toLowerCase()));
@@ -1913,11 +1912,21 @@ function renderSupply() {
       : '공공데이터포털에서 청약홈과 LH API를 각각 활용신청한 뒤 수집을 실행하면 실제 공고가 표시됩니다.';
     const empty = createElement('div', 'supply-empty');
     const icon = createElement('span'); icon.append(createElement('i', `ti ${state.supplyFeed?.loadError ? 'ti-plug-connected-x' : 'ti-home-search'}`));
-    empty.append(icon, createElement('strong', '', state.supplyFeed?.loadError ? '공식 공고 연결을 확인해주세요' : notices.length ? '조건에 맞는 공고가 없어요' : '아직 수집된 공식 공고가 없어요'), createElement('p', '', state.supplyFeed?.loadError || (notices.length ? '접수 상태나 지역·유형 조건을 바꿔보세요.' : noNoticeMessage)));
+    const quickLabel = SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter];
+    empty.append(icon,
+      createElement('strong', '', state.supplyFeed?.loadError ? '공식 공고 연결을 확인해주세요' : notices.length ? quickLabel ? `${quickLabel}에 해당하는 공고가 없어요` : '조건에 맞는 공고가 없어요' : '아직 수집된 공식 공고가 없어요'),
+      createElement('p', '', state.supplyFeed?.loadError || (notices.length ? quickLabel ? '지역·검색어·내 조건을 유지한 결과예요. 빠른 보기를 해제하거나 아래 조건을 조정해보세요.' : '접수 상태나 지역·유형 조건을 바꿔보세요.' : noNoticeMessage)));
     const actions = createElement('div', 'supply-empty-actions');
-    const apply = document.createElement('a'); apply.href = 'https://www.data.go.kr/data/15098547/openapi.do'; apply.target = '_blank'; apply.rel = 'noopener noreferrer'; apply.textContent = '청약홈 API 신청';
-    const lh = document.createElement('a'); lh.href = 'https://www.data.go.kr/data/15058530/openapi.do'; lh.target = '_blank'; lh.rel = 'noopener noreferrer'; lh.textContent = 'LH API 신청';
-    actions.append(apply, lh); empty.appendChild(actions); root.replaceChildren(empty);
+    if (notices.length && quickLabel) {
+      const clear = createElement('button', '', '빠른 보기 해제'); clear.type = 'button';
+      clear.addEventListener('click', () => selectSupplyQuickFilter(''));
+      actions.appendChild(clear);
+    } else if (!notices.length) {
+      const apply = document.createElement('a'); apply.href = 'https://www.data.go.kr/data/15098547/openapi.do'; apply.target = '_blank'; apply.rel = 'noopener noreferrer'; apply.textContent = '청약홈 API 신청';
+      const lh = document.createElement('a'); lh.href = 'https://www.data.go.kr/data/15058530/openapi.do'; lh.target = '_blank'; lh.rel = 'noopener noreferrer'; lh.textContent = 'LH API 신청';
+      actions.append(apply, lh);
+    }
+    empty.appendChild(actions); root.replaceChildren(empty);
     renderSupplyDetail(null);
   } else {
     if (!filtered.some((notice) => String(notice.id) === state.supplySelectedId)) state.supplySelectedId = String(filtered[0].id);
@@ -1925,6 +1934,29 @@ function renderSupply() {
     renderSupplyDetail(filtered.find((notice) => String(notice.id) === state.supplySelectedId) || filtered[0]);
   }
   renderSupplyUnreadBadge();
+}
+
+function renderSupplyQuickFilters(summary) {
+  const countIds = { new: 'supplyNewCount', open: 'supplyOpenCount', soon: 'supplySoonCount', newlywed: 'supplyNewlywedCount' };
+  Object.entries(countIds).forEach(([key, id]) => { $(`#${id}`).textContent = summary.counts[key].toLocaleString('ko-KR'); });
+  $$('[data-supply-quick-filter]').forEach((button) => {
+    const key = button.dataset.supplyQuickFilter;
+    const selected = summary.quickFilter === key;
+    button.setAttribute('aria-pressed', String(selected));
+    button.setAttribute('aria-label', `${SUPPLY_QUICK_FILTER_LABELS[key]} ${summary.counts[key].toLocaleString('ko-KR')}개${selected ? ' · 선택됨, 다시 눌러 해제' : '만 보기'}`);
+  });
+  const selected = Boolean(summary.quickFilter);
+  $('#supplyQuickFilterStatus').hidden = !selected;
+  $('#supplyQuickFilterLabel').textContent = selected ? `${SUPPLY_QUICK_FILTER_LABELS[summary.quickFilter]}만 보기 · ${summary.notices.length.toLocaleString('ko-KR')}개` : '';
+  // Keep the previous status in state so dismissing a card restores it. A direct
+  // status selection exits quick view and becomes the new ordinary filter.
+  $('#supplyStatusFilter').value = summary.quickFilter === 'open' ? 'open'
+    : summary.quickFilter === 'soon' ? 'upcoming' : selected ? 'recent' : state.supplyFilters.status;
+}
+
+function selectSupplyQuickFilter(key) {
+  state.supplyFilters.quickFilter = Object.hasOwn(SUPPLY_QUICK_FILTER_LABELS, key) && state.supplyFilters.quickFilter !== key ? key : '';
+  renderSupply();
 }
 
 function markAllSupplySeen() {
@@ -5421,6 +5453,13 @@ function selectCompanyPickerLocation(location) {
     lng: Number(location.lng),
     name: companyLocationLabel(location) || '지도에서 선택한 회사 위치',
   };
+  const draft = activeCompanyDestinationDraft();
+  if (draft) {
+    draft.location = { ...state.companyPickerSelection };
+    draft.locationEdited = true;
+    draft.error = '';
+    renderCompanyDestinationDrafts();
+  }
   renderCompanyPickerSelection();
   $$('.company-location-result', $('#companyLocationSearchResults')).forEach((button) => {
     const selected = Number(button.dataset.lat) === Number(location.lat) && Number(button.dataset.lng) === Number(location.lng);
@@ -5435,6 +5474,7 @@ function armCompanyPickerMap() {
   companyPickerMap.startPinMode(async (coords) => {
     companyPickerSearchToken += 1;
     const token = ++companyPickerClickToken;
+    invalidateCompanyDraftLocation();
     $('#companyLocationSearchResults').hidden = true;
     $('#companyPickerSelectionTitle').textContent = '지도 좌표의 주소를 확인하는 중…';
     $('#companyPickerSelectionAddress').textContent = '잠시만 기다려주세요.';
@@ -5606,6 +5646,7 @@ function setCompanyPostcodeBackgroundInert(inert) {
   [
     '.company-location-modal > .modal-head',
     '.company-location-help',
+    '.company-destination-drafts',
     '#companyLocationSearchForm',
     '#companySearchCapability',
     '#companyLocationSearchResults',
@@ -5709,7 +5750,9 @@ async function openCompanyPostcodeSearch(queryValue = '', expectedToken = null) 
   setCompanyPostcodeBackgroundInert(true);
   status.textContent = `공식 주소 DB에서 ‘${query}’ 검색 중…`;
   root.replaceChildren(createElement('p', 'company-location-search-empty', '건물명·도로명 주소 검색을 불러오고 있어요…'));
-  window.setTimeout(() => $('#closeCompanyPostcode')?.focus(), 0);
+  window.setTimeout(() => {
+    if (!$('#companyLocationModal').hidden && !panel.hidden && sessionToken === companyPickerSearchToken) $('#closeCompanyPostcode')?.focus();
+  }, 0);
   try {
     const Postcode = await loadCompanyPostcodeScript();
     if ($('#companyLocationModal').hidden || panel.hidden
@@ -5725,6 +5768,7 @@ async function openCompanyPostcodeSearch(queryValue = '', expectedToken = null) 
     postcode.embed(root, { q: query, autoClose: false });
     return true;
   } catch (_) {
+    if ($('#companyLocationModal').hidden || panel.hidden || sessionToken !== companyPickerSearchToken) return false;
     closeCompanyPostcodeSearch({ rearm: true });
     renderCompanyLocationSearchResults([], '공식 주소 검색을 불러오지 못했어요. 네트워크를 확인하거나 지도에서 건물을 직접 선택해주세요.');
     return false;
@@ -5825,34 +5869,153 @@ async function searchCompanyLocations(event = null) {
   return [];
 }
 
-async function openCompanyLocationModal(workplaceIdToEdit = null) {
-  const editing = state.workplaces.find((item) => item.id === workplaceIdToEdit) || null;
-  state.activeWorkplaceId = editing?.id || null;
-  const query = editing && !isGeoPoint(editing) ? editing.address || editing.label || '' : editing?.label || '';
-  updateCompanySearchCapability();
-  $('#companyLocationTitle').textContent = editing ? '출근 목적지 수정' : '출근 목적지 추가';
-  $('span', $('#applyCompanyLocation')).textContent = editing ? '목적지 수정' : '목적지에 추가';
-  $('#companyDaysPerWeek').value = String(editing?.daysPerWeek || 5);
-  $('#companyWeightPercent').value = String(editing?.weightPercent ?? (state.workplaces.length ? 100 / (state.workplaces.length + 1) : 100));
-  $('#companyMaxMinutes').value = String(editing?.individualMaxMinutes || $('#recommendCommuteMax').value || 60);
-  $('#companyEnforceTime').checked = editing?.required !== false;
-  $('#companyLocationSearch').value = query;
+function activeCompanyDestinationDraft() {
+  return state.companyDestinationDraft?.items.find(item => item.id === state.activeWorkplaceId) || null;
+}
+
+function createCompanyDestinationDraft(workplace = null) {
+  const weight = workplace?.weightPercent ?? (state.companyDestinationDraft?.items.length
+    ? 100 / (state.companyDestinationDraft.items.length + 1) : 100);
+  return {
+    id: workplace?.id || workplaceId(), original: workplace ? { ...workplace } : null,
+    location: workplace && isGeoPoint(workplace) ? { ...workplace } : null,
+    query: workplace && !isGeoPoint(workplace) ? workplace.address || workplace.label || '' : workplace?.label || '',
+    weight: String(weight), minutes: String(workplace?.individualMaxMinutes || $('#recommendCommuteMax').value || 60),
+    days: String(workplace?.daysPerWeek || 5), required: workplace?.required !== false,
+    locationEdited: false, error: '',
+  };
+}
+
+function captureCompanyDestinationDraft() {
+  const item = activeCompanyDestinationDraft();
+  if (!item) return;
+  item.query = $('#companyLocationSearch').value.trim();
+  item.location = state.companyPickerSelection ? { ...state.companyPickerSelection } : null;
+  item.weight = $('#companyWeightPercent').value;
+  item.minutes = $('#companyMaxMinutes').value;
+  item.days = $('#companyDaysPerWeek').value;
+  item.required = $('#companyEnforceTime').checked;
+}
+
+function invalidateCompanyDraftLocation() {
+  state.companyPickerSelection = null;
+  const item = activeCompanyDestinationDraft();
+  if (item) {
+    item.location = null;
+    item.locationEdited = true;
+    item.error = '';
+  }
+}
+
+function companyDestinationDraftError(item) {
+  if (!item.weight.trim() || !Number.isFinite(Number(item.weight)) || Number(item.weight) < 0) return '비중을 0 이상의 숫자로 입력해주세요.';
+  if (!item.minutes.trim() || !Number.isFinite(Number(item.minutes)) || Number(item.minutes) < 1 || Number(item.minutes) > 180) return '통근 목표시간을 1~180분으로 입력해주세요.';
+  if (!isGeoPoint(item.location) && (!item.original || item.locationEdited)) return '검색 결과나 지도에서 이 목적지의 위치를 선택해주세요.';
+  return '';
+}
+
+function renderCompanyDestinationDrafts() {
+  const draft = state.companyDestinationDraft;
+  const root = $('#companyDestinationDraftList');
+  if (!draft || !root) return;
+  const included = draft.items.filter(item => item.original || item.query || item.location);
+  const total = included.reduce((sum, item) => sum + (Number.isFinite(Number(item.weight)) ? Math.max(0, Number(item.weight)) : 0), 0);
+  root.replaceChildren(...draft.items.map((item, index) => {
+    const row = createElement('div', 'company-destination-draft');
+    row.dataset.active = String(item.id === state.activeWorkplaceId);
+    row.dataset.invalid = String(Boolean(item.error));
+    const choose = createElement('button', 'company-destination-draft-main');
+    choose.type = 'button';
+    choose.setAttribute('aria-pressed', String(item.id === state.activeWorkplaceId));
+    const label = companyLocationLabel(item.location) || item.original?.label || item.query || '새 목적지';
+    choose.setAttribute('aria-label', `${destinationLetter(index)} ${label} 편집`);
+    choose.append(createElement('strong', '', `${destinationLetter(index)} · ${label}`));
+    const share = total && Number.isFinite(Number(item.weight)) ? Math.max(0, Number(item.weight)) / total * 100 : 0;
+    choose.append(createElement('small', '', item.error || (item.original || item.query || item.location
+      ? `${isGeoPoint(item.location) ? '위치 선택됨' : '위치 재확인 필요'} · 반영 ${share.toFixed(1)}% · ${item.minutes}분 ${item.required ? '초과 제외' : '초과 허용'}`
+      : '검색하거나 지도에서 위치를 선택하세요')));
+    choose.addEventListener('click', () => switchCompanyDestinationDraft(item.id));
+    const remove = createElement('button', 'company-destination-draft-remove');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', `${destinationLetter(index)} ${label} 임시 목록에서 삭제`);
+    remove.innerHTML = '<i class="ti ti-x" aria-hidden="true"></i>';
+    remove.addEventListener('click', () => removeCompanyDestinationDraft(item.id));
+    row.append(choose, remove);
+    return row;
+  }));
+  $('#companyDestinationDraftCount').textContent = `${included.length}곳 · 전체 저장 전까지 기존 조건은 유지됩니다.`;
+  $('span', $('#saveCompanyDestinations')).textContent = included.length ? `전체 ${included.length}곳 저장` : '강남역 기준으로 저장';
+  const active = activeCompanyDestinationDraft();
+  $('#companyDestinationEditing').textContent = active
+    ? `${destinationLetter(draft.items.indexOf(active))} 목적지 편집 · 목록을 눌러 다른 회사도 이어서 입력하세요.` : '';
+}
+
+async function switchCompanyDestinationDraft(id, { capture = true, focus = false } = {}) {
+  if (capture) captureCompanyDestinationDraft();
+  const item = state.companyDestinationDraft?.items.find(entry => entry.id === id);
+  if (!item) return;
+  const token = ++companyPickerSearchToken;
+  companyPickerClickToken += 1;
+  companyPickerMap.cancelPinMode();
+  closeCompanyPostcodeSearch({ rearm: false, restoreFocus: false });
+  state.activeWorkplaceId = id;
+  $('#companyDaysPerWeek').value = item.days;
+  $('#companyWeightPercent').value = item.weight;
+  $('#companyMaxMinutes').value = item.minutes;
+  $('#companyEnforceTime').checked = item.required;
+  $('#companyLocationSearch').value = item.query;
   $('#companyLocationSearchResults').hidden = true;
   $('#companyLocationSearchResults').replaceChildren();
-  state.companyPickerSelection = editing && isGeoPoint(editing) ? { ...editing } : null;
+  state.companyPickerSelection = item.location ? { ...item.location } : null;
   if (!state.companyPickerSelection) companyPickerMap.clearSearchLocation();
   renderCompanyPickerSelection();
-  openModalShell('companyLocationModal', '#companyLocationSearch');
+  renderCompanyDestinationDrafts();
+  if (focus) $('#companyLocationSearch').focus();
   const map = await ensureCompanyPickerMap();
-  if (!map || $('#companyLocationModal').hidden) return;
+  if (!map || token !== companyPickerSearchToken || state.activeWorkplaceId !== id || $('#companyLocationModal').hidden) return;
   if (state.companyPickerSelection) {
-    selectCompanyPickerLocation(state.companyPickerSelection);
-    armCompanyPickerMap();
-  } else if (query) {
-    await searchCompanyLocations();
-  } else {
-    armCompanyPickerMap();
+    const location = state.companyPickerSelection;
+    map.showSearchLocation(location.lat, location.lng, companyLocationLabel(location) || '선택한 회사 위치', 17);
   }
+  armCompanyPickerMap();
+}
+
+async function addCompanyDestinationDraft() {
+  captureCompanyDestinationDraft();
+  const draft = state.companyDestinationDraft;
+  if (!draft) return;
+  let item = draft.items.find(entry => !entry.original && !entry.query && !entry.location);
+  if (!item) {
+    item = createCompanyDestinationDraft();
+    draft.items.push(item);
+  }
+  await switchCompanyDestinationDraft(item.id, { capture: false, focus: true });
+}
+
+async function removeCompanyDestinationDraft(id) {
+  captureCompanyDestinationDraft();
+  const draft = state.companyDestinationDraft;
+  if (!draft) return;
+  const index = draft.items.findIndex(item => item.id === id);
+  if (index < 0) return;
+  draft.items.splice(index, 1);
+  if (!draft.items.length) draft.items.push(createCompanyDestinationDraft());
+  if (state.activeWorkplaceId === id) await switchCompanyDestinationDraft(draft.items[Math.min(index, draft.items.length - 1)].id, { capture: false });
+  else renderCompanyDestinationDrafts();
+}
+
+async function openCompanyLocationModal(workplaceIdToEdit = null) {
+  state.companyDestinationDraft = { items: [], originalSnapshot: JSON.stringify(state.workplaces) };
+  state.companyDestinationDraft.items = state.workplaces.map(workplace => createCompanyDestinationDraft(workplace));
+  let editing = state.companyDestinationDraft.items.find(item => item.id === workplaceIdToEdit);
+  if (!editing) {
+    editing = createCompanyDestinationDraft();
+    state.companyDestinationDraft.items.push(editing);
+  }
+  updateCompanySearchCapability();
+  $('#companyLocationTitle').textContent = '출근 목적지 함께 편집';
+  openModalShell('companyLocationModal', '#companyLocationSearch');
+  await switchCompanyDestinationDraft(editing.id, { capture: false });
 }
 
 function closeCompanyLocationModal() {
@@ -5860,42 +6023,70 @@ function closeCompanyLocationModal() {
   companyPickerClickToken += 1;
   companyPickerMap.cancelPinMode();
   closeCompanyPostcodeSearch({ rearm: false, restoreFocus: false });
+  state.companyDestinationDraft = null;
+  state.companyPickerSelection = null;
+  state.activeWorkplaceId = null;
   closeModalShell('companyLocationModal');
 }
 
 function applyCompanyPickerLocation() {
-  const selected = state.companyPickerSelection;
-  if (!selected || !isGeoPoint(selected)) return;
-  const query = companyLocationLabel(selected) || `지도 선택 ${Number(selected.lat).toFixed(6)}, ${Number(selected.lng).toFixed(6)}`;
-  const inputWeight = Number($('#companyWeightPercent').value);
-  const individualMaxMinutes = Number($('#companyMaxMinutes').value);
-  if (!$('#companyWeightPercent').value.trim() || !Number.isFinite(inputWeight) || inputWeight < 0 || !Number.isFinite(individualMaxMinutes) || individualMaxMinutes < 1 || individualMaxMinutes > 180) return showToast('비중은 0 이상, 최대 통근시간은 1~180분으로 입력해주세요.', 'error');
-  const saved = saveGeocodeResult(query, { ...selected, name: query }) || selected;
-  const next = normalizeDestinations([{
-    ...selected,
-    ...saved,
-    id: state.activeWorkplaceId || workplaceId(),
-    label: query,
-    name: query,
-    query,
-    address: companyLocationAddress(selected) || companyLocationAddress(saved) || query,
-    daysPerWeek: Number($('#companyDaysPerWeek').value) || 5,
-    weightSource: 'explicit-percent', weightPercent: inputWeight, individualMaxMinutes,
-    required: $('#companyEnforceTime').checked,
-    modes: readSelectedCommuteModes(),
-    maxMinutes: Math.max(1, Number($('#recommendCommuteMax').value) || 60),
-    departureTime: $('#recommendDepartureTime').value || '08:00',
-  }])[0];
-  const workplace = { ...selected, ...saved, ...next, individualMaxMinutes, weightPercent: inputWeight, weightSource: 'explicit-percent', name: query, query, label: query };
-  const existingIndex = state.workplaces.findIndex((item) => item.id === state.activeWorkplaceId);
-  if (existingIndex >= 0) state.workplaces.splice(existingIndex, 1, workplace);
-  else state.workplaces.push(workplace);
+  captureCompanyDestinationDraft();
+  const item = activeCompanyDestinationDraft();
+  if (!item) return;
+  item.error = companyDestinationDraftError(item);
+  renderCompanyDestinationDrafts();
+  if (item.error) return showToast(item.error, 'error');
+  void addCompanyDestinationDraft();
+}
+
+function saveCompanyDestinationDrafts() {
+  captureCompanyDestinationDraft();
+  const draft = state.companyDestinationDraft;
+  if (!draft) return;
+  if (JSON.stringify(state.workplaces) !== draft.originalSnapshot) return showToast('편집 중에 기존 목적지가 변경됐어요. 취소한 뒤 다시 열어 최신 목적지를 확인해주세요.', 'error');
+  const included = draft.items.filter(item => item.original || item.query || item.location);
+  for (const item of included) item.error = companyDestinationDraftError(item);
+  const invalid = included.find(item => item.error);
+  if (invalid) {
+    void switchCompanyDestinationDraft(invalid.id, { capture: false, focus: true });
+    return showToast(invalid.error, 'error');
+  }
+  const workplaces = included.map(item => {
+    const original = item.original;
+    const initial = createCompanyDestinationDraft(original);
+    const changed = !original || item.locationEdited || item.weight !== initial.weight || item.minutes !== initial.minutes
+      || item.days !== initial.days || item.required !== initial.required;
+    if (!changed) return { ...original };
+    const selected = item.location || original;
+    const query = (item.location ? companyLocationLabel(item.location) : original?.label || companyLocationLabel(original)) || item.query;
+    const saved = item.locationEdited && isGeoPoint(selected) ? saveGeocodeResult(query, { ...selected, name: query }) || selected : selected;
+    const retained = { ...original };
+    if (item.locationEdited) {
+      // A replacement location must not inherit the old POI name/address or coordinate provenance.
+      for (const key of ['placeName', 'displayName', 'category', 'source', 'coordinateSource', 'locationSource',
+        'address', 'roadAddress', 'jibunAddress', 'latitude', 'longitude', 'lon', 'x', 'y', 'elements', 'placeId', 'key', 'cachedAt']) delete retained[key];
+    }
+    return {
+      ...retained, ...selected, ...saved,
+      id: item.id, label: query, name: query, query,
+      address: companyLocationAddress(selected) || (!item.locationEdited && original?.address) || query,
+      weightSource: 'explicit-percent', weightPercent: Number(item.weight), individualMaxMinutes: Number(item.minutes),
+      daysPerWeek: Number(item.days) || 5, required: item.required,
+      modes: original?.modes || readSelectedCommuteModes(),
+      maxMinutes: original?.maxMinutes || Math.max(1, Number($('#recommendCommuteMax').value) || 60),
+      departureTime: original?.departureTime || $('#recommendDepartureTime').value || '08:00',
+    };
+  });
+  if (JSON.stringify(workplaces) === draft.originalSnapshot) {
+    closeCompanyLocationModal();
+    return showToast('기존 목적지를 그대로 유지했어요.');
+  }
+  state.workplaces = workplaces;
   state.companyLocation = state.workplaces[0] || null;
-  state.activeWorkplaceId = null;
   renderWorkplaces();
   handleRecommendationCriteriaChanged();
   closeCompanyLocationModal();
-  showToast(`${query} 목적지를 저장했어요.`);
+  showToast(workplaces.length ? `목적지 ${workplaces.length}곳을 함께 저장했어요.` : '목적지가 없어 강남역 100% 기준으로 돌아갑니다.');
 }
 
 async function confirmCompanyLocation({ announce = true } = {}) {
@@ -8220,7 +8411,13 @@ function bindEvents() {
     });
     renderSupply();
   }));
-  $('#supplyStatusFilter').addEventListener('change', (event) => { state.supplyFilters.status = event.target.value; renderSupply(); });
+  $$('[data-supply-quick-filter]').forEach((button) => button.addEventListener('click', () => selectSupplyQuickFilter(button.dataset.supplyQuickFilter)));
+  $('#clearSupplyQuickFilter').addEventListener('click', () => {
+    const previous = state.supplyFilters.quickFilter;
+    selectSupplyQuickFilter('');
+    $(`[data-supply-quick-filter="${previous}"]`)?.focus();
+  });
+  $('#supplyStatusFilter').addEventListener('change', (event) => { state.supplyFilters.status = event.target.value; state.supplyFilters.quickFilter = ''; renderSupply(); });
   $('#supplyProgramFilter').addEventListener('change', (event) => { state.supplyFilters.program = event.target.value; renderSupply(); });
   $('#supplySort').addEventListener('change', (event) => { state.supplyFilters.sort = event.target.value; renderSupply(); });
   $('#supplyFavoriteFilter').addEventListener('click', (event) => {
@@ -8641,7 +8838,9 @@ function bindEvents() {
     companyPickerClickToken += 1;
     closeCompanyPostcodeSearch({ rearm: false, restoreFocus: false });
     $('#companyLocationSearchResults').hidden = true;
-    state.companyPickerSelection = null;
+    invalidateCompanyDraftLocation();
+    captureCompanyDestinationDraft();
+    renderCompanyDestinationDrafts();
     companyPickerMap.clearSearchLocation();
     renderCompanyPickerSelection();
     armCompanyPickerMap();
@@ -8651,7 +8850,7 @@ function bindEvents() {
   $('#useCompanyPostcodeSearch').addEventListener('click', async () => {
     companyPickerClickToken += 1;
     const token = ++companyPickerSearchToken;
-    state.companyPickerSelection = null;
+    invalidateCompanyDraftLocation();
     renderCompanyPickerSelection();
     const opened = await openCompanyPostcodeSearch($('#companyLocationSearch').value, token);
     if (!opened && token === companyPickerSearchToken) armCompanyPickerMap();
@@ -8665,6 +8864,16 @@ function bindEvents() {
     }, 80);
   });
   $('#applyCompanyLocation').addEventListener('click', applyCompanyPickerLocation);
+  $('#addCompanyDestinationDraft').addEventListener('click', addCompanyDestinationDraft);
+  $('#saveCompanyDestinations').addEventListener('click', saveCompanyDestinationDrafts);
+  ['#companyWeightPercent', '#companyMaxMinutes', '#companyEnforceTime'].forEach(selector => {
+    $(selector).addEventListener('input', () => {
+      captureCompanyDestinationDraft();
+      const item = activeCompanyDestinationDraft();
+      if (item) item.error = '';
+      renderCompanyDestinationDrafts();
+    });
+  });
   document.addEventListener('keydown', (event) => {
     const postcodePanel = $('#companyPostcodePanel');
     if (event.key === 'Tab' && postcodePanel && !postcodePanel.hidden) {
