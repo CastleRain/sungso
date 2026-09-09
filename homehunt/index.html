@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply.css?v=2.5.0">
+  <link rel="stylesheet" href="./css/supply.css?v=4.14.0">
   <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
@@ -60,8 +60,9 @@
   <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
   <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
   <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
+  <link rel="stylesheet" href="./css/destination-editor.css?v=4.14.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.13.1" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.14.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -458,12 +459,14 @@
           <div class="supply-source-links"><a href="https://www.applyhome.co.kr/" target="_blank" rel="noopener noreferrer">청약홈</a><a href="https://apply.lh.or.kr/lhapply/apply/sc/list.do" target="_blank" rel="noopener noreferrer">LH 청약플러스</a><a href="https://www.i-sh.co.kr/app/lay2/program/S48T561C562/www/brd/m_244/list.do?multi_itm_seq=1" target="_blank" rel="noopener noreferrer">SH 공고</a><a href="https://www.gh.or.kr/gh/announcement-of-salerental001.do?mode=list" target="_blank" rel="noopener noreferrer">GH 공고</a><a href="https://www.gh.or.kr/gh/saleslease-notification.do" target="_blank" rel="noopener noreferrer">GH 문자알림</a></div>
         </section>
 
-        <div class="supply-summary" aria-label="분양 공고 요약">
-          <article><span class="supply-summary-icon new"><i class="ti ti-sparkles" aria-hidden="true"></i></span><div><small>새로 올라온 공고</small><strong id="supplyNewCount">0</strong><em>마지막 확인 뒤</em></div></article>
-          <article><span class="supply-summary-icon open"><i class="ti ti-calendar-check" aria-hidden="true"></i></span><div><small>지금 접수 중</small><strong id="supplyOpenCount">0</strong><em>특별·일반공급 포함</em></div></article>
-          <article><span class="supply-summary-icon soon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></span><div><small>7일 안에 시작</small><strong id="supplySoonCount">0</strong><em>접수 예정</em></div></article>
-          <article><span class="supply-summary-icon newlywed"><i class="ti ti-hearts" aria-hidden="true"></i></span><div><small>신혼 대상 확인</small><strong id="supplyNewlywedCount">0</strong><em>공식 구조화 항목 기준</em></div></article>
+        <div class="supply-summary" role="group" aria-label="분양 공고 빠른 보기">
+          <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="new" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon new"><i class="ti ti-sparkles" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>새로 올라온 공고</small><strong id="supplyNewCount">0</strong><em>마지막 확인 뒤</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
+          <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="open" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon open"><i class="ti ti-calendar-check" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>지금 접수 중</small><strong id="supplyOpenCount">0</strong><em>특별·일반공급 포함</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
+          <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="soon" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon soon"><i class="ti ti-clock-hour-4" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>7일 안에 시작</small><strong id="supplySoonCount">0</strong><em>접수 예정</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
+          <article><button class="supply-summary-filter" type="button" data-supply-quick-filter="newlywed" aria-pressed="false" aria-controls="supplyFeed"><span class="supply-summary-icon newlywed"><i class="ti ti-hearts" aria-hidden="true"></i></span><span class="supply-summary-copy"><small>신혼 대상 확인</small><strong id="supplyNewlywedCount">0</strong><em>공식 구조화 항목 기준</em></span><i class="ti ti-chevron-right supply-summary-arrow" aria-hidden="true"></i></button></article>
         </div>
+        <p class="supply-summary-help">카드를 눌러 골라보세요. 숫자는 아래 지역·검색 조건 기준이며, 접수 상태 전체에서 셉니다.</p>
+        <div class="supply-quick-filter-status" id="supplyQuickFilterStatus" aria-live="polite" hidden><span id="supplyQuickFilterLabel"></span><button id="clearSupplyQuickFilter" type="button"><i class="ti ti-x" aria-hidden="true"></i>빠른 보기 해제</button></div>
 
         <section class="supply-command" aria-label="분양 공고 검색 조건">
           <label class="supply-search"><i class="ti ti-search" aria-hidden="true"></i><input id="supplySearch" autocomplete="off" placeholder="단지명·지역·사업주체 검색"></label>
@@ -886,9 +889,15 @@
 
   <div class="modal-backdrop" id="companyLocationModal" hidden>
     <section class="guide-modal company-location-modal" role="dialog" aria-modal="true" aria-labelledby="companyLocationTitle" aria-describedby="companyLocationHelp">
-      <header class="modal-head"><div><span>COMMUTE DESTINATION</span><h2 id="companyLocationTitle">출근 목적지 추가</h2></div><button class="modal-close" type="button" data-close-company-location aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <header class="modal-head"><div><span>COMMUTE DESTINATIONS</span><h2 id="companyLocationTitle">출근 목적지 함께 편집</h2></div><button class="modal-close" type="button" data-close-company-location aria-label="닫기"><i class="ti ti-x" aria-hidden="true"></i></button></header>
       <div class="company-location-modal-body">
         <p class="company-location-help" id="companyLocationHelp"><strong>회사 위치는 아파트로 추측하지 않습니다.</strong> 회사·건물·상가·오피스텔 이름이나 도로명·지번 주소로 찾고, 결과가 없으면 지도에서 직접 선택합니다.</p>
+        <section class="company-destination-drafts" aria-label="함께 저장할 출근 목적지">
+          <div class="company-destination-drafts-head"><div><strong>목적지를 한 번에 정리하세요</strong><small id="companyDestinationDraftCount" role="status">전체 저장 전까지 기존 조건은 유지됩니다.</small></div><button class="outline-btn" id="addCompanyDestinationDraft" type="button"><i class="ti ti-plus" aria-hidden="true"></i><span>새 목적지 추가</span></button></div>
+          <div id="companyDestinationDraftList" class="company-destination-draft-list"></div>
+          <p>아래에서 위치와 비중을 정한 뒤 다른 목적지를 이어서 입력하세요. 빈 새 목적지는 저장하지 않습니다.</p>
+        </section>
+        <p id="companyDestinationEditing" class="company-destination-editing"></p>
         <form class="company-location-search" id="companyLocationSearchForm" role="search">
           <label class="sr-only" for="companyLocationSearch">회사·건물·주소 검색</label>
           <i class="ti ti-search" aria-hidden="true"></i>
@@ -918,7 +927,7 @@
             <strong id="companyPickerSelectionTitle">아직 선택하지 않았어요</strong>
             <p id="companyPickerSelectionAddress">검색 결과 또는 지도 위 건물을 선택해주세요.</p>
             <small id="companyPickerCoordinates">좌표를 선택해야 실제 통근 경로를 계산합니다.</small>
-            <label class="company-days-field"><span>추천에 반영할 비중</span><input id="companyWeightPercent" type="number" min="0" step="1" value="100" inputmode="decimal" aria-describedby="companyWeightHelp"><small id="companyWeightHelp">예: A 10 · B 50 · C 40. 합계가 100이 아니면 비율로 환산합니다.</small></label>
+            <label class="company-days-field"><span>추천에 반영할 비중</span><input id="companyWeightPercent" type="number" min="0" step="any" value="100" inputmode="decimal" aria-describedby="companyWeightHelp"><small id="companyWeightHelp">예: A 10 · B 50 · C 40. 합계가 100이 아니면 비율로 환산합니다.</small></label>
             <label class="company-days-field"><span>이 회사 통근 목표시간</span><input id="companyMaxMinutes" type="number" min="1" max="180" step="1" value="60" inputmode="numeric"><small>분 · 시간 초과 허용 여부는 아래에서 선택하세요.</small></label>
             <label class="personalized-check"><input id="companyEnforceTime" type="checkbox" checked><span>이 시간을 넘으면 후보에서 제외</span></label>
             <small>끄면 멀어도 제외하지 않고 이 회사의 비중만큼 통근 부담을 점수에 반영합니다. 예: 광화문 10%는 초과 허용, 분당·판교 90%를 우선.</small>
@@ -926,7 +935,7 @@
           </aside>
         </div>
         <p class="company-location-limit"><i class="ti ti-info-circle" aria-hidden="true"></i><span>공식 주소 DB는 등록 건물명·법인명을, 네이버 장소 API는 입점 상호·지점까지 찾습니다. 같은 이름이 많으면 동네나 역 이름을 함께 입력하세요.</span></p>
-        <div class="modal-actions company-location-actions"><span></span><button class="outline-btn" type="button" data-close-company-location><i class="ti ti-x" aria-hidden="true"></i><span>취소</span></button><button class="record-btn" id="applyCompanyLocation" type="button" disabled><i class="ti ti-map-pin-check" aria-hidden="true"></i><span>목적지에 추가</span></button></div>
+        <div class="modal-actions company-location-actions"><button class="outline-btn" type="button" data-close-company-location><span>취소</span></button><button class="outline-btn" id="applyCompanyLocation" type="button" disabled><i class="ti ti-plus" aria-hidden="true"></i><span>반영하고 다음 추가</span></button><button class="record-btn" id="saveCompanyDestinations" type="button"><i class="ti ti-check" aria-hidden="true"></i><span>전체 저장</span></button></div>
       </div>
     </section>
   </div>
@@ -1000,10 +1009,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.13.1" defer></script>
+  <script src="./js/ui-kit.js?v=4.14.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.13.1"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.13.1"></script>
+  <script type="module" src="./js/app.js?v=4.14.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.14.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>

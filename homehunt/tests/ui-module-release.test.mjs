@@ -62,3 +62,13 @@ test('an old cached formatter lacking the new export prevents module initializat
   await assert.rejects(import(oldImporter), error => error instanceof SyntaxError
     && /does not provide an export named ['"]evidenceTierMeta['"]/.test(error.message));
 });
+
+test('supply quick view exports link at the current release before the app starts', async () => {
+  const helpers = importRows.find(row => row.names.includes('buildSupplyQuickFilterView'));
+  assert.ok(helpers);
+  const url = new URL(helpers.path, new URL('js/app.js', root));
+  assert.equal(url.searchParams.get('v'), release);
+  const linked = await import(dataModule(helpers.statement.replace(helpers.path, url.href)
+    + '\nexport const initialized = typeof buildSupplyQuickFilterView === "function" && Boolean(SUPPLY_QUICK_FILTER_LABELS.open);'));
+  assert.equal(linked.initialized, true);
+});

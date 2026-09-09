@@ -13,6 +13,8 @@ async function read(relativePath) {
 
 test('supply screen, alert settings, and official application links remain wired', async () => {
   const html = await read('index.html');
+  const config = await read('js/config.js');
+  const uiVersion = config.match(/uiVersion:\s*'([^']+)'/)[1];
 
   assert.match(html, /data-view-target="supply"/);
   assert.match(html, /id="view-supply"/);
@@ -22,7 +24,7 @@ test('supply screen, alert settings, and official application links remain wired
   assert.match(html, /i-sh\.co\.kr/);
   assert.match(html, /gh\.or\.kr\/gh\/announcement-of-salerental001\.do/);
   assert.match(html, /gh\.or\.kr\/gh\/saleslease-notification\.do/);
-  assert.match(html, /css\/supply\.css\?v=2\.5\.0/);
+  assert.ok(html.includes(`css/supply.css?v=${uiVersion}`));
   assert.match(html, /id="supplyMatchModal"/);
   assert.match(html, /id="supplyMatchDistricts"/);
   assert.match(html, /id="supplyMatchMinUnits"/);

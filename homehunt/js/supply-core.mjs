@@ -568,6 +568,42 @@ function dateKeyDistance(from, to) {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / (24 * 60 * 60 * 1000));
 }
 
+function startsWithin7Days(notice, now) {
+  if (supplyStatusAtKst(notice, now) !== 'upcoming') return false;
+  const today = kstDateKey(now);
+  return applicationWindows(notice).some(({ startDate }) => {
+    const days = dateKeyDistance(today, startDate);
+    return days >= 1 && days <= 7;
+  });
+}
+
+export const SUPPLY_QUICK_FILTER_LABELS = Object.freeze({
+  new: '새로 올라온 공고',
+  open: '지금 접수 중',
+  soon: '7일 안에 시작',
+  newlywed: '신혼 대상 확인',
+});
+
+// Summary cards replace only the status constraint. Region, search, property
+// preferences and favorites remain in scope, so each count is its click result.
+export function buildSupplyQuickFilterView(notices = [], preferences = {}, options = {}) {
+  const now = options.now || new Date();
+  const quickFilter = Object.hasOwn(SUPPLY_QUICK_FILTER_LABELS, options.quickFilter || '') ? options.quickFilter : '';
+  const scope = filterSupplyNotices(notices, { ...preferences, statuses: [], excludeClosed: false, unreadOnly: false }, now);
+  const unreadIds = new Set(normalizedList(options.unreadIds));
+  const groups = {
+    new: scope.filter((notice) => unreadIds.has(notice.id.toLowerCase())),
+    open: scope.filter((notice) => supplyStatusAtKst(notice, now) === 'open'),
+    soon: scope.filter((notice) => startsWithin7Days(notice, now)),
+    newlywed: scope.filter((notice) => notice.newlywedSupplyAvailable === true || notice.program === 'newlywed-town'),
+  };
+  return {
+    quickFilter,
+    counts: Object.fromEntries(Object.entries(groups).map(([key, values]) => [key, values.length])),
+    notices: quickFilter ? groups[quickFilter] : filterSupplyNotices(scope, preferences, now),
+  };
+}
+
 export function summarizeSupplyNotices(notices = [], now = new Date()) {
   const today = kstDateKey(now);
   const values = dedupeSupplyNotices(notices);
@@ -598,10 +634,7 @@ export function summarizeSupplyNotices(notices = [], now = new Date()) {
     if (!regions.size) regions.add('other');
     regions.forEach((region) => { summary.regions[region] += 1; });
     const windows = applicationWindows(notice);
-    if (status === 'upcoming' && windows.some(({ startDate }) => {
-      const days = dateKeyDistance(today, startDate);
-      return days >= 0 && days <= 7;
-    })) summary.openingWithin7Days += 1;
+    if (startsWithin7Days(notice, now)) summary.openingWithin7Days += 1;
     if (status === 'open' && windows.some(({ endDate }) => {
       const days = dateKeyDistance(today, endDate);
       return days >= 0 && days <= 7;

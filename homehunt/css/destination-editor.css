@@ -1,0 +1,76 @@
+.hh-app .company-destination-drafts {
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid #dce5f1;
+  border-radius: 14px;
+  background: #f7f9fd;
+}
+.hh-app .company-destination-drafts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.hh-app .company-destination-drafts-head > div { display: grid; gap: 4px; }
+.hh-app .company-destination-drafts-head strong { color: #162d48; font-size: 13px; }
+.hh-app .company-destination-drafts-head small,
+.hh-app .company-destination-drafts > p { margin: 0; color: #60738d; font-size: 11px; line-height: 1.5; }
+.hh-app .company-destination-draft-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 2px;
+  margin-bottom: 8px;
+}
+.hh-app .company-destination-draft {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid #d7e1ee;
+  border-radius: 10px;
+  background: #fff;
+}
+.hh-app .company-destination-draft[data-active="true"] { border-color: #245cff; background: #edf3ff; box-shadow: inset 0 0 0 1px #245cff; }
+.hh-app .company-destination-draft[data-invalid="true"] { border-color: #ba3a35; }
+.hh-app .company-destination-draft-main {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+}
+.hh-app .company-destination-draft-main strong { overflow-wrap: anywhere; color: #183653; font-size: 12px; }
+.hh-app .company-destination-draft-main small { color: #60738d; font-size: 10px; line-height: 1.5; }
+.hh-app .company-destination-draft[data-invalid="true"] small { color: #a63029; }
+.hh-app .company-destination-draft-remove { flex: none; width: 32px; height: 36px; margin-right: 3px; border: 0; border-radius: 8px; background: transparent; color: #657991; }
+.hh-app .company-destination-draft-main:focus-visible,
+.hh-app .company-destination-draft-remove:focus-visible { outline: 2px solid #245cff; outline-offset: 2px; }
+.hh-app .company-destination-editing { margin: 0 0 8px; color: #2454a2; font-size: 12px; font-weight: 700; }
+.hh-app .company-location-actions {
+  position: sticky;
+  bottom: -20px;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0;
+  background: #fff;
+  border-top: 1px solid #e3e9f2;
+}
+.hh-app .company-location-actions > :first-child { margin-right: auto; }
+@media (max-width: 600px) {
+  .hh-app .company-destination-drafts { padding: 9px; }
+  .hh-app .company-destination-drafts-head { align-items: flex-start; }
+  .hh-app .company-destination-drafts-head .outline-btn { flex-shrink: 0; padding: 7px 8px; font-size: 11px; }
+  .hh-app .company-destination-draft-list { grid-template-columns: minmax(0, 1fr); max-height: 176px; }
+  .hh-app .company-location-actions { bottom: -13px; flex-wrap: wrap; gap: 6px; padding-bottom: 12px; }
+  .hh-app .company-location-actions .record-btn { flex: 1 1 100%; justify-content: center; }
+  .hh-app .company-location-actions .outline-btn { font-size: 12px; }
+}
