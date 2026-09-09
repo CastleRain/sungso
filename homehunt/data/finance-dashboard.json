@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-09T17:41:51.248Z",
+  "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+  "status": "ok",
+  "collectionNote": "공식 공개 자료를 하루 한 번 확인합니다. 관측월·적용일과 확인시각은 다르며, 수집 실패 시 이전 자료의 기준일을 유지합니다.",
+  "series": [
+    {
+      "id": "mortgage_new",
+      "sourceId": "bok_mortgage",
+      "label": "은행 주택담보대출 평균",
+      "kind": "average",
+      "frequency": "monthly",
+      "unit": "%",
+      "sourceName": "한국은행 ECOS",
+      "sourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11064110",
+      "description": "예금은행이 해당 월 새로 취급한 주택담보대출의 금액 가중평균입니다. 개인에게 제시되는 금리와 다르며 공표까지 시차가 있습니다.",
+      "value": 4.48,
+      "observationDate": "2026-07",
+      "history": [
+        {
+          "date": "2025-12",
+          "value": 4.23
+        },
+        {
+          "date": "2026-01",
+          "value": 4.29
+        },
+        {
+          "date": "2026-02",
+          "value": 4.32
+        },
+        {
+          "date": "2026-03",
+          "value": 4.34
+        },
+        {
+          "date": "2026-04",
+          "value": 4.31
+        },
+        {
+          "date": "2026-05",
+          "value": 4.32
+        },
+        {
+          "date": "2026-06",
+          "value": 4.36
+        },
+        {
+          "date": "2026-07",
+          "value": 4.48
+        }
+      ],
+      "publishedAt": "2026-08-26",
+      "dataUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202512/202609/BECBLA0302",
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "status": "ok",
+      "statusReason": null,
+      "publicationNote": null,
+      "publicationBasis": "bok_press_release_registered_at",
+      "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11064110"
+    },
+    {
+      "id": "bok_base_rate",
+      "sourceId": "bok_base",
+      "label": "한국은행 기준금리",
+      "kind": "policy",
+      "frequency": "decision",
+      "unit": "%",
+      "sourceName": "한국은행",
+      "sourceUrl": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
+      "description": "한국은행의 정책금리입니다. 기준일은 마지막 변경일이며, 은행 대출에 그대로 적용되는 금리가 아닙니다.",
+      "value": 3,
+      "observationDate": "2026-08-27",
+      "publishedAt": null,
+      "history": [
+        {
+          "date": "2015-06-11",
+          "value": 1.5
+        },
+        {
+          "date": "2016-06-09",
+          "value": 1.25
+        },
+        {
+          "date": "2017-11-30",
+          "value": 1.5
+        },
+        {
+          "date": "2018-11-30",
+          "value": 1.75
+        },
+        {
+          "date": "2019-07-18",
+          "value": 1.5
+        },
+        {
+          "date": "2019-10-16",
+          "value": 1.25
+        },
+        {
+          "date": "2020-03-17",
+          "value": 0.75
+        },
+        {
+          "date": "2020-05-28",
+          "value": 0.5
+        },
+        {
+          "date": "2021-08-26",
+          "value": 0.75
+        },
+        {
+          "date": "2021-11-25",
+          "value": 1
+        },
+        {
+          "date": "2022-01-14",
+          "value": 1.25
+        },
+        {
+          "date": "2022-04-14",
+          "value": 1.5
+        },
+        {
+          "date": "2022-05-26",
+          "value": 1.75
+        },
+        {
+          "date": "2022-07-13",
+          "value": 2.25
+        },
+        {
+          "date": "2022-08-25",
+          "value": 2.5
+        },
+        {
+          "date": "2022-10-12",
+          "value": 3
+        },
+        {
+          "date": "2022-11-24",
+          "value": 3.25
+        },
+        {
+          "date": "2023-01-13",
+          "value": 3.5
+        },
+        {
+          "date": "2024-10-11",
+          "value": 3.25
+        },
+        {
+          "date": "2024-11-28",
+          "value": 3
+        },
+        {
+          "date": "2025-02-25",
+          "value": 2.75
+        },
+        {
+          "date": "2025-05-29",
+          "value": 2.5
+        },
+        {
+          "date": "2026-07-16",
+          "value": 2.75
+        },
+        {
+          "date": "2026-08-27",
+          "value": 3
+        }
+      ],
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "status": "ok",
+      "statusReason": null,
+      "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다.",
+      "publicationBasis": null,
+      "publicationSourceUrl": null
+    },
+    {
+      "id": "hf_bogeumjari_30",
+      "sourceId": "hf_bogeumjari",
+      "label": "아낌e보금자리론 · 30년",
+      "kind": "product",
+      "frequency": "monthly",
+      "unit": "%",
+      "sourceName": "한국주택금융공사",
+      "sourceUrl": "https://www.hf.go.kr/ko/sub01/sub01_01_04.do",
+      "description": "아낌e보금자리론 30년 만기의 공시 고정금리입니다. 전자약정·등기 방식 금리이며 추가 우대금리 적용 전입니다. 실제 이용 가능 여부·금리는 공사의 심사로 결정됩니다.",
+      "value": 5.1,
+      "observationDate": "2026-09-01",
+      "publishedAt": "2026-09-01",
+      "history": [
+        {
+          "date": "2026-09",
+          "value": 5.1
+        }
+      ],
+      "terms": [
+        {
+          "years": 10,
+          "value": 4.9
+        },
+        {
+          "years": 15,
+          "value": 5
+        },
+        {
+          "years": 20,
+          "value": 5.05
+        },
+        {
+          "years": 30,
+          "value": 5.1
+        },
+        {
+          "years": 40,
+          "value": 5.15
+        },
+        {
+          "years": 50,
+          "value": 5.2
+        }
+      ],
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastAttemptAt": "2026-09-09T17:41:51.248Z",
+      "status": "ok",
+      "statusReason": null,
+      "publicationNote": null,
+      "publicationBasis": "hf_rate_table_disclosure_date",
+      "publicationSourceUrl": "https://www.hf.go.kr/ko/sub01/sub01_01_04.do"
+    }
+  ],
+  "sources": [
+    {
+      "id": "bok_mortgage",
+      "status": "ok",
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+    },
+    {
+      "id": "bok_base",
+      "status": "ok",
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+    },
+    {
+      "id": "hf_bogeumjari",
+      "status": "ok",
+      "checkedAt": "2026-09-09T17:41:51.248Z",
+      "lastSuccessAt": "2026-09-09T17:41:51.248Z"
+    }
+  ]
+}

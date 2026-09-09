@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "observationDate": "2026-07",
+  "publishedAt": "2026-08-31",
+  "checkedAt": "2026-09-09T17:45:00Z",
+  "refreshMode": "manual",
+  "sourceName": "국토교통부 · KDI 경제정책자료 게재",
+  "sourceUrl": "https://eiec.kdi.re.kr/policy/materialView.do?num=286032&pg=1&pp=20&topic=P",
+  "indicators": [
+    {
+      "id": "unsold_national",
+      "label": "전국 미분양 주택",
+      "scope": "전국 · 월말 잔여 물량",
+      "value": 68217,
+      "unit": "호",
+      "changePct": 1.1,
+      "changeLabel": "전월 대비",
+      "description": "분양 후 아직 팔리지 않은 주택입니다. 아래 준공 후 미분양을 포함하므로 두 숫자를 더하지 않습니다."
+    },
+    {
+      "id": "unsold_completed_national",
+      "label": "준공 후 미분양",
+      "scope": "전국 · 전체 미분양의 일부",
+      "value": 29152,
+      "unit": "호",
+      "changePct": -2.1,
+      "changeLabel": "전월 대비",
+      "description": "건물이 완성된 뒤에도 남은 물량입니다. 전체 미분양 증가와 방향이 다른지 함께 확인합니다."
+    },
+    {
+      "id": "completed_capital",
+      "label": "수도권 주택 준공",
+      "scope": "서울·인천·경기 · 해당 월 전체주택",
+      "value": 18279,
+      "unit": "호",
+      "changePct": 20.9,
+      "changeLabel": "전년 같은 달 대비",
+      "description": "그 달 공사를 마친 주택 수입니다. 입주 예정·실제 입주 수와 다르며 아파트만의 통계도 아닙니다."
+    }
+  ]
+}

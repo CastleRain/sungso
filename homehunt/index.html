@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="./css/styles.css?v=2.5.0">
   <link rel="stylesheet" href="./css/ui-kit.css?v=2.5.0">
-  <link rel="stylesheet" href="./css/supply.css?v=4.18.0">
+  <link rel="stylesheet" href="./css/supply.css?v=4.19.0">
   <link rel="stylesheet" href="./css/supply-location.css?v=4.13.1">
   <link rel="stylesheet" href="./css/guide.css?v=2.5.0">
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
@@ -45,11 +45,11 @@
   <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.18.0">
+  <link rel="stylesheet" href="./css/decision-workspace.css?v=4.19.0">
   <link rel="stylesheet" href="./css/history-query.css?v=4.4.0">
   <link rel="stylesheet" href="./css/financial-plan.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-evidence.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.18.0">
+  <link rel="stylesheet" href="./css/market-area-overview.css?v=4.19.0">
   <link rel="stylesheet" href="./css/location-discovery.css?v=4.4.0">
   <link rel="stylesheet" href="./css/map-markers.css?v=4.4.0">
   <link rel="stylesheet" href="./css/personalized-recommendation.css?v=4.4.0">
@@ -60,10 +60,11 @@
   <link rel="stylesheet" href="./css/official-complex-progress.css?v=4.13.1">
   <link rel="stylesheet" href="./css/commute-auto-control.css?v=4.13.1">
   <link rel="stylesheet" href="./css/recommendation-price-coverage.css?v=4.13.1">
-  <link rel="stylesheet" href="./css/destination-editor.css?v=4.18.0">
-  <link rel="stylesheet" href="./css/search-continuity.css?v=4.18.0">
+  <link rel="stylesheet" href="./css/destination-editor.css?v=4.19.0">
+  <link rel="stylesheet" href="./css/search-continuity.css?v=4.19.0">
+  <link rel="stylesheet" href="./css/finance-dashboard.css?v=4.19.0">
 </head>
-<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.18.0" data-hh-screen="finder">
+<body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.19.0" data-hh-screen="finder">
   <div class="hh-shell">
   <header class="portal-header hh-rail">
     <a class="portal-brand hh-rail__brand" href="../" aria-label="sungso 홈으로 돌아가기">
@@ -76,6 +77,7 @@
       <button class="portal-nav-item hh-rail__item" type="button" data-view-target="candidates"><i class="ti ti-list-check" aria-hidden="true"></i><span>확인한 후보</span></button>
       <button class="portal-nav-item hh-rail__item" id="recordsPrimaryNav" type="button" data-view-target="visits" data-nav-group="records"><i class="ti ti-notebook" aria-hidden="true"></i><span>내 기록</span></button>
       <button class="portal-nav-item hh-rail__item" type="button" data-view-target="market"><i class="ti ti-chart-line" aria-hidden="true"></i><span>실거래</span></button>
+      <button class="portal-nav-item hh-rail__item" type="button" data-view-target="dashboard"><i class="ti ti-dashboard" aria-hidden="true"></i><span>대시보드</span></button>
       <button class="portal-nav-item hh-rail__item supply-nav-item" type="button" data-view-target="supply"><i class="ti ti-building-community" aria-hidden="true"></i><span>분양·청약</span><em id="supplyNavBadge" hidden>0</em></button>
       <button class="portal-nav-item hh-rail__item secondary-nav-item" type="button" data-view-target="guide"><i class="ti ti-help-circle" aria-hidden="true"></i><span>사용 안내</span></button>
       <button class="portal-nav-item hh-rail__item secondary-nav-item" id="connectionsPrimaryNav" type="button" data-view-target="connections"><i class="ti ti-plug-connected" aria-hidden="true"></i><span>연결 상태</span><em class="v25-connection-indicator waiting" aria-hidden="true"></em></button>
@@ -443,6 +445,10 @@
       </div>
     </section>
 
+    <section class="app-view finance-dashboard-view" id="view-dashboard" data-view="dashboard" hidden>
+      <div class="page-wrap wide" id="financeDashboard" aria-label="부동산 금리·시장 대시보드"></div>
+    </section>
+
     <section class="app-view supply-view" id="view-supply" data-view="supply" hidden>
       <div class="supply-page page-wrap wide">
         <header class="supply-hero">
@@ -739,6 +745,7 @@
             <article><i class="ti ti-adjustments-search" aria-hidden="true"></i><div><h3>집 찾기</h3><p>여러 목적지의 이동시간과 예산·면적·세대수·연식을 조합해 아파트 후보를 지도에서 봅니다.</p></div><button type="button" data-view-target="recommend">열기</button></article>
             <article><i class="ti ti-notebook" aria-hidden="true"></i><div><h3>내 기록</h3><p>실제로 방문한 집만 저장하고 지도·목록을 전환합니다. 방문일·가격·면적·둘의 평가를 보고 최대 3곳을 나란히 비교합니다.</p></div><button type="button" data-view-target="visits">열기</button></article>
             <article><i class="ti ti-chart-line" aria-hidden="true"></i><div><h3>실거래</h3><p>단지와 전용면적을 고르면 국토부 실제 계약의 평균가격과 흐름을 확인합니다. 예측은 오차 검증을 통과한 경우만 참고로 표시합니다.</p></div><button type="button" data-view-target="market">열기</button></article>
+            <article><i class="ti ti-dashboard" aria-hidden="true"></i><div><h3>부동산 대시보드</h3><p>공식 주담대 금리·지역 거래 흐름·월 상환액을 확인하고 금리·수요·공급이 집값에 영향을 주는 과정을 이해합니다.</p></div><button type="button" data-view-target="dashboard">열기</button></article>
             <article><i class="ti ti-building-community" aria-hidden="true"></i><div><h3>분양·청약</h3><p>서울·경기 청약홈·LH·SH 공고 중 신혼 관련·동네·가격·면적·세대수 조건에 맞는 공고를 보고 알림을 설정합니다.</p></div><button type="button" data-view-target="supply">열기</button></article>
             <article><i class="ti ti-help-circle" aria-hidden="true"></i><div><h3>사용 안내</h3><p>처음 시작 순서, 화면별 역할, 휴대폰 알림과 두 사람의 청약 준비도 입력 범위를 확인합니다.</p></div><button type="button" data-view-target="guide">열기</button></article>
             <article><i class="ti ti-plug-connected" aria-hidden="true"></i><div><h3>연결 상태</h3><p>Google 로그인과 지도·실거래·분양·회사 검색·통근의 연결 상태를 확인합니다.</p></div><button type="button" data-view-target="connections">열기</button></article>
@@ -1021,10 +1028,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js" defer></script>
-  <script src="./js/ui-kit.js?v=4.18.0" defer></script>
+  <script src="./js/ui-kit.js?v=4.19.0" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js?v=4.18.0"></script>
-  <script type="module" src="./js/ui-shell.js?v=4.18.0"></script>
+  <script type="module" src="./js/app.js?v=4.19.0"></script>
+  <script type="module" src="./js/ui-shell.js?v=4.19.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
 </body>
 </html>
