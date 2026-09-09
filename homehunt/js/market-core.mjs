@@ -461,6 +461,7 @@ function oneHorizonRollingDiagnostics(usable, {
   horizon,
   minTrainingObservations,
   conformalCoverage,
+  modelKind = 'damped-trend',
 }) {
   const residuals = [];
   const actualByMonth = new Map(usable.map((item) => [item.monthIndex, item]));
@@ -472,12 +473,14 @@ function oneHorizonRollingDiagnostics(usable, {
     const windowStart = origin.monthIndex - windowMonths + 1;
     const training = usable.slice(0, originPosition + 1).filter((item) => item.monthIndex >= windowStart);
     if (training.length < minTrainingObservations) continue;
-    const model = fitDampedModel(training);
+    const model = modelKind === 'damped-trend'
+      ? fitDampedModel(training)
+      : { lastIndex: origin.monthIndex };
     if (!model) continue;
     const actual = actualByMonth.get(model.lastIndex + horizon);
     if (!actual) continue;
-    const predicted = forecastPointFromModel(model, phi, horizon);
     const naive = training.at(-1).averageP33;
+    const predicted = modelKind === 'damped-trend' ? forecastPointFromModel(model, phi, horizon) : naive;
     residuals.push({
       originMonthIndex: model.lastIndex,
       targetMonthIndex: actual.monthIndex,
@@ -551,7 +554,7 @@ function minOriginsForHorizon(horizon, backtestMinSamples, minOriginsByHorizon) 
   return productMinOrigins(horizon);
 }
 
-export function fitDampedForecast(series, {
+function forecastSettings({
   windowMonths = 36,
   phi = .85,
   horizon = 6,
@@ -570,6 +573,18 @@ export function fitDampedForecast(series, {
   maxBacktestMapePct = 20,
   asOfMonthIndex = currentMonthIndex(),
 } = {}) {
+  return {
+    windowMonths, phi, horizon, minMonthlyCount, minObservations, minSpanMonths,
+    minTransactions, maxStaleMonths, backtestMinTrainingObservations,
+    backtestMinSamples, minOriginsByHorizon, minConformalOrigins,
+    minBaselineSkillPct, conformalCoverage, incompleteMonths,
+    maxBacktestMapePct, asOfMonthIndex,
+  };
+}
+
+function prepareForecastTraining(series, {
+  windowMonths, minMonthlyCount, asOfMonthIndex, incompleteMonths,
+}) {
   const normalized = normalizeForecastSeries(series);
   const completeSeries = excludeIncompleteMonths(normalized, { asOfMonthIndex, incompleteMonths });
   const latestCompleteObservation = completeSeries.at(-1)?.monthIndex;
@@ -580,17 +595,17 @@ export function fitDampedForecast(series, {
   const transactionCount = usable.reduce((sum, item) => sum + item.count, 0);
   const calendarSpanMonths = usable.length ? usable.at(-1).monthIndex - usable[0].monthIndex + 1 : 0;
   const staleMonths = usable.length ? Math.max(0, asOfMonthIndex - usable.at(-1).monthIndex) : null;
-  const horizons = Array.from({ length: Math.max(1, Math.floor(horizon)) }, (_, index) => index + 1);
-  const horizonDiagnostics = rollingOriginForecastDiagnostics(usable, {
-    windowMonths,
-    phi,
-    horizons,
-    minTrainingObservations: backtestMinTrainingObservations,
-    conformalCoverage,
-  });
+  return { normalized, completeSeries, usable, transactionCount, calendarSpanMonths, staleMonths };
+}
+
+function forecastDiagnostics(training, horizonDiagnostics, {
+  horizon, backtestMinSamples, minOriginsByHorizon, minMonthlyCount,
+  asOfMonthIndex, incompleteMonths, conformalCoverage, backtestMinTrainingObservations,
+}) {
+  const { normalized, completeSeries, usable, transactionCount, calendarSpanMonths, staleMonths } = training;
   const finalBacktest = horizonDiagnostics.find((item) => item.horizonMonths === horizon) || horizonDiagnostics.at(-1);
   const requiredBacktestOrigins = minOriginsForHorizon(horizon, backtestMinSamples, minOriginsByHorizon);
-  const diagnostics = {
+  return {
     observations: usable.length,
     transactionCount,
     calendarSpanMonths,
@@ -616,18 +631,45 @@ export function fitDampedForecast(series, {
     backtestMinSamples: requiredBacktestOrigins,
     horizonDiagnostics,
   };
+}
+
+// Both candidate models must pass the same evidence gates. Model accuracy and
+// improvement over a simpler model are evaluated separately, never by parsing
+// translated rejection messages.
+function forecastQualityReasons(diagnostics, {
+  minObservations, minSpanMonths, minTransactions, maxStaleMonths, minConformalOrigins,
+}) {
+  const { observations, calendarSpanMonths, transactionCount, staleMonths,
+    backtestSamples, backtestMinSamples, backtestHorizonMonths, horizonDiagnostics } = diagnostics;
   const reasons = [];
-  if (usable.length < minObservations) reasons.push(`유효한 월별 표본이 ${minObservations}개월보다 적어요.`);
-  if (usable.length && calendarSpanMonths < minSpanMonths) reasons.push(`관측 기간이 ${minSpanMonths}개월보다 짧아요.`);
+  if (observations < minObservations) reasons.push(`유효한 월별 표본이 ${minObservations}개월보다 적어요.`);
+  if (observations && calendarSpanMonths < minSpanMonths) reasons.push(`관측 기간이 ${minSpanMonths}개월보다 짧아요.`);
   if (transactionCount < minTransactions) reasons.push(`전체 거래 표본이 ${minTransactions}건보다 적어요.`);
-  if (usable.length && staleMonths > maxStaleMonths) reasons.push(`마지막 유효 거래월이 ${maxStaleMonths}개월보다 오래됐어요.`);
-  if ((finalBacktest?.origins || 0) < requiredBacktestOrigins) reasons.push(`${horizon}개월 시계열 백테스트 원점이 ${requiredBacktestOrigins}회보다 적어요.`);
+  if (observations && staleMonths > maxStaleMonths) reasons.push(`마지막 유효 거래월이 ${maxStaleMonths}개월보다 오래됐어요.`);
+  if (backtestSamples < backtestMinSamples) reasons.push(`${backtestHorizonMonths}개월 시계열 백테스트 원점이 ${backtestMinSamples}회보다 적어요.`);
   const weakInterval = horizonDiagnostics.find((item) => item.origins < minConformalOrigins || item.conformalRadiusLog === null);
   if (weakInterval) reasons.push(`${weakInterval.horizonMonths}개월 불확실성 구간 표본이 ${minConformalOrigins}회보다 적어요.`);
-  if (!Number.isFinite(finalBacktest?.skillPct) || finalBacktest.skillPct < minBaselineSkillPct) {
+  return reasons;
+}
+
+export function fitDampedForecast(series, options = {}) {
+  const settings = forecastSettings(options);
+  const { windowMonths, phi, horizon, backtestMinTrainingObservations, conformalCoverage,
+    minBaselineSkillPct, maxBacktestMapePct } = settings;
+  const training = prepareForecastTraining(series, settings);
+  const { usable } = training;
+  const horizons = Array.from({ length: Math.max(1, Math.floor(horizon)) }, (_, index) => index + 1);
+  const horizonDiagnostics = rollingOriginForecastDiagnostics(usable, {
+    windowMonths, phi, horizons,
+    minTrainingObservations: backtestMinTrainingObservations,
+    conformalCoverage,
+  });
+  const diagnostics = forecastDiagnostics(training, horizonDiagnostics, settings);
+  const reasons = forecastQualityReasons(diagnostics, settings);
+  if (!Number.isFinite(diagnostics.baselineSkillPct) || diagnostics.baselineSkillPct < minBaselineSkillPct) {
     reasons.push(`무변화 기준보다 백테스트 MAE를 ${minBaselineSkillPct}% 이상 줄이지 못했어요.`);
   }
-  if (Number.isFinite(finalBacktest?.modelMapePct) && finalBacktest.modelMapePct > maxBacktestMapePct) {
+  if (Number.isFinite(diagnostics.backtestMapePct) && diagnostics.backtestMapePct > maxBacktestMapePct) {
     reasons.push(`시간순 백테스트 평균 오차가 ${maxBacktestMapePct}%를 넘어요.`);
   }
   if (reasons.length) return { eligible: false, reasons, points: [], ...diagnostics };
@@ -668,6 +710,85 @@ export function fitDampedForecast(series, {
     finalRangeWidthPct: finalPoint ? (finalPoint.upper - finalPoint.lower) / finalPoint.point * 100 : null,
     intervalKind: 'rolling-origin-conformal-absolute-log-error',
     ...diagnostics,
+  };
+}
+
+/**
+ * Select a supported price outlook without relaxing the data-quality gates.
+ * A trend must still improve on no change. When it cannot, the simpler model
+ * is assessed using its own fixed-horizon errors and interval calibration.
+ * These same historical residuals drive selection and calibration; neither
+ * the reported error nor calibration coverage is an independent evaluation
+ * of the model-selection procedure or a future coverage guarantee.
+ */
+export function fitPriceOutlook(series, options = {}) {
+  const settings = forecastSettings(options);
+  const trend = fitDampedForecast(series, settings);
+  const training = prepareForecastTraining(series, settings);
+  const { usable } = training;
+  const latest = usable.at(-1);
+  const metadata = {
+    trainingEndMonthIndex: latest?.monthIndex ?? null,
+    trainingEndMonth: latest ? monthFromIndex(latest.monthIndex) : null,
+    baselinePriceP33: latest?.averageP33 ?? null,
+    baselineDescription: '마지막 학습월의 평균 실거래가격이 유지된다고 가정합니다.',
+    trendRejectedReasons: [...(trend.reasons || [])],
+    modelSelectionMethod: 'safety-gated-trend-with-no-change-fallback',
+    modelSelectionIsIndependent: false,
+    intervalCoverageIsIndependent: false,
+    intervalCoverageBasis: 'same-rolling-origin-residuals-used-for-calibration',
+  };
+  if (trend.eligible) return { ...trend, ...metadata, modelKind: 'damped-trend' };
+
+  const { horizon, windowMonths, phi, backtestMinTrainingObservations,
+    conformalCoverage, maxBacktestMapePct } = settings;
+  const horizons = Array.from({ length: Math.max(1, Math.floor(horizon)) }, (_, index) => index + 1);
+  const horizonDiagnostics = horizons.map((step) => oneHorizonRollingDiagnostics(usable, {
+    windowMonths, phi, horizon: step,
+    minTrainingObservations: backtestMinTrainingObservations,
+    conformalCoverage,
+    modelKind: 'last-observation-carried-forward',
+  }));
+  const diagnostics = forecastDiagnostics(training, horizonDiagnostics, settings);
+  const reasons = forecastQualityReasons(diagnostics, settings);
+  if (Number.isFinite(diagnostics.backtestMapePct) && diagnostics.backtestMapePct > maxBacktestMapePct) {
+    reasons.push(`가격 유지 가정의 시간순 백테스트 평균 오차가 ${maxBacktestMapePct}%를 넘어요.`);
+  }
+  if (!latest || !Number.isFinite(diagnostics.backtestMapePct)) {
+    reasons.push('가격 유지 가정을 검증할 실거래 표본이 부족해요.');
+  }
+  if (reasons.length) return { eligible: false, reasons, points: [], ...diagnostics, ...metadata, modelKind: null };
+
+  const points = horizonDiagnostics.map((calibration) => ({
+    monthIndex: latest.monthIndex + calibration.horizonMonths,
+    month: monthFromIndex(latest.monthIndex + calibration.horizonMonths),
+    point: latest.averageP33,
+    lower: latest.averageP33 * Math.exp(-calibration.conformalRadiusLog),
+    upper: latest.averageP33 * Math.exp(calibration.conformalRadiusLog),
+    intervalCalibrationOrigins: calibration.origins,
+    intervalCoveragePct: conformalCoverage * 100,
+  }));
+  const finalPoint = points.at(-1);
+  const recentVolume = usable.filter((item) => item.monthIndex >= latest.monthIndex - 5).reduce((sum, item) => sum + item.count, 0);
+  const previousVolume = usable.filter((item) => item.monthIndex >= latest.monthIndex - 11 && item.monthIndex <= latest.monthIndex - 6).reduce((sum, item) => sum + item.count, 0);
+  // Keep compatibility with the existing diagnostics panel, using this model's
+  // one-month absolute log errors rather than the rejected trend's residuals.
+  const residualScale = median(horizonDiagnostics[0].residuals.map((item) => item.absoluteLogError));
+  return {
+    eligible: true,
+    modelKind: 'last-observation-carried-forward',
+    points,
+    monthlyTrendPct: 0,
+    slope: 0,
+    residualScale,
+    residualVolatilityPct: residualScale * 100,
+    residualVolatilityBasis: 'median-one-month-backtest-absolute-log-error',
+    recentVolume, previousVolume,
+    volumeChangePct: previousVolume ? (recentVolume / previousVolume - 1) * 100 : null,
+    finalRangeWidthPct: (finalPoint.upper - finalPoint.lower) / finalPoint.point * 100,
+    intervalKind: 'rolling-origin-conformal-absolute-log-error',
+    ...diagnostics,
+    ...metadata,
   };
 }
 

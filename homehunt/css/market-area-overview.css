@@ -32,7 +32,34 @@
 .market-total-summary span { color:#5e7187; font-size:11px; }
 .market-total-summary[hidden] { display:none!important; }
 .market-chart-basis { margin:0 18px 14px; color:#61738a; font-size:12px; line-height:1.6; }
+.forecast-reference { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:4px 20px 22px; }
+.forecast-reference[hidden] { display:none!important; }
+.forecast-observed-card { min-width:0; padding:17px 18px; border:1px solid #dce5ef; border-radius:12px; background:#f6f9fc; }
+.forecast-observed-card>small { color:#536c83; font-size:12px; font-weight:650; }
+.forecast-observed-card>strong { display:block; margin:9px 0; font-size:22px; color:#193852; line-height:1.45; }
+.forecast-observed-price .hh-evidence-badge { display:inline-flex; font-size:11px; vertical-align:middle; margin-right:8px; }
+.forecast-observed-card>p { margin:5px 0 0; font-size:12px; color:#5e748a; line-height:1.6; }
+.hh-app.hh-v3 .forecast-layout { align-items:start; }
+.hh-app.hh-v3 .forecast-explain { min-width:0; padding:20px; }
+.hh-app.hh-v3 .forecast-explain .forecast-estimate-title { font-size:15px; line-height:1.6; }
+.hh-app.hh-v3 .forecast-explain .forecast-number { display:flex; flex-direction:column; align-items:flex-start; gap:8px; font-size:clamp(22px,2.4vw,26px); line-height:1.5; }
+.hh-app.hh-v3 .forecast-explain .forecast-number .hh-evidence-badge { font-size:11px; }
+.hh-app.hh-v3 .forecast-explain p,.hh-app.hh-v3 .forecast-explain dt,.hh-app.hh-v3 .forecast-explain dd { font-size:12px; line-height:1.65; }
+.hh-app.hh-v3 .forecast-explain .forecast-range { color:#245899; font-weight:700; }
+.forecast-method { display:inline-block; margin-bottom:12px; padding:4px 9px; border-radius:6px; color:#265f99; background:#e6effb; font-size:11px; font-weight:700; }
+.forecast-hold-reasons { padding-left:18px; font-size:12px; line-height:1.8; color:#65748a; }
+.hh-app.hh-v3 .forecast-explain .forecast-training-note { margin-top:14px; color:#667d92; }
+.hh-app.hh-v3 .forecast-explain .forecast-facts { grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:8px 12px; }
+.forecast-facts dd { overflow-wrap:anywhere; }
+.forecast-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.forecast-actions>button { flex:1 1 160px; min-height:40px; white-space:normal; }
+.forecast-validation { margin-top:18px; padding-top:14px; border-top:1px solid #dce5ef; }
+.forecast-validation>summary { cursor:pointer; color:#345d84; font-size:12px; font-weight:650; }
 @media(max-width:600px) {
+  .forecast-reference { grid-template-columns:1fr; margin:0 12px 18px; gap:9px; }
+  .forecast-observed-card { padding:14px; }
+  .hh-app.hh-v3 .forecast-layout { padding:0 12px 16px; gap:14px; }
+  .hh-app.hh-v3 .forecast-explain { padding:16px; }
   .hh-v3 #marketPanelTrend .trend-card>.data-card-head { flex-wrap:wrap; gap:10px; }
   .hh-v3 #marketPanelTrend .trend-card>.data-card-head>div:first-child { flex:1 0 100%; }
   .hh-v3 #marketPanelTrend .trend-card .chart-legend { white-space:nowrap; }
