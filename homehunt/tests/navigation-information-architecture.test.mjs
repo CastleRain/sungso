@@ -98,17 +98,17 @@ function mediaBlocks(css, maximumWidth = 760) {
   return blocks.join('\n');
 }
 
-test('데스크톱 전역 메뉴는 확인한 후보를 포함한 일곱 사용자 목적을 노출한다', async () => {
+test('데스크톱 전역 메뉴는 대시보드를 포함한 여덟 사용자 목적을 노출한다', async () => {
   const html = await read('index.html');
   const nav = elementByClass(html, 'nav', 'portal-nav');
   assert.ok(nav, 'aria-label을 가진 .portal-nav 전역 메뉴가 필요합니다.');
 
   const entries = navEntries(nav);
-  assert.equal(entries.length, 7, '전역 메뉴는 중복·더보기 없이 정확히 7개여야 합니다.');
+  assert.equal(entries.length, 8, '전역 메뉴는 중복·더보기 없이 정확히 8개여야 합니다.');
   assert.deepEqual(entries.map(({ target }) => target), [
-    'recommend', 'candidates', 'visits', 'market', 'supply', 'guide', 'connections',
+    'recommend', 'candidates', 'visits', 'market', 'dashboard', 'supply', 'guide', 'connections',
   ]);
-  const expectedLabels = ['집 찾기', '확인한 후보', '내 기록', '실거래', '분양·청약', '사용 안내', '연결 상태'];
+  const expectedLabels = ['집 찾기', '확인한 후보', '내 기록', '실거래', '대시보드', '분양·청약', '사용 안내', '연결 상태'];
   entries.forEach((entry, index) => {
     assert.ok(entry.label.includes(expectedLabels[index]), `${entry.target} 메뉴 이름은 '${expectedLabels[index]}'이어야 합니다.`);
   });
@@ -192,19 +192,20 @@ test('집 찾기·내 기록·분양 결과에서 해당 아파트 실거래로 
   );
 });
 
-test('모바일은 핵심 네 메뉴를 하단에 두고 안내·연결은 상단에서도 열 수 있다', async () => {
-  const [html, styles, uiKit, supply, guide, navigationV25] = await Promise.all([
+test('모바일은 대시보드를 포함한 여섯 메뉴를 하단에 두고 안내·연결은 상단에서도 열 수 있다', async () => {
+  const [html, styles, uiKit, supply, guide, navigationV25, shell, candidates, finance] = await Promise.all([
     read('index.html'), read('css/styles.css'), read('css/ui-kit.css'), read('css/supply.css'), read('css/guide.css'),
     readOptional('css/navigation-v25.css'),
+    read('css/hh-shell.css'), read('css/candidate-review.css'), read('css/finance-dashboard.css'),
   ]);
   assert.match(html, /css\/navigation-v25\.css(?:\?[^"']*)?["']/i, '2.5 내비게이션 스타일시트를 페이지에서 불러와야 합니다.');
-  const mobileCss = mediaBlocks([styles, uiKit, supply, guide, navigationV25].join('\n'));
+  const mobileCss = mediaBlocks([styles, uiKit, supply, guide, navigationV25, shell, candidates, finance].join('\n'), 1023);
   const compactCss = mobileCss.replace(/\s+/g, ' ');
 
   assert.match(compactCss, /\.hh-app\s+\.portal-nav\s*\{[^}]*position\s*:\s*fixed[^}]*bottom\s*:/i);
   const navColumnDeclarations = [...compactCss.matchAll(/portal-nav\s*\{[^}]*grid-template-columns\s*:\s*repeat\((\d+)\s*,/gi)];
   assert.ok(navColumnDeclarations.length, '모바일 하단 내비게이션 열 수를 선언해야 합니다.');
-  assert.equal(navColumnDeclarations.at(-1)[1], '4', '최종 모바일 cascade는 핵심 메뉴 4열이어야 합니다.');
+  assert.equal(navColumnDeclarations.at(-1)[1], '6', '최종 모바일 cascade는 대시보드 포함 6열이어야 합니다.');
 
   const hiddenRules = [...compactCss.matchAll(/([^{}]+)\{([^{}]*display\s*:\s*none[^{}]*)\}/gi)]
     .map(([, selector]) => selector)
@@ -214,7 +215,7 @@ test('모바일은 핵심 네 메뉴를 하단에 두고 안내·연결은 상�
   const hidesSemanticSecondaryClass = /(?:portal-nav-secondary|nav-secondary|secondary-nav|mobile-secondary|desktop-only-nav)/i.test(hiddenRules);
   assert.ok(
     hidesSecondaryTargets || hidesSemanticSecondaryClass,
-    '760px 이하에서는 사용 안내·연결 상태 두 보조 항목을 하단 4칸에서 숨기는 의미 있는 규칙이 필요합니다.',
+    '모바일에서는 사용 안내·연결 상태 두 보조 항목을 하단에서 숨기는 의미 있는 규칙이 필요합니다.',
   );
 
   const headerActions = elementByClass(html, 'div', 'header-actions');

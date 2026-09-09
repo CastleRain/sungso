@@ -17,6 +17,7 @@ export const UI_SCREENS = Object.freeze([
   'candidates',
   'records',
   'market',
+  'dashboard',
   'supply',
   'guide',
   'health',

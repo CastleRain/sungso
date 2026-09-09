@@ -1,0 +1,45 @@
+name: Update HomeHunt finance dashboard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 0 * * *"
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: homehunt-finance-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Collect dated official mortgage and benchmark rates
+        run: node homehunt/scripts/fetch-finance-data.mjs
+      - name: Commit public dashboard snapshot
+        id: publish_data
+        run: |
+          if git diff --quiet -- homehunt/data/finance-dashboard.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add homehunt/data/finance-dashboard.json
+          git commit -m "data: refresh homehunt official finance indicators"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Request GitHub Pages rebuild
+        if: steps.publish_data.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds"

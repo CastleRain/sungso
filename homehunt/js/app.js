@@ -1,31 +1,33 @@
-import { APP_CONFIG, REGIONS } from './config.js?v=4.18.0';
-import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.18.0';
-import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.18.0';
+import { APP_CONFIG, REGIONS } from './config.js?v=4.19.0';
+import { createFinanceDashboard } from './controllers/finance-dashboard.js?v=4.19.0';
+import { buildFinanceMarketContext } from './finance-market-context.mjs?v=4.19.0';
+import { buildCompanySearchScope } from './company-search-scope-core.mjs?v=4.19.0';
+import { createOfficialComplexClient } from './official-complex-client.mjs?v=4.19.0';
 import { createOfficialComplexQueue } from './official-complex-queue.mjs?v=4.13.1';
-import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.18.0';
+import { createOfficialComplexProgress } from './controllers/official-complex-progress.js?v=4.19.0';
 import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
-import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.18.0';
+import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.19.0';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.18.0';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.19.0';
 import { homeTargetPriceBridge } from '../../shared/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.18.0';
-import { mountCloudPanel } from './cloud-panel.js?v=4.18.0';
-import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.18.0';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.19.0';
+import { mountCloudPanel } from './cloud-panel.js?v=4.19.0';
+import { normalizeCloudSnapshot, CloudSnapshotError } from './cloud-snapshot-core.mjs?v=4.19.0';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
-import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.18.0';
-import { createCandidateReview } from './controllers/candidate-review.js?v=4.18.0';
+import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.19.0';
+import { createCandidateReview } from './controllers/candidate-review.js?v=4.19.0';
 import { createRecommendationPriceCoverage } from './controllers/recommendation-price-coverage.js?v=4.6.1';
-import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.18.0';
-import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.18.0';
-import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey, mergeSavedTransactionActivity } from './candidate-review-core.mjs?v=4.18.0';
-import { normalizeTransactionActivity } from './transaction-activity-core.mjs?v=4.18.0';
+import { createRecommendationQuickFilters } from './controllers/recommendation-quick-filters.js?v=4.19.0';
+import { priceCoverageLabel, mergeRetriedPriceResults } from './price-coverage-core.mjs?v=4.19.0';
+import { createCandidateReviewBookmark, compareBookmarkConditions, mergeLiveReviewCandidates, liveRecommendationSearchKey, mergeSavedTransactionActivity } from './candidate-review-core.mjs?v=4.19.0';
+import { normalizeTransactionActivity } from './transaction-activity-core.mjs?v=4.19.0';
 import { renderMarketAreaPanel } from './controllers/market-area-panel.js?v=4.4.0';
 import { buildMarketAreaOverview } from './market-area-overview.mjs?v=4.4.0';
-import { buildMarketOutlookContext } from './market-outlook-context.mjs?v=4.18.0';
-import { renderMarketForecastPanel } from './controllers/market-forecast-panel.js?v=4.18.0';
+import { buildMarketOutlookContext } from './market-outlook-context.mjs?v=4.19.0';
+import { renderMarketForecastPanel } from './controllers/market-forecast-panel.js?v=4.19.0';
 import { buildForecastChartSeries } from './market-chart-series.mjs?v=4.4.0';
 import {
   loadVisits, saveVisits, downloadJson, loadImportedMarket, saveImportedMarket,
@@ -51,7 +53,7 @@ import {
   parseMolitCsv, buildMarketSummary, validateMarketSummary,
   getRegion, getSeries, withChanges, latestRegionComparison, getRecentTransactions,
   fitPriceOutlook, monthLabel, normalizeTransaction, bandFor,
-} from './market-core.mjs?v=4.18.0';
+} from './market-core.mjs?v=4.19.0';
 import {
   MAX_COMPARE, pricePerP33, pruneCompareIds, buildComparisonHighlights,
 } from './comparison-core.mjs?v=2.5.0';
@@ -63,7 +65,7 @@ import {
 } from './complex-availability-core.mjs?v=2.5.0';
 import {
   PYEONG_TO_M2, parseKoreanMoneyToManWon, parseRecommendationQuery, filterCatalogForRecommendation,
-} from './recommendation-core.mjs?v=4.18.0';
+} from './recommendation-core.mjs?v=4.19.0';
 import {
   companySearchStepMessage, decideCompanySearchNextStep,
 } from './company-search-core.mjs?v=2.5.1';
@@ -76,14 +78,14 @@ import {
 import {
   buildSupplyQuickFilterView, SUPPLY_QUICK_FILTER_LABELS, matchesAlertPreferences, noticeStatusAtKst,
   normalizeSupplyNotice, sortSupplyNotices, newlywedApplicationContext,
-} from './supply-core.mjs?v=4.18.0';
+} from './supply-core.mjs?v=4.19.0';
 import {
   assessNewlywedReadiness, normalizeSubscriptionProfile,
 } from './subscription-readiness-core.mjs?v=2.5.0';
-import { hhUI } from './ui-state.js?v=4.4.0';
+import { hhUI } from './ui-state.js?v=4.19.0';
 import {
   EVIDENCE_TIERS, evidenceTierMeta, createEvidenceViewModel, renderValueText,
-} from './ui-format.js?v=4.18.0';
+} from './ui-format.js?v=4.19.0';
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -109,6 +111,7 @@ const fetch = (input, options) => {
 const storedVisits = loadVisits();
 const initialVisits = storedVisits === null ? [] : storedVisits;
 let decisionWorkspace;
+let financeDashboard;
 let candidateReview;
 let recommendationPriceCoverage;
 let recommendationQuickFilters;
@@ -2234,7 +2237,7 @@ function goToGuideAnchor(anchorId) {
 }
 
 function setView(view, persist = true) {
-  const valid = ['map', 'recommend', 'candidates', 'visits', 'supply', 'market', 'connections', 'guide'].includes(view) ? view : 'recommend';
+  const valid = ['map', 'recommend', 'candidates', 'visits', 'supply', 'market', 'dashboard', 'connections', 'guide'].includes(view) ? view : 'recommend';
   const changed = state.currentView !== valid;
   state.currentView = valid;
   const shellScreen = valid === 'recommend' ? 'finder' : ['map', 'visits'].includes(valid) ? 'records' : valid === 'connections' ? 'health' : valid;
@@ -2259,6 +2262,12 @@ function setView(view, persist = true) {
   if (valid !== 'recommend') setRecommendationPanel('');
   if (valid === 'map') window.setTimeout(() => homeMap.resize(), 60);
   if (valid === 'market') window.setTimeout(renderMarket, 20);
+  if (valid === 'dashboard') {
+    void financeDashboard?.activate();
+    void ensureSupplyFeed().then(() => {
+      if (state.currentView === 'dashboard') financeDashboard?.render();
+    });
+  }
   if (valid === 'supply') window.setTimeout(async () => {
     await ensureSupplyFeed();
     if (state.currentView === 'supply') renderSupply();
@@ -2684,6 +2693,7 @@ async function loadMarketSummary(forceStatic = false) {
     };
   }
   state.marketSummary = summary;
+  if (state.currentView === 'dashboard') financeDashboard?.render();
   populateMarketRegions();
   renderMarket();
   if (!APP_CONFIG.localMarketEnabled) await loadStaticApartmentHistory();
@@ -5278,6 +5288,7 @@ function initializeWecostTargetConnection() {
     if ($('#recommendBudgetSource').value !== 'wecost') return;
     updateTargetPriceConnection({ apply: true });
     updateRecommendationPriceLabel();
+    if (state.currentView === 'dashboard') financeDashboard?.render();
     // A failed refresh must not replace a budget with zero and erase results.
     if (next.status === 'available' && targetChanged) handleRecommendationCriteriaChanged();
     if (next.status !== 'loading') void restoreRecentRecommendation();
@@ -9224,6 +9235,35 @@ function bindEvents() {
 }
 
 async function init() {
+  financeDashboard = createFinanceDashboard({
+    container: $('#financeDashboard'),
+    getContext: (selection = {}) => {
+      const source = $('#recommendBudgetSource')?.value;
+      const linked = wecostTargetState?.status === 'available' ? wecostTargetState.snapshot?.targetPriceWon / 10000 : null;
+      const target = source === 'wecost' ? linked : readRecommendationPriceManWon();
+      return {
+        ...buildFinanceMarketContext({ marketSummary: state.marketSummary, supplyFeed: state.supplyFeed,
+          regionCode: selection.regionCode, band: selection.band, now: new Date() }),
+        targetPriceManWon: Number.isFinite(target) && target > 0 ? target : null,
+        targetPriceSource: source === 'wecost' ? 'WeCost 목표 집값' : '집 찾기 목표 집값',
+      };
+    },
+    fetchSnapshot: async () => {
+      const readPublic = async path => {
+        const response = await nativeFetch(path, { cache: 'no-cache', signal: AbortSignal.timeout(12000) });
+        if (!response.ok) throw new Error('공식 자료를 불러오지 못했습니다.');
+        return response.json();
+      };
+      const [rates, housing] = await Promise.allSettled([
+        readPublic('./data/finance-dashboard.json'), readPublic('./data/housing-indicators.json'),
+      ]);
+      if (rates.status === 'rejected' && housing.status === 'rejected') throw rates.reason;
+      return { ...(rates.status === 'fulfilled' ? rates.value : { schemaVersion: 1, series: [], status: 'failed' }),
+        housing: housing.status === 'fulfilled' ? housing.value : null,
+        financeLoadFailed: rates.status === 'rejected', housingLoadFailed: housing.status === 'rejected' };
+    },
+    onNavigate: view => setView(view),
+  });
   recommendationQuickFilters = createRecommendationQuickFilters({
     getValues: getRecommendationQuickValues, applyValues: applyRecommendationQuickValues,
     openFull: openRecommendationFullFilter,
