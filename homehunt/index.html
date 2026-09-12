@@ -41,7 +41,7 @@
   <link rel="stylesheet" href="./css/navigation-v25.css?v=2.5.0">
   <link rel="stylesheet" href="./css/hh-tokens.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-base.css?v=4.4.0">
-  <link rel="stylesheet" href="./css/hh-shell.css?v=4.4.0">
+  <link rel="stylesheet" href="./css/hh-shell.css?v=20260912-calendar">
   <link rel="stylesheet" href="./css/hh-components.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-map.css?v=4.4.0">
   <link rel="stylesheet" href="./css/hh-screens.css?v=4.4.0">
@@ -63,7 +63,7 @@
   <link rel="stylesheet" href="./css/destination-editor.css?v=4.19.0">
   <link rel="stylesheet" href="./css/search-continuity.css?v=4.19.0">
   <link rel="stylesheet" href="./css/finance-dashboard.css?v=4.19.0">
-<link rel="stylesheet" href="../shared/decision-panel.css">
+<link rel="stylesheet" href="../shared/decision-panel.css?v=20260912-calendar">
 </head>
 <body class="hh-app hh-v3" data-ui-library="homehunt" data-ui-version="4.19.0" data-hh-screen="finder">
   <div class="hh-shell">
@@ -89,7 +89,8 @@
   <div class="hh-main">
   <header class="hh-topbar" id="hhTopbar">
     <div class="hh-topbar-context hh-topbar__title" aria-live="polite">
-      <span id="hhViewKicker">HOME FINDER</span>
+      <a class="hh-page-home" href="../" aria-label="성우와 소희 홈으로"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>홈으로</span></a>
+      <span id="hhViewKicker" class="sr-only">HOME FINDER</span>
       <strong id="hhViewTitle">집 찾기</strong>
     </div>
     <form class="hh-global-search hh-topbar__search" id="hhGlobalSearchForm" role="search">
@@ -1034,6 +1035,6 @@
   <script type="module" src="./js/app.js?v=4.19.0"></script>
   <script type="module" src="./js/ui-shell.js?v=4.19.0"></script>
   <script src="./js/navigation-v25.js?v=4.4.0" defer></script>
-<script type="module" src="../shared/decision-panel.mjs"></script>
+<script type="module" src="../shared/decision-panel.mjs?v=20260912-calendar"></script>
 </body>
 </html>

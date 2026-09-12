@@ -13,12 +13,12 @@
 })();
 </script>
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/layout.css?v=20260912-calendar">
 <link rel="stylesheet" href="css/dashboard.css">
 <link rel="stylesheet" href="css/cashflow.css">
 <link rel="stylesheet" href="css/wedding.css">
 <link rel="stylesheet" href="css/house.css">
-<link rel="stylesheet" href="../shared/decision-panel.css">
+<link rel="stylesheet" href="../shared/decision-panel.css?v=20260912-calendar">
 </head>
 <body>
 
@@ -49,6 +49,11 @@
 
 <!-- 메인 앱 -->
 <main id="app-main">
+
+  <header class="wecost-page-topbar">
+    <a class="wecost-home-link" href="../" aria-label="성우와 소희 홈으로"><span aria-hidden="true">←</span> 홈으로</a>
+    <span class="wecost-page-label">WeCost · 결혼 비용</span>
+  </header>
 
   <!-- 로딩 -->
   <div id="loading-screen">
@@ -630,6 +635,6 @@
         integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi"
         crossorigin="anonymous"></script>
 <script type="module" src="js/app.js"></script>
-<script type="module" src="../shared/decision-panel.mjs"></script>
+<script type="module" src="../shared/decision-panel.mjs?v=20260912-calendar"></script>
 </body>
 </html>

@@ -19,6 +19,22 @@
 
 /* Current itinerary is shared with Travel; old saved days remain a readable archive. */
 .hero-trip-link { margin-left: auto; white-space: nowrap; }
+.honeymoon-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, .12);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.honeymoon-home-link:hover { opacity: 1; background: rgba(255, 255, 255, .24); }
+.honeymoon-home-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .memo-center-drawer:not(.mcd-open) { display: none; }
 .plan-current-link {
   display: inline-flex;

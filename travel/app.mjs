@@ -1,4 +1,5 @@
 import { TRIP_DAYS, HOTELS, PLACES, DECISIONS } from '../shared/trip-data.mjs';
+import { createTripCalendar } from './calendar.mjs';
 
 // Keep the local itinerary readable even if the shared storage SDK cannot load.
 let saveHotelChoice = async () => { throw new Error('공동 저장 연결을 확인해주세요.'); };
@@ -26,6 +27,7 @@ let renderSignature = '';
 let hotelSignature = '';
 let historySnapshot = { entries: [], connection: 'loading', error: null };
 let showAllHistory = false;
+let calendar = null;
 
 function allDays() { return Array.isArray(snapshot.data?.days) ? snapshot.data.days : TRIP_DAYS; }
 function currentDay() { return allDays().find((day) => day.date === selectedDate) || allDays()[0]; }
@@ -103,6 +105,7 @@ function renderDay(changeMap = true) {
   $('#day-note').textContent = day.note || '';
   $('#timeline').innerHTML = (day.events || []).length ? day.events.map((event) => `<li><time>${escapeHTML(event.time)}</time><strong>${escapeHTML(event.title)}</strong><p>${escapeHTML(event.text)}</p>${event.place && PLACES[event.place] ? `<button type="button" class="text-button" data-location="${escapeHTML(event.place)}">${escapeHTML(event.place === 'hotel' ? currentHotel().name : PLACES[event.place].name)} 지도 보기 ↗</button>` : ''}</li>`).join('') : '<li class="empty-day">아직 일정이 없어요. ‘일정 수정’에서 함께 추가해보세요.</li>';
   document.querySelectorAll('[data-day]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.day === selectedDate)));
+  calendar?.select(selectedDate);
   renderRoute(day);
   if (changeMap) { previewHotelId = null; showPlace(day.focus); }
   else showPlace(selectedPlace);
@@ -113,7 +116,10 @@ function selectDay(date, scroll = false) {
   selectedDate = date;
   renderDay();
   renderSignature = JSON.stringify({ days: snapshot.data.days, hotels: snapshot.data.hotels });
-  if (scroll) scrollToElement($('#itinerary'));
+  if (scroll) {
+    document.dispatchEvent(new CustomEvent('travel:open-itinerary', { detail: { scroll: false } }));
+    scrollToElement($('.planning-grid'));
+  }
   const button = document.querySelector(`[data-day="${date}"]`);
   // Keep the selected day visible without shifting the page vertically.
   if (button) {
@@ -149,7 +155,7 @@ function updateSnapshot(next) {
     badge.classList.toggle('confirmed', state === 'confirmed');
   });
   const nextDaySignature = JSON.stringify({ days: next.data.days, hotels: next.data.hotels });
-  if (nextDaySignature !== renderSignature) { renderDay(false); renderSignature = nextDaySignature; }
+  if (nextDaySignature !== renderSignature) { renderDay(false); calendar?.updateDays(allDays()); renderSignature = nextDaySignature; }
   const nextHotelSignature = JSON.stringify({ hotels: next.data.hotels, save: canSave(), pendingHotel });
   if (nextHotelSignature !== hotelSignature) { renderHotels(); hotelSignature = nextHotelSignature; }
 }
@@ -229,7 +235,12 @@ document.addEventListener('click', async (event) => {
   const locationButton = event.target.closest('[data-location]');
   if (locationButton) { previewHotelId = null; showPlace(locationButton.dataset.location, { focusMap: innerWidth <= 720 }); }
   const previewButton = event.target.closest('[data-preview-hotel]');
-  if (previewButton) { previewHotelId = previewButton.dataset.previewHotel; showPlace('hotel'); scrollToElement($('.map-card')); }
+  if (previewButton) {
+    previewHotelId = previewButton.dataset.previewHotel;
+    document.dispatchEvent(new CustomEvent('travel:open-itinerary', { detail: { scroll: false } }));
+    showPlace('hotel');
+    scrollToElement($('.map-card'));
+  }
   const saveButton = event.target.closest('[data-save-hotel]');
   if (saveButton && canSave() && !pendingHotel) {
     const { slot, saveHotel: id } = saveButton.dataset;
@@ -290,13 +301,11 @@ $('#day-form').addEventListener('submit', async (event) => {
   }
 });
 
-const sectionObserver = new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    if (!entry.isIntersecting) continue;
-    document.querySelectorAll('.section-nav a').forEach((link) => link.classList.toggle('is-active', link.hash === `#${entry.target.id}`));
-  }
-}, { rootMargin: '-70px 0px -65% 0px', threshold: 0 });
-['itinerary', 'hotels', 'flights', 'cruise', 'resort', 'history'].forEach((id) => sectionObserver.observe(document.getElementById(id)));
+if ($('#trip-calendar')) {
+  calendar = createTripCalendar($('#trip-calendar'), {
+    days: allDays(), selectedDate, onSelect: date => selectDay(date, true)
+  });
+}
 renderHotels();
 renderDay();
 import('../shared/trip-store.mjs').then((store) => {

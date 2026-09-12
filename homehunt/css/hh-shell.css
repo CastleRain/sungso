@@ -1265,3 +1265,27 @@
     padding-inline: 2px;
   }
 }
+
+/* Explicit hub navigation remains visible beside the screen title on phones. */
+.hh-v3.hh-app .hh-page-home {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 26px;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  color: var(--hh-ink-2);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hh-v3.hh-app .hh-page-home:hover { color: var(--hh-accent); text-decoration: underline; text-underline-offset: 3px; }
+.hh-v3.hh-app .hh-page-home:focus-visible { outline: 3px solid var(--hh-accent); outline-offset: 3px; }
+@media (max-width: 1023px) {
+  .hh-v3.hh-app .hh-page-home { min-height: 28px; }
+}
+@media (max-width: 479px) {
+  .hh-v3.hh-app .hh-topbar-context { min-width: 58px; max-width: 76px; }
+}

@@ -226,22 +226,15 @@ function startPanel() {
 
   const connection = element('p', 'sg-decisions-connection', '함께 보는 목록을 불러오는 중…');
   connection.setAttribute('role', 'status');
-  const nav = element('nav', 'sg-project-nav');
-  nav.setAttribute('aria-label', '성우와 소희의 준비 공간');
-  for (const [path, label] of [['wecost/', '결혼 비용'], ['honeymoon/', '몰디브 메모'], ['homehunt/', '집 찾기'], ['travel/', '여행 일정']]) {
-    const link = element('a', 'sg-project-link', label);
-    link.href = siteUrl(path);
-    if (location.pathname.startsWith(new URL(link.href).pathname)) link.setAttribute('aria-current', 'page');
-    nav.append(link);
-  }
   const foot = element('footer', 'sg-decisions-bottom');
-  const footerLinks = element('div', 'sg-footer-links');
-  const hub = element('a', 'sg-hub-link', '준비 공간 홈 ↗');
+  const footerLinks = element('nav', 'sg-footer-links');
+  footerLinks.setAttribute('aria-label', '홈과 여행 변경 기록');
+  const hub = element('a', 'sg-hub-link', '← 홈으로');
   hub.href = SITE_ROOT.href;
   const history = element('a', 'sg-history-link', '변경 기록 ↗');
   history.href = siteUrl('travel/#history');
   footerLinks.append(hub, history);
-  foot.append(connection, nav, footerLinks);
+  foot.append(connection, footerLinks);
   panel.append(header, scroll, foot);
   document.body.append(host, drawer, toggle);
   document.body.classList.add('sg-has-decisions');

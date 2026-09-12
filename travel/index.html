@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#174c51">
+  <meta name="theme-color" content="#faf7f2">
   <meta name="description" content="성우와 소희의 싱가포르·디즈니 크루즈·몰디브 신혼여행 일정과 숙소 후보를 함께 정리하는 공간.">
   <title>여행 일정 · sungso</title>
   <script>
@@ -16,16 +16,16 @@
     location.replace('../?return=' + encodeURIComponent(location.pathname + location.search + location.hash));
   })();
   </script>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="../shared/decision-panel.css">
+  <link rel="stylesheet" href="style.css?v=20260912-calendar">
+  <link rel="stylesheet" href="calendar.css?v=20260912-calendar">
+  <link rel="stylesheet" href="../shared/decision-panel.css?v=20260912-calendar">
 </head>
 <body>
   <a class="skip-link" href="#main">본문 바로가기</a>
   <header class="travel-topbar">
-    <a class="brand" href="../" aria-label="sungso 홈">sungso<span>성우와 소희</span></a>
-    <nav class="project-nav" aria-label="우리의 준비 공간">
-      <a href="../wecost/">결혼 비용</a><a href="../honeymoon/">리조트 비교</a><a href="../homehunt/">집 찾기</a><a href="./" aria-current="page">여행 일정</a>
-    </nav>
+    <a class="home-link" href="../"><span aria-hidden="true">←</span> 홈으로</a>
+    <a class="travel-brand" href="#itinerary">sungso <span>TRAVEL BOOK</span></a>
+    <span class="topbar-couple">성우와 소희의 여행</span>
   </header>
   <main id="main" class="travel-main">
     <section class="page-heading" aria-labelledby="page-title">
@@ -33,18 +33,24 @@
       <div class="trip-date"><strong>03.07 <span>—</span> 03.17</strong><span>성인 2명 · 11일 · 시간은 모두 현지 기준</span></div>
     </section>
     <div class="trip-overview" aria-label="전체 여행 구성">
-      <a href="#hotels"><span class="segment-number">01</span><div><strong>싱가포르</strong><small>3/7 · 3/11 각각 1박</small></div></a>
-      <a href="#cruise"><span class="segment-number">02</span><div><strong>디즈니 어드벤처</strong><small>3/8—11 · 3박</small></div></a>
-      <a href="#resort"><span class="segment-number">03</span><div><strong>몰디브</strong><small>3/12—16 · 4박 계획</small></div></a>
+      <a href="#hotels" class="overview-singapore"><span class="segment-number">01</span><div><strong>싱가포르</strong><small>3/7 · 3/11 각각 1박</small></div></a>
+      <a href="#cruise" class="overview-cruise"><span class="segment-number">02</span><div><strong>디즈니 어드벤처</strong><small>3/8—11 · 3박</small></div></a>
+      <a href="#resort" class="overview-maldives"><span class="segment-number">03</span><div><strong>몰디브</strong><small>3/12—16 · 4박 계획</small></div></a>
     </div>
     <div class="sync-row"><span id="trip-sync" role="status" aria-live="polite">함께 저장한 일정 불러오는 중…</span><span class="muted">후보 선택은 실제 예약과 별개예요</span></div>
     <div id="action-message" class="action-message" role="status" aria-live="polite" hidden></div>
-    <nav class="section-nav" aria-label="여행 페이지 메뉴">
-      <a href="#itinerary" class="is-active">날짜별 일정·지도</a><a href="#hotels">싱가포르 숙소</a><a href="#flights">항공</a><a href="#cruise">크루즈</a><a href="#resort">리조트·이동</a><a href="#history">변경 기록</a>
+    <nav class="section-nav" aria-label="여행 화면 선택">
+      <a id="nav-itinerary" href="#itinerary" data-travel-view-link="itinerary" aria-controls="itinerary" aria-current="page" class="is-active">전체 일정</a>
+      <a id="nav-hotels" href="#hotels" data-travel-view-link="hotels" aria-controls="hotels">숙소</a>
+      <a id="nav-transport" href="#flights" data-travel-view-link="transport" aria-controls="transport-view">항공·크루즈</a>
+      <a id="nav-stay" href="#resort" data-travel-view-link="stay" aria-controls="stay-view">리조트·이동</a>
+      <a id="nav-activities" href="#activities" data-travel-view-link="activities" aria-controls="activities-view">관광·식사</a>
+      <a id="nav-history" href="#history" data-travel-view-link="history" aria-controls="history">변경 기록</a>
     </nav>
 
-    <section id="itinerary" class="page-section" aria-labelledby="itinerary-title">
-      <div class="section-heading"><div><p class="eyebrow">DAYS & PLACES</p><h2 id="itinerary-title">오늘은 어디로 갈까?</h2></div><a href="#activities" class="subtle-link">관광·식사 정하기 ↓</a></div>
+    <section id="itinerary" class="page-section travel-view" data-travel-view="itinerary" aria-labelledby="itinerary-title">
+      <div class="section-heading"><div><p class="eyebrow">DAYS & PLACES</p><h2 id="itinerary-title">오늘은 어디로 갈까?</h2></div><a href="#activities" class="subtle-link">관광·식사 정하기 →</a></div>
+      <div id="trip-calendar"></div>
       <div id="day-tabs" class="day-tabs" role="group" aria-label="여행 날짜 선택"></div>
       <div class="planning-grid">
         <article class="day-card">
@@ -63,7 +69,7 @@
       </div>
     </section>
 
-    <section id="hotels" class="page-section" aria-labelledby="hotels-title">
+    <section id="hotels" class="page-section travel-view" data-travel-view="hotels" aria-labelledby="hotels-title" hidden>
       <div class="section-heading"><div><p class="eyebrow">TWO NIGHTS IN SINGAPORE</p><h2 id="hotels-title">두 번의 밤, 어느 호텔에서?</h2></div><span class="section-note">실제 날짜별 요금·잔여 객실 확인 전</span></div>
       <p class="section-description">시티홀은 식사와 교통이 편하고, 마리나센터는 베이 산책에 좋아요. 두 날짜를 각각 골라두면 그날의 지도와 동선에도 반영돼요.</p>
       <div id="hotel-choices" class="hotel-choices"></div>
@@ -71,8 +77,8 @@
       <details class="booking-tips"><summary>호텔을 예약할 때 확인할 것</summary><div class="tips-grid"><p><strong>예약은 2건으로</strong>3/7 → 3/8, 3/11 → 3/12 각각 1박. 성인 2명, 킹베드 우선으로 비교해요.</p><p><strong>세금 포함 총액·무료 취소</strong>취소 마감과 선결제 여부를 함께 확인해요. 객실 선택 버튼은 예약을 진행하지 않아요.</p><p><strong>조식은 날짜별로</strong>3/8 아침은 여유가 있지만, 3/12는 06:20 전후 출발 예정이라 조식 추가를 신중히 골라요.</p><p><strong>짐 보관·조기 입실</strong>크루즈 기간 보관과 3/11 하선 후 짐 보관은 호텔에 확인해요. 오전 객실 입실은 보장되지 않아요.</p></div></details>
     </section>
 
-    <section class="page-section" aria-labelledby="reservations-title">
-      <div class="section-heading"><div><p class="eyebrow">RESERVATIONS & DETAILS</p><h2 id="reservations-title">예약할 때 다시 볼 내용</h2></div><a href="../wecost/" class="subtle-link">결혼 비용에서 예산 보기 ↗</a></div>
+    <section id="transport-view" class="page-section travel-view" data-travel-view="transport" aria-labelledby="reservations-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">RESERVATIONS & DETAILS</p><h2 id="reservations-title">항공과 크루즈, 예약 전 한 번 더</h2></div><a href="../wecost/" class="subtle-link">결혼 비용에서 예산 보기 ↗</a></div>
       <div class="reservation-grid">
         <article id="flights" class="detail-card">
           <div class="detail-heading"><span class="card-icon" aria-hidden="true">↗</span><span class="status-badge" data-decision-status="flights">구매 전 후보</span></div><p class="eyebrow">FLIGHTS</p><h3>항공편 네 구간</h3><p class="muted">싱가포르항공 · 2명 · 일반석</p>
@@ -88,25 +94,32 @@
           <details class="terms"><summary>취소·잔금 기한 다시 보기</summary><p>일반 비컨시어지 3박 공식 규정 기준. 제한 조건부 환불 불가 특가는 다른 조건이 적용돼요.</p><dl><div><dt>2026/12/8까지</dt><dd>취소 수수료 없음</dd></div><div><dt>12/9—2027/1/22</dt><dd>예약금 전액</dd></div><div><dt>1/23—2/6</dt><dd>여행 요금 50%</dd></div><div><dt>2/7—2/21</dt><dd>75%</dd></div><div><dt>2/22 이후</dt><dd>100%</dd></div></dl><p>잔금은 2026/12/8이 기준이에요. 정확한 금액과 마감 시간은 예약 확인서를 따라요.</p><a href="https://disneycruise.disney.go.com/contracts-terms-safety/terms-conditions/other-regions/" target="_blank" rel="noopener noreferrer">공식 취소 약관 ↗</a></details>
           <div class="link-row"><a class="button secondary" href="https://disneycruise.disney.go.com/en-sg/select-stateroom/DA0142" target="_blank" rel="noopener noreferrer">디즈니 공식 예약 ↗</a><a href="https://www.klook.com/en-GB/activity/142451-3-night-disney-adventure-cruise-from-singapore/" target="_blank" rel="noopener noreferrer">클룩 비교 ↗</a></div>
         </article>
+
+      </div>
+    </section>
+
+    <section id="stay-view" class="page-section travel-view" data-travel-view="stay" aria-labelledby="stay-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">ISLAND DAYS & TRANSFERS</p><h2 id="stay-title">섬에서의 나흘, 오가는 길까지</h2></div><span class="section-note">리조트 예약 완료 · 세부사항 확인 중</span></div>
+      <div class="reservation-grid stay-grid">
         <article id="resort" class="detail-card resort-card">
           <div class="detail-heading"><span class="card-icon" aria-hidden="true">☀</span><span class="status-badge confirmed">숙소 예약 완료</span></div><p class="eyebrow">MALDIVES</p><h3>아나네아 마디바루</h3><p class="muted">3/12 금 — 3/16 화 · 4박 계획</p>
           <p class="resort-description">도시와 크루즈를 즐긴 뒤에는<br>아무것도 서두르지 않는 나흘.</p><p class="fine">예약 완료라고 공유한 숙소예요. 숙박일·객실·식사 플랜·취소 조건은 예약 확인서와 대조해야 해요.</p>
           <div class="check-list"><span>객실 종류·숙박일 대조</span><span>식사·활동 포함 내역 확인</span><span>레스토랑 사전 예약 확인</span></div>
           <div class="link-row"><a class="button secondary" href="../honeymoon/?resort=ananea">리조트 비교·둘의 메모 ↗</a><a href="https://www.google.com/maps/search/?api=1&amp;query=ananea%20Madivaru%20Maldives" target="_blank" rel="noopener noreferrer">Google 지도 ↗</a></div>
         </article>
+      <section id="transfers" class="detail-card" aria-labelledby="transfers-title"><p class="eyebrow">TRANSFERS</p><h2 id="transfers-title">이동에서 놓치지 않을 것</h2><div class="transfer-item"><strong>3/8 · 호텔 → 크루즈 항구</strong><p>Marina Bay Cruise Centre Singapore로 이동해요. 지정된 Port Arrival Time에 맞춰 출발하고, HarbourFront와 혼동하지 않아요.</p></div><div class="transfer-item"><strong>3/12 · 호텔 → 창이공항</strong><p>06:20 전후 호텔 출발, 07:00 전후 공항 도착이 목표예요. 10:05 몰디브행 비행에 맞춘 계획이에요.</p></div><div class="transfer-item"><strong>3/12·16 · 몰디브 공항 ↔ 리조트</strong><p>수상비행기 시간은 리조트 배정을 확인해야 해요. 특히 3/16 12:55 출발편이라 정오 퇴실까지 머무는 일정으로 잡으면 안 돼요.</p></div><a href="https://disneycruise.disney.go.com/en-nz/ships/adventure/disney-adventure-pre-arrival/" target="_blank" rel="noopener noreferrer">크루즈 공식 승선 안내 ↗</a></section>
       </div>
     </section>
-
-    <div class="preparation-grid">
-      <section id="transfers" class="detail-card" aria-labelledby="transfers-title"><p class="eyebrow">TRANSFERS</p><h2 id="transfers-title">이동에서 놓치지 않을 것</h2><div class="transfer-item"><strong>3/8 · 호텔 → 크루즈 항구</strong><p>Marina Bay Cruise Centre Singapore로 이동해요. 지정된 Port Arrival Time에 맞춰 출발하고, HarbourFront와 혼동하지 않아요.</p></div><div class="transfer-item"><strong>3/12 · 호텔 → 창이공항</strong><p>06:20 전후 호텔 출발, 07:00 전후 공항 도착이 목표예요. 10:05 몰디브행 비행에 맞춘 계획이에요.</p></div><div class="transfer-item"><strong>3/12·16 · 몰디브 공항 ↔ 리조트</strong><p>수상비행기 시간은 리조트 배정을 확인해야 해요. 특히 3/16 12:55 출발편이라 정오 퇴실까지 머무는 일정으로 잡으면 안 돼요.</p></div><a href="https://disneycruise.disney.go.com/en-nz/ships/adventure/disney-adventure-pre-arrival/" target="_blank" rel="noopener noreferrer">크루즈 공식 승선 안내 ↗</a></section>
+    <section id="activities-view" class="page-section travel-view" data-travel-view="activities" aria-labelledby="activities-title" hidden>
       <section id="activities" class="detail-card" aria-labelledby="activities-title"><p class="eyebrow">LITTLE PLANS</p><h2 id="activities-title">관광과 식사는 가볍게 정하기</h2><div class="activity-row"><span>3/7</span><div><strong>첫날은 야경과 저녁</strong><p>머라이언·베이 산책 → 저녁 → 스펙트라. 피곤하면 호텔 근처 식사까지만 해도 좋아요.</p><button type="button" class="text-button" data-go-day="2027-03-07">이날 일정 보기 ↑</button></div></div><div class="activity-row"><span>3/11</span><div><strong>브런치, 가든스, 슈퍼트리</strong><p>하선 후 쉬었다가 Cloud Forest와 야경. 샌즈를 고르면 관광 일부를 수영장 시간으로 바꿔요.</p><button type="button" class="text-button" data-go-day="2027-03-11">이날 일정 보기 ↑</button></div></div><p class="fine">식당은 아직 미정이에요. 공연 시간과 2027년 가든스 휴장일이 확인되면 일정에 반영해요.</p><a href="https://www.gardensbythebay.com.sg/en/plan-your-visit/opening-hours.html" target="_blank" rel="noopener noreferrer">가든스 운영·휴장 안내 ↗</a></section>
-    </div>
-    <section id="history" class="page-section" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">OUR UPDATES</p><h2 id="history-title">어떤 내용을 바꿨는지 함께 보기</h2></div><span class="section-note">최근 50건 · 최신순</span></div><div class="history-card"><p id="history-status" class="fine" role="status" aria-live="polite">변경 기록을 불러오는 중…</p><ol id="history-list" class="history-list"></ol><button id="history-more" type="button" class="button secondary" hidden>변경 기록 더 보기</button></div></section>
+    </section>
+    <section id="history" class="page-section travel-view" data-travel-view="history" aria-labelledby="history-title" hidden><div class="section-heading"><div><p class="eyebrow">OUR UPDATES</p><h2 id="history-title">어떤 내용을 바꿨는지 함께 보기</h2></div><span class="section-note">최근 50건 · 최신순</span></div><div class="history-card"><p id="history-status" class="fine" role="status" aria-live="polite">변경 기록을 불러오는 중…</p><ol id="history-list" class="history-list"></ol><button id="history-more" type="button" class="button secondary" hidden>변경 기록 더 보기</button></div></section>
     <footer class="travel-footer"><a href="../">sungso · 우리의 결혼 준비</a><p>가격·운영 정보 확인 기준 2026.09.12 · 실제 예약 조건은 예약 화면과 확인서 기준</p><details><summary>참고한 공식 안내</summary><div class="source-links"><a href="https://www.changiairport.com/en/at-changi/transport-and-directions/leaving-the-airport.html" target="_blank" rel="noopener noreferrer">창이공항 교통</a><a href="https://www.singaporeair.com/en_UK/gb/travel-info/check-in/airport-check-in/" target="_blank" rel="noopener noreferrer">싱가포르항공 체크인</a><a href="https://ko.marinabaysands.com/singapore-visitors-guide/around-mbs/light-and-sound-show.html" target="_blank" rel="noopener noreferrer">스펙트라 공연</a></div></details></footer>
   </main>
   <dialog id="day-editor" class="day-editor" aria-labelledby="editor-title"><form id="day-form"><header><div><p class="eyebrow" id="editor-date"></p><h2 id="editor-title">이날 일정 수정</h2></div><button type="button" class="close-button" id="close-editor" aria-label="일정 수정 닫기">×</button></header><p class="fine">두 사람에게 같은 일정으로 저장돼요. ‘미정’, ‘오전’, ‘15:00 전후’처럼 시간을 적어도 좋아요.</p><div id="editor-events"></div><button type="button" id="add-event" class="button secondary">+ 일정 추가</button><p id="editor-error" class="editor-error" role="alert"></p><footer><button type="button" id="cancel-editor" class="button secondary">취소</button><button type="submit" id="save-day" class="button primary">함께 보는 일정에 저장</button></footer></form></dialog>
   <noscript><p class="no-script">일정과 지도를 보려면 브라우저에서 JavaScript를 켜주세요.</p></noscript>
-  <script type="module" src="app.mjs"></script>
-  <script type="module" src="../shared/decision-panel.mjs"></script>
+  <script type="module" src="navigation.mjs?v=20260912-calendar"></script>
+  <script type="module" src="app.mjs?v=20260912-calendar"></script>
+  <script type="module" src="../shared/decision-panel.mjs?v=20260912-calendar"></script>
 </body>
 </html>
