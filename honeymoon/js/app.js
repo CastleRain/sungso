@@ -91,7 +91,7 @@ function setHeroBg() {
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
-  const target = new Date('2027-03-07');
+  const target = new Date('2027-03-12T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
@@ -1121,7 +1121,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── 마지막 탭 복원 ───────────────────────────────────────────────
-  switchTab(localStorage.getItem('honeymoon_tab') || 'plan');
+  const resortParam = new URLSearchParams(location.search).get('resort');
+  const linkedResort = RESORTS.find(resort => resort.id === resortParam);
+  const savedTab = localStorage.getItem('honeymoon_tab');
+  const validTabs = ['plan', 'cards', 'price', 'tournament', 'pdf'];
+  switchTab(linkedResort ? 'cards' : (validTabs.includes(savedTab) ? savedTab : 'plan'));
+  if (linkedResort) openDetailSheet(linkedResort.id);
 });
 
 // ══════════════════════════════════════════════════════════════════

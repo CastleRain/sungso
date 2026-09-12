@@ -9,7 +9,7 @@
 (function(){
   var TOKEN_KEY='sungso_pin_auth', EXPIRE=30*24*60*60*1000;
   try{var s=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');if(s&&Date.now()-s.ts<EXPIRE)return;}catch(e){}
-  location.replace('../?return='+encodeURIComponent(location.pathname));
+  location.replace('../?return='+encodeURIComponent(location.pathname + location.search + location.hash));
 })();
 </script>
 <link rel="stylesheet" href="css/base.css">
@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="../shared/decision-panel.css">
 </head>
 <body>
 
@@ -30,14 +31,15 @@
     <div class="hero-topbar">
       <a href="../" class="hero-back">← sungso 홈</a>
       <span class="hero-topbar-sep">·</span>
-      <span class="hero-topbar-title">Maldives Honeymoon Planner</span>
+      <span class="hero-topbar-title">Maldives Resort Collection</span>
+      <a href="../travel/" class="hero-back hero-trip-link">전체 여행 일정 →</a>
     </div>
     <div class="hero-body">
       <div class="hero-text-group">
-        <p class="hero-eyebrow">Honeymoon Planner 2027</p>
-        <h1 class="hero-title">🌊 몰디브 허니문</h1>
+        <p class="hero-eyebrow">Our Maldives stay · March 2027</p>
+        <h1 class="hero-title">몰디브 리조트 비교</h1>
         <div class="hero-subline">
-          <span>2027.03.07 – 2027.03.14</span>
+          <span>2027.03.12 – 2027.03.16 · 4박</span>
           <span class="hero-sep">·</span>
           <span>성우 ❤️ 소희</span>
         </div>
@@ -45,7 +47,7 @@
       <div class="hero-stats">
         <div class="hero-stat-dday">
           <span class="hero-dday-num" id="ddayBadge">D-…</span>
-          <span class="hero-dday-label">days to go</span>
+          <span class="hero-dday-label">리조트 체크인까지</span>
         </div>
         <div class="hero-stat-item">
           <span class="hero-stat-num">12</span>
@@ -59,7 +61,7 @@
 <!-- ══════════════════════════════════════════════ 탭 네비게이션 -->
 <nav class="tab-nav">
   <button class="tab-btn active" data-tab="plan">
-    <span class="tab-icon">💍</span> 우리의 플랜
+    <span class="tab-icon">💍</span> 우리의 리조트
   </button>
   <button class="tab-btn" data-tab="cards">
     <span class="tab-icon">🏨</span> 리조트 정보
@@ -456,5 +458,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script type="module" src="js/app.js"></script>
 
+<script type="module" src="../shared/decision-panel.mjs"></script>
 </body>
 </html>

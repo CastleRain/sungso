@@ -91,7 +91,7 @@ const SEED = [
   { date: '2027-01-20', title: '신혼집 계약',      emoji: '🏠' },
   { date: '2027-02-15', title: '혼수 준비 완료',   emoji: '🛍️' },
   { date: '2027-03-06', title: '결혼식',           emoji: '💒' },
-  { date: '2027-03-10', title: '신혼여행 출발',    emoji: '✈️' },
+  { date: '2027-03-07', title: '신혼여행 출발',    emoji: '✈️' },
 ];
 (async () => {
   const snap = await getDocs(eventsCol);

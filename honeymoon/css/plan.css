@@ -17,6 +17,87 @@
   gap: 28px;
 }
 
+/* Current itinerary is shared with Travel; old saved days remain a readable archive. */
+.hero-trip-link { margin-left: auto; white-space: nowrap; }
+.memo-center-drawer:not(.mcd-open) { display: none; }
+.plan-current-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fff;
+  color: #0b5b45;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 750;
+}
+.plan-current-link:hover { background: #e6f6f1; }
+.plan-current-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.plan-current-links a {
+  color: #0b5b45;
+  background: #fff;
+  border: 1px solid #cce5dc;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  text-decoration: none;
+}
+.plan-current-links a:hover { background: #e6f6f1; }
+.plan-current-overview { margin-top: 16px; color: var(--text); }
+.plan-current-overview summary, .plan-archive summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+.plan-current-overview ol { list-style: none; padding: 0; margin: 16px 0; }
+.plan-current-overview li { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.plan-current-overview li > span { color: #0b5b45; font-size: 12px; font-weight: 700; flex: 0 0 40px; }
+.plan-current-overview li strong { font-size: 13px; }
+.plan-current-overview li p { font-size: 12px; color: var(--text-muted); margin: 5px 0 0; line-height: 1.7; }
+.plan-resort-focus {
+  background: #fff;
+  border: 1px solid #cce5dc;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.plan-focus-label { font-size: 11px; color: #0b5b45; background: #e6f6f1; padding: 4px 8px; border-radius: 6px; font-weight: 700; }
+.plan-resort-focus h2 { margin: 12px 0 8px; font-size: 22px; color: var(--text); }
+.plan-resort-focus p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin: 0; }
+.plan-focus-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; flex-shrink: 0; }
+.plan-text-link { color: #0b5b45; font-size: 12px; font-weight: 700; text-underline-offset: 3px; }
+.plan-section-intro { font-size: 13px; line-height: 1.8; color: var(--text-muted); margin: 0; }
+.plan-section-intro a { color: #0b5b45; font-weight: 700; }
+.plan-archive { background: #f9faf9; border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+.plan-archive summary span { margin-left: 8px; color: var(--text-muted); font-size: 11px; font-weight: 400; }
+.plan-archive > p { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin: 12px 0 18px; }
+.plan-legacy-days { list-style: none; padding: 0; margin: 0; }
+.plan-legacy-days > li { padding: 18px 0; border-top: 1px solid var(--border); }
+.plan-legacy-date { font-size: 11px; color: var(--text-muted); margin-bottom: 7px; }
+.plan-legacy-days h3 { margin: 0 0 8px; font-size: 15px; color: var(--text); }
+.plan-legacy-days p, .plan-legacy-days ul { font-size: 12px; line-height: 1.7; color: var(--text-muted); }
+.plan-legacy-days p { margin: 4px 0; }
+.plan-legacy-days ul { margin: 10px 0 0; padding-left: 18px; }
+@media (max-width: 680px) {
+  .tab-nav { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+  .tab-nav .tab-btn { flex-shrink: 0; }
+  #planCurrentTrip .plan-trip-header { flex-direction: column; align-items: stretch; padding: 22px 18px; }
+  #planCurrentTrip .plan-trip-main { gap: 10px; }
+  #planCurrentTrip .plan-trip-name { font-size: 18px; }
+  #planCurrentTrip .plan-trip-dates { flex-wrap: wrap; font-size: 12px; }
+  #planCurrentTrip .plan-trip-icon { display: none; }
+  .plan-current-link { justify-content: center; }
+  .plan-resort-focus { flex-direction: column; align-items: stretch; padding: 18px; }
+  .plan-focus-actions { align-items: stretch; }
+  .hero-topbar-title { display: none; }
+}
+@media (max-width: 480px) {
+  .hero-stat-item { display: none; }
+  .hero-stat-dday { padding: 9px 10px; }
+  .hero-subline { flex-wrap: wrap; font-size: 11px; }
+  .hero-title { font-size: 21px; }
+  .hero-eyebrow { font-size: 8px; }
+}
+
 /* ── 여행 요약 헤더 ── */
 .plan-trip-header {
   background: linear-gradient(135deg, #0B5B45 0%, #1D9E75 60%, #2EC495 100%);
