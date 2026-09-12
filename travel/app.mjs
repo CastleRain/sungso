@@ -1,5 +1,5 @@
 import { TRIP_DAYS, HOTELS, PLACES, DECISIONS } from '../shared/trip-data.mjs';
-import { createTripCalendar } from './calendar.mjs';
+import { createTripCalendar } from './calendar.mjs?v=20260912-calendar-icons';
 
 // Keep the local itinerary readable even if the shared storage SDK cannot load.
 let saveHotelChoice = async () => { throw new Error('공동 저장 연결을 확인해주세요.'); };
@@ -303,7 +303,8 @@ $('#day-form').addEventListener('submit', async (event) => {
 
 if ($('#trip-calendar')) {
   calendar = createTripCalendar($('#trip-calendar'), {
-    days: allDays(), selectedDate, onSelect: date => selectDay(date, true)
+    days: allDays(), selectedDate,
+    onSelect: (date, options = {}) => selectDay(date, options.scroll === true)
   });
 }
 renderHotels();

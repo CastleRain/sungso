@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>성우 &amp; 소희</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/style.css?v=20260912-cards">
 <link rel="stylesheet" href="./shared/decision-panel.css?v=20260912-calendar">
 </head>
 <body>
@@ -134,43 +134,53 @@
     </div>
   </div>
 
-  <div class="grid">
-    <a class="card" href="./wecost/index.html">
-      <div class="icon-wrap" style="background:#FFF0F5;">💍</div>
-      <div>
-        <span class="badge">웨딩 가계부</span>
-        <div class="card-title">WeCost</div>
-        <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악해요</div>
+  <div class="project-groups">
+    <section class="project-group" aria-labelledby="prepGroupTitle">
+      <h2 class="project-group-title" id="prepGroupTitle">살림·집 준비</h2>
+      <div class="grid">
+        <a class="card" href="./wecost/index.html">
+          <div class="icon-wrap" style="background:#FFF0F5;">💍</div>
+          <div>
+            <span class="badge">웨딩 가계부</span>
+            <div class="card-title">WeCost</div>
+            <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악해요</div>
+          </div>
+          <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
+        </a>
+        <a class="card" href="./homehunt/index.html">
+          <div class="icon-wrap" style="background:#EEF4EF;">🏠</div>
+          <div>
+            <span class="badge homehunt-badge">우리 집 찾기</span>
+            <div class="card-title">HomeHunt</div>
+            <div class="card-desc">둘이 보고 온 집을 지도에 기록하고<br>면적별 실거래 변화를 비교해요</div>
+          </div>
+          <div class="card-cta homehunt-cta"><span class="card-cta-text">집 보러 가기</span><span class="card-cta-arrow">→</span></div>
+        </a>
       </div>
-      <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
-    </a>
-    <a class="card" href="./honeymoon/index.html">
-      <div class="icon-wrap" style="background:#F0F8FF;">🌴</div>
-      <div>
-        <span class="badge">몰디브 리조트 비교</span>
-        <div class="card-title">Honeymoon</div>
-        <div class="card-desc">리조트 견적과 사진을 비교하고<br>함께 고른 후보·메모를 보관해요</div>
+    </section>
+    <section class="project-group" aria-labelledby="travelGroupTitle">
+      <h2 class="project-group-title" id="travelGroupTitle">우리의 여행</h2>
+      <div class="grid">
+        <a class="card" href="./honeymoon/index.html">
+          <div class="icon-wrap" style="background:#F0F8FF;">🌴</div>
+          <div>
+            <span class="badge">몰디브 리조트 비교</span>
+            <div class="card-title">Honeymoon</div>
+            <div class="card-desc">리조트 견적과 사진을 비교하고<br>함께 고른 후보·메모를 보관해요</div>
+          </div>
+          <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
+        </a>
+        <a class="card" href="./travel/">
+          <div class="icon-wrap" style="background:#E9F3F3;">✈️</div>
+          <div>
+            <span class="badge">싱가포르 · 크루즈 · 몰디브</span>
+            <div class="card-title">여행 일정</div>
+            <div class="card-desc">3월 7–17일 일정과 지도를 보며<br>호텔·항공·예약을 함께 정해요</div>
+          </div>
+          <div class="card-cta"><span class="card-cta-text">일정 보러 가기</span><span class="card-cta-arrow">→</span></div>
+        </a>
       </div>
-      <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
-    </a>
-    <a class="card" href="./travel/">
-      <div class="icon-wrap" style="background:#E9F3F3;">✈️</div>
-      <div>
-        <span class="badge">싱가포르 · 크루즈 · 몰디브</span>
-        <div class="card-title">여행 일정</div>
-        <div class="card-desc">3월 7–17일 일정과 지도를 보며<br>호텔·항공·예약을 함께 정해요</div>
-      </div>
-      <div class="card-cta"><span class="card-cta-text">일정 보러 가기</span><span class="card-cta-arrow">→</span></div>
-    </a>
-    <a class="card" href="./homehunt/index.html">
-      <div class="icon-wrap" style="background:#EEF4EF;">🏠</div>
-      <div>
-        <span class="badge homehunt-badge">우리 집 찾기</span>
-        <div class="card-title">HomeHunt</div>
-        <div class="card-desc">둘이 보고 온 집을 지도에 기록하고<br>면적별 실거래 변화를 비교해요</div>
-      </div>
-      <div class="card-cta homehunt-cta"><span class="card-cta-text">집 보러 가기</span><span class="card-cta-arrow">→</span></div>
-    </a>
+    </section>
   </div>
 
   <!-- Events -->
