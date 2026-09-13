@@ -54,7 +54,11 @@
         "calendar.mjs",
         "navigation.mjs",
         "style.css",
-        "calendar.css"
+        "calendar.css",
+        "budget.mjs",
+        "budget.css",
+        "readiness.mjs",
+        "readiness.css"
       ]
     }
   ],

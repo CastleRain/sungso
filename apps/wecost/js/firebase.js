@@ -8,6 +8,7 @@ import {
   getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
 import { homeTargetPriceBridge } from '../../../shared/finance/home-target-price.mjs';
 
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
@@ -134,7 +135,11 @@ export async function addItem(item) {
   });
 }
 
-export async function updateItem(id, fields) {
+export async function updateItem(id, fields, expectedItem = null) {
+  if (isTravelItem(expectedItem)) {
+    const { saveTravelLedgerItem } = await import('../../../shared/finance/travel-budget-store.mjs');
+    return saveTravelLedgerItem(id, fields, expectedItem);
+  }
   await updateDoc(doc(db, 'wecost_items', id), {
     ...fields,
     updatedAt: serverTimestamp(),

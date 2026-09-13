@@ -11,7 +11,7 @@
 | [apps/hub](apps/hub/README.md) | `/sungso/` | 홈·일정·달력·D-day |
 | [apps/wecost](apps/wecost/README.md) | `/sungso/wecost/` | 결혼비용·현금흐름·집 예산 |
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
-| [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·결정·변경 이력 |
+| [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·WeCost 연결 예산·출발 준비·변경 이력 |
 | [apps/homehunt](apps/homehunt/README.md) | `/sungso/homehunt/` | 아파트·실거래·통근·분양 |
 
 ## 시작

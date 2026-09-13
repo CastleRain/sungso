@@ -5,20 +5,22 @@ const dateAt = text => new Date(`${text}T12:00:00Z`);
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 // A calendar-only milestone; this does not extend or write to the 11-day trip.
 const WEDDING_DATE = '2027-03-06';
+const PLACE_SYMBOLS = {'한국':'🇰🇷','싱가포르':'🇸🇬','몰디브':'🇲🇻','크루즈':'🚢'};
+const countryHTML = country => country === '싱가포르' ? '싱가<wbr>포르' : escapeHTML(country);
 
 // The ship's sea days are a separate location, not extra nights in Singapore.
 export const TRAVEL_LOCATIONS = {
- '2027-03-07': {flag:'🇸🇬',activity:'✈️',activityType:'flight',tone:'singapore',country:'싱가포르',journey:'한국 → 싱가포르',label:'도착 · 1박',icon:'↗',stay:'싱가포르 호텔 · 후보 선택 전'},
- '2027-03-08': {flag:'',activity:'🚢',activityType:'ship',tone:'sea',country:'크루즈',journey:'싱가포르 → 크루즈',label:'승선 · 3박',icon:'≈',stay:'디즈니 어드벤처 · 예약 전 후보'},
+ '2027-03-07': {flag:'🇸🇬',activity:'✈️',activityType:'flight',tone:'singapore',country:'싱가포르',route:['한국','싱가포르'],journey:'한국 → 싱가포르',label:'도착 · 1박',icon:'↗',stay:'싱가포르 호텔 · 후보 선택 전'},
+ '2027-03-08': {flag:'',activity:'🚢',activityType:'ship',tone:'sea',country:'크루즈',route:['싱가포르','크루즈'],journey:'싱가포르 → 크루즈',label:'승선 · 3박',icon:'≈',stay:'디즈니 어드벤처 · 예약 전 후보'},
  '2027-03-09': {flag:'',activity:'🚢',activityType:'ship',tone:'sea',country:'크루즈',journey:'크루즈 · 해상',label:'바다 위 하루',icon:'≈',stay:'디즈니 어드벤처 · 예약 전 후보'},
  '2027-03-10': {flag:'',activity:'🚢',activityType:'ship',tone:'sea',country:'크루즈',journey:'크루즈 · 해상',label:'바다 위 하루',icon:'≈',stay:'디즈니 어드벤처 · 예약 전 후보'},
- '2027-03-11': {flag:'🇸🇬',activity:'🚢',activityType:'ship',tone:'singapore',country:'싱가포르',journey:'크루즈 → 싱가포르',label:'하선 · 1박',icon:'↓',stay:'싱가포르 호텔 · 후보 선택 전'},
- '2027-03-12': {flag:'🇲🇻',activity:'✈️',activityType:'flight',tone:'maldives',country:'몰디브',journey:'싱가포르 → 몰디브',label:'리조트 · 4박',icon:'↗',stay:'아나네아 마디바루 · 4박 계획'},
+ '2027-03-11': {flag:'🇸🇬',activity:'🚢',activityType:'ship',tone:'singapore',country:'싱가포르',route:['크루즈','싱가포르'],journey:'크루즈 → 싱가포르',label:'하선 · 1박',icon:'↓',stay:'싱가포르 호텔 · 후보 선택 전'},
+ '2027-03-12': {flag:'🇲🇻',activity:'✈️',activityType:'flight',tone:'maldives',country:'몰디브',route:['싱가포르','몰디브'],journey:'싱가포르 → 몰디브',label:'리조트 · 4박',icon:'↗',stay:'아나네아 마디바루 · 4박 계획'},
  '2027-03-13': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
  '2027-03-14': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
  '2027-03-15': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
- '2027-03-16': {flag:'🇲🇻',activity:'✈️',activityType:'flight',tone:'maldives',country:'몰디브',journey:'몰디브 → 싱가포르 (다음 날 도착)',label:'23:30 출발',icon:'↗',stay:'리조트 체크아웃 · 23:30 말레 출발 · 기내박'},
- '2027-03-17': {flag:'🇰🇷',activity:'✈️',activityType:'flight',tone:'korea',country:'한국',journey:'몰디브 → 싱가포르 환승 → 한국',label:'22:00 도착',icon:'⌂',stay:'07:15 싱가포르 도착 · 14:35 출발 → 22:00 인천 도착'}
+ '2027-03-16': {flag:'🇲🇻',activity:'✈️',activityType:'flight',tone:'maldives',country:'몰디브',route:['몰디브','싱가포르'],routeNote:'다음 날 도착',journey:'몰디브 → 싱가포르 (다음 날 도착)',label:'23:30 출발',icon:'↗',stay:'리조트 체크아웃 · 23:30 말레 출발 · 기내박'},
+ '2027-03-17': {flag:'🇰🇷',activity:'✈️',activityType:'flight',tone:'korea',country:'한국',route:['싱가포르','한국'],journey:'싱가포르 → 한국 (07:15 싱가포르 도착·환승)',label:'22:00 도착',icon:'⌂',stay:'07:15 싱가포르 도착 · 14:35 출발 → 22:00 인천 도착'}
 };
 
 export function calendarDates(fullMonth = false) {
@@ -39,7 +41,9 @@ export function createTripCalendar(container, {days, selectedDate, onSelect}) {
    if(date===WEDDING_DATE)return `<td><div class="calendar-wedding-day" role="group" aria-label="3월 6일 토요일, 우리의 결혼식"><span class="calendar-date-row"><strong>6</strong><small aria-hidden="true">💍</small></span><span class="calendar-place-symbols" aria-hidden="true"><span class="calendar-activity">💒</span></span><span class="calendar-country">결혼식</span><span class="calendar-day-note">우리의 시작</span></div></td>`;
    if(!day||!location)return `<td class="calendar-inactive ${date.slice(0,7)!=='2027-03'?'calendar-outside':''}"><div><span>${number}</span><span class="calendar-sr">${date} · 여행 일정 없음</span></div></td>`;
    const index=currentDays.findIndex(day=>day.date===date)+1;
-   return `<td><button type="button" class="calendar-day" data-calendar-date="${date}" data-tone="${location.tone}" aria-pressed="${selected===date}" aria-label="3월 ${number}일 ${WEEKDAYS[value.getUTCDay()]}요일, ${escapeHTML(location.journey)}, ${escapeHTML(day.title)}" title="${escapeHTML(location.journey)} · ${escapeHTML(day.title)}"><span class="calendar-date-row"><strong>${number}</strong><small>D${index}</small></span><span class="calendar-place-symbols" aria-hidden="true">${location.flag?`<span class="calendar-flag">${location.flag}</span>`:''}<span class="calendar-activity" data-activity="${location.activityType}">${location.activity}</span></span><span class="calendar-country">${location.country==='싱가포르'?'싱가<wbr>포르':escapeHTML(location.country)}</span><span class="calendar-day-note"><i aria-hidden="true">${location.icon}</i>${escapeHTML(location.label)}</span></button></td>`;
+   const symbols=location.route?location.route.map(country=>`<span class="${country==='크루즈'?'calendar-activity':'calendar-flag'}"${country==='크루즈'?' data-activity="ship"':''}>${PLACE_SYMBOLS[country]}</span>`).join('<span class="calendar-symbol-arrow">→</span>'):`${location.flag?`<span class="calendar-flag">${location.flag}</span>`:''}<span class="calendar-activity" data-activity="${location.activityType}">${location.activity}</span>`;
+   const countries=location.route?`<span class="calendar-country calendar-route">${location.route.map(country=>`<span>${countryHTML(country)}</span>`).join('<span class="calendar-route-arrow" aria-hidden="true">↓</span>')}</span>`:`<span class="calendar-country">${countryHTML(location.country)}</span>`;
+   return `<td><button type="button" class="calendar-day" data-calendar-date="${date}" data-tone="${location.tone}" aria-pressed="${selected===date}" aria-label="3월 ${number}일 ${WEEKDAYS[value.getUTCDay()]}요일, ${escapeHTML(location.journey)}, ${escapeHTML(day.title)}" title="${escapeHTML(location.journey)} · ${escapeHTML(day.title)}"><span class="calendar-date-row"><strong>${number}</strong><small>D${index}</small></span><span class="calendar-place-symbols${location.route?' calendar-route-symbols':''}" aria-hidden="true">${symbols}</span>${countries}${location.routeNote?`<span class="calendar-route-note">${escapeHTML(location.routeNote)}</span>`:''}<span class="calendar-day-note"><i aria-hidden="true">${location.icon}</i>${escapeHTML(location.label)}</span></button></td>`;
   }).join('')}</tr>`).join('');
   container.querySelectorAll('[data-calendar-range]').forEach(button=>button.setAttribute('aria-pressed',String((button.dataset.calendarRange==='month')===fullMonth)));
   updateSelection();

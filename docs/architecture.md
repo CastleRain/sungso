@@ -14,7 +14,7 @@ sungso/
 │   └── homehunt/            → dist/homehunt/           → /sungso/homehunt/
 ├── shared/
 │   ├── firebase/            공개 설정
-│   ├── finance/             재무 계산·목표 집값 연결
+│   ├── finance/             재무 계산·목표 집값·여행 예산 연결
 │   ├── travel/              여행 기준·검증·공동 저장
 │   └── homehunt/            화면·서버 공통 순수 로직
 ├── services/
@@ -39,6 +39,14 @@ Firebase·Render·GitHub 설정은 도구가 찾는 루트 위치에 둔다. 앱
 - HTML의 `src`/`href`와 CSS·fetch의 공개 자산 URL은 **출력 위치**를 기준으로 유지한다. 허브의 `wecost/`, 하위 앱의 `../`, 한글 PDF 경로와 지도·외부 링크를 소스 폴더 깊이에 맞춰 바꾸지 않는다.
 - CDN URL·버전 query·동적 import·초기화 순서를 보존한다. 새로운 앱 공통화는 실제 소비자가 있을 때 수행하고, 화면만 비슷하다는 이유로 독립 앱 상태를 합치지 않는다.
 - 공통 Firebase 모듈은 공개 설정만 내보낸다. 앱별 Firebase 이름·SDK·인증·구독·시딩은 해당 앱이 소유한다.
+
+## 여행과 재무 연결
+
+Travel의 `budget.mjs`와 WeCost의 기존 비용 편집은 `shared/finance/travel-budget-core.mjs`의 계산·검증과 `travel-budget-store.mjs`의 구독·트랜잭션을 공유한다. 저장소는 별도 Firebase 앱 이름 `sungso-travel-budget`을 사용하고, 기존 앱의 초기화·시딩 순서는 유지한다. 두 모듈도 등록부를 통해 `/sungso/shared/{파일명}.mjs`로 직접 출력한다.
+
+여행비는 기존 `wecost_items/{id}` 중 `cat === '✈️신혼여행'`인 한 항목을 연결한다. 세부 예산을 결혼비용의 새 항목으로 복제하지 않는다. `itineraries/honeymoon_2027_budget`에는 연결 ID·세부 비용·처음 비교 금액·계산 환율·남은 여행용 준비금을 저장하며, 일정 문서 `itineraries/honeymoon_2027`과 과거 `itineraries/main`은 분리한다. 지급액은 기존 `deposit + actual`, 잔금은 `max(planned - 지급액, 0)` 계약을 따른다.
+
+Travel의 명시적 예산 저장은 같은 트랜잭션에서 기존 장부의 예상액·잔금, 상세 예산 문서, `itineraries/honeymoon_2027_budget_log_…` 이력을 반영한다. 기존 신혼여행 장부 항목을 편집할 때도 장부와 금액 이력을 원자적으로 기록한다. 앱은 이력을 추가만 하며 과거 이력을 편집·삭제하지 않는다. 조회·초안 계산·후보 가격 적용은 저장하지 않고, 저장 시 편집 전 원본을 비교해 동시 변경을 차단한다. Firestore 보안 규칙이나 인증 정책을 이 연결의 부수 작업으로 변경하지 않는다.
 
 ## 새 앱 추가
 

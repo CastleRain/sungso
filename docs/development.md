@@ -74,11 +74,13 @@ firebase emulators:exec --only firestore --project demo-homehunt "node --test --
 | 앱 | 확인할 기능 |
 |---|---|
 | Hub | PIN·일정·핀·D-day·달력·다섯 앱 연결 |
-| WeCost | 네 탭·재무 계산·저축/대출/조정 저장 흐름·HomeHunt 목표 집값 |
+| WeCost | 네 탭·재무 계산·저축/대출/조정 저장 흐름·HomeHunt 목표 집값·Travel 신혼여행 예산 왕복 연결 |
 | Honeymoon | 여섯 탭·비교·토너먼트·메모/picks·PDF 10개·현재/이전 여행 |
-| Travel | 여섯 화면·달력 날짜 선택의 스크롤 유지·지도·숙소·결정 패널·이력 |
+| Travel | 여덟 화면·달력 이동 국가·날짜 선택의 스크롤 유지·지도·숙소·결정 패널·예산/지급/준비금·출발 준비·일정/금액 이력 |
 | HomeHunt | 지도·검색·후보/조건 복원·면적별 실거래·분양·대시보드·인증 |
 
 저장 성공·실패·오프라인·동시 편집은 대역 또는 Emulator로 검증한다. 실제 데이터를 읽는 검증은 Firebase 쓰기를 네트워크/SDK 대역에서 차단하고 운영 데이터에 테스트 기록을 넣지 않는다. **홈·WeCost의 기본 시딩과 Honeymoon의 자동 환율 갱신도 쓰기**다. 단순 화면 열기만으로 쓰기가 없다고 가정하지 않는다.
+
+Travel–WeCost 예산의 계산·저장 대역은 `tests/travel-budget-core.test.mjs`·`tests/travel-budget-store.test.mjs`로 확인한다. 브라우저에서는 `#budget`·`#readiness`·WeCost `?tab=wedding` 직접 진입과 왕복 이동, 조회·후보 금액 적용 시 쓰기 0, 명시 저장의 장부·예산·이력 일괄 반영을 확인한다. 미입력 금액·환율, 여러 신혼여행 항목 중 선택, 장부와 세부 합계의 차이, 오프라인·실패·동시 편집 시 초안 보존도 대역으로 검증한다. 운영 Firebase에서 테스트 예산이나 금액 이력을 만들지 않는다.
 
 기존 사용자 탭·조건·브라우저 저장 기록을 보존한다. 별도 테스트 저장소를 사용하고 실제 통근·Telegram 발송을 검증에 끼워 넣지 않는다. Google·NAVER 지도나 회원 인증을 대역으로만 확인했다면 실제 운영 확인과 구분해 기록한다.

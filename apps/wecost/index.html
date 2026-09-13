@@ -324,6 +324,8 @@
       <button class="btn btn-primary" onclick="window._openItemDrawer(null)">+ 항목 추가</button>
     </div>
 
+    <div id="wecost-travel-summary" class="wecost-travel-summary"></div>
+
     <!-- 상단 4 카드 -->
     <div class="metric-grid metric-grid-4">
       <div class="metric-card mc-primary">
@@ -603,7 +605,7 @@
         </div>
       </div>
       <div class="inp-grp">
-        <label>실지출 (원) <small style="color:var(--text-muted)">선택</small></label>
+        <label>계약금 외 실지출 (원) <small style="color:var(--text-muted)">선택</small></label>
         <div class="sav-inp-row" style="margin-bottom:0">
           <input type="text" inputmode="numeric" id="di-actual" placeholder="예: 0" class="input-field" style="flex:1"
                  oninput="window._fmtMoneyHint(this,'hint-di-actual')">

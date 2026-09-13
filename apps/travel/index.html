@@ -18,6 +18,8 @@
   </script>
   <link rel="stylesheet" href="style.css?v=20260912-calendar">
   <link rel="stylesheet" href="calendar.css?v=20260912-calendar-icons">
+  <link rel="stylesheet" href="budget.css">
+  <link rel="stylesheet" href="readiness.css">
   <link rel="stylesheet" href="../shared/decision-panel.css?v=20260912-calendar">
 </head>
 <body>
@@ -39,12 +41,15 @@
     </div>
     <div class="sync-row"><span id="trip-sync" role="status" aria-live="polite">함께 저장한 일정 불러오는 중…</span><span class="muted">후보 선택은 실제 예약과 별개예요</span></div>
     <div id="action-message" class="action-message" role="status" aria-live="polite" hidden></div>
+    <div id="travel-budget-summary" class="travel-budget-summary" aria-label="여행 비용 요약" hidden></div>
     <nav class="section-nav" aria-label="여행 화면 선택">
       <a id="nav-itinerary" href="#itinerary" data-travel-view-link="itinerary" aria-controls="itinerary" aria-current="page" class="is-active">전체 일정</a>
       <a id="nav-hotels" href="#hotels" data-travel-view-link="hotels" aria-controls="hotels">숙소</a>
       <a id="nav-transport" href="#flights" data-travel-view-link="transport" aria-controls="transport-view">항공·크루즈</a>
       <a id="nav-stay" href="#resort" data-travel-view-link="stay" aria-controls="stay-view">리조트·이동</a>
       <a id="nav-activities" href="#activities" data-travel-view-link="activities" aria-controls="activities-view">관광·식사</a>
+      <a id="nav-budget" href="#budget" data-travel-view-link="budget" aria-controls="budget">여행 비용</a>
+      <a id="nav-readiness" href="#readiness" data-travel-view-link="readiness" aria-controls="readiness">출발 준비</a>
       <a id="nav-history" href="#history" data-travel-view-link="history" aria-controls="history">변경 기록</a>
     </nav>
 
@@ -113,6 +118,8 @@
     <section id="activities-view" class="page-section travel-view" data-travel-view="activities" aria-labelledby="activities-title" hidden>
       <section id="activities" class="detail-card" aria-labelledby="activities-title"><p class="eyebrow">LITTLE PLANS</p><h2 id="activities-title">관광과 식사는 가볍게 정하기</h2><div class="activity-row"><span>3/7</span><div><strong>첫날은 야경과 저녁</strong><p>머라이언·베이 산책 → 저녁 → 스펙트라. 피곤하면 호텔 근처 식사까지만 해도 좋아요.</p><button type="button" class="text-button" data-go-day="2027-03-07">이날 일정 보기 ↑</button></div></div><div class="activity-row"><span>3/11</span><div><strong>브런치, 가든스, 슈퍼트리</strong><p>하선 후 쉬었다가 Cloud Forest와 야경. 샌즈를 고르면 관광 일부를 수영장 시간으로 바꿔요.</p><button type="button" class="text-button" data-go-day="2027-03-11">이날 일정 보기 ↑</button></div></div><p class="fine">식당은 아직 미정이에요. 공연 시간과 2027년 가든스 휴장일이 확인되면 일정에 반영해요.</p><a href="https://www.gardensbythebay.com.sg/en/plan-your-visit/opening-hours.html" target="_blank" rel="noopener noreferrer">가든스 운영·휴장 안내 ↗</a></section>
     </section>
+    <section id="budget" class="page-section travel-view" data-travel-view="budget" aria-labelledby="budget-title" hidden><div class="section-heading"><div><p class="eyebrow">OUR TRIP, OUR BUDGET</p><h2 id="budget-title">지금 얼마, 앞으로 얼마?</h2></div></div><div id="budget-content"></div></section>
+    <section id="readiness" class="page-section travel-view" data-travel-view="readiness" aria-labelledby="readiness-title" hidden><div class="section-heading"><div><p class="eyebrow">READY TO GO</p><h2 id="readiness-title">출발 전에 함께 챙길 것</h2></div></div><div id="readiness-content"></div></section>
     <section id="history" class="page-section travel-view" data-travel-view="history" aria-labelledby="history-title" hidden><div class="section-heading"><div><p class="eyebrow">OUR UPDATES</p><h2 id="history-title">어떤 내용을 바꿨는지 함께 보기</h2></div><span class="section-note">최근 50건 · 최신순</span></div><div class="history-card"><p id="history-status" class="fine" role="status" aria-live="polite">변경 기록을 불러오는 중…</p><ol id="history-list" class="history-list"></ol><button id="history-more" type="button" class="button secondary" hidden>변경 기록 더 보기</button></div></section>
     <footer class="travel-footer"><a href="../">sungso · 우리의 결혼 준비</a><p>항공 시간·가격은 2026.09.13 공유 캡처, 그 외 정보는 2026.09.12 기준 · 실제 예약 조건은 예약 화면과 확인서 기준</p><details><summary>참고한 공식 안내</summary><div class="source-links"><a href="https://www.changiairport.com/en/at-changi/transport-and-directions/leaving-the-airport.html" target="_blank" rel="noopener noreferrer">창이공항 교통</a><a href="https://www.singaporeair.com/en_UK/gb/travel-info/check-in/airport-check-in/" target="_blank" rel="noopener noreferrer">싱가포르항공 체크인</a><a href="https://ko.marinabaysands.com/singapore-visitors-guide/around-mbs/light-and-sound-show.html" target="_blank" rel="noopener noreferrer">스펙트라 공연</a></div></details></footer>
   </main>
@@ -120,6 +127,8 @@
   <noscript><p class="no-script">일정과 지도를 보려면 브라우저에서 JavaScript를 켜주세요.</p></noscript>
   <script type="module" src="navigation.mjs?v=20260912-calendar"></script>
   <script type="module" src="app.mjs?v=20260912-calendar-icons"></script>
+  <script type="module" src="budget.mjs"></script>
+  <script type="module" src="readiness.mjs"></script>
   <script type="module" src="../shared/decision-panel.mjs?v=20260912-calendar"></script>
 </body>
 </html>

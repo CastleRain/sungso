@@ -157,3 +157,10 @@
 @media (max-width: 768px) {
   .cat-bar-wrap { display: none; }
 }
+
+/* Travel uses the same expense row; this link does not add another cost. */
+.wecost-travel-summary { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; margin-bottom:20px; border:1px solid var(--border); border-radius:12px; background:var(--bg-card,#fff); }
+.wecost-travel-summary strong { font-size:14px; }
+.wecost-travel-summary p { font-size:12px; color:var(--text-muted); margin:7px 0 0; }
+.wecost-travel-summary a { color:var(--primary); font-weight:600; font-size:12px; white-space:nowrap; }
+@media(max-width:600px) { .wecost-travel-summary { align-items:flex-start; flex-direction:column; } }

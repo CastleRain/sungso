@@ -3,11 +3,11 @@ const views = [...document.querySelectorAll('[data-travel-view]')];
 const links = [...document.querySelectorAll('[data-travel-view-link]')];
 const titles = {
   itinerary: '전체 일정', hotels: '숙소', transport: '항공·크루즈',
-  stay: '리조트·이동', activities: '관광·식사', history: '변경 기록'
+  stay: '리조트·이동', activities: '관광·식사', budget: '여행 비용', readiness: '출발 준비', history: '변경 기록'
 };
 const defaults = {
   itinerary: '#itinerary', hotels: '#hotels', transport: '#flights',
-  stay: '#resort', activities: '#activities', history: '#history'
+  stay: '#resort', activities: '#activities', budget: '#budget', readiness: '#readiness', history: '#history'
 };
 let activeView = 'itinerary';
 let pendingScroll = 0;

@@ -504,5 +504,33 @@ export const DECISIONS = [
     "detail": "몰디브 3/12 도착·3/16 23:30 출발 · 퇴실 후 이용·수상비행기 확인",
     "href": "travel/#transfers",
     "status": "pending"
+  },
+  {
+    "id": "documents",
+    "title": "여권·입국 신고",
+    "detail": "싱가포르 입국·크루즈 하선 재입국·몰디브 IMUGA 준비",
+    "href": "travel/#readiness",
+    "status": "pending"
+  },
+  {
+    "id": "insurance",
+    "title": "여행자보험·비상 연락",
+    "detail": "여행 기간·크루즈·수상활동 보장과 두 사람의 연락처 준비",
+    "href": "travel/#readiness",
+    "status": "pending"
+  },
+  {
+    "id": "connectivity",
+    "title": "통신·해외결제·환전",
+    "detail": "싱가포르·몰디브 데이터·크루즈 인터넷·SGD·USD 준비",
+    "href": "travel/#readiness",
+    "status": "pending"
+  },
+  {
+    "id": "homebound",
+    "title": "인천 도착 후 귀가",
+    "detail": "3/17 22:00 도착 후 귀가편·막차·공항 왕복 비용 확인",
+    "href": "travel/#readiness",
+    "status": "pending"
   }
 ];

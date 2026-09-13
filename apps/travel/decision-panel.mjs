@@ -280,6 +280,18 @@ function startPanel() {
   panel.addEventListener('click', (event) => {
     if (event.target.closest('a') && drawer.open) closeDrawer(false);
   });
+  document.addEventListener('travel:edit-decision', (event) => {
+    const card = cards.get(event.detail?.id);
+    if (!card) return;
+    if (!desktop.matches && !drawer.open) {
+      drawer.showModal();
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('sg-decisions-open');
+    }
+    card.editor.open = true;
+    card.row.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    card.status.focus({ preventScroll: true });
+  });
   desktop.addEventListener('change', arrangePanel);
   arrangePanel();
 

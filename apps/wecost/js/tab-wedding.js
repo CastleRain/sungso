@@ -1,8 +1,17 @@
 import { won, dday, pct, CAT_COLOR } from './utils.js';
 import { addItem, updateItem, deleteItem } from './firebase.js';
+import { isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
+let editingItem = null;
 
 export function renderWedding(st) {
   const items         = st.items || [];
+  const travelItems = items.filter(isTravelItem);
+  const travelSummary = document.getElementById('wecost-travel-summary');
+  if (travelSummary) {
+    const planned = travelItems.reduce((sum, item) => sum + (item.planned || 0), 0);
+    const paid = travelItems.reduce((sum, item) => sum + (item.deposit || 0) + (item.actual || 0), 0);
+    travelSummary.innerHTML = `<div><strong>✈️ 신혼여행 비용도 함께 보고 있어요</strong><p>${travelItems.length ? `예상 ${won(planned)} · 지급 ${won(paid)} · 앞으로 ${won(Math.max(planned-paid,0))}` : '신혼여행 항목을 추가하면 여행 페이지에서 세부 예산을 연결할 수 있어요.'}</p></div><a href="../travel/#budget">세부 예산·증감 보기 →</a>`;
+  }
   const totalPlanned  = st.totalPlanned || 0;
   const totalPaid     = st.totalPaid    || 0;
   const remain        = Math.max(0, totalPlanned - totalPaid);
@@ -171,6 +180,8 @@ function _renderEmptyState() {
 export function registerWeddingHandlers(getStFn) {
   window._openItemDrawer = (id) => {
     const isNew = !id;
+    editingItem = null;
+    document.getElementById('di-cat').disabled = false;
     document.getElementById('drawer-title').textContent = isNew ? '항목 추가' : '항목 수정';
     document.getElementById('drawer-item-id').value = id || '';
     document.getElementById('drawer-delete-btn').style.display = isNew ? 'none' : '';
@@ -182,6 +193,8 @@ export function registerWeddingHandlers(getStFn) {
       const st   = getStFn();
       const item = (st.items || []).find(i => i.id === id);
       if (item) {
+        editingItem = structuredClone(item);
+        document.getElementById('di-cat').disabled = isTravelItem(item);
         _setDi('di-name',        item.name || '');
         _setDi('di-cat',         item.cat  || '✨기타');
         _setDiNum('di-planned',  item.planned  || 0);
@@ -224,18 +237,19 @@ export function registerWeddingHandlers(getStFn) {
     const payload = { name: nameVal, cat, planned, deposit, actual, balance, balanceDue, memo };
 
     const btn = document.querySelector('#item-drawer .btn-primary');
-    if (btn) btn.textContent = '저장 중…';
+    if (btn?.disabled) return;
+    if (btn) { btn.textContent = '저장 중…'; btn.disabled = true; }
     try {
       if (id) {
-        await updateItem(id, payload);
+        await updateItem(id, payload, editingItem);
       } else {
         await addItem(payload);
       }
       window._closeItemDrawer();
     } catch (e) {
-      alert('저장 중 오류가 발생했어요. 다시 시도해주세요.');
+      alert(e.message || '저장 중 오류가 발생했어요. 입력한 내용은 그대로예요.');
     } finally {
-      if (btn) btn.textContent = '저장';
+      if (btn) { btn.textContent = '저장'; btn.disabled = false; }
     }
   };
 
