@@ -77,3 +77,9 @@ Emulator는 `demo-homehunt`와 localhost만 사용했다. 운영 코드의 `fire
 새 디자인의 JSON 계약은 단위 검사와 Emulator로 검증했다. 브라우저의 실제 JSON 파일 다운로드 검사는 위 최초 여섯 디자인 구현 때의 결과이며, 이번 추가 검증에서는 공동 저장된 별자리의 클립보드 출력까지 확인했다. 검사 중 운영 DB에 접근하거나 테스트 기록을 쓰지 않았다. 기존 8017 미리보기 서버는 선택 스냅샷을 보관해 재시작했고, 찜·선택·변경 번호·쓰기 횟수가 전후 동일함을 비교했다.
 
 **다음:** 두 사람이 특별한 6종의 동작과 색감을 비교하고 실제 제작 페이지의 디자인을 결정한다. 실제 모바일 기기·공개 배포 검증은 별도다.
+
+## GitHub 반영·Pages 배포
+
+사용자 확정 후 최신 `origin/master`에서 별도 작업 브랜치를 만들고 청첩장과 홈 연결 변경만 `4014d001349e840a84dd6e82cba845dc641d7b09`로 커밋해 master에 반영했다. 기존 여행·WeCost 변경은 최신 master의 내용을 보존했다. 통합 소스의 `npm run check` 1,447개도 통과했다.
+
+[Pages 실행 34742479321](https://github.com/CastleRain/sungso/actions/runs/34742479321)의 검사·서비스 번들·배포 단계가 모두 성공했다. [공개 청첩장](https://CastleRain.github.io/sungso/invitation/)과 관련 파일, 홈 HTML·CSS 총 21개가 HTTP 200이며 검증한 `dist`와 SHA-256이 일치했다. 상세 임시 결과는 `/tmp/sungso-invitation-public-check.json`에 있다. 원격 확인은 정적 GET 요청만 사용했다. 공개 브라우저에서 운영 DB를 이용한 공동 저장과 실제 모바일 기기 검증은 이번에 실행하지 않았다.
