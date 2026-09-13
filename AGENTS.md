@@ -35,10 +35,14 @@
 
 ## 진행 상황
 
-### 2026-09-13 — 앱·공통 코드·서비스 분리, 로컬 검증 완료
+### 2026-09-13 — 앱·공통 코드·서비스 분리, Pages·Render 배포 성공
 
 - 앱 소스·공통 도메인·서버/수집·과거 자료를 분리하고 앱 등록부·루트 빌드/미리보기/검사와 현행 문서를 정리했다. 공통 모듈은 기존 공개 URL에 직접 출력하고 query·모듈 동일성을 보존한다.
-- `npm run check` 1,403개와 정적 참조 294개·JS 문법 113개, Firestore Emulator 순차 검사 20개, Render·HomeHunt Cloud·default Firebase 번들을 통과했다. 변경 전 데이터/PDF 22개·CSS 46개·Firestore 규칙의 해시가 유지됐다.
-- 읽기 전용 QA의 1440px·390px에서 홈 PIN/직접 복귀·일정·달력, WeCost 네 탭, 여행 여섯 화면·날짜 선택 스크롤 유지·패널·이력, 리조트 비교·토너먼트·현재/이전 여행·PDF 10개 canvas, HomeHunt 여섯 메뉴·지도·조건 보존을 확인했다. 가로 넘침·운영 DB 쓰기·새 통근 호출은 없었다. 사용자의 원래 HomeHunt 로그인·개인 기록은 새 QA origin에서 재검증하지 않았다. 공개 배포·최종 운영 확인은 진행 중이다. [검증 근거와 한계](docs/restructure-verification.md)를 참고한다.
+- `npm run check` 1,403개와 정적 참조 294개·JS 문법 113개, Firestore Emulator 순차 검사 20개, Render·HomeHunt Cloud·default Firebase 번들을 통과했다. 수집 재개 전 데이터/PDF 22개·CSS 46개·Firestore 규칙의 해시가 유지됐다.
+- 읽기 전용 QA의 1440px·390px에서 홈 PIN/직접 복귀·일정·달력, WeCost 네 탭, 여행 여섯 화면·날짜 선택 스크롤 유지·패널·이력, 리조트 비교·토너먼트·현재/이전 여행·PDF 10개 canvas, HomeHunt 여섯 메뉴·지도·조건 보존을 확인했다. 가로 넘침·운영 DB 쓰기·새 통근 호출은 없었다. 사용자의 원래 HomeHunt 로그인·개인 기록은 새 QA origin에서 재검증하지 않았다. 로그인한 공개 HomeHunt의 개인 기록·회원 API는 사용자 로그인 후 수동 확인으로 남겼다. [검증 근거와 한계](docs/restructure-verification.md)를 참고한다.
 
-**다음:** 공개 Pages·Render 전환과 전체 화면·자동 수집→배포 연결을 확인하고 실제 결과를 기록한다.
+- `981e50d`의 [Pages 배포 34737387442](https://github.com/CastleRain/sungso/actions/runs/34737387442)와 같은 소스의 Render `dep-daj26bdg1s2s7395duj0` Live를 확인했다. 공개 파일 189개가 모두 HTTP 200·로컬 해시 일치, 내부 경로 18개는 404다. Render `/healthz` 200·CORS와 무로그인 health/quota 401, 공개 홈의 기존 일정·D-day·달력 보존을 확인했다.
+- 금리 수집 [34737525979](https://github.com/CastleRain/sungso/actions/runs/34737525979)가 정상 자료 `25c6254`를 커밋하고 [Pages 34737535176](https://github.com/CastleRain/sungso/actions/runs/34737535176)을 명시 호출해 배포 성공까지 확인했다. 네 수집·Pages 워크플로 active와 Render On Commit 복원을 확인했고 로컬에도 새 금리 자료를 유지했다.
+- 공개 WeCost 네 탭·Travel 여섯 화면/hash·390px 배치, HomeHunt 공식 단지 17,851곳·지도·로그인 전 경계를 확인했다. Honeymoon 공개 브라우저 로드는 자동 환율 쓰기를 피하기 위해 생략하고 공개 파일 해시·로컬 읽기 전용 화면/PDF로 확인했다. 남은 수동 확인은 로그인한 HomeHunt의 원래 개인 기록·회원 API다.
+
+**다음:** 사용자 로그인 후 HomeHunt의 기존 기록·회원 API를 읽기 위주로 확인하고, 새 앱은 등록부와 앱 폴더로 추가한다.

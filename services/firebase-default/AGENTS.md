@@ -10,6 +10,6 @@
 
 ### 2026-09-13 — 서비스 경로 분리·번들 검증 완료
 
-세 서비스 번들, 전체 1,403개 검사와 localhost `demo-homehunt`의 Emulator 순차 20개 검사가 통과했다. 운영 DB 쓰기·새 통근 호출·Functions 배포는 수행하지 않았다. Pages·Render 공개 전환 확인은 진행 중이며 [검증 기록](../../docs/restructure-verification.md)의 실제 범위를 따른다.
+세 서비스 번들, 전체 1,403개 검사와 localhost `demo-homehunt`의 Emulator 순차 20개 검사가 통과했다. 운영 DB 쓰기·새 통근 호출·Functions 배포는 수행하지 않았다. 같은 릴리스 `981e50d`의 Pages·Render 공개 배포는 성공했으며 이 default Functions는 번들 검증만 수행했다. 금리 수집→Pages 재배포와 네 수집·Render 자동 실행 재개도 확인했다. 로그인한 HomeHunt의 회원 API·개인 기록만 수동 확인으로 남아 있다. [검증 기록](../../docs/restructure-verification.md)의 실제 범위를 따른다.
 
-**다음:** 공개 전환 결과와 자동 수집→배포 연결을 확인한다.
+**다음:** 기존 공개 구성을 유지하며 사용자 로그인 후 HomeHunt 회원 확인 결과를 기록한다.

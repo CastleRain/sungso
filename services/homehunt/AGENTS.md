@@ -17,8 +17,10 @@
 
 ## 진행 상황
 
-### 2026-09-13 — 서비스 경로 분리·번들 검증 완료
+### 2026-09-13 — 서비스 경로 분리·Render 공개 배포 성공
 
-세 서비스 번들, 전체 1,403개 검사와 localhost `demo-homehunt`의 Emulator 순차 20개 검사가 통과했다. 운영 DB 쓰기·새 통근 호출·Functions 배포는 수행하지 않았다. Pages·Render 공개 전환 확인은 진행 중이며 [검증 기록](../../docs/restructure-verification.md)의 실제 범위를 따른다.
+세 서비스 번들, 전체 1,403개 검사와 localhost `demo-homehunt`의 Emulator 순차 20개 검사가 통과했다. 운영 DB 쓰기·새 통근 호출·Functions 배포는 수행하지 않았다. Pages 실행 `34737387442`와 Render `dep-daj26bdg1s2s7395duj0`가 같은 `981e50d` 소스로 성공했다. Render의 Build/Start·감시 7개 경로를 변경하고 `/healthz` 200·CORS·무로그인 health/quota 401을 확인했다. [검증 기록](../../docs/restructure-verification.md)의 실제 범위를 따른다.
 
-**다음:** 공개 전환 결과와 자동 수집→배포 연결을 확인한다.
+금리 수집 `34737525979`가 자료 `25c6254`를 커밋하고 Pages `34737535176`을 명시 호출해 성공했다. 네 수집·Pages 워크플로의 active와 Render On Commit 복원을 확인했다. 회원 API는 사용자 로그인 후 수동 확인으로 남겼다.
+
+**다음:** 사용자 로그인 후 회원 API를 확인한다. 재배포 때문에 통근 원호출·사용량 초기화를 실행하지 않는다.

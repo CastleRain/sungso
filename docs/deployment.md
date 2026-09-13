@@ -4,13 +4,13 @@
 
 이 문서는 구조 전환과 이후 배포 절차다. **실제 전환·배포 완료 여부는 [루트 진행 상황](../AGENTS.md#진행-상황)의 이번 검증 결과를 따른다.** 소스 설정을 바꾼 사실만으로 원격 설정이나 배포 성공을 뜻하지 않는다.
 
-로컬 검사 1,403개·Emulator 20개·세 서비스 번들 검증은 완료했다. 공개 전환은 아직 진행 중이며 [검증 기록](restructure-verification.md)과 최종 진행 상황을 함께 확인한다.
+로컬 검사 1,403개·Emulator 20개·세 서비스 번들 검증 후 `981e50d`의 Pages·Render 배포를 완료했다. 금리 수집 `34737525979`→자료 `25c6254`→Pages `34737535176` 성공과 네 수집·Pages active·Render On Commit 복원도 확인했다. 로그인한 HomeHunt의 개인 기록·회원 API만 사용자 로그인 후 수동 확인으로 남아 있다. [검증 기록](restructure-verification.md)의 실행 ID·공개 파일 대조와 최종 진행 상황을 함께 확인한다.
 
 ## GitHub Pages
 
 - 저장소·브랜치: `CastleRain/sungso`의 `master`.
 - Pages의 Source는 GitHub Actions다. 워크플로에서 Node 의존성을 설치하고 검사·빌드한 `dist/`를 Pages artifact로 올려 배포한다.
-- 웹 출력은 `config/apps.json`의 허용 목록을 따른다. `services/`, 원천자료, 비밀 설정, 테스트, archive 전체를 업로드하지 않는다.
+- 웹 출력은 `config/apps.json`의 허용 목록을 따른다. 서비스 구현·비밀 설정·상태 장부·테스트·archive 전체는 제외한다. 예외로 기존 공개 전국 단지 자료 `services/homehunt/data/source/apartment-catalog.json`·`apartment-catalog-meta.json` 두 파일은 명시된 호환 출력으로 이전 `homehunt/data/` URL을 유지한다. 원천자료 디렉터리 전체를 배포하는 것은 아니다.
 - 공통 모듈·여행 패널은 wrapper 없이 기존 공개 URL에 직접 출력하며 버전 query를 유지한다. 캐시된 기존 페이지와 새 산출물을 함께 읽는 경우의 모듈 동일성도 검증한다.
 - 이전 소스 폴더를 Pages 배포 루트로 선택하거나 일반 branch 기반 빌드를 수집 작업에서 다시 호출하지 않는다.
 - 배포 후 실제 공개 다섯 페이지와 소스→공개 경로 매핑으로 유지한 공통 모듈의 기존 주소, 독립 보고서·PDF·명시한 백업 주소를 확인한다.
