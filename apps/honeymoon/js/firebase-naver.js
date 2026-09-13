@@ -1,6 +1,9 @@
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { requireMember, getMember, syncAppAuth, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { FIREBASE_CONFIG } from '../../../shared/firebase/config.mjs';
+import { createMemberWork } from '../../../shared/firebase/member-work.mjs';
 // firebase-naver.js — 네이버 블로그 후기 캐시 + pin/hide 관리
-// Naver API를 브라우저에서 직접 호출 (CORS proxy 경유)
+// Provider credentials stay on the authenticated Render API.
 // naver_blog_cache/{resortId}  — API 결과 (새로 가져오기 시 덮어씀)
 // blog_review_prefs/{resortId} — pin/hide 상태 (절대 덮어쓰기 금지)
 // naver_blog_meta/{resortId}   — 카드 배지용 count
@@ -12,11 +15,8 @@ import {
   serverTimestamp, deleteField,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const NAVER_CLIENT_ID     = 'SIUfSSP3KTI1ui7rzHSk';
-const NAVER_CLIENT_SECRET = 'kPSbNhWM3y';
 
-// CORS 프록시 — Naver API는 브라우저 직접 호출 불가 (CORS 미지원)
-const CORS_PROXY = 'https://corsproxy.io/?url=';
+
 
 const RESORT_QUERIES = {
   cora_cora:    '코라코라 몰디브 후기',
@@ -33,8 +33,12 @@ const RESORT_QUERIES = {
   outrigger:    '아웃리거 마푸시바루 후기',
 };
 
-const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
-const db  = getFirestore(app);
+const app = getApps().find(item => item.name === '[DEFAULT]') || initializeApp(FIREBASE_CONFIG);
+await requireMember();
+await syncAppAuth(app);
+const db = getFirestore(app);
+const memberWork = createMemberWork({ getMember, registerPrivateCleanup });
+const observe = (...args) => memberWork.observe(onSnapshot, ...args);
 
 // djb2 hash → base36
 export function makeLinkHash(url) {
@@ -51,34 +55,37 @@ function stripHtml(s) {
   return (div.textContent || div.innerText || '').trim();
 }
 
-// Naver Blog Search API 직접 호출 (CORS proxy 경유)
-async function callNaverApi(query, sort) {
-  const params = new URLSearchParams({ query, display: '8', start: '1', sort });
-  const naverUrl = `https://openapi.naver.com/v1/search/blog?${params}`;
-  const resp = await fetch(CORS_PROXY + encodeURIComponent(naverUrl), {
-    headers: {
-      'X-Naver-Client-Id':     NAVER_CLIENT_ID,
-      'X-Naver-Client-Secret': NAVER_CLIENT_SECRET,
-    },
-  });
-  if (!resp.ok) throw new Error(`Naver API 오류 (${resp.status})`);
-  const data = await resp.json();
-  return data.items || [];
+// User-triggered member request; no public CORS relay or browser secret.
+async function callNaverApi(query, sort, resortId) {
+  const request = memberWork.capture();
+  await syncAppAuth(app);
+  request.assert();
+  const token = await getAuth(app).currentUser.getIdToken();
+  request.assert();
+  const params = new URLSearchParams({ query, sort, resortId });
+  const response = await fetch(`https://sungso-homehunt-api.onrender.com/api/blog-search?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!response.ok) throw new Error(`후기 검색 연결을 확인해주세요. (${response.status})`);
+  const data = await response.json();
+  request.assert();
+  return Array.isArray(data.items) ? data.items : [];
 }
 
 // ── 캐시 읽기 ──────────────────────────────────────────────────────
 export async function getNaverCache(resortId) {
+  const request = memberWork.capture();
   const snap = await getDoc(doc(db, 'naver_blog_cache', resortId));
+  request.assert();
   if (!snap.exists()) return null;
   return snap.data();
 }
 
 // ── Naver API 호출 → Firestore 캐시 저장 ──────────────────────────
 export async function refreshNaverBlog(resortId, sort = 'sim') {
+  await requireMember();
   const query = RESORT_QUERIES[resortId];
   if (!query) throw new Error('알 수 없는 resortId: ' + resortId);
 
-  const rawItems = await callNaverApi(query, sort);
+  const rawItems = await callNaverApi(query, sort, resortId);
 
   const items = rawItems.map(item => ({
     linkHash:    makeLinkHash(item.link || ''),
@@ -90,22 +97,12 @@ export async function refreshNaverBlog(resortId, sort = 'sim') {
     description: stripHtml(item.description).slice(0, 120),
   }));
 
-  await setDoc(doc(db, 'naver_blog_cache', resortId), {
-    query, sort, items,
-    fetchedAt: serverTimestamp(),
-  });
-
-  await setDoc(doc(db, 'naver_blog_meta', resortId), {
-    count:     items.length,
-    updatedAt: serverTimestamp(),
-  });
-
   return { items, query, sort, fetchedAt: new Date() };
 }
 
 // ── prefs 실시간 구독 ──────────────────────────────────────────────
 export function subscribeReviewPrefs(resortId, cb) {
-  return onSnapshot(
+  return observe(
     doc(db, 'blog_review_prefs', resortId),
     snap => cb(snap.exists() ? snap.data() : { pinned: {}, hidden: {} }),
     ()   => cb({ pinned: {}, hidden: {} }),
@@ -115,10 +112,13 @@ export function subscribeReviewPrefs(resortId, cb) {
 // ── 핀 저장 ───────────────────────────────────────────────────────
 // setDoc+merge:true 는 dot notation을 리터럴 필드명으로 처리하므로
 // updateDoc(dot notation)을 사용. 문서 없으면 setDoc으로 생성.
-export async function pinReview(resortId, item, pinnedBy = '성우') {
+export async function pinReview(resortId, item, pinnedBy) {
+  const request = memberWork.capture();
+  pinnedBy = request.member.name;
   const lh  = item.linkHash;
   const ref = doc(db, 'blog_review_prefs', resortId);
   const snap = await getDoc(ref);
+  request.assert();
   if (snap.exists()) {
     await updateDoc(ref, {
       [`pinned.${lh}`]: { ...item, pinnedBy, pinnedAt: serverTimestamp() },
@@ -131,21 +131,27 @@ export async function pinReview(resortId, item, pinnedBy = '성우') {
       updatedAt: serverTimestamp(),
     });
   }
+  request.assert();
 }
 
 // ── 핀 해제 ───────────────────────────────────────────────────────
 export async function unpinReview(resortId, linkHash) {
+  const request = memberWork.capture();
   await updateDoc(doc(db, 'blog_review_prefs', resortId), {
     [`pinned.${linkHash}`]: deleteField(),
     updatedAt: serverTimestamp(),
   });
+  request.assert();
 }
 
 // ── 숨김 (pinned에서도 동시 제거) ──────────────────────────────────
-export async function hideReview(resortId, item, hiddenBy = '소희', reason = '관련 없음') {
+export async function hideReview(resortId, item, hiddenBy, reason = '관련 없음') {
+  const request = memberWork.capture();
+  hiddenBy = request.member.name;
   const lh  = item.linkHash;
   const ref = doc(db, 'blog_review_prefs', resortId);
   const snap = await getDoc(ref);
+  request.assert();
   if (snap.exists()) {
     await updateDoc(ref, {
       [`hidden.${lh}`]: { ...item, hiddenBy, reason, hiddenAt: serverTimestamp() },
@@ -159,19 +165,22 @@ export async function hideReview(resortId, item, hiddenBy = '소희', reason = '
       updatedAt: serverTimestamp(),
     });
   }
+  request.assert();
 }
 
 // ── 숨김 복구 ─────────────────────────────────────────────────────
 export async function unhideReview(resortId, linkHash) {
+  const request = memberWork.capture();
   await updateDoc(doc(db, 'blog_review_prefs', resortId), {
     [`hidden.${linkHash}`]: deleteField(),
     updatedAt: serverTimestamp(),
   });
+  request.assert();
 }
 
 // ── naver_blog_meta 전체 구독 (카드 배지용) ────────────────────────
 export function subscribeNaverMeta(cb) {
-  return onSnapshot(
+  return observe(
     collection(db, 'naver_blog_meta'),
     snap => {
       const meta = {};

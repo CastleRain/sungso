@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { FIREBASE_CONFIG } from '../shared/firebase/config.mjs';
+import { createMemberWork } from '../shared/firebase/member-work.mjs';
 import * as core from '../shared/finance/travel-budget-core.mjs';
 
 // Production source with in-memory Firebase adapters only. No SDK import,
 // credentials, external request, or live database mutation occurs in this suite.
 const source = readFileSync(new URL('../shared/finance/travel-budget-store.mjs', import.meta.url), 'utf8')
-  .replace(/^import .*;\n/gm, '').replace(/^export /gm, '');
+  .replaceAll('\r\n','\n').replace(/^import .*;\n/gm, '').replace(/^await syncAppAuth\(app\);\n/gm, '').replace(/^export /gm, '');
 const planPath = 'itineraries/honeymoon_2027_budget';
 const ledgerPath = 'wecost_items/synthetic-trip';
 const prefix = 'honeymoon_2027_budget_log_';
@@ -27,7 +28,9 @@ function createStore(t, options = {}) {
   ]);
   const listeners = new Map(), timers = new Map(), subscriptions = [], transactions = [], queries = [], reads = [];
   const storage = new Map([['sungso_trip_actor', '소희']]);
-  let uuid = 0, timerId = 0, failHistory = false, beforeTransaction = null;
+  let uuid = 0, timerId = 0, failHistory = false, beforeTransaction = null, afterRead = null;
+  let member = {uid:'member-sohee',role:'sohee',name:'소희'};
+  const cleanups = [];
   let metadata = { fromCache: options.cache ?? false, hasPendingWrites: false };
   const snapshot = ref => ({ exists: () => documents.has(ref.path), data: () => clone(documents.get(ref.path)), metadata: { ...metadata } });
   const querySnapshot = ref => {
@@ -64,7 +67,7 @@ function createStore(t, options = {}) {
       beforeTransaction?.();
       const transaction = { writes: [], committed: false }; transactions.push(transaction);
       const result = await action({
-        get: async ref => { assert.equal(transaction.writes.length, 0, 'All transactional reads must precede writes'); reads.push(ref.path); return snapshot(ref); },
+        get: async ref => { assert.equal(transaction.writes.length, 0, 'All transactional reads must precede writes'); reads.push(ref.path); const result=snapshot(ref); afterRead?.(ref.path); return result; },
         update: (ref, data) => {
           if (!documents.has(ref.path)) throw new Error('Missing update document');
           transaction.writes.push({ type: 'update', path: ref.path, data: clone(data) });
@@ -86,6 +89,7 @@ function createStore(t, options = {}) {
   };
   const context = vm.createContext({
     ...sdk, ...core, FIREBASE_CONFIG, structuredClone,
+    createMemberWork, getMember: () => member, registerPrivateCleanup: fn => cleanups.push(fn),
     Date: class extends Date { static now() { return now; } },
     navigator: { onLine: true }, crypto: { randomUUID: () => `mock-${++uuid}` },
     localStorage: { getItem: key => storage.get(key) ?? null },
@@ -94,6 +98,8 @@ function createStore(t, options = {}) {
   });
   vm.runInContext(source + '\nthis.api = {subscribeTravelBudget, subscribeBudgetHistory, saveTravelBudget, saveTravelLedgerItem};', context);
   return {
+    switchMember: () => {member={uid:'member-sungwoo',role:'sungwoo',name:'성우'};},
+    retire: () => {cleanups.forEach(fn=>fn());member=null;}, afterRead: fn => {afterRead=fn;},
     api: context.api, documents, subscriptions, transactions, queries, reads, emit, storage,
     metadata: value => { metadata = { ...metadata, ...value }; },
     offline: () => { context.navigator.onLine = false; listeners.get('offline')(); },
@@ -260,4 +266,38 @@ test('history uses a bounded reverse-time prefix query and returns latest 50 wit
     { type: 'endAt', value: prefix + '\uf8ff' }, { type: 'limit', value: 50 },
   ]);
   assert.equal(store.transactions.length, 0);
+});
+
+test('account switching after the first budget read stops before further reads or atomic writes', async t => {
+  for (const source of ['travel', 'wecost']) {
+    const store = createStore(t), states = connect(t, store);
+    const { draft, expected } = editor(states.at(-1));
+    draft.rows[0].amount = 7200000;
+    const before = clone([...store.documents]);
+    store.afterRead(() => store.switchMember());
+    const pending = source === 'travel'
+      ? store.api.saveTravelBudget(draft, expected)
+      : store.api.saveTravelLedgerItem('synthetic-trip', { actual: 500000 }, item());
+    await assert.rejects(pending, /계정이 바뀌었어요/);
+    assert.deepEqual(store.reads, [ledgerPath]);
+    assert.equal(store.transactions[0].writes.length, 0);
+    assert.equal(store.history().length, 0);
+    assert.deepEqual([...store.documents], before);
+  }
+});
+
+test('budget cleanup blocks queued private snapshots and history callbacks', t => {
+  const store = createStore(t), states = connect(t, store), history = [];
+  const stop = store.api.subscribeBudgetHistory(state => history.push(clone(state))); t.after(stop);
+  store.retire();
+  assert.ok(store.subscriptions.every(sub => !sub.active));
+  const counts = [states.length, history.length];
+  for (const sub of store.subscriptions) {
+    sub.next({ docs: [{ id: 'private', data: () => item() }], exists: () => true, data: () => ({ private: true }), metadata: { fromCache: false, hasPendingWrites: false } });
+    sub.error(new Error('late private failure'));
+  }
+  assert.deepEqual([states.length, history.length], counts);
+  const clean = [], cleanStop = store.api.subscribeTravelBudget(state => clean.push(clone(state))); t.after(cleanStop);
+  assert.deepEqual(clean.at(-1).items, []);
+  assert.equal(clean.at(-1).plan, null);
 });

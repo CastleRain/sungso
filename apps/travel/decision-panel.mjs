@@ -1,17 +1,9 @@
+import { getMember } from '../../shared/firebase/site-auth.mjs';
 import { DECISIONS } from '../../shared/travel/trip-data.mjs';
 
 const SITE_ROOT = new URL('../', import.meta.url);
 const STATUS_LABELS = { pending: '미정', candidate: '후보 있음', confirmed: '확인 완료' };
-const PIN_KEY = 'sungso_pin_auth';
-const PIN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const desktop = window.matchMedia('(min-width: 1280px)');
-
-function hasValidPin() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(PIN_KEY) || 'null');
-    return Number.isFinite(saved?.ts) && Date.now() - saved.ts >= 0 && Date.now() - saved.ts < PIN_MAX_AGE;
-  } catch { return false; }
-}
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -51,7 +43,7 @@ function startPanel() {
   const panel = element('div', 'sg-decisions');
   const header = element('header', 'sg-decisions-header');
   const headingRow = element('div', 'sg-heading-row');
-  const eyebrow = element('a', 'sg-eyebrow', 'OUR MARCH · 2027');
+  const eyebrow = element('a', 'sg-eyebrow', 'OUR TRAVEL');
   eyebrow.href = siteUrl('travel/');
   const close = element('button', 'sg-decisions-close', '닫기 ×');
   close.type = 'button';
@@ -82,7 +74,7 @@ function startPanel() {
     option.value = name;
     actor.append(option);
   }
-  const actorHelp = element('p', 'sg-actor-help', '이 기기에서 쓸 이름이에요. 본인 인증은 아니에요.');
+  const actorHelp = element('p', 'sg-actor-help', '로그인한 회원 이름으로 기록해요.');
   actorHelp.id = 'sg-actor-help';
   actor.setAttribute('aria-describedby', actorHelp.id);
   const actorFeedback = element('p', 'sg-actor-feedback');
@@ -325,8 +317,7 @@ function startPanel() {
   }
   render(current);
 
-  // The existing PIN guard does not reload the hub after authentication.
-  // Delay all shared-store loading until that guard has been satisfied.
+  // The common entrypoint loads this module after membership and reference data.
   import('../../shared/travel/trip-store.mjs').then((store) => {
     saveDecision = store.saveDecision;
     const syncActor = () => {
@@ -334,18 +325,7 @@ function startPanel() {
       actor.value = ['성우', '소희'].includes(savedActor) ? savedActor : '미지정';
     };
     syncActor();
-    actor.disabled = false;
-    actor.addEventListener('change', () => {
-      try {
-        store.setActor(actor.value);
-        syncActor();
-        actorFeedback.textContent = `앞으로 '${actor.value}' 이름으로 기록해요.`;
-      } catch {
-        actorFeedback.textContent = '이름을 저장하지 못했어요. 다시 선택해 주세요.';
-        syncActor();
-      }
-    });
-    window.addEventListener('storage', syncActor);
+    actor.disabled = true;
     const unsubscribe = store.subscribeTrip(render);
     window.addEventListener('pagehide', (event) => {
       if (!event.persisted && typeof unsubscribe === 'function') unsubscribe();
@@ -353,20 +333,4 @@ function startPanel() {
   }).catch(() => render({ ...current, connection: 'error' }));
 }
 
-function bootWhenUnlocked() {
-  if (!hasValidPin()) return false;
-  startPanel();
-  return true;
-}
-
-if (!bootWhenUnlocked()) {
-  const check = () => {
-    if (!bootWhenUnlocked()) return;
-    clearInterval(poll);
-    window.removeEventListener('storage', onStorage);
-  };
-  const onStorage = (event) => { if (event.key === PIN_KEY) check(); };
-  const poll = setInterval(check, 1000);
-  window.addEventListener('storage', onStorage);
-  window.addEventListener('pagehide', () => clearInterval(poll), { once: true });
-}
+if (getMember()) startPanel();

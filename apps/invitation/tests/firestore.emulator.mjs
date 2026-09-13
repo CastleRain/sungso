@@ -15,22 +15,34 @@ let environment;
 const ref = db => sdk.doc(db, ...DOCUMENT_PATH.split('/'));
 before(async () => { environment = await initializeTestEnvironment({ projectId: 'demo-homehunt', firestore: { host, port: Number(port), rules: await readFile(new URL('../../../firestore.rules', import.meta.url), 'utf8') } }); });
 after(async () => environment?.cleanup());
-beforeEach(async () => environment.clearFirestore());
-const client = () => environment.unauthenticatedContext().firestore();
+beforeEach(async () => {
+  await environment.clearFirestore();
+  await environment.withSecurityRulesDisabled(async ctx => {
+    for (const role of ['sungwoo', 'sohee']) await sdk.setDoc(sdk.doc(ctx.firestore(), 'site_members', `${role}-uid`), { active: true, role });
+  });
+});
+const identities = new WeakMap();
+const client = (role = 'sungwoo') => {
+  const uid = `${role}-uid`;
+  const db = environment.authenticatedContext(uid, { email: `${role}@example.test`, email_verified: true, firebase: { sign_in_provider: 'google.com' } }).firestore();
+  identities.set(db, { uid, role, name: role === 'sungwoo' ? '성우' : '소희' });
+  return db;
+};
+const makeAdapter = (db, options = {}) => firestoreAdapter(sdk, db, { member: () => identities.get(db), ...options });
 
 test('read-only subscription does not create a selection document', async () => {
-  const db = client(), adapter = firestoreAdapter(sdk, db);
+  const db = client(), adapter = makeAdapter(db);
   let stop;
   await new Promise((resolve, reject) => { stop = adapter.subscribe((raw, connection) => { if (connection === 'live') { assert.equal(raw, null); resolve(); } }, reject); });
   stop(); assert.equal((await sdk.getDoc(ref(db))).exists(), false);
 });
 test('simultaneous favorites from different people merge without changing the saved selection or legacy picks', async () => {
-  const first = client(), second = client();
+  const first = client(), second = client('sohee');
   await sdk.setDoc(sdk.doc(first, 'couplePicks', 'main'), { confirmedResort: 'legacy-fixture' });
-  await firestoreAdapter(sdk, first).transact({ type: 'selection', actor: 'sungwoo', selection: defaultSelection('letter'), expectedRevision: 0 });
+  await makeAdapter(first).transact({ type: 'selection', actor: 'sungwoo', selection: defaultSelection('letter'), expectedRevision: 0 });
   await Promise.all([
-    firestoreAdapter(sdk, first).transact({ type: 'favorite', actor: 'sungwoo', templateId: 'minimal', enabled: true }),
-    firestoreAdapter(sdk, second).transact({ type: 'favorite', actor: 'sohee', templateId: 'garden', enabled: true }),
+    makeAdapter(first).transact({ type: 'favorite', actor: 'sungwoo', templateId: 'minimal', enabled: true }),
+    makeAdapter(second).transact({ type: 'favorite', actor: 'sohee', templateId: 'garden', enabled: true }),
   ]);
   const saved = normalizeDocument((await sdk.getDoc(ref(first))).data());
   assert.deepEqual(saved.favorites, { sungwoo: ['minimal'], sohee: ['garden'] });
@@ -38,28 +50,28 @@ test('simultaneous favorites from different people merge without changing the sa
   assert.equal((await sdk.getDoc(sdk.doc(first, 'couplePicks', 'main'))).data().confirmedResort, 'legacy-fixture');
 });
 test('two final choices with the same expected revision cannot silently overwrite one another', async () => {
-  const first = client(), second = client();
+  const first = client(), second = client('sohee');
   const result = await Promise.allSettled([
-    firestoreAdapter(sdk, first).transact({ type: 'selection', actor: 'sungwoo', selection: defaultSelection('photo'), expectedRevision: 0 }),
-    firestoreAdapter(sdk, second).transact({ type: 'selection', actor: 'sohee', selection: defaultSelection('garden'), expectedRevision: 0 }),
+    makeAdapter(first).transact({ type: 'selection', actor: 'sungwoo', selection: defaultSelection('photo'), expectedRevision: 0 }),
+    makeAdapter(second).transact({ type: 'selection', actor: 'sohee', selection: defaultSelection('garden'), expectedRevision: 0 }),
   ]);
   assert.equal(result.filter(item => item.status === 'fulfilled').length, 1);
   assert.equal(result.filter(item => item.status === 'rejected' && item.reason.code === 'selection-conflict').length, 1);
   const saved = (await sdk.getDoc(ref(first))).data(); assert.equal(saved.selectionRevision, 1);
-  await firestoreAdapter(sdk, second).transact({ type: 'selection', actor: 'sohee', selection: defaultSelection('sketch'), expectedRevision: 1 });
+  await makeAdapter(second).transact({ type: 'selection', actor: 'sohee', selection: defaultSelection('sketch'), expectedRevision: 1 });
   assert.equal((await sdk.getDoc(ref(first))).data().selection.templateId, 'sketch');
 });
 test('offline adapter rejects writes and leaves the remote snapshot unchanged', async () => {
   const db = client();
-  await assert.rejects(firestoreAdapter(sdk, db, { online: () => false }).transact({ type: 'favorite', actor: 'sohee', templateId: 'garden', enabled: true }), /인터넷/);
+  await assert.rejects(makeAdapter(db, { online: () => false }).transact({ type: 'favorite', actor: 'sungwoo', templateId: 'garden', enabled: true }), /인터넷/);
   assert.equal((await sdk.getDoc(ref(db))).exists(), false);
 });
 
 test('a special template saves and exports only design settings alongside existing favorites', async () => {
-  const db = client(), adapter = firestoreAdapter(sdk, db);
+  const db = client(), adapter = makeAdapter(db), partnerAdapter = makeAdapter(client('sohee'));
   await adapter.transact({ type: 'favorite', actor: 'sungwoo', templateId: 'minimal', enabled: true });
-  await adapter.transact({ type: 'favorite', actor: 'sohee', templateId: 'constellation', enabled: true });
-  await adapter.transact({ type: 'selection', actor: 'sohee', expectedRevision: 0, selection: { ...defaultSelection('constellation'), paletteId: 'plum', active: true, stars: [0, 1, 2, 3, 4] } });
+  await partnerAdapter.transact({ type: 'favorite', actor: 'sohee', templateId: 'constellation', enabled: true });
+  await partnerAdapter.transact({ type: 'selection', actor: 'sohee', expectedRevision: 0, selection: { ...defaultSelection('constellation'), paletteId: 'plum', active: true, stars: [0, 1, 2, 3, 4] } });
   const saved = (await sdk.getDoc(ref(db))).data();
   assert.equal(saved.selection.templateId, 'constellation');
   assert.equal(saved.selection.paletteId, 'plum');

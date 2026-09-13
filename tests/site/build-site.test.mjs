@@ -161,7 +161,13 @@ test('registry rejects collisions, source traversal and duplicate canonical modu
 
 test('does not publish symlinks or overwrite source directories', async t => {
   const f = await fixture(t);
-  await symlink(path.join(f.rootDir, 'services/private.mjs'), path.join(f.rootDir, 'apps/sample/js/link.mjs'));
+  if (process.platform === 'win32') {
+    // A junction exercises the same no-link boundary without requiring the
+    // Windows privilege needed to create file symlinks.
+    await symlink(path.join(f.rootDir, 'services'), path.join(f.rootDir, 'apps/sample/js/link'), 'junction');
+  } else {
+    await symlink(path.join(f.rootDir, 'services/private.mjs'), path.join(f.rootDir, 'apps/sample/js/link.mjs'));
+  }
   await assert.rejects(buildSite(f), /Symlinks cannot be published/);
   await assert.rejects(buildSite({ ...f, distDir: path.join(f.rootDir, 'apps') }), /dedicated dist/);
 });

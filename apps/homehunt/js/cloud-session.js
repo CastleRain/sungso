@@ -65,36 +65,44 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
   }
   const configured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.authDomain);
   let sdk; let auth; let user = null; let privateStore; let initializing; let unsubscribeAuth;
-  let generation = 0;
+  let generation = 0, retired = false, rejectAuthReady;
+  const retiredError = () => new CloudSnapshotError('로그인 계정이 바뀌었습니다. 다시 실행해주세요.', 'CLOUD_SESSION_CHANGED', 409);
+  const assertActive = () => { if (retired) throw retiredError(); };
   let state = { configured, apiConfigured: Boolean(base), transport: snapshotTransport,
     status: configured ? 'idle' : 'unconfigured', user: null, error: null, apiStatus: 'idle' };
   const listeners = new Set();
   const getState = () => ({ ...state, user: state.user ? { ...state.user } : null });
-  const publish = patch => { state = { ...state, ...patch }; for (const listener of listeners) listener(getState()); };
+  const publish = patch => { if (retired) return; state = { ...state, ...patch }; for (const listener of listeners) listener(getState()); };
   const readiness = base?.hostname.endsWith('.onrender.com') ? createCloudApiReadiness({
     url: new URL('/healthz', base).href, fetchImpl,
     onState: apiStatus => publish({ apiStatus }),
   }) : null;
   const updateUser = next => {
+    if (retired) return;
     user = next || null; generation += 1;
     publish({ status: user ? 'signed-in' : 'signed-out', error: null,
       user: user ? { uid: user.uid, email: user.email || '', displayName: user.displayName || '', emailVerified: user.emailVerified === true } : null });
   };
   const init = async () => {
+    assertActive();
     if (!configured) return getState();
     if (initializing) return initializing;
     initializing = (async () => {
       publish({ status: 'loading', error: null });
       sdk = await loadSdk();
+      assertActive();
       const existing = sdk.getApps().find(app => app.name === APP_NAME);
       if (existing && existing.options.projectId !== firebaseConfig.projectId) throw new CloudSnapshotError('Firebase 프로젝트 설정이 기존 로그인과 다릅니다.', 'CLOUD_PROJECT_MISMATCH');
       const app = existing || sdk.initializeApp(firebaseConfig, APP_NAME);
       auth = sdk.getAuth(app);
       await sdk.setPersistence(auth, sdk.browserLocalPersistence);
+      assertActive();
       privateStore = createUserSnapshotStore({ db: sdk.getFirestore(app), sdk, getUid: () => user?.uid });
       await new Promise((resolve, reject) => {
-        unsubscribeAuth = sdk.onAuthStateChanged(auth, next => { updateUser(next); resolve(); }, reject);
+        rejectAuthReady = reject;
+        unsubscribeAuth = sdk.onAuthStateChanged(auth, next => { rejectAuthReady = null; updateUser(next); resolve(); }, reject);
       });
+      assertActive();
       return getState();
     })().catch(error => {
       initializing = null;
@@ -133,7 +141,11 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
     return response;
   };
   const snapshotResponse = async response => {
+    const caller = user, epoch = generation;
+    assertActive();
+    if (!caller) throw retiredError();
     const data = await response.json().catch(() => null);
+    if (retired || epoch !== generation || user !== caller) throw retiredError();
     if (!response.ok) {
       const error = new CloudSnapshotError(response.status === 409 ? '다른 기기에서 저장한 변경이 있습니다. 클라우드 기록을 먼저 불러와주세요.'
         : response.status === 403 ? '이 계정의 기록 접근 권한을 확인해주세요.' : '클라우드 기록 요청을 완료하지 못했습니다.',
@@ -149,7 +161,7 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
   };
   return {
     init, getState, apiFetch,
-    subscribe(listener) { listeners.add(listener); listener(getState()); return () => listeners.delete(listener); },
+    subscribe(listener) { if (!retired) listeners.add(listener); listener(getState()); return () => listeners.delete(listener); },
     async signIn() {
       await init();
       if (!auth) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
@@ -174,6 +186,12 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
       if (!privateStore) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
       return privateStore.save(safe, expectedRevision);
     },
-    destroy() { unsubscribeAuth?.(); listeners.clear(); generation += 1; user = null; readiness?.reset(); },
+    destroy() {
+      if (retired) return;
+      retired = true; generation += 1; user = null;
+      unsubscribeAuth?.(); rejectAuthReady?.(retiredError()); rejectAuthReady = null;
+      listeners.clear(); readiness?.reset();
+      state = { ...state, status: 'signed-out', user: null, error: null, apiStatus: 'idle' };
+    },
   };
 }

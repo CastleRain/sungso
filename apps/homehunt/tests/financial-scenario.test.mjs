@@ -5,9 +5,9 @@ import { computeAll } from '../../wecost/js/calc.js';
 import { calculateFundingScenario, fundingPriceBasis, fundingReferencePriceWon, parseScenarioMoney, FINANCIAL_SCENARIO_STORAGE_KEY, loadFinancialScenarios, saveFinancialScenario, removeFinancialScenario } from '../js/financial-scenario-core.mjs';
 import { createFinancialSnapshotService, validateFinancialSnapshot } from '../js/financial-snapshot-service.mjs';
 
-const now = new Date(2026, 8, 6, 12);
+const now = new Date(2054, 8, 6, 12);
 const source = () => ({
-  settings: { weddingDate: '2027-03-06', monthlyPaymentLimit: 300_000, parentSupportSohee: 10_000_000, parentSupportSunwo: 999_000_000, includeSupportSohee: true },
+  settings: { weddingDate: '2055-03-06', monthlyPaymentLimit: 300_000, parentSupportSohee: 10_000_000, parentSupportSunwo: 999_000_000, includeSupportSohee: true },
   savings: { soheeCurrent: 30_000_000, soheeMonthly: 2_000_000, sunwoCurrent: 20_000_000, sunwoMonthly: 1_500_000 },
   items: [{ planned: 12_000_000, deposit: 2_000_000, actual: 1_000_000, balance: 9_000_000 }],
   adjustments: [{ sign: '-', amount: 3_000_000 }, { sign: '+', amount: 1_000_000 }],
@@ -39,8 +39,8 @@ test('shared cash calculation preserves the WeCost savings, wedding, support, ad
 });
 
 test('wedding months stay at zero after the target; negative available cash retains the existing zero floor', () => {
-  assert.equal(monthsUntil('2026-09-01', now), 0);
-  assert.equal(monthsUntil('2026-08-30', now), 0);
+  assert.equal(monthsUntil('2054-09-01', now), 0);
+  assert.equal(monthsUntil('2054-08-30', now), 0);
   assert.equal(monthsUntil('', now), 0);
   assert.equal(calculateFinancialState({ items: [{ planned: 10_000 }] }, { now }).availCash, 0);
 });
@@ -64,7 +64,7 @@ test('snapshot includes only required totals and honors saved support settings w
   assert.deepEqual(Object.keys(snapshot).sort(), ['version', 'source', 'availableCashWon', 'existingMonthlyWon', 'monthlyPaymentLimitWon', 'calculationDate', 'synchronizedAt'].sort());
   assert.deepEqual(validateFinancialSnapshot({ ...snapshot, savings: original.savings, email: 'private' }), snapshot);
   assert.equal(validateFinancialSnapshot({ ...snapshot, availableCashWon: '67000000' }), null);
-  assert.equal(validateFinancialSnapshot({ ...snapshot, calculationDate: '2026-02-30' }), null);
+  assert.equal(validateFinancialSnapshot({ ...snapshot, calculationDate: '2054-02-30' }), null);
   assert.equal(validateFinancialSnapshot({ ...snapshot, synchronizedAt: null }), null);
 });
 
@@ -90,14 +90,14 @@ test('a candidate price by itself cannot claim affordability or assume a loan ra
 });
 
 test('an unchanged repeating official mean retains its source after input rounding, calculation, saving and reload', () => {
-  const candidate = { id: 'mean-price', name: '오포추자서희스타힐스', priceManWon: 36833.333333333336, priceSource: '국토부 실거래 평균', priceObservedAt: '2026-08-31', dealType: '매매' };
+  const candidate = { id: 'mean-price', name: '오포추자서희스타힐스', priceManWon: 36833.333333333336, priceSource: '국토부 실거래 평균', priceObservedAt: '2054-08-31', dealType: '매매' };
   const priceWon = parseScenarioMoney('36,833.3333');
   assert.equal(priceWon, 368_333_333);
   assert.equal(fundingReferencePriceWon(candidate), priceWon);
   const basis = fundingPriceBasis(candidate, { priceWon });
   assert.equal(basis.label, '국토부 실거래 평균');
   assert.equal(basis.provenance, 'reference');
-  assert.equal(basis.observedAt, '2026-08-31');
+  assert.equal(basis.observedAt, '2054-08-31');
   assert.equal(calculateFundingScenario(complete({ priceWon: candidate.priceManWon * 10_000 })).requiredLoanWon, priceWon);
   const storage = memoryStorage();
   const saved = saveFinancialScenario(storage, { candidate, input: complete({ priceWon: candidate.priceManWon * 10_000 }) }, now);

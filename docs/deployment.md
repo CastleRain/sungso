@@ -1,6 +1,6 @@
 # 배포와 복구
 
-소스는 `apps/`·`shared/`·`services/`로 관리하고, 웹은 생성된 `dist/`를 GitHub Pages로 배포한다. 공개 주소 `/sungso/`와 네 앱의 기존 하위 주소, Firebase 데이터·인증·함수명, Render API 주소를 유지한다.
+소스는 `apps/`·`shared/`·`services/`로 관리하고, 웹은 생성된 `dist/`를 GitHub Pages로 배포한다. `/sungso/`와 기존 앱 URL을 유지하고 날짜 화면을 `/sungso/dates/`에 추가했다. 개인 홈 인증 전환 근거는 [활성 계획](development-plans/active/couple-home/README.md)을 따른다.
 
 이 문서는 구조 전환과 이후 배포 절차다. **실제 전환·배포 완료 여부는 [루트 진행 상황](../AGENTS.md#진행-상황)의 이번 검증 결과를 따른다.** 소스 설정을 바꾼 사실만으로 원격 설정이나 배포 성공을 뜻하지 않는다.
 
@@ -13,7 +13,7 @@
 - 웹 출력은 `config/apps.json`의 허용 목록을 따른다. 서비스 구현·비밀 설정·상태 장부·테스트·archive 전체는 제외한다. 예외로 기존 공개 전국 단지 자료 `services/homehunt/data/source/apartment-catalog.json`·`apartment-catalog-meta.json` 두 파일은 명시된 호환 출력으로 이전 `homehunt/data/` URL을 유지한다. 원천자료 디렉터리 전체를 배포하는 것은 아니다.
 - 공통 모듈·여행 패널은 wrapper 없이 기존 공개 URL에 직접 출력하며 버전 query를 유지한다. 캐시된 기존 페이지와 새 산출물을 함께 읽는 경우의 모듈 동일성도 검증한다.
 - 이전 소스 폴더를 Pages 배포 루트로 선택하거나 일반 branch 기반 빌드를 수집 작업에서 다시 호출하지 않는다.
-- 배포 후 실제 공개 다섯 페이지와 소스→공개 경로 매핑으로 유지한 공통 모듈의 기존 주소, 독립 보고서·PDF·명시한 백업 주소를 확인한다.
+- 배포 후 7개 앱의 인증 화면·직접 링크와 공통 모듈 주소를 확인한다. 개인 보고서·WeCost 호환 백업 출력은 제거했다. PDF 10개만 사용자 지시로 공개 경로를 유지하며 보호 완료로 기록하지 않는다.
 
 GitHub Actions 토큰이 만든 커밋에 일반 push 실행을 기대하지 않는다. 수집 워크플로는 변경이 있을 때 Pages 배포 워크플로를 명시적으로 호출한다. [Pages custom workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), [워크플로 실행 조건](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow).
 
@@ -58,6 +58,8 @@ GitHub Actions 토큰이 만든 커밋에 일반 push 실행을 기대하지 않
 6. 네 수집 작업의 새 경로와 자동 수집→배포 연결을 확인한 뒤 원래 활성 상태와 Render 자동 배포를 복원한다. 결과·배포 ID·검증하지 못한 항목을 진행 상황에 기록한다.
 
 ## 실패와 복구
+
+개인 홈 전환은 비공개 DB 백업·dry-run·원본 보존 검증 후 회원/기준 문서만 보충하고, 인증 웹·Render·회원 규칙을 함께 배포한다. 이전의 공개 개인 컬렉션 규칙으로 되돌리지 않는다. 인증 실패 시 회원 등록·권한/웹 오류를 수정하며 기존 데이터는 초기화하지 않는다. 브라우저 검색 키는 서버의 교체 키 설정이 완료될 때까지 재사용하지 않는다. 운영 Functions가 0개이면 Spark에서 새 Functions 배포를 시도하지 않는다.
 
 웹 실패는 보관한 이전 산출물을 배포하고 Render 실패는 이전 성공 버전과 명령으로 되돌린다. 경로를 되돌릴 때 새 구조용 자동 수집을 그대로 실행하지 않는다. 원래 코드·설정과 일치하는 워크플로 상태를 복원한다.
 

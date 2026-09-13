@@ -2,6 +2,7 @@
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
 const https     = require('https');
+const { protectMemberEndpoint } = require('./member-endpoint.cjs');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -93,12 +94,12 @@ function fetchNaverApi(query, sort) {
 
 exports.naverBlogSearch = functions
   .runWith({ secrets: ['NAVER_SEARCH_CLIENT_ID', 'NAVER_SEARCH_CLIENT_SECRET'] })
-  .https.onRequest(async (req, res) => {
+  .https.onRequest(protectMemberEndpoint(async (req, res) => {
   const origin = allowedSiteOrigin(req.get('origin'));
   if (origin) res.set('Access-Control-Allow-Origin', origin);
   res.set('Vary', 'Origin');
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return origin ? res.status(204).send('') : res.status(403).send('');
@@ -150,10 +151,10 @@ exports.naverBlogSearch = functions
     return res.json({ ok: true, items, query, sort });
 
   } catch (err) {
-    console.error('naverBlogSearch error:', err);
-    return res.status(500).json({ error: err.message });
+    console.error('naverBlogSearch request failed');
+    return res.status(500).json({ error: 'Blog search is temporarily unavailable' });
   }
-  });
+  }, { auth: admin.auth(), db }));
 
 // HomeHunt — official MOLIT apartment sale/rent history + Firestore cache.
 // The service key is stored in Firebase Secret Manager, never in browser code.
@@ -161,4 +162,4 @@ const { createApartmentHistoryHandler } = require('../homehunt/server/molit.cjs'
 
 exports.apartmentHistory = functions
   .runWith({ timeoutSeconds: 540, memory: '512MB', secrets: ['MOLIT_SERVICE_KEY'] })
-  .https.onRequest(createApartmentHistoryHandler({ db }));
+  .https.onRequest(protectMemberEndpoint(createApartmentHistoryHandler({ db }), { auth: admin.auth(), db }));

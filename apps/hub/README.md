@@ -1,11 +1,10 @@
 # Hub
 
-전체 앱을 연결하는 홈이다. 결혼 준비 일정·달력·D-day를 Firestore `events`에 연결한다.
+성우·소희의 밝은 개인 홈이다. `/sungso/`에서 Google 회원 인증 후 용도별 앱 바로가기, 다가오는 일정 3개, 최근 공유 메모 3개를 표시한다.
 
-- 소스: `index.html`, `css/style.css`, `js/app.js`, `js/firebase.js`.
-- 공개 경로: `/sungso/`.
-- 공통 의존성: `shared/firebase/`의 공개 설정. UI·PIN·구독 순서는 홈에서 관리한다.
-- D-day 아래 결혼 전(모바일 청첩장·Honeymoon·여행 일정), 그 아래 살림·집 준비 순서다.
-- 홈의 앱 카드와 각 앱의 홈 링크는 기존 공개 경로로 이동한다.
+- `js/entry.mjs`: 화면, 홈 편집 초안, 메모 입력과 실시간 구독.
+- `shared/home/home-core.mjs`·`home-store.mjs`: 앱 등록·KST 날짜·revision 트랜잭션·작성자 메모 계약.
+- 홈 구성은 `site_home/shared`, 메모는 `home_notes`, 일정 요약은 기존 `events`를 사용한다. 읽기 시 자동 생성/시딩은 없다.
+- 기존 날짜·달력·D-day·일정 추가/삭제/고정은 [Dates](../dates/README.md)의 `/sungso/dates/`에서 제공한다.
 
-저장소 루트에서 `npm run dev`로 열고 [작업 지침](AGENTS.md)과 [검증 안내](../../docs/development.md)를 따른다.
+[작업 지침](AGENTS.md) · [개발 계획](../../docs/development-plans/active/couple-home/README.md)

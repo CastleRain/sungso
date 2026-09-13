@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>우리의 날짜 · sungso</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="./css/style.css?v=couple-home-1">
+  <link rel="stylesheet" href="./css/dates.css?v=couple-home-1">
+  <script type="module" src="../shared/firebase/boot.mjs"></script>
+</head>
+<body>
+  <main class="main" data-private-root hidden>
+    <nav class="dates-nav" aria-label="주 메뉴"><a href="../">← 우리의 공간</a><span>기억하고 싶은 날들</span></nav>
+    <header><h1>우리의 <span class="amp">날짜</span></h1><div class="sub">기념일도, 소소한 약속도 함께 기억해요.</div></header>
+    <div class="dday-row" id="ddayRow"><p class="dates-empty">고정한 일정을 불러오고 있어요.</p></div>
+    <section class="events-wrap" aria-label="우리의 일정">
+      <div class="section-label">일정</div>
+      <div class="view-tabs" role="tablist" aria-label="일정 보기">
+        <button class="tab-btn active" id="tabList" role="tab" aria-selected="true" aria-controls="listView">리스트</button>
+        <button class="tab-btn" id="tabCal" role="tab" aria-selected="false" aria-controls="calView">달력</button>
+      </div>
+      <p id="dateStatus" class="date-status" role="status"></p>
+      <div id="listView" role="tabpanel" aria-labelledby="tabList">
+        <div class="event-list" id="eventList"><p class="dates-empty">일정을 불러오고 있어요.</p></div>
+        <button class="add-btn" id="addBtn" aria-expanded="false" aria-controls="addForm">+ 일정 추가</button>
+        <form class="add-form" id="addForm">
+          <div class="form-label">이모지</div>
+          <div class="emoji-picker" id="emojiPicker" aria-label="일정 이모지"></div>
+          <div class="form-row">
+            <input type="text" class="form-input" id="formTitle" placeholder="일정 제목 입력" aria-label="일정 제목" maxlength="120" required>
+            <input type="text" class="form-input" id="formDate" placeholder="날짜 선택" aria-label="일정 날짜" required>
+            <button type="submit" class="form-submit" id="formSubmit">추가</button>
+          </div>
+          <button class="cancel-date" type="button" id="cancelDate">취소</button>
+        </form>
+      </div>
+      <div id="calView" class="cal-view" role="tabpanel" aria-labelledby="tabCal" hidden>
+        <div class="cal-header"><button class="cal-nav" id="calPrev" aria-label="이전 달">‹</button><span class="cal-month-label" id="calMonthLabel"></span><button class="cal-nav" id="calNext" aria-label="다음 달">›</button></div>
+        <div class="cal-grid" id="calGrid"></div><div class="cal-popup" id="calPopup" aria-live="polite"></div>
+      </div>
+    </section>
+    <footer>성우 ♡ 소희 · 우리의 보통날</footer>
+    <dialog id="deleteDateDialog" aria-labelledby="deleteDateTitle" aria-describedby="deleteDateDescription">
+      <form id="deleteDateForm"><h2 id="deleteDateTitle">일정 삭제</h2><p id="deleteDateDescription">이 일정을 삭제할까요? 삭제한 일정은 다시 가져올 수 없어요.</p><p id="deleteDateStatus" class="date-status" role="status"></p><div><button type="button" id="cancelDeleteDate">취소</button><button type="submit" id="confirmDeleteDate">삭제</button></div></form>
+    </dialog>
+  </main>
+  <script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+  <script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=couple-home-1"></script>
+</body>
+</html>

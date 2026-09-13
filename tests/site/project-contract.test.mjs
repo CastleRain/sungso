@@ -7,10 +7,9 @@ import { PROJECT_ROOT, createFilePlan, loadRegistry } from '../../scripts/build-
 test('production registry preserves existing entrypoints and adds invitation without losing historical routes', async () => {
   const registry = await loadRegistry();
   const { files } = await createFilePlan({ registry });
-  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'travel', 'invitation']);
+  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'travel', 'invitation', 'dates']);
   for (const pathname of ['index.html', 'wecost/index.html', 'honeymoon/index.html', 'homehunt/index.html', 'travel/index.html', 'invitation/index.html',
-    'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json', 'honeymoon/maldives_report.html',
-    'honeymoon/data/maldives_resorts_data.xml', 'wecost/backup/index.html', 'wecost/_reference/결혼비용_템플릿.csv']) {
+    'dates/index.html', 'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json']) {
     assert.ok(files.has(pathname), `Missing historical URL: ${pathname}`);
   }
   assert.equal([...files.keys()].filter(filename => filename.endsWith('.pdf')).length, 10);

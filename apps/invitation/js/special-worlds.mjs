@@ -7,7 +7,7 @@ const starShape = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 19
 const action = (kind, idleLabel, activeLabel) => `<button class="world-action" type="button" data-experience-action="${kind}" data-idle-label="${idleLabel}" data-active-label="${activeLabel}" aria-pressed="false"><span data-experience-label>${idleLabel}</span><span class="world-action-icon" aria-hidden="true">↗</span></button>`;
 const artworkAction = (kind, idleLabel, activeLabel) => `<button class="world-artwork-action" type="button" data-experience-action="${kind}" data-idle-label="${idleLabel}" data-active-label="${activeLabel}" aria-pressed="false"><span class="world-artwork-label" data-experience-label>${idleLabel}</span></button>`;
 const status = message => `<p class="world-status" data-experience-status aria-live="polite">${message}</p>`;
-const date = '<p class="cover-date">2027. 03. 06 <span>SATURDAY · OUR WEDDING DAY</span></p>';
+const date = '<p class="cover-date">2030. 05. 18 <span>SATURDAY · OUR WEDDING DAY</span></p>';
 
 // Fixed decorative positions keep the sky steady when a star is selected.
 const stars = [
@@ -60,7 +60,7 @@ function storybook(thumbnail) {
           <span class="storybook-paper-heart" aria-hidden="true">♡</span>
           <span class="storybook-paper-star" aria-hidden="true">✧</span>
         </div>
-        <div class="storybook-jacket" aria-hidden="true"><div class="storybook-jacket-border"><span class="small-caps">THE STORY OF US</span><span class="storybook-monogram">S<i>&</i>S</span><span class="storybook-jacket-rule"></span><span class="storybook-jacket-title">펼치면,<br>우리</span><span class="storybook-jacket-date">MARCH 6, 2027</span></div></div>
+        <div class="storybook-jacket" aria-hidden="true"><div class="storybook-jacket-border"><span class="small-caps">THE STORY OF US</span><span class="storybook-monogram">S<i>&</i>S</span><span class="storybook-jacket-rule"></span><span class="storybook-jacket-title">펼치면,<br>우리</span><span class="storybook-jacket-date">MAY 18, 2030</span></div></div>
       </div>
       ${thumbnail ? '' : artworkAction('unfold', '책 표지 펼치기', '책 다시 접기')}
     </div>
@@ -77,7 +77,7 @@ function curtain(thumbnail) {
     <h2 class="world-title">The first<br><em>scene of us.</em></h2>
     <p class="world-subtitle">우리의 가장 빛나는 첫 장면</p>
     <div class="theater-stage">
-      <div class="theater-scene">${image(0, 'world-photo', thumbnail)}<div class="theater-spotlight" aria-hidden="true"></div><div class="theater-photo-caption"><span class="small-caps">STARRING</span><p class="couple-names">${names}</p><span>2027. 03. 06</span></div></div>
+      <div class="theater-scene">${image(0, 'world-photo', thumbnail)}<div class="theater-spotlight" aria-hidden="true"></div><div class="theater-photo-caption"><span class="small-caps">STARRING</span><p class="couple-names">${names}</p><span>2030. 05. 18</span></div></div>
       <div class="theater-curtain theater-curtain-left" aria-hidden="true"></div><div class="theater-curtain theater-curtain-right" aria-hidden="true"></div>
       <div class="theater-closed-title" aria-hidden="true"><span>ꕥ</span><span class="theater-monogram">S <i>&</i> S</span><span class="small-caps">THE BEGINNING OF FOREVER</span></div>
       <div class="theater-valance" aria-hidden="true"></div>

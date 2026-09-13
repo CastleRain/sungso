@@ -15,9 +15,10 @@
 
 - 방문 키 `homehunt_visits_v1`, 비교 키 `homehunt_compare_ids_v1`(방문 ID 최대 3개, JSON 백업 v2), 청약 자가입력 `homehunt_subscription_profile_v1` 등 기존 저장 키를 유지한다.
 - 방문 필드: `id, name, address, lat, lng, visitDate, dealType, askingPrice, areaM2, floor, builtYear, households, walkMinutes, direction, status, visitedBy, pros, cons, memo, tags`.
-- 개인 기록·회사 조건은 기본적으로 브라우저에 둔다. 로그인 후 사용자 저장 선택 시 Google 토큰·검증 이메일·활성 회원·본인 UID 규칙을 적용한 `homehunt_user_snapshots`에만 백업한다. 로그인·조회만으로 기존 로컬 기록을 덮지 않는다.
-- 현재 `CLOUD_API_BASE_URL`과 API 버전·함수명·HTTP 인증 경계를 보존한다. 공개 `/healthz`와 인증된 `/api/health`를 구분한다. PIN은 서버 인증을 대신하지 않는다.
-- 새 검색·계정 전환·조건 변경 후 늦게 도착한 응답은 새 결과를 덮지 않는다. 실패·오프라인·불완전한 월 자료에서 기존 후보·사용자 입력을 보존한다.
+- 개인 기록·회사 조건은 기본적으로 브라우저에 둔다. 공통 Google 회원 확인 전에 앱을 시작하거나 개인 로컬 기록을 표시하지 않는다. 사용자 저장 선택 시 검증된 Google 토큰·`site_members/{uid}` 활성 상태와 `sungwoo`/`sohee` 역할·본인 UID 규칙을 적용한 `homehunt_user_snapshots`에만 백업한다. 로그인·조회만으로 기존 로컬 기록을 덮지 않는다.
+- `homehunt-private-cloud` 앱 이름과 기존 백업 UID를 유지한다. API는 관리자 회원 문서의 기존 `householdId`를 사용하며 클라이언트 입력으로 가구·소유자를 바꾸지 않는다. 다른 회원의 본인 UID 백업을 읽거나 덮을 수 없다. 기존 `homehunt_members` 이메일 문서는 사이트 권한의 대체 허용 경로가 아니다.
+- 현재 `CLOUD_API_BASE_URL`과 API 버전·함수명·HTTP 인증 경계를 보존한다. 공개 `/healthz`와 인증된 `/api/health`를 구분한다. 4자리 PIN은 제거했으며 서버도 UID 회원을 매 요청 검증한다.
+- 새 검색·계정 전환·조건 변경 후 늦게 도착한 응답은 새 결과를 덮지 않는다. 로그아웃·계정 전환 시 구독·메모리·화면을 비우되 기존 localStorage/IndexedDB 개인 기록을 삭제하지 않는다. 실패·오프라인·불완전한 월 자료에서 기존 후보·사용자 입력을 보존한다.
 - WeCost 목표가격은 해당 필드 읽기와 기존 연결 신호로만 받는다. 오류로 기존 후보를 지우거나 사용자의 조건을 임의로 바꾸지 않는다.
 
 ## 공급자·로컬 상태
@@ -30,9 +31,15 @@
 
 ## 검증
 
-루트 `npm test`, `npm run check`, 서비스 번들·Emulator 검사를 따른다. 브라우저에서는 지도·검색·기존 후보/조건 복원·면적별 실거래·확인한 후보·내 기록·분양·대시보드·인증과 1440px/390px 배치를 확인한다. 구조 정리 검증에 실제 DB 쓰기·통근 추가 호출을 사용하지 않는다. 여행 결정 패널을 이 앱에 로드하지 않는다.
+루트 `npm test`, `npm run check`, 서비스 번들·Emulator 검사를 따른다. 브라우저에서는 지도·검색·기존 후보/조건 복원·면적별 실거래·확인한 후보·내 기록·분양·대시보드와 1440px/390px 배치를 확인한다. 두 회원·비회원·직접 링크·로그아웃·본인/상대 UID 격리는 대역·Emulator로 검증하고 실제 운영 접근 확인과 구분한다. QA에 운영 DB 쓰기·새 로컬 통근 원호출을 사용하지 않는다. 여행 결정 패널을 이 앱에 로드하지 않는다.
 
 ## 진행 상황
+
+### 2026-09-13 — 공통 Google 회원 진입·본인 UID 보존
+
+개인 홈의 공통 인증을 진입과 연결하고 서버·Firestore 권한을 UID 회원으로 통일했다. 기존 가구 연결·개인 백업 UID·브라우저 저장 키·검색 API 계약을 유지한다. 두 회원과 비회원의 서버 경계·UID 격리는 [보안 검증](../../docs/development-plans/active/couple-home/SECURITY-VALIDATION.md)을, 실제 운영 접근·배포와 남은 사용자 확인은 [진행 중 계획](../../docs/development-plans/active/couple-home/README.md)을 따른다.
+
+**다음:** 실제 두 회원의 저장 기록·최근 검색을 읽기 위주로 확인하고 운영 서버의 접근 결과를 계획에 남긴다.
 
 ### 2026-09-13 — 앱·공통 로직·서비스 분리, 공개 코드 배포 성공
 

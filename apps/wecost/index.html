@@ -4,22 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💍 결혼 재무 플래너</title>
-<script>
-// PIN 인증 가드 — 토큰 없으면 루트로 리다이렉트
-(function(){
-  var TOKEN_KEY='sungso_pin_auth', EXPIRE=30*24*60*60*1000;
-  try{var s=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');if(s&&Date.now()-s.ts<EXPIRE)return;}catch(e){}
-  location.replace('../?return='+encodeURIComponent(location.pathname + location.search + location.hash));
-})();
-</script>
+
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css?v=20260912-calendar">
 <link rel="stylesheet" href="css/dashboard.css">
 <link rel="stylesheet" href="css/cashflow.css">
 <link rel="stylesheet" href="css/wedding.css">
 <link rel="stylesheet" href="css/house.css">
+<style>[data-private-root][hidden]{display:none!important}</style>
+<script type="module" src="../shared/firebase/boot.mjs"></script>
 </head>
-<body>
+<body data-app="wecost"><div data-private-root hidden inert>
 
 <!-- 사이드바 / 하단 탭바 -->
 <nav id="app-nav">
@@ -507,7 +502,7 @@
           <span class="loan-won-lbl" id="add-loan-won-lbl">₩2억</span>
         </div>
         <input type="range" class="loan-slider" id="add-loan-slider"
-               min="0" max="1000000000" step="10000000" value="200000000"
+               min="0" max="1000000000" step="10000000" value="0"
                oninput="window._syncAmt('slider')">
         <div class="loan-slider-ticks">
           <span>₩0</span><span>₩2.5억</span><span>₩5억</span><span>₩7.5억</span><span>₩10억</span>
@@ -537,7 +532,7 @@
       <div class="total-loan-bar">
         <div class="tl-label">
           월 감당 한도:
-          <input type="number" class="tl-limit-inp" id="inp-loan-limit" value="1500000"
+          <input type="number" class="tl-limit-inp" id="inp-loan-limit" value="0"
                  oninput="window._onLimitChange()">
           원
         </div>
@@ -632,9 +627,9 @@
 
 </main><!-- app-main -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"
+<script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"
         integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi"
         crossorigin="anonymous"></script>
-<script type="module" src="js/app.js"></script>
-</body>
+<script type="application/x-sungso-script" data-type="module" data-src="js/app.js"></script>
+</div></body>
 </html>

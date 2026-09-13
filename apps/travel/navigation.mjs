@@ -11,6 +11,7 @@ const defaults = {
 };
 let activeView = 'itinerary';
 let pendingScroll = 0;
+let layoutReady = !document.querySelector('[data-private-root][hidden]');
 
 function findTarget(hash) {
   if (!hash || hash === '#') return null;
@@ -53,13 +54,13 @@ export function openTravelView(name, options = {}) {
     history[options.history === 'replace' ? 'replaceState' : 'pushState']({ travelView: activeView }, '', url);
   }
   cancelAnimationFrame(pendingScroll);
-  if (options.scroll !== false) {
+  if (layoutReady && options.scroll !== false) {
     const target = options.screenTop ? chosen : findTarget(hash) || chosen;
     pendingScroll = requestAnimationFrame(() => scrollToTarget(target));
   }
   const activeLink = links.find((link) => link.dataset.travelViewLink === activeView);
   const nav = document.querySelector('.section-nav');
-  if (activeLink && nav) {
+  if (layoutReady && activeLink && nav) {
     const left = activeLink.offsetLeft;
     const right = left + activeLink.offsetWidth;
     if (left < nav.scrollLeft || right > nav.scrollLeft + nav.clientWidth) {
@@ -97,6 +98,16 @@ function restoreHash() {
 
 window.addEventListener('hashchange', restoreHash);
 window.addEventListener('popstate', restoreHash);
+window.addEventListener('sungso:ready', () => {
+  // Auth loads this module before revealing the private root. Restore layout
+  // only after later scripts are ready, so hash anchors have measurable boxes.
+  layoutReady = true;
+  restoreHash();
+}, { once: true });
+window.addEventListener('sungso:private-clear', () => {
+  layoutReady = false;
+  cancelAnimationFrame(pendingScroll);
+});
 document.addEventListener('travel:open-itinerary', (event) => {
   openTravelView('itinerary', { hash: '#itinerary', scroll: event.detail?.scroll !== false });
 });

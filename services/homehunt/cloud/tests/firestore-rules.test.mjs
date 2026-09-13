@@ -32,8 +32,8 @@ before(async () => {
 after(async () => { await environment?.cleanup(); });
 beforeEach(async () => {
   await environment.clearFirestore();
-  await seed('homehunt_members/owner@example.test', { active: true, householdId: 'family-a' });
-  await seed('homehunt_members/partner@example.test', { active: true, householdId: 'family-a' });
+  await seed('site_members/owner-uid', { active: true, role: 'sungwoo', householdId: 'family-a' });
+  await seed('site_members/partner-uid', { active: true, role: 'sohee', householdId: 'family-a' });
 });
 
 test('unauthenticated users cannot create or read a private snapshot', async () => {
@@ -52,7 +52,7 @@ test('approved verified Google user can create, retrieve, and update their own s
   assert.equal((await getDoc(reference(db))).data().revision, 2);
 });
 
-test('uppercase verified Google email maps to its administrator-seeded membership', async () => {
+test('verified Google email changes do not change the administrator-seeded UID membership', async () => {
   const db = member(ownerUid, { email: 'OWNER@EXAMPLE.TEST' });
   await assertSucceeds(setDoc(reference(db), snapshot()));
   await assertSucceeds(getDoc(reference(db)));
@@ -77,17 +77,18 @@ test('snapshot collection listing and deleting ones own backup are denied', asyn
 test('unverified email, non-Google login, and an unapproved Google account are denied', async () => {
   for (const claims of [
     { email_verified: false }, { firebase: { sign_in_provider: 'password' } },
-    { firebase: { sign_in_provider: 'anonymous' } }, { email: 'unknown@example.test' },
+    { firebase: { sign_in_provider: 'anonymous' } },
   ]) {
     const db = member(ownerUid, claims);
     await assertFails(setDoc(reference(db), snapshot()));
     await assertFails(getDoc(reference(db)));
   }
+  await assertFails(getDoc(reference(member('unknown-uid', { email: 'owner@example.test' }))));
 });
 
 test('deactivating membership immediately denies an existing users reads and writes', async () => {
   await seed(`homehunt_user_snapshots/${ownerUid}`, snapshot());
-  await seed('homehunt_members/owner@example.test', { active: false, householdId: 'family-a' });
+  await seed('site_members/owner-uid', { active: false, role: 'sungwoo', householdId: 'family-a' });
   const db = member();
   await assertFails(getDoc(reference(db)));
   await assertFails(setDoc(reference(db), snapshot(ownerUid, 2)));
@@ -100,7 +101,7 @@ test('membership is never readable, writable, or self-provisionable through a cl
   await assertFails(setDoc(ref, { active: true, householdId: 'attacker-selected-household' }));
   await assertFails(deleteDoc(ref));
   const newcomer = member('new-uid', { email: 'new@example.test' });
-  await assertFails(setDoc(doc(newcomer, 'homehunt_members', 'new@example.test'), { active: true, householdId: 'family-a' }));
+  await assertFails(setDoc(doc(newcomer, 'homehunt_members', 'new@example.test'), { active: true, role: 'sungwoo', householdId: 'family-a' }));
 });
 
 test('private server caches, quotas, jobs, job chunks, and household records are denied', async () => {
@@ -166,8 +167,8 @@ test('unknown top-level fields, wrong schema, and malformed collections are reje
   for (const value of invalid) await assertFails(setDoc(reference(db), value));
 });
 
-test('existing public event, finance, honeymoon, and nested comment collections remain compatible', async () => {
-  const db = environment.unauthenticatedContext().firestore();
+test('existing event, finance, honeymoon, and nested comment contracts work for members only', async () => {
+  const db = member();
   for (const path of [
     'events/test', 'wecost_settings/main', 'wecost_savings/test', 'wecost_items/test',
     'wecost_loans/test', 'wecost_adjustments/test', 'honeymoon_fx/test', 'blog_review_prefs/test',
@@ -177,15 +178,21 @@ test('existing public event, finance, honeymoon, and nested comment collections 
     const ref = doc(db, path);
     await assertSucceeds(setDoc(ref, { regressionFixture: true }));
     assert.equal((await assertSucceeds(getDoc(ref))).data().regressionFixture, true);
+    for (const denied of [environment.unauthenticatedContext().firestore(), member('unknown-uid')]) {
+      await assertFails(getDoc(doc(denied, path)));
+      await assertFails(setDoc(doc(denied, path), { regressionFixture: false }));
+      await assertFails(deleteDoc(doc(denied, path)));
+    }
   }
 });
 
-test('public blog caches remain readable but cannot be edited by any browser', async () => {
-  const db = environment.unauthenticatedContext().firestore();
+test('blog caches require membership and cannot be edited by any browser', async () => {
+  const db = member();
   for (const path of ['naver_blog_cache/test', 'naver_blog_meta/test']) {
     await seed(path, { fixture: true });
     await assertSucceeds(getDoc(doc(db, path)));
     await assertFails(setDoc(doc(db, path), { fixture: false }));
+    await assertFails(getDoc(doc(environment.unauthenticatedContext().firestore(), path)));
   }
 });
 

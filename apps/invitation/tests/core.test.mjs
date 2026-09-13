@@ -112,19 +112,18 @@ test('store rejects a second in-flight mutation and preserves observer isolation
   state.data.favorites.sohee.push('minimal');
   complete(); await first; assert.deepEqual(state.data.favorites.sohee, []); store.dispose();
 });
-test('home places invitation first in the before-wedding group and preserves original links', async () => {
-  const html = await readFile(new URL('../../hub/index.html', import.meta.url), 'utf8');
-  assert.ok(html.indexOf('>결혼 전</h2>') < html.indexOf('>살림·집 준비</h2>'));
-  assert.ok(html.indexOf('href="./invitation/"') < html.indexOf('href="./honeymoon/index.html"'));
-  for (const link of ['./wecost/index.html', './homehunt/index.html', './honeymoon/index.html', './travel/']) assert.ok(html.includes(`href="${link}"`));
-});
-test('new invitation entry checks PIN before loading modules and preserves full return URL', async () => {
-  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.ok(html.indexOf("localStorage.getItem('sungso_pin_auth')") < html.indexOf('type="module"'));
-  assert.ok(html.includes('location.pathname + location.search + location.hash'));
-  assert.ok(html.includes('noindex,nofollow'));
+test('home registry preserves the invitation route alongside all existing applications', async () => {
+  const { APP_REGISTRY } = await import('../../../shared/home/home-core.mjs');
+  assert.ok(APP_REGISTRY.some(app => app.id === 'invitation' && app.href.includes('invitation/')));
 });
 
+test('invitation entry loads its application only after the shared member gate', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.ok(html.includes('firebase/boot.mjs'));
+  assert.ok(html.includes('type="application/x-sungso-script"'));
+  assert.ok(!html.includes('sungso_pin_auth'));
+  assert.ok(html.includes('noindex,nofollow'));
+});
 
 test('classic and special collections combine with people filters and persist without losing old drafts', () => {
   assert.deepEqual(TEMPLATES.filter(item => item.collection === 'classic').map(item => item.id), ['minimal', 'photo', 'garden', 'letter', 'sketch', 'cinema']);
@@ -161,6 +160,6 @@ test('special thumbnails are plain links content while full covers expose access
     assert.ok(full.includes('data-experience-status'));
     const page = invitation(defaultSelection(template.id));
     assert.ok(page.indexOf('data-section="greeting"') > page.indexOf('data-experience='));
-    assert.ok(page.includes('2027년 3월 6일'));
+    assert.ok(page.includes('2030년 5월 18일'));
   }
 });

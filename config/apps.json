@@ -71,6 +71,16 @@
         "js",
         "assets"
       ]
+    },
+    {
+      "id": "dates",
+      "source": "apps/dates",
+      "output": "dates",
+      "files": [
+        "index.html",
+        "css",
+        "js"
+      ]
     }
   ],
   "shared": [
@@ -109,6 +119,13 @@
         "decision-panel.mjs",
         "decision-panel.css"
       ]
+    },
+    {
+      "source": "shared/home",
+      "output": "shared/home",
+      "files": [
+        "."
+      ]
     }
   ],
   "compatibility": {
@@ -120,34 +137,6 @@
       {
         "source": "services/homehunt/data/source/apartment-catalog.json",
         "output": "homehunt/data/apartment-catalog.json"
-      },
-      {
-        "source": "archive/honeymoon/sources/maldives_resorts_data.xml",
-        "output": "honeymoon/data/maldives_resorts_data.xml"
-      },
-      {
-        "source": "archive/honeymoon/maldives_report.html",
-        "output": "honeymoon/maldives_report.html"
-      },
-      {
-        "source": "archive/wecost/reference/index.html",
-        "output": "wecost/_reference/index.html"
-      },
-      {
-        "source": "archive/wecost/reference/wedding-dashboard.html",
-        "output": "wecost/_reference/wedding-dashboard.html"
-      },
-      {
-        "source": "archive/wecost/reference/결혼비용_템플릿.csv",
-        "output": "wecost/_reference/결혼비용_템플릿.csv"
-      },
-      {
-        "source": "archive/wecost/reference/셋업가이드.md",
-        "output": "wecost/_reference/셋업가이드.md"
-      },
-      {
-        "source": "archive/wecost/backup/index.html",
-        "output": "wecost/backup/index.html"
       },
       {
         "source": "apps/homehunt/docs/personalized-recommendations.md",

@@ -7,6 +7,7 @@ import { createCloudCommuteService } from './commute-service.mjs';
 import { createCloudKaptService } from './kapt-service.mjs';
 import { fetchNaverLocalSearch } from '../scripts/naver-local-search.mjs';
 import molit from './molit.cjs';
+import { createBlogSearch } from './blog-search.mjs';
 
 /** Shared server assembly: hosting never changes authentication or quota rules. */
 export function createConfiguredHomehuntApi({ db, auth, env = {}, loadCatalog,
@@ -17,7 +18,7 @@ export function createConfiguredHomehuntApi({ db, auth, env = {}, loadCatalog,
   return createHomehuntApi({
     authenticate: createAuthGate({ auth, db }), rateLimit: createApiRateLimit({ db }),
     jobs: createRecommendationJobService({ db, loadCatalog, loadMonth }),
-    household: createHouseholdStore({ db }), commute, officialComplex: kapt.complex,
+    household: createHouseholdStore({ db }), commute, officialComplex: kapt.complex, blogSearch: createBlogSearch({ env, db }),
     health: async () => {
       const quota = await commute.quota();
       const catalog = await loadCatalog();

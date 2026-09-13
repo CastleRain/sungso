@@ -1,309 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>성우 &amp; 소희</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="./css/style.css?v=20260913-invitation">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>우리의 공간 · sungso</title>
+  <link rel="stylesheet" href="./css/style.css?v=couple-home-1">
+  <script type="module" src="./shared/firebase/boot.mjs"></script>
 </head>
 <body>
-
-<!-- ===== PIN 잠금 오버레이 ===== -->
-<div id="pin-overlay">
-  <div id="pin-box">
-    <div id="pin-emoji">💍</div>
-    <h2 id="pin-title">성우 <span>♥</span> 소희</h2>
-    <p id="pin-sub">접근 코드 4자리를 입력해주세요</p>
-    <div id="pin-dots">
-      <span class="pin-dot" id="pd0"></span>
-      <span class="pin-dot" id="pd1"></span>
-      <span class="pin-dot" id="pd2"></span>
-      <span class="pin-dot" id="pd3"></span>
-    </div>
-    <div id="pin-error"></div>
-    <div id="pin-keypad">
-      <button class="pin-key" onclick="_pinKey('1')">1</button>
-      <button class="pin-key" onclick="_pinKey('2')">2</button>
-      <button class="pin-key" onclick="_pinKey('3')">3</button>
-      <button class="pin-key" onclick="_pinKey('4')">4</button>
-      <button class="pin-key" onclick="_pinKey('5')">5</button>
-      <button class="pin-key" onclick="_pinKey('6')">6</button>
-      <button class="pin-key" onclick="_pinKey('7')">7</button>
-      <button class="pin-key" onclick="_pinKey('8')">8</button>
-      <button class="pin-key" onclick="_pinKey('9')">9</button>
-      <span></span>
-      <button class="pin-key" onclick="_pinKey('0')">0</button>
-      <button class="pin-key pin-back" onclick="_pinBack()">⌫</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function() {
-  // ★ PIN 변경: 아래 숫자를 바꾸면 됩니다
-  var PIN = '0306';
-  var TOKEN_KEY = 'sungso_pin_auth';
-  var EXPIRE_MS = 30 * 24 * 60 * 60 * 1000; // 30일
-
-  // 저장된 인증 확인
-  try {
-    var stored = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
-    if (stored && (Date.now() - stored.ts) < EXPIRE_MS) {
-      document.getElementById('pin-overlay').style.display = 'none';
-      return;
-    }
-  } catch(e) {}
-
-  var entered = '';
-
-  function updateDots() {
-    for (var i = 0; i < 4; i++) {
-      var dot = document.getElementById('pd' + i);
-      dot.classList.toggle('filled', i < entered.length);
-    }
-  }
-
-  function shake() {
-    var box = document.getElementById('pin-box');
-    box.classList.add('shake');
-    setTimeout(function() { box.classList.remove('shake'); }, 500);
-  }
-
-  function showError(msg) {
-    var el = document.getElementById('pin-error');
-    el.textContent = msg;
-    entered = '';
-    updateDots();
-    shake();
-    setTimeout(function() { el.textContent = ''; }, 2000);
-  }
-
-  function tryUnlock() {
-    if (entered === PIN) {
-      localStorage.setItem(TOKEN_KEY, JSON.stringify({ ts: Date.now() }));
-      // ?return= 파라미터 있으면 원래 목적지로 복귀
-      var params = new URLSearchParams(location.search);
-      var returnTo = params.get('return');
-      if (returnTo) { location.replace(returnTo); return; }
-      var ov = document.getElementById('pin-overlay');
-      ov.style.opacity = '0';
-      setTimeout(function() { ov.style.display = 'none'; }, 300);
-    } else {
-      showError('올바르지 않은 코드예요 🙅');
-    }
-  }
-
-  window._pinKey = function(k) {
-    if (entered.length >= 4) return;
-    entered += k;
-    updateDots();
-    if (entered.length === 4) {
-      setTimeout(tryUnlock, 120);
-    }
-  };
-
-  window._pinBack = function() {
-    entered = entered.slice(0, -1);
-    updateDots();
-  };
-
-  // 키보드 지원
-  document.addEventListener('keydown', function(e) {
-    if (document.getElementById('pin-overlay').style.display === 'none') return;
-    if (e.key >= '0' && e.key <= '9') { window._pinKey(e.key); }
-    else if (e.key === 'Backspace') { window._pinBack(); }
-  });
-})();
-</script>
-
-<div class="particles" id="particles"></div>
-
-<div class="main">
-  <header>
-    <h1>성우 <span class="amp">♥</span> 소희</h1>
-    <div class="sub">우리의 결혼 준비 공간 💕</div>
-  </header>
-
-  <div class="dday-row" id="ddayRow">
-    <div class="dday-card">
-      <div class="dday-label">결혼식까지</div>
-      <div class="dday-number" id="ddayNum">—</div>
-      <div class="dday-date">2027년 3월 6일 토요일</div>
-    </div>
-  </div>
-
-  <div class="project-groups">
-    <section class="project-group" aria-labelledby="beforeWeddingGroupTitle">
-      <h2 class="project-group-title" id="beforeWeddingGroupTitle">결혼 전</h2>
-      <div class="grid">
-        <a class="card invitation-card" href="./invitation/">
-          <div class="icon-wrap" style="background:#F0F3E8;">✉️</div>
-          <div>
-            <span class="badge invitation-badge">우리의 청첩장 고르기</span>
-            <div class="card-title">모바일 청첩장</div>
-            <div class="card-desc">여러 디자인을 내려보며 비교하고<br>우리 청첩장 스타일을 함께 골라요</div>
-          </div>
-          <div class="card-cta invitation-cta"><span class="card-cta-text">예시 보러 가기</span><span class="card-cta-arrow">→</span></div>
-        </a>
-        <a class="card" href="./honeymoon/index.html">
-          <div class="icon-wrap" style="background:#F0F8FF;">🌴</div>
-          <div>
-            <span class="badge">몰디브 리조트 비교</span>
-            <div class="card-title">Honeymoon</div>
-            <div class="card-desc">리조트 견적과 사진을 비교하고<br>함께 고른 후보·메모를 보관해요</div>
-          </div>
-          <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
-        </a>
-        <a class="card" href="./travel/">
-          <div class="icon-wrap" style="background:#E9F3F3;">✈️</div>
-          <div>
-            <span class="badge">싱가포르 · 크루즈 · 몰디브</span>
-            <div class="card-title">여행 일정</div>
-            <div class="card-desc">3월 7–17일 일정과 지도를 보며<br>호텔·항공·예약을 함께 정해요</div>
-          </div>
-          <div class="card-cta"><span class="card-cta-text">일정 보러 가기</span><span class="card-cta-arrow">→</span></div>
-        </a>
-      </div>
-    </section>
-    <section class="project-group" aria-labelledby="prepGroupTitle">
-      <h2 class="project-group-title" id="prepGroupTitle">살림·집 준비</h2>
-      <div class="grid">
-        <a class="card" href="./wecost/index.html">
-          <div class="icon-wrap" style="background:#FFF0F5;">💍</div>
-          <div>
-            <span class="badge">웨딩 가계부</span>
-            <div class="card-title">WeCost</div>
-            <div class="card-desc">결혼 준비 비용을 항목별로 정리하고<br>예산을 한눈에 파악해요</div>
-          </div>
-          <div class="card-cta"><span class="card-cta-text">방문하기</span><span class="card-cta-arrow">→</span></div>
-        </a>
-        <a class="card" href="./homehunt/index.html">
-          <div class="icon-wrap" style="background:#EEF4EF;">🏠</div>
-          <div>
-            <span class="badge homehunt-badge">우리 집 찾기</span>
-            <div class="card-title">HomeHunt</div>
-            <div class="card-desc">둘이 보고 온 집을 지도에 기록하고<br>면적별 실거래 변화를 비교해요</div>
-          </div>
-          <div class="card-cta homehunt-cta"><span class="card-cta-text">집 보러 가기</span><span class="card-cta-arrow">→</span></div>
-        </a>
-      </div>
-    </section>
-  </div>
-
-  <!-- Events -->
-  <div class="events-wrap">
-    <div class="section-label">일정</div>
-
-    <div class="view-tabs">
-      <button class="tab-btn active" id="tabList">리스트</button>
-      <button class="tab-btn" id="tabCal">달력</button>
-    </div>
-
-    <!-- List view -->
-    <div id="listView">
-      <div class="event-list" id="eventList">
-        <div style="text-align:center;padding:28px;color:#ddd;font-size:13px;">불러오는 중...</div>
-      </div>
-      <button class="add-btn" id="addBtn">+ 일정 추가</button>
-      <div class="add-form" id="addForm">
-        <div class="form-label">이모지</div>
-        <div class="emoji-picker" id="emojiPicker"></div>
-        <div class="form-row">
-          <input type="text" class="form-input" id="formTitle" placeholder="일정 제목 입력">
-          <input type="text" class="form-input" id="formDate" placeholder="날짜 선택" readonly>
-          <button class="form-submit" id="formSubmit">추가</button>
+  <main data-private-root hidden>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="sungso 홈">sungso<span>.</span></a>
+      <nav aria-label="주 메뉴"><a href="./" aria-current="page">우리의 공간</a><a href="./dates/">우리의 날짜</a></nav>
+      <div class="member-label"><span id="memberName"></span><span aria-hidden="true">♡</span></div>
+    </header>
+    <div class="home-content">
+      <section class="welcome" aria-labelledby="welcomeTitle">
+        <div>
+          <p class="today" id="todayLabel"></p>
+          <p class="hello" id="helloLabel"></p>
+          <h1 id="welcomeTitle">우리의 오늘,<br><span>함께 채워가요.</span></h1>
+          <p class="welcome-copy">소소한 일상부터 설레는 여행까지.</p>
         </div>
+        <div class="keepsake" aria-hidden="true"><div class="keepsake-back"></div><div class="keepsake-card"><div>S <small>&amp;</small> S</div><p>OUR EVERYDAY</p></div><span class="little-heart">♡</span></div>
+      </section>
+      <section class="apps-section" aria-labelledby="appsTitle">
+        <div class="section-heading"><h2 id="appsTitle">우리의 앱</h2><button class="quiet-button" id="editHome" disabled>☷ &nbsp;홈 편집</button></div>
+        <p class="status" id="homeStatus" role="status">우리의 공간을 불러오고 있어요.</p>
+        <div class="app-groups" id="appGroups"></div>
+      </section>
+      <div class="home-details">
+        <section aria-labelledby="eventsTitle">
+          <div class="section-heading"><h2 id="eventsTitle">다가오는 우리 일정</h2><a class="sub-link" href="./dates/">모두 보기 ↗</a></div>
+          <div id="upcomingEvents" class="upcoming-events"><p class="empty">일정을 불러오고 있어요.</p></div>
+        </section>
+        <section aria-labelledby="notesTitle">
+          <div class="section-heading"><h2 id="notesTitle">서로에게 남긴 말</h2><span class="eyebrow">LITTLE NOTES</span></div>
+          <div id="notesList" class="notes-list"><p class="empty">메모를 불러오고 있어요.</p></div>
+          <p class="status" id="notesStatus" role="status"></p>
+          <button class="note-more quiet-button" id="moreNotes" hidden>이전 메모 더보기</button>
+          <button class="write-note" id="openNote">✎ &nbsp;한마디 남기기</button>
+          <form id="noteForm" class="note-form" hidden>
+            <label for="noteInput">서로에게 남길 말</label>
+            <textarea id="noteInput" rows="4" maxlength="500" placeholder="오늘 함께 나누고 싶은 이야기" required></textarea>
+            <div class="note-form-footer"><span id="noteCount">0 / 500</span><div><button type="button" id="cancelNote" class="quiet-button">취소</button><button class="primary-button" id="saveNote" type="submit">남기기</button></div></div>
+          </form>
+        </section>
       </div>
+      <footer><span>성우 <b>♡</b> 소희</span><span>우리의 보통날이 특별해지는 곳.</span></footer>
     </div>
-
-    <!-- Calendar view -->
-    <div id="calView">
-      <div class="cal-header">
-        <button class="cal-nav" id="calPrev">‹</button>
-        <div class="cal-month-label" id="calMonthLabel"></div>
-        <button class="cal-nav" id="calNext">›</button>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <div class="cal-popup" id="calPopup"></div>
-    </div>
-  </div>
-
-  <footer>성우 ♥ 소희 · 2027</footer>
-</div>
-
-<!-- Characters -->
-<div class="scene">
-  <div class="char-h-boy">
-    <div class="char-bob">
-      <svg width="58" height="92" viewBox="0 0 58 92" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="29" cy="12" rx="15" ry="9" fill="#3B2314"/>
-        <rect x="14" y="8" width="30" height="11" rx="5" fill="#3B2314"/>
-        <circle cx="29" cy="23" r="14" fill="#F5CBA7"/>
-        <circle cx="15" cy="23" r="4.5" fill="#F5CBA7"/>
-        <circle cx="43" cy="23" r="4.5" fill="#F5CBA7"/>
-        <circle cx="23" cy="21" r="2.3" fill="#2d2d2d"/>
-        <circle cx="35" cy="21" r="2.3" fill="#2d2d2d"/>
-        <circle cx="23.8" cy="20.2" r="0.9" fill="white"/>
-        <circle cx="35.8" cy="20.2" r="0.9" fill="white"/>
-        <path d="M 22 27 Q 29 33 36 27" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <rect x="24" y="36" width="10" height="6" rx="2" fill="#F5CBA7"/>
-        <rect x="15" y="40" width="28" height="24" rx="8" fill="#5B8EE0"/>
-        <path d="M 24 41 L 29 48 L 34 41" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="7" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
-        <circle cx="11" cy="60" r="4.5" fill="#F5CBA7"/>
-        <rect x="43" y="41" width="8" height="18" rx="4" fill="#5B8EE0"/>
-        <circle cx="47" cy="60" r="4.5" fill="#F5CBA7"/>
-        <rect x="15" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
-        <rect x="32" y="62" width="11" height="23" rx="5.5" fill="#2C3E50"/>
-        <ellipse cx="20" cy="85" rx="9" ry="5" fill="#1C2A38"/>
-        <ellipse cx="37" cy="85" rx="9" ry="5" fill="#1C2A38"/>
-      </svg>
-    </div>
-  </div>
-  <div class="char-h-girl">
-    <div class="char-bob-delay">
-      <svg width="62" height="98" viewBox="0 0 62 98" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
-        <ellipse cx="31" cy="13" rx="17" ry="12" fill="#4A2E2E"/>
-        <ellipse cx="12" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(-12 12 26)"/>
-        <ellipse cx="50" cy="26" rx="6.5" ry="12" fill="#4A2E2E" transform="rotate(12 50 26)"/>
-        <circle cx="14" cy="16" r="5" fill="#FF85B3"/>
-        <circle cx="48" cy="16" r="5" fill="#FF85B3"/>
-        <circle cx="31" cy="26" r="15" fill="#F5CBA7"/>
-        <circle cx="16" cy="26" r="4.5" fill="#F5CBA7"/>
-        <circle cx="46" cy="26" r="4.5" fill="#F5CBA7"/>
-        <ellipse cx="21" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
-        <ellipse cx="41" cy="31" rx="5.5" ry="3.5" fill="#FFB6C1" opacity="0.55"/>
-        <circle cx="25" cy="23" r="2.6" fill="#2d2d2d"/>
-        <circle cx="37" cy="23" r="2.6" fill="#2d2d2d"/>
-        <circle cx="25.9" cy="22.1" r="1.1" fill="white"/>
-        <circle cx="37.9" cy="22.1" r="1.1" fill="white"/>
-        <path d="M 23 19.5 L 24.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M 35 19.5 L 36.5 21.5" stroke="#2d2d2d" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M 25 31 Q 31 37 37 31" stroke="#C0836A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <rect x="26" y="40" width="10" height="6" rx="2" fill="#F5CBA7"/>
-        <path d="M 17 45 L 45 45 L 47 65 L 15 65 Z" fill="#FF85B3"/>
-        <ellipse cx="31" cy="46" rx="9" ry="4.5" fill="white" opacity="0.55"/>
-        <path d="M 10 61 Q 31 72 52 61 L 54 79 Q 31 87 8 79 Z" fill="#FF85B3"/>
-        <rect x="8"  y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
-        <circle cx="12" cy="63" r="5" fill="#F5CBA7"/>
-        <rect x="45" y="46" width="9" height="17" rx="4.5" fill="#F5CBA7"/>
-        <circle cx="50" cy="63" r="5" fill="#F5CBA7"/>
-        <rect x="19" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
-        <rect x="33" y="77" width="10" height="18" rx="5" fill="#F5CBA7"/>
-        <ellipse cx="24" cy="95" rx="9" ry="5" fill="#FF4081"/>
-        <ellipse cx="38" cy="95" rx="9" ry="5" fill="#FF4081"/>
-      </svg>
-    </div>
-  </div>
-</div>
-
-<!-- Flatpickr -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-
-<script src="./js/app.js"></script>
-<script type="module" src="./js/firebase.js"></script>
-
+    <dialog id="homeEditor" aria-labelledby="editorTitle">
+      <form id="homeEditorForm">
+        <div class="editor-heading"><div><p class="eyebrow">OUR SHARED HOME</p><h2 id="editorTitle">우리에게 편한 홈으로</h2></div><button type="button" class="icon-button" id="closeEditor" aria-label="홈 편집 취소">×</button></div>
+        <p class="editor-intro">앱과 그룹의 순서를 바꾸고, 자주 쓰는 앱만 남겨보세요.<br>적용하면 두 사람의 모든 기기에 함께 반영돼요.</p>
+        <div id="editorGroups"></div>
+        <div class="editor-conflict" id="editorConflict" hidden><strong>다른 기기에서 홈 구성이 바뀌었어요.</strong><p>작성 중인 초안은 유지했어요. 아래 최신 구성을 확인한 뒤 다시 편집해 주세요.</p><p id="latestSummary"></p><button type="button" class="quiet-button" id="loadLatest">최신 구성으로 다시 편집</button></div>
+        <p class="status" id="editorStatus" role="status"></p>
+        <div class="editor-footer"><span>숨긴 앱은 언제든 다시 표시할 수 있어요.</span><div><button type="button" class="quiet-button" id="cancelEditor">취소</button><button type="submit" class="primary-button" id="saveHome">함께 적용</button></div></div>
+      </form>
+    </dialog>
+    <dialog id="noteDeleteDialog" aria-labelledby="noteDeleteTitle" aria-describedby="noteDeleteDescription">
+      <form id="noteDeleteForm" class="delete-note-form">
+        <h2 id="noteDeleteTitle">내 메모 삭제</h2>
+        <p id="noteDeleteDescription">이 메모를 삭제할까요? 삭제한 메모는 다시 가져올 수 없어요.</p>
+        <p id="noteDeleteStatus" class="status" role="status"></p>
+        <div class="delete-note-actions"><button id="cancelNoteDelete" type="button" class="quiet-button">취소</button><button id="confirmNoteDelete" type="submit" class="primary-button">삭제</button></div>
+      </form>
+    </dialog>
+  </main>
+  <script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=couple-home-1"></script>
 </body>
 </html>

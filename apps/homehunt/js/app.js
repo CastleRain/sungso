@@ -14,6 +14,7 @@ import { homeTargetPriceBridge } from '../../../shared/finance/home-target-price
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
 import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.19.0';
+import { registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { mountCloudPanel } from './cloud-panel.js?v=4.19.0';
 import { normalizeCloudSnapshot, CloudSnapshotError } from '../../../shared/homehunt/cloud-snapshot-core.mjs?v=4.19.0';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
@@ -94,6 +95,7 @@ const cloudSession = createCloudSession({
   apiBaseUrl: APP_CONFIG.cloudApiBaseUrl,
   firebaseConfig: APP_CONFIG.cloudStorageEnabled ? APP_CONFIG.firebaseConfig : {},
 });
+registerPrivateCleanup(() => cloudSession.destroy());
 const nativeFetch = globalThis.fetch.bind(globalThis);
 // All existing endpoint callers share this boundary, including injected
 // progressive history reads. Public files and other providers never get tokens.

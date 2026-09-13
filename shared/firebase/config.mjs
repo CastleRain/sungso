@@ -1,5 +1,5 @@
-// Public browser configuration only. Each consumer owns its SDK, app name,
-// authentication and initialization timing.
+// Public browser configuration only. site-auth owns membership and named-app
+// authentication synchronization; app data modules start after that boundary.
 export const FIREBASE_CONFIG = Object.freeze({
   apiKey: 'AIzaSyBz-P5ycMAjYZBV7hkcZDrmq28EAw7Hsp8',
   authDomain: 'sungso-358cb.firebaseapp.com',

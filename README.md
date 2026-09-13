@@ -1,6 +1,6 @@
 # sungso
 
-성우와 소희의 결혼 준비를 위한 여러 앱을 한 저장소에서 운영한다. 화면은 GitHub Pages, 공동 데이터는 Firebase, HomeHunt 검색은 Render에서 제공한다.
+성우와 소희의 일상·집 준비·결혼·여행을 위한 개인 홈이다. 화면은 GitHub Pages, 공동 데이터는 Firebase, HomeHunt 검색은 Render에서 제공한다. 승인된 두 Google 계정으로 로그인한 뒤 개인 데이터를 읽는다.
 
 [서비스 열기](https://CastleRain.github.io/sungso/) · [구조](docs/architecture.md) · [개발·검증](docs/development.md) · [배포·복구](docs/deployment.md) · [작업 지침](AGENTS.md) · [이번 구조 정리 검증](docs/restructure-verification.md)
 
@@ -8,7 +8,8 @@
 
 | 소스 | 공개 경로 | 역할 |
 |---|---|---|
-| [apps/hub](apps/hub/README.md) | `/sungso/` | 홈·일정·달력·D-day |
+| [apps/hub](apps/hub/README.md) | `/sungso/` | 공유 앱 그룹·홈 편집·다가오는 일정·메모 |
+| [apps/dates](apps/dates/README.md) | `/sungso/dates/` | 기존 일정·달력·D-day |
 | [apps/invitation](apps/invitation/README.md) | `/sungso/invitation/` | 청첩장 기본 6종·특별한 6종·찜·공동 디자인 선택 |
 | [apps/wecost](apps/wecost/README.md) | `/sungso/wecost/` | 결혼비용·현금흐름·집 예산 |
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
@@ -37,7 +38,7 @@ npm run check
 ## 구조의 기준
 
 - `apps/`: 앱별 화면·자산·공개 데이터·관련 테스트.
-- `shared/`: Firebase 공개 설정, 금융·여행·HomeHunt의 실제 공통 코드. 앱 구현을 역으로 참조하지 않는다.
+- `shared/`: Firebase 인증·공개 설정, 공유 홈·금융·여행·HomeHunt의 공통 코드. 앱 구현을 역으로 참조하지 않는다.
 - `services/`: 검색 API·수집·배포 진입점·원천자료·비공개 로컬 상태.
 - `config/apps.json`: 앱과 공개 출력의 등록부. `scripts/`가 등록된 파일만 `dist/`에 생성한다.
 - `docs/`: 현행 개발·운영 안내. `archive/`는 이전 문서와 보관 자료이며 현재 구현 기준이 아니다.
@@ -47,3 +48,5 @@ npm run check
 ## 개발 계획
 
 [우리 둘의 홈·인증 전환 계획과 프로토타입](docs/development-plans/active/couple-home/README.md) · [계획 목록](docs/development-plans/README.md)
+
+개인 PDF 10개는 사용자 요청으로 GitHub에 유지한다. Drive 제한 공유와 노출된 외부 검색 키 교체는 [진행 기록](docs/development-plans/active/couple-home/PROGRESS.md)의 후속 작업이다. 현재 소스에서 개인 기준 자료를 제거해도 과거 Git 이력의 노출이 해소되는 것은 아니다.

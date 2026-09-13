@@ -2,7 +2,7 @@
 import { RESORTS, getFeaturedImage, getBestPrice } from './resorts-data.js';
 import { subscribePicks, subscribeItinerary, removePick, setFinalCandidates,
          setConfirmedResort } from './firebase-picks.js';
-import { TRIP_DAYS } from '../../../shared/travel/trip-data.mjs';
+import { TRIP_DAYS, TRAVEL_LOCATIONS, PLACES } from '../../../shared/travel/trip-data.mjs';
 import { subscribeTrip } from '../../../shared/travel/trip-store.mjs';
 
 const RANK_EMOJI = ['🥇', '🥈', '🥉'];
@@ -15,10 +15,12 @@ const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&
 export function initPlan({ openDetailFn }) {
   const wrap = document.getElementById('planWrap');
   if (!wrap) return;
+  const stay = TRIP_DAYS.filter(day => TRAVEL_LOCATIONS[day.date]?.tone === 'maldives');
+  const resort = RESORTS.find(item => item.name_ko?.includes(PLACES.resort?.name || '\0'));
   wrap.innerHTML = `
     <section id="planCurrentTrip" aria-label="현재 신혼여행 일정"></section>
     <section class="plan-resort-focus" aria-label="예약한 리조트">
-      <div><span class="plan-focus-label">예약한 리조트</span><h2>아나네아 마디바루</h2><p>3월 12–16일 · 4박<br>객실·식사·수상비행기 조건은 예약서와 함께 확인해요.</p></div>
+      <div><span class="plan-focus-label">함께 보는 리조트</span><h2>${esc(resort?.name_ko || PLACES.resort?.name || '리조트')}</h2><p>${esc(stay[0]?.date)} – ${esc(stay.at(-1)?.date)}<br>객실·식사·수상비행기 조건은 예약서와 함께 확인해요.</p></div>
       <div class="plan-focus-actions"><button type="button" class="confirmed-detail-btn" id="openAnaneaPlan">리조트 정보·메모 보기 →</button><a class="plan-text-link" href="../travel/#resort">예약 세부사항 정리</a></div>
     </section>
     <p class="plan-section-intro">아래는 함께 비교하며 남긴 리조트 후보와 메모예요. 항공·크루즈·호텔과 현재 예약 상태는 <a href="../travel/">여행 일정</a>에서 함께 관리해요.</p>
@@ -27,7 +29,7 @@ export function initPlan({ openDetailFn }) {
     <details class="plan-archive" id="planLegacyArchive"><summary>이전 일정 기록 <span>읽기 전용</span></summary><p>여행 구성을 바꾸기 전에 저장한 기록이에요. 현재 여행 일정과 분리해 그대로 보관하고 있어요.</p><div id="planItinerary"><p class="plan-section-intro">이전 기록을 불러오는 중…</p></div></details>
   `;
 
-  document.getElementById('openAnaneaPlan').addEventListener('click', () => openDetailFn('ananea'));
+  document.getElementById('openAnaneaPlan').addEventListener('click', () => { if (resort) openDetailFn(resort.id); });
   _renderCurrentTrip({ days: TRIP_DAYS });
   _tripUnsub?.();
   _tripUnsub = subscribeTrip(snapshot => _renderCurrentTrip(snapshot.data));
@@ -64,14 +66,14 @@ function _renderCurrentTrip(data = {}) {
   const el = document.getElementById('planCurrentTrip');
   if (!el) return;
   const days = Array.isArray(data.days) && data.days.length ? data.days : TRIP_DAYS;
-  const start = days[0]?.date?.replaceAll('-', '.') || '2027.03.07';
-  const end = days.at(-1)?.date?.replaceAll('-', '.') || '2027.03.17';
+  const start = days[0]?.date?.replaceAll('-', '.') || '미정';
+  const end = days.at(-1)?.date?.replaceAll('-', '.') || '미정';
   el.innerHTML = `
     <div class="plan-trip-header">
-      <div class="plan-trip-main"><div class="plan-trip-icon" aria-hidden="true">✈️</div><div class="plan-trip-info"><div class="plan-trip-name">우리의 3월, 전체 여행 일정</div><div class="plan-trip-dates">${esc(start)} — ${esc(end)}<span class="plan-trip-dur">${days.length}일</span></div><div class="plan-trip-dest">싱가포르 · 디즈니 크루즈 3박 · 몰디브 4박</div></div></div>
+      <div class="plan-trip-main"><div class="plan-trip-icon" aria-hidden="true">✈️</div><div class="plan-trip-info"><div class="plan-trip-name">우리의 전체 여행 일정</div><div class="plan-trip-dates">${esc(start)} — ${esc(end)}<span class="plan-trip-dur">${days.length}일</span></div><div class="plan-trip-dest">${esc([...new Set(days.map(day => TRAVEL_LOCATIONS[day.date]?.country).filter(Boolean))].join(' · '))}</div></div></div>
       <a class="plan-current-link" href="../travel/">일정·지도 보러 가기 →</a>
     </div>
-    <div class="plan-current-links"><a href="../travel/#hotels">싱가포르 호텔 2박 고르기</a><a href="../travel/#cruise">3/8–11 크루즈 확인</a><a href="../travel/#flights">항공편·환승 확인</a></div>
+    <div class="plan-current-links"><a href="../travel/#hotels">숙박 후보 고르기</a><a href="../travel/#cruise">크루즈 확인</a><a href="../travel/#flights">항공편·환승 확인</a></div>
     <details class="plan-current-overview"><summary>현재 여정 한눈에 보기</summary><ol>${days.map(day => `<li><span>${esc(day.date?.slice(5).replace('-', '/'))}</span><div><strong>${esc(day.title)}</strong><p>${esc(day.description)}</p></div></li>`).join('')}</ol><a class="plan-text-link" href="../travel/">이 일정 자세히 보기 →</a></details>
   `;
 }

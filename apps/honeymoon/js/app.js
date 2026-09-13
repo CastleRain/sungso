@@ -6,7 +6,8 @@ import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
 import { initPlan } from './tab-plan.js';
-import { RESORTS, getBestPrice, getFeaturedImage } from './resorts-data.js';
+import { RESORTS, TRIP_INFO, getBestPrice, getFeaturedImage } from './resorts-data.js';
+import { TRIP_DAYS, TRAVEL_LOCATIONS } from '../../../shared/travel/trip-data.mjs';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages, subscribeAllMetaCounts } from './firebase-notes.js';
 import { subscribePicks, setPick, removePick } from './firebase-picks.js';
 import { calcFitScore, initPrefsPanel, getPrefs } from './user-prefs.js';
@@ -91,7 +92,11 @@ function setHeroBg() {
 
 // ── D-Day 계산 ─────────────────────────────────────────────────────
 function updateDDay() {
-  const target = new Date('2027-03-12T00:00:00');
+  const stayDays = TRIP_DAYS.filter(day => TRAVEL_LOCATIONS[day.date]?.tone === 'maldives');
+  const target = new Date(`${stayDays[0]?.date || TRIP_INFO.check_in}T00:00:00`);
+  if (!Number.isFinite(target.getTime())) return;
+  const stayDates = document.getElementById('private-stay-dates');
+  if (stayDates && stayDays.length) stayDates.textContent = `${stayDays[0].date} – ${stayDays.at(-1).date}`;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
@@ -1009,7 +1014,7 @@ function initFxWidget() {
 }
 
 // ── 초기화 ──────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+function initializeHoneymoon() {
   updateDDay();
   setHeroBg();
   initFxWidget();
@@ -1127,7 +1132,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const validTabs = ['plan', 'cards', 'price', 'tournament', 'pdf'];
   switchTab(linkedResort ? 'cards' : (validTabs.includes(savedTab) ? savedTab : 'plan'));
   if (linkedResort) openDetailSheet(linkedResort.id);
-});
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeHoneymoon, {once:true}); else queueMicrotask(initializeHoneymoon);
 
 // ══════════════════════════════════════════════════════════════════
 // 네이버 블로그 후기 — 상태 + 함수들

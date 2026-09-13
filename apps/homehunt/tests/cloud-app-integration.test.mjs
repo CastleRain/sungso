@@ -19,7 +19,7 @@ function configFor(hostname, api) {
   const declaration = /const CLOUD_API_BASE_URL = (['"])[^'"\r\n]*\1;/;
   assert.match(config, declaration, 'The active endpoint declaration can be explicitly replaced by a fixture');
   const source = (api === undefined ? config : config.replace(declaration, () => `const CLOUD_API_BASE_URL = ${JSON.stringify(api)};`))
-    .replace(/^import .*;\n/gm, '').replaceAll('export ', '');
+    .replaceAll('\r\n', '\n').replace(/^import .*;\n/gm, '').replaceAll('export ', '');
   return vm.runInContext(`${source}\nAPP_CONFIG`, context);
 }
 

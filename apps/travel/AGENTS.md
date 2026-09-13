@@ -18,6 +18,8 @@
 
 ## 여행 비용·출발 준비
 
+2026-09-13 개인 홈 전환: 공개 개인 기본값은 `private_data/travel_reference`로 옮긴다. 공통 인증 완료 후 `prepareTravelPage()`로 여행 본문과 공통 기준을 먼저 로드하고 기존 앱 모듈을 실행한다. 여행 예산·출발 준비·현재 일정/이전 일정·변경 이력 계약은 유지하며 작성자는 로그인 회원 이름이다. 상세한 검증과 운영 이관 상태는 [계획의 자료 전환 기록](../../docs/development-plans/active/couple-home/PRIVATE-DATA.md)을 따른다. 아래 과거 기기별 작성자/PIN 설명은 전환 전 동작이며 새 접근 권한은 Google 회원 검증으로 처리한다.
+
 - 예산 UI는 `budget.mjs`·`budget.css`, 공통 계산·저장은 `shared/finance/travel-budget-core.mjs`·`travel-budget-store.mjs`다. `cat === '✈️신혼여행'`인 기존 `wecost_items/{id}` 한 항목을 사용하고 새 비용 항목을 자동 생성하지 않는다. 여러 후보가 있으면 사용자가 합계 항목을 선택한다.
 - 상세 예산 문서는 `itineraries/honeymoon_2027_budget`이며 `linkedItemId`, `baselineTotal`, `availableCash`, `fxRate`, `rows`, `note`, `updatedAt`를 사용한다. 첫 명시 저장 때 기존 장부 예상액을 비교 기준으로 고정한다. 최초 조회의 메모 분해는 인식한 항목 합계가 장부 예상액과 일치할 때만 초안에 적용하고 원래 WeCost 메모를 보존한다.
 - 예상 총액·처음 기준 대비 증감, 지급액 `deposit + actual`, 앞으로 지출할 금액, 사용자가 입력한 남은 여행용 준비금과 추가 필요 금액을 구분한다. 준비금은 WeCost 전체 저축을 자동 배정한 금액이 아니다. 미입력 비용·환율은 `0원`으로 확정하지 않으며, 금액이 미확인이거나 USD 비용에 필요한 환율이 빠졌으면 장부 총액 저장을 막는다. 참고 환율 `honeymoon_fx/usd_krw`는 읽기만 하고 자동 조회·갱신·시딩을 하지 않는다.

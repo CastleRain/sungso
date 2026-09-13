@@ -1,6 +1,7 @@
 const PROVIDER_FIELDS = ['MOLIT_SERVICE_KEY', 'DATA_GO_KR_SERVICE_KEY', 'KAKAO_REST_API_KEY', 'TMAP_APP_KEY',
   'TRANSIT_PROVIDER', 'NAVER_MAPS_CLIENT_ID', 'NAVER_MAPS_CLIENT_SECRET',
-  'NAVER_LOCAL_SEARCH_CLIENT_ID', 'NAVER_LOCAL_SEARCH_CLIENT_SECRET', 'KAKAO_DAILY_LIMIT', 'TMAP_DAILY_LIMIT'];
+  'NAVER_LOCAL_SEARCH_CLIENT_ID', 'NAVER_LOCAL_SEARCH_CLIENT_SECRET', 'NAVER_SEARCH_CLIENT_ID', 'NAVER_SEARCH_CLIENT_SECRET',
+  'KAKAO_DAILY_LIMIT', 'TMAP_DAILY_LIMIT'];
 function objectJson(value, message) {
   try { const parsed = JSON.parse(value); if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed; }
   catch { /* JSON parse errors can contain secret material. */ }

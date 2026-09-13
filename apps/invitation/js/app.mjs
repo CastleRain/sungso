@@ -3,19 +3,25 @@ import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeL
 import { cover, invitation, themeAttributes, heart } from './templates.mjs';
 import { createStore } from './store.mjs';
 import { createExperiences } from './experiences.mjs';
+import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
+
+const member = await requireMember();
 
 const experiences = createExperiences();
 
 const main = document.querySelector('#main');
 let storage; try { storage = window.localStorage; } catch { storage = null; }
 const local = readLocal(storage);
+local.actor = member.role;
 let shared = { data: normalizeDocument(null), connection: 'loading', saving: false, error: '' };
 let store, route = parseRoute(location.hash), pendingAction, toastTimer, photoIndex = 0, localWarning = false;
 let revealObserver;
+let disposed = false, connecting = false;
+const active = () => !disposed && getMember()?.uid === member.uid && getMember()?.role === member.role;
 history.scrollRestoration = 'manual';
 const dialog = id => document.getElementById(id);
 const persist = () => { if (!writeLocal(storage, local) && !localWarning) { localWarning = true; toast('이 브라우저에서는 임시 설정을 보관할 수 없어요. 페이지를 닫기 전 우리의 선택으로 저장해주세요.'); } };
-function toast(message) { const target = dialog('toast'); target.textContent = message; target.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { target.hidden = true; }, 6000); }
+function toast(message) { if (!active()) return; const target = dialog('toast'); target.textContent = message; target.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { target.hidden = true; }, 6000); }
 function getDraft(id) {
   if (!local.drafts[id]) {
     const selection = shared.data.selection?.templateId === id ? structuredClone(shared.data.selection) : defaultSelection(id);
@@ -24,7 +30,7 @@ function getDraft(id) {
   }
   return local.drafts[id];
 }
-function personButton() { dialog('actor-button').textContent = local.actor ? `${PEOPLE[local.actor]}의 취향` : '누가 고르나요?'; }
+function personButton() { dialog('actor-button').textContent = `${member.name}의 취향`; dialog('actor-button').disabled = true; }
 function favoriteButton(id, compact = false) {
   const active = local.actor && shared.data.favorites[local.actor].includes(id);
   return `<button class="favorite-button ${compact ? 'compact' : ''}" data-action="favorite" data-template="${id}" aria-pressed="${!!active}" aria-label="${e(getTemplate(id).name)} ${active ? '찜 해제' : '찜하기'}">${heart(active)}${compact ? '' : `<span>${active ? '찜했어요' : '찜하기'}</span>`}</button>`;
@@ -47,7 +53,7 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">A LITTLE NOTE, A BIG DAY</p><h1>우리의 마음을 담을<br>청첩장을 골라볼까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">오래 보아도 좋은 기본 여섯 장,<br>누르는 순간 특별해지는 새로운 여섯 장.</p></div><div class="date-stamp"><span>OUR WEDDING</span><b>03<span>/</span>06</b><span>2027 · SUNGWOO & SOHEE</span></div></section><div class="catalog-intro"><p><span>01</span> 펼쳐보기 <i>—</i> <span>02</span> 취향 모으기 <i>—</i> <span>03</span> 함께 고르기</p><span class="intro-note">사진과 일부 예식 정보는 예시예요</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두 보기','12'],['classic','기본 6종','01–06'],['special','특별한 6종','07–12']].map(([id,label,count]) => `<button data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${id === 'special' ? '✦ ' : ''}${label}</span><small>${count}</small></button>`).join('')}</div><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><span id="template-count"></span></div><div id="template-grid" class="template-grid"></div></section><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">A LITTLE NOTE, A BIG DAY</p><h1>우리의 마음을 담을<br>청첩장을 골라볼까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">오래 보아도 좋은 기본 여섯 장,<br>누르는 순간 특별해지는 새로운 여섯 장.</p></div><div class="date-stamp"><span>OUR WEDDING</span><b>05<span>/</span>18</b><span>2030 · SUNGWOO & SOHEE</span></div></section><div class="catalog-intro"><p><span>01</span> 펼쳐보기 <i>—</i> <span>02</span> 취향 모으기 <i>—</i> <span>03</span> 함께 고르기</p><span class="intro-note">사진과 일부 예식 정보는 예시예요</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두 보기','12'],['classic','기본 6종','01–06'],['special','특별한 6종','07–12']].map(([id,label,count]) => `<button data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${id === 'special' ? '✦ ' : ''}${label}</span><small>${count}</small></button>`).join('')}</div><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><span id="template-count"></span></div><div id="template-grid" class="template-grid"></div></section><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
@@ -80,6 +86,7 @@ function reveal() {
   document.querySelectorAll('.reveal').forEach(target => { target.classList.add('will-reveal'); revealObserver.observe(target); });
 }
 function renderRoute() {
+  if (!active()) return;
   experiences.dispose();
   document.querySelectorAll('dialog[open]').forEach(target => target.close());
   route = parseRoute(location.hash);
@@ -158,9 +165,9 @@ document.addEventListener('click', async event => {
   const target = event.target.closest('[data-action]'); if (!target) return;
   try {
     switch (target.dataset.action) {
-      case 'actor': pendingAction = null; dialog('actor-dialog').showModal(); break;
+      case 'actor': break;
       case 'choose-actor': {
-        local.actor = target.dataset.person; persist(); dialog('actor-dialog').close(); updateStateUI(); const action = pendingAction; pendingAction = null; if (action) await action(); break;
+        local.actor = getMember()?.role; dialog('actor-dialog').close(); updateStateUI(); break;
       }
       case 'favorite': await withActor(() => favorite(target.dataset.template)); break;
       case 'save': await withActor(saveSelection); break;
@@ -219,18 +226,25 @@ window.addEventListener('hashchange', renderRoute);
 window.addEventListener('pagehide', () => { experiences.dispose(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
 window.addEventListener('pageshow', event => { if (event.persisted && route.view === 'preview') experiences.mount(dialog('preview-canvas')); });
 async function connectStore() {
-  if (store) return;
+  if (store || connecting || !active()) return;
+  connecting = true;
   try {
     const { connect } = await import('./firebase.mjs');
-    store = createStore(connect());
+    if (!active()) return;
+    const adapter = await connect();
+    if (!active()) return;
+    store = createStore(adapter);
     store.subscribe(value => {
+      if (!active()) return;
       shared = value;
       if (shared.connection === 'live' && route.view === 'preview') { const draft = getDraft(route.templateId); if (draft.baseRevision === null) { draft.baseRevision = shared.data.selectionRevision; persist(); } }
       updateStateUI();
       if (route.view === 'catalog') renderGrid();
       if (route.view === 'selection') renderSelection();
     });
-  } catch { shared = { ...shared, connection: 'error', error: '공동 선택에 연결하지 못했어요. 예시와 임시 설정은 계속 사용할 수 있어요.' }; updateStateUI(); }
+  } catch { if (active()) { shared = { ...shared, connection: 'error', error: '공동 선택에 연결하지 못했어요. 예시와 임시 설정은 계속 사용할 수 있어요.' }; updateStateUI(); } }
+  finally { connecting = false; }
 }
 renderRoute();
+registerPrivateCleanup(() => { disposed = true; store?.dispose(); experiences.dispose(); revealObserver?.disconnect(); clearTimeout(toastTimer); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();

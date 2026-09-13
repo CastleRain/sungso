@@ -1,4 +1,4 @@
-import { TRIP_DAYS, HOTELS, PLACES, DECISIONS } from '../../shared/travel/trip-data.mjs';
+import { TRIP_DAYS, HOTELS, PLACES, DECISIONS, TRIP_SETTINGS } from '../../shared/travel/trip-data.mjs';
 import { createTripCalendar } from './calendar.mjs?v=20260912-calendar-icons';
 
 // Keep the local itinerary readable even if the shared storage SDK cannot load.
@@ -31,7 +31,7 @@ let calendar = null;
 
 function allDays() { return Array.isArray(snapshot.data?.days) ? snapshot.data.days : TRIP_DAYS; }
 function currentDay() { return allDays().find((day) => day.date === selectedDate) || allDays()[0]; }
-function daySlot(date = selectedDate) { return date <= '2027-03-08' ? 'arrival' : 'return'; }
+function daySlot(date = selectedDate) { return date <= TRIP_SETTINGS.arrivalEnd ? 'arrival' : 'return'; }
 function currentHotel() { return hotelById(snapshot.data?.hotels?.[daySlot()]) || HOTELS[0]; }
 function placeQuery(key) {
   if (key === 'hotel') return (hotelById(previewHotelId) || currentHotel()).query;
@@ -60,7 +60,7 @@ function showPlace(key, { focusMap = false } = {}) {
   if (map.getAttribute('src') !== source) map.src = source;
   map.title = `${placeName(key)} Google 지도`;
   document.querySelectorAll('[data-place]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.place === key)));
-  const slotLabel = daySlot() === 'arrival' ? '3/7 도착일' : '3/11 하선일';
+  const slotLabel = daySlot() === 'arrival' ? `${formatDay(TRIP_DAYS[0].date)} 도착일` : `${formatDay(TRIP_DAYS[4].date)} 하선일`;
   const savedHotel = hotelById(snapshot.data?.hotels?.[daySlot()]);
   $('#map-hotel-note').textContent = previewHotelId
     ? `지도만 미리보기: ${hotelById(previewHotelId).name}. 저장한 숙박 후보와 동선은 바뀌지 않아요.`
@@ -132,13 +132,13 @@ function selectDay(date, scroll = false) {
 function renderHotels() {
   const choices = snapshot.data?.hotels || {};
   $('#hotel-choices').innerHTML = [
-    { key: 'arrival', date: '3/7', label: '도착일 · 3/8 체크아웃' },
-    { key: 'return', date: '3/11', label: '하선일 · 3/12 체크아웃' }
+    { key: 'arrival', date: formatDay(TRIP_DAYS[0].date), label: `도착일 · ${formatDay(TRIP_DAYS[1].date)} 체크아웃` },
+    { key: 'return', date: formatDay(TRIP_DAYS[4].date), label: `하선일 · ${formatDay(TRIP_DAYS[5].date)} 체크아웃` }
   ].map((slot) => {
     const hotel = hotelById(choices[slot.key]);
     return `<div class="hotel-choice"><div class="slot-date">${slot.date}<span>1박</span></div><div class="slot-details"><small>${slot.label}</small><strong>${escapeHTML(hotel?.name || '숙박 후보를 골라주세요')}</strong><p>${hotel ? '함께 저장한 후보 · 예약 완료 아님' : '지도는 파크로열 기준으로 미리보기 중'}</p></div></div>`;
   }).join('');
-  $('#hotel-grid').innerHTML = HOTELS.map((hotel) => `<article class="hotel-card ${Object.values(choices).includes(hotel.id) ? 'is-chosen' : ''}"><span class="hotel-area">${escapeHTML(hotel.area)}</span><h3>${escapeHTML(hotel.name)}</h3><p class="hotel-room">${escapeHTML(hotel.room)}</p><p class="hotel-reason">${escapeHTML(hotel.reason)}</p><p class="hotel-caution">${escapeHTML(hotel.caution)}</p><div class="hotel-links"><button type="button" class="text-button" data-preview-hotel="${hotel.id}">지도 미리보기 ↗</button><a href="${escapeHTML(hotel.url)}" target="_blank" rel="noopener noreferrer">호텔 공식 사이트 ↗</a></div><div class="hotel-actions">${['arrival', 'return'].map((slot) => `<button type="button" data-save-hotel="${hotel.id}" data-slot="${slot}" aria-pressed="${choices[slot] === hotel.id}" ${!canSave() || pendingHotel ? 'disabled' : ''}><span>${slot === 'arrival' ? '3/7' : '3/11'} 숙박 후보</span><span>${pendingHotel === `${slot}:${hotel.id}` ? '저장 중…' : choices[slot] === hotel.id ? '선택됨 ✓' : '선택 +'}</span></button>`).join('')}</div></article>`).join('');
+  $('#hotel-grid').innerHTML = HOTELS.map((hotel) => `<article class="hotel-card ${Object.values(choices).includes(hotel.id) ? 'is-chosen' : ''}"><span class="hotel-area">${escapeHTML(hotel.area)}</span><h3>${escapeHTML(hotel.name)}</h3><p class="hotel-room">${escapeHTML(hotel.room)}</p><p class="hotel-reason">${escapeHTML(hotel.reason)}</p><p class="hotel-caution">${escapeHTML(hotel.caution)}</p><div class="hotel-links"><button type="button" class="text-button" data-preview-hotel="${hotel.id}">지도 미리보기 ↗</button><a href="${escapeHTML(hotel.url)}" target="_blank" rel="noopener noreferrer">호텔 공식 사이트 ↗</a></div><div class="hotel-actions">${['arrival', 'return'].map((slot) => `<button type="button" data-save-hotel="${hotel.id}" data-slot="${slot}" aria-pressed="${choices[slot] === hotel.id}" ${!canSave() || pendingHotel ? 'disabled' : ''}><span>${slot === 'arrival' ? formatDay(TRIP_DAYS[0].date) : formatDay(TRIP_DAYS[4].date)} 숙박 후보</span><span>${pendingHotel === `${slot}:${hotel.id}` ? '저장 중…' : choices[slot] === hotel.id ? '선택됨 ✓' : '선택 +'}</span></button>`).join('')}</div></article>`).join('');
 }
 
 function updateSnapshot(next) {
@@ -212,7 +212,7 @@ function renderHistory() {
   $('#history-status').textContent = error ? '변경 기록을 불러오지 못했어요. 연결 상태를 확인해주세요.' : connection === 'loading' ? '변경 기록을 불러오는 중…' : connection !== 'live' ? '연결을 확인하는 중이에요. 표시된 기록이 최신이 아닐 수 있어요.' : entries.length ? '누가 언제 무엇을 바꿨는지 확인해요. 이름은 선택한 작성자 기준이에요.' : '아직 변경 기록이 없어요. 호텔 후보·일정·결정 사항을 저장하면 여기에 쌓여요.';
   const visibleEntries = showAllHistory ? entries : entries.slice(0, 8);
   $('#history-list').innerHTML = visibleEntries.map((entry) => {
-    const label = entry.type === 'hotel' ? `${entry.target === 'arrival' ? '3/7' : '3/11'} 숙박 후보` : entry.type === 'day' ? `${formatDay(entry.target)} 일정` : DECISIONS.find((decision) => decision.id === entry.target)?.title || '결정 사항';
+    const label = entry.type === 'hotel' ? `${entry.target === 'arrival' ? formatDay(TRIP_DAYS[0].date) : formatDay(TRIP_DAYS[4].date)} 숙박 후보` : entry.type === 'day' ? `${formatDay(entry.target)} 일정` : DECISIONS.find((decision) => decision.id === entry.target)?.title || '결정 사항';
     const changedAt = new Date(entry.changedAt);
     const time = Number.isNaN(changedAt.getTime()) ? '시간 확인 중' : new Intl.DateTimeFormat('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }).format(changedAt);
     return `<li class="history-item"><details><summary><div class="history-item-heading"><span class="history-actor">${escapeHTML(entry.actor || '함께')}</span><strong>${escapeHTML(label)}</strong><time>${escapeHTML(time)} <span>한국 시간</span></time></div><span class="history-expand">변경 내용 보기</span></summary><div class="history-diff"><div><span class="diff-label">변경 전</span>${historyValue(entry.type, entry.before)}</div><div><span class="diff-label">변경 후</span>${historyValue(entry.type, entry.after)}</div></div></details></li>`;
@@ -223,7 +223,7 @@ function renderHistory() {
 
 $('#day-tabs').innerHTML = TRIP_DAYS.map((day) => `<button type="button" class="day-tab" data-day="${escapeHTML(day.date)}" aria-pressed="${day.date === selectedDate}"><strong>${formatDay(day.date)}</strong><span>${escapeHTML(day.label)}</span></button>`).join('');
 $('#place-buttons').innerHTML = Object.entries(PLACES).map(([key, place]) => `<button type="button" class="place-button" data-place="${escapeHTML(key)}" aria-pressed="false">${escapeHTML(place.name)}</button>`).join('');
-$('#flight-search').href = 'https://www.skyscanner.co.kr/transport/d/sela/2027-03-07/sin/sin/2027-03-12/mle/mle/2027-03-16/sin/sin/2027-03-17/sela/?adultsv2=2&cabinclass=economy&childrenv2=#/results';
+$('#flight-search').href = TRIP_SETTINGS.flightUrl;
 
 document.addEventListener('click', async (event) => {
   const dayButton = event.target.closest('[data-day]');
@@ -250,7 +250,7 @@ document.addEventListener('click', async (event) => {
     try {
       await saveHotelChoice(slot, id);
       previewHotelId = null;
-      showMessage(`${slot === 'arrival' ? '3/7' : '3/11'} 숙박 후보로 ${hotelById(id).name}을 함께 저장했어요. 실제 호텔 예약은 아직 진행하지 않았어요.`);
+      showMessage(`${slot === 'arrival' ? formatDay(TRIP_DAYS[0].date) : formatDay(TRIP_DAYS[4].date)} 숙박 후보로 ${hotelById(id).name}을 함께 저장했어요. 실제 호텔 예약은 아직 진행하지 않았어요.`);
       renderDay(false);
     } catch (error) { showMessage(error.message || '호텔 후보를 저장하지 못했어요. 다시 시도해주세요.', true); }
     finally { pendingHotel = null; renderHotels(); document.querySelector(`[data-save-hotel="${id}"][data-slot="${slot}"]`)?.focus({ preventScroll: true }); }

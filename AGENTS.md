@@ -8,8 +8,8 @@
 
 ## 폴더와 의존성
 
-- `apps/{hub,invitation,wecost,honeymoon,travel,homehunt}`: 브라우저 화면, 앱 자산, 공개 데이터, 앱 테스트.
-- `shared/{firebase,finance,travel,homehunt}`: 공개 설정·실제 공통 코드. `shared` 또는 서버가 `apps`의 구현 모듈을 import하지 않는다. 서버가 앱의 공개 JSON을 빌드에 포함하는 것은 허용한다.
+- `apps/{hub,dates,invitation,wecost,honeymoon,travel,homehunt}`: 브라우저 화면, 앱 자산, 공개 데이터, 앱 테스트.
+- `shared/{firebase,home,finance,travel,homehunt}`: 인증·공개 설정·실제 공통 코드. `shared` 또는 서버가 `apps`의 구현 모듈을 import하지 않는다. 서버가 앱의 공개 JSON을 빌드에 포함하는 것은 허용한다.
 - `services/homehunt`: 검색 API, 수집기, Render/Firebase 진입점, 원천자료·수집 설정·알림 장부. `services/firebase-default`: 기존 Firebase 함수.
 - `config/apps.json`의 명시적 배포 목록으로 `dist/`를 생성한다. `dist/`는 Git 제외이며 직접 수정하지 않는다. 서비스·테스트·비밀 설정·archive 전체를 웹에 복사하지 않는다.
 - JS import는 실제 소스 파일 위치를 기준으로 쓴다. 빌드는 소스→공개 경로 매핑으로 기존 URL에 직접 출력한다. 금융·여행 공통 모듈은 기존 `shared/` 파일명, HomeHunt 공통 모듈은 기존 `homehunt/js/`, 여행 패널은 기존 `shared/decision-panel.*` URL을 유지한다. wrapper·새 별칭·query 제거로 모듈 동일성을 바꾸지 않는다. HTML·CSS의 URL, CDN·버전 query·지연 초기화 순서를 보존한다.
@@ -17,14 +17,15 @@
 
 ## 기능·데이터 보존
 
-- 기존 공개 주소와 직접 링크, PIN 정책·실행 순서, localStorage/IndexedDB 키, API·Firestore 계약을 임의로 바꾸지 않는다. PIN은 화면 진입 장치이며 DB 인증이 아니다.
-- Firebase 프로젝트는 `sungso-358cb`. 공통 공개 설정만 `shared/firebase/`에서 가져오고, 앱 이름·SDK 버전·구독·시딩 시점은 앱별로 유지한다.
+- 기존 공개 주소와 직접 링크, localStorage/IndexedDB 키, API·Firestore 계약을 보존한다. PIN 대신 공통 Google 로그인과 관리자 관리 `site_members/{uid}`의 활성 회원 검증을 적용한다.
+- Firebase 프로젝트는 `sungso-358cb`. `shared/firebase/boot.mjs`가 인증 후 앱 스크립트를 순서대로 실행한다. 기존 다섯 Firebase 앱 이름·SDK 10.12.0을 유지하며 `syncAppAuth` 이후에만 구독한다. 계정 전환 시 구독·늦은 응답·개인 DOM을 정리하고 로컬 초안을 임의 삭제하지 않는다. 개인 데이터 자동 시딩은 금지한다.
 - WeCost는 Firestore로 마이그레이션 완료했다. Sheets 기반 파일은 archive의 과거 자료다.
 - 여행 예산은 기존 `wecost_items`의 신혼여행 항목 하나를 연결한다. 세부안 `itineraries/honeymoon_2027_budget`을 새 결혼비용으로 복제하지 않으며 금액 이력은 `honeymoon_2027_budget_log_` 접두사 문서에 추가만 한다. 공통 계산·저장은 `shared/finance/travel-budget-{core,store}.mjs`를 사용하고 명시적 저장·원본 비교·원자적 이력 계약을 유지한다.
 - 현재 여행은 `itineraries/honeymoon_2027`; `itineraries/main`은 Honeymoon의 이전 일정 기록이며 읽기 전용 UI를 유지한다. 여행 결정 패널은 Travel에서만 로드한다.
 - HomeHunt 개인 백업은 Google 검증·회원·본인 UID 규칙을 적용한 `homehunt_user_snapshots`. 공개 공공 JSON에 개인 기록·회사 위치·키를 넣지 않는다.
 - `.env`, 캐시·통근 사용량 장부, 기존 사용자 데이터는 폴더 정리 과정에서 초기화하지 않는다. 실비밀값을 Git·문서·출력·캡처에 넣지 않는다. 로컬 통근 원호출은 0회로 유지한다.
-- 실제 과금·인증·보안 규칙·데이터 마이그레이션은 이 구조 정리의 부수 작업으로 변경하지 않는다.
+- 개인 기준은 회원 전용 `private_data`에서 읽는다. 이전은 비공개 백업·dry-run·원본 해시 검증 후 없는 문서만 생성한다. 회원 UID·이메일·백업을 Git·문서에 넣지 않는다. PDF는 사용자가 GitHub 유지를 요청한 예외이며 Drive 이전·과거 Git 노출 후속을 완료로 처리하지 않는다.
+- Firebase Spark·Render Free를 유지하고 새 과금·Blaze 전환은 하지 않는다. 인증·규칙 변경은 명시된 개인 홈 계획 범위에서만 수행한다.
 
 ## 검증과 기록
 
@@ -35,6 +36,14 @@
 의미 있는 변경·완료가 생기면 매번 묻지 않고 아래 진행 상황을 갱신한다. 큰 작업 뒤에는 다음에 할 일을 한 줄 남긴다. 배포는 [배포·복구 안내](docs/deployment.md)를 따른다.
 
 ## 진행 상황
+
+### 2026-09-13 — 개인 홈·두 회원 인증 구현과 보호 규칙 전환
+
+- 밝은 공유 홈과 편집·메모, `/dates/`의 기존 일정, 공통 Google 인증을 구현했다. 청첩장 12종·Travel 8화면·WeCost 원자 저장·HomeHunt 본인 UID/로컬 기록을 보존하고 계정 변경 중 늦은 응답을 차단했다.
+- 운영 67개 문서를 백업·해시 비교해 유지하면서 기준 자료 2개·회원 2개만 생성했다. 공개 개인 호환 사본·브라우저 검색 비밀값은 제거했고 PDF 10개는 사용자 지시로 유지했다.
+- 최종 check 1,519개·참조 365개·문법 137개·서비스 번들 3개·Emulator 36개 통과. 07:24 UTC 회원 규칙 배포 후 실제 개인 컬렉션 11종 익명 403을 확인했다. 웹·서버 릴리스와 실제 회원 검증은 [활성 계획 결과](docs/development-plans/active/couple-home/RESULTS.md)에 이어 기록한다.
+
+**다음:** 웹/Render 배포를 검증하고 외부 검색 키 교체·실회원 로그인·PDF 제한 공유를 마칠 때까지 계획을 active에 유지한다.
 
 ### 2026-09-13 — 개인 홈 개발 계획 인계
 

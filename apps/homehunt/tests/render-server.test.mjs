@@ -24,7 +24,7 @@ async function running(t, api, limits = {}) {
 function configured() {
   const db = createMemoryFirestore();
   db.doc = path => { const [collection, id] = path.split('/'); return db.collection(collection).doc(id); };
-  db.documents.set('homehunt_members/owner@example.test', { active: true, householdId: 'test-home' });
+  db.documents.set('site_members/member-token', { active: true, role: 'sungwoo', householdId: 'test-home' });
   const authCalls = [];
   const auth = { verifyIdToken: async (token, revoked) => {
     authCalls.push([token, revoked]);

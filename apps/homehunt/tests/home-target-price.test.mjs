@@ -120,6 +120,7 @@ test('blocked browser storage does not throw or interrupt a successful owner-sid
   assert.equal(bridge({ storage: null }).read().snapshot, null);
 });
 
+const { createMemberWork } = await import('../../../shared/firebase/member-work.mjs');
 const firebaseSource = fs.readFileSync(new URL('../../wecost/js/firebase.js', import.meta.url), 'utf8');
 function actualFirebaseFunction(name) {
   const match = firebaseSource.match(new RegExp(`(?:async )?function ${name}\\([^]*?\\n\\}`));
@@ -141,6 +142,8 @@ test('WeCost settings subscription publishes only its loaded target without addi
     onSnapshot: (reference, callback, error) => { subscriptions.push({ reference, callback, error }); return () => {}; },
     homeTargetPriceBridge: { publish: (value) => published.push(value), clear: (reason) => published.push(reason) },
   };
+  sandbox.getMember = () => ({uid:'member-sohee',role:'sohee',name:'소희'}); sandbox.registerPrivateCleanup = () => {};
+  sandbox.memberWork = createMemberWork(sandbox);
   vm.createContext(sandbox);
   vm.runInContext(actualFirebaseFunction('subscribeAll'), sandbox);
   sandbox.subscribeAll(() => {});
@@ -159,6 +162,8 @@ test('WeCost target updates publish only after successful save and do not expose
   const gate = deferred();
   const sandbox = { db: {}, targetPriceWriteSequence: 0, doc: () => 'settings', serverTimestamp: () => 'server-time',
     updateDoc: () => gate.promise, homeTargetPriceBridge: { publish: (price) => published.push(price) } };
+  sandbox.getMember = () => ({uid:'member-sohee',role:'sohee',name:'소희'}); sandbox.registerPrivateCleanup = () => {};
+  sandbox.memberWork = createMemberWork(sandbox);
   vm.createContext(sandbox);
   vm.runInContext(actualFirebaseFunction('updateSettings'), sandbox);
   const saved = sandbox.updateSettings({ targetHousePrice: 600000000, parentSupportSohee: 999 });
@@ -180,6 +185,8 @@ test('an older owner-side save cannot overwrite a newer completed target in the 
   let calls = 0;
   const sandbox = { db: {}, targetPriceWriteSequence: 0, doc: () => 'settings', serverTimestamp: () => 'server-time',
     updateDoc: () => (++calls === 1 ? first.promise : second.promise), homeTargetPriceBridge: { publish: (price) => published.push(price) } };
+  sandbox.getMember = () => ({uid:'member-sohee',role:'sohee',name:'소희'}); sandbox.registerPrivateCleanup = () => {};
+  sandbox.memberWork = createMemberWork(sandbox);
   vm.createContext(sandbox);
   vm.runInContext(actualFirebaseFunction('updateSettings'), sandbox);
   const older = sandbox.updateSettings({ targetHousePrice: 600000000 });

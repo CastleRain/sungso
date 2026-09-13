@@ -38,9 +38,9 @@ export function connect() {
 }`;
 const hubFixtures = `
 const data = [
-  {id:'qa-photo',date:'2026-09-13',title:'웨딩 촬영',emoji:'📸'},
-  {id:'qa-wedding',date:'2027-03-06',title:'결혼식',emoji:'💒',pinned:true},
-  {id:'qa-travel',date:'2027-03-07',title:'신혼여행 출발',emoji:'✈️',pinned:true}
+  {id:'qa-photo',date:'2030-04-20',title:'웨딩 촬영',emoji:'📸'},
+  {id:'qa-wedding',date:'2030-05-18',title:'결혼식',emoji:'💒',pinned:true},
+  {id:'qa-travel',date:'2030-05-19',title:'신혼여행 출발',emoji:'✈️',pinned:true}
 ];
 const snapshot = {empty:false,docs:data.map(item=>({id:item.id,data:()=>item}))};
 export const getFirestore=()=>({}), collection=()=>({}), doc=()=>({}), query=()=>({}), orderBy=()=>({}), serverTimestamp=()=>null;

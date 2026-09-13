@@ -12,3 +12,4 @@ dist/
 test-results/
 firebase-debug.log
 firestore-debug.log
+.private-migration/

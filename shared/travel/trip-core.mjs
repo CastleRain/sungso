@@ -1,9 +1,9 @@
 import { TRIP_DAYS, HOTELS, PLACES, DECISIONS } from './trip-data.mjs';
 const clone=value=>JSON.parse(JSON.stringify(value));
 const statuses=new Set(['pending','candidate','confirmed']);
-const hotelIds=new Set(HOTELS.map(h=>h.id));
-const dates=new Set(TRIP_DAYS.map(d=>d.date));
-const decisionIds=new Set(DECISIONS.map(d=>d.id));
+const hotelIds={has:id=>HOTELS.some(h=>h.id===id)};
+const dates={has:date=>TRIP_DAYS.some(d=>d.date===date)};
+const decisionIds={has:id=>DECISIONS.some(d=>d.id===id),[Symbol.iterator]:()=>DECISIONS.map(d=>d.id)[Symbol.iterator]()};
 export function defaultTrip(){return {schemaVersion:1,days:clone(TRIP_DAYS),hotels:{arrival:null,return:null},decisions:Object.fromEntries(DECISIONS.map(d=>[d.id,{status:d.status,note:''}]))};}
 function safeText(value,max=1500){return typeof value==='string'?value.slice(0,max):'';}
 export function normalizeEvents(events){

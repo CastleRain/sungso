@@ -1,4 +1,5 @@
 import { hhUI, clampPanelWidth } from './ui-state.js?v=4.19.0';
+import { registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const VIEW_META = Object.freeze({
   recommend: { screen: 'finder', kicker: 'HOME FINDER', title: '집 찾기', placeholder: '단지명·동네 검색' },
@@ -146,6 +147,12 @@ function syncVisitRecordAction() {
 }
 
 function initShell() {
+  const recordAction = $('#openVisitButton');
+  registerPrivateCleanup(() => {
+    // The mobile action is reparented into body, outside the private root.
+    // Remove that captured control synchronously when the member signs out.
+    if (recordAction) { recordAction.hidden = true; recordAction.inert = true; recordAction.remove(); }
+  });
   hhUI.subscribe(applyShellState);
   initPanelResize();
   initMobileSheet();

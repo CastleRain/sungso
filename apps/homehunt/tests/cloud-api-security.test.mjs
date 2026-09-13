@@ -41,9 +41,9 @@ function setup(overrides = {}) {
     ['partner-token', googleToken({ uid: 'partner-id', email: 'partner@example.test' })],
     ['stranger-token', googleToken({ uid: 'stranger-id', email: 'stranger@example.test' })],
   ]);
-  db.documents.set('homehunt_members/owner@example.test', { active: true, householdId: 'family-a' });
-  db.documents.set('homehunt_members/partner@example.test', { active: true, householdId: 'family-a' });
-  db.documents.set('homehunt_members/stranger@example.test', { active: true, householdId: 'family-b' });
+  db.documents.set('site_members/owner-id', { active: true, role: 'sungwoo', householdId: 'family-a' });
+  db.documents.set('site_members/partner-id', { active: true, role: 'sungwoo', householdId: 'family-a' });
+  db.documents.set('site_members/stranger-id', { active: true, role: 'sohee', householdId: 'family-b' });
   const verifications = [];
   const calls = [];
   let instant = Date.parse('2026-09-08T00:00:00Z');
@@ -89,7 +89,7 @@ test('every data/API route requires a verified bearer token before any provider 
   const env = setup();
   const routes = [
     ['/api/health', 'GET'], ['/api/commute/quota', 'GET'], ['/api/commute', 'POST'], ['/api/commute/batch', 'POST'],
-    ['/api/place-search?query=test', 'GET'], ['/api/apartment-history', 'GET'], ['/api/recommendations', 'POST'],
+    ['/api/place-search?query=test', 'GET'], ['/api/blog-search?query=test', 'GET'], ['/api/apartment-history', 'GET'], ['/api/recommendations', 'POST'],
     ['/api/kapt/complex?catalogId=fixture', 'GET'],
     ['/api/recommendations/recent', 'GET'], ['/api/recommendations/known-job', 'GET'], ['/api/recommendations/known-job/advance', 'POST'],
     ['/api/recommendations/known-job/retry', 'POST'],
@@ -140,12 +140,60 @@ test('membership is reread each request and disabled/unknown accounts are denied
   const env = setup();
   env.tokens.set('owner-token', googleToken({ email: ' OWNER@EXAMPLE.TEST ' }));
   assert.equal((await env.request('/api/health')).statusCode, 200);
-  env.db.documents.set('homehunt_members/owner@example.test', { active: false, householdId: 'family-a' });
+  env.db.documents.set('site_members/owner-id', { active: false, role: 'sungwoo', householdId: 'family-a' });
   assert.equal((await env.request('/api/health')).statusCode, 403);
-  env.tokens.set('unknown', googleToken({ email: 'unknown@example.test' }));
+  env.tokens.set('unknown', googleToken({ uid: 'unknown-uid', email: 'unknown@example.test' }));
   assert.equal((await env.request('/api/health', { token: 'unknown' })).statusCode, 403);
   assert.equal(env.calls.length, 1);
   assert.deepEqual(env.calls[0][1], { uid: 'owner-id', householdId: 'family-a' });
+});
+
+test('UID membership cannot be borrowed by spoofing an approved email or legacy membership', async () => {
+  const env = setup();
+  env.tokens.set('borrowed-email', googleToken({ uid: 'unknown-uid' }));
+  env.db.documents.set('homehunt_members/owner@example.test', { active: true, householdId: 'family-a' });
+  assert.equal((await env.request('/api/health', { token: 'borrowed-email' })).statusCode, 403);
+  assert.equal(env.calls.length, 0);
+  assert.deepEqual(env.db.reads, ['site_members/unknown-uid']);
+});
+
+test('invalid roles and missing household mapping fail closed without expanding API access', async () => {
+  for (const member of [
+    { active: true, role: 'admin', householdId: 'family-a' },
+    { active: true, role: 'sungwoo' },
+    { active: true, role: 'sohee', householdId: '../other' },
+  ]) {
+    const env = setup();
+    env.db.documents.set('site_members/owner-id', member);
+    assert.equal((await env.request('/api/health')).statusCode, 403);
+    assert.equal(env.calls.length, 0);
+  }
+});
+
+test('blog search dispatch retains verified server context and passes only query parameters to the provider adapter', async () => {
+  const received = [];
+  const env = setup({ blogSearch: async query => { received.push(query); return { ok: true, items: [] }; } });
+  const response = await env.request('/api/blog-search?query=fixture&sort=date&resortId=cora_cora');
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(received, [{ query: 'fixture', sort: 'date', resortId: 'cora_cora' }]);
+  assert.equal((await env.request('/api/blog-search?query=fixture', { token: null })).statusCode, 401);
+  assert.equal(received.length, 1);
+});
+
+test('blog search has an atomic ten-per-minute family cap and two-hundred-per-KST-day server cap', async () => {
+  const db = fakeDatabase();
+  let instant = Date.parse('2030-01-01T00:00:00Z');
+  const rateLimit = createApiRateLimit({ db, now: () => instant });
+  const context = { uid: 'owner-id', householdId: 'family-a' };
+  const attempts = await Promise.allSettled(Array.from({ length: 11 }, () => rateLimit(context, '/blog-search', 'GET')));
+  assert.equal(attempts.filter(result => result.status === 'fulfilled').length, 10);
+  assert.equal(attempts.filter(result => result.status === 'rejected' && result.reason.status === 429).length, 1);
+  instant += 60000;
+  const day = Math.floor((instant + 9 * 60 * 60 * 1000) / 86400000);
+  db.documents.set(`homehunt_request_limits/blog_daily_${day}`, { used: 200 });
+  await assert.rejects(rateLimit(context, '/blog-search', 'GET'), { status: 429 });
+  instant += 86400000;
+  await assert.doesNotReject(rateLimit(context, '/blog-search', 'GET'));
 });
 
 test('CORS uses exact origins and denies hostile preflight before verifying any token', async () => {

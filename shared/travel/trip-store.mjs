@@ -1,4 +1,6 @@
+import { getMember, syncAppAuth, registerPrivateCleanup } from '../firebase/site-auth.mjs';
 import { FIREBASE_CONFIG } from '../firebase/config.mjs';
+import { createMemberWork } from '../firebase/member-work.mjs';
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, collection, query, orderBy, documentId, startAt, endAt, limit, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { defaultTrip, normalizeTrip, applyTripChange, describeTripChange } from './trip-core.mjs';
@@ -6,16 +8,16 @@ import { defaultTrip, normalizeTrip, applyTripChange, describeTripChange } from 
 // A named app keeps the existing finance/property Firebase initializers intact.
 const name='sungso-travel';
 const app=getApps().find(app=>app.name===name)||initializeApp(FIREBASE_CONFIG,name);
+await syncAppAuth(app);
 const db=getFirestore(app),ref=doc(db,'itineraries','honeymoon_2027');
+const memberWork=createMemberWork({getMember,registerPrivateCleanup});
+const observe=(...args)=>memberWork.observe(onSnapshot,...args);
 const historyPrefix='honeymoon_2027_log_';
 // Reverse-time IDs use Firestore's built-in ascending name index for recent entries.
 // Descending name queries need an extra index in this existing project.
 const historyQuery=query(collection(db,'itineraries'),orderBy(documentId()),startAt(historyPrefix),endAt(historyPrefix+'\uf8ff'),limit(50));
-const actorKey='sungso_trip_actor';
-let actor='미지정';
-try{const saved=localStorage.getItem(actorKey);if(['성우','소희'].includes(saved))actor=saved;}catch{}
-export function getActor(){try{const saved=localStorage.getItem(actorKey);actor=['성우','소희'].includes(saved)?saved:'미지정';}catch{}return actor;}
-export function setActor(value){actor=['성우','소희'].includes(value)?value:'미지정';try{localStorage.setItem(actorKey,actor);}catch{}return actor;}
+export function getActor(){ return getMember()?.name || '미지정'; }
+export function setActor(){ return getActor(); }
 
 let state={data:defaultTrip(),connection:'loading',saving:false,error:''};
 let historyState={entries:[],connection:'loading',error:''};
@@ -24,18 +26,20 @@ let stop=null,timer=null,historyStop=null,historyTimer=null;
 const emit=()=>subscribers.forEach(cb=>cb({...state,data:structuredClone(state.data)}));
 const emitHistory=()=>historySubscribers.forEach(cb=>cb(structuredClone(historyState)));
 function start(){
+ if(!getMember())return;
  if(stop)return;
  timer=setTimeout(()=>{if(state.connection==='loading'){state={...state,connection:'offline',error:'공동 저장에 연결하지 못했어요. 현재 초안을 보고 있어요.'};emit();}},15000);
- stop=onSnapshot(ref,{includeMetadataChanges:true},snap=>{
+ stop=observe(ref,{includeMetadataChanges:true},snap=>{
   const live=!snap.metadata.fromCache;
   if(live)clearTimeout(timer);
   state={...state,data:normalizeTrip(snap.exists()?snap.data():null),connection:live?'live':(navigator.onLine?'loading':'offline'),error:live?'':state.error};emit();
  },error=>{clearTimeout(timer);state={...state,connection:'error',error:error.code==='permission-denied'?'공동 저장 권한을 확인해야 해요.':'공동 저장을 불러오지 못했어요. 새로고침 후 다시 확인해주세요.'};emit();});
 }
 function startHistory(){
+ if(!getMember())return;
  if(historyStop)return;
  historyTimer=setTimeout(()=>{if(historyState.connection==='loading'){historyState={...historyState,connection:'offline',error:'변경 기록에 연결하지 못했어요. 새로고침 후 다시 확인해주세요.'};emitHistory();}},15000);
- historyStop=onSnapshot(historyQuery,{includeMetadataChanges:true},snap=>{
+ historyStop=observe(historyQuery,{includeMetadataChanges:true},snap=>{
   const live=!snap.metadata.fromCache;
   if(live)clearTimeout(historyTimer);
   const entries=snap.docs.map(row=>{
@@ -48,6 +52,7 @@ function startHistory(){
 export function subscribeTrip(cb){subscribers.add(cb);cb({...state,data:structuredClone(state.data)});start();return()=>{subscribers.delete(cb);if(!subscribers.size){stop?.();stop=null;clearTimeout(timer);state={...state,connection:'loading'};}};}
 export function subscribeTripHistory(cb){historySubscribers.add(cb);cb(structuredClone(historyState));startHistory();return()=>{historySubscribers.delete(cb);if(!historySubscribers.size){historyStop?.();historyStop=null;clearTimeout(historyTimer);historyState={...historyState,connection:'loading'};}};}
 async function save(change){
+ const request=memberWork.capture(),caller=request.member;
  if(state.connection!=='live'||!navigator.onLine)throw new Error('공동 저장에 연결된 뒤 다시 저장해주세요.');
  if(state.saving)throw new Error('앞선 저장이 끝난 뒤 다시 시도해주세요.');
  applyTripChange(state.data,change);
@@ -56,16 +61,19 @@ async function save(change){
  state={...state,saving:true,error:''};emit();
  try{
   await runTransaction(db,async tx=>{
+   request.assert();
    const snap=await tx.get(ref),raw=snap.exists()?snap.data():null;
+   request.assert();
    const next=applyTripChange(raw,change),audit=describeTripChange(raw,next,change,changeActor);
    if(!audit)return;
    // The state and its audit entry either both succeed or both fail.
    // itineraries/main and all legacy comments/picks remain untouched.
    tx.set(ref,{...next,updatedAt:serverTimestamp()},{merge:true});
-   tx.set(historyRef,{...audit,changedAt:serverTimestamp()});
+   tx.set(historyRef,{...audit,actorUid:caller.uid,changedAt:serverTimestamp()});
   });
+  request.assert();
   state={...state,saving:false,error:''};emit();
- }catch(e){const message=e.code==='permission-denied'?'저장 권한이 없어 반영되지 않았어요.':e.message||'저장하지 못했어요. 내용을 유지한 뒤 다시 시도해주세요.';state={...state,saving:false,error:message};emit();throw new Error(message);}
+ }catch(e){if(!request.current())throw new Error('로그인 계정이 바뀌었어요.');const message=e.code==='permission-denied'?'저장 권한이 없어 반영되지 않았어요.':e.message||'저장하지 못했어요. 내용을 유지한 뒤 다시 시도해주세요.';state={...state,saving:false,error:message};emit();throw new Error(message);}
 }
 export const saveHotelChoice=(slot,hotelId)=>save({type:'hotel',slot,hotelId});
 export const saveDecision=(id,patch,expectedDecision)=>save({type:'decision',id,patch,expectedDecision});
@@ -75,3 +83,5 @@ window.addEventListener('online',()=>{
  if(subscribers.size){stop?.();stop=null;clearTimeout(timer);state={...state,connection:'loading',error:''};emit();start();}
  if(historySubscribers.size){historyStop?.();historyStop=null;clearTimeout(historyTimer);historyState={...historyState,connection:'loading',error:''};emitHistory();startHistory();}
 });
+
+registerPrivateCleanup(()=>{stop?.();historyStop?.();stop=null;historyStop=null;clearTimeout(timer);clearTimeout(historyTimer);subscribers.clear();historySubscribers.clear();state={data:null,connection:'signed-out',saving:false,error:''};historyState={entries:[],connection:'signed-out',error:''};});

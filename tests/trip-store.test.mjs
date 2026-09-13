@@ -1,25 +1,28 @@
+import './fixtures/trip-reference.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { FIREBASE_CONFIG } from '../shared/firebase/config.mjs';
+import { createMemberWork } from '../shared/firebase/member-work.mjs';
 import { defaultTrip, normalizeTrip, applyTripChange, describeTripChange } from '../shared/travel/trip-core.mjs';
 
 // Execute the production store with in-memory SDK adapters. No Firebase SDK,
 // credentials, network request, or production database is involved in these tests.
 const storeSource = readFileSync(new URL('../shared/travel/trip-store.mjs', import.meta.url), 'utf8')
-  .replace(/^import .*;\n/gm, '')
-  .replace(/^export /gm, '');
+  .replace(/^import .*;\r?\n/gm, '')
+  .replace(/^export /gm, '')
+  .replace(/^await syncAppAuth\(app\);\r?\n/gm, '');
 const canonicalPath = 'itineraries/honeymoon_2027';
 const historyPrefix = 'honeymoon_2027_log_';
-const mockNow = Date.parse('2026-09-12T05:00:00.000Z');
+const mockNow = Date.parse('2034-05-12T05:00:00.000Z');
 const historyId = (millis, suffix) => `${historyPrefix}${String(9999999999999 - millis).padStart(13, '0')}_${suffix}`;
 const clone = value => structuredClone(value);
 
 function createStore(t, options = {}) {
   const documents = new Map([
     [canonicalPath, clone(options.trip ?? defaultTrip())],
-    ['itineraries/main', { days: [{ date: '2027-03-07', items: ['이전 기록'] }, { date: '2027-03-14', items: [] }] }],
+    ['itineraries/main', { days: [{ date: '2035-06-10', items: ['이전 기록'] }, { date: '2035-06-17', items: [] }] }],
     ...(options.documents || []),
   ]);
   const storage = new Map(options.storage || []);
@@ -31,6 +34,9 @@ function createStore(t, options = {}) {
   let failCommit = false;
   let uuid = 0;
   let beforeTransaction = null;
+  let afterRead = null;
+  let member = {uid:'member-sohee',role:'sohee',name:'소희'};
+  const cleanup = [];
 
   const docSnapshot = ref => ({
     exists: () => documents.has(ref.path),
@@ -74,13 +80,13 @@ function createStore(t, options = {}) {
       const staged = [];
       const transaction = { writes: staged, committed: false }; transactions.push(transaction);
       const result = await fn({
-        get: async ref => { reads.push(ref.path); return docSnapshot(ref); },
+        get: async ref => { reads.push(ref.path); const result = docSnapshot(ref); afterRead?.(); return result; },
         set: (ref, data, setOptions) => staged.push({ path: ref.path, data: clone(data), options: clone(setOptions) }),
       });
       if (failCommit) throw Object.assign(new Error('Mock transaction rejected'), { code: 'permission-denied' });
       for (const write of staged) {
         const data = clone(write.data);
-        for (const field of ['updatedAt', 'changedAt']) if (data[field] === '__SERVER_TIMESTAMP__') data[field] = '2026-09-12T05:00:00.000Z';
+        for (const field of ['updatedAt', 'changedAt']) if (data[field] === '__SERVER_TIMESTAMP__') data[field] = '2034-05-12T05:00:00.000Z';
         documents.set(write.path, write.options?.merge ? { ...documents.get(write.path), ...data } : data);
       }
       transaction.committed = true;
@@ -90,6 +96,7 @@ function createStore(t, options = {}) {
   };
   const timers = new Set();
   const context = vm.createContext({
+    createMemberWork, getMember:()=>member, syncAppAuth:async()=>{}, registerPrivateCleanup:fn=>cleanup.push(fn),
     ...sdk, FIREBASE_CONFIG, defaultTrip, normalizeTrip, applyTripChange, describeTripChange, structuredClone,
     Date: class extends Date { static now() { return options.now ?? mockNow; } },
     navigator: { onLine: true }, crypto: { randomUUID: () => `mock-${++uuid}` },
@@ -101,9 +108,11 @@ function createStore(t, options = {}) {
   vm.runInContext(storeSource + '\nthis.storeApi={subscribeTrip,subscribeTripHistory,saveHotelChoice,saveDecision,saveDay,getActor,setActor};', context);
   t.after(() => timers.forEach(clearTimeout));
   return {
+    switchMember:next=>{member=next;}, cleanup:()=>cleanup.forEach(fn=>fn()),
     api: context.storeApi, documents, reads, queryReads, subscriptions, transactions, storage, emit,
     failCommit: () => { failCommit = true; },
     beforeTransaction: fn => { beforeTransaction = fn; },
+    afterRead: fn => { afterRead = fn; },
     history: () => [...documents.entries()].filter(([path]) => path.startsWith(`itineraries/${historyPrefix}`)),
   };
 }
@@ -121,7 +130,7 @@ test('one atomic transaction writes the current trip and exact before/after hist
   const states = connect(t, store);
   const legacyBefore = clone(store.documents.get('itineraries/main'));
   store.api.setActor('소희');
-  await store.api.saveHotelChoice('arrival', 'fair');
+  await store.api.saveHotelChoice('arrival', 'hotel-a');
 
   assert.equal(store.transactions.length, 1);
   const transaction = store.transactions[0];
@@ -132,14 +141,14 @@ test('one atomic transaction writes the current trip and exact before/after hist
   const reverseTime = transaction.writes[1].path.slice(`itineraries/${historyPrefix}`.length).split('_')[0];
   assert.equal(Number(reverseTime) + mockNow, 9999999999999, 'New IDs sort recent client times first with ascending document-ID order');
   assert.deepEqual(transaction.writes[0].options, { merge: true });
-  assert.equal(store.documents.get(canonicalPath).hotels.arrival, 'fair');
+  assert.equal(store.documents.get(canonicalPath).hotels.arrival, 'hotel-a');
   assert.deepEqual(store.history()[0][1], {
-    tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', actor: '소희', before: null, after: 'fair', changedAt: '2026-09-12T05:00:00.000Z',
+    tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', actor: '소희', actorUid:'member-sohee', before: null, after: 'hotel-a', changedAt: '2034-05-12T05:00:00.000Z',
   });
   assert.deepEqual(store.documents.get('itineraries/main'), legacyBefore);
   assert.deepEqual(store.reads, [canonicalPath]);
   assert.equal(states.at(-1).saving, false);
-  assert.equal(states.at(-1).data.hotels.arrival, 'fair');
+  assert.equal(states.at(-1).data.hotels.arrival, 'hotel-a');
 });
 
 test('a rejected transaction leaves both documents and subscriber trip unchanged', async t => {
@@ -177,24 +186,24 @@ test('history uses the latest server field as before and preserves concurrent ch
   assert.equal(states.at(-1).data.hotels.arrival, null);
   store.beforeTransaction(() => {
     const latest = clone(store.documents.get(canonicalPath));
-    latest.hotels = { arrival: 'park', return: 'mbs' };
+    latest.hotels = { arrival: 'hotel-b', return: 'hotel-c' };
     latest.decisions.transfers = { status: 'confirmed', note: '함께 확인한 이동편' };
     store.documents.set(canonicalPath, latest); // Server changes before this client receives its next snapshot.
   });
-  await store.api.saveHotelChoice('arrival', 'fair');
-  assert.equal(store.history()[0][1].before, 'park');
-  assert.equal(store.history()[0][1].after, 'fair');
-  assert.deepEqual(store.documents.get(canonicalPath).hotels, { arrival: 'fair', return: 'mbs' });
+  await store.api.saveHotelChoice('arrival', 'hotel-a');
+  assert.equal(store.history()[0][1].before, 'hotel-b');
+  assert.equal(store.history()[0][1].after, 'hotel-a');
+  assert.deepEqual(store.documents.get(canonicalPath).hotels, { arrival: 'hotel-a', return: 'hotel-c' });
   assert.deepEqual(store.documents.get(canonicalPath).decisions.transfers, { status: 'confirmed', note: '함께 확인한 이동편' });
 });
 
 test('history subscription is bounded to this trip history IDs and excludes the canonical and old main records', t => {
-  const row = (actor, changedAt, extra = {}) => ({ tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', before: null, after: 'fair', actor, changedAt, ...extra });
+  const row = (actor, changedAt, extra = {}) => ({ tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', before: null, after: 'hotel-a', actor, changedAt, ...extra });
   const store = createStore(t, { documents: [
-    [`itineraries/${historyId(Date.parse('2026-09-10T05:00:00.000Z'), 'a')}`, row('성우', '2026-09-10T05:00:00.000Z')],
-    [`itineraries/${historyId(Date.parse('2026-09-12T05:00:00.000Z'), 'b')}`, row('소희', '2026-09-12T05:00:00.000Z')],
-    ['itineraries/another_trip_history_1770000000003', row('이전 여행', '2026-09-13T05:00:00.000Z')],
-    ['itineraries/honeymoon_2027_private', row('다른 기록', '2026-09-14T05:00:00.000Z')],
+    [`itineraries/${historyId(Date.parse('2034-05-10T05:00:00.000Z'), 'a')}`, row('성우', '2034-05-10T05:00:00.000Z')],
+    [`itineraries/${historyId(Date.parse('2034-05-12T05:00:00.000Z'), 'b')}`, row('소희', '2034-05-12T05:00:00.000Z')],
+    ['itineraries/another_trip_history_1770000000003', row('이전 여행', '2034-05-13T05:00:00.000Z')],
+    ['itineraries/honeymoon_2027_private', row('다른 기록', '2034-05-14T05:00:00.000Z')],
   ] });
   const states = [];
   const stop = store.api.subscribeTripHistory(state => states.push(clone(state)));
@@ -215,17 +224,18 @@ test('history subscription is bounded to this trip history IDs and excludes the 
   assert.equal(store.subscriptions[0].active, false);
 });
 
-test('selected author persists locally and is captured before an asynchronous save', async t => {
+test('authenticated author ignores local name changes and records the member UID', async t => {
   const store = createStore(t, { storage: [['sungso_trip_actor', '소희']] });
   connect(t, store);
   assert.equal(store.api.getActor(), '소희');
   store.api.setActor('성우');
-  assert.equal(store.storage.get('sungso_trip_actor'), '성우');
+  assert.equal(store.storage.get('sungso_trip_actor'), '소희');
   store.beforeTransaction(() => store.api.setActor('소희'));
-  await store.api.saveHotelChoice('return', 'park');
-  assert.equal(store.history()[0][1].actor, '성우');
+  await store.api.saveHotelChoice('return', 'hotel-b');
+  assert.equal(store.history()[0][1].actor, '소희');
+  assert.equal(store.history()[0][1].actorUid, 'member-sohee');
   assert.equal(store.api.getActor(), '소희');
-  assert.equal(store.api.setActor('unknown'), '미지정');
+  assert.equal(store.api.setActor('unknown'), '소희');
 });
 
 test('a decision changed on the server rejects a stale draft without writing trip or history', async t => {
@@ -253,7 +263,7 @@ test('ascending reverse-time document IDs fetch exactly the latest 50 of 60 entr
     const millis = mockNow + index * 60000;
     return {
       id: historyId(millis, `entry-${String(index).padStart(2, '0')}`),
-      data: { tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', before: null, after: 'fair', actor: '성우', changedAt: new Date(millis).toISOString() },
+      data: { tripId: 'honeymoon_2027', type: 'hotel', target: 'arrival', before: null, after: 'hotel-a', actor: '성우', changedAt: new Date(millis).toISOString() },
     };
   });
   const store = createStore(t, { documents: [
@@ -272,4 +282,35 @@ test('ascending reverse-time document IDs fetch exactly the latest 50 of 60 entr
   assert.equal(received.at(-1).entries[0].changedAt, generated[59].data.changedAt);
   assert.equal(received.at(-1).entries.at(-1).changedAt, generated[10].data.changedAt);
   assert.equal(store.transactions.length, 0);
+});
+
+test('account switch rejects a pending write before either trip or history is staged', async t => {
+ const store=createStore(t); connect(t,store);
+ store.beforeTransaction(()=>store.switchMember({uid:'member-sungwoo',role:'sungwoo',name:'성우'}));
+ await assert.rejects(store.api.saveHotelChoice('arrival','hotel-a'),/계정이 바뀌었어요/);
+ assert.equal(store.transactions[0].writes.length,0);assert.equal(store.history().length,0);
+});
+
+test('account switch after the transaction read cannot stage trip or history writes', async t => {
+  const store = createStore(t); connect(t, store);
+  store.afterRead(() => store.switchMember({ uid: 'member-sungwoo', role: 'sungwoo', name: '성우' }));
+  await assert.rejects(store.api.saveHotelChoice('arrival', 'hotel-a'), /계정이 바뀌었어요/);
+  assert.deepEqual(store.reads, [canonicalPath]);
+  assert.equal(store.transactions[0].writes.length, 0);
+  assert.equal(store.history().length, 0);
+});
+
+test('trip cleanup blocks queued current and history snapshots from restoring private memory', t => {
+  const store = createStore(t), states = connect(t, store), history = [];
+  const stop = store.api.subscribeTripHistory(state => history.push(clone(state))); t.after(stop);
+  store.cleanup(); store.switchMember(null);
+  assert.ok(store.subscriptions.every(sub => !sub.active));
+  const counts = [states.length, history.length];
+  for (const sub of store.subscriptions) {
+    sub.next({ exists: () => true, data: () => defaultTrip(), docs: [{ id: 'private', data: () => ({ private: true }) }], metadata: { fromCache: false } });
+    sub.error(new Error('late private failure'));
+  }
+  assert.deepEqual([states.length, history.length], counts);
+  const clean = [], cleanStop = store.api.subscribeTrip(state => clean.push(clone(state))); t.after(cleanStop);
+  assert.equal(clean.at(-1).data, null);
 });

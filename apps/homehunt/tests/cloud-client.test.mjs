@@ -230,6 +230,38 @@ test('known Firebase permission and setup errors are shown without raw SDK/crede
   assert.doesNotMatch(cloudSessionErrorMessage(new Error('secret raw details')), /secret/);
 });
 
+test('destroy during SDK initialization prevents auth resurrection and further API access', async () => {
+  const f = sdkFixture(); let release, initialized = 0;
+  f.sdk.initializeApp = () => { initialized++; return {}; };
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', loadSdk: () => new Promise(resolve => { release = resolve; }) });
+  const pending = session.init(); session.destroy(); release(f.sdk);
+  await assert.rejects(pending, { code: 'CLOUD_SESSION_CHANGED' });
+  assert.equal(initialized, 0); assert.equal(session.getState().user, null);
+  assert.equal(session.getState().status, 'signed-out');
+  await assert.rejects(session.apiFetch('/health'), { code: 'CLOUD_SESSION_CHANGED' });
+});
+
+test('destroy retires queued auth callbacks and rejects a pending token before any API request', async () => {
+  const f = sdkFixture(); let authCallback, release, calls = 0;
+  f.sdk.onAuthStateChanged = (_auth, callback) => { authCallback = callback; callback(f.user()); return () => {}; };
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', loadSdk: f.loadSdk, fetchImpl: () => { calls++; throw new Error('unexpected'); } });
+  await session.init();
+  const user = f.user(); user.getIdToken = () => new Promise(resolve => { release = resolve; }); authCallback(user);
+  const pending = session.apiFetch('/health'); await tick();
+  session.destroy(); authCallback(f.user('uid-b')); release('synthetic-old-token');
+  await assert.rejects(pending, { code: 'CLOUD_SESSION_CHANGED' });
+  assert.equal(calls, 0); assert.equal(session.getState().user, null);
+});
+
+test('an API snapshot JSON body cannot resolve with private data after common logout', async () => {
+  const f = sdkFixture(); let release;
+  const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/api', snapshotTransport: 'api', loadSdk: f.loadSdk,
+    fetchImpl: async () => ({ ok: true, status: 200, json: () => new Promise(resolve => { release = resolve; }) }) });
+  await session.signIn(); const pending = session.loadSnapshot(); await tick();
+  session.destroy(); release({ snapshot: personal(), revision: 1 });
+  await assert.rejects(pending, { code: 'CLOUD_SESSION_CHANGED' });
+});
+
 class Element extends EventTarget {
   constructor(tag, ownerDocument) { super(); this.tagName = tag; this.ownerDocument = ownerDocument; this.children = []; this.dataset = {}; this.classList = { add() {} }; this.attributes = {}; this.ownText = ''; }
   set textContent(value) { this.ownText = String(value); this.children = []; }

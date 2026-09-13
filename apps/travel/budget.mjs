@@ -1,3 +1,4 @@
+import { BUDGET_QUOTES } from '../../shared/travel/trip-data.mjs';
 import { deriveBudgetDraft, calculateTravelBudget } from '../../shared/finance/travel-budget-core.mjs';
 let saveTravelBudget = async () => { throw new Error('WeCost 연결을 확인해주세요.'); };
 let saveTravelLedgerItem = saveTravelBudget;
@@ -35,7 +36,7 @@ root.innerHTML = `
       </form>
     </section>
     <section class="budget-card"><p class="eyebrow">REFERENCE PRICES</p><h3>후보 가격으로 비교해보기</h3><p class="fine">아래 금액은 견적 당시 후보예요. 적용할 세부 항목을 고르면 저장 전에 총액 변화를 볼 수 있어요.</p>
-      <div class="budget-quotes"><article><span>항공 네 구간 · 2인</span><strong>3,355,600원</strong><small>2026.09.13 공유 캡처 · 구매 전</small><label>교체할 항목<select id="quote-flight-target"></select></label><button class="small-button" type="button" data-quote="flight">항공 후보 금액 적용</button></article><article><span>크루즈 2인·3박 + 권장 팁</span><strong>US$2,141</strong><small>요금 $2,045 + 팁 $96 · 2026.09.12 기준</small><label>교체할 항목<select id="quote-cruise-target"></select></label><button class="small-button" type="button" data-quote="cruise">크루즈 참고 금액 적용</button></article></div>
+      <div class="budget-quotes">${['flight','cruise'].map(type=>`<article><span>${type==='flight'?'항공 후보':'크루즈 후보'}</span><strong>${esc(BUDGET_QUOTES[type]?.currency)} ${esc(BUDGET_QUOTES[type]?.amount?.toLocaleString('ko-KR') || '미확인')}</strong><small>${esc(BUDGET_QUOTES[type]?.note)}</small><label>교체할 항목<select id="quote-${type}-target"></select></label><button class="small-button" type="button" data-quote="${type}">후보 금액 적용</button></article>`).join('')}</div>
     </section>
     <details class="budget-card budget-checks"><summary>합계에 빠진 비용은 없을까?</summary><p>이미 리조트·크루즈 요금에 포함된 비용은 다시 더하지 않아요. 항목을 추가해 비교하고, 저장할 때 예상 금액도 입력해주세요.</p><div class="budget-cost-suggestions">${['리조트 왕복 수상비행기·세금','퇴실 후 이용·공항 휴식','공항 왕복·심야 귀가','여행자보험·eSIM·크루즈 인터넷','해외결제 수수료·예비비'].map(name=>`<button type="button" class="small-button" data-cost-name="${esc(name)}">+ ${esc(name)}</button>`).join('')}</div><a href="#readiness" class="text-button">출발 준비 함께 보기 →</a></details>
   </div>
@@ -155,8 +156,10 @@ root.addEventListener('click',event=>{
   const quote=event.target.closest('[data-quote]');if(!quote||!draft)return;
   const type=quote.dataset.quote,id=$(`#quote-${type}-target`).value,row=draft.rows.find(r=>r.id===id);
   if(!row)return message('교체할 세부 항목을 먼저 선택해주세요. 합계 항목 전체를 항공료로 바꾸지 않도록 확인해요.',true);
-  row.amount=type==='flight'?3355600:2141;row.currency=type==='flight'?'KRW':'USD';
-  row.note=type==='flight'?'2인·네 구간, 2026.09.13 공유 캡처 기준 · 구매 전 후보':'2인·3박 요금 US$2,045 + 권장 팁 US$96 · 2026.09.12 참고액';
+  const referenceQuote=BUDGET_QUOTES[type];
+  if(!referenceQuote||!Number.isFinite(referenceQuote.amount)){message('후보 견적을 확인해주세요.',true);return;}
+  row.amount=referenceQuote.amount;row.currency=referenceQuote.currency;
+  row.note=referenceQuote.note || '';
   renderRows();markDirty();message('후보 금액으로 미리 보고 있어요. 확인 후 저장하면 WeCost에도 반영돼요.');
 });
 $('#budget-reset').addEventListener('click',()=>{loadDraft(selectedItem());message();});
