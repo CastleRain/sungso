@@ -1,0 +1,147 @@
+{
+  "apps": [
+    {
+      "id": "hub",
+      "source": "apps/hub",
+      "output": "",
+      "files": [
+        "index.html",
+        "css",
+        "js"
+      ]
+    },
+    {
+      "id": "wecost",
+      "source": "apps/wecost",
+      "output": "wecost",
+      "files": [
+        "index.html",
+        "css",
+        "js"
+      ]
+    },
+    {
+      "id": "honeymoon",
+      "source": "apps/honeymoon",
+      "output": "honeymoon",
+      "files": [
+        "index.html",
+        "css",
+        "js",
+        "data"
+      ]
+    },
+    {
+      "id": "homehunt",
+      "source": "apps/homehunt",
+      "output": "homehunt",
+      "files": [
+        "index.html",
+        "css",
+        "js",
+        "assets",
+        "data",
+        "providers"
+      ]
+    },
+    {
+      "id": "travel",
+      "source": "apps/travel",
+      "output": "travel",
+      "files": [
+        "index.html",
+        "app.mjs",
+        "calendar.mjs",
+        "navigation.mjs",
+        "style.css",
+        "calendar.css"
+      ]
+    }
+  ],
+  "shared": [
+    {
+      "source": "shared/finance",
+      "output": "shared",
+      "files": [
+        "."
+      ]
+    },
+    {
+      "source": "shared/travel",
+      "output": "shared",
+      "files": [
+        "."
+      ]
+    },
+    {
+      "source": "shared/homehunt",
+      "output": "homehunt/js",
+      "files": [
+        "."
+      ]
+    },
+    {
+      "source": "shared/firebase",
+      "output": "shared/firebase",
+      "files": [
+        "."
+      ]
+    },
+    {
+      "source": "apps/travel",
+      "output": "shared",
+      "files": [
+        "decision-panel.mjs",
+        "decision-panel.css"
+      ]
+    }
+  ],
+  "compatibility": {
+    "files": [
+      {
+        "source": "services/homehunt/data/source/apartment-catalog-meta.json",
+        "output": "homehunt/data/apartment-catalog-meta.json"
+      },
+      {
+        "source": "services/homehunt/data/source/apartment-catalog.json",
+        "output": "homehunt/data/apartment-catalog.json"
+      },
+      {
+        "source": "archive/honeymoon/sources/maldives_resorts_data.xml",
+        "output": "honeymoon/data/maldives_resorts_data.xml"
+      },
+      {
+        "source": "archive/honeymoon/maldives_report.html",
+        "output": "honeymoon/maldives_report.html"
+      },
+      {
+        "source": "archive/wecost/reference/index.html",
+        "output": "wecost/_reference/index.html"
+      },
+      {
+        "source": "archive/wecost/reference/wedding-dashboard.html",
+        "output": "wecost/_reference/wedding-dashboard.html"
+      },
+      {
+        "source": "archive/wecost/reference/결혼비용_템플릿.csv",
+        "output": "wecost/_reference/결혼비용_템플릿.csv"
+      },
+      {
+        "source": "archive/wecost/reference/셋업가이드.md",
+        "output": "wecost/_reference/셋업가이드.md"
+      },
+      {
+        "source": "archive/wecost/backup/index.html",
+        "output": "wecost/backup/index.html"
+      },
+      {
+        "source": "apps/homehunt/docs/personalized-recommendations.md",
+        "output": "homehunt/docs/personalized-recommendations.md"
+      },
+      {
+        "source": "apps/homehunt/docs/rail-station-data.md",
+        "output": "homehunt/docs/rail-station-data.md"
+      }
+    ]
+  }
+}

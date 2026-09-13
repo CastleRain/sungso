@@ -2,11 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { defaultTrip, normalizeTrip, applyTripChange, describeTripChange } from '../shared/trip-core.mjs';
+import { FIREBASE_CONFIG } from '../shared/firebase/config.mjs';
+import { defaultTrip, normalizeTrip, applyTripChange, describeTripChange } from '../shared/travel/trip-core.mjs';
 
 // Execute the production store with in-memory SDK adapters. No Firebase SDK,
 // credentials, network request, or production database is involved in these tests.
-const storeSource = readFileSync(new URL('../shared/trip-store.mjs', import.meta.url), 'utf8')
+const storeSource = readFileSync(new URL('../shared/travel/trip-store.mjs', import.meta.url), 'utf8')
   .replace(/^import .*;\n/gm, '')
   .replace(/^export /gm, '');
 const canonicalPath = 'itineraries/honeymoon_2027';
@@ -89,7 +90,7 @@ function createStore(t, options = {}) {
   };
   const timers = new Set();
   const context = vm.createContext({
-    ...sdk, defaultTrip, normalizeTrip, applyTripChange, describeTripChange, structuredClone,
+    ...sdk, FIREBASE_CONFIG, defaultTrip, normalizeTrip, applyTripChange, describeTripChange, structuredClone,
     Date: class extends Date { static now() { return options.now ?? mockNow; } },
     navigator: { onLine: true }, crypto: { randomUUID: () => `mock-${++uuid}` },
     localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },

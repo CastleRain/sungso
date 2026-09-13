@@ -1,0 +1,16 @@
+{
+  "name": "sungso",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "dev": "node scripts/dev-site.mjs",
+    "test": "node scripts/test.mjs",
+    "test:site": "node --test tests/site/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "build:services": "node scripts/build-services.mjs"
+  },
+  "devDependencies": {
+    "es-module-lexer": "1.7.0"
+  }
+}

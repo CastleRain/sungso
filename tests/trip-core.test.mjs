@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defaultTrip,normalizeTrip,applyTripChange,describeTripChange} from '../shared/trip-core.mjs';
+import {defaultTrip,normalizeTrip,applyTripChange,describeTripChange} from '../shared/travel/trip-core.mjs';
 test('shared plan has eleven dates and no hotel reservation assumed',()=>{const d=defaultTrip();assert.equal(d.days.length,11);assert.equal(d.days[0].date,'2027-03-07');assert.equal(d.days.at(-1).date,'2027-03-17');assert.deepEqual(d.hotels,{arrival:null,return:null});assert.equal(d.decisions.resort.status,'pending');});
 test('legacy/corrupt data cannot replace trip with eight day schedule',()=>{const d=normalizeTrip({days:[{date:'2027-03-09',items:[{text:'legacy'}]}],hotels:{arrival:'unknown'},decisions:{hotels:{status:'bogus'}}});assert.equal(d.days.length,11);assert.equal(d.days[2].focus,'port');assert.equal(d.hotels.arrival,null);assert.equal(d.decisions.hotels.status,'candidate');});
 test('different clients patch current state without clobbering separate slots or tasks',()=>{const a=applyTripChange(null,{type:'hotel',slot:'arrival',hotelId:'fair'});const b=applyTripChange(a,{type:'hotel',slot:'return',hotelId:'park'});const c=applyTripChange(b,{type:'decision',id:'flights',patch:{status:'confirmed',note:'발권 확인'}});assert.deepEqual(c.hotels,{arrival:'fair',return:'park'});assert.equal(c.decisions.flights.status,'confirmed');assert.equal(c.decisions.hotels.status,'candidate');assert.equal(a.hotels.return,null);});

@@ -4,8 +4,11 @@ functions/node_modules/
 .env
 .env.*
 !.env.example
-homehunt/.local/
-homehunt/cloud/lib/
-homehunt/render/lib/
+services/homehunt/.local/
+services/homehunt/cloud/lib/
+services/homehunt/render/lib/
+services/firebase-default/lib/
+dist/
+test-results/
 firebase-debug.log
 firestore-debug.log

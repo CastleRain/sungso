@@ -5,19 +5,18 @@ services:
     plan: free
     region: singapore
     branch: master
-    buildCommand: npm ci --include=dev --prefix homehunt/render && npm run build --prefix homehunt/render
-    startCommand: npm start --prefix homehunt/render
+    buildCommand: npm ci --include=dev --prefix services/homehunt/render && npm run build --prefix services/homehunt/render
+    startCommand: npm start --prefix services/homehunt/render
     healthCheckPath: /healthz
     autoDeployTrigger: commit
     buildFilter:
       paths:
-        - homehunt/render/**
-        - homehunt/server/**
-        - homehunt/scripts/**
-        - homehunt/js/**
-        - homehunt/data/apartment-catalog-seoul-gyeonggi.json
-        - functions/molit.js
-        - shared/**
+        - services/homehunt/render/**
+        - services/homehunt/server/**
+        - services/homehunt/scripts/**
+        - services/homehunt/paths.mjs
+        - apps/homehunt/data/apartment-catalog-seoul-gyeonggi.json
+        - shared/homehunt/**
         - render.yaml
     envVars:
       - key: NODE_VERSION

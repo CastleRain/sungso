@@ -1,0 +1,61 @@
+name: Validate and deploy sungso
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sungso-pages-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Deployments are serialized. A delayed push/collector dispatch reads
+          # the latest branch snapshot when its turn starts; PRs test their merge.
+          ref: ${{ github.event_name == 'pull_request' && github.sha || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install site build dependencies from the lockfile
+        run: npm ci
+      - name: Install service build dependencies from lockfiles
+        run: |
+          npm ci --include=dev --prefix services/firebase-default
+          npm ci --include=dev --prefix services/homehunt/render
+          npm ci --include=dev --prefix services/homehunt/cloud
+      - name: Build the site, check public paths, and run regression tests
+        run: npm run check
+      - name: Verify all service bundles
+        run: npm run build:services
+      - name: Upload the validated public artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the validated site artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

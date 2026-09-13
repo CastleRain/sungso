@@ -1,8 +1,12 @@
 {
   "functions": [
-    { "source": "functions", "runtime": "nodejs20", "codebase": "default" },
     {
-      "source": "homehunt/cloud", "runtime": "nodejs22", "codebase": "homehunt",
+      "source": "services/firebase-default", "runtime": "nodejs20", "codebase": "default",
+      "ignore": ["node_modules", ".git", ".env*", "*.log", "tests", "index.js", "build.mjs"],
+      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
+    },
+    {
+      "source": "services/homehunt/cloud", "runtime": "nodejs22", "codebase": "homehunt",
       "ignore": ["node_modules", ".git", ".env*", "*.log", "tests", "index.mjs", "build.mjs"],
       "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
     }
