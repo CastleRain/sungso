@@ -223,7 +223,7 @@ function renderHistory() {
 
 $('#day-tabs').innerHTML = TRIP_DAYS.map((day) => `<button type="button" class="day-tab" data-day="${escapeHTML(day.date)}" aria-pressed="${day.date === selectedDate}"><strong>${formatDay(day.date)}</strong><span>${escapeHTML(day.label)}</span></button>`).join('');
 $('#place-buttons').innerHTML = Object.entries(PLACES).map(([key, place]) => `<button type="button" class="place-button" data-place="${escapeHTML(key)}" aria-pressed="false">${escapeHTML(place.name)}</button>`).join('');
-$('#flight-search').href = 'https://www.skyscanner.co.kr/transport/d/sela/2027-03-07/sin/sin/2027-03-12/mle/mle/2027-03-16/sin/sin/2027-03-17/sela/config/12409-2703070850--31876-0-16292-2703071425%7C16292-2703121005--31876-0-14155-2703121140%7C14155-2703161255--31876-0-16292-2703162045%7C16292-2703170010--31876-0-12409-2703170725?adultsv2=2&cabinclass=economy&childrenv2=&ref=home&departure-times=0-750,0-750#/results';
+$('#flight-search').href = 'https://www.skyscanner.co.kr/transport/d/sela/2027-03-07/sin/sin/2027-03-12/mle/mle/2027-03-16/sin/sin/2027-03-17/sela/?adultsv2=2&cabinclass=economy&childrenv2=#/results';
 
 document.addEventListener('click', async (event) => {
   const dayButton = event.target.closest('[data-day]');

@@ -17,8 +17,8 @@ export const TRAVEL_LOCATIONS = {
  '2027-03-13': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
  '2027-03-14': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
  '2027-03-15': {flag:'🇲🇻',activity:'🌴',activityType:'island',tone:'maldives',country:'몰디브',journey:'몰디브',label:'아나네아',icon:'☀',stay:'아나네아 마디바루'},
- '2027-03-16': {flag:'🇸🇬',activity:'✈️',activityType:'flight',tone:'singapore',country:'싱가포르',journey:'몰디브 → 싱가포르',label:'귀국 환승',icon:'↗',stay:'싱가포르 20:45 도착 · 공항 환승'},
- '2027-03-17': {flag:'🇰🇷',activity:'✈️',activityType:'flight',tone:'korea',country:'한국',journey:'싱가포르 → 한국',label:'07:25 도착',icon:'⌂',stay:'00:10 싱가포르 출발 → 인천 귀국'}
+ '2027-03-16': {flag:'🇲🇻',activity:'✈️',activityType:'flight',tone:'maldives',country:'몰디브',journey:'몰디브 → 싱가포르 (다음 날 도착)',label:'23:30 출발',icon:'↗',stay:'리조트 체크아웃 · 23:30 말레 출발 · 기내박'},
+ '2027-03-17': {flag:'🇰🇷',activity:'✈️',activityType:'flight',tone:'korea',country:'한국',journey:'몰디브 → 싱가포르 환승 → 한국',label:'22:00 도착',icon:'⌂',stay:'07:15 싱가포르 도착 · 14:35 출발 → 22:00 인천 도착'}
 };
 
 export function calendarDates(fullMonth = false) {
