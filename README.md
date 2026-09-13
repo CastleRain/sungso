@@ -43,3 +43,7 @@ npm run check
 - `docs/`: 현행 개발·운영 안내. `archive/`는 이전 문서와 보관 자료이며 현재 구현 기준이 아니다.
 
 새 앱은 `apps/{id}/`와 등록부 항목을 추가한다. 자세한 순서는 [새 앱 추가](docs/architecture.md#새-앱-추가)를 따른다. 소스 폴더 이동과 공개 URL 변경은 별개다. 공통 모듈도 소스→공개 경로 매핑으로 기존 URL에 직접 출력하고 버전 query를 유지한다. 이번 정리에서는 기존 URL·Firestore 컬렉션·브라우저 저장 키를 보존한다.
+
+## 개발 계획
+
+[우리 둘의 홈·인증 전환 계획과 프로토타입](docs/development-plans/active/couple-home/README.md) · [계획 목록](docs/development-plans/README.md)

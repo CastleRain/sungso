@@ -1,0 +1,441 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@400;500&display=swap');
+#sungso-home-bright { color-scheme:light; --sg-paper:#ffffff; --sg-surface:#ffffff; --sg-ink:#34415b; --sg-muted:#63718a; --sg-line:#e5ecf4; --sg-accent:#c93e79; --sg-soft:#fff0f7; --sg-sage:#edfaf5; --sg-sage-ink:#28785c; --sg-blue:#eef7ff; --sg-blue-ink:#416fa2; --sg-note:#fff3f9; --sg-shadow:#799aca0d; color:var(--sg-ink); font-family:'DM Sans','Noto Sans KR',sans-serif; font-weight:400; width:100%; }
+#sungso-home-bright * { box-sizing:border-box; }
+#sungso-home-bright [hidden] { display:none !important; }
+#sungso-home-bright button,#sungso-home-bright textarea { font:inherit; }
+#sungso-home-bright button { cursor:pointer; color:inherit; }
+#sungso-home-bright button:disabled { cursor:default; opacity:.45; }
+#sungso-home-bright .sg-stage { width:100%; max-width:1100px; margin:auto; container:sg-home / inline-size; background:var(--sg-paper); border:1px solid var(--sg-line); border-radius:20px; overflow:clip; }
+#sungso-home-bright .sg-stage.sg-phone { max-width:390px; }
+#sungso-home-bright .sg-top { min-height:76px; padding:0 42px; display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid var(--sg-line); }
+#sungso-home-bright .sg-brand { border:0; padding:8px 0; background:none; font-family:'Noto Serif KR',serif; font-size:27px; letter-spacing:-1.7px; font-weight:500; }
+#sungso-home-bright .sg-brand em { font-style:normal; color:var(--sg-accent); }
+#sungso-home-bright .sg-top-left { display:flex; align-items:center; gap:43px; }
+#sungso-home-bright .sg-top-nav { display:flex; align-items:center; gap:27px; }
+#sungso-home-bright .sg-nav { background:none; border:0; padding:26px 0; font-size:12px; position:relative; color:var(--sg-muted); }
+#sungso-home-bright .sg-nav[aria-current=page] { color:var(--sg-ink); }
+#sungso-home-bright .sg-nav[aria-current=page]:after { content:''; position:absolute; bottom:0; height:2px; background:var(--sg-accent); left:0; right:0; }
+#sungso-home-bright .sg-user { display:flex; align-items:center; gap:9px; font-size:12px; }
+#sungso-home-bright .sg-avatar { display:grid; place-items:center; width:30px; height:30px; border-radius:50%; font-size:11px; color:var(--sg-accent); background:var(--sg-soft); }
+#sungso-home-bright .sg-user i,#sungso-home-bright .sg-user svg { width:13px; height:13px; color:var(--sg-sage-ink); }
+#sungso-home-bright .sg-content { padding:0 42px 28px; }
+#sungso-home-bright .sg-hero { display:grid; grid-template-columns:1fr 220px; align-items:center; min-height:240px; padding:35px 0 32px; gap:24px; }
+#sungso-home-bright .sg-eyebrow { margin:0 0 13px; font-size:11px; letter-spacing:2.2px; color:var(--sg-muted); }
+#sungso-home-bright .sg-greeting { margin:0 0 9px; font-size:13px; color:var(--sg-accent); }
+#sungso-home-bright .sg-hero h1 { font-family:'Noto Sans KR',sans-serif; font-size:34px; line-height:1.6; letter-spacing:-1.65px; font-weight:500; margin:0; }
+#sungso-home-bright .sg-hero h1 em { font-style:normal; color:var(--sg-accent); }
+#sungso-home-bright .sg-hero-copy { margin:13px 0 0; color:var(--sg-muted); font-size:12px; line-height:1.9; }
+#sungso-home-bright .sg-keepsake { position:relative; height:176px; width:200px; justify-self:center; }
+#sungso-home-bright .sg-keepsake-back { position:absolute; width:136px; height:151px; background:var(--sg-blue); border:1px solid var(--sg-line); border-radius:8px; transform:rotate(-10deg); top:11px; left:10px; }
+#sungso-home-bright .sg-keepsake-front { position:absolute; right:7px; top:13px; width:142px; height:161px; background:var(--sg-surface); border:1px solid var(--sg-line); border-radius:4px; padding:13px; transform:rotate(7deg); box-shadow:0 5px 16px var(--sg-shadow); text-align:center; }
+#sungso-home-bright .sg-stamp { height:100px; background:var(--sg-soft); display:flex; align-items:center; justify-content:center; gap:5px; color:var(--sg-accent); font-family:'Noto Serif KR',serif; font-size:38px; }
+#sungso-home-bright .sg-stamp span:nth-child(2) { font-size:24px; font-style:italic; padding:0 2px; }
+#sungso-home-bright .sg-keepsake-front p { margin:10px 0 0; font-size:11px; letter-spacing:1.8px; color:var(--sg-muted); }
+#sungso-home-bright .sg-keepsake > i,#sungso-home-bright .sg-keepsake > svg { position:absolute; width:26px; height:26px; left:15px; bottom:0; color:var(--sg-accent); transform:rotate(-12deg); }
+#sungso-home-bright .sg-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+#sungso-home-bright h2 { font-size:15px; font-weight:500; margin:0; letter-spacing:-.5px; }
+#sungso-home-bright .sg-heading-meta { color:var(--sg-muted); font-size:11px; letter-spacing:.25px; }
+#sungso-home-bright .sg-groups { display:grid; grid-template-columns:repeat(var(--sg-columns,3),minmax(0,1fr)); gap:18px; }
+#sungso-home-bright .sg-group { min-width:0; }
+#sungso-home-bright .sg-group-title { display:flex; align-items:center; gap:8px; margin:7px 0 13px; font-weight:500; font-size:12px; }
+#sungso-home-bright .sg-group-title:before { content:''; width:6px; height:6px; border-radius:50%; background:var(--sg-sage-ink); }
+#sungso-home-bright .sg-group[data-group=wedding] .sg-group-title:before { background:var(--sg-accent); }
+#sungso-home-bright .sg-group[data-group=travel] .sg-group-title:before { background:var(--sg-blue-ink); }
+#sungso-home-bright .sg-apps { display:grid; grid-template-columns:1fr; gap:11px; }
+#sungso-home-bright .sg-app { text-align:left; display:flex; align-items:center; gap:13px; min-height:105px; padding:20px 16px; background:var(--sg-surface); border:1px solid var(--sg-line); border-radius:12px; transition:border-color .15s,transform .15s; position:relative; }
+#sungso-home-bright .sg-app:hover { border-color:var(--sg-accent); transform:translateY(-2px); }
+#sungso-home-bright .sg-app[data-selected=true] { border-color:var(--sg-accent); background:var(--sg-soft); }
+#sungso-home-bright .sg-app-icon { width:38px; height:42px; border-radius:11px; background:var(--sg-soft); color:var(--sg-accent); flex-shrink:0; display:grid; place-items:center; }
+#sungso-home-bright .sg-app-icon i,#sungso-home-bright .sg-app-icon svg { width:21px; height:21px; stroke-width:1.4; }
+#sungso-home-bright .sg-app.sg-green .sg-app-icon { background:var(--sg-sage); color:var(--sg-sage-ink); }
+#sungso-home-bright .sg-app.sg-blue .sg-app-icon { background:var(--sg-blue); color:var(--sg-blue-ink); }
+#sungso-home-bright .sg-app-title { display:block; font-size:13px; font-weight:500; margin:0 0 6px; }
+#sungso-home-bright .sg-app-sub { display:block; font-size:11px; line-height:1.65; color:var(--sg-muted); }
+#sungso-home-bright .sg-edit-trigger { display:inline-flex; align-items:center; gap:7px; min-height:36px; border:1px solid var(--sg-line); border-radius:8px; background:var(--sg-surface); padding:7px 12px; color:var(--sg-muted); font-size:11px; }
+#sungso-home-bright .sg-edit-trigger svg,#sungso-home-bright .sg-edit-trigger i { width:14px; height:14px; }
+#sungso-home-bright .sg-home-editor { background:var(--sg-surface); border:1px solid var(--sg-line); border-radius:14px; padding:20px; }
+#sungso-home-bright .sg-home-editor p { font-size:12px; color:var(--sg-muted); margin:0 0 15px; line-height:1.8; }
+#sungso-home-bright .sg-home-editor input,#sungso-home-bright .sg-home-editor select { font:inherit; color:var(--sg-ink); }
+#sungso-home-bright .sg-layout-help { font-size:11px; color:var(--sg-muted); }
+#sungso-home-bright .sg-edit-row { display:grid; grid-template-columns:minmax(160px,1fr) minmax(130px,180px) 95px 76px; align-items:center; gap:14px; border-top:1px solid var(--sg-line); padding:15px 0; }
+#sungso-home-bright .sg-edit-app-name { font-size:12px; font-weight:500; }
+#sungso-home-bright .sg-edit-app-name small { display:block; font-size:11px; font-weight:400; color:var(--sg-muted); margin-top:4px; }
+#sungso-home-bright .sg-group-select { min-width:0; width:100%; border:1px solid var(--sg-line); border-radius:7px; padding:9px 10px; background:var(--sg-surface); font-size:12px !important; }
+#sungso-home-bright .sg-show-label { display:flex; align-items:center; gap:7px; font-size:11px; min-height:36px; cursor:pointer; white-space:nowrap; }
+#sungso-home-bright .sg-show-label input { accent-color:var(--sg-accent); width:16px; height:16px; }
+#sungso-home-bright .sg-move-controls { display:flex; gap:4px; }
+#sungso-home-bright .sg-move { border:1px solid var(--sg-line); background:var(--sg-surface); border-radius:7px; width:36px; height:36px; padding:0; font-size:18px; }
+#sungso-home-bright .sg-group-settings { border-top:1px solid var(--sg-line); padding:15px 0; }
+#sungso-home-bright .sg-group-settings summary { cursor:pointer; font-size:12px; padding:5px 0; }
+#sungso-home-bright .sg-group-fields { display:grid; gap:10px; margin-top:12px; }
+#sungso-home-bright .sg-group-field { display:grid; grid-template-columns:1fr 76px; gap:12px; align-items:center; }
+#sungso-home-bright .sg-group-field input { border:1px solid var(--sg-line); background:var(--sg-surface); border-radius:7px; padding:9px 11px; font-size:13px; width:100%; min-width:0; }
+#sungso-home-bright .sg-layout-actions { display:flex; align-items:center; justify-content:space-between; gap:15px; border-top:1px solid var(--sg-line); padding-top:16px; }
+#sungso-home-bright .sg-layout-buttons { display:flex; gap:14px; align-items:center; }
+#sungso-home-bright .sg-layout-empty { padding:25px 0; color:var(--sg-muted); font-size:12px; }
+#sungso-home-bright .sg-layout-status { margin:12px 0 0; font-size:11px; color:var(--sg-accent); line-height:1.7; }
+#sungso-home-bright .sg-lower { display:grid; grid-template-columns:.93fr 1.07fr; gap:28px; margin-top:35px; }
+#sungso-home-bright .sg-text-button { display:inline-flex; align-items:center; justify-content:center; gap:5px; color:var(--sg-muted); background:none; border:0; padding:5px 0; font-size:11px; white-space:nowrap; }
+#sungso-home-bright .sg-text-button svg,#sungso-home-bright .sg-text-button i { width:12px; height:12px; }
+#sungso-home-bright .sg-events { border-top:1px solid var(--sg-line); }
+#sungso-home-bright .sg-event { display:flex; gap:15px; align-items:center; padding:17px 0; border-bottom:1px solid var(--sg-line); }
+#sungso-home-bright .sg-event-date { flex-shrink:0; width:47px; text-align:center; }
+#sungso-home-bright .sg-event-date span { display:block; color:var(--sg-muted); font-size:11px; margin-bottom:2px; white-space:nowrap; }
+#sungso-home-bright .sg-event-date b { font-size:22px; font-weight:400; font-family:'Noto Serif KR',serif; }
+#sungso-home-bright .sg-event-info { flex:1; min-width:0; }
+#sungso-home-bright .sg-event-info p { margin:0 0 5px; font-size:12px; }
+#sungso-home-bright .sg-event-info small { color:var(--sg-muted); font-size:11px; }
+#sungso-home-bright .sg-event-count { font-size:11px; color:var(--sg-accent); white-space:nowrap; }
+#sungso-home-bright .sg-messages { display:grid; gap:9px; }
+#sungso-home-bright .sg-message { padding:14px 16px; background:var(--sg-note); border:1px solid var(--sg-line); border-radius:4px 13px 13px; }
+#sungso-home-bright .sg-message:nth-child(2) { background:var(--sg-blue); }
+#sungso-home-bright .sg-message:last-child { background:var(--sg-sage); }
+#sungso-home-bright .sg-message-head { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+#sungso-home-bright .sg-message-head b { font-size:11px; font-weight:500; }
+#sungso-home-bright .sg-message-head time { font-size:11px; color:var(--sg-muted); }
+#sungso-home-bright .sg-message p { margin:0; font-size:11px; line-height:1.85; overflow-wrap:anywhere; }
+#sungso-home-bright .sg-compose { margin-top:11px; width:100%; display:flex; align-items:center; justify-content:center; gap:7px; min-height:41px; border:1px dashed var(--sg-line); background:none; border-radius:8px; font-size:11px; color:var(--sg-accent); }
+#sungso-home-bright .sg-compose svg,#sungso-home-bright .sg-compose i { width:14px; height:14px; }
+#sungso-home-bright .sg-editor { margin:12px 0 0; }
+#sungso-home-bright .sg-editor label { display:block; font-size:11px; margin:0 0 8px; }
+#sungso-home-bright .sg-editor textarea { width:100%; min-height:92px; resize:vertical; padding:12px; border:1px solid var(--sg-line); border-radius:8px; background:var(--sg-surface); color:var(--sg-ink); font-size:14px; line-height:1.6; }
+#sungso-home-bright .sg-editor-actions { display:flex; justify-content:flex-end; gap:15px; align-items:center; margin-top:8px; }
+#sungso-home-bright .sg-primary { background:var(--sg-accent); color:var(--sg-paper); border:0; border-radius:7px; min-height:36px; padding:8px 17px; font-size:11px; }
+#sungso-home-bright .sg-footer { margin-top:32px; padding-top:18px; border-top:1px solid var(--sg-line); display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--sg-muted); font-size:11px; letter-spacing:.4px; }
+#sungso-home-bright .sg-footer-heart { display:flex; align-items:center; gap:6px; }
+#sungso-home-bright .sg-footer-heart svg,#sungso-home-bright .sg-footer-heart i { width:10px; height:10px; color:var(--sg-accent); }
+#sungso-home-bright .sg-toast { padding:12px 16px; margin-top:12px; background:var(--sg-soft); border-radius:8px; color:var(--sg-accent); font-size:11px; line-height:1.7; }
+#sungso-home-bright .sg-dates-head { padding:35px 0 25px; }
+#sungso-home-bright .sg-dates-head h1 { font-family:'Noto Serif KR',serif; font-size:30px; font-weight:400; margin:12px 0 8px; }
+#sungso-home-bright .sg-dates-head p { font-size:12px; color:var(--sg-muted); }
+#sungso-home-bright .sg-dday { background:var(--sg-soft); color:var(--sg-accent); text-align:center; border-radius:13px; padding:30px; margin-bottom:28px; }
+#sungso-home-bright .sg-dday p { margin:0; font-size:12px; }
+#sungso-home-bright .sg-dday strong { display:block; margin:10px 0; font-family:'Noto Serif KR',serif; font-weight:400; font-size:54px; }
+#sungso-home-bright .sg-date-layout { display:grid; grid-template-columns:1fr 1fr; gap:30px; }
+#sungso-home-bright .sg-calendar { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; padding-top:15px; }
+#sungso-home-bright .sg-calendar span { text-align:center; padding:8px 0; font-size:11px; border-radius:50%; }
+#sungso-home-bright .sg-calendar .sg-weekday { font-size:11px; color:var(--sg-muted); }
+#sungso-home-bright .sg-calendar .sg-marked { color:var(--sg-accent); background:var(--sg-soft); }
+#sungso-home-bright .sg-calendar .sg-today { background:var(--sg-accent); color:var(--sg-paper); }
+#sungso-home-bright .sg-login { padding:70px 22px 84px; text-align:center; }
+#sungso-home-bright .sg-login-symbol { width:70px; height:70px; border-radius:22px; background:var(--sg-soft); color:var(--sg-accent); margin:0 auto 24px; display:grid; place-items:center; }
+#sungso-home-bright .sg-login-symbol svg,#sungso-home-bright .sg-login-symbol i { width:29px; height:29px; stroke-width:1.4; }
+#sungso-home-bright .sg-login h1 { font-family:'Noto Serif KR',serif; font-size:28px; line-height:1.8; font-weight:400; margin:0 0 12px; letter-spacing:-1px; }
+#sungso-home-bright .sg-login p { font-size:12px; line-height:1.9; color:var(--sg-muted); }
+#sungso-home-bright .sg-google { margin:25px auto 17px; min-height:46px; padding:12px 35px; background:var(--sg-surface); border:1px solid var(--sg-line); border-radius:9px; display:flex; align-items:center; justify-content:center; gap:17px; font-size:12px; }
+#sungso-home-bright .sg-google span { font-size:18px; }
+#sungso-home-bright .sg-login small { font-size:11px; color:var(--sg-muted); }
+@container sg-home (max-width:760px) {
+  #sungso-home-bright .sg-top { padding:0 28px; }
+  #sungso-home-bright .sg-content { padding:0 28px 24px; }
+  #sungso-home-bright .sg-top-left { gap:26px; }
+  #sungso-home-bright .sg-hero { grid-template-columns:1fr 150px; min-height:235px; }
+  #sungso-home-bright .sg-hero h1 { font-size:30px; }
+  #sungso-home-bright .sg-keepsake { transform:scale(.8); width:175px; }
+#sungso-home-bright .sg-groups { grid-template-columns:1fr; gap:22px; }
+#sungso-home-bright .sg-apps { grid-template-columns:repeat(2,minmax(0,1fr)); }
+#sungso-home-bright .sg-app { min-height:93px; }
+#sungso-home-bright .sg-edit-row { grid-template-columns:minmax(140px,1fr) minmax(120px,160px) 90px 76px; gap:9px; }
+  #sungso-home-bright .sg-lower { gap:22px; }
+}
+@container sg-home (max-width:520px) {
+  #sungso-home-bright .sg-top { padding:0 22px; min-height:65px; }
+  #sungso-home-bright .sg-top-nav { display:none; }
+  #sungso-home-bright .sg-brand { font-size:25px; }
+  #sungso-home-bright .sg-content { padding:0 22px 22px; }
+  #sungso-home-bright .sg-user { font-size:11px; }
+  #sungso-home-bright .sg-hero { grid-template-columns:1fr; min-height:auto; padding:31px 0 29px; gap:0; }
+  #sungso-home-bright .sg-hero h1 { font-size:28px; line-height:1.65; letter-spacing:-1.5px; }
+  #sungso-home-bright .sg-hero-copy { margin-top:12px; font-size:11px; }
+  #sungso-home-bright .sg-keepsake { display:none; }
+  #sungso-home-bright .sg-eyebrow { font-size:11px; margin-bottom:16px; }
+  #sungso-home-bright .sg-greeting { font-size:12px; }
+  #sungso-home-bright .sg-heading { margin-bottom:14px; }
+  #sungso-home-bright h2 { font-size:14px; }
+  #sungso-home-bright .sg-heading-meta { font-size:11px; }
+  #sungso-home-bright .sg-apps { gap:10px; }
+  #sungso-home-bright .sg-app { flex-direction:column; align-items:flex-start; gap:12px; padding:15px; min-height:130px; }
+  #sungso-home-bright .sg-app-icon { width:32px; height:34px; border-radius:9px; }
+  #sungso-home-bright .sg-app-icon svg,#sungso-home-bright .sg-app-icon i { width:19px; height:19px; }
+  #sungso-home-bright .sg-app-title { font-size:12px; margin-bottom:5px; }
+  #sungso-home-bright .sg-app-sub { font-size:11px; line-height:1.7; }
+  #sungso-home-bright .sg-lower { grid-template-columns:1fr; gap:29px; margin-top:29px; }
+  #sungso-home-bright .sg-event { padding:15px 0; }
+  #sungso-home-bright .sg-event-info p { font-size:12px; }
+  #sungso-home-bright .sg-message { padding:15px; }
+  #sungso-home-bright .sg-message p { font-size:12px; }
+  #sungso-home-bright .sg-message-head b { font-size:11px; }
+  #sungso-home-bright .sg-message-head time { font-size:11px; }
+  #sungso-home-bright .sg-compose { min-height:44px; font-size:12px; }
+  #sungso-home-bright .sg-text-button { min-height:32px; }
+  #sungso-home-bright .sg-editor textarea { font-size:16px; }
+  #sungso-home-bright .sg-editor-actions button { min-height:44px; }
+  #sungso-home-bright .sg-footer { margin-top:27px; font-size:11px; letter-spacing:0; }
+  #sungso-home-bright .sg-date-layout { grid-template-columns:1fr; }
+  #sungso-home-bright .sg-dates-head h1 { font-size:27px; }
+  #sungso-home-bright .sg-edit-trigger { min-height:44px; }
+  #sungso-home-bright .sg-home-editor { padding:15px; }
+  #sungso-home-bright .sg-edit-row { grid-template-columns:minmax(0,1fr) 92px; grid-template-areas:'name show' 'group move'; gap:10px; padding:16px 0; }
+  #sungso-home-bright .sg-edit-app-name { grid-area:name; line-height:1.65; }
+  #sungso-home-bright .sg-group-select { grid-area:group; font-size:16px !important; min-height:44px; padding:8px; }
+  #sungso-home-bright .sg-show-label { grid-area:show; font-size:11px; min-height:44px; gap:5px; }
+  #sungso-home-bright .sg-move-controls { grid-area:move; }
+  #sungso-home-bright .sg-move { width:44px; height:44px; }
+  #sungso-home-bright .sg-layout-actions { align-items:flex-start; flex-direction:column; }
+  #sungso-home-bright .sg-layout-buttons { align-self:flex-end; }
+  #sungso-home-bright .sg-layout-buttons button { min-height:44px; }
+  #sungso-home-bright .sg-group-field { grid-template-columns:minmax(0,1fr) 92px; gap:10px; }
+  #sungso-home-bright .sg-group-field .sg-move-controls { grid-area:auto; }
+  #sungso-home-bright .sg-group-field input { font-size:16px; min-height:44px; }
+  #sungso-home-bright .sg-group-settings summary { min-height:44px; }
+}
+@media (prefers-reduced-motion:reduce) { #sungso-home-bright .sg-app { transition:none; } }
+</style>
+<div id="sungso-home-bright" aria-label="sungso 첫 홈 디자인">
+  <div class="sg-stage">
+    <header class="sg-top">
+      <div class="sg-top-left">
+        <button class="sg-brand" type="button" data-view="home" aria-label="sungso 홈">sungso<em>.</em></button>
+        <nav class="sg-top-nav" aria-label="주 메뉴">
+          <button type="button" class="sg-nav" data-view="home" aria-current="page">우리의 공간</button>
+          <button type="button" class="sg-nav" data-view="dates">우리의 날짜</button>
+        </nav>
+      </div>
+      <div class="sg-user" aria-label="성우로 로그인됨"><span class="sg-avatar">성우</span><span>성우</span><i data-lucide="lock-keyhole" aria-hidden="true"></i></div>
+    </header>
+    <main class="sg-content">
+      <div data-screen="home">
+        <section class="sg-hero" aria-label="우리의 공간 인사말">
+          <div>
+            <p class="sg-eyebrow">9월 13일, 일요일</p>
+            <p class="sg-greeting">안녕, 성우.</p>
+            <h1>우리의 오늘,<br><em>함께 채워가요.</em></h1>
+            <p class="sg-hero-copy">소소한 일상부터 설레는 여행까지.</p>
+          </div>
+          <div class="sg-keepsake" aria-hidden="true"><div class="sg-keepsake-back"></div><div class="sg-keepsake-front"><div class="sg-stamp"><span>S</span><span>&</span><span>S</span></div><p>OUR EVERYDAY</p></div><i data-lucide="heart"></i></div>
+        </section>
+        <section aria-labelledby="sg-apps-title">
+          <div class="sg-heading"><h2 id="sg-apps-title">우리의 앱</h2><button type="button" class="sg-edit-trigger" data-edit-home aria-expanded="false" aria-controls="sg-home-editor"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>홈 편집</button></div>
+          <div class="sg-groups">
+            <section class="sg-group" data-group="daily" aria-labelledby="sg-daily-title"><h3 class="sg-group-title" id="sg-daily-title">일상·집 준비</h3><div class="sg-apps">
+              <button type="button" class="sg-app sg-green" data-app-id="dates" data-view="dates"><span class="sg-app-icon"><i data-lucide="calendar-heart" aria-hidden="true"></i></span><span><span class="sg-app-title">우리의 날짜</span><span class="sg-app-sub">기념일과 약속<br>기억하고 싶은 날들</span></span></button>
+              <button type="button" class="sg-app sg-green" data-app-id="homehunt" data-app="HomeHunt"><span class="sg-app-icon"><i data-lucide="house" aria-hidden="true"></i></span><span><span class="sg-app-title">우리 집 찾기</span><span class="sg-app-sub">HomeHunt<br>둘이 살고 싶은 곳</span></span></button>
+            </div></section>
+            <section class="sg-group" data-group="wedding" aria-labelledby="sg-wedding-title"><h3 class="sg-group-title" id="sg-wedding-title">결혼 준비</h3><div class="sg-apps">
+              <button type="button" class="sg-app" data-app-id="wecost" data-app="WeCost"><span class="sg-app-icon"><i data-lucide="wallet" aria-hidden="true"></i></span><span><span class="sg-app-title">함께 쓰는 가계부</span><span class="sg-app-sub">WeCost<br>살림과 결혼 예산</span></span></button>
+              <button type="button" class="sg-app" data-app-id="invitation" data-app="Invitation"><span class="sg-app-icon"><i data-lucide="mails" aria-hidden="true"></i></span><span><span class="sg-app-title">모바일 청첩장</span><span class="sg-app-sub">Invitation<br>우리다운 초대장 고르기</span></span></button>
+            </div></section>
+            <section class="sg-group" data-group="travel" aria-labelledby="sg-travel-title"><h3 class="sg-group-title" id="sg-travel-title">우리의 여행</h3><div class="sg-apps">
+              <button type="button" class="sg-app sg-blue" data-app-id="travel" data-app="Travel"><span class="sg-app-icon"><i data-lucide="plane" aria-hidden="true"></i></span><span><span class="sg-app-title">여행 일정</span><span class="sg-app-sub">Travel<br>함께 떠나는 다음 여행</span></span></button>
+              <button type="button" class="sg-app sg-blue" data-app-id="honeymoon" data-app="Honeymoon"><span class="sg-app-icon"><i data-lucide="tree-palm" aria-hidden="true"></i></span><span><span class="sg-app-title">신혼여행 고르기</span><span class="sg-app-sub">Honeymoon<br>리조트와 견적 비교</span></span></button>
+            </div></section>
+          </div>
+          <div class="sg-layout-empty" hidden>홈에 표시할 앱을 골라주세요. ‘홈 편집’에서 다시 꺼낼 수 있어요.</div>
+          <section class="sg-home-editor" id="sg-home-editor" hidden aria-label="홈 앱 편집">
+            <p>표시할 앱과 묶음을 골라주세요.<br>화살표로 같은 묶음 안의 순서를 바꿀 수 있어요.</p>
+            <div class="sg-edit-rows"></div>
+            <details class="sg-group-settings"><summary>그룹 이름과 순서 바꾸기</summary><div class="sg-group-fields"></div></details>
+            <p data-layout-error hidden role="alert"></p>
+            <div class="sg-layout-actions"><span class="sg-layout-help" data-visible-count>6개 앱 표시</span><div class="sg-layout-buttons"><button class="sg-text-button" type="button" data-cancel-layout>취소</button><button type="button" class="sg-primary" data-apply-layout>적용하기</button></div></div>
+          </section>
+          <p class="sg-layout-status" role="status" data-layout-status hidden></p>
+          <div class="sg-toast" data-app-detail hidden role="status"></div>
+        </section>
+        <div class="sg-lower">
+          <section aria-labelledby="sg-events-title">
+            <div class="sg-heading"><h2 id="sg-events-title">다가오는 우리 일정</h2><button type="button" class="sg-text-button" data-view="dates">모두 보기 <i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+            <div class="sg-events">
+              <div class="sg-event"><div class="sg-event-date"><span>9월 · 토</span><b>19</b></div><div class="sg-event-info"><p>청첩장 디자인 같이 보기</p><small>마음에 드는 후보 골라두기</small></div><span class="sg-event-count">D−6</span></div>
+              <div class="sg-event"><div class="sg-event-date"><span>9월 · 토</span><b>26</b></div><div class="sg-event-info"><p>우리 집 보러 가는 날</p><small>함께하는 토요일</small></div><span class="sg-event-count">D−13</span></div>
+              <div class="sg-event"><div class="sg-event-date"><span>10월 · 목</span><b>01</b></div><div class="sg-event-info"><p>여행 준비 이야기</p><small>숙소 후보와 일정 살펴보기</small></div><span class="sg-event-count">D−18</span></div>
+            </div>
+          </section>
+          <section aria-labelledby="sg-notes-title">
+            <div class="sg-heading"><h2 id="sg-notes-title">서로에게 남긴 말</h2><span class="sg-heading-meta">LITTLE NOTES</span></div>
+            <div class="sg-messages" aria-live="polite">
+              <article class="sg-message"><div class="sg-message-head"><b>소희</b><time>오늘</time></div><p>청첩장은 편지 같은 디자인이 예쁘더라.<br>저녁에 같이 보자 :)</p></article>
+              <article class="sg-message"><div class="sg-message-head"><b>성우</b><time>어제</time></div><p>좋아! 마음에 드는 것들 찜해둘게 ♡</p></article>
+              <article class="sg-message"><div class="sg-message-head"><b>소희</b><time>어제</time></div><p>이번 주말엔 산책하고 맛있는 것도 먹자.</p></article>
+            </div>
+            <button type="button" class="sg-compose" data-compose><i data-lucide="pencil-line" aria-hidden="true"></i>한마디 남기기</button>
+            <form class="sg-editor" hidden>
+              <label for="sg-note-input">소희에게 남길 말</label><textarea id="sg-note-input" maxlength="500" placeholder="기억할 일도, 그냥 하고 싶은 말도." required></textarea>
+              <div class="sg-editor-actions"><button class="sg-text-button" type="button" data-cancel-note>취소</button><button class="sg-primary" type="button" data-save-note>메모 남기기</button></div>
+            </form>
+          </section>
+        </div>
+      </div>
+      <div data-screen="dates" hidden>
+        <section class="sg-dates-head"><button type="button" class="sg-text-button" data-view="home"><i data-lucide="arrow-left" aria-hidden="true"></i>우리의 공간</button><h1>우리의 날짜</h1><p>기다려지는 날도, 오래 기억할 날도.</p></section>
+        <section class="sg-dday" aria-label="결혼식 디데이"><p>결혼식까지</p><strong>D−174</strong><p>2027년 3월 6일 토요일</p></section>
+        <div class="sg-date-layout"><section><div class="sg-heading"><h2>2026년 9월</h2><span class="sg-heading-meta">SEPTEMBER</span></div><div class="sg-calendar" aria-label="2026년 9월 달력"></div></section><section><div class="sg-heading"><h2>다가오는 일정</h2></div><div class="sg-events" data-dates-events></div></section></div>
+      </div>
+      <div data-screen="login" hidden>
+        <section class="sg-login"><div class="sg-login-symbol"><i data-lucide="house-heart" aria-hidden="true"></i></div><p class="sg-eyebrow">OUR LITTLE EVERYDAY</p><h1>우리만의 공간에<br>오신 걸 환영해요.</h1><p>함께 채워가는 일상,<br>로그인하고 이어가요.</p><button type="button" class="sg-google" data-view="home"><span aria-hidden="true">G</span>Google로 계속하기</button><small>등록한 두 사람의 계정으로만 들어올 수 있어요.</small></section>
+      </div>
+      <footer class="sg-footer"><span class="sg-footer-heart">성우 <i data-lucide="heart" aria-hidden="true"></i> 소희</span><span>우리의 보통날이 특별해지는 곳.</span></footer>
+    </main>
+  </div>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('sungso-home-bright');
+  const stage = root.querySelector('.sg-stage');
+  const options = { device:'desktop', palette:'pink', screen:'home' };
+  const appCopy = {
+    WeCost:'함께 쓰는 가계부 — 결혼 비용, 저축과 살림 예산을 이어서 확인해요.',
+    HomeHunt:'우리 집 찾기 — 마음에 드는 집과 둘러본 곳을 함께 살펴봐요.',
+    Travel:'여행 일정 — 일정, 숙소, 준비할 일과 여행 예산을 확인해요.',
+    Honeymoon:'신혼여행 고르기 — 몰디브 리조트와 견적을 비교해요.',
+    Invitation:'모바일 청첩장 — 디자인을 펼쳐보고, 각자 찜하고, 우리의 선택을 모아요.'
+  };
+  const appNodes = new Map([...root.querySelectorAll('[data-app-id]')].map(el => [el.dataset.appId,el]));
+  const groupNodes = new Map([...root.querySelectorAll('[data-group]')].map(el => [el.dataset.group,el]));
+  const groupContainer = root.querySelector('.sg-groups');
+  const homeEditor = root.querySelector('.sg-home-editor');
+  const editTrigger = root.querySelector('[data-edit-home]');
+  let layout = {
+    groups:[
+      {id:'daily',name:'일상·집 준비',apps:['dates','homehunt']},
+      {id:'wedding',name:'결혼 준비',apps:['wecost','invitation']},
+      {id:'travel',name:'우리의 여행',apps:['travel','honeymoon']}
+    ],hidden:[]
+  };
+  let draft = null;
+  const appName = id => appNodes.get(id).querySelector('.sg-app-title').textContent;
+  const make = (tag,css,text) => { const el=document.createElement(tag); if(css)el.className=css; if(text!==undefined)el.textContent=text; return el; };
+  function renderLayout() {
+    let visibleGroups=0;
+    for (const group of layout.groups) {
+      const section=groupNodes.get(group.id), body=section.querySelector('.sg-apps');
+      section.querySelector('.sg-group-title').textContent=group.name;
+      body.replaceChildren();
+      for(const id of group.apps)if(!layout.hidden.includes(id))body.append(appNodes.get(id));
+      section.hidden=body.children.length===0;
+      if(!section.hidden)visibleGroups++;
+      groupContainer.append(section);
+    }
+    groupContainer.style.setProperty('--sg-columns',Math.max(1,visibleGroups));
+    groupContainer.hidden=Boolean(draft)||visibleGroups===0;
+    root.querySelector('.sg-layout-empty').hidden=Boolean(draft)||visibleGroups!==0;
+    homeEditor.hidden=!draft;
+    editTrigger.setAttribute('aria-expanded',String(Boolean(draft)));
+    editTrigger.hidden=Boolean(draft);
+  }
+  function moveButton(label,direction,disabled,action) {
+    const button=make('button','sg-move',direction<0?'↑':'↓');button.type='button';button.disabled=disabled;
+    button.setAttribute('aria-label',label+(direction<0?' 위로 이동':' 아래로 이동'));
+    button.addEventListener('click',action);return button;
+  }
+  function updateCount() {
+    root.querySelector('[data-visible-count]').textContent=(appNodes.size-draft.hidden.length)+'개 앱 표시';
+  }
+  function renderEditor() {
+    const rows=root.querySelector('.sg-edit-rows');rows.replaceChildren();
+    for(const group of draft.groups)for(const [index,id] of group.apps.entries()) {
+      const row=make('div','sg-edit-row');row.dataset.editId=id;
+      const name=make('div','sg-edit-app-name',appName(id));
+      name.append(make('small','',id==='dates'?'기념일·약속':appNodes.get(id).dataset.app));
+      const select=make('select','sg-group-select');select.setAttribute('aria-label',appName(id)+' 그룹');
+      for(const target of draft.groups){const option=make('option','',target.name);option.value=target.id;select.append(option);}
+      select.value=group.id;
+      select.addEventListener('change',()=>{
+        const destination=draft.groups.find(g=>g.id===select.value);
+        group.apps.splice(group.apps.indexOf(id),1);destination.apps.push(id);renderEditor();
+        root.querySelector('[data-edit-id="'+id+'"] select').focus();
+      });
+      const label=make('label','sg-show-label');
+      const toggle=make('input');toggle.type='checkbox';toggle.checked=!draft.hidden.includes(id);
+      toggle.setAttribute('aria-label',appName(id)+' 홈에 표시');
+      toggle.addEventListener('change',()=>{
+        draft.hidden=draft.hidden.filter(item=>item!==id);if(!toggle.checked)draft.hidden.push(id);updateCount();
+      });
+      label.append(toggle,make('span','','홈에 표시'));
+      const controls=make('div','sg-move-controls');
+      for(const dir of [-1,1])controls.append(moveButton(appName(id),dir,index+dir<0||index+dir>=group.apps.length,()=>{
+        const [moved]=group.apps.splice(index,1);group.apps.splice(index+dir,0,moved);renderEditor();
+        const next=root.querySelector('[data-edit-id="'+id+'"] .sg-move:not(:disabled)');if(next)next.focus();
+      }));
+      row.append(name,select,label,controls);rows.append(row);
+    }
+    const fields=root.querySelector('.sg-group-fields');fields.replaceChildren();
+    for(const [index,group] of draft.groups.entries()) {
+      const row=make('div','sg-group-field');
+      const field=make('input');field.type='text';field.maxLength=18;field.value=group.name;field.dataset.groupName=group.id;
+      field.setAttribute('aria-label',group.id==='daily'?'일상 그룹 이름':group.id==='wedding'?'결혼 그룹 이름':'여행 그룹 이름');
+      field.addEventListener('input',()=>{
+        group.name=field.value;
+        root.querySelectorAll('.sg-group-select option').forEach(option=>{if(option.value===group.id)option.textContent=field.value||'이름 입력 중';});
+      });
+      const controls=make('div','sg-move-controls');
+      for(const dir of [-1,1])controls.append(moveButton(group.name+' 그룹',dir,index+dir<0||index+dir>=draft.groups.length,()=>{
+        const [moved]=draft.groups.splice(index,1);draft.groups.splice(index+dir,0,moved);renderEditor();
+        root.querySelector('[data-group-name="'+group.id+'"]').focus();
+      }));
+      row.append(field,controls);fields.append(row);
+    }
+    updateCount();
+  }
+  editTrigger.addEventListener('click',()=>{
+    draft=structuredClone(layout);root.querySelector('[data-layout-status]').hidden=true;
+    root.querySelector('[data-app-detail]').hidden=true;root.querySelector('[data-layout-error]').hidden=true;
+    renderEditor();renderLayout();
+  });
+  root.querySelector('[data-cancel-layout]').addEventListener('click',()=>{draft=null;renderLayout();editTrigger.focus();});
+  root.querySelector('[data-apply-layout]').addEventListener('click',()=>{
+    const error=root.querySelector('[data-layout-error]');
+    if(draft.groups.some(group=>!group.name.trim())){error.textContent='그룹 이름을 입력해주세요.';error.hidden=false;return;}
+    layout=structuredClone(draft);layout.groups.forEach(group=>group.name=group.name.trim());draft=null;renderLayout();
+    const status=root.querySelector('[data-layout-status]');status.textContent='홈 구성을 바꿨어요. 숨긴 앱은 홈 편집에서 다시 표시할 수 있어요.';status.hidden=false;editTrigger.focus();
+  });
+  function render() {
+    stage.classList.toggle('sg-phone', options.device === 'mobile');
+    const palettes={pink:{accent:'#c93e79',soft:'#fff0f7'},sky:{accent:'#3975b8',soft:'#edf6ff'},lavender:{accent:'#7c56b8',soft:'#f5f0ff'}};
+    root.style.setProperty('--sg-accent',palettes[options.palette].accent);
+    root.style.setProperty('--sg-soft',palettes[options.palette].soft);
+    root.querySelectorAll('[data-screen]').forEach(el => { el.hidden = el.dataset.screen !== options.screen; });
+    root.querySelectorAll('.sg-nav').forEach(el => { if (el.dataset.view === options.screen) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current'); });
+    root.querySelector('.sg-user').hidden = options.screen === 'login';
+    root.querySelector('.sg-top-nav').hidden = options.screen === 'login';
+  }
+  root.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { options.screen=button.dataset.view; render(); }));
+  root.querySelectorAll('[data-app]').forEach(button => button.addEventListener('click', () => {
+    root.querySelectorAll('[data-app]').forEach(el => { el.dataset.selected = String(el === button); });
+    const detail = root.querySelector('[data-app-detail]'); detail.textContent = appCopy[button.dataset.app]; detail.hidden = false;
+  }));
+  const editor = root.querySelector('.sg-editor');
+  const input = root.querySelector('#sg-note-input');
+  const compose = root.querySelector('[data-compose]');
+  const closeEditor = () => { editor.hidden=true; compose.hidden=false; };
+  compose.addEventListener('click', () => { editor.hidden=false; compose.hidden=true; input.focus(); });
+  root.querySelector('[data-cancel-note]').addEventListener('click', closeEditor);
+  const saveNote = event => {
+    event.preventDefault(); const value=input.value.trim(); if (!value) { input.focus(); return; }
+    const message=document.createElement('article'); message.className='sg-message';
+    const head=document.createElement('div'); head.className='sg-message-head';
+    const name=document.createElement('b'); name.textContent='성우';
+    const time=document.createElement('time'); time.textContent='방금';
+    const text=document.createElement('p'); text.textContent=value; text.style.whiteSpace='pre-wrap';
+    head.append(name,time); message.append(head,text);
+    const messages=root.querySelector('.sg-messages'); messages.prepend(message);
+    while(messages.children.length > 3) messages.lastElementChild.remove();
+    input.value=''; closeEditor();
+  };
+  editor.addEventListener('submit', event => event.preventDefault());
+  root.querySelector('[data-save-note]').addEventListener('click', saveNote);
+  const calendar = root.querySelector('.sg-calendar');
+  for (const day of ['일','월','화','수','목','금','토']) { const cell=document.createElement('span'); cell.className='sg-weekday'; cell.textContent=day; calendar.append(cell); }
+  for (let i=0;i<2;i++) calendar.append(document.createElement('span'));
+  for (let day=1;day<=30;day++) { const cell=document.createElement('span'); cell.textContent=String(day); if(day===13) cell.className='sg-today'; else if([19,26].includes(day)) cell.className='sg-marked'; calendar.append(cell); }
+  root.querySelector('[data-dates-events]').innerHTML=root.querySelector('.sg-events').innerHTML;
+  renderLayout();
+  render();
+  if (globalThis.Tweak) {
+    const tweak=new Tweak({container:root,onChange:render});
+    tweak.addSelect(options,'device',{label:'화면 크기',options:[{label:'데스크톱',value:'desktop'},{label:'휴대폰 · 390px',value:'mobile'}]});
+    tweak.addSelect(options,'palette',{label:'밝은 포인트 색감',options:[{label:'맑은 핑크',value:'pink'},{label:'하늘빛',value:'sky'},{label:'라벤더',value:'lavender'}]});
+    tweak.addSelect(options,'screen',{label:'화면 보기',options:[{label:'첫 홈',value:'home'},{label:'우리의 날짜',value:'dates'},{label:'로그인',value:'login'}]});
+  }
+})();
+</script>
