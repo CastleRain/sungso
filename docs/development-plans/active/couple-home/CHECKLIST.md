@@ -14,16 +14,18 @@
 - [x] Travel–WeCost 원자 저장·금액 이력·출발 준비 보존
 - [x] 정적 개인 기본값의 인증 저장 이전·기존 운영 값 보존 확인
 - [ ] Drive 제한 공유·회원 전용 PDF 링크·공개 파일 제거 확인 — 사용자 요청으로 보류, GitHub PDF 10개 유지
-- [ ] 브라우저 자격증명 제거·폐기/교체·서버 인증 경계 확인
+- [x] NAVER 공개 브라우저 키·공개 프록시 제거 및 회원 전용 서버 경계 구현 — 새 키의 실제 설정·이전 키 폐기와 구분
+- [x] NAVER Client Secret 재발급·Render 신규 키 설정 — 동일 Client ID·Secret 변경 확인. 기존 설정 백업 후 지역 검색 Secret 교체·블로그 검색 ID/Secret 추가, 총 11개 필드·다른 기존 8개 보존 및 2026-09-13 15:16:47.553 UTC 재조회 일치. Render dep-dajbrqvqj5pc73d0p2g0 Live/Free 확인
+- [ ] 노출된 이전 NAVER 키 폐기 확인 — 재발급 뒤에도 30일 유효하므로 교체만으로 완료 처리하지 않음. 즉시 삭제는 NAVER 별도 문의 필요([공식 공지](https://developers.naver.com/notice/article/33626))
 - [x] 과거 Git 노출 후속 작업과 현재 보호 범위를 구분해 기록 — RESULTS의 남은 작업
 - [x] build/test/check 및 필요한 서비스 빌드·Emulator 통과 — 추가 보강 전체 1,556개. 기존 서버 번들 3개·규칙 Emulator 36개, 후속 청첩장 Emulator 18개 통과; 보강은 서버/규칙 변경 없음
 - [x] 1440px/390px 대역 QA·두 회원/비회원·동시 편집·실패 복구 확인 — RESULTS/캡처·Emulator/구독 회귀 근거
 - [x] 현재 소스/배포 자산의 개인 자료·비밀값 노출 검사 — 현재 보관 문서/시안도 일반화. PDF 공개 예외·과거 Git 이력은 PRIVATE-DATA에 명시
 - [x] commit·push·Pages/필요 서버/규칙 배포 결과 확인 — 1935118, Pages 34745590531, Render dep-daj549ek1f9s73fhfia0
-- [ ] 실제 회원 접근과 비회원 차단 검증 완료 — 성우 홈/날짜/WeCost/Travel/청첩장 읽기·로그아웃 및 익명 403 확인. 성우 Honeymoon/HomeHunt와 소희 전체 앱 실제 검증 미완료
+- [ ] 실제 회원 접근과 비회원 차단 검증 완료 — 성우 홈/날짜/WeCost/Travel/청첩장 읽기·로그아웃·홈 복구, HomeHunt 실제 회원 진입/회원 API 접근 및 익명 403 확인. HomeHunt 백업 저장·복원은 실행하지 않았고 자동 요청 장부 쓰기는 미측정. 남은 실제 접근 QA는 성우 Honeymoon·소희 전체 앱
 - [x] RESULTS.md에 변경·검증·한계·커밋·배포 근거 기록
 - [ ] completed/couple-home으로 이동하고 개발 계획 색인 갱신
-- [ ] 완료 감사의 추가 로그아웃 보강 공개 배포 — ea578cb master push. Pages 34748753391 queued/작업 0개, 수동 재시도 HTTP 500. 변경 JS 4개 공개 미반영
+- [x] 완료 감사의 추가 로그아웃 보강 공개 배포 — c11ab3a의 후속 Pages 34761005184 성공, 2026-09-13 14:52:36.736 UTC 공개 11/11 HTTP 200·해시 일치. 인증 2개·HomeHunt JS 2개 반영 확인. 기존 대기 실행 2개는 queued로 유지
 
 ## 진행 기록
 

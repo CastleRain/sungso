@@ -1,6 +1,6 @@
 # 운영 적용 근거 — 2026-09-13
 
-2026-09-13 07:31 UTC 기준. 인증·보안의 로컬 검사는 [SECURITY-VALIDATION.md](./SECURITY-VALIDATION.md), 전체 완료 여부와 최종 릴리스는 [RESULTS.md](./RESULTS.md) 및 [CHECKLIST.md](./CHECKLIST.md)를 따른다. 이 기록에는 이메일·UID·토큰·개인 문서 내용·자격증명을 넣지 않는다.
+초기 확인은 2026-09-13 07:31 UTC이며, 추가 보강 배포·신규 키 설정·실제 회원 접근의 후속 확인은 아래에 시각별로 기록한다. 인증·보안의 로컬 검사는 [SECURITY-VALIDATION.md](./SECURITY-VALIDATION.md), 전체 완료 여부와 최종 릴리스는 [RESULTS.md](./RESULTS.md) 및 [CHECKLIST.md](./CHECKLIST.md)를 따른다. 이 기록에는 이메일·UID·토큰·개인 문서 내용·자격증명을 넣지 않는다.
 
 ## Firestore 규칙 배포와 익명 접근
 
@@ -53,4 +53,24 @@
 - `07:40:16.084Z` 운영 문서의 최종 GET 대조에서 **기존 67건 보존·변경 0건·누락 0건**을 다시 확인했다. 원백업 해시를 먼저 재검증하고 GET 이외 메서드를 거부하는 읽기 전용 요청으로 비교했다. 마이그레이션을 다시 실행하지 않았다.
 - 공개 브라우저에서 성우 회원의 홈·날짜 기존 일정 3개, WeCost 23개 행, Travel 8개 화면·예산 6개 행의 실제 읽기가 확인됐다. 소희 계정의 실제 브라우저 접근은 아직 미확인이다. 대역/Emulator의 두 회원 성공과 구분한다.
 
-비민감 원본 근거는 Git 제외 로컬의 `pages-release-evidence.json`, `public-assets-release-evidence.json`, `production-preservation-final-evidence.json`에 보관했다. 관리자 세션 폐기 이후 이 검증 작업은 추가 관리자 조회를 실행하지 않는다. PDF 제한 공유·NAVER 자격증명 교체·남은 실제 회원 검증 때문에 계획은 계속 `active`에 둔다.
+비민감 원본 근거는 Git 제외 로컬의 `pages-release-evidence.json`, `public-assets-release-evidence.json`, `production-preservation-final-evidence.json`에 보관했다. 관리자 세션 폐기 이후 이 검증 작업은 추가 관리자 조회를 실행하지 않았다. 당시 PDF 제한 공유·NAVER 자격증명 교체·남은 실제 회원 검증은 미완료였으며, 키 설정과 HomeHunt 접근의 후속 결과는 아래에서 구분한다.
+
+## 추가 로그아웃 보강 공개 반영 — 14:52 UTC
+
+- `6e7c0c7` 뒤의 자동 공공 `home-supply.json` 갱신 1개를 fast-forward로 보존한 HEAD `c11ab3a1912d9d66a8a5e12813eb5f7110ac9521`의 [Pages 34761005184](https://github.com/CastleRain/sungso/actions/runs/34761005184)가 성공했다. `workflow_dispatch` 실행의 루트 check·서비스 번들 3개 validate 완료는 13:52:08 UTC, deploy 완료는 13:52:20 UTC다.
+- 같은 소스의 빌드와 공개 진입 HTML 7개·인증 모듈 2개·HomeHunt JS 2개를 2026-09-13 14:52:36.736 UTC 대조했다. 11/11개가 HTTP 200·LF 정규화 SHA-256 일치이며 앞서 미반영이었던 JS 4개도 포함한다. 근거는 Git 제외 `.private-migration/completion-public-evidence.json`이다.
+- 기존 대기 실행 2개는 여전히 `queued`다. 이를 성공으로 바꾸지 않고 후속 성공 실행으로 공개 배포 차단이 해소된 것으로 기록한다.
+
+## NAVER 신규 키 설정·Render Live 확인 — 15:16 UTC
+
+- 사용자 재발급 뒤 실제 애플리케이션의 Client ID 동일·Secret 변경을 확인했다. 기존 Render `HOMEHUNT_PROVIDER_CONFIG`를 비공개 백업·검증한 뒤 `NAVER_LOCAL_SEARCH_CLIENT_SECRET`을 교체하고 `NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET`을 추가했다. 총 11개 필드 중 다른 기존 8개는 그대로다.
+- 2026-09-13 15:16:47.553 UTC 환경설정 재조회에서 신규 키 일치와 다른 값 보존을 확인했다. 소스 `c11ab3a`의 [Render dep-dajbrqvqj5pc73d0p2g0](https://dashboard.render.com/web/srv-dag27je7bikc73e2cjtg/deploys/dep-dajbrqvqj5pc73d0p2g0)는 Deploy succeeded·Live이며 Free 요금제를 유지한다. 공개 `/healthz` 200·익명 `/api/health` 401을 확인했다. 실제 값·계정 식별자는 문서에 기록하지 않으며 비민감 근거는 Git 제외 `.private-migration/naver-rotation-evidence.json`이다.
+- 블로그 API는 요청 장부를 쓰므로 이번 QA에서 호출하지 않았다. 신규 키 설정·배포 확인과 실제 블로그 공급자 응답 검증을 구분한다.
+- 브라우저 키 제거·회원 서버 경계와 신규 키 설정은 완료다. [NAVER 공식 정책](https://developers.naver.com/notice/article/33626)에 따라 재발급 후 이전 키도 30일 동안 유효하며 즉시 삭제는 별도 문의가 필요하다. 이전 키의 즉시 폐기는 아직 미완료이고 신규 키 설정을 폐기 근거로 사용하지 않는다.
+
+## 성우 HomeHunt 실제 접근·자동 쓰기 검증 한계 — 15:19 UTC
+
+- 2026-09-13 15:19:54.685 UTC 실제 연결 패널에서 온라인 서버 정상·공식 단지 17,851개·계정 전용 저장 표시와 표시 중인 경고 0개를 확인했다. 성우의 실제 회원 진입·회원 API 접근을 확인한 근거이며, 이전 시간 초과 판단은 숨겨진 안내 문구를 읽은 오탐으로 정정한다. 근거는 Git 제외 `.private-migration/real-homehunt-read-evidence.json`이다.
+- 개인 저장·백업 복원 버튼과 통근 실행은 누르지 않았다. 자체 백업 복원 검증을 완료했다고 기록하지 않는다.
+- 자동 진입의 `/recommendations/recent` GET은 요청 제한 장부를 쓸 수 있고, 저장 후보의 `/kapt/complex` 자동 조회는 캐시를 쓸 수 있다. 실제 화면의 저장 후보는 0개였으나 자동 요청과 장부 쓰기 발생 여부를 측정하지 못했다. 따라서 이번 실제 확인에 운영 DB 쓰기 0회를 주장하지 않는다. 앞선 대역 검증의 쓰기 0회 근거와 구분하며, 미측정을 개인 변경·데이터 훼손의 증거로 해석하지 않는다.
+- 이후 전체 실제 HomeHunt QA는 자동 요청을 차단하는 대역을 준비한 뒤 진행한다. 남은 실제 접근 QA는 성우 Honeymoon과 소희 전체 앱이며 필요한 로그인과 자동 쓰기 차단 준비를 기다린다. 이전 키 폐기와 사용자 보류 PDF 보호도 남아 계획은 `active`에 둔다.

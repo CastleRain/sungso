@@ -57,4 +57,33 @@
 
 최종 전체 검사 1,556개·인증/HomeHunt 대상 48개와 내부 로그아웃 대역 검증을 통과했다. 보강 커밋 `ea578cb411ad004b6a980d28a7c024c3fcf36a30`을 최신 master에 fast-forward push했고 원래 작업 폴더의 다른 미커밋 변경은 그대로다. [Pages 34748753391](https://github.com/CastleRain/sungso/actions/runs/34748753391)은 현재 GitHub 대기열에 있으며 배포 성공으로 처리하지 않았다. 다음은 실행 완료와 공개 자산 대조다.
 
-추가 배포 확인: 8분 이상 `queued`/작업 0개인 실행의 취소는 이미 완료된 실행이라는 응답으로 거절됐지만, 캐시를 우회한 조회는 계속 대기였다. 공개 대조(09:09:03 UTC)도 변경 JS 4개의 미반영을 확인했다. 같은 master로 한 번 수동 재시도했으나 GitHub API HTTP 500으로 실패했다. 이 보강은 배포 미완료이며 RESULTS에 근거를 남겼다. 다음은 GitHub 실행 정상화 후 Pages 완료·11개 자산 일치 재검증이다.
+추가 배포 확인 당시: 8분 이상 `queued`/작업 0개인 실행의 취소는 이미 완료된 실행이라는 응답으로 거절됐지만, 캐시를 우회한 조회는 계속 대기였다. 공개 대조(09:09:03 UTC)도 변경 JS 4개의 미반영을 확인했다. 같은 master로 한 번 수동 재시도했으나 GitHub API HTTP 500으로 실패했다. 이 시점에는 보강 배포를 미완료로 남겼으며, 아래 후속 성공 실행과 자산 대조로 공개 반영을 확인했다.
+
+## 2026-09-14 — 재개 후 추가 보강 배포 차단 해소
+
+- 작업 재개 시 `6e7c0c7` 뒤의 자동 공공 `home-supply.json` 갱신 1개를 fast-forward로 보존했다. 확인한 HEAD는 `c11ab3a1912d9d66a8a5e12813eb5f7110ac9521`이다.
+- 이 커밋의 `workflow_dispatch` 실행 [Pages 34761005184](https://github.com/CastleRain/sungso/actions/runs/34761005184)가 성공했다. 2026-09-13 13:52:08 UTC validate에서 루트 check·서비스 번들 3개가 통과했고 13:52:20 UTC deploy가 성공했다.
+- 같은 소스를 빌드한 뒤 2026-09-13 14:52:36.736 UTC 공개 파일 11개를 대조했다. 모두 HTTP 200이며 LF로 정규화한 SHA-256이 일치한다. 이전에 미반영이었던 공통 인증 모듈 2개·HomeHunt JS 2개도 포함한다. 원본 근거는 Git 제외 `.private-migration/completion-public-evidence.json`이다.
+- `34748753391`을 포함한 기존 대기 실행 2개는 재개 후에도 `queued`다. 해당 실행을 성공으로 바꾸지 않고 후속 실행의 성공으로 배포 차단이 해소된 것으로 기록한다.
+
+다음: NAVER 신규 키 재발급·Render 설정과 이전 키 폐기를 각각 확인하고, 남은 실제 회원 QA를 진행한다. 사용자 지시로 GitHub에 유지한 PDF 보호도 보류 상태이며 계획은 `active`에 유지한다.
+
+## 2026-09-14 — NAVER 완료 조건 분리·실제 세션 확인
+
+- NAVER 공개 브라우저 키·공개 프록시 제거와 회원 전용 Render 서버 경계는 구현 완료다. 이 시점에는 신규 키 재발급/Render 설정과 노출된 이전 키 폐기를 별도 미완료 조건으로 CHECKLIST·RESULTS에 나눠 기록했다. 후속 설정 완료는 아래에 기록한다.
+- 소유자 로그인에서 대상 ‘성우소희’ 애플리케이션과 Render의 기존 지역 검색 키가 같은 애플리케이션의 값임을 확인했다. 새 키 적용에는 `HOMEHUNT_PROVIDER_CONFIG`의 `NAVER_LOCAL_SEARCH_CLIENT_SECRET` 교체와 `NAVER_SEARCH_CLIENT_ID`·`NAVER_SEARCH_CLIENT_SECRET` 추가가 필요하고 다른 공급자 설정은 유지하기로 했다. 이 시점에는 재발급 확인이 미완료였으며 서버 환경설정을 저장하지 않았다. 실제 값은 기록하지 않는다.
+- [NAVER 공식 공지](https://developers.naver.com/notice/article/33626)는 2026-08-26 이후 재발급된 경우 이전 Client Secret도 30일간 유효하다고 안내한다. 즉시 삭제는 별도 문의가 필요하므로 재발급·교체만으로 폐기 완료라고 기록하지 않는다.
+- 성우의 홈 로그인 복구와 HomeHunt 회원 화면 진입을 확인했다. 처음에는 숨겨진 시간 초과 안내 문구를 서버 장애로 읽었으나, 아래 실제 연결 패널 확인에서 오탐으로 정정했다. 성우 Honeymoon과 소희 전체 앱의 실제 검증은 남아 있다.
+
+다음: 신규 키 재발급·Render 설정을 완료한 뒤 이전 키 폐기 근거를 별도로 확보하고, HomeHunt 서버 연결과 남은 회원 접근을 확인한다. PDF 보호 보류와 미완료 조건 때문에 `active`를 유지한다.
+
+## 2026-09-14 — 신규 키 설정 완료·HomeHunt 확인 정정
+
+- 사용자의 재발급 뒤 실제 애플리케이션의 Client ID 동일·Secret 변경을 확인했다. 기존 Render `HOMEHUNT_PROVIDER_CONFIG`를 비공개 백업·검증하고 지역 검색 Secret을 교체했으며 블로그 검색 ID/Secret을 추가했다. 총 11개 필드 중 다른 기존 8개는 유지했다. 2026-09-13 15:16:47.553 UTC 재조회에서 신규 키 일치를 확인했고 실제 값은 기록하지 않았다.
+- 소스 `c11ab3a`의 Render `dep-dajbrqvqj5pc73d0p2g0`가 Deploy succeeded·Live·Free임을 확인했다. `/healthz` 200·익명 `/api/health` 401이며, 요청 장부 쓰기가 있는 블로그 API는 QA로 호출하지 않았다. `.private-migration/naver-rotation-evidence.json`이 비공개 근거다. 이전 키 폐기는 재발급/설정과 별도 미완료 조건이다.
+- 2026-09-13 15:19:54.685 UTC 실제 HomeHunt 연결 패널은 온라인 서버 정상·공식 단지 17,851개·계정 전용 저장을 표시했고 표시 중인 경고는 0개였다. 앞서 시간 초과로 기록한 문구는 숨겨진 안내여서 오탐으로 정정한다. 성우의 실제 회원 진입·회원 API 접근을 확인했으며 `.private-migration/real-homehunt-read-evidence.json`에 근거를 보관한다.
+- 개인 저장·백업 복원 버튼과 통근 실행은 누르지 않았다. 자동 진입의 `/recommendations/recent` 요청 제한 장부와 저장 후보의 `/kapt/complex` 캐시는 쓰기가 발생할 수 있다. 화면의 저장 후보는 0개였으나 자동 요청·장부 쓰기 발생 여부는 미측정이다. 이번 실제 확인을 과거 대역의 운영 DB 쓰기 0회 근거에 포함하지 않고, 개인 변경·훼손이나 백업 복원 검증으로 추정하지 않는다. 이후 전체 실제 HomeHunt QA에는 자동 요청 차단 대역이 필요하다.
+
+문서 반영 검증: 최종 문서 11개에서 회원 이메일·이전/신규 NAVER Secret 일치 0건, 로컬 링크 63개 누락 0건과 `git diff --check` 통과를 확인했다. `check-site`는 공개 파일 228개의 내부 참조 382개를 통과했다. 최신 master `c11ab3a`와 원래 작업 폴더의 무관한 미커밋 변경 4개 보존을 확인했으며 이 기록은 추가 운영 API 검증을 뜻하지 않는다.
+
+다음: 아직 유효할 수 있는 이전 NAVER 키의 즉시 폐기를 [미발송 문의 초안과 완료 근거](NAVER-KEY-REVOCATION.md)에 따라 별도로 확인하고 성우 Honeymoon·소희 전체 앱의 실제 접근을 검증한다. 필요한 로그인과 자동 쓰기 차단 준비를 기다리며, 사용자 보류 PDF와 남은 조건 때문에 `active`를 유지한다.

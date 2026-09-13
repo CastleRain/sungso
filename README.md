@@ -49,4 +49,4 @@ npm run check
 
 [우리 둘의 홈·인증 전환 계획과 프로토타입](docs/development-plans/active/couple-home/README.md) · [계획 목록](docs/development-plans/README.md)
 
-개인 PDF 10개는 사용자 요청으로 GitHub에 유지한다. Drive 제한 공유와 노출된 외부 검색 키 교체는 [진행 기록](docs/development-plans/active/couple-home/PROGRESS.md)의 후속 작업이다. 현재 소스에서 개인 기준 자료를 제거해도 과거 Git 이력의 노출이 해소되는 것은 아니다.
+개인 PDF 10개는 사용자 요청으로 GitHub에 유지한다. NAVER 신규 키의 서버 설정·배포는 완료했으며 이전 키 폐기와 Drive 제한 공유, 남은 실제 회원 접근은 [진행 기록](docs/development-plans/active/couple-home/PROGRESS.md)의 후속 작업이다. 새 키를 설정해도 일정 기간 유효한 이전 키가 즉시 폐기되지는 않는다. 현재 소스에서 개인 기준 자료를 제거해도 과거 Git 이력의 노출이 해소되는 것은 아니다.

@@ -36,9 +36,9 @@
 
 ### 2026-09-13 — 개인 기준 자료 인증 전환
 
-리조트·견적 기준 자료는 회원 전용 `private_data/honeymoon_reference`에서 읽고 현재 여행 기준은 공통 보호 모듈로 연결한다. 공개 report/XML 사본을 비공개 백업 후 보관 안내로 바꿨다. 브라우저 Naver 자격증명·공개 프록시를 제거하고 회원 토큰을 사용하는 Render 후기 검색으로 연결했다. 사용자가 PDF GitHub 보존을 선택하여 기존 10개 파일·URL·뷰어는 유지한다. PDF 보호와 과거 키 폐기·교체는 미완료이며 [계획의 자료 전환 기록](../../docs/development-plans/active/couple-home/PRIVATE-DATA.md)에 구현·검증 범위와 후속 작업을 남겼다.
+리조트·견적 기준 자료는 회원 전용 `private_data/honeymoon_reference`에서 읽고 현재 여행 기준은 공통 보호 모듈로 연결한다. 공개 report/XML 사본을 비공개 백업 후 보관 안내로 바꿨다. 브라우저 Naver 자격증명·공개 프록시를 제거하고 회원 토큰을 사용하는 Render 후기 검색으로 연결했다. 사용자가 재발급한 신규 키의 서버 설정·재조회·Render Live는 확인했으며, 요청 장부 쓰기를 피하기 위해 실제 블로그 API QA는 실행하지 않았다. 이전 키 즉시 폐기는 별도 미완료다. 사용자가 PDF GitHub 보존을 선택하여 기존 10개 파일·URL·뷰어를 유지한다. [자료 전환 기록](../../docs/development-plans/active/couple-home/PRIVATE-DATA.md)과 [최신 운영 근거](../../docs/development-plans/active/couple-home/OPERATIONS.md)에 범위와 후속 작업을 남겼다.
 
-**다음:** 운영 자료·규칙·서버 배포 후 회원 화면을 검증하고 보류한 PDF 보호와 노출 키 교체를 별도 처리한다.
+**다음:** 자동 환율 저장·공급자 호출을 차단한 환경에서 성우·소희의 실제 회원 화면을 확인하고 보류한 PDF 보호와 이전 키 즉시 폐기를 별도로 처리한다.
 
 ### 2026-09-13 — 리조트 앱·보관 자료 분리, 로컬 검사 완료
 
