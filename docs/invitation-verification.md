@@ -106,4 +106,8 @@ Emulator는 `demo-homehunt`와 localhost만 사용했다. 운영 코드의 `fire
 
 화면 검증은 내장 브라우저와 loopback 메모리 대역이며, 실제 iOS/Android 기기 검증으로 표현하지 않는다. 모션 감소는 CSS·상태 전환 단위 검사로 확인했다. 운영 DB QA 쓰기·새 통근/공급자 호출은 0이다. 기존 개인 홈 계획의 외부 키 교체·실회원 확인·PDF 보호 보류는 별도로 남는다.
 
-**다음:** 구현 커밋의 Pages 배포·공개 자산 확인 후 근거를 추가한다.
+구현 커밋 [`6d8667f`](https://github.com/CastleRain/sungso/commit/6d8667fec1755d91a548be614b5a55a4d4394f48)를 최신 master에 fast-forward push했다. [Pages 34747581063](https://github.com/CastleRain/sungso/actions/runs/34747581063)의 Node 22 검사·서비스 번들 3개·배포가 성공했다(08:24:40 UTC). 08:25:55 UTC 공개 청첩장 자산 **28/28개**가 HTTP 200이며 로컬 `dist`와 해시가 일치했다. 텍스트의 CRLF만 LF로 정규화하고 이미지 바이트는 그대로 비교했다. 공개 `#preview/envelope` 직접 링크는 인증 전 개인 루트를 숨긴다. 운영 로그인 후 새 체험은 대역 검증과 구분하며 실제 운영 저장을 실행하지 않았다.
+
+이번 변경은 웹 예시·검증만 수정하여 Render 서버·Firestore 규칙 재배포나 데이터 이전이 필요하지 않았다. 기존 무료 운영·인증 경계·PDF 공개 보류를 유지한다. 정적 자산 원본 근거는 Git 제외 로컬 `signature-public-evidence.json`, Emulator 근거는 `signature-emulator.log`에 있다.
+
+**다음:** 세 시그니처를 비교해 실제 제작에 담을 연출을 고른다. 실제 하객용 제작은 별도 작업이다.

@@ -57,4 +57,6 @@ Firestore 규칙은 07:24:35 UTC 배포 성공. 배포 소스 SHA-256 `b54aa098f
 
 루트 검사 1,542개·Invitation 51개·localhost Emulator 18개를 통과했고, 기존 9종 × 3설정 HTML 27개와 12종의 이전 옵션/초안이 일치했다. 1440px/390px 화면·체험 상태 복원·숨김·사진 확대·공동 선택 충돌·로그아웃을 대역에서 확인했다. 체험 중 쓰기 0회, 명시적 찜/선택 이후 대역 쓰기 2회이며 운영/공급자 호출은 0이다. [상세 검증](../../../invitation-verification.md)과 evidence의 `signature-*` 캡처를 따른다. 위 개인 홈 계획의 남은 조건은 그대로 유지한다.
 
-구현 커밋·Pages 배포 근거는 배포 확인 후 아래에 추가한다.
+구현 커밋 [`6d8667f`](https://github.com/CastleRain/sungso/commit/6d8667fec1755d91a548be614b5a55a4d4394f48)를 최신 master에 fast-forward push했다. [Pages 34747581063](https://github.com/CastleRain/sungso/actions/runs/34747581063)의 Node 22 검사·서비스 번들 3개·배포가 성공했다(08:24:40 UTC). 08:25:55 UTC 공개 청첩장 자산 **28/28개**가 HTTP 200이며 로컬 `dist`와 해시가 일치했다. 텍스트의 CRLF만 LF로 정규화하고 이미지 바이트는 그대로 비교했다. 공개 `#preview/envelope` 직접 링크는 인증 전 개인 루트를 숨긴다. 운영 로그인 후 새 체험은 대역 검증과 구분하며 실제 운영 저장을 실행하지 않았다.
+
+이번 변경은 웹 예시·검증만 수정하여 Render 서버·Firestore 규칙 재배포나 데이터 이전이 필요하지 않았다. 기존 무료 운영·인증 경계·PDF 공개 보류를 유지한다. 정적 자산 원본 근거는 Git 제외 로컬 `signature-public-evidence.json`, Emulator 근거는 `signature-emulator.log`에 있다.
