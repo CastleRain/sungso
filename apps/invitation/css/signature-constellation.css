@@ -1,0 +1,147 @@
+/* A complete editorial invitation. Only the signature constellation is styled. */
+.signature-invitation.signature-constellation {
+  --cs-line: color-mix(in srgb, var(--accent) 28%, transparent);
+  --cs-muted: color-mix(in srgb, var(--ink) 76%, var(--paper));
+  color: var(--ink);
+  background: var(--paper);
+}
+.signature-constellation .cs-edition {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 19px 23px; border-bottom: 1px solid var(--cs-line);
+  color: var(--accent); font: 8px/1.5 var(--sans); letter-spacing: 1.4px;
+}
+.signature-constellation .cs-opening .cover-constellation {
+  min-height: 780px; padding-top: 47px; padding-bottom: 43px;
+  background: radial-gradient(ellipse at 72% 34%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 62%), var(--paper);
+}
+.signature-constellation .cs-opening .world-title { font-size: clamp(59px, 16vw, 76px); line-height: .93; letter-spacing: -2.7px; margin: 31px 0 21px; }
+.signature-constellation .cs-opening .world-eyebrow { font-size: 8px; letter-spacing: 3px; }
+.signature-constellation .cs-opening .world-subtitle { color: var(--cs-muted); line-height: 1.8; }
+.signature-constellation .cs-opening .constellation-chart { margin-top: 30px; }
+.signature-constellation .cs-opening .constellation-portrait { width: 160px; height: 202px; }
+.signature-constellation .cs-opening .world-names { margin-top: 24px; font-size: 23px; }
+.signature-constellation .cs-opening .world-action { font-size: 11px; border-color: var(--cs-line); min-height: 48px; }
+.signature-constellation .cs-opening .world-status { font-size: 10px; opacity: .83; }
+.signature-constellation .cs-chapter {
+  display: grid; grid-template-columns: 24px 1fr 24px; align-items: center; gap: 10px;
+  padding-bottom: 15px; border-bottom: 1px solid var(--cs-line); color: var(--accent);
+  font: 9px/1.6 var(--sans); letter-spacing: 1.3px; text-align: center;
+}
+.signature-constellation .cs-chapter p { margin: 0; font: inherit; }
+.signature-constellation .cs-chapter > :first-child { text-align: left; }
+.signature-constellation .cs-chapter > :last-child { text-align: right; }
+.signature-constellation .cs-invitation-letter { position: relative; padding: 38px 28px 70px; border-top: 1px solid var(--cs-line); }
+.signature-constellation .cs-orbit-drawing { display: block; width: 100%; height: auto; color: var(--accent); stroke: currentColor; stroke-width: .65; }
+.signature-constellation .cs-orbit-drawing > :not(.cs-orbit-star):not(.cs-orbit-point) { opacity: .42; }
+.signature-constellation .cs-orbit-star { fill: color-mix(in srgb, var(--accent) 12%, transparent); }
+.signature-constellation .cs-orbit-point { fill: var(--accent); }
+.signature-constellation .cs-invitation-letter > .cs-orbit-drawing { width: calc(100% + 16px); margin: 38px -8px -15px; }
+.signature-constellation .invite-section { position: relative; margin: 0; padding: 55px 30px; border: 0; background: none; }
+.signature-constellation .section-eyebrow { font-size: 8px; letter-spacing: 2.5px; color: var(--accent); opacity: .95; }
+.signature-constellation .section-eyebrow::before { content: none; }
+.signature-constellation .invite-section h2 { font-weight: 400; font-size: 23px; line-height: 1.6; letter-spacing: -.5px; color: var(--ink); }
+.signature-constellation .cs-invitation-letter .invite-section { padding: 27px 0 20px; }
+.signature-constellation .invitation-prose { font-size: 12px; line-height: 2.6; color: var(--cs-muted); }
+.signature-constellation .signature { margin-top: 38px; color: var(--accent); }
+.signature-constellation .cs-letter-postscript { text-align: center; margin: 12px auto 0; color: var(--accent); font: 11px/2.2 var(--serif); letter-spacing: .5px; }
+.signature-constellation .cs-letter-postscript::before { content: ''; display: block; width: 1px; height: 36px; background: var(--cs-line); margin: 0 auto 24px; }
+.signature-constellation .cs-story { margin: 0 27px 55px; border-top: 1px solid var(--cs-line); border-bottom: 1px solid var(--cs-line); }
+.signature-constellation .cs-story .invite-section { padding: 46px 10px; }
+.signature-constellation .cs-story .story-list { gap: 30px; margin-top: 35px; }
+.signature-constellation .cs-story .story-list article { border-left: 0; padding-left: 0; }
+.signature-constellation .cs-story .story-list article > span { font-size: 18px; border-bottom: 1px solid var(--cs-line); height: 30px; min-width: 25px; }
+.signature-constellation .cs-kicker { color: var(--accent); font: 10px/1.8 var(--sans); letter-spacing: 1px; }
+.signature-constellation .cs-scenes { --cs-glow: #cfb582; position: relative; padding: 32px 26px 43px; background: color-mix(in srgb, var(--soft) 44%, var(--paper)); }
+.signature-constellation .cs-scenes[data-glow='blue'] { --cs-glow: #7baad5; }
+.signature-constellation .cs-scenes[data-glow='rose'] { --cs-glow: #d494a9; }
+.signature-constellation .cs-scenes-heading { text-align: left; padding: 43px 0 28px; }
+.signature-constellation .cs-scenes-heading > h2 { margin: 19px 0; font: 400 53px/.99 var(--display); letter-spacing: -1.9px; }
+.signature-constellation .cs-scenes-heading > h2 em { font-weight: 400; color: var(--accent); }
+.signature-constellation .cs-scenes-heading > p:last-child { margin: 0; color: var(--cs-muted); font: 11px/2 var(--sans); }
+.signature-constellation .cs-scene-buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 0 0 31px; }
+.signature-constellation .cs-scene-buttons button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; position: relative;
+  min-width: 0; min-height: 73px; padding: 12px 9px; border: 1px solid var(--cs-line); border-radius: 0;
+  background: transparent; color: var(--cs-muted); text-align: left; font: 10px/1.7 var(--sans);
+  cursor: pointer; touch-action: manipulation; transition: background-color 200ms, border-color 200ms, color 200ms;
+}
+.signature-constellation .cs-scene-buttons button > span:first-child { color: var(--accent); font: 12px/1 var(--display); }
+.signature-constellation .cs-scene-buttons button > i { position: absolute; right: 9px; top: 10px; font-style: normal; color: var(--accent); }
+.signature-constellation .cs-scene-buttons button[aria-pressed='true'] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.signature-constellation .cs-scene-buttons button[aria-pressed='true'] > i { text-shadow: 0 0 10px var(--accent); }
+.signature-constellation .cs-scene-buttons button:hover { border-color: var(--accent); }
+.signature-constellation .cs-scene-buttons button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.signature-constellation .cs-scene-stage { position: relative; isolation: isolate; padding-top: 18px; }
+.signature-constellation .cs-scene-stage::before { content: ''; position: absolute; z-index: -1; inset: -10px -26px 0; background: radial-gradient(ellipse at 50% 33%, color-mix(in srgb, var(--cs-glow) 24%, transparent), transparent 64%); pointer-events: none; }
+.signature-constellation .cs-scene-coordinate { margin: 0 0 12px; font: 7px/1.8 var(--sans); letter-spacing: 1.6px; color: var(--accent); text-align: center; }
+.signature-constellation .cs-scene-orbit { position: absolute; z-index: -1; inset: 12% -5% 38%; border: 1px solid var(--cs-line); border-radius: 50%; transform: rotate(-24deg); pointer-events: none; }
+.signature-constellation .cs-scene-orbit::after { content: '✦'; position: absolute; top: 16%; left: 11%; color: var(--accent); font-size: 16px; }
+.signature-constellation .cs-scene-figure { position: relative; margin: 0 14px; border: 1px solid var(--cs-line); padding: 7px; background: var(--paper); }
+.signature-constellation .cs-scene-figure > img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; display: block; filter: saturate(.7) brightness(.83); object-position: center 60%; }
+.signature-constellation .cs-scenes[data-scene='1'] .cs-scene-figure > img { object-position: 48% center; filter: saturate(.55) brightness(.76); }
+.signature-constellation .cs-scenes[data-scene='2'] .cs-scene-figure > img { object-position: 51% center; filter: saturate(.66) brightness(.86); }
+.signature-constellation .cs-photo-corner { position: absolute; top: 24px; right: 23px; color: #fff6e8; font: 19px var(--display); text-shadow: 0 2px 12px #0009; }
+.signature-constellation .cs-photo-corner i { font-size: 11px; }
+.signature-constellation .cs-scene-figure > figcaption { display: flex; justify-content: space-between; gap: 10px; padding: 13px 3px 6px; color: var(--accent); font: 7px/1.5 var(--sans); letter-spacing: 1.1px; }
+.signature-constellation .cs-scene-copy { text-align: center; padding: 35px 0 13px; min-height: 178px; }
+.signature-constellation .cs-scene-copy > h3 { margin: 13px 0 17px; font: 400 23px/1.5 var(--serif); letter-spacing: -.5px; }
+.signature-constellation .cs-scene-copy > p:last-child { white-space: pre-line; color: var(--cs-muted); font: 11px/2.1 var(--serif); }
+.signature-constellation .cs-scenes[data-show-story='false'] .cs-scene-copy { min-height: 0; padding: 30px 0 8px; }
+.signature-constellation .cs-example-note { text-align: center; margin: 10px 0 0; color: var(--cs-muted); font: 9px/1.8 var(--sans); }
+.signature-constellation .cs-photo-archive { padding-top: 34px; }
+.signature-constellation .cs-archive-label { text-align: center; color: var(--accent); font: 7px/1.8 var(--sans); letter-spacing: 1.8px; }
+.signature-constellation .cs-photo-archive .invite-section { padding-top: 21px; }
+.signature-constellation .cs-photo-archive .section-eyebrow { display: none; }
+.signature-constellation .photo-gallery img { filter: saturate(.62); }
+.signature-constellation .gallery-slide .gallery-photo { flex-basis: 85%; }
+.signature-constellation .gallery-slide img { height: 320px; }
+.signature-constellation .gallery-grid .gallery-photo:first-child { border-radius: 0; }
+.signature-constellation .cs-date { position: relative; isolation: isolate; margin: 0 20px 24px; padding: 28px 10px 36px; border: 1px solid var(--cs-line); }
+.signature-constellation .cs-date > .cs-chapter { margin: 0 9px; border-bottom: 0; }
+.signature-constellation .cs-date .invite-section { padding: 36px 7px 14px; }
+.signature-constellation .cs-date .section-eyebrow { letter-spacing: 3.5px; }
+.signature-constellation .cs-date .invite-section h2 { font-size: 25px; }
+.signature-constellation .cs-date-orbits { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 65%); }
+.signature-constellation .cs-date-orbits i { position: absolute; inset: 18% -26%; border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 50%; transform: rotate(28deg); }
+.signature-constellation .cs-date-orbits i + i { inset: 5% -10%; transform: rotate(-31deg); }
+.signature-constellation .cs-date-orbits > span { position: absolute; top: 11%; left: 10%; color: var(--accent); font-size: 17px; }
+.signature-constellation .wedding-calendar { border: 0; padding: 27px 0 17px; max-width: 275px; }
+.signature-constellation .calendar-week { color: var(--cs-muted); opacity: 1; }
+.signature-constellation .calendar-days { row-gap: 8px; }
+.signature-constellation .calendar-days .wedding-day { outline: 1px solid var(--accent); outline-offset: 4px; box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 25%, transparent); }
+.signature-constellation .cs-coordinate-note { margin: 18px 0 0; padding: 0 8px; font: 11px/2.2 var(--serif); color: var(--accent); text-align: center; }
+.signature-constellation .cs-arrival { position: relative; padding: 0 9px 20px; }
+.signature-constellation .cs-vertical-note { position: absolute; left: 10px; top: 65px; margin: 0; writing-mode: vertical-rl; color: var(--accent); opacity: .7; font: 7px/1.5 var(--sans); letter-spacing: 2px; }
+.signature-constellation .cs-arrival .sample-map { border: 1px solid var(--cs-line); padding: 5px; background: transparent; }
+.signature-constellation .sample-buttons > span { border-color: var(--cs-line); padding-top: 11px; padding-bottom: 11px; }
+.signature-constellation .transport-notes { padding-top: 7px; border-top: 1px solid var(--cs-line); }
+.signature-constellation .cs-warm-wishes { margin: 0 26px; border-top: 1px solid var(--cs-line); }
+.signature-constellation .cs-warm-wishes .invite-section { padding: 48px 0; }
+.signature-constellation .cs-warm-wishes .invite-section + .invite-section { border-top: 1px solid var(--cs-line); }
+.signature-constellation .sample-accounts details { border: 1px solid var(--cs-line); padding: 17px; background: transparent; }
+.signature-constellation .sample-accounts summary { min-height: 24px; align-items: center; color: var(--accent); }
+.signature-constellation .sample-accounts summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+.signature-constellation .cs-finale { position: relative; border-top: 1px solid var(--cs-line); margin-top: 10px; padding: 46px 24px 0; background: radial-gradient(ellipse at 50% 42%, var(--soft), transparent 65%); }
+.signature-constellation .cs-final-orbit { width: 90%; margin: 0 auto -22px; }
+.signature-constellation .cs-finale-title { margin: 0; text-align: center; font: 400 47px/1.05 var(--display); letter-spacing: -1.5px; }
+.signature-constellation .cs-finale-title > em { font-weight: 400; color: var(--accent); }
+.signature-constellation .cs-finale .invitation-ending { padding: 35px 0 37px; border: 0; background: none; }
+.signature-constellation .cs-finale .invitation-ending::before { content: none; }
+.signature-constellation .cs-finale .ending-script { font: 9px/1.8 var(--sans); text-transform: uppercase; letter-spacing: 2.3px; margin-bottom: 23px; }
+.signature-constellation .cs-finale .invitation-ending .couple-names { margin-top: 32px; font-size: 23px; }
+.signature-constellation .cs-colophon { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 20px 0; border-top: 1px solid var(--cs-line); color: var(--accent); font: 7px/1.8 var(--sans); letter-spacing: .8px; }
+@media (max-width: 380px) {
+  .signature-constellation .cs-scenes { padding-left: 21px; padding-right: 21px; }
+  .signature-constellation .cs-scene-buttons { gap: 5px; }
+  .signature-constellation .cs-scene-buttons button { padding-left: 7px; padding-right: 7px; font-size: 9px; }
+  .signature-constellation .cs-scenes-heading > h2 { font-size: 49px; }
+  .signature-constellation .cs-chapter { font-size: 8px; letter-spacing: 1px; }
+  .signature-constellation .cs-finale-title { font-size: 43px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signature-constellation .cs-scene-buttons button { transition: none; }
+  .signature-constellation .constellation-portrait,
+  .signature-constellation .constellation-star > svg,
+  .signature-constellation .constellation-lines line,
+  .signature-constellation .constellation-caption { transition: none; }
+}

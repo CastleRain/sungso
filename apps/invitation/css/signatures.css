@@ -1,0 +1,35 @@
+.signature-collection{margin:46px 0 50px;padding:32px 0 40px;border-bottom:1px solid var(--line)}
+.signature-collection>header{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:24px}
+.signature-collection .eyebrow{font-size:9px;letter-spacing:2px;margin-bottom:12px;color:#8b735b}
+.signature-collection h2{font:27px/1.5 var(--serif);letter-spacing:-1px}
+.signature-collection>header>p{font-size:12px;line-height:1.9;color:var(--muted)}
+.signature-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.signature-pick{--pick-ink:#654939;--pick-accent:#a57455;display:flex;position:relative;flex-direction:column;min-width:0;padding:24px 25px 16px;color:var(--pick-ink);border:1px solid #d7c4ad;background:#f0e6d6;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.signature-pick:hover{transform:translateY(-4px);box-shadow:0 12px 26px #463c3014}
+.signature-pick:focus-visible{outline:3px solid #77715c;outline-offset:5px}
+.signature-pick-top,.signature-pick-bottom{display:flex;align-items:center;justify-content:space-between;font:9px var(--sans);letter-spacing:1.3px}
+.signature-pick-top{opacity:.8}.signature-pick-art{height:135px;position:relative;display:grid;place-items:center}
+.signature-pick strong{font:24px/1.5 var(--serif);letter-spacing:-.6px}
+.signature-pick-description{font-size:11px;line-height:1.9;margin:10px 0 25px;opacity:.85}
+.signature-pick-bottom{border-top:1px solid currentColor;padding-top:14px;margin-top:auto;letter-spacing:.4px}
+.signature-pick-bottom>span{font-size:22px}
+.signature-pick-art .pick-envelope{display:grid;place-items:center;width:133px;height:84px;transform:rotate(-7deg);background:linear-gradient(148deg,#e5d4be 50%,transparent 50%),linear-gradient(-148deg,#eadbc8 50%,#f7efdf 50%);box-shadow:0 11px 20px #5c443b20;border:1px solid #c4a785}
+.signature-pick-art .pick-envelope>b{display:grid;place-items:center;border-radius:50%;width:36px;height:36px;background:#9c6651;box-shadow:0 2px 3px #5945374a;font:italic 12px var(--display);color:#f5e6d0;z-index:1}
+.pick-constellation{--pick-ink:#f0e8d2;--pick-accent:#cebb8f;background:radial-gradient(ellipse at 68% 27%,#394268,#162035 68%);border-color:#2c3952}
+.pick-orbit{position:absolute;width:156px;height:72px;border:1px solid #c7b89080;border-radius:50%;transform:rotate(-30deg)}
+.pick-orbit:before,.pick-orbit:after{content:'';position:absolute;inset:15px -14px;border:1px solid #c7b89044;border-radius:50%;transform:rotate(60deg)}
+.pick-orbit:after{inset:-15px 40px;transform:rotate(-40deg)}
+.pick-stars{font-size:35px;font-weight:400;color:#ead9ab;text-shadow:50px -29px 0 #e2d9c4,-56px 27px 0 #e2d9c4}
+.pick-ticket{--pick-ink:#285250;background:#e0e8de;border-color:#b4cbbf}
+.signature-pick-art .pick-ticket{padding:18px 28px;border:1px solid #88a79b;background:#f5f4e8;transform:rotate(5deg);box-shadow:0 10px 17px #20483d16;font:22px var(--display);position:relative}
+.signature-pick-art .pick-ticket:after{content:'';position:absolute;left:17px;right:17px;bottom:8px;border-top:1px dashed #698e83}
+.signature-pick-art .pick-ticket span{display:block;font:7px var(--sans);letter-spacing:1.2px;margin-top:10px}
+.signature-badge{display:inline-block;font:8px var(--sans);letter-spacing:1.4px;color:#86664b;border-bottom:1px solid #c9b8a0;padding-bottom:4px;margin-bottom:8px}
+.signature-guide{max-width:784px;margin:0 auto 26px;padding:18px 22px;background:#efeee6;border:1px solid #d9dbce;color:#4d5446}
+.signature-guide p:first-child{display:flex;align-items:center;gap:15px;margin-bottom:8px}.signature-guide p:first-child span{font-size:8px;letter-spacing:1.6px;color:#82735f}
+.signature-guide strong{font:15px var(--serif)}.signature-guide p:nth-child(2){font-size:11px;line-height:1.8}.signature-guide small{display:block;margin-top:5px;font-size:10px;line-height:1.8;opacity:.8}
+.signature-invitation button:focus-visible,.signature-invitation summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.signature-invitation [hidden]{display:none!important}
+@media(max-width:900px){.signature-collection>header{display:block}.signature-collection>header>p{margin-top:14px}.signature-pick{padding:20px 17px 15px}.signature-pick strong{font-size:20px}.signature-pick-top{font-size:8px}.signature-picks{gap:12px}}
+@media(max-width:700px){.signature-collection{margin:22px 0 24px;padding:22px 0 28px}.signature-collection h2{font-size:23px}.signature-collection>header>p{font-size:11px}.signature-picks{grid-template-columns:minmax(0,1fr);gap:14px}.signature-pick{display:grid;grid-template-columns:minmax(0,1fr) 108px;padding:21px 20px 15px}.signature-pick-top{grid-column:1/-1}.signature-pick-art{grid-column:2;grid-row:2/4;height:108px}.signature-pick-art .pick-envelope{width:88px;height:64px}.pick-orbit{width:102px;height:50px}.pick-stars{font-size:27px;text-shadow:35px -24px 0 #e2d9c4,-35px 20px 0 #e2d9c4}.signature-pick-art .pick-ticket{font-size:18px;padding:15px 12px}.signature-pick-art .pick-ticket span{font-size:5px}.signature-pick strong{font-size:20px;align-self:end;margin-top:21px;grid-column:1;grid-row:2}.signature-pick-description{font-size:10px;grid-column:1;grid-row:3;margin:8px 0 15px}.signature-pick-bottom{grid-column:1/-1;font-size:10px}.signature-guide{border-left:0;border-right:0;margin:0;padding:16px 22px}.signature-guide p:first-child{gap:10px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.signature-pick{transition:none}.signature-pick:hover{transform:none}}

@@ -1,4 +1,4 @@
-import { PHOTOS } from './catalog.mjs';
+import { PHOTOS } from './catalog.mjs?v=20260913-signature';
 
 const photograph = (index, thumbnail, attributes = '') => `<img src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : ''} ${attributes}>`;
 const names = '<span>성우</span><i>&</i><span>소희</span>';
@@ -57,7 +57,7 @@ export function paperCover(templateId, thumbnail = false) {
           <div class="boarding-route"><div><small>FROM</small><strong>ME</strong><span>서로 다른 우리</span></div><span class="boarding-route-line" aria-hidden="true">${plane}</span><div><small>TO</small><strong>US</strong><span>함께할 모든 날</span></div></div>
           <p class="boarding-passengers"><small>PASSENGERS</small>성우 <span>&</span> 소희</p>
           <dl class="boarding-details"><div><dt>DEPARTURE</dt><dd>18 MAY 2030</dd></div><div><dt>DESTINATION</dt><dd>FOREVER</dd></div><div><dt>FLIGHT</dt><dd>SS 0518</dd></div><div><dt>SEAT</dt><dd>TOGETHER</dd></div></dl>
-          <div class="boarding-stamp" aria-hidden="true"><span>OFFICIALLY</span><strong>MARRIED</strong><span>06 · MAR · 2030</span></div>
+          <div class="boarding-stamp" aria-hidden="true"><span>OFFICIALLY</span><strong>MARRIED</strong><span>18 · MAY · 2030</span></div>
         </div>
         <div class="boarding-stub"><span class="boarding-barcode" aria-hidden="true"></span>${thumbnail ? '<span class="boarding-confirm" aria-hidden="true">BOARDING COMPLETE<br><b>WELCOME ABOARD ↗</b></span>' : '<button class="boarding-confirm" type="button" data-experience-action="stamp" aria-label="탑승권에 결혼 도장 찍기" aria-pressed="false" data-idle-label="탑승 확인 ↗" data-active-label="한 번 더 ↺"><small>YOUR INVITATION TO FOREVER</small><span data-experience-label>탑승 확인 ↗</span></button>'}</div>
       </div>

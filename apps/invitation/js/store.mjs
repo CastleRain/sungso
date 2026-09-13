@@ -1,4 +1,4 @@
-import { normalizeDocument, applyChange } from './core.mjs';
+import { normalizeDocument, applyChange } from './core.mjs?v=20260913-signature';
 
 export function createStore(adapter) {
   let disposed = false;

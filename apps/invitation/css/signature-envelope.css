@@ -1,0 +1,188 @@
+/* Paper Atelier. Every rule stays inside the full envelope preview. */
+.signature-envelope {
+  --env-rule: color-mix(in srgb, var(--ink) 22%, transparent);
+  --env-paper-light: color-mix(in srgb, var(--paper) 75%, white);
+  background-image: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--ink) 1.8%, transparent) 3px 4px);
+  font-family: var(--serif);
+}
+.signature-envelope .env-postal-header,
+.signature-envelope .env-cover-colophon,
+.signature-envelope .env-section-index,
+.signature-envelope .env-insert-label {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-family: var(--sans); font-size: 9px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.5;
+}
+.signature-envelope .env-postal-header { padding: 20px 24px 17px; border-bottom: 1px solid var(--env-rule); }
+.signature-envelope .env-cover-sheet { margin: 12px; border: 1px solid var(--env-rule); }
+.signature-envelope .experience-envelope { padding: 36px 22px 26px; background: none; min-height: 710px; }
+.signature-envelope .paper-kicker { font-family: var(--sans); font-size: 9px; letter-spacing: 3px; }
+.signature-envelope .envelope-title { font-size: clamp(53px, 15vw, 65px); line-height: 1; margin: 27px 0 19px; letter-spacing: -2px; font-weight: 400; }
+.signature-envelope .envelope-title em { font-weight: 400; }
+.signature-envelope .paper-subtitle { font-size: 12px; letter-spacing: .04em; }
+.signature-envelope .envelope-stage { margin: 0 -3px; height: 365px; }
+.signature-envelope .envelope-back { background: color-mix(in srgb, var(--soft) 85%, var(--paper)); }
+.signature-envelope .envelope-letter { border: 1px solid var(--env-rule); box-shadow: 0 2px 8px #32241712; background: var(--env-paper-light); }
+.signature-envelope .envelope-letter > span { font-size: 7px; letter-spacing: 1.1px; }
+.signature-envelope .envelope-letter img { filter: saturate(.72); }
+.signature-envelope .envelope-seal { box-shadow: inset 0 0 0 3px #fff2, inset 0 0 0 5px #0001, 0 5px 9px #3a211c30; }
+.signature-envelope .envelope-seal:focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
+.signature-envelope .paper-experience-hint { margin: 0 auto 23px; font-size: 11px; line-height: 1.8; max-width: 28em; }
+.signature-envelope .paper-names { font-size: 22px; letter-spacing: 7px; }
+.signature-envelope .paper-date { font-size: 9px; letter-spacing: 3px; margin-top: 13px; }
+.signature-envelope .env-cover-colophon { padding: 15px 15px 13px; border-top: 1px solid var(--env-rule); font-size: 8px; letter-spacing: 1px; }
+.signature-envelope .env-greeting-sheet { position: relative; margin: 58px 24px 0; padding-bottom: 48px; }
+.signature-envelope .env-address-block { display: flex; align-items: center; justify-content: space-between; gap: 20px; text-align: left; margin-bottom: 35px; }
+.signature-envelope .env-address-block > div > span { font-family: var(--sans); font-size: 8px; letter-spacing: 2px; }
+.signature-envelope .env-address-block p { font-size: 14px; letter-spacing: .04em; margin: 7px 0 0; }
+.signature-envelope .env-postage { width: 77px; min-width: 77px; height: 91px; border: 1px dashed var(--accent); outline: 3px solid var(--soft); outline-offset: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--soft); transform: rotate(4deg); }
+.signature-envelope .env-postage > span { font-size: 7px !important; letter-spacing: 1px !important; }
+.signature-envelope .env-postage strong { display: flex; align-items: baseline; font-family: var(--display); font-size: 29px; font-weight: 400; line-height: 1.7; letter-spacing: -1px; }
+.signature-envelope .env-postage strong span { font-size: 16px; padding: 0 2px; }
+.signature-envelope .env-letter-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 0; border-block: 1px solid var(--env-rule); }
+.signature-envelope .env-letter-heading > span:first-child { font: italic 23px/1.4 var(--display); }
+.signature-envelope .env-letter-heading > span:last-child { font: 8px/1.5 var(--sans); letter-spacing: 1px; }
+.signature-envelope .env-greeting-sheet .invite-section { margin: 0; padding: 44px 0 20px; border: 0; background: none; text-align: left; }
+.signature-envelope .env-greeting-sheet .section-eyebrow { font: 9px/1.5 var(--sans); letter-spacing: 2.4px; }
+.signature-envelope .env-greeting-sheet h2 { font-size: 23px; letter-spacing: -.7px; line-height: 1.6; margin: 15px 0 28px; }
+.signature-envelope .invitation-prose { font-size: 13px; line-height: 2.2; letter-spacing: -.15px; }
+.signature-envelope .invitation-prose p + p { margin-top: 22px; }
+.signature-envelope .env-greeting-sheet .signature { margin-top: 32px; font-size: 18px; }
+.signature-envelope .env-greeting-sheet .signature span { font-size: 10px; padding: 0 8px; }
+.signature-envelope .env-greeting-postmark { display: flex; justify-content: flex-end; margin-top: -10px; color: var(--accent); opacity: .72; }
+.signature-envelope .env-greeting-postmark svg,
+.signature-envelope .env-postscript svg { width: 148px; height: 82px; stroke: currentColor; stroke-width: .9; transform: rotate(-12deg); }
+.signature-envelope .env-greeting-postmark text,
+.signature-envelope .env-postscript text { fill: currentColor; stroke: none; font: 6px var(--sans); letter-spacing: .8px; text-anchor: middle; }
+.signature-envelope .env-greeting-postmark .env-postmark-day,
+.signature-envelope .env-postscript .env-postmark-day { font: 11px var(--display); letter-spacing: 0; }
+.signature-envelope .env-correspondence { padding: 34px 24px 43px; background: color-mix(in srgb, var(--soft) 45%, transparent); border-block: 1px solid var(--env-rule); }
+.signature-envelope .env-section-index { font-size: 8px; letter-spacing: 1.1px; text-align: left; }
+.signature-envelope .env-script { font: italic 33px/1.25 var(--display); letter-spacing: -.9px; margin: 33px 0 14px; text-align: center; }
+.signature-envelope .env-correspondence h2 { text-align: center; font-size: 21px; font-weight: 400; letter-spacing: -.6px; margin: 0; }
+.signature-envelope .env-story-intro { text-align: center; font-size: 12px; line-height: 2; margin: 19px 0 29px; }
+.signature-envelope .env-folded-letters { text-align: left; }
+.signature-envelope .env-folded-letter { position: relative; margin: 0 0 13px; border: 1px solid var(--env-rule); background: var(--env-paper-light); box-shadow: 0 3px 0 color-mix(in srgb, var(--paper) 70%, var(--soft)), 0 4px 0 var(--env-rule); }
+.signature-envelope .env-folded-letter summary { display: flex; gap: 14px; align-items: center; list-style: none; min-height: 84px; padding: 15px 17px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.signature-envelope .env-folded-letter summary::-webkit-details-marker { display: none; }
+.signature-envelope .env-folded-letter summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -5px; }
+.signature-envelope .env-letter-number { font: italic 30px/1 var(--display); color: var(--accent); flex: 0 0 33px; }
+.signature-envelope .env-letter-subject { flex: 1; min-width: 0; }
+.signature-envelope .env-letter-subject > span { display: block; font: italic 13px/1.5 var(--display); color: var(--accent); margin-bottom: 3px; }
+.signature-envelope .env-letter-subject strong { display: block; font-size: 13px; font-weight: 500; line-height: 1.7; word-break: keep-all; }
+.signature-envelope .env-letter-toggle { width: 18px; height: 18px; flex: 0 0 18px; position: relative; }
+.signature-envelope .env-letter-toggle::before,
+.signature-envelope .env-letter-toggle::after { content: ""; position: absolute; background: var(--accent); left: 3px; top: 8px; width: 12px; height: 1px; }
+.signature-envelope .env-letter-toggle::after { transform: rotate(90deg); }
+.signature-envelope .env-folded-letter[open] .env-letter-toggle::after { transform: rotate(0); }
+.signature-envelope .env-folded-letter[open] summary { border-bottom: 1px dashed var(--env-rule); }
+.signature-envelope .env-letter-content { padding: 26px 22px 25px; background-image: linear-gradient(180deg, color-mix(in srgb, var(--soft) 24%, transparent), transparent 22px); font-size: 12px; line-height: 2.15; word-break: keep-all; overflow-wrap: break-word; }
+.signature-envelope .env-letter-content p { margin: 0 0 18px; }
+.signature-envelope .env-letter-content .env-letter-to { font-size: 14px; margin-bottom: 24px; }
+.signature-envelope .env-letter-content .env-letter-closing { padding-top: 5px; font-size: 12px; font-weight: 500; }
+.signature-envelope .env-letter-content .env-letter-signature { text-align: right; font-size: 14px; margin: 24px 0 0; }
+.signature-envelope .env-reading-hint { font: 10px/1.8 var(--sans); text-align: center; margin: 24px 0 7px; }
+.signature-envelope .env-correspondence > .sample-caption { display: block; text-align: center; line-height: 1.8; }
+.signature-envelope .env-date-sheet { padding: 55px 24px 41px; }
+.signature-envelope .env-date-annotation { margin: 0 0 18px; text-align: center; font: 8px/1.5 var(--sans); letter-spacing: 2px; }
+.signature-envelope .env-date-frame { border: 1px solid var(--env-rule); outline: 1px solid var(--env-rule); outline-offset: -7px; background: var(--env-paper-light); }
+.signature-envelope .env-date-frame .invite-section { margin: 0; padding: 40px 19px 35px; border: 0; background: none; }
+.signature-envelope .env-date-frame .section-eyebrow { font: italic 21px/1.3 var(--display); letter-spacing: 0; }
+.signature-envelope .env-date-frame h2 { font-size: 23px; letter-spacing: -.5px; margin: 20px 0 6px; }
+.signature-envelope .env-date-frame .wedding-time { font-size: 12px; }
+.signature-envelope .env-date-frame .wedding-calendar { padding: 19px 0; margin: 23px auto; max-width: 265px; border-block: 1px solid var(--env-rule); }
+.signature-envelope .env-date-frame .calendar-week { font-size: 10px; }
+.signature-envelope .env-date-frame .calendar-days { font-size: 12px; }
+.signature-envelope .env-date-frame .wedding-day { border: 1px solid var(--accent); background: none; color: var(--ink); }
+.signature-envelope .env-date-frame .venue-name { font-size: 12px; }
+.signature-envelope .env-date-footnote { font-size: 11px; text-align: center; margin: 21px 0 0; letter-spacing: .8px; }
+.signature-envelope .env-photographs { padding: 27px 24px 44px; }
+.signature-envelope .env-photographs .env-section-index { border-block: 1px solid var(--env-rule); padding: 13px 0; }
+.signature-envelope .env-photographs .env-script { margin: 35px 0 10px; font-size: 40px; }
+.signature-envelope .env-photographs .invite-section { padding: 10px 0 0; margin: 0; border: 0; background: none; }
+.signature-envelope .env-photographs .section-eyebrow { display: none; }
+.signature-envelope .env-photographs h2 { font-size: 13px; font-weight: 400; letter-spacing: 2px; margin: 0 0 30px; }
+.signature-envelope .env-photographs .photo-gallery { padding: 0; border: 0; background: none; box-shadow: none; gap: 10px; }
+.signature-envelope .env-photographs .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.signature-envelope .env-photographs .gallery-grid .gallery-photo:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
+.signature-envelope .env-photographs .gallery-grid .gallery-photo { aspect-ratio: 1; padding: 7px 7px 25px; background: var(--env-paper-light); box-shadow: 0 2px 6px #30201c13; }
+.signature-envelope .env-photographs .gallery-grid .gallery-photo:first-child { padding: 9px 9px 31px; }
+.signature-envelope .env-photographs .gallery-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.68) contrast(.96); }
+.signature-envelope .env-photographs .gallery-photo { min-width: 44px; min-height: 44px; border-radius: 0; }
+.signature-envelope .env-photographs .gallery-photo:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
+.signature-envelope .env-photographs .gallery-slide { padding: 0 0 12px; scroll-padding-inline: 0; }
+.signature-envelope .env-photographs .gallery-slide .gallery-photo { border: 8px solid var(--env-paper-light); border-bottom-width: 28px; }
+.signature-envelope .env-photographs .gallery-filmstrip { padding: 10px; background: var(--ink); color: var(--paper); }
+.signature-envelope .env-photographs .gallery-filmstrip .gallery-photo { background: var(--ink); }
+.signature-envelope .env-photographs .gallery-filmstrip .gallery-photo span { color: var(--paper); font-size: 8px; letter-spacing: 1px; }
+.signature-envelope .env-photographs .gallery-help { font-size: 10px; margin: 17px 0 0; }
+.signature-envelope .env-photo-caption { display: flex; flex-direction: column; gap: 7px; text-align: center; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--env-rule); font-size: 11px; }
+.signature-envelope .env-photo-caption > span:first-child { font: 8px/1.5 var(--sans); letter-spacing: 1.4px; }
+.signature-envelope .env-enclosures { padding: 38px 24px; background: color-mix(in srgb, var(--soft) 35%, transparent); border-block: 1px solid var(--env-rule); }
+.signature-envelope .env-enclosures-empty { display: none; }
+.signature-envelope .env-insert { background: var(--env-paper-light); border: 1px solid var(--env-rule); margin-bottom: 24px; }
+.signature-envelope .env-insert:last-child { margin-bottom: 0; }
+.signature-envelope .env-insert-label { padding: 13px 17px 12px; border-bottom: 1px solid var(--env-rule); font-size: 8px; letter-spacing: 1.5px; }
+.signature-envelope .env-insert-label > span:first-child { font: italic 16px/1 var(--display); }
+.signature-envelope .env-insert .invite-section { margin: 0; padding: 28px 17px 31px; border: 0; background: none; }
+.signature-envelope .env-insert .section-eyebrow { font: italic 19px/1.4 var(--display); letter-spacing: 0; }
+.signature-envelope .env-insert h2 { font-size: 20px; letter-spacing: -.5px; margin: 12px 0 24px; }
+.signature-envelope .env-insert .invite-section > p { font-size: 12px; }
+.signature-envelope .env-insert .invite-section > .section-eyebrow { font-size: 19px; }
+.signature-envelope .env-insert .sample-map { border: 1px solid var(--env-rule); border-radius: 0; margin-top: 23px; }
+.signature-envelope .env-insert .sample-buttons { gap: 5px; margin: 15px 0 22px; }
+.signature-envelope .env-insert .sample-buttons span { border: 1px solid var(--env-rule); background: none; border-radius: 0; font-size: 10px; padding: 9px 4px; }
+.signature-envelope .env-insert .transport-notes { padding: 15px 0 0; border-top: 1px solid var(--env-rule); font-size: 11px; line-height: 1.9; }
+.signature-envelope .env-insert .transport-notes p { margin: 0 0 12px; }
+.signature-envelope .env-insert .transport-notes b { display: block; margin-bottom: 2px; font-weight: 500; }
+.signature-envelope .env-insert .sample-accounts { margin-top: 25px; }
+.signature-envelope .env-insert .sample-accounts details { border: 1px solid var(--env-rule); border-radius: 0; background: none; }
+.signature-envelope .env-insert .sample-accounts summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; font-size: 12px; }
+.signature-envelope .env-insert .sample-accounts summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.signature-envelope .env-insert .sample-accounts p { border-top: 1px solid var(--env-rule); margin: 0; padding: 17px 15px; font-size: 12px; }
+.signature-envelope .env-insert .rsvp-example { border: 1px solid var(--env-rule); background: none; border-radius: 0; }
+.signature-envelope .env-insert .rsvp-example span { border-bottom: 1px solid var(--env-rule); font-size: 11px; }
+.signature-envelope .env-insert .sample-callout { border: 1px solid var(--env-rule); border-radius: 0; background: var(--soft); }
+.signature-envelope .env-insert blockquote { padding: 23px 10px; background: none; border-block: 1px solid var(--env-rule); border-radius: 0; font-size: 12px; }
+.signature-envelope .env-insert blockquote cite { font-size: 10px; }
+.signature-envelope .sample-caption { font-family: var(--sans); font-size: 9px; line-height: 1.8; opacity: .8; }
+.signature-envelope .env-last-page { padding: 51px 24px 25px; }
+.signature-envelope .env-last-photograph { position: relative; padding: 9px 9px 14px; margin: 5px 20px 44px; border: 1px solid var(--env-rule); background: var(--env-paper-light); transform: rotate(-3deg); box-shadow: 0 5px 12px #35291e13; }
+.signature-envelope .env-last-photograph::before { content: ""; position: absolute; width: 72px; height: 22px; top: -11px; left: calc(50% - 36px); background: color-mix(in srgb, var(--soft) 72%, transparent); border-inline: 1px dashed var(--env-rule); transform: rotate(7deg); }
+.signature-envelope .env-last-photograph img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; filter: saturate(.58); }
+.signature-envelope .env-last-photograph figcaption { padding-top: 12px; font: italic 16px/1.4 var(--display); text-align: center; }
+.signature-envelope .env-last-page .invitation-ending { border: 0; padding: 0 0 30px; margin: 0; background: none; }
+.signature-envelope .env-last-page .invitation-ending::before { display: none; }
+.signature-envelope .env-last-page .ending-script { font: italic 35px/1.3 var(--display); letter-spacing: -1px; }
+.signature-envelope .env-last-page .invitation-ending > p:not(.ending-script):not(.couple-names) { font-size: 11px; }
+.signature-envelope .env-last-page .couple-names { font-size: 21px; margin: 27px 0 15px; letter-spacing: 5px; }
+.signature-envelope .env-last-page .small-caps { font-size: 9px; letter-spacing: 2px; }
+.signature-envelope .env-postscript { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 17px 0; border-block: 1px solid var(--env-rule); }
+.signature-envelope .env-postscript > span:first-child { font-size: 11px; line-height: 1.8; }
+.signature-envelope .env-postscript > span:last-child { color: var(--accent); opacity: .7; flex-shrink: 0; }
+.signature-envelope .env-postscript svg { width: 106px; height: 65px; }
+.signature-envelope .env-print-colophon { font: 8px/2 var(--sans); letter-spacing: 1.3px; text-align: center; margin: 25px 0 0; }
+.signature-envelope .env-print-colophon span { letter-spacing: .2px; }
+@media (max-width: 390px) {
+  .signature-envelope .env-postal-header { padding-inline: 20px; font-size: 8px; letter-spacing: 1px; }
+  .signature-envelope .env-cover-sheet { margin: 10px; }
+  .signature-envelope .experience-envelope { padding-inline: 16px; }
+  .signature-envelope .env-greeting-sheet { margin-inline: 21px; }
+  .signature-envelope .env-correspondence,
+  .signature-envelope .env-date-sheet,
+  .signature-envelope .env-photographs,
+  .signature-envelope .env-enclosures,
+  .signature-envelope .env-last-page { padding-inline: 21px; }
+  .signature-envelope .env-letter-heading > span:first-child { font-size: 21px; }
+  .signature-envelope .env-folded-letter summary { gap: 10px; padding-inline: 14px; }
+  .signature-envelope .env-letter-subject strong { font-size: 12px; }
+  .signature-envelope .env-letter-content { padding-inline: 19px; }
+  .signature-envelope .env-cover-colophon { font-size: 7px; letter-spacing: .8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signature-envelope .envelope-letter,
+  .signature-envelope .envelope-flap,
+  .signature-envelope .envelope-seal,
+  .signature-envelope .gallery-photo,
+  .signature-envelope .gallery-photo img { animation: none; transition: none; }
+  .signature-envelope .photo-gallery { scroll-behavior: auto; }
+}

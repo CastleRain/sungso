@@ -1,13 +1,16 @@
-import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs';
-import { createStore } from './store.mjs';
-import { createExperiences } from './experiences.mjs';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260913-signature';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260913-signature';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260913-signature';
+import { createStore } from './store.mjs?v=20260913-signature';
+import { createExperiences } from './experiences.mjs?v=20260913-signature';
+import { createSignatures } from './signatures.mjs?v=20260913-signature';
+import { signatureCollection, signatureGuide } from './signature-catalog.mjs?v=20260913-signature';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
 
 const experiences = createExperiences();
+const signatures = createSignatures();
 
 const main = document.querySelector('#main');
 let storage; try { storage = window.localStorage; } catch { storage = null; }
@@ -37,7 +40,7 @@ function favoriteButton(id, compact = false) {
 }
 function favoriteMarks(id) { return `<div class="favorite-marks">${Object.entries(PEOPLE).map(([person, name]) => `<span class="${shared.data.favorites[person].includes(id) ? 'is-picked' : ''}">${name} ${shared.data.favorites[person].includes(id) ? '♥' : '♡'}</span>`).join('')}</div>`; }
 function card(template) {
-  return `<article class="template-card ${template.collection === 'special' ? 'special-card' : ''}"><a class="template-thumb" href="#preview/${template.id}" aria-label="${template.name} 전체 미리보기"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div><span class="open-preview">${template.collection === 'special' ? '직접 눌러 체험하기' : '전체 펼쳐보기'} <span>${template.collection === 'special' ? '✦' : '↗'}</span></span></a><div class="template-info"><div class="template-name-row"><div><p class="template-number">${template.number} / ${template.english}</p><h2><a href="#preview/${template.id}">${template.name}</a></h2></div>${favoriteButton(template.id, true)}</div><p class="template-description">${template.description}</p>${template.experienceHint ? `<p class="experience-hint"><span aria-hidden="true">✦</span> ${template.experienceHint}</p>` : ''}<p class="photo-hint">${template.photoHint}</p><div class="template-bottom"><span class="mood">${template.mood}</span>${favoriteMarks(template.id)}</div></div></article>`;
+  return `<article class="template-card ${template.collection === 'special' ? 'special-card' : ''}"><a class="template-thumb" href="#preview/${template.id}" aria-label="${template.name} 전체 미리보기"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div><span class="open-preview">${template.collection === 'special' ? '직접 눌러 체험하기' : '전체 펼쳐보기'} <span>${template.collection === 'special' ? '✦' : '↗'}</span></span></a><div class="template-info"><div class="template-name-row"><div>${SIGNATURES[template.id] ? '<span class="signature-badge">SIGNATURE EDITION</span>' : ''}<p class="template-number">${template.number} / ${template.english}</p><h2><a href="#preview/${template.id}">${template.name}</a></h2></div>${favoriteButton(template.id, true)}</div><p class="template-description">${template.description}</p>${template.experienceHint ? `<p class="experience-hint"><span aria-hidden="true">✦</span> ${template.experienceHint}</p>` : ''}<p class="photo-hint">${template.photoHint}</p><div class="template-bottom"><span class="mood">${template.mood}</span>${favoriteMarks(template.id)}</div></div></article>`;
 }
 function renderGrid() {
   const grid = dialog('template-grid'); if (!grid) return;
@@ -53,7 +56,7 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">A LITTLE NOTE, A BIG DAY</p><h1>우리의 마음을 담을<br>청첩장을 골라볼까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">오래 보아도 좋은 기본 여섯 장,<br>누르는 순간 특별해지는 새로운 여섯 장.</p></div><div class="date-stamp"><span>OUR WEDDING</span><b>05<span>/</span>18</b><span>2030 · SUNGWOO & SOHEE</span></div></section><div class="catalog-intro"><p><span>01</span> 펼쳐보기 <i>—</i> <span>02</span> 취향 모으기 <i>—</i> <span>03</span> 함께 고르기</p><span class="intro-note">사진과 일부 예식 정보는 예시예요</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두 보기','12'],['classic','기본 6종','01–06'],['special','특별한 6종','07–12']].map(([id,label,count]) => `<button data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${id === 'special' ? '✦ ' : ''}${label}</span><small>${count}</small></button>`).join('')}</div><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><span id="template-count"></span></div><div id="template-grid" class="template-grid"></div></section><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">A LITTLE NOTE, A BIG DAY</p><h1>우리의 마음을 담을<br>청첩장을 골라볼까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">오래 보아도 좋은 기본 여섯 장,<br>이야기와 체험을 담은 특별한 여섯 장.</p></div><div class="date-stamp"><span>OUR WEDDING</span><b>05<span>/</span>18</b><span>2030 · SUNGWOO & SOHEE</span></div></section><div class="catalog-intro"><p><span>01</span> 펼쳐보기 <i>—</i> <span>02</span> 취향 모으기 <i>—</i> <span>03</span> 함께 고르기</p><span class="intro-note">사진과 일부 예식 정보는 예시예요</span></div>${signatureCollection()}<section class="catalog-collection" aria-label="청첩장 템플릿"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두 보기','12'],['classic','기본 6종','01–06'],['special','특별한 6종','07–12']].map(([id,label,count]) => `<button data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${id === 'special' ? '✦ ' : ''}${label}</span><small>${count}</small></button>`).join('')}</div><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><span id="template-count"></span></div><div id="template-grid" class="template-grid"></div></section><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
@@ -63,8 +66,8 @@ function optionsMarkup(selection, scope = 'desktop') {
 function renderPreview() {
   const template = getTemplate(route.templateId), draft = getDraft(template.id);
   main.className = 'preview-main';
-  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">디자인 미리보기 · 사진, 시간, 장소는 예시입니다.</p><div class="preview-layout"><div id="preview-canvas">${invitation(draft.selection)}</div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
-  reveal(); experiences.mount(dialog('preview-canvas')); updateDraftStatus();
+  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">디자인 미리보기 · 사진, 시간, 장소는 예시입니다.</p>${signatureGuide(template.id)}<div class="preview-layout"><div id="preview-canvas">${invitation(draft.selection)}</div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
+  reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); updateDraftStatus();
 }
 function updateDraftStatus() {
   if (route.view !== 'preview') return;
@@ -87,7 +90,7 @@ function reveal() {
 }
 function renderRoute() {
   if (!active()) return;
-  experiences.dispose();
+  experiences.dispose(); signatures.dispose();
   document.querySelectorAll('dialog[open]').forEach(target => target.close());
   route = parseRoute(location.hash);
   document.body.dataset.view = route.view;
@@ -137,7 +140,7 @@ function latestChoiceMarkup() {
 function showConflict() { dialog('latest-choice').innerHTML = latestChoiceMarkup(); dialog('conflict-dialog').dataset.revision = String(shared.data.selectionRevision); dialog('conflict-dialog').showModal(); }
 function refreshPreview() {
   const selection = getDraft(route.templateId).selection, previousScroll = window.scrollY;
-  dialog('preview-canvas').innerHTML = invitation(selection); reveal(); experiences.mount(dialog('preview-canvas'));
+  dialog('preview-canvas').innerHTML = invitation(selection); reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas'));
   document.querySelectorAll('[data-option="paletteId"]').forEach(input => { input.checked = input.value === selection.paletteId; });
   document.querySelectorAll('[data-option="galleryLayout"]').forEach(input => { input.checked = input.value === selection.galleryLayout; input.closest('fieldset').disabled = !selection.sections.gallery; });
   document.querySelectorAll('[data-section-option]').forEach(input => { input.checked = selection.sections[input.dataset.sectionOption]; });
@@ -223,13 +226,13 @@ document.querySelectorAll('dialog').forEach(target => {
   target.addEventListener('close', () => { if (target.id === 'actor-dialog') pendingAction = null; });
 });
 window.addEventListener('hashchange', renderRoute);
-window.addEventListener('pagehide', () => { experiences.dispose(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
-window.addEventListener('pageshow', event => { if (event.persisted && route.view === 'preview') experiences.mount(dialog('preview-canvas')); });
+window.addEventListener('pagehide', () => { experiences.dispose(); signatures.dispose(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
+window.addEventListener('pageshow', event => { if (active() && event.persisted && route.view === 'preview') { experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); } });
 async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs');
+    const { connect } = await import('./firebase.mjs?v=20260913-signature');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;
@@ -246,5 +249,5 @@ async function connectStore() {
   finally { connecting = false; }
 }
 renderRoute();
-registerPrivateCleanup(() => { disposed = true; store?.dispose(); experiences.dispose(); revealObserver?.disconnect(); clearTimeout(toastTimer); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
+registerPrivateCleanup(() => { disposed = true; store?.dispose(); experiences.dispose(); signatures.dispose(); revealObserver?.disconnect(); clearTimeout(toastTimer); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();

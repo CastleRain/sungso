@@ -27,7 +27,9 @@
 
 색감은 각 템플릿의 첫 번째가 기본이다. 갤러리·오시는 길·마음 전하실 곳은 기본 켬, 우리 이야기·참석 여부·방명록은 기본 끔이다. 표지·초대글·예식 정보·마무리는 고정한다. 메모는 최대 1,000자다.
 
-같은 가상 커플 사진 3장을 모든 템플릿에서 사용한다. 그림 템플릿의 표지는 같은 커플을 참고해 생성한 일러스트다. 사진·날짜·시간·장소·이야기는 예시이며 실제 일정은 인증된 날짜 화면에서 관리한다. 지도·계좌·참석·방명록은 형태만 보여주고 실제 데이터·응답을 받지 않는다. 갤러리 확대·닫기·사진 이동은 동작한다. 이미지 경로와 생성 프롬프트는 [이미지 기록](docs/image-prompts.md)에 있다.
+봉투·별자리·탑승권은 **시그니처 에디션**으로, 목록 상단에서 바로 열 수 있다. 종이 편지·밤하늘 장면·하객 여정처럼 첫 장부터 마무리까지 고유한 본문과 체험을 제공한다. 새 초안은 세 디자인의 우리 이야기, 탑승권의 참석 체험을 기본으로 켠다. 이전 초안과 공동 선택의 명시적인 섹션 켜짐/꺼짐은 유지한다.
+
+같은 가상 커플 사진 3장을 모든 템플릿에서 사용한다. 그림 템플릿의 표지는 같은 커플을 참고해 생성한 일러스트다. 사진·날짜·시간·장소·이야기는 예시이며 실제 일정은 인증된 날짜 화면에서 관리한다. 지도·계좌·방명록은 예시이며 실제 데이터·응답을 받지 않는다. 탑승권은 교통수단 전환과 가상 하객의 참석 티켓 만들기를 체험할 수 있고, 입력이나 전송 없이 현재 세션에서만 보여준다. 갤러리 확대·닫기·사진 이동은 동작한다. 이미지 경로와 생성 프롬프트는 [이미지 기록](docs/image-prompts.md)에 있다.
 
 ## 특별한 여섯 장
 
@@ -50,12 +52,13 @@
 - `core.mjs`: 입력 정리, 임시 설정, 경로, 필터, 트랜잭션 변경 규칙, 선택서 출력.
 - `templates.mjs` / `css/invitation.css`: 기본 여섯 디자인의 표지·본문·마무리.
 - `special-paper.mjs`·`special-worlds.mjs`와 같은 이름의 CSS: 특별한 여섯 디자인의 표지와 본문.
-- `experiences.mjs`: 체험 진행·다시 보기·키보드 버튼·타이머 정리. 저장 계층과 독립한다.
+- `experiences.mjs`: 표지 체험 진행·다시 보기·키보드 버튼·타이머 정리. 저장 계층과 독립한다.
+- `signature-{envelope,constellation,ticket}.mjs`와 같은 이름의 CSS: 세 시그니처의 전체 본문과 메모리 체험. `signatures.mjs`가 렌더·마운트·정리를 연결하고 `signature-catalog.mjs`가 목록 소개를 만든다.
 - `app.mjs` / `css/app.css`: 목록·꾸미기·공동 선택·모달 UI.
 - `store.mjs`: 공동 상태와 실패 처리. `firestore-adapter.mjs`: SDK를 주입하는 실제 트랜잭션·구독.
 - `firebase.mjs`: SDK 10.12.0, 이름 `sungso-invitation`, 공통 공개 설정만 사용한다.
 
-Firestore는 **`couplePicks/invitation_templates`** 한 문서만 사용한다. 기존 공개 `couplePicks` 정책을 계승하며 규칙을 변경하지 않았다. 기존 리조트 문서 `couplePicks/main`에는 접근하지 않는다. 조회로 문서를 생성하지 않는다.
+Firestore는 **`couplePicks/invitation_templates`** 한 문서만 사용한다. 관리자가 승인한 두 Google 회원만 접근하고, 본인 찜과 공동 선택 revision을 서버 규칙으로 검증한다. 기존 리조트 문서 `couplePicks/main`에는 접근하지 않는다. 조회로 문서를 생성하지 않는다.
 
 ```js
 {
@@ -69,7 +72,7 @@ Firestore는 **`couplePicks/invitation_templates`** 한 문서만 사용한다. 
     note: ''
   },
   selectionRevision: 1,
-  updatedBy: 'sohee',
+  updatedBy: 'MEMBER_UID',
   updatedAt: /* Firestore serverTimestamp */ null
 }
 ```

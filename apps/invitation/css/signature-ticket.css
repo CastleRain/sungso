@@ -1,0 +1,157 @@
+/* A travel journal and passport. Every selector belongs to the full ticket preview. */
+.signature-ticket{--ticket-rule:color-mix(in srgb,var(--ink) 24%,transparent);--ticket-white:#fffdf5;overflow:clip}
+.signature-ticket .ticket-document{background:var(--paper);min-width:0}
+.signature-ticket .ticket-document [hidden]{display:none!important}
+.signature-ticket .ticket-document button{min-height:44px;min-width:44px;touch-action:manipulation}
+.signature-ticket .ticket-document button:focus-visible,.signature-ticket .ticket-document summary:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.signature-ticket .ticket-document img{display:block;max-width:100%}
+.signature-ticket .ticket-masthead{display:flex;justify-content:space-between;align-items:center;padding:25px 25px 22px;border-top:5px solid var(--ink);border-bottom:1px solid var(--ticket-rule);gap:18px}
+.signature-ticket .ticket-masthead>span:first-child{font:italic 23px/1 var(--display);letter-spacing:-.5px}
+.signature-ticket .ticket-masthead b{font:9px var(--sans);font-weight:500;letter-spacing:2px;margin-left:5px}
+.signature-ticket .ticket-masthead>span:last-child{font:7px/1.8 var(--sans);letter-spacing:1.4px;text-align:right}
+.signature-ticket .ticket-hero-copy{padding:32px 25px 28px;text-align:center}
+.signature-ticket .ticket-hero-copy>p{font:7px/1.8 var(--sans);letter-spacing:2.3px;margin-bottom:20px}
+.signature-ticket .ticket-hero-copy h2{font:400 clamp(28px,7.8vw,35px)/1.13 var(--display);letter-spacing:-.5px}
+.signature-ticket .ticket-hero-copy h2 em{font-weight:400;color:var(--accent)}
+.signature-ticket .ticket-hero-portrait{margin:0 18px;position:relative;isolation:isolate;aspect-ratio:4/5;overflow:hidden;border-radius:50% 50% 2px 2px / 23% 23% 2px 2px}
+.signature-ticket .ticket-portrait{width:100%;height:100%;object-fit:cover;object-position:center 48%;filter:saturate(.75)}
+.signature-ticket .ticket-portrait-shade{position:absolute;inset:0;background:linear-gradient(transparent 38%,#102c2c0a 50%,#102c2cbd)}
+.signature-ticket .ticket-hero-route{position:absolute;inset:0;width:100%;height:100%;color:#fffdf5;pointer-events:none}
+.signature-ticket .ticket-hero-route>path:first-child{stroke:currentColor;stroke-width:1;stroke-dasharray:4 6;opacity:.85}
+.signature-ticket .ticket-hero-route circle{stroke:currentColor;stroke-width:1.5;fill:var(--accent)}
+.signature-ticket .ticket-hero-plane{fill:currentColor}
+.signature-ticket .ticket-portrait-label{position:absolute;bottom:30px;left:28px;right:25px;color:#fffdf5;text-shadow:0 1px 5px #14323240}
+.signature-ticket .ticket-portrait-label>span{display:block;font:36px/1 var(--display);letter-spacing:1px;margin-bottom:13px}
+.signature-ticket .ticket-portrait-label strong{display:block;font:17px/1.5 var(--serif);font-weight:400;letter-spacing:2px}
+.signature-ticket .ticket-portrait-label small{display:block;font:6px/1.8 var(--sans);letter-spacing:2px;margin-top:13px}
+.signature-ticket .ticket-edition{display:flex;justify-content:space-between;gap:12px;padding:17px 23px 28px;font:7px/1.6 var(--sans);letter-spacing:1.2px;border-bottom:1px solid var(--ticket-rule)}
+.signature-ticket .ticket-chapter-label{display:flex;align-items:center;gap:12px;font:8px/1.5 var(--sans);letter-spacing:1.3px;margin:0 0 28px;text-align:left}
+.signature-ticket .ticket-chapter-label>span{font:10px/1.5 var(--display);border:1px solid currentColor;border-radius:50%;min-width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;letter-spacing:0}
+.signature-ticket .ticket-boarding-page{padding-top:25px;background-image:linear-gradient(var(--soft) 1px,transparent 1px),linear-gradient(90deg,var(--soft) 1px,transparent 1px);background-size:26px 26px}
+.signature-ticket .ticket-boarding-page>.ticket-chapter-label{margin:0 27px 8px}
+.signature-ticket .ticket-boarding-page .experience-ticket{min-height:0;background:none;padding:18px 27px 28px}
+.signature-ticket .experience-ticket .paper-kicker{font-size:7px;letter-spacing:1.4px}
+.signature-ticket .experience-ticket .ticket-title{font-size:44px;line-height:.98;margin-top:18px}
+.signature-ticket .experience-ticket .paper-subtitle{margin-top:13px}
+.signature-ticket .experience-ticket .boarding-stage{height:417px;margin-top:24px}
+.signature-ticket .experience-ticket .boarding-pass{width:min(300px,94%);transform:translateX(-50%) rotate(-2deg)}
+.signature-ticket .experience-ticket .boarding-main,.signature-ticket .experience-ticket .boarding-stub{background:var(--ticket-white)}
+.signature-ticket .experience-ticket .boarding-header{background:var(--ink);color:var(--ticket-white)}
+.signature-ticket .experience-ticket .boarding-route-line svg{background:var(--ticket-white)}
+.signature-ticket .experience-ticket .boarding-stub{gap:12px}
+.signature-ticket .experience-ticket .boarding-confirm{color:var(--ink)}
+.signature-ticket .experience-ticket .paper-experience-hint{font-size:10px;color:var(--ink);max-width:265px}
+.signature-ticket .experience-ticket .ticket-footer{gap:14px;padding-top:17px;letter-spacing:.8px;color:var(--ink)}
+.signature-ticket .ticket-document .invite-section{margin:0;padding:53px 29px;text-align:left;border:0;border-top:1px solid var(--ticket-rule);background-image:none}
+.signature-ticket .ticket-document .invite-section:before,.signature-ticket .ticket-document .invite-section:after{content:none}
+.signature-ticket .ticket-document .section-eyebrow{padding:0;border-left:0;font:8px/1.6 var(--sans);letter-spacing:2px;margin-bottom:18px;color:var(--ink)}
+.signature-ticket .ticket-document .invite-section h2{font:400 22px/1.65 var(--serif);letter-spacing:-.7px;margin-bottom:27px}
+.signature-ticket .ticket-document .invitation-prose{font-size:12px;line-height:2.35}
+.signature-ticket .ticket-letter-page{position:relative;background:color-mix(in srgb,var(--paper) 80%,#fff)}
+.signature-ticket .ticket-letter-page .invite-section{border:0;padding-top:66px;padding-bottom:30px}
+.signature-ticket .ticket-postmark{position:absolute;top:22px;right:24px;width:59px;height:59px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font:7px/1.5 var(--sans);letter-spacing:1px;transform:rotate(14deg);color:var(--accent);box-shadow:inset 0 0 0 4px var(--paper),inset 0 0 0 5px var(--accent)}
+.signature-ticket .ticket-letter-signoff{padding:0 28px 47px;font:italic 21px/1.3 var(--display);color:var(--accent)}
+.signature-ticket .ticket-story-page .story-list article{border-bottom:1px solid var(--ticket-rule);padding-bottom:19px}
+.signature-ticket .ticket-itinerary-page{padding:36px 26px 0;background:var(--ink);color:var(--paper)}
+.signature-ticket .ticket-display-title{font:400 33px/1.09 var(--display);letter-spacing:-.5px}
+.signature-ticket .ticket-display-title em{font-weight:400;color:var(--paper)}
+.signature-ticket .ticket-page-subtitle{font:11px/1.8 var(--serif);margin:20px 0 27px;opacity:.85}
+.signature-ticket .ticket-flight-board{padding:0 13px 4px;background:#ffffff0b;border:1px solid #ffffff30;font-family:var(--sans)}
+.signature-ticket .ticket-flight-board-head,.signature-ticket .ticket-flight-row{display:grid;grid-template-columns:47px minmax(0,1fr) 64px;gap:7px;align-items:center}
+.signature-ticket .ticket-flight-board-head{font-size:6px;letter-spacing:.7px;padding:17px 0 10px;opacity:.75}
+.signature-ticket .ticket-flight-row{padding:16px 0;border-top:1px solid #ffffff29;font-size:11px;line-height:1.4}
+.signature-ticket .ticket-flight-row>span:first-child{font:15px/1 monospace;letter-spacing:-.5px}
+.signature-ticket .ticket-flight-row>span:last-child{font:6px/1.5 var(--sans);letter-spacing:.5px;text-align:right}
+.signature-ticket .ticket-flight-board-head>span:last-child{text-align:right}
+.signature-ticket .ticket-example-note{font:10px/1.85 var(--sans)!important;margin-top:19px;opacity:.8;text-align:left}
+.signature-ticket .ticket-itinerary-page>.ticket-example-note{font-size:9px!important;margin-top:13px}
+.signature-ticket .ticket-itinerary-page .invite-section{border-top:1px solid #ffffff38;padding:33px 0 41px;margin-top:31px}
+.signature-ticket .ticket-itinerary-page .section-eyebrow{color:var(--paper)}
+.signature-ticket .ticket-itinerary-page .wedding-calendar{border-color:#ffffff38;padding:18px 0;margin-top:25px;max-width:none}
+.signature-ticket .ticket-itinerary-page .calendar-days .wedding-day{background:var(--paper);color:var(--ink);border-radius:50%}
+.signature-ticket .ticket-itinerary-page .sample-caption{color:var(--paper)}
+.signature-ticket .ticket-memory-heading{padding:40px 27px 0}
+.signature-ticket .ticket-memory-heading>.ticket-chapter-label{margin-bottom:23px}
+.signature-ticket .ticket-memory-heading>p:last-child{font:30px/1.05 var(--display)}
+.signature-ticket .ticket-memory-heading>p:last-child em{color:var(--accent)}
+.signature-ticket .ticket-memories-page .invite-section{border-top:0;padding-top:29px}
+.signature-ticket .ticket-memories-page .photo-gallery{border:0;border-top:5px solid var(--ink);border-bottom:5px solid var(--ink);padding:9px 0;background:transparent}
+.signature-ticket .ticket-memories-page .gallery-photo{background:var(--ink);color:var(--paper);border-radius:0;box-shadow:none}
+.signature-ticket .ticket-memories-page .gallery-photo img{filter:saturate(.7)}
+.signature-ticket .ticket-document .ticket-arrivals{background:var(--soft);padding-top:40px}
+.signature-ticket .ticket-document .ticket-arrivals h2,.signature-ticket .ticket-document .ticket-rsvp h2{font:400 42px/.96 var(--display);letter-spacing:-.8px;margin-bottom:21px}
+.signature-ticket .ticket-arrivals h2 em,.signature-ticket .ticket-rsvp h2 em{color:var(--accent)}
+.signature-ticket .ticket-document .ticket-korean-title{font:12px/1.7 var(--serif);margin-bottom:30px}
+.signature-ticket .ticket-destination{border-top:1px solid var(--ticket-rule);padding-top:25px;margin-bottom:25px}
+.signature-ticket .ticket-destination>span{display:block;font:7px/1.6 var(--sans);letter-spacing:1.5px;margin-bottom:13px}
+.signature-ticket .ticket-destination>strong{font:400 19px/1.5 var(--serif);letter-spacing:-.5px}
+.signature-ticket .ticket-destination>p{font:10px/1.8 var(--sans);margin-top:9px}
+.signature-ticket .ticket-transport-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:5px;background:color-mix(in srgb,var(--paper) 70%,transparent);border:1px solid var(--ticket-rule);margin-bottom:17px}
+.signature-ticket .ticket-transport-switch button{font:11px/1.5 var(--sans);color:var(--ink);padding:9px 4px;border:1px solid transparent;transition:background .18s,color .18s}
+.signature-ticket .ticket-transport-switch button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.signature-ticket .ticket-route-map{position:relative;background:var(--paper);border:1px solid var(--ticket-rule)}
+.signature-ticket .ticket-route-map svg{display:block;width:100%;height:auto}
+.signature-ticket .ticket-map-river{stroke:var(--accent);stroke-width:22;opacity:.15}
+.signature-ticket .ticket-map-road{stroke:var(--soft);stroke-width:15}
+.signature-ticket .ticket-map-block{fill:var(--soft);opacity:.7}
+.signature-ticket .ticket-map-garden{fill:var(--accent);opacity:.25}
+.signature-ticket .ticket-map-tree{stroke:var(--ink);stroke-width:1.2;opacity:.5}
+.signature-ticket .ticket-map-route{stroke:var(--ink);stroke-width:2;stroke-dasharray:4 4;stroke-linecap:round}
+.signature-ticket .ticket-map-start{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.signature-ticket .ticket-map-end-halo{fill:var(--accent);opacity:.2}
+.signature-ticket .ticket-map-end{fill:var(--ink)}
+.signature-ticket .ticket-map-label{fill:var(--ink);font:10px var(--sans)}
+.signature-ticket .ticket-map-small{fill:var(--ink);font:6px var(--sans);letter-spacing:.6px}
+.signature-ticket .ticket-map-caption{display:block;padding:10px 14px;border-top:1px solid var(--ticket-rule);font:8px/1.6 var(--sans);text-align:right}
+.signature-ticket .ticket-route-detail{padding:23px 0 0;min-height:176px}
+.signature-ticket .ticket-route-detail>div{display:flex;align-items:center;justify-content:space-between;gap:12px;font:10px/1.6 var(--sans);margin-bottom:14px}
+.signature-ticket .ticket-route-detail>div>span{font-size:9px;border:1px solid var(--ticket-rule);padding:4px 8px}
+.signature-ticket .ticket-route-detail>div>strong{font-weight:500}
+.signature-ticket .ticket-route-detail h3{font:400 18px/1.6 var(--serif);letter-spacing:-.6px;margin-bottom:10px}
+.signature-ticket .ticket-route-detail>p{font:11px/1.9 var(--sans)}
+.signature-ticket .ticket-gratitude-page .sample-accounts details{background:transparent;border:1px solid var(--ticket-rule);border-radius:0;margin-bottom:11px}
+.signature-ticket .ticket-gratitude-page .sample-accounts summary{min-height:50px;align-items:center;padding:14px 16px}
+.signature-ticket .ticket-document .ticket-rsvp{background:color-mix(in srgb,var(--soft) 60%,var(--paper));padding-top:41px}
+.signature-ticket .ticket-rsvp .ticket-rsvp-notice{font-size:10px!important;opacity:1;margin:0 0 24px;border-left:2px solid var(--accent);padding-left:12px}
+.signature-ticket .ticket-rsvp-notice strong{font-weight:500}
+.signature-ticket .ticket-guest{border-top:1px solid var(--ticket-rule);border-bottom:1px solid var(--ticket-rule);padding:21px 0;margin-bottom:26px}
+.signature-ticket .ticket-guest>span{display:block;font:7px/1.6 var(--sans);letter-spacing:1.5px;margin-bottom:12px}
+.signature-ticket .ticket-guest>strong{font:400 22px/1.5 var(--serif);letter-spacing:-.5px}
+.signature-ticket .ticket-guest>small{display:block;font:9px/1.7 var(--sans);margin-top:8px;opacity:.75}
+.signature-ticket .ticket-choice{padding:0;margin:0 0 21px;border:0;min-width:0}
+.signature-ticket .ticket-choice legend{font:11px/1.7 var(--sans);margin-bottom:10px}
+.signature-ticket .ticket-choice>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.signature-ticket .ticket-choice button{border:1px solid var(--ticket-rule);padding:11px 5px;color:var(--ink);font:10px/1.5 var(--sans);background:var(--paper);transition:background .18s,color .18s}
+.signature-ticket .ticket-choice button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.signature-ticket .ticket-choice button:disabled{opacity:.4;cursor:not-allowed}
+.signature-ticket .ticket-document .ticket-choice-help{font:9px/1.8 var(--sans);min-height:34px;margin:0 0 14px}
+.signature-ticket .ticket-rsvp-confirm{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:14px 17px;font:11px/1.6 var(--sans)}
+.signature-ticket .ticket-rsvp-confirm>span{font-size:22px}
+.signature-ticket .ticket-confirmation{position:relative;background:var(--ticket-white);color:var(--ink);border:1px solid var(--ticket-rule);margin-top:27px;padding:0 18px 18px;box-shadow:0 6px 16px #1835320a}
+.signature-ticket .ticket-confirmation-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--ticket-rule);padding:15px 0;font:7px/1.4 var(--sans);letter-spacing:1.7px}
+.signature-ticket .ticket-confirmation-top svg{width:25px;height:25px}
+.signature-ticket .ticket-confirmation-title{font:italic 29px/1.3 var(--display);margin:23px 0 11px}
+.signature-ticket .ticket-confirmation-message{font:12px/2 var(--serif);margin-bottom:22px}
+.signature-ticket .ticket-confirmation-code{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:15px 0;border-top:1px dashed var(--ticket-rule);border-bottom:1px dashed var(--ticket-rule);font:7px/1.5 monospace}
+.signature-ticket .ticket-mini-barcode{width:47px;height:23px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,var(--ink) 3px 5px,transparent 5px 6px);opacity:.8;flex-shrink:0}
+.signature-ticket .ticket-confirmation>small{display:block;font:9px/1.8 var(--sans);margin-top:18px}
+.signature-ticket .ticket-confirmation>button{font:10px/1.5 var(--sans);color:var(--ink);text-decoration:underline;text-underline-offset:4px;margin-top:9px;padding:5px 0}
+.signature-ticket .ticket-rsvp-status{font:10px/1.8 var(--sans)!important;margin-top:16px;min-height:0}
+.signature-ticket .ticket-rsvp-status:empty{display:none}
+.signature-ticket .ticket-wishes-page .invite-section blockquote{border-left:2px solid var(--ink);background:transparent;padding-left:20px}
+.signature-ticket .ticket-final-page{padding:31px 20px 0;background:var(--ink);color:var(--paper)}
+.signature-ticket .ticket-last-photograph{padding:9px 9px 0;background:var(--paper);color:var(--ink);margin:0;transform:rotate(-2deg)}
+.signature-ticket .ticket-last-photo{width:100%;aspect-ratio:4/3;object-fit:cover;filter:saturate(.6)}
+.signature-ticket .ticket-last-photograph figcaption{font:7px/1.6 var(--sans);letter-spacing:1.4px;padding:16px 7px;text-align:center}
+.signature-ticket .ticket-final-route{display:flex;align-items:center;justify-content:center;gap:13px;margin:47px 25px 0;font:20px/1 var(--display)}
+.signature-ticket .ticket-final-route>i{flex:1;max-width:44px;border-top:1px dashed currentColor;opacity:.5}
+.signature-ticket .ticket-final-route svg{width:26px;height:26px}
+.signature-ticket .ticket-document .invitation-ending{margin:0;padding:33px 8px 37px;border:0;border-radius:0;background:transparent;color:var(--paper)}
+.signature-ticket .ticket-document .invitation-ending:after{content:none}
+.signature-ticket .ticket-document .invitation-ending .ending-script{font-size:38px;margin-bottom:21px;color:var(--paper)}
+.signature-ticket .ticket-document .invitation-ending i{color:var(--paper)}
+.signature-ticket .ticket-document-end{border-top:1px solid #ffffff40;padding:23px 3px 27px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.signature-ticket .ticket-document-end>span{font:6px/1.8 var(--sans);letter-spacing:1.2px;opacity:.8}
+.signature-ticket .ticket-document-end>b{font:italic 27px/1 var(--display);letter-spacing:1px;font-weight:400}
+@media(max-width:380px){.signature-ticket .ticket-document .invite-section{padding-left:23px;padding-right:23px}.signature-ticket .ticket-itinerary-page{padding-left:22px;padding-right:22px}.signature-ticket .ticket-itinerary-page .invite-section{padding-left:0;padding-right:0}.signature-ticket .ticket-masthead{padding-left:21px;padding-right:21px}.signature-ticket .ticket-hero-copy h2{font-size:28px}.signature-ticket .ticket-display-title{font-size:30px}.signature-ticket .ticket-flight-board{padding-left:10px;padding-right:10px}.signature-ticket .ticket-flight-board-head,.signature-ticket .ticket-flight-row{grid-template-columns:43px minmax(0,1fr) 59px;gap:5px}.signature-ticket .ticket-flight-row>span:nth-child(2){font-size:10px}.signature-ticket .ticket-boarding-page .experience-ticket{padding-left:21px;padding-right:21px}}
+@media(prefers-reduced-motion:reduce){.signature-ticket .ticket-document *,.signature-ticket .ticket-document *:before,.signature-ticket .ticket-document *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

@@ -1,4 +1,4 @@
-import { PHOTOS } from './catalog.mjs';
+import { PHOTOS } from './catalog.mjs?v=20260913-signature';
 
 const names = '<span>성우</span><i>&</i><span>소희</span>';
 const image = (index, className, thumbnail) => `<img class="${className}" src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : 'fetchpriority="high"'}>`;

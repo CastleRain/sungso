@@ -18,6 +18,11 @@ export const TEMPLATES = [
 export const COLLECTIONS = { classic: { name: '기본 6종', title: '오래 보아도 좋은, 기본 여섯 장', english: 'THE CLASSIC COLLECTION', description: '여백과 사진, 서체로 전하는 담백한 초대.' }, special: { name: '특별한 6종', title: '누르는 순간 시작되는, 특별한 여섯 장', english: 'THE PLAYFUL COLLECTION', description: '봉투를 열고, 별을 잇고, 커튼을 걷으며 만나는 우리.' } };
 
 export const PEOPLE = { sungwoo: '성우', sohee: '소희' };
+export const SIGNATURES = Object.freeze({
+  envelope: { label: 'PAPER ATELIER', title: '손끝에 닿는 초대', description: '봉투를 열고, 접힌 편지와 사진을 한 장씩.', features: '입체 봉투 · 펼치는 편지 · 페이퍼 화보', sections: { story: true } },
+  constellation: { label: 'AFTER THE STARS', title: '별빛으로 쓰는 이야기', description: '우리의 별자리를 잇고, 세 장면의 밤을 건너요.', features: '별자리 잇기 · 장면 선택 · 밤하늘 화보', sections: { story: true } },
+  ticket: { label: 'DESTINATION: US', title: '함께 떠나는 우리의 날', description: '초대부터 도착까지, 한 장의 여행처럼.', features: '탑승 도장 · 하객 여정 · 참석 티켓 체험', sections: { story: true, rsvp: true } },
+});
 export const GALLERIES = { grid: '격자', slide: '슬라이드', filmstrip: '필름 스트립' };
 export const SECTIONS = { story: '우리 이야기', gallery: '갤러리', directions: '오시는 길', accounts: '마음 전하실 곳', rsvp: '참석 여부', guestbook: '방명록' };
 export const DEFAULT_SECTIONS = { story: false, gallery: true, directions: true, accounts: true, rsvp: false, guestbook: false };

@@ -1,7 +1,7 @@
 import { FIREBASE_CONFIG } from '../../../shared/firebase/config.mjs';
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import * as sdk from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { firestoreAdapter } from './firestore-adapter.mjs';
+import { firestoreAdapter } from './firestore-adapter.mjs?v=20260913-signature';
 import { getMember, syncAppAuth } from '../../../shared/firebase/site-auth.mjs';
 
 export async function connect() {

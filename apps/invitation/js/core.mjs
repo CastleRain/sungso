@@ -1,11 +1,11 @@
-import { TEMPLATES, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, getTemplate } from './catalog.mjs';
+import { TEMPLATES, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260913-signature';
 
 export const DOCUMENT_PATH = 'couplePicks/invitation_templates';
 export const STORAGE_KEY = 'sungso_invitation_v1';
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 export function defaultSelection(templateId = 'minimal') {
   const template = getTemplate(templateId) || TEMPLATES[0];
-  return { schemaVersion: 1, templateId: template.id, paletteId: template.palettes[0].id, galleryLayout: template.galleryLayout, sections: { ...DEFAULT_SECTIONS }, note: '' };
+  return { schemaVersion: 1, templateId: template.id, paletteId: template.palettes[0].id, galleryLayout: template.galleryLayout, sections: { ...DEFAULT_SECTIONS, ...SIGNATURES[template.id]?.sections }, note: '' };
 }
 export function normalizeSelection(value) {
   if (!value || value.schemaVersion !== 1 || !getTemplate(value.templateId)) return null;

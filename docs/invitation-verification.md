@@ -83,3 +83,27 @@ Emulator는 `demo-homehunt`와 localhost만 사용했다. 운영 코드의 `fire
 사용자 확정 후 최신 `origin/master`에서 별도 작업 브랜치를 만들고 청첩장과 홈 연결 변경만 `4014d001349e840a84dd6e82cba845dc641d7b09`로 커밋해 master에 반영했다. 기존 여행·WeCost 변경은 최신 master의 내용을 보존했다. 통합 소스의 `npm run check` 1,447개도 통과했다.
 
 [Pages 실행 34742479321](https://github.com/CastleRain/sungso/actions/runs/34742479321)의 검사·서비스 번들·배포 단계가 모두 성공했다. [공개 청첩장](https://CastleRain.github.io/sungso/invitation/)과 관련 파일, 홈 HTML·CSS 총 21개가 HTTP 200이며 검증한 `dist`와 SHA-256이 일치했다. 상세 임시 결과는 `/tmp/sungso-invitation-public-check.json`에 있다. 원격 확인은 정적 GET 요청만 사용했다. 공개 브라우저에서 운영 DB를 이용한 공동 저장과 실제 모바일 기기 검증은 이번에 실행하지 않았다.
+
+## 2026-09-13 — 시그니처 에디션 세 가지
+
+개인 홈·공통 Google 인증 릴리스 `4e561cb`를 기준으로 기존 ID `envelope`, `constellation`, `ticket`의 전체 미리보기를 확장했다. 12종 카탈로그·저장 문서·로컬 키·직접 링크를 보존하며 실제 하객용 제작과 응답 수집은 포함하지 않는다.
+
+| 검증 | 결과 |
+|---|---|
+| 루트 `npm run check` | 1,542/1,542, 참조 382개·JavaScript 142개 통과 |
+| Invitation 단위·계약 | 51개 통과. 편지의 지연 toggle/DOM 교체·장면 선택·교통/참석 체험·옵션 끄기·dispose·기존 설정·체험 값의 선택서 제외 포함 |
+| localhost Firestore Emulator | 18/18. 기존 청첩장 5개·회원 규칙 11개·이번 기본값/명시적 끔 보존 2개. Java 21·`demo-homehunt`, 관리자 로그인/운영 요청 없음 |
+| 이전 렌더 보존 | 이전 커밋의 입력으로 기존 9종 × 기본/전체/모두 끔 27개 HTML 문자열 동일. 기본값 9개, 12종의 명시적 false 72필드·정규화·초안 모두 보존 |
+| 1440px·390px | 세 시그니처와 목록 배치·가로 넘침 0. 봉투/별자리/탑승권 표지 체험과 추가 본문, 모바일 꾸미기, 섹션 숨김·복원, 사진 확대 확인 |
+| 체험·동시 편집 | 체험만으로 대역 쓰기 0. 소희 찜/공동 저장 이후 쓰기 2. 성우의 뒤늦은 저장은 충돌 안내·메모 초안 유지, 추가 쓰기 없음 |
+| 인증 정리 | 대역 로그아웃 뒤 개인 루트/미리보기 제거와 Google 로그인 화면 복귀 |
+
+봉투의 첫 편지는 기본으로 열린다. 다른 편지를 열거나 닫은 상태가 색감·섹션 재렌더 후에도 유지된다. native `toggle` 이벤트보다 DOM 교체가 먼저 일어나도 이전 노드의 `open`을 수집하도록 보강했다. 별자리의 장면 사진·문구·빛은 함께 변경되고 우리 이야기/갤러리 끄기를 따른다. 탑승권은 세 교통수단과 참석/마음 전달·동행을 선택해 가상 게스트 확인 티켓을 만든다. 실제 응답·지도 요청·개인정보 입력은 없다.
+
+캐시된 이전 `catalog.mjs`에 새 named export를 요청하지 않도록 invitation 내부 정적·동적 import의 버전을 통일했다. 공통 인증·Firebase CDN 경로는 변경하지 않았다. 모바일 QA 패널이 하단 꾸미기 버튼을 가리지 않도록 접힌 대역 제어판만 상단 작은 표시로 옮겼다. 이 제어판은 배포되지 않는다.
+
+[1440px 목록](development-plans/active/couple-home/evidence/signature-catalog-1440.png) · [390px 목록](development-plans/active/couple-home/evidence/signature-catalog-390.png) · [봉투](development-plans/active/couple-home/evidence/signature-envelope-390.png) · [별자리](development-plans/active/couple-home/evidence/signature-constellation-390.png) · [탑승권](development-plans/active/couple-home/evidence/signature-ticket-390.png)
+
+화면 검증은 내장 브라우저와 loopback 메모리 대역이며, 실제 iOS/Android 기기 검증으로 표현하지 않는다. 모션 감소는 CSS·상태 전환 단위 검사로 확인했다. 운영 DB QA 쓰기·새 통근/공급자 호출은 0이다. 기존 개인 홈 계획의 외부 키 교체·실회원 확인·PDF 보호 보류는 별도로 남는다.
+
+**다음:** 구현 커밋의 Pages 배포·공개 자산 확인 후 근거를 추가한다.
