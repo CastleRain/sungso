@@ -229,6 +229,19 @@ header .sub { margin-top: 10px; font-size: 15px; color: #bbb; }
 .homehunt-cta .card-cta-text,
 .homehunt-cta .card-cta-arrow { color: #47705b; }
 .card:hover .homehunt-cta { background: #e5efe8; }
+.invitation-card { grid-column: 1 / -1; }
+.invitation-badge { color: #536446; background: #f0f3e8; }
+.invitation-cta { background: #f5f7ef; }
+.invitation-cta .card-cta-text,
+.invitation-cta .card-cta-arrow { color: #657951; }
+.card:hover .invitation-cta { background: #eaf0df; }
+@media (min-width: 621px) {
+  .invitation-card { flex-direction: row; align-items: center; gap: 22px; }
+  .invitation-card .card-title { margin-top: 6px; }
+  .invitation-card .card-desc { margin-top: 5px; }
+  .invitation-card .card-cta { margin-left: auto; min-width: 155px; }
+  .invitation-card .icon-wrap { flex-shrink: 0; width: 60px; height: 60px; font-size: 26px; }
+}
 
 /* ── Events section ── */
 .events-wrap { width: 100%; max-width: 560px; }

@@ -8,7 +8,7 @@
 
 ## 폴더와 의존성
 
-- `apps/{hub,wecost,honeymoon,travel,homehunt}`: 브라우저 화면, 앱 자산, 공개 데이터, 앱 테스트.
+- `apps/{hub,invitation,wecost,honeymoon,travel,homehunt}`: 브라우저 화면, 앱 자산, 공개 데이터, 앱 테스트.
 - `shared/{firebase,finance,travel,homehunt}`: 공개 설정·실제 공통 코드. `shared` 또는 서버가 `apps`의 구현 모듈을 import하지 않는다. 서버가 앱의 공개 JSON을 빌드에 포함하는 것은 허용한다.
 - `services/homehunt`: 검색 API, 수집기, Render/Firebase 진입점, 원천자료·수집 설정·알림 장부. `services/firebase-default`: 기존 Firebase 함수.
 - `config/apps.json`의 명시적 배포 목록으로 `dist/`를 생성한다. `dist/`는 Git 제외이며 직접 수정하지 않는다. 서비스·테스트·비밀 설정·archive 전체를 웹에 복사하지 않는다.
@@ -36,6 +36,13 @@
 
 ## 진행 상황
 
+### 2026-09-13 — 청첩장 특별한 인터랙션 6종 추가
+
+- 기본 6종에 봉투·별자리·즉석사진·입체 책·탑승권·무대 커튼을 더해 총 12종을 제공한다. 컬렉션 필터와 재생·다시 보기, 키보드 조작·모션 감소를 지원하며 체험 상태는 공동 선택에 저장하지 않는다.
+- `npm run build`·`npm test`·`npm run check`의 1,447개 검사와 참조 331개·JS 문법 127개, Invitation 단위 검사 25개·Firestore Emulator 5개가 통과했다. 새 여섯 디자인의 1440px·390px 전체 스크롤·조작·설정·찜·공동 저장·복사와 기존 목록 복원을 대역에서 확인했다. 기존 로컬 미리보기의 선택을 보존했고 운영 DB에 테스트 기록을 쓰지 않았다. [검증 기록](docs/invitation-verification.md)을 참고한다.
+
+**다음:** 12종을 함께 비교해 선택하고 실제 제작·하객용 페이지와 공개 배포를 별도 진행한다.
+
 ### 2026-09-13 — 여행 이동 국가·예산 연동·출발 준비, Pages 배포 완료
 
 - 여행 달력 칸에 이동 국가를 함께 표시하고 여행 비용·출발 준비를 더해 여덟 화면으로 확장했다. 기존 WeCost 신혼여행 항목을 공유해 예상액·지급액·남은 지출·준비금·증감과 금액 이력을 보여준다.
@@ -44,6 +51,14 @@
 - `eb8bea8`의 [Pages 34740618135](https://github.com/CastleRain/sungso/actions/runs/34740618135) 검증·서비스 번들·배포 성공을 확인했다. 공개 파일 23개가 HTTP 200·검증 산출물 해시 일치였고, 실제 공동 일정·WeCost를 읽은 1440px/390px에서 이동 국가·여덟 화면·기존 금액·견적 미리보기·출발 준비를 확인했다. SDK/네트워크 쓰기 차단 상태에서 운영 DB 쓰기·JS 오류·가로 넘침 0이었다. 임시 검증 근거는 `/private/tmp/sungso-travel-budget/`의 `qa-report.json`, `qa-public-report.json`, `public-files.json`에 보관한다.
 
 **다음:** 실제 견적과 남은 여행용 준비금을 입력하고, 발권·리조트 이동·입국 신고 등 준비 상태를 함께 갱신한다.
+
+### 2026-09-13 — 결혼 전 홈 구성과 모바일 청첩장 선택 구현
+
+- 홈 첫 묶음을 결혼 전으로 변경하고 청첩장·Honeymoon·여행 일정 순서로 배치했다. `apps/invitation/`을 `/sungso/invitation/`에 등록하고 여섯 예시·임시 꾸미기·사람별 찜·공동 선택·선택서 출력을 구현했다.
+- 기존 PIN·일정·D-day·달력과 공개 경로를 보존했다. 전용 `couplePicks/invitation_templates` 문서만 사용하며 조회 시 시딩하지 않는다. 실사진·연락처·계좌·하객 응답은 취급하지 않는다.
+- 1440px·390px에서 여섯 전체 스크롤과 홈 왕복·패널·갤러리, 대역의 새로고침·충돌·실패 흐름, 내려받은 JSON을 확인했다. Firestore Emulator 4개가 통과했고 운영 DB에 테스트 기록을 쓰지 않았다. [검증 결과](docs/invitation-verification.md)를 참고한다.
+
+**다음:** 공개 배포와 선택서를 기반으로 한 실제 제작·하객용 페이지를 별도 작업한다.
 
 ### 2026-09-13 — 여행 귀국편을 몰디브 밤 출발 후보로 변경
 

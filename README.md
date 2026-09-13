@@ -9,6 +9,7 @@
 | 소스 | 공개 경로 | 역할 |
 |---|---|---|
 | [apps/hub](apps/hub/README.md) | `/sungso/` | 홈·일정·달력·D-day |
+| [apps/invitation](apps/invitation/README.md) | `/sungso/invitation/` | 청첩장 기본 6종·특별한 6종·찜·공동 디자인 선택 |
 | [apps/wecost](apps/wecost/README.md) | `/sungso/wecost/` | 결혼비용·현금흐름·집 예산 |
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
 | [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·WeCost 연결 예산·출발 준비·변경 이력 |

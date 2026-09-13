@@ -1,0 +1,233 @@
+/* Interactive worlds share the invitation's document scroll and palette contract. */
+.cover-worlds { min-height: 710px; padding: 35px 25px 25px; isolation: isolate; }
+.cover-worlds .world-eyebrow { position: relative; z-index: 1; color: var(--accent); font-size: 7px; letter-spacing: 2.8px; }
+.cover-worlds .world-title { position: relative; z-index: 1; margin: 23px 0 15px; font: 400 57px/.96 var(--display); letter-spacing: -1.8px; }
+.cover-worlds .world-title em { font-weight: 400; }
+.cover-worlds .world-subtitle { position: relative; z-index: 1; font-size: 10px; letter-spacing: 1px; }
+.cover-worlds .world-names { margin: 10px 0 17px; font-size: 21px; gap: 18px; }
+.cover-worlds .cover-date { position: relative; font-size: 15px; }
+.cover-worlds .cover-date span { font-size: 7px; letter-spacing: 2px; margin-top: 9px; }
+.world-action { position: relative; z-index: 3; display: inline-flex; align-items: center; justify-content: center; gap: 17px; min-height: 46px; max-width: 100%; margin: 22px auto 0; padding: 11px 18px; border: 1px solid var(--accent); border-radius: 0; color: var(--ink); background: transparent; font: 11px/1.6 var(--sans); letter-spacing: .15px; cursor: pointer; }
+.world-action:hover { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.world-action:focus-visible, .constellation-star:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.world-action-icon { font: 18px/1 var(--display); }
+.world-artwork-action { position: absolute; z-index: 6; inset: 0; display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; touch-action: manipulation; }
+.world-artwork-action:focus-visible { outline: 2px solid var(--accent); outline-offset: -8px; }
+.world-artwork-label { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.world-status { position: relative; z-index: 1; min-height: 30px; max-width: 300px; margin: 13px auto 0; font: 9px/1.8 var(--sans); color: var(--ink); opacity: .68; }
+.world-thumbnail-note { margin: 15px 0 0; font: 8px/1.8 var(--sans); letter-spacing: .2px; opacity: .7; }
+.world-photo { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* 01 · A constellation drawn by the guest. */
+.cover-constellation { background: radial-gradient(ellipse at 48% 43%, var(--soft), transparent 58%), var(--paper); }
+.constellation-sky { position: absolute; inset: 0; z-index: -1; color: var(--accent); pointer-events: none; }
+.constellation-sky span { position: absolute; opacity: .6; font: 12px serif; }
+.constellation-sky span:nth-child(1) { left: 12%; top: 8%; font-size: 7px; }
+.constellation-sky span:nth-child(2) { right: 14%; top: 13%; }
+.constellation-sky span:nth-child(3) { left: 8%; top: 30%; font-size: 21px; }
+.constellation-sky span:nth-child(4) { right: 8%; top: 34%; font-size: 7px; }
+.constellation-sky span:nth-child(5) { left: 20%; top: 69%; font-size: 18px; }
+.constellation-sky span:nth-child(6) { right: 20%; top: 76%; font-size: 6px; }
+.constellation-sky span:nth-child(7) { right: 31%; top: 5%; }
+.constellation-sky span:nth-child(8) { left: 7%; top: 89%; font-size: 8px; }
+.constellation-sky span:nth-child(9) { right: 8%; top: 91%; }
+.constellation-sky span:nth-child(10) { left: 40%; top: 64%; font-size: 5px; }
+.constellation-sky span:nth-child(11) { right: 41%; top: 27%; }
+.constellation-sky span:nth-child(12) { right: 2%; top: 64%; font-size: 19px; }
+.constellation-chart { position: relative; width: 100%; max-width: 355px; height: 298px; margin: 11px auto 0; }
+.constellation-orbit { position: absolute; width: 220px; height: 220px; left: 50%; top: 40%; border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: 50%; transform: translate(-50%, -35%) rotate(-25deg) scaleY(.68); }
+.constellation-orbit::after { content: ''; position: absolute; inset: -25px 18px; border: 1px solid color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 50%; transform: rotate(65deg); }
+.constellation-portrait { position: absolute; width: 148px; height: 186px; top: 77px; left: 50%; overflow: hidden; border-radius: 100px 100px 3px 3px; border: 1px solid var(--accent); padding: 5px; background: var(--paper); opacity: 0; transform: translateX(-50%) translateY(14px) scale(.88); transition: opacity 900ms ease, transform 1100ms cubic-bezier(.16, 1, .3, 1); }
+.constellation-portrait .world-photo { border-radius: 100px 100px 1px 1px; object-position: center 65%; opacity: .82; }
+.constellation-portrait > span { position: absolute; left: 0; right: 0; bottom: 13px; color: white; font: 17px var(--display); letter-spacing: 4px; text-shadow: 0 1px 6px #0008; }
+.constellation-portrait > span i { font-size: 14px; }
+.constellation-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.constellation-lines line { stroke: var(--accent); stroke-width: .35; stroke-dasharray: 1.1 1.2; opacity: .12; transition: opacity 550ms ease, stroke-dasharray 550ms ease; }
+.constellation-lines line.is-lit { stroke-dasharray: 100 0; opacity: .75; }
+.constellation-star { position: absolute; z-index: 2; top: var(--star-y); left: var(--star-x); display: flex; width: 46px; height: 46px; padding: 10px; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: var(--accent); transform: translate(-50%, -50%); cursor: pointer; }
+.constellation-star > svg { width: 25px; height: 25px; overflow: visible; fill: var(--paper); stroke: var(--accent); stroke-width: 1; transition: fill 400ms ease, filter 500ms ease, transform 550ms ease; }
+.constellation-star.is-lit > svg { fill: var(--accent); filter: drop-shadow(0 0 7px var(--accent)); transform: rotate(90deg) scale(1.12); }
+.constellation-word { position: absolute; top: 40px; font: 8px var(--sans); letter-spacing: 1px; white-space: nowrap; opacity: .6; }
+.constellation-star.is-lit .constellation-word { opacity: 1; }
+.constellation-caption { position: absolute; bottom: 0; left: 0; right: 0; font: 9px var(--serif); letter-spacing: 2px; opacity: 0; transition: opacity 700ms ease; }
+.cover-constellation.is-active .constellation-portrait { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+.cover-constellation.is-active .constellation-caption { opacity: .8; }
+.theme-constellation { color-scheme: dark; }
+.theme-constellation .invite-section { margin: 0 24px; padding: 65px 12px; border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); background-image: radial-gradient(circle at 7% 26%, color-mix(in srgb, var(--accent) 45%, transparent) 0 1px, transparent 1.3px), radial-gradient(circle at 96% 75%, color-mix(in srgb, var(--accent) 35%, transparent) 0 1px, transparent 1.3px); }
+.theme-constellation .section-eyebrow { letter-spacing: 3px; font-size: 8px; }
+.theme-constellation .section-eyebrow::before { content: '✧'; display: block; margin-bottom: 17px; font: 25px serif; }
+.theme-constellation .invite-section h2 { color: var(--accent); }
+.theme-constellation .wedding-calendar { border-color: color-mix(in srgb, var(--accent) 30%, transparent); padding: 25px 0; }
+.theme-constellation .calendar-days .wedding-day { box-shadow: 0 0 17px color-mix(in srgb, var(--accent) 25%, transparent); }
+.theme-constellation .gallery-grid .gallery-photo:first-child { border-radius: 150px 150px 2px 2px; }
+.theme-constellation .gallery-grid { gap: 9px; }
+.theme-constellation .gallery-filmstrip { border-color: var(--paper); }
+.theme-constellation .story-list article { border-left: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding-left: 15px; }
+.theme-constellation .sample-accounts details { border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 0; }
+.theme-constellation .invitation-ending { position: relative; padding: 86px 25px 72px; background: radial-gradient(ellipse at 50% 90%, var(--soft), transparent 70%), var(--paper); border-top: 1px solid var(--soft); }
+.theme-constellation .invitation-ending::before { content: '·    ✦    ·'; display: block; margin-bottom: 25px; color: var(--accent); font: 17px var(--display); letter-spacing: 16px; }
+.theme-constellation .ending-script { font-size: 39px; }
+
+/* 02 · An opening book, dimensional paper, a photograph and folded flowers. */
+.cover-storybook { min-height: 730px; background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, color-mix(in srgb, var(--ink) 2%, transparent) 4px); }
+.cover-storybook .world-title { font-size: 55px; }
+.storybook-stage { position: relative; height: 325px; width: 100%; margin: 6px auto 0; perspective: 1000px; }
+.storybook-book { position: absolute; inset: 0; transform-style: preserve-3d; }
+.storybook-pages { position: absolute; bottom: 11px; left: 50%; display: flex; width: 93%; max-width: 330px; height: 138px; border: 1px solid color-mix(in srgb, var(--accent) 60%, var(--paper)); background: var(--soft); box-shadow: 0 3px var(--paper), 0 4px color-mix(in srgb, var(--accent) 35%, var(--paper)), 0 7px var(--paper), 0 9px var(--accent), 0 18px 20px #27211720; transform: translateX(-50%) rotateX(44deg); transform-origin: 50% 100%; opacity: 0; transition: opacity 350ms ease 150ms; }
+.storybook-pages > span { flex: 1; height: 100%; background: linear-gradient(90deg, var(--paper), var(--paper) 80%, var(--soft)); border-radius: 3px 0 0 8px; }
+.storybook-pages > span + span { border-left: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); background: linear-gradient(90deg, var(--soft), var(--paper) 20%); border-radius: 0 3px 8px 0; }
+.storybook-pop-up { position: absolute; inset: 0; }
+.storybook-photo { position: absolute; z-index: 2; bottom: 63px; left: 50%; width: 158px; height: 221px; padding: 7px 7px 28px; border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 80px 80px 1px 1px; background: var(--paper); box-shadow: 1px 7px 10px #29251b18; transform-origin: 50% 100%; transform: translateX(-50%) translateY(70px) rotateX(-80deg) scale(.8); opacity: 0; transition: opacity 400ms ease 180ms, transform 1000ms cubic-bezier(.22, 1, .36, 1) 150ms; }
+.storybook-photo .world-photo { border-radius: 80px 80px 0 0; object-position: center 62%; }
+.storybook-photo p { margin: 7px -3px 0; font: 7px var(--serif); letter-spacing: .5px; }
+.storybook-flower { position: absolute; bottom: 40px; width: 93px; height: 170px; color: var(--accent); filter: drop-shadow(2px 4px 1px #35302313); transform-origin: 50% 100%; opacity: 0; transition: opacity 400ms ease 300ms, transform 950ms cubic-bezier(.22, 1, .36, 1) 250ms; }
+.storybook-flower-left { z-index: 3; left: 1%; transform: translateY(38px) rotate(18deg) scaleY(.1); }
+.storybook-flower-right { z-index: 1; right: 1%; bottom: 55px; width: 105px; height: 192px; transform: translateY(45px) rotate(-20deg) scaleY(.1); }
+.storybook-paper-heart, .storybook-paper-star { position: absolute; color: var(--accent); opacity: 0; font: 30px var(--display); transition: opacity 450ms ease 700ms, transform 700ms ease 500ms; transform: translateY(15px) scale(.4); }
+.storybook-paper-heart { top: 20px; right: 16%; }
+.storybook-paper-star { top: 39px; left: 15%; font-size: 25px; }
+.storybook-jacket { position: absolute; z-index: 4; width: 215px; height: 275px; top: 22px; left: 50%; padding: 11px; color: var(--paper); background: var(--accent); border-radius: 3px 8px 8px 3px; border-left: 9px solid color-mix(in srgb, var(--accent) 75%, var(--ink)); box-shadow: 4px 4px 0 var(--paper), 5px 5px 0 var(--accent), 9px 14px 20px #27211726; transform: translateX(-50%) rotate(-6deg); transform-origin: 4% 50%; transition: transform 1000ms cubic-bezier(.22, 1, .36, 1), opacity 400ms ease 250ms; }
+.storybook-jacket-border { height: 100%; padding: 22px 10px 13px; border: 1px solid color-mix(in srgb, var(--paper) 55%, transparent); display: flex; flex-direction: column; align-items: center; }
+.storybook-jacket .small-caps { font-size: 6px; letter-spacing: 2px; }
+.storybook-monogram { margin: 18px 0 10px; font: 47px/.9 var(--display); letter-spacing: 4px; }
+.storybook-monogram i { font-size: 20px; letter-spacing: 0; }
+.storybook-jacket-rule { width: 25px; height: 1px; background: currentColor; opacity: .6; }
+.storybook-jacket-title { margin-top: 13px; font: 21px/1.6 var(--serif); letter-spacing: 2px; }
+.storybook-jacket-date { margin-top: auto; font: 7px var(--display); letter-spacing: 1.8px; }
+.cover-storybook.is-active .storybook-pages { opacity: 1; }
+.cover-storybook.is-active .storybook-jacket { opacity: 0; pointer-events: none; transform: translateX(-50%) rotate(-6deg) rotateY(-125deg); }
+.cover-storybook.is-active .storybook-photo { opacity: 1; transform: translateX(-50%) translateY(0) rotateX(0deg) scale(1); }
+.cover-storybook.is-active .storybook-flower-left { opacity: 1; transform: translateY(0) rotate(-11deg) scaleY(1); }
+.cover-storybook.is-active .storybook-flower-right { opacity: 1; transform: translateY(0) rotate(15deg) scaleY(1); }
+.cover-storybook.is-active .storybook-paper-heart, .cover-storybook.is-active .storybook-paper-star { opacity: .75; transform: translateY(0) scale(1); }
+.cover-storybook .world-names { margin-top: 0; }
+.theme-storybook .invite-section { margin: 0 17px 18px; padding: 47px 19px; border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent); box-shadow: 3px 3px 0 var(--soft); background: linear-gradient(90deg, color-mix(in srgb, var(--soft) 45%, var(--paper)), var(--paper) 8%); }
+.theme-storybook .section-eyebrow { display: inline-block; padding: 5px 12px; border-bottom: 1px solid var(--accent); font-size: 8px; letter-spacing: 2px; }
+.theme-storybook .invite-section h2 { font-size: 21px; }
+.theme-storybook .invitation-prose { font-size: 12px; }
+.theme-storybook .signature { color: var(--accent); }
+.theme-storybook .wedding-calendar { padding: 22px 0; }
+.theme-storybook .calendar-days .wedding-day { border-radius: 4px; transform: rotate(-7deg); }
+.theme-storybook .gallery-photo { padding: 6px 6px 20px; background: var(--paper); border: 1px solid var(--soft); box-shadow: 1px 3px 0 var(--soft); }
+.theme-storybook .gallery-grid { gap: 12px; }
+.theme-storybook .gallery-grid .gallery-photo:first-child { margin: 0 5px; transform: rotate(-2deg); }
+.theme-storybook .gallery-slide { padding: 8px 2px 18px; }
+.theme-storybook .gallery-filmstrip { padding-bottom: 16px; }
+.theme-storybook .story-list { gap: 30px; }
+.theme-storybook .story-list article > span { display: flex; width: 30px; height: 30px; flex-shrink: 0; align-items: center; justify-content: center; background: var(--soft); font-size: 18px; }
+.theme-storybook .sample-map { border: 1px solid var(--accent); padding: 4px; }
+.theme-storybook .sample-accounts details { border-left: 3px solid var(--accent); border-radius: 0; }
+.theme-storybook .invitation-ending { position: relative; margin: 27px 17px 22px; padding: 59px 17px 44px; background: var(--accent); color: var(--paper); outline: 1px solid color-mix(in srgb, var(--paper) 50%, transparent); outline-offset: -10px; }
+.theme-storybook .invitation-ending::before { content: 'THE NEXT CHAPTER'; display: block; margin-bottom: 24px; font: 8px var(--sans); letter-spacing: 2.4px; opacity: .8; }
+.theme-storybook .ending-script, .theme-storybook .invitation-ending .couple-names i { color: var(--paper); }
+.theme-storybook .ending-script { font-size: 34px; }
+
+/* 03 · A small theatre. Curtains and confetti run only after a deliberate tap. */
+.cover-curtain { min-height: 750px; padding: 34px 24px 25px; background: radial-gradient(ellipse at 50% 25%, var(--soft), transparent 65%), var(--paper); }
+.cover-curtain .world-title { font-size: 57px; margin-bottom: 13px; }
+.theater-stage { position: relative; height: 336px; margin-top: 27px; overflow: hidden; border-radius: 150px 150px 0 0; background: var(--paper); }
+.theater-scene { position: absolute; inset: 0; }
+.theater-scene .world-photo { object-position: center 70%; filter: brightness(.88); transform: scale(1.1); transition: transform 1900ms cubic-bezier(.22, 1, .36, 1); }
+.theater-scene::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0002 0, transparent 37%, #0009 100%); }
+.theater-photo-caption { position: absolute; z-index: 1; bottom: 24px; left: 0; right: 0; color: #fff9ec; opacity: 0; transform: translateY(9px); transition: transform 900ms ease 500ms, opacity 800ms ease 500ms; }
+.theater-photo-caption > .small-caps { font-size: 6px; letter-spacing: 3px; }
+.theater-photo-caption .couple-names { margin: 12px 0 12px; font-size: 21px; gap: 17px; }
+.theater-photo-caption .couple-names i { color: #fff9ec; }
+.theater-photo-caption > span:last-child { font: 12px var(--display); letter-spacing: 2px; }
+.theater-curtain { position: absolute; z-index: 2; top: 0; bottom: 0; width: 52%; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--paper) 85%, #000) 0, var(--soft) 13%, color-mix(in srgb, var(--paper) 72%, var(--accent)) 23%, var(--paper) 37%, var(--soft) 49%); box-shadow: inset -4px 0 10px #0004, 5px 0 15px #0004; transition: transform 1500ms cubic-bezier(.65, 0, .2, 1); }
+.theater-curtain::after { content: ''; position: absolute; bottom: 10px; left: 0; right: 0; height: 3px; border-top: 1px solid var(--accent); border-bottom: 1px solid var(--accent); opacity: .6; }
+.theater-curtain-left { left: 0; transform-origin: left top; }
+.theater-curtain-right { right: 0; transform-origin: center top; transform: scaleX(-1); }
+.theater-valance { position: absolute; z-index: 4; top: -7px; left: 0; right: 0; height: 60px; pointer-events: none; background: repeating-linear-gradient(90deg, var(--paper), var(--soft) 8%, var(--paper) 16%); border-bottom: 2px solid var(--accent); border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: 0 6px 12px #0004; }
+.theater-closed-title { position: absolute; z-index: 3; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; color: var(--accent); pointer-events: none; text-shadow: 0 2px 3px #0005; transition: opacity 350ms ease; }
+.theater-closed-title > span:first-child { font: 30px serif; }
+.theater-monogram { font: 51px var(--display); letter-spacing: 3px; }
+.theater-monogram i { font-size: 30px; }
+.theater-closed-title .small-caps { font-size: 6px; letter-spacing: 2px; }
+.theater-frame { position: absolute; z-index: 5; pointer-events: none; inset: 0; border: 1px solid var(--accent); border-radius: 150px 150px 0 0; box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--paper) 70%, transparent), inset 0 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent); }
+.theater-spotlight { position: absolute; z-index: 1; top: -3%; left: 16%; width: 80%; height: 110%; background: linear-gradient(180deg, #fff6d56b, #fff5cf18 70%, transparent); clip-path: polygon(42% 0, 47% 0, 100% 100%, 0 100%); transform-origin: 45% 0; transform: rotate(-13deg); mix-blend-mode: screen; opacity: 0; transition: opacity 1400ms ease 250ms; }
+.theater-confetti { position: absolute; z-index: 4; inset: 0; overflow: hidden; pointer-events: none; }
+.theater-confetti i { position: absolute; top: -10px; left: var(--confetti-x); width: 5px; height: 10px; background: var(--accent); opacity: 0; }
+.theater-confetti i:nth-child(3n) { background: #fff6dc; width: 4px; height: 7px; }
+.theater-confetti i:nth-child(3n + 1) { border-radius: 50%; width: 6px; height: 6px; background: var(--soft); }
+.cover-curtain.is-active .theater-curtain-left { transform: translateX(-102%); }
+.cover-curtain.is-active .theater-curtain-right { transform: translateX(102%) scaleX(-1); }
+.cover-curtain.is-active .theater-closed-title { opacity: 0; }
+.cover-curtain.is-active .theater-scene .world-photo { transform: scale(1); }
+.cover-curtain.is-active .theater-photo-caption { opacity: 1; transform: translateY(0); }
+.cover-curtain.is-active .theater-spotlight { opacity: 1; }
+.cover-curtain.is-active:not(.experience-thumbnail) .theater-confetti i { animation: theater-celebrate 1900ms ease-out calc(650ms + var(--confetti-delay)) both; }
+.theater-caption { font: 10px/1.7 var(--serif); margin: 19px 0 13px; letter-spacing: .4px; }
+.cover-curtain .cover-date { font-size: 14px; }
+.cover-curtain .cover-date span { font-size: 6px; }
+@keyframes theater-celebrate { 0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0); } 12% { opacity: .95; } 82% { opacity: .8; } 100% { opacity: 0; transform: translate3d(var(--confetti-drift), 340px, 0) rotate(var(--confetti-turn)); } }
+.theme-curtain { color-scheme: dark; }
+.theme-curtain .invite-section { padding: 64px 31px; border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); }
+.theme-curtain .invite-section::before { content: ''; position: absolute; top: 18px; left: 50%; width: 6px; height: 6px; transform: translateX(-50%) rotate(45deg); border: 1px solid var(--accent); opacity: .65; }
+.theme-curtain .section-eyebrow { font-size: 7px; letter-spacing: 3px; color: var(--accent); }
+.theme-curtain .invite-section h2 { color: var(--accent); font-size: 24px; letter-spacing: 0; }
+.theme-curtain .invitation-prose { font-size: 12px; line-height: 2.6; }
+.theme-curtain .wedding-calendar { border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding: 18px 12px 23px; position: relative; }
+.theme-curtain .wedding-calendar::before { content: 'ADMIT ONE BEAUTIFUL DAY'; display: block; font: 6px var(--sans); letter-spacing: 1.8px; color: var(--accent); margin-bottom: 22px; }
+.theme-curtain .calendar-days .wedding-day { border-radius: 0; }
+.theme-curtain .gallery-grid .gallery-photo:first-child { border-radius: 140px 140px 0 0; padding: 5px; border: 1px solid var(--accent); }
+.theme-curtain .gallery-grid .gallery-photo:first-child img { border-radius: 140px 140px 0 0; }
+.theme-curtain .gallery-grid { gap: 9px; }
+.theme-curtain .gallery-filmstrip { border-color: var(--paper); }
+.theme-curtain .gallery-slide .gallery-photo { border-top: 1px solid var(--accent); border-bottom: 1px solid var(--accent); padding: 5px 0; }
+.theme-curtain .story-list article > span { font-size: 29px; }
+.theme-curtain .sample-buttons > span { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.theme-curtain .sample-accounts details { border-radius: 0; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: transparent; }
+.theme-curtain .sample-map { padding: 5px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+.theme-curtain .invitation-ending { position: relative; margin: 0 20px 22px; padding: 70px 16px 60px; border: 1px solid var(--accent); background: radial-gradient(ellipse at 50% 0, var(--soft), var(--paper) 80%); }
+.theme-curtain .invitation-ending::before { content: 'ꕥ'; display: block; margin-bottom: 28px; color: var(--accent); font: 33px serif; }
+.theme-curtain .ending-script { font-size: 37px; }
+.theme-curtain .invitation-ending > .small-caps { border-top: 1px solid var(--accent); display: inline-block; padding-top: 23px; }
+
+/* Catalog cards show a completed scene without dormant controls or live regions. */
+.cover-worlds.experience-thumbnail { min-height: 384px; padding: 22px 20px 18px; }
+.cover-worlds.experience-thumbnail .world-title { font-size: 34px; margin: 16px 0 12px; letter-spacing: -1px; }
+.cover-worlds.experience-thumbnail .world-eyebrow { font-size: 6px; letter-spacing: 2px; }
+.cover-worlds.experience-thumbnail .world-subtitle { display: none; }
+.cover-worlds.experience-thumbnail .world-names { font-size: 15px; margin: 6px 0 12px; gap: 13px; }
+.cover-worlds.experience-thumbnail .cover-date { font-size: 12px; }
+.cover-worlds.experience-thumbnail .cover-date span { display: none; }
+.experience-thumbnail .constellation-chart { height: 185px; margin-top: 3px; }
+.experience-thumbnail .constellation-orbit { width: 158px; height: 158px; }
+.experience-thumbnail .constellation-portrait { width: 104px; height: 124px; top: 43px; padding: 4px; }
+.experience-thumbnail .constellation-portrait > span { bottom: 9px; font-size: 13px; }
+.experience-thumbnail .constellation-star { width: 36px; height: 36px; padding: 9px; pointer-events: none; }
+.experience-thumbnail .constellation-star > svg { width: 18px; height: 18px; }
+.experience-thumbnail .constellation-word { top: 30px; font-size: 6px; }
+.experience-thumbnail .constellation-caption { font-size: 7px; }
+.experience-thumbnail .world-thumbnail-note { display: none; }
+.experience-thumbnail .storybook-stage { height: 197px; margin-top: 4px; }
+.experience-thumbnail .storybook-pages { max-width: 260px; bottom: 3px; height: 102px; }
+.experience-thumbnail .storybook-photo { bottom: 34px; width: 104px; height: 153px; padding: 5px 5px 22px; }
+.experience-thumbnail .storybook-photo p { font-size: 5px; margin-top: 6px; }
+.experience-thumbnail .storybook-flower-left { width: 70px; height: 126px; bottom: 22px; }
+.experience-thumbnail .storybook-flower-right { width: 77px; height: 145px; bottom: 33px; }
+.experience-thumbnail .storybook-paper-heart { top: 0; right: 12%; font-size: 22px; }
+.experience-thumbnail .storybook-paper-star { top: 17px; left: 13%; font-size: 20px; }
+.experience-thumbnail .storybook-jacket { display: none; }
+.experience-thumbnail .theater-stage { height: 229px; margin-top: 17px; }
+.experience-thumbnail .theater-valance { height: 41px; }
+.experience-thumbnail .theater-photo-caption { bottom: 19px; }
+.experience-thumbnail .theater-photo-caption .couple-names { font-size: 16px; margin: 9px 0; }
+.experience-thumbnail .theater-photo-caption > span:last-child { font-size: 9px; }
+.experience-thumbnail .theater-photo-caption > .small-caps { font-size: 5px; }
+.experience-thumbnail .theater-caption, .cover-curtain.experience-thumbnail > .cover-date { display: none; }
+.experience-thumbnail .theater-confetti { display: none; }
+
+@media (max-width: 380px) {
+  .cover-worlds { padding-left: 20px; padding-right: 20px; }
+  .cover-worlds .world-title { font-size: 53px; }
+  .storybook-flower-left { left: -2%; }
+  .storybook-flower-right { right: -2%; }
+  .theme-storybook .invite-section { margin-left: 13px; margin-right: 13px; padding-left: 16px; padding-right: 16px; }
+  .theme-curtain .invite-section { padding-left: 25px; padding-right: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cover-worlds *, .cover-worlds *::before, .cover-worlds *::after { transition: none !important; animation: none !important; }
+  .theater-confetti { display: none; }
+}

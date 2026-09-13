@@ -60,6 +60,17 @@
         "readiness.mjs",
         "readiness.css"
       ]
+    },
+    {
+      "id": "invitation",
+      "source": "apps/invitation",
+      "output": "invitation",
+      "files": [
+        "index.html",
+        "css",
+        "js",
+        "assets"
+      ]
     }
   ],
   "shared": [

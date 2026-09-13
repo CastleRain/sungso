@@ -1,0 +1,205 @@
+/* Three tactile covers: stationery, instant photography, and a boarding pass. */
+.paper-experience{isolation:isolate;padding:36px 24px 33px;min-height:710px;background:var(--paper)}
+.paper-experience .paper-kicker{font:8px var(--sans);letter-spacing:2.5px;color:var(--accent)}
+.paper-experience .paper-subtitle{font:11px/1.8 var(--serif);margin-top:18px;opacity:.8}
+.paper-experience .paper-names{font-size:20px;gap:17px;margin:23px 0 10px}
+.paper-experience .paper-date{font:8px/1.6 var(--sans);letter-spacing:2.2px}
+.paper-experience-hint{font:10px/1.8 var(--sans);color:var(--accent);min-height:36px;max-width:310px;margin:0 auto}
+.paper-experience button:focus-visible{outline:2px solid var(--ink);outline-offset:5px}
+
+/* The triangular flap folds behind the letter; the wax control stays above it. */
+.experience-envelope{background-image:repeating-linear-gradient(12deg,transparent 0 3px,#76552905 3px 4px)}
+.envelope-title{font:500 57px/.87 var(--display);letter-spacing:-1px;margin:28px 0 0}
+.envelope-title em{font-weight:400;color:var(--accent)}
+.envelope-stage{position:relative;height:376px;margin:0 -6px;perspective:1000px}
+.envelope-object{position:absolute;top:170px;left:50%;width:min(310px,94%);height:180px;transform:translateX(-50%);perspective:1000px}
+.envelope-back,.envelope-front,.envelope-flap{position:absolute;inset:0;border-radius:2px}
+.envelope-back{background:color-mix(in srgb,var(--accent) 34%,var(--paper));box-shadow:0 14px 25px #3525171e}
+.envelope-front{z-index:4;background:color-mix(in srgb,var(--soft) 90%,var(--accent));clip-path:polygon(0 0,50% 55%,100% 0,100% 100%,0 100%)}
+.envelope-front:after{content:'';position:absolute;inset:0;background:var(--soft);clip-path:polygon(0 100%,50% 41%,100% 100%);box-shadow:inset 0 -1px 0 #493a2526}
+.envelope-flap{z-index:5;transform-origin:50% 0;clip-path:polygon(0 0,100% 0,50% 62%);background:color-mix(in srgb,var(--soft) 83%,var(--paper));filter:drop-shadow(0 2px 1px #382c2622);transition:transform .8s cubic-bezier(.4,0,.2,1),z-index 0s .38s;backface-visibility:visible}
+.envelope-letter{position:absolute;z-index:2;left:18px;right:18px;top:8px;padding:15px 13px 19px;background:#fffcf6;box-shadow:0 0 0 1px #6e57331a,0 3px 15px #4c38201a;transform:translateY(14px);opacity:0;transition:transform .85s cubic-bezier(.2,.7,.25,1),opacity .35s}
+.envelope-letter>span{display:block;font:6px var(--sans);letter-spacing:1.4px;color:#8b7254;margin-bottom:13px}
+.envelope-letter img{width:100%;height:180px;object-fit:cover;object-position:center 58%}
+.envelope-letter p{font:15px var(--serif);color:#4e4033;margin-top:15px;letter-spacing:3px}
+.envelope-address{position:absolute;z-index:6;bottom:23px;left:0;right:0;font:italic 23px var(--display);color:var(--accent);transition:opacity .3s}
+.envelope-seal{position:absolute;z-index:8;top:231px;left:calc(50% - 36px);width:72px;height:72px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;padding:0;border-radius:43% 49% 43% 47%;color:var(--paper);background:var(--accent);box-shadow:inset 0 0 0 4px #ffffff12,inset 0 0 0 6px #00000015,2px 5px 8px #3828202e;transform:rotate(-8deg);transition:transform .65s cubic-bezier(.2,.7,.2,1),top .65s}
+.envelope-seal .seal-monogram{font:italic 22px var(--display)}
+.envelope-seal [data-experience-label]{font:8px var(--sans);opacity:.85}
+.experience-envelope.is-active .envelope-flap{transform:rotateX(180deg);z-index:1}
+.experience-envelope.is-active .envelope-letter{transform:translateY(-155px);opacity:1;transition-delay:.28s}
+.experience-envelope.is-active .envelope-seal{top:295px;transform:rotate(9deg) scale(.88)}
+.experience-envelope.is-active .envelope-address{opacity:0}
+.experience-envelope .paper-experience-hint{margin-top:7px}
+.theme-envelope .invite-section{margin:0 21px;padding:57px 17px;border-top:1px solid color-mix(in srgb,var(--accent) 24%,transparent);background-image:repeating-linear-gradient(12deg,transparent 0 3px,#76552905 3px 4px)}
+.theme-envelope .section-eyebrow{font:italic 18px var(--display);letter-spacing:1px}
+.theme-envelope .invite-section h2{font-size:21px}
+.theme-envelope .photo-gallery{padding:10px;background:#fffdf7;box-shadow:0 2px 14px #38282014}
+.theme-envelope .invitation-ending{margin:0 21px 21px;padding-top:55px;border:1px solid var(--accent);background:transparent}
+.theme-envelope .invitation-ending:before{content:'S & S';display:flex;align-items:center;justify-content:center;width:52px;height:52px;margin:0 auto 30px;border:1px solid var(--accent);border-radius:50%;font:italic 18px var(--display);color:var(--accent)}
+
+/* A small flash stays on the camera; the paper slides out and develops. */
+.experience-camera{padding-top:31px;background-image:radial-gradient(#65513712 .6px,transparent .6px);background-size:6px 6px;min-height:740px}
+.camera-title{position:relative;width:max-content;max-width:100%;margin:26px auto 0;text-align:left;font:600 53px/.87 var(--display);letter-spacing:-1.2px;transform:rotate(-3deg)}
+.camera-title em{font-weight:400}
+.camera-title>span{position:absolute;right:-29px;top:-4px;color:var(--accent);font:34px var(--display)}
+.camera-stage{height:407px;position:relative;margin:22px 0 0}
+.instant-camera{position:absolute;z-index:3;top:8px;left:50%;transform:translateX(-50%) rotate(-3deg);width:min(285px,100%);height:155px;border-radius:18px 18px 14px 14px;background:linear-gradient(180deg,#e4dfd4 0 39%,#343937 39% 78%,#c1bdb3 78% 100%);border:1px solid #aca79f;box-shadow:inset 0 -6px 0 #00000014,0 12px 22px #26332624}
+.camera-top{position:absolute;left:21px;right:20px;top:15px;display:flex;align-items:center;justify-content:space-between;color:#3b413b}
+.camera-top>span:first-child{font:italic 17px var(--display)}
+.camera-top>span:last-child{font:6px var(--sans);letter-spacing:1.3px}
+.camera-flash-window{position:absolute;left:16px;top:42px;width:37px;height:24px;border:3px solid #7d837d;background:repeating-linear-gradient(90deg,#dbe0d7 0 2px,#a5b0a2 2px 3px);border-radius:4px}
+.camera-lens{position:absolute;top:46px;left:50%;transform:translateX(-50%);width:98px;height:98px;border:7px solid #242d29;border-radius:50%;background:radial-gradient(circle at 42% 42%,#405b52 0 9%,#1b2926 11% 23%,#314b43 25% 28%,#111c17 30% 44%,#56645b 46% 48%,#1e2822 50%);box-shadow:0 4px 8px #0003,inset 0 0 0 2px #738171;overflow:hidden}
+.camera-lens:after{content:'';position:absolute;inset:7px;background:radial-gradient(ellipse at 35% 30%,#fffefa,transparent 60%);border-radius:50%;opacity:.1}
+.camera-lens>span{position:absolute;width:12px;height:7px;top:23px;left:24px;border-radius:50%;background:#d8e1dc80;transform:rotate(-30deg)}
+.camera-detail{position:absolute;left:26px;top:83px;color:#a6aa9f;font:9px/1.3 monospace;letter-spacing:2px}
+.camera-shutter{position:absolute;right:19px;top:34px;min-width:45px;min-height:46px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:0;color:#fffcf2}
+.camera-shutter>span:first-child{display:flex;justify-content:center;align-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);border:3px solid #d9d6cb;box-shadow:0 2px 2px #0004;font-size:0}
+.camera-shutter [data-experience-label]{position:absolute;top:100%;font:7px var(--sans);white-space:nowrap;letter-spacing:.3px}
+.camera-shutter:active>span:first-child{transform:translateY(2px);box-shadow:0 0 1px #0004}
+.camera-print-slot{position:absolute;left:25px;right:25px;bottom:6px;height:4px;background:#252d27;border-radius:5px;box-shadow:0 1px 0 #ffffff80}
+.camera-waiting{position:absolute;top:210px;left:0;right:0;transition:opacity .35s}
+.camera-waiting>span{font:40px var(--display);color:var(--accent);display:block;transform:rotate(-12deg)}
+.camera-waiting p{font:24px/1.2 'Nanum Pen Script',cursive;transform:rotate(-5deg);margin:10px 0 19px}
+.camera-waiting small{font:6px var(--sans);letter-spacing:1.5px;opacity:.65}
+.instant-print{position:absolute;z-index:2;top:91px;left:50%;width:min(247px,88%);padding:13px 13px 17px;background:#fffefa;box-shadow:0 3px 14px #2b302823;transform:translate(-50%,-35px) rotate(-3deg);opacity:0;transition:transform 1s cubic-bezier(.2,.65,.2,1),opacity .45s}
+.instant-print-image{height:168px;background:#33423b;overflow:hidden;position:relative}
+.instant-print-image img{width:100%;height:100%;object-fit:cover;object-position:center 58%;filter:saturate(.7);transition:filter 1.2s .3s}
+.instant-print-image img[hidden]{display:none}
+.instant-print>p{font:18px/.95 'Nanum Pen Script',cursive;color:#364139;margin:17px 0 10px;transform:rotate(-2deg)}
+.instant-print>p>span{color:var(--accent)}
+.instant-print-date{font:5px var(--sans);letter-spacing:.8px;color:#6f7367}
+.experience-camera.is-active .camera-waiting{opacity:0}
+.experience-camera.is-active .instant-print{transform:translate(-50%,62px) rotate(4deg);opacity:1}
+.experience-camera.is-active .instant-print-image img{filter:saturate(.92)}
+.experience-camera.is-flashing .camera-lens:after{animation:camera-glint .48s ease-out}
+.experience-camera.is-flashing .instant-print{animation:camera-paper .95s cubic-bezier(.2,.65,.2,1) both}
+.experience-camera.is-flashing .instant-print-image img:not([hidden]){animation:camera-develop .95s ease-out both}
+.experience-camera .paper-names{margin-top:16px}
+@keyframes camera-glint{0%{opacity:.8}100%{opacity:.1}}
+@keyframes camera-paper{0%{transform:translate(-50%,-35px) rotate(-3deg);opacity:0}20%{opacity:1}100%{transform:translate(-50%,62px) rotate(4deg);opacity:1}}
+@keyframes camera-develop{0%,20%{filter:brightness(.35) saturate(0);opacity:.4}100%{filter:brightness(1) saturate(.92);opacity:1}}
+.theme-camera{counter-reset:camera-chapter}
+.theme-camera .invite-section{counter-increment:camera-chapter;margin:0 15px;padding:53px 20px;border-top:1px solid color-mix(in srgb,var(--accent) 24%,transparent)}
+.theme-camera .section-eyebrow{font:7px var(--sans);letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:12px}
+.theme-camera .section-eyebrow:before{content:'FRAME / 0' counter(camera-chapter);font:7px monospace;background:var(--soft);padding:5px 7px;letter-spacing:.5px}
+.theme-camera .invite-section h2{font:33px/1.2 'Nanum Pen Script',cursive;transform:rotate(-2deg)}
+.theme-camera .gallery-grid{gap:14px}
+.theme-camera .gallery-photo{padding:8px 8px 22px;background:#fffefa;box-shadow:0 3px 10px #25322716;transform:rotate(-1.5deg)}
+.theme-camera .gallery-photo:nth-child(2n){transform:rotate(2deg)}
+.theme-camera .gallery-filmstrip .gallery-photo{transform:none}
+.theme-camera .signature{font:27px 'Nanum Pen Script',cursive!important}
+.theme-camera .invitation-ending{margin:0 17px 18px;border:1px solid var(--accent);background:var(--soft);padding:53px 22px;transform:rotate(-1deg)}
+.theme-camera .ending-script{font:47px/1 'Nanum Pen Script',cursive}
+
+/* Perforated ticket tears away with a physical stamp impression. */
+.experience-ticket{min-height:727px;background-image:linear-gradient(var(--soft) 1px,transparent 1px),linear-gradient(90deg,var(--soft) 1px,transparent 1px);background-size:35px 35px;padding-top:35px}
+.ticket-title{font:500 60px/.9 var(--display);letter-spacing:-1.3px;margin:26px 0 0}
+.ticket-title em{color:var(--accent);font-weight:400}
+.boarding-stage{position:relative;height:421px;margin:20px 0 0}
+.boarding-pass{position:absolute;top:6px;left:50%;width:min(318px,100%);transform:translateX(-50%) rotate(-3deg);text-align:left;filter:drop-shadow(0 8px 12px #203c331b)}
+.boarding-main{position:relative;background:#fffdf5;border-radius:10px 10px 0 0;color:#303f39;overflow:hidden}
+.boarding-header{display:flex;align-items:center;justify-content:space-between;background:var(--accent);color:var(--paper);padding:13px 19px;font:8px monospace;letter-spacing:2px}
+.boarding-header svg{width:23px;height:23px}
+.boarding-route{display:flex;justify-content:space-between;align-items:center;padding:20px 22px 16px;gap:5px}
+.boarding-route>div{display:flex;flex-direction:column;gap:3px}
+.boarding-route small{font:7px monospace;letter-spacing:2px;color:#758578}
+.boarding-route strong{font:700 48px/.95 var(--sans);letter-spacing:-2px}
+.boarding-route>div>span{font:8px var(--sans);color:#7b8274;margin-top:5px}
+.boarding-route-line{flex:1;position:relative;color:var(--accent);margin:0 10px;display:flex;justify-content:center}
+.boarding-route-line:before{content:'';position:absolute;top:50%;left:0;right:0;border-top:1px dashed #b7c3b7}
+.boarding-route-line svg{position:relative;z-index:1;background:#fffdf5;width:33px;height:33px;transform:rotate(45deg);padding:3px}
+.boarding-passengers{font:19px var(--serif);padding:0 22px;letter-spacing:1.4px}
+.boarding-passengers small{display:block;font:6px monospace;letter-spacing:1.4px;color:#778574;margin-bottom:7px}
+.boarding-passengers>span{font:italic 18px var(--display);color:var(--accent);margin:0 5px}
+.boarding-details{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:19px 22px 22px}
+.boarding-details dt{font:6px monospace;letter-spacing:1.3px;color:#768675}
+.boarding-details dd{font:11px monospace;letter-spacing:.2px;margin:5px 0 0}
+.boarding-stamp{position:absolute;z-index:2;right:18px;bottom:48px;width:133px;height:66px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;color:var(--accent);border:2px solid currentColor;border-radius:8px;box-shadow:inset 0 0 0 3px #fffdf5,inset 0 0 0 4px currentColor;background:#fffdf5ec;transform:rotate(-19deg) scale(1.6);opacity:0;transition:transform .42s cubic-bezier(.25,1.6,.5,1),opacity .2s}
+.boarding-stamp strong{font:700 21px/1 monospace;letter-spacing:1.3px}
+.boarding-stamp>span{font:5px monospace;letter-spacing:2px}
+.boarding-stub{position:relative;min-height:88px;display:flex;align-items:center;gap:17px;padding:15px 19px;background:#fffdf5;color:#303f39;border-radius:0 0 10px 10px;border-top:1px dashed #99a797;transform-origin:85% 0;transition:transform .7s cubic-bezier(.2,.7,.2,1);z-index:3}
+.boarding-stub:before,.boarding-stub:after{content:'';position:absolute;top:-7px;width:14px;height:14px;border-radius:50%;background:var(--paper)}
+.boarding-stub:before{left:-7px}.boarding-stub:after{right:-7px}
+.boarding-barcode{display:block;flex:0 0 62px;height:38px;opacity:.75;background:repeating-linear-gradient(90deg,#303f39 0 1px,transparent 1px 3px,#303f39 3px 6px,transparent 6px 8px,#303f39 8px 10px,transparent 10px 11px,#303f39 11px 12px,transparent 12px 15px)}
+.boarding-confirm{display:flex;flex-direction:column;gap:9px;flex:1;text-align:left;padding:8px 0;min-height:53px;color:var(--accent);font:6px/1.6 monospace;letter-spacing:.6px}
+.boarding-confirm small{font:5px/1.4 monospace;letter-spacing:.7px;color:#748271}
+.boarding-confirm [data-experience-label],.boarding-confirm>b{font:12px var(--sans);letter-spacing:0;font-weight:600}
+.experience-ticket.is-active .boarding-stub{transform:translate(12px,20px) rotate(7deg)}
+.experience-ticket.is-active .boarding-stamp{transform:rotate(-19deg) scale(1);opacity:.9;transition-delay:.26s}
+.ticket-footer{display:flex;align-items:center;justify-content:center;gap:21px;font:6px monospace;letter-spacing:1px;padding-top:21px;margin-top:9px;border-top:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
+.theme-ticket .invite-section{margin:0 19px;padding:49px 18px;border-top:1px dashed var(--accent);text-align:left}
+.theme-ticket .invite-section:before,.theme-ticket .invite-section:after{content:'';position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--soft)}
+.theme-ticket .invite-section:before{left:-6px}.theme-ticket .invite-section:after{right:-6px}
+.theme-ticket .section-eyebrow{font:8px monospace;letter-spacing:2px;border-left:3px solid var(--accent);padding-left:10px}
+.theme-ticket .invite-section h2{font:700 23px/1.6 var(--sans);letter-spacing:-1px}
+.theme-ticket .invitation-prose,.theme-ticket .wedding-time,.theme-ticket .venue-name,.theme-ticket .sample-caption,.theme-ticket .gallery-help{text-align:left}
+.theme-ticket .wedding-calendar{max-width:none;border-color:var(--soft);padding:20px 0;margin-top:23px}
+.theme-ticket .calendar-days .wedding-day{border-radius:3px}
+.theme-ticket .photo-gallery{border:1px solid var(--soft);padding:7px}
+.theme-ticket .sample-accounts details{border-radius:0}
+.theme-ticket .invitation-ending{margin:0 19px 20px;background:var(--accent);color:var(--paper);border-radius:0 0 12px 12px;padding-top:52px}
+.theme-ticket .invitation-ending .ending-script,.theme-ticket .invitation-ending i{color:var(--paper)}
+.theme-ticket .invitation-ending:after{content:'WELCOME TO OUR FOREVER';display:block;font:7px monospace;letter-spacing:2px;border-top:1px dashed currentColor;margin-top:28px;padding-top:20px;opacity:.65}
+
+/* Catalogs show the final compositions, without nested controls or live regions. */
+.paper-experience.experience-thumbnail{padding:25px 14px 25px;min-height:510px}
+.experience-thumbnail .paper-kicker{font-size:6px;letter-spacing:1.5px}
+.experience-thumbnail .paper-subtitle{font-size:8px;margin-top:12px}
+.experience-thumbnail .paper-names{font-size:16px;margin:15px 0 9px}
+.experience-thumbnail .paper-date{font-size:6px;letter-spacing:1.5px}
+.experience-thumbnail .envelope-title{font-size:40px;margin-top:20px}
+.experience-thumbnail .envelope-stage{height:258px;margin:0}
+.experience-thumbnail .envelope-object{top:112px;height:124px;width:94%}
+.experience-thumbnail .envelope-letter{left:12px;right:12px;padding:10px}
+.experience-thumbnail .envelope-letter>span{font-size:4px;letter-spacing:.8px;margin-bottom:8px}
+.experience-thumbnail .envelope-letter img{height:133px}
+.experience-thumbnail .envelope-letter p{font-size:10px;margin-top:9px}
+.experience-thumbnail.is-active .envelope-letter{transform:translateY(-97px)}
+.experience-thumbnail .envelope-seal{width:49px;height:49px;left:calc(50% - 24px)}
+.experience-thumbnail .envelope-seal .seal-monogram{font-size:17px}
+.experience-thumbnail.is-active .envelope-seal{top:210px}
+.experience-thumbnail .camera-title{font-size:38px;margin-top:21px}
+.experience-thumbnail .camera-title>span{font-size:25px;right:-20px}
+.experience-thumbnail .camera-stage{height:290px;margin-top:15px}
+.experience-thumbnail .instant-camera{width:215px;height:124px;max-width:100%;top:0;border-radius:13px}
+.experience-thumbnail .camera-top{left:15px;right:15px;top:9px}
+.experience-thumbnail .camera-top>span:first-child{font-size:14px}
+.experience-thumbnail .camera-top>span:last-child{font-size:5px}
+.experience-thumbnail .camera-flash-window{top:34px;left:12px;width:28px;height:18px;border-width:2px}
+.experience-thumbnail .camera-lens{top:33px;width:81px;height:81px;border-width:5px}
+.experience-thumbnail .camera-shutter{top:24px;right:9px;min-width:35px;min-height:35px}
+.experience-thumbnail .camera-shutter>span:first-child{width:25px;height:25px}
+.experience-thumbnail .camera-detail{left:20px;top:67px;font-size:6px}
+.experience-thumbnail .instant-print{width:185px;max-width:87%;top:79px;padding:10px}
+.experience-thumbnail.is-active .instant-print{transform:translate(-50%,40px) rotate(4deg)}
+.experience-thumbnail .instant-print-image{height:121px}
+.experience-thumbnail .instant-print>p{font-size:14px;margin:12px 0 5px}
+.experience-thumbnail .instant-print-date{font-size:4px;letter-spacing:.3px}
+.experience-thumbnail .ticket-title{font-size:43px;margin-top:20px}
+.experience-thumbnail .boarding-stage{height:323px;margin-top:18px}
+.experience-thumbnail .boarding-pass{width:100%;top:0}
+.experience-thumbnail .boarding-header{padding:9px 13px;font-size:6px;letter-spacing:1px}
+.experience-thumbnail .boarding-header svg{width:17px;height:17px}
+.experience-thumbnail .boarding-route{padding:13px 15px 12px}
+.experience-thumbnail .boarding-route strong{font-size:35px}
+.experience-thumbnail .boarding-route small{font-size:5px}
+.experience-thumbnail .boarding-route>div>span{font-size:6px}
+.experience-thumbnail .boarding-route-line{margin:0 3px}
+.experience-thumbnail .boarding-route-line svg{width:25px;height:25px}
+.experience-thumbnail .boarding-passengers{font-size:16px;padding:0 15px}
+.experience-thumbnail .boarding-passengers small{font-size:5px;margin-bottom:4px}
+.experience-thumbnail .boarding-details{margin:13px 15px 17px;gap:10px}
+.experience-thumbnail .boarding-details dt{font-size:5px;letter-spacing:.7px}
+.experience-thumbnail .boarding-details dd{font-size:8px}
+.experience-thumbnail .boarding-stamp{width:112px;height:55px;right:12px;bottom:35px}
+.experience-thumbnail .boarding-stamp strong{font-size:17px}
+.experience-thumbnail .boarding-stamp>span{font-size:4px}
+.experience-thumbnail .boarding-stub{padding:9px 13px;gap:10px;min-height:67px}
+.experience-thumbnail .boarding-barcode{flex-basis:42px;height:30px}
+.experience-thumbnail .boarding-confirm{font-size:4px;gap:5px;min-height:45px}
+.experience-thumbnail .boarding-confirm>b{font:6px monospace;letter-spacing:.5px}
+.experience-thumbnail.is-active .boarding-stub{transform:translate(7px,13px) rotate(7deg)}
+.experience-thumbnail .ticket-footer{gap:10px;font-size:4px;padding-top:15px;margin-top:0}
+@media(max-width:360px){.paper-experience:not(.experience-thumbnail){padding-left:20px;padding-right:20px}.paper-experience:not(.experience-thumbnail) .ticket-title{font-size:54px}.paper-experience:not(.experience-thumbnail) .boarding-details dd{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.paper-experience *,.paper-experience *:before,.paper-experience *:after{animation:none!important;transition:none!important}.experience-camera.is-flashing .instant-print{transform:translate(-50%,62px) rotate(4deg);opacity:1}.experience-camera.is-flashing .instant-print-image img{filter:saturate(.92);opacity:1}}

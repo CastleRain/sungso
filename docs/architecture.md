@@ -8,6 +8,7 @@ sungso는 앱 소스와 공개 URL을 분리한다. 앱·공통 코드·서비�
 sungso/
 ├── apps/
 │   ├── hub/                 → dist/                   → /sungso/
+│   ├── invitation/          → dist/invitation/         → /sungso/invitation/
 │   ├── wecost/              → dist/wecost/            → /sungso/wecost/
 │   ├── honeymoon/           → dist/honeymoon/          → /sungso/honeymoon/
 │   ├── travel/              → dist/travel/             → /sungso/travel/

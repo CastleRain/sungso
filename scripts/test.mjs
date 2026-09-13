@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { PROJECT_ROOT } from './build-site.mjs';
 
-const directories = ['tests', 'tests/site', 'apps/homehunt/tests'];
+const directories = ['tests', 'tests/site', 'apps/homehunt/tests', 'apps/invitation/tests'];
 const files = [];
 for (const directory of directories) {
   for (const file of (await readdir(path.join(PROJECT_ROOT, directory))).sort()) {

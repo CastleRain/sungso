@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="성우와 소희의 모바일 청첩장 디자인을 함께 고르는 공간.">
+  <title>모바일 청첩장 · sungso</title>
+  <script>
+  (function () {
+    try {
+      var auth = JSON.parse(localStorage.getItem('sungso_pin_auth') || 'null');
+      if (auth && typeof auth.ts === 'number' && Date.now() - auth.ts >= 0 && Date.now() - auth.ts < 30 * 24 * 60 * 60 * 1000) return;
+    } catch (error) {}
+    location.replace('../?return=' + encodeURIComponent(location.pathname + location.search + location.hash));
+  })();
+  </script>
+  <link rel="stylesheet" href="./css/app.css?v=20260913-special">
+  <link rel="stylesheet" href="./css/invitation.css?v=20260913-special">
+  <link rel="stylesheet" href="./css/special-paper.css?v=20260913-special">
+  <link rel="stylesheet" href="./css/special-worlds.css?v=20260913-special">
+</head>
+<body>
+  <a class="skip-link" href="#main">본문 바로가기</a>
+  <header class="app-topbar">
+    <a class="brand" href="../" aria-label="sungso 홈으로">sungso<span>OUR WEDDING NOTE</span></a>
+    <nav aria-label="청첩장 화면"><a href="#catalog" id="nav-catalog">전체 예시</a><a href="#selection" id="nav-selection">우리의 선택<span class="selection-dot" hidden></span></a></nav>
+    <button class="actor-button" data-action="actor" id="actor-button">누가 고르나요?</button>
+  </header>
+  <div class="connection-bar"><span id="sync-status" role="status">공동 선택 연결 중…</span><button data-action="retry" id="retry" hidden>다시 연결</button></div>
+  <main id="main" tabindex="-1"><p class="initial-loading">우리의 청첩장을 펼치는 중…</p></main>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="actor-dialog" class="small-dialog" aria-labelledby="actor-title"><form method="dialog"><button class="dialog-close" aria-label="닫기">×</button></form><p class="eyebrow">PICKED WITH LOVE</p><h2 id="actor-title">누가 고르고 있나요?</h2><p>각자의 취향을 모아<br>우리의 청첩장을 함께 골라요.</p><div class="actor-choices"><button data-action="choose-actor" data-person="sungwoo">성우<span>의 취향</span></button><button data-action="choose-actor" data-person="sohee">소희<span>의 취향</span></button></div><small>이 기기에서 기억할게요. 언제든 바꿀 수 있어요.</small></dialog>
+  <dialog id="options-dialog" class="options-dialog" aria-label="청첩장 꾸미기"><form method="dialog"><button class="dialog-close" aria-label="꾸미기 닫기">×</button></form><div id="mobile-options"></div><form method="dialog"><button class="button primary full-width">미리보기로 돌아가기</button></form></dialog>
+  <dialog id="photo-dialog" class="photo-dialog" aria-label="예시 사진 크게 보기"><form method="dialog"><button class="photo-close" aria-label="사진 닫기">×</button></form><img id="large-photo" alt=""><div class="photo-navigation"><button data-action="previous-photo" aria-label="이전 사진">←</button><span id="photo-count"></span><button data-action="next-photo" aria-label="다음 사진">→</button></div></dialog>
+  <dialog id="conflict-dialog" class="small-dialog" aria-labelledby="conflict-title"><form method="dialog"><button class="dialog-close" aria-label="닫기">×</button></form><p class="eyebrow">OUR LATEST CHOICE</p><h2 id="conflict-title">함께 고른 내용이 바뀌었어요</h2><p>다른 기기에서 저장한 최신 선택을 확인해주세요. 지금 꾸민 내용은 임시로 유지할게요.</p><div id="latest-choice"></div><div class="conflict-actions"><button class="button secondary" data-action="view-latest">최신 선택 보기</button><button class="button primary" data-action="acknowledge-conflict">확인했어요 · 계속 꾸미기</button></div></dialog>
+  <noscript><p>청첩장 예시와 공동 선택 기능을 사용하려면 JavaScript를 켜주세요.</p></noscript>
+  <script type="module" src="./js/app.mjs?v=20260913-special"></script>
+</body>
+</html>
