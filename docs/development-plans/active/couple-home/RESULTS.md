@@ -96,3 +96,9 @@ Firestore 규칙은 07:24:35 UTC 배포 성공. 배포 소스 SHA-256 `b54aa098f
 - 실제 HomeHunt 확인에서는 명시적 개인 저장·백업 복원·통근 실행을 하지 않았다. 자동 진입의 `/recommendations/recent` GET은 요청 제한 장부를 쓸 수 있고, 저장 후보의 `/kapt/complex` 자동 조회는 캐시를 쓸 수 있다. 화면의 저장 후보는 0개였지만 해당 자동 요청과 장부 쓰기 발생 여부는 측정하지 않았다. 이 한계를 과거 대역 검증의 쓰기 0회와 합치지 않으며, 개인 데이터 변경·훼손이 있었다고 추정하지 않는다. 자체 백업 복원 검증으로도 표현하지 않는다. 이후 전체 실제 HomeHunt QA는 자동 요청을 차단하는 대역을 마련한 뒤 진행한다.
 
 신규 키 설정 완료는 30일 동안 유효할 수 있는 이전 키의 폐기를 뜻하지 않는다. 이전 키 즉시 폐기, 성우 Honeymoon·소희 전체 앱의 실제 접근, 보류한 PDF 제한 공유가 남았다.
+
+## 재개 작업 기록 커밋·Pages 확인
+
+검증한 기록 11개를 [`5ebc25e`](https://github.com/CastleRain/sungso/commit/5ebc25e017bd423a871b873ea3b2fdf070df7d95)로 커밋하고 최신 master에 fast-forward push했다. 원래 작업 공간의 미커밋 변경 4개는 보존했다. [Pages 34765783215](https://github.com/CastleRain/sungso/actions/runs/34765783215)의 validate가 2026-09-13 15:30:41 UTC, deploy가 15:30:54 UTC에 성공했다. 15:32:19.755 UTC 공개 자산 11/11개의 HTTP 200·LF 정규화 SHA-256 일치를 재확인했다.
+
+원본 근거는 Git 제외 `resumed-record-release.json`·`resumed-record-public-evidence.json`에 보관한다. 이 기록의 후속 문서 수정은 서비스 코드·규칙·환경 설정을 바꾸지 않는다. 이전 NAVER 키 폐기·남은 실제 회원 QA·사용자 보류 PDF 보호가 남아 계획은 active에 유지한다.
