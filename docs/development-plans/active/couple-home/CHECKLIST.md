@@ -23,6 +23,7 @@
 - [ ] 실제 회원 접근과 비회원 차단 검증 완료 — 성우 홈/날짜/WeCost/Travel/청첩장 읽기·로그아웃 및 익명 403 확인. 성우 Honeymoon/HomeHunt와 소희 전체 앱 실제 검증 미완료
 - [x] RESULTS.md에 변경·검증·한계·커밋·배포 근거 기록
 - [ ] completed/couple-home으로 이동하고 개발 계획 색인 갱신
+- [ ] 완료 감사의 추가 로그아웃 보강 공개 배포 — ea578cb master push. Pages 34748753391 queued/작업 0개, 수동 재시도 HTTP 500. 변경 JS 4개 공개 미반영
 
 ## 진행 기록
 

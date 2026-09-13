@@ -1,6 +1,6 @@
 # 우리 둘의 홈·인증 전환
 
-상태: **구현·Pages/Render/규칙 배포 완료, 일부 완료 조건 대기**. [결과·남은 작업](RESULTS.md), [진행·검증 기록](PROGRESS.md)을 함께 확인한다. PDF·NAVER 키 교체·소희 전체 앱 및 성우 Honeymoon/HomeHunt 실제 접근 검증이 남아 `active`를 유지한다.
+상태: **기본 구현·배포 완료, 추가 로그아웃 보강 배포와 일부 완료 조건 대기**. [결과·남은 작업](RESULTS.md), [진행·검증 기록](PROGRESS.md)을 함께 확인한다. 추가 Pages 실행 지연/HTTP 500, PDF·NAVER 키 교체·소희 전체 앱 및 성우 Honeymoon/HomeHunt 실제 접근 검증이 남아 `active`를 유지한다.
 
 결혼 D-day 중심 첫 화면을 성우·소희의 개인 홈으로 바꾸고, Google 계정 두 명만 개인 데이터에 접근하도록 전환한다. 모바일 청첩장과 여행 예산 연동도 포함한다.
 
