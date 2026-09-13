@@ -12,6 +12,8 @@ document.head.append(panelStyle);
 const actions = document.createElement('div'); Object.assign(actions.style, { display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '8px' }); panel.append(actions);
 const button = (title, action) => { const button = document.createElement('button'); button.textContent = title; button.type = 'button'; button.style.cssText = 'padding:5px;border:1px solid #ddd;border-radius:4px;background:#f5f7ff;color:#223;font:11px system-ui;cursor:pointer'; button.addEventListener('click', action); actions.append(button); };
 for (const [title, value] of [['성우 로그인', 'sungwoo'], ['소희 로그인', 'sohee'], ['비회원 로그인', 'nonmember'], ['로그아웃', 'signed-out']]) button(title, () => setActor(value));
+button('로그아웃 실패 켜기', () => { sessionStorage.setItem('sungso_qa_signout_failure', 'on'); });
+button('로그아웃 실패 끄기', () => { sessionStorage.removeItem('sungso_qa_signout_failure'); });
 async function control(action, extra = {}) { await fetch('/__qa/control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...extra }) }); }
 button('권한 회수', () => control('revoke', { uid: actor() === 'sohee' ? 'qa-sohee' : 'qa-sungwoo' }));
 button('회원 복구', () => control('restore-members'));

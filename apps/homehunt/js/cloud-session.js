@@ -55,7 +55,7 @@ export function cloudSessionErrorMessage(error) {
 
 /** Tokens remain inside Firebase Auth; neither state nor storage/export
  * helpers expose them. The caller passes only the public Firebase config. */
-export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'firestore', firebaseConfig = {}, loadSdk = firebaseSdk, fetchImpl = globalThis.fetch } = {}) {
+export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'firestore', firebaseConfig = {}, loadSdk = firebaseSdk, fetchImpl = globalThis.fetch, signOutMember } = {}) {
   const base = apiBase(apiBaseUrl);
   // Enabling online search must not silently move existing personal backups
   // into a different household collection. Shared snapshots require an explicit
@@ -170,7 +170,16 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
       await sdk.signInWithPopup(auth, provider);
       return getState();
     },
-    async signOut() { await init(); if (auth) await sdk.signOut(auth); },
+    async signOut() {
+      // The site owns logout across every named Firebase app, immediate private
+      // cleanup and failed-logout persistence. Standalone consumers retain the
+      // original SDK behavior without importing the browser-only site module.
+      if (signOutMember) {
+        if (await signOutMember() === false) throw new CloudSnapshotError('로그아웃을 완료하지 못했습니다. 로그아웃을 다시 시도해주세요.', 'CLOUD_SIGN_OUT_INCOMPLETE');
+        return;
+      }
+      await init(); if (auth) await sdk.signOut(auth);
+    },
     async loadSnapshot() {
       if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot'));
       await init();

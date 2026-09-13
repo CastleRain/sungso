@@ -122,8 +122,8 @@ window._closeDetailSheet()         // 닫기
 
 ### 섹션 구성
 
-1. **여행 요약 헤더** — 2027.03.07~14, 8일 7박, 준비 중 배지
-2. **여정 개요 Route Strip** — 인천→싱가폴(2박)→몰디브(5박)→인천
+1. **여행 요약 헤더** — 저장된 여행 기간·숙박 일수, 준비 상태 배지
+2. **여정 개요 Route Strip** — 저장된 방문지·이동 순서·체류 기간을 연결한 여행 경로
 3. **🏆 우리의 리조트** — 확정 리조트 히어로 카드 (Firebase에 저장된 경우만 표시)
 4. **커플 Top 3** — 소희/성우 각 3위까지 Pick 슬롯
 5. **최종 협의 후보** — finalCandidates 목록 + "✓ 이 리조트로 확정" 버튼
@@ -144,7 +144,7 @@ setItinerary(days[])         // 일정표 저장
 
 ### 일정표 편집 모드
 
-**자동 생성:** "📅 기본 일정 자동 생성" 버튼 → 싱가폴 2박 + 몰디브 5박 8일 템플릿 삽입
+**자동 생성:** "📅 기본 일정 자동 생성" 버튼으로 당시 기준의 기본 일정 템플릿을 삽입했다. 개인 체류 구성은 비공개 백업에 보관한다. 현재 앱의 자동 시딩 여부와 데이터 접근은 최신 지침을 따른다.
 
 **Day 카드 — View 모드:**
 - 타입 chip으로 항목 표시 (아이콘 + 색상)
@@ -379,7 +379,7 @@ initResizeHandle(handle, leftEl, storageKey, min, max)
 
 ```js
 export const RESORTS       // 리조트 배열 (12개)
-export const TRIP_INFO     // 여행 일정 정보 (출발일: 2027-03-08 등)
+export const TRIP_INFO     // 여행 일정 정보 (개인 출발일 등은 비공개 백업에 보관)
 export const AGENCIES      // 여행사 정보 (3개)
 export function getBestPrice(resort, priceKey)
 export function sortByPrice(resorts, priceKey)
@@ -429,7 +429,7 @@ export function getFeaturedImage(resort)
 | id | 이름 | 특이사항 |
 |---|---|---|
 | `realmaldives` | 리얼몰디브 | 기본 여행사 |
-| `honeymoonresort` | 허니문리조트 | $200 추가 할인 (기간 한정) |
+| `honeymoonresort` | 허니문리조트 | 기간 한정 할인 조건은 비공개 견적 기준에서 확인 |
 | `tourmin` | 투어민 | PDF 없음. outrigger는 2026년 가격 참고치 주의 |
 
 ---
@@ -447,7 +447,7 @@ sungso 루트 사이트와 통일된 핑크/로즈 테마:
 
 ## D-day 배지
 
-`app.js`의 `updateDDay()` — 여행 출발일 `2027-03-08` 기준.  
+`app.js`의 `updateDDay()` — 저장된 여행 출발일 기준. 개인 날짜는 비공개 백업에 보관한다.
 DOM ID: `#ddayBadge`
 
 ---
@@ -479,4 +479,4 @@ DOM ID: `#ddayBadge`
 | 2026-06-14 | 상세 패널 Leaflet 지도: "위치 & 이동" 아래 200px 지도, 리조트·공항 핀 + 점선 경로, 구글지도 링크 |
 | 2026-06-14 | 지도 버그 수정: `_minimapShowWithPin`의 `closeCardDetail`(미존재) → `closeDetailSheet` 수정 |
 | 2026-06-14 | USD/KRW 환율 토글: `firebase-fx.js` 신규, `honeymoon_fx/usd_krw` 컬렉션, 탭 네비 FX 위젯 |
-| 2026-06-14 | 아나네아 가격 수정: 허니문리조트 HB→AI(HB+) 기준, 비치풀$3,169·워터풀$3,322·믹스$3,246 |
+| 2026-06-14 | 리조트 가격 수정: 여행사 견적의 식사 조건 기준을 HB→AI(HB+)로 바로잡음. 구체 금액은 비공개 백업에 보관 |

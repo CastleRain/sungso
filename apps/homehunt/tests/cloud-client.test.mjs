@@ -66,6 +66,30 @@ test('an unconfigured session never loads an SDK and cannot fetch a cloud API', 
   assert.equal(f.sdkLoads, 0);
 });
 
+test('site logout delegates immediately without initializing or signing out an independent SDK', async () => {
+  const f = sdkFixture(); let siteLogouts = 0;
+  const session = createCloudSession({ firebaseConfig, loadSdk: f.loadSdk, signOutMember: async () => {
+    siteLogouts++; session.destroy(); return true;
+  } });
+  await session.signOut();
+  assert.equal(siteLogouts, 1);
+  assert.equal(f.sdkLoads, 0);
+  assert.equal(session.getState().user, null);
+  assert.deepEqual(f.reads, []); assert.deepEqual(f.writes, []);
+});
+
+test('site logout failure is propagated without a raw SDK fallback even after common cleanup retires the session', async () => {
+  const f = sdkFixture(); let siteLogouts = 0;
+  const session = createCloudSession({ firebaseConfig, loadSdk: f.loadSdk, signOutMember: async () => {
+    siteLogouts++; session.destroy(); return false;
+  } });
+  await assert.rejects(session.signOut(), { code: 'CLOUD_SIGN_OUT_INCOMPLETE' });
+  assert.equal(siteLogouts, 1);
+  assert.equal(f.sdkLoads, 0);
+  assert.equal(session.getState().user, null);
+  assert.deepEqual(f.reads, []); assert.deepEqual(f.writes, []);
+});
+
 test('API token is limited to the configured origin and path, never arbitrary URLs or redirects', async () => {
   const f = sdkFixture(); const calls = [];
   const session = createCloudSession({ firebaseConfig, apiBaseUrl: 'https://api.example.test/homehunt/api', loadSdk: f.loadSdk,
@@ -301,6 +325,25 @@ test('cloud panel login never reads, writes or replaces the local snapshot', asy
   const f = panelFixture(); await f.click('login');
   assert.equal(f.reads, 0); assert.equal(f.saves, 0); assert.equal(f.applies, 0);
   assert.match(f.root.textContent, /저장 또는 불러오기/);
+});
+
+test('the HomeHunt panel logout uses the injected site flow and never reports a rejected logout as successful', async () => {
+  const document = { createElement: tag => new Element(tag, document) };
+  const root = document.createElement('section');
+  const f = sdkFixture(); let siteLogouts = 0, sdkLogouts = 0;
+  f.sdk.signOut = async () => { sdkLogouts++; };
+  const session = createCloudSession({ firebaseConfig, loadSdk: f.loadSdk,
+    signOutMember: async () => { siteLogouts++; return false; } });
+  await session.signIn();
+  const panel = mountCloudPanel({ root, session, captureSnapshot: () => { throw new Error('unexpected local read'); },
+    applySnapshot: () => { throw new Error('unexpected local replacement'); } });
+  root.descendants().find(item => item.dataset.cloudAction === 'logout').dispatchEvent(new Event('click'));
+  await tick();
+  assert.equal(siteLogouts, 1); assert.equal(sdkLogouts, 0);
+  assert.match(root.textContent, /로그아웃을 완료하지 못했습니다.*다시 시도/);
+  assert.doesNotMatch(root.textContent, /로그아웃했습니다/);
+  assert.deepEqual(f.reads, []); assert.deepEqual(f.writes, []);
+  panel.destroy(); session.destroy();
 });
 
 test('explicit first save inspects remote revision and only creates an empty cloud record', async () => {

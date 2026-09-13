@@ -16,7 +16,7 @@ let started = false, pending = false;
 const setError = error => { status.textContent = /popup-closed|cancelled-popup/.test(error?.code || '') ? '로그인을 취소했어요.' : /popup-blocked/.test(error?.code || '') ? '팝업을 허용한 뒤 다시 눌러주세요.' : '로그인을 완료하지 못했어요. 연결 상태와 계정을 확인해주세요.'; };
 async function loginAction() { if (pending) return; pending = true; login.disabled = true; try { await signInMember(); } catch (error) { setError(error); } finally { pending = false; login.disabled = false; } }
 login.addEventListener('click', loginAction);
-change.addEventListener('click', async () => { try { await signOutMember(); await loginAction(); } catch (error) { setError(error); } });
+change.addEventListener('click', async () => { try { await signOutMember(); } catch (error) { setError(error); } });
 logout.addEventListener('click', () => { void signOutMember(); });
 document.addEventListener('click', event => { if (event.target.closest('[data-site-sign-out]')) void signOutMember(); });
 
@@ -57,6 +57,7 @@ registerPrivateCleanup(() => { gate.hidden = false; toolbar.hidden = true; name.
 subscribeAuth(state => {
   const member = state.status === 'member' ? state.member : null;
   login.hidden = state.status === 'loading' || !!member;
+  login.textContent = state.status === 'sign-out-failed' ? '로그아웃 다시 시도' : 'Google 계정으로 로그인';
   change.hidden = state.status !== 'denied';
   if (!member) {
     gate.hidden = false; toolbar.hidden = true;

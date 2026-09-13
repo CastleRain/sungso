@@ -8,5 +8,10 @@ export const onIdTokenChanged = onAuthStateChanged;
 export class GoogleAuthProvider { setCustomParameters() {} addScope() {} }
 export async function signInWithPopup(auth) { const name = actor() === 'signed-out' ? 'sungwoo' : actor(); setActor(name); return { user: fakeUser(name) }; }
 export async function updateCurrentUser(auth, user) { auth.currentUser = user; emitAuth(auth); }
-export async function signOut(auth) { auth.currentUser = null; if (auth.app.name === 'homehunt-private-cloud') sessionStorage.setItem('sungso_qa_actor', 'signed-out'); emitAuth(auth); }
+export async function signOut(auth) {
+  if (sessionStorage.getItem('sungso_qa_signout_failure') === 'on' && auth.app.name === 'homehunt-private-cloud') throw new Error('QA sign-out unavailable');
+  auth.currentUser = null;
+  if (auth.app.name === 'homehunt-private-cloud') sessionStorage.setItem('sungso_qa_actor', 'signed-out');
+  emitAuth(auth);
+}
 export async function getIdToken(user) { return user.getIdToken(); }

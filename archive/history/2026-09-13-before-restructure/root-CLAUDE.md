@@ -86,7 +86,7 @@ appId:             "1:143797950443:web:95b0f616246d84aae3bae"
 
 | 필드 | 타입 | 예시 |
 |---|---|---|
-| `date` | string (YYYY-MM-DD) | `"2027-03-06"` |
+| `date` | string (YYYY-MM-DD) | `"YYYY-MM-DD"` (형식 예시, 개인 날짜는 비공개 백업) |
 | `title` | string | `"결혼식"` |
 | `emoji` | string | `"💒"` |
 | `pinned` | boolean | `true` (없으면 false 취급) |
@@ -209,6 +209,6 @@ Google Sheets CSV → Firebase Firestore 전환 + UI 전면 개편 (단일 파�
 - **honeymoon 상세 패널 Leaflet 지도:** 리조트 상세 "위치 & 이동" 아래 200px Leaflet 지도 추가. 리조트 핀(핑크) + 말레공항 핀(회색) + 점선 경로. "구글지도로 열기" 링크 포함.
 - **지도에서 보기 버그 수정:** `closeCardDetail`(미존재) → `closeDetailSheet` 수정, Detail Sheet 닫힌 후 미니맵 정상 표시.
 - **USD/KRW 환율 토글:** `firebase-fx.js` 신규. open.er-api.com 실시간 조회 → `honeymoon_fx/usd_krw` 저장. 탭 네비 우측 위젯(환율 라벨 + ⟳ 새로고침 + USD↔KRW 토글). 카드·가격비교·상세 가격 전환.
-- **아나네아 가격 수정:** 허니문리조트 HB 기준 → HB+(AI 올인클루시브) 기준으로 교체. 비치풀$3,169 / 워터풀$3,322 / 믹스$3,246.
+- **리조트 가격 수정:** 여행사 견적을 HB 기준에서 HB+(AI 올인클루시브) 기준으로 교체했다. 객실별 실제 견적 금액은 비공개 백업에 보관한다.
 
 **다음:** 리조트 데이터 추가 보완, wecost 브라우저 검증.
