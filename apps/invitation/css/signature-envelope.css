@@ -16,7 +16,7 @@
 .signature-envelope .env-cover-sheet { margin: 12px; border: 1px solid var(--env-rule); }
 .signature-envelope .experience-envelope { padding: 36px 22px 26px; background: none; min-height: 710px; }
 .signature-envelope .paper-kicker { font-family: var(--sans); font-size: 9px; letter-spacing: 3px; }
-.signature-envelope .envelope-title { font-size: clamp(53px, 15vw, 65px); line-height: 1; margin: 27px 0 19px; letter-spacing: -2px; font-weight: 400; }
+.signature-envelope .envelope-title { font-size: clamp(53px, 15cqw, 65px); line-height: 1; margin: 27px 0 19px; letter-spacing: -2px; font-weight: 400; }
 .signature-envelope .envelope-title em { font-weight: 400; }
 .signature-envelope .paper-subtitle { font-size: 12px; letter-spacing: .04em; }
 .signature-envelope .envelope-stage { margin: 0 -3px; height: 365px; }
@@ -162,7 +162,7 @@
 .signature-envelope .env-postscript svg { width: 106px; height: 65px; }
 .signature-envelope .env-print-colophon { font: 8px/2 var(--sans); letter-spacing: 1.3px; text-align: center; margin: 25px 0 0; }
 .signature-envelope .env-print-colophon span { letter-spacing: .2px; }
-@media (max-width: 390px) {
+@container invitation-preview (max-width: 390px) {
   .signature-envelope .env-postal-header { padding-inline: 20px; font-size: 8px; letter-spacing: 1px; }
   .signature-envelope .env-cover-sheet { margin: 10px; }
   .signature-envelope .experience-envelope { padding-inline: 16px; }

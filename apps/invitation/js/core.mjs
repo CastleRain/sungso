@@ -1,11 +1,11 @@
-import { TEMPLATES, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260913-signature';
+import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-mobile-preview';
 
 export const DOCUMENT_PATH = 'couplePicks/invitation_templates';
 export const STORAGE_KEY = 'sungso_invitation_v1';
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 export function defaultSelection(templateId = 'minimal') {
   const template = getTemplate(templateId) || TEMPLATES[0];
-  return { schemaVersion: 1, templateId: template.id, paletteId: template.palettes[0].id, galleryLayout: template.galleryLayout, sections: { ...DEFAULT_SECTIONS, ...SIGNATURES[template.id]?.sections }, note: '' };
+  return { schemaVersion: 1, templateId: template.id, paletteId: template.palettes[0].id, galleryLayout: template.galleryLayout, sections: { ...DEFAULT_SECTIONS, ...SIGNATURES[template.id]?.sections, ...template.defaultSections }, note: '' };
 }
 export function normalizeSelection(value) {
   if (!value || value.schemaVersion !== 1 || !getTemplate(value.templateId)) return null;
@@ -58,8 +58,12 @@ export function parseRoute(hash) {
   if (match && getTemplate(match[1])) return { view: 'preview', templateId: match[1] };
   return { view: 'catalog' };
 }
-export function filterTemplates(templates, favorites, filter, collection = 'all') {
-  return templates.filter(template => collection === 'all' || template.collection === collection).filter(({ id }) => filter === 'sungwoo' ? favorites.sungwoo.includes(id) : filter === 'sohee' ? favorites.sohee.includes(id) : filter === 'both' ? favorites.sungwoo.includes(id) && favorites.sohee.includes(id) : true);
+export function filterTemplates(templates, favorites, filter, collection = 'all', search = '') {
+  const terms = String(search).trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  return templates.filter(template => collection === 'all' || template.collection === collection).filter(({ id }) => filter === 'sungwoo' ? favorites.sungwoo.includes(id) : filter === 'sohee' ? favorites.sohee.includes(id) : filter === 'both' ? favorites.sungwoo.includes(id) && favorites.sohee.includes(id) : true).filter(template => {
+    const text = [template.name, template.english, template.mood, template.description, template.experienceHint, ...(template.tags || [])].join(' ').toLocaleLowerCase();
+    return terms.every(term => text.includes(term));
+  });
 }
 export function normalizeLocal(raw) {
   const drafts = {};
@@ -67,7 +71,7 @@ export function normalizeLocal(raw) {
     const entry = raw?.drafts?.[template.id], selection = normalizeSelection(entry?.selection);
     if (selection?.templateId === template.id) drafts[template.id] = { selection, baseRevision: Number.isSafeInteger(entry.baseRevision) && entry.baseRevision >= 0 ? entry.baseRevision : null };
   }
-  return { collection: ['all', 'classic', 'special'].includes(raw?.collection) ? raw.collection : 'all', actor: Object.hasOwn(PEOPLE, raw?.actor) ? raw.actor : null, filter: ['all', 'sungwoo', 'sohee', 'both'].includes(raw?.filter) ? raw.filter : 'all', catalogScroll: Number.isFinite(raw?.catalogScroll) ? Math.max(0, raw.catalogScroll) : 0, drafts };
+  return { collection: raw?.collection === 'all' || Object.hasOwn(COLLECTIONS, raw?.collection || '') ? raw.collection : 'all', search: typeof raw?.search === 'string' ? raw.search.slice(0, 100) : '', density: raw?.density === 'comfortable' ? 'comfortable' : 'compact', compare: [...new Set(Array.isArray(raw?.compare) ? raw.compare.filter(id => getTemplate(id)) : [])].slice(0, 4), actor: Object.hasOwn(PEOPLE, raw?.actor) ? raw.actor : null, filter: ['all', 'sungwoo', 'sohee', 'both'].includes(raw?.filter) ? raw.filter : 'all', catalogScroll: Number.isFinite(raw?.catalogScroll) ? Math.max(0, raw.catalogScroll) : 0, drafts };
 }
 export function readLocal(storage) { try { return normalizeLocal(JSON.parse(storage.getItem(STORAGE_KEY))); } catch { return normalizeLocal(null); } }
 export function writeLocal(storage, value) { try { storage.setItem(STORAGE_KEY, JSON.stringify(normalizeLocal(value))); return true; } catch { return false; } }

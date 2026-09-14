@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260913-signature';
-import { escapeHtml as e } from './core.mjs?v=20260913-signature';
+import { PHOTOS } from './catalog.mjs?v=20260914-mobile-preview';
+import { escapeHtml as e } from './core.mjs?v=20260914-mobile-preview';
 
 const photograph = (index, className, eager = false) => `<img class="${className}" src="${e(PHOTOS[index].src)}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" decoding="async" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'}>`;
 const plane = '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="m5 18 13 3 12-13 5 1-8 15 6 7-3 3-8-5-12 6-3-2 6-12-8-1Z" fill="currentColor"/></svg>';

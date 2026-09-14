@@ -1,3 +1,4 @@
+import { EDITIONS } from './edition-catalog.mjs?v=20260914-mobile-preview';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [
@@ -15,7 +16,12 @@ export const TEMPLATES = [
   { collection: 'special', id: 'curtain', name: '우리의 첫 장면', english: 'The night is ours', number: '12', mood: '극적인 · 우아한', description: '막이 오르는 순간, 당신을 위한 초대가 시작돼요.', experienceHint: '커튼을 열어 첫 장면 만나기', photoHint: '스포트라이트 속 세로 커플 사진', galleryLayout: 'slide', palettes: [palette('velvet', '벨벳', '#341a24', '#fcf1db', '#d0a56c', '#512d39'), palette('emerald', '에메랄드', '#19342d', '#f2efda', '#bbbd81', '#2c4d42'), palette('navy', '네이비', '#1d2940', '#f4f0e6', '#b5bfd2', '#303f58')] },
 ];
 
-export const COLLECTIONS = { classic: { name: '기본 6종', title: '오래 보아도 좋은, 기본 여섯 장', english: 'THE CLASSIC COLLECTION', description: '여백과 사진, 서체로 전하는 담백한 초대.' }, special: { name: '특별한 6종', title: '누르는 순간 시작되는, 특별한 여섯 장', english: 'THE PLAYFUL COLLECTION', description: '봉투를 열고, 별을 잇고, 커튼을 걷으며 만나는 우리.' } };
+TEMPLATES.push(...EDITIONS);
+export const COLLECTIONS = {
+  immersive: { name: '새로운 이야기', title: '한 장을 넘어, 하나의 이야기', english: 'THE STORY EDITIONS', description: '잡지부터 음반, 전시와 축제까지. 끝까지 서로 다른 구성을 만나보세요.' },
+  special: { name: '손으로 여는 초대', title: '직접 열어보는 초대', english: 'THE PLAYFUL COLLECTION', description: '봉투·별자리·탑승권의 전체 이야기와 사진·책·커튼의 오프닝.' },
+  classic: { name: '사진과 여백', title: '오래 보아도 좋은 초대', english: 'THE CLASSIC COLLECTION', description: '여백과 사진, 서체로 전하는 담백한 초대.' },
+};
 
 export const PEOPLE = { sungwoo: '성우', sohee: '소희' };
 export const SIGNATURES = Object.freeze({

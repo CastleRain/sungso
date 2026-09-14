@@ -1,4 +1,4 @@
-import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260913-signature';
+import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-mobile-preview';
 
 export function signatureCollection() {
   return `<section class="signature-collection" aria-labelledby="signature-collection-title">

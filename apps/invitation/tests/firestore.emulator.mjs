@@ -29,6 +29,55 @@ const client = (role = 'sungwoo') => {
   return db;
 };
 const makeAdapter = (db, options = {}) => firestoreAdapter(sdk, db, { member: () => identities.get(db), ...options });
+const editionIds = ['magazine', 'film', 'vinyl', 'museum', 'greenhouse', 'scrapbook', 'festival', 'promenade'];
+const allTemplateIds = ['minimal', 'letter', 'photo', 'garden', 'cinema', 'sketch',
+  'envelope', 'constellation', 'camera', 'storybook', 'ticket', 'curtain', ...editionIds];
+
+for (const templateId of editionIds) {
+  test(`new edition ${templateId} supports own favorites and a shared selection`, async () => {
+    const db = client(), partner = client('sohee');
+    await makeAdapter(db).transact({ type: 'favorite', actor: 'sungwoo', templateId, enabled: true });
+    await makeAdapter(partner).transact({ type: 'selection', actor: 'sohee', selection: defaultSelection(templateId), expectedRevision: 0 });
+    const saved = (await sdk.getDoc(ref(db))).data();
+    assert.deepEqual(saved.favorites.sungwoo, [templateId]);
+    assert.equal(saved.selection.templateId, templateId);
+    assert.equal(saved.selectionRevision, 1);
+    assert.equal(saved.updatedBy, 'sohee-uid');
+  });
+}
+
+test('a member can favorite all twenty templates without changing their partner favorites', async () => {
+  const db = client(), partner = client('sohee');
+  await makeAdapter(partner).transact({ type: 'favorite', actor: 'sohee', templateId: 'garden', enabled: true });
+  for (const templateId of allTemplateIds) {
+    await makeAdapter(db).transact({ type: 'favorite', actor: 'sungwoo', templateId, enabled: true });
+  }
+  const saved = (await sdk.getDoc(ref(db))).data();
+  assert.equal(saved.favorites.sungwoo.length, 20);
+  assert.deepEqual(new Set(saved.favorites.sungwoo), new Set(allTemplateIds));
+  assert.deepEqual(saved.favorites.sohee, ['garden']);
+  assert.equal('selection' in saved, false);
+});
+
+test('the server rejects unknown favorite IDs and more than twenty entries', async () => {
+  const db = client();
+  const favoriteWrite = values => sdk.setDoc(ref(db), {
+    schemaVersion: 1, favorites: { sungwoo: values },
+    updatedBy: 'sungwoo-uid', updatedAt: sdk.serverTimestamp(),
+  });
+  await assert.rejects(favoriteWrite(['not-a-template']), { code: 'permission-denied' });
+  await assert.rejects(favoriteWrite([...allTemplateIds, 'magazine']), { code: 'permission-denied' });
+  assert.equal((await sdk.getDoc(ref(db))).exists(), false);
+});
+
+test('the expanded template list does not let a member replace partner favorites', async () => {
+  const db = client(), partner = client('sohee');
+  await makeAdapter(partner).transact({ type: 'favorite', actor: 'sohee', templateId: 'greenhouse', enabled: true });
+  await assert.rejects(sdk.setDoc(ref(db), {
+    favorites: { sohee: ['magazine'] }, updatedBy: 'sungwoo-uid', updatedAt: sdk.serverTimestamp(),
+  }, { merge: true }), { code: 'permission-denied' });
+  assert.deepEqual((await sdk.getDoc(ref(db))).data().favorites.sohee, ['greenhouse']);
+});
 
 test('read-only subscription does not create a selection document', async () => {
   const db = client(), adapter = makeAdapter(db);

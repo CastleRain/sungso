@@ -7,7 +7,7 @@ import { invitation, cover } from '../js/templates.mjs';
 import { createStore } from '../js/store.mjs';
 
 test('each template offers valid palettes and defaults without shared mutable state', () => {
-  assert.equal(TEMPLATES.length, 12);
+  assert.equal(TEMPLATES.length, 20);
   for (const template of TEMPLATES) {
     assert.equal(template.palettes.length, 3);
     const first = defaultSelection(template.id), second = defaultSelection(template.id);
@@ -56,7 +56,7 @@ test('draft persistence tolerates corrupt data, unavailable storage and future s
   let value;
   const storage = { getItem: () => value, setItem: (_, next) => { value = next; } };
   const data = { actor: 'sohee', collection: 'all', filter: 'both', catalogScroll: 360, drafts: { garden: { selection: defaultSelection('garden'), baseRevision: 2 } } };
-  assert.equal(writeLocal(storage, data), true); assert.deepEqual(readLocal(storage), data);
+  assert.equal(writeLocal(storage, data), true); assert.deepEqual(readLocal(storage), { ...data, search: '', density: 'compact', compare: [] });
   value = '{bad'; assert.equal(readLocal(storage).actor, null);
   assert.equal(writeLocal({ setItem() { throw new Error('quota'); } }, data), false);
   assert.deepEqual(readLocal(null), normalizeLocal(null));
@@ -71,7 +71,7 @@ test('route parsing is bounded and supports direct template and joint-choice lin
 test('filters expose each persons favorites and their intersection', () => {
   const favorites = { sungwoo: ['minimal', 'garden'], sohee: ['garden', 'sketch'] };
   assert.deepEqual(filterTemplates(TEMPLATES, favorites, 'both').map(item => item.id), ['garden']);
-  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, 12);
+  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, 20);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sungwoo').length, 2);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sohee').length, 2);
 });

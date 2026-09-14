@@ -219,7 +219,7 @@
 .experience-thumbnail .theater-caption, .cover-curtain.experience-thumbnail > .cover-date { display: none; }
 .experience-thumbnail .theater-confetti { display: none; }
 
-@media (max-width: 380px) {
+@container invitation-preview (max-width: 380px) {
   .cover-worlds { padding-left: 20px; padding-right: 20px; }
   .cover-worlds .world-title { font-size: 53px; }
   .storybook-flower-left { left: -2%; }

@@ -1,0 +1,64 @@
+.mobile-preview-link {
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:12px;padding:9px 10px;min-height:42px;
+  color:#73536c;background:#f8f1f6;border:1px solid #ebdeea;border-radius:6px;
+  font-size:12px;
+}
+.mobile-preview-link:hover {background:#f0e4ef;border-color:#d5bbcf}
+.mobile-preview-link>span:first-child {font-size:22px;line-height:1}
+.mobile-preview-link>span:last-child {margin-left:auto}
+.preview-device-toolbar {
+  position:sticky;top:0;z-index:21;display:flex;align-items:center;flex-wrap:wrap;
+  gap:12px 18px;padding:14px 16px;margin:20px 0 28px;
+  background:#ffffffed;backdrop-filter:blur(16px);border:1px solid #e8dee7;border-radius:12px;
+}
+.device-modes {display:flex;gap:4px;padding:4px;background:#f5f0f5;border-radius:8px}
+.device-modes button {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:8px 14px;font-size:12px;border-radius:5px;color:#827483;
+}
+.device-modes button[aria-pressed=true] {background:#73536c;color:white;box-shadow:0 2px 5px #422d4315}
+.phone-icon {width:11px;height:17px;border:1.4px solid currentColor;border-radius:3px;display:inline-block}
+.device-width {display:flex;align-items:center;gap:9px;font-size:11px;color:#706274}
+.device-width[hidden] {display:none}
+.device-width select {padding:9px 24px 9px 10px;border:1px solid #e8dee7;border-radius:6px;background:#fff;color:#5f4c62;font:12px var(--sans);min-height:40px}
+.device-hint {font-size:11px;color:#827483;margin-left:auto}
+.preview-stage {min-width:0}
+.device-statusbar,.device-homebar {display:none}
+.preview-main[data-preview-device=mobile] .preview-layout {display:block;width:min(100%,calc(var(--preview-width) + 18px));margin:0 auto}
+.preview-main[data-preview-device=mobile] .preview-stage {padding:9px;border-radius:38px;background:#28252e;box-shadow:0 18px 65px #4b364529,0 0 0 1px #443b48}
+.preview-main[data-preview-device=mobile] #preview-canvas {box-shadow:none}
+.preview-main[data-preview-device=mobile] .device-statusbar {
+  display:flex;align-items:center;justify-content:space-between;position:relative;
+  height:40px;padding:0 23px;background:white;color:#302934;
+  border-radius:29px 29px 0 0;font:600 11px var(--sans);
+}
+.device-statusbar>i {position:absolute;left:50%;top:9px;transform:translateX(-50%);width:88px;height:22px;background:#28252e;border-radius:20px}
+.preview-main[data-preview-device=mobile] .device-homebar {display:flex;justify-content:center;padding:14px 0 9px;background:#fff;border-radius:0 0 29px 29px}
+.device-homebar>i {width:110px;height:4px;border-radius:10px;background:#28252e}
+.preview-main[data-preview-device=mobile] .desktop-options {display:none}
+.preview-main[data-preview-device=mobile] {padding-bottom:120px}
+.preview-main[data-preview-device=mobile] .mobile-preview-actions {
+  display:flex;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:25;
+  width:min(440px,calc(100% - 30px));gap:10px;padding:12px;
+  background:#fffffff5;backdrop-filter:blur(14px);border:1px solid #e8dee7;border-radius:12px;
+  box-shadow:0 4px 24px #422d431c;
+}
+.preview-main[data-preview-device=mobile] .mobile-preview-actions .primary {flex:1}
+body:has(.preview-main[data-preview-device=mobile]) #toast {bottom:105px}
+@media(max-width:700px) {
+  .mobile-preview-link {font-size:11px;padding:9px 8px;gap:5px}
+  .preview-device-toolbar {top:55px;gap:8px;padding:10px 12px;margin:14px 0;border-radius:0;border-left:0;border-right:0}
+  .device-modes {width:100%}
+  .device-modes button {flex:1;font-size:12px}
+  .preview-device-toolbar .device-width {display:none}
+  .device-hint {display:none}
+  .preview-main[data-preview-device=mobile] .preview-layout {width:100%}
+  .preview-main[data-preview-device=mobile] .preview-stage {padding:0;border-radius:0;background:transparent;box-shadow:none}
+  .preview-main[data-preview-device=mobile] .device-statusbar,
+  .preview-main[data-preview-device=mobile] .device-homebar {display:none}
+  .preview-main[data-preview-device=mobile] .mobile-preview-actions {
+    bottom:0;left:0;right:0;width:100%;transform:none;border-radius:0;
+    padding:12px 17px calc(12px + env(safe-area-inset-bottom));
+  }
+}

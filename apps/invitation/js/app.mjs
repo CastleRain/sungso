@@ -1,16 +1,20 @@
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260913-signature';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260913-signature';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260913-signature';
-import { createStore } from './store.mjs?v=20260913-signature';
-import { createExperiences } from './experiences.mjs?v=20260913-signature';
-import { createSignatures } from './signatures.mjs?v=20260913-signature';
-import { signatureCollection, signatureGuide } from './signature-catalog.mjs?v=20260913-signature';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-mobile-preview';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-mobile-preview';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-mobile-preview';
+import { createStore } from './store.mjs?v=20260914-mobile-preview';
+import { createExperiences } from './experiences.mjs?v=20260914-mobile-preview';
+import { createSignatures } from './signatures.mjs?v=20260914-mobile-preview';
+import { signatureGuide } from './signature-catalog.mjs?v=20260914-mobile-preview';
+import { createEditions } from './editions.mjs?v=20260914-mobile-preview';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
 
 const experiences = createExperiences();
 const signatures = createSignatures();
+const editions = createEditions();
+// Viewing preferences stay in this tab; they are not part of the couple's choice.
+let previewDevice = 'default', previewWidth = 390;
 
 const main = document.querySelector('#main');
 let storage; try { storage = window.localStorage; } catch { storage = null; }
@@ -19,6 +23,7 @@ local.actor = member.role;
 let shared = { data: normalizeDocument(null), connection: 'loading', saving: false, error: '' };
 let store, route = parseRoute(location.hash), pendingAction, toastTimer, photoIndex = 0, localWarning = false;
 let revealObserver;
+let posterObserver;
 let disposed = false, connecting = false;
 const active = () => !disposed && getMember()?.uid === member.uid && getMember()?.role === member.role;
 history.scrollRestoration = 'manual';
@@ -40,34 +45,86 @@ function favoriteButton(id, compact = false) {
 }
 function favoriteMarks(id) { return `<div class="favorite-marks">${Object.entries(PEOPLE).map(([person, name]) => `<span class="${shared.data.favorites[person].includes(id) ? 'is-picked' : ''}">${name} ${shared.data.favorites[person].includes(id) ? '♥' : '♡'}</span>`).join('')}</div>`; }
 function card(template) {
-  return `<article class="template-card ${template.collection === 'special' ? 'special-card' : ''}"><a class="template-thumb" href="#preview/${template.id}" aria-label="${template.name} 전체 미리보기"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div><span class="open-preview">${template.collection === 'special' ? '직접 눌러 체험하기' : '전체 펼쳐보기'} <span>${template.collection === 'special' ? '✦' : '↗'}</span></span></a><div class="template-info"><div class="template-name-row"><div>${SIGNATURES[template.id] ? '<span class="signature-badge">SIGNATURE EDITION</span>' : ''}<p class="template-number">${template.number} / ${template.english}</p><h2><a href="#preview/${template.id}">${template.name}</a></h2></div>${favoriteButton(template.id, true)}</div><p class="template-description">${template.description}</p>${template.experienceHint ? `<p class="experience-hint"><span aria-hidden="true">✦</span> ${template.experienceHint}</p>` : ''}<p class="photo-hint">${template.photoHint}</p><div class="template-bottom"><span class="mood">${template.mood}</span>${favoriteMarks(template.id)}</div></div></article>`;
+  return `<article class="template-card" data-template-card="${template.id}"><a class="template-thumb" href="#preview/${template.id}" aria-label="${template.name} 전체 미리보기"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div><span class="open-preview">${template.collection === 'classic' ? '전체 펼쳐보기' : '이야기 체험하기'} <span>↗</span></span></a><div class="template-info"><div class="template-name-row"><div><p class="template-number">${template.number} / ${template.collection === 'immersive' ? 'NEW STORY' : SIGNATURES[template.id] ? 'SIGNATURE' : template.english}</p><h2><a href="#preview/${template.id}">${template.name}</a></h2></div>${favoriteButton(template.id, true)}</div><p class="template-description">${template.description}</p><p class="experience-hint">${template.experienceHint || template.mood}</p><p class="photo-hint">${template.photoHint}</p><div class="template-bottom">${favoriteMarks(template.id)}<button type="button" class="compare-toggle" data-action="compare-toggle" data-template="${template.id}" aria-pressed="${local.compare.includes(template.id)}" aria-label="${template.name} 비교 후보 ${local.compare.includes(template.id) ? '빼기' : '담기'}">${local.compare.includes(template.id) ? '✓ 비교 중' : '+ 비교'}</button></div>${mobilePreviewLink(template)}</div></article>`;
+}
+function fitPosters(root = main) {
+  posterObserver?.disconnect();
+  const posters = root.querySelectorAll('.template-thumb');
+  const fit = node => node.style.setProperty('--poster-scale', String(Math.max(0.1, node.clientWidth / 430)));
+  posters.forEach(fit);
+  if (typeof ResizeObserver !== 'undefined') { posterObserver = new ResizeObserver(entries => entries.forEach(({ target }) => fit(target))); posters.forEach(node => posterObserver.observe(node)); }
+}
+function renderCompareTray() {
+  const tray = dialog('compare-tray'); if (!tray) return;
+  tray.hidden = !local.compare.length;
+  tray.innerHTML = `<span>${local.compare.length}개 후보</span><div class="compare-chips">${local.compare.map(id => `<button type="button" data-action="compare-toggle" data-template="${id}" aria-label="${getTemplate(id).name} 비교에서 빼기">${getTemplate(id).name} ×</button>`).join('')}</div><button type="button" class="button primary" data-action="compare-open" ${local.compare.length < 2 ? 'disabled' : ''}>나란히 비교</button><button type="button" class="text-button" data-action="compare-clear">비우기</button>`;
+}
+function showCompare() {
+  if (local.compare.length < 2) return;
+  const selected = local.compare.map(getTemplate);
+  dialog('compare-content').innerHTML = `<p class="eyebrow">SIDE BY SIDE</p><h2 id="compare-title">우리의 후보, 나란히</h2><p>분위기와 페이지 흐름을 살펴보고 전체 예시로 이어가세요.</p><div class="compare-grid" style="--compare-columns:${selected.length}">${selected.map(template => `<section class="compare-item"><div class="template-thumb" aria-hidden="true"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div></div><h3>${template.name}</h3><p>${template.mood}</p><dl><dt>직접 해볼 것</dt><dd>${template.experienceHint || '사진 확대와 갤러리 탐색'}</dd><dt>페이지의 흐름</dt><dd>${template.description}</dd><dt>기본 구성</dt><dd>${Object.entries(SECTIONS).filter(([key]) => defaultSelection(template.id).sections[key]).map(([, value]) => value).join(' · ')}</dd></dl><a class="button secondary" href="#preview/${template.id}">전체 예시 보기 ↗</a></section>`).join('')}</div>`;
+  dialog('compare-dialog').showModal(); fitPosters(dialog('compare-dialog'));
 }
 function renderGrid() {
   const grid = dialog('template-grid'); if (!grid) return;
-  const visible = filterTemplates(TEMPLATES, shared.data.favorites, local.filter, local.collection);
+  const focused = document.activeElement;
+  const restore = (grid.contains(focused) || dialog('compare-tray')?.contains(focused)) && focused?.dataset.action ? { action: focused.dataset.action, template: focused.dataset.template, inTray: !!focused.closest('#compare-tray') } : null;
+  const visible = filterTemplates(TEMPLATES, shared.data.favorites, local.filter, local.collection, local.search);
+  grid.dataset.density = local.density;
   grid.innerHTML = visible.length ? Object.entries(COLLECTIONS).map(([id, collection]) => {
     const templates = visible.filter(template => template.collection === id);
     if (!templates.length) return '';
     return `<section class="template-series series-${id}" aria-label="${collection.name}"><header class="series-heading"><div><p class="eyebrow">${collection.english}</p><h2>${collection.title}</h2><p>${collection.description}</p></div><span class="series-number">${String(templates.length).padStart(2, '0')}</span></header><div class="series-grid">${templates.map(card).join('')}</div></section>`;
-  }).join('') : `<div class="empty-state"><span>♡</span><h2>아직 고른 후보가 없어요</h2><p>예시를 내려보며 마음에 드는 디자인을 찜해보세요.</p><button class="button secondary" data-action="filter" data-filter="all">전체 예시 보기</button></div>`;
+  }).join('') : `<div class="empty-state"><span>♡</span><h2>조건에 맞는 예시가 없어요</h2><p>다른 단어로 검색하거나 모음과 찜 조건을 풀어보세요.</p><button class="button secondary" data-action="browse-reset">모든 예시 보기</button></div>`;
   dialog('template-count').textContent = `${String(visible.length).padStart(2, '0')} DESIGNS`;
   document.querySelectorAll('[data-filter]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.filter === local.filter)));
   document.querySelectorAll('[data-collection]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.collection === local.collection)));
+  document.querySelectorAll('[data-density]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.density === local.density)));
+  fitPosters(); renderCompareTray();
+  if (restore) {
+    const root = restore.inTray ? dialog('compare-tray') : grid;
+    const candidates = [...root.querySelectorAll('[data-action]')];
+    const replacement = candidates.find(node => node.dataset.action === restore.action && node.dataset.template === restore.template)
+      || (restore.inTray ? root.querySelector('button:not(:disabled)') || document.querySelector('#catalog-search') : null);
+    replacement?.focus({ preventScroll: true });
+  }
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">A LITTLE NOTE, A BIG DAY</p><h1>우리의 마음을 담을<br>청첩장을 골라볼까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">오래 보아도 좋은 기본 여섯 장,<br>이야기와 체험을 담은 특별한 여섯 장.</p></div><div class="date-stamp"><span>OUR WEDDING</span><b>05<span>/</span>18</b><span>2030 · SUNGWOO & SOHEE</span></div></section><div class="catalog-intro"><p><span>01</span> 펼쳐보기 <i>—</i> <span>02</span> 취향 모으기 <i>—</i> <span>03</span> 함께 고르기</p><span class="intro-note">사진과 일부 예식 정보는 예시예요</span></div>${signatureCollection()}<section class="catalog-collection" aria-label="청첩장 템플릿"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두 보기','12'],['classic','기본 6종','01–06'],['special','특별한 6종','07–12']].map(([id,label,count]) => `<button data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${id === 'special' ? '✦ ' : ''}${label}</span><small>${count}</small></button>`).join('')}</div><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><span id="template-count"></span></div><div id="template-grid" class="template-grid"></div></section><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">한 권의 잡지, 작은 전시, 함께 듣는 음반.<br>처음부터 끝까지 다른 이야기를 펼쳐보세요.</p></div><div class="library-feature"><span>NEW STORIES</span><b>${TEMPLATES.filter(t => t.collection === 'immersive').length}</b><p>새로운 전체 페이지 예시</p><button type="button" data-action="collection" data-collection="immersive">새 이야기부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
   const template = getTemplate(selection.templateId);
   return `<div class="options-content"><p class="eyebrow">MAKE IT OURS</p><h2>우리답게 꾸미기</h2><p class="options-description">마음에 드는 조합을 찾아보세요.<br>아래 저장 버튼을 눌러야 함께 반영돼요.</p><fieldset><legend>01 <span>색감</span></legend><div class="palette-options">${template.palettes.map(palette => `<label class="palette-option"><input type="radio" name="palette-${scope}-${selection.templateId}" data-option="paletteId" value="${palette.id}" ${selection.paletteId === palette.id ? 'checked' : ''}><span class="palette-swatch" style="--swatch:${palette.paper};--swatch-ink:${palette.accent}"><i></i></span><span>${palette.name}</span></label>`).join('')}</div></fieldset><fieldset ${selection.sections.gallery ? '' : 'disabled'}><legend>02 <span>갤러리 배치</span></legend><div class="gallery-options">${Object.entries(GALLERIES).map(([id,name]) => `<label><input type="radio" name="gallery-${scope}-${selection.templateId}" data-option="galleryLayout" value="${id}" ${selection.galleryLayout === id ? 'checked' : ''}><span>${name}</span></label>`).join('')}</div></fieldset><fieldset><legend>03 <span>담고 싶은 이야기</span></legend><p class="fixed-sections">표지·초대글·예식 정보·마무리는 함께 들어가요.</p><div class="section-options">${Object.entries(SECTIONS).map(([id,name]) => `<label><span>${name}</span><input type="checkbox" role="switch" data-section-option="${id}" ${selection.sections[id] ? 'checked' : ''}><span class="switch" aria-hidden="true"></span></label>`).join('')}</div></fieldset><label class="note-label"><span>04 <b>디자인 메모</b></span><textarea data-option="note" maxlength="1000" rows="3" placeholder="예: 사진은 더 크게, 문구는 조금 짧게…">${e(selection.note)}</textarea></label><p class="note-count">${selection.note.length} / 1,000</p><button class="text-button" data-action="reset-draft">이 템플릿의 기본 설정으로</button></div>`;
 }
+function mobilePreviewLink(template) {
+  return `<a class="mobile-preview-link" href="#preview/${template.id}" data-action="mobile-preview" data-template="${template.id}" aria-label="${template.name} 모바일로 보기"><span aria-hidden="true">▯</span> 모바일로 보기 <span aria-hidden="true">↗</span></a>`;
+}
+function deviceToolbar() {
+  return `<section class="preview-device-toolbar" aria-label="미리보기 화면 크기"><div class="device-modes" role="group" aria-label="보기 방식"><button type="button" data-action="preview-device" data-device="default" aria-pressed="${previewDevice === 'default'}">기본 보기</button><button type="button" data-action="preview-device" data-device="mobile" aria-pressed="${previewDevice === 'mobile'}"><span class="phone-icon" aria-hidden="true"></span>모바일로 보기</button></div><label class="device-width" ${previewDevice === 'mobile' ? '' : 'hidden'}>화면 너비<select id="preview-width" aria-label="모바일 화면 너비">${[360,390,430].map(width => `<option value="${width}" ${width === previewWidth ? 'selected' : ''}>${width}px${width === 390 ? ' · 기본' : ''}</option>`).join('')}</select></label><p class="device-hint" role="status">${previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.'}</p></section>`;
+}
+function updatePreviewDevice() {
+  if (route.view !== 'preview') return;
+  main.dataset.previewDevice = previewDevice;
+  main.style.setProperty('--preview-width', `${previewWidth}px`);
+  main.querySelectorAll('[data-action="preview-device"]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.device === previewDevice)));
+  main.querySelector('.device-width').hidden = previewDevice !== 'mobile';
+  main.querySelector('.device-hint').textContent = previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.';
+}
 function renderPreview() {
   const template = getTemplate(route.templateId), draft = getDraft(template.id);
   main.className = 'preview-main';
-  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">디자인 미리보기 · 사진, 시간, 장소는 예시입니다.</p>${signatureGuide(template.id)}<div class="preview-layout"><div id="preview-canvas">${invitation(draft.selection)}</div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
-  reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); updateDraftStatus();
+  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">디자인 미리보기 · 사진, 시간, 장소는 예시입니다.</p>${signatureGuide(template.id)}${deviceToolbar()}<div class="preview-layout"><div class="preview-stage"><div class="device-statusbar" aria-hidden="true"><span>9:41</span><i></i><span>▮▮▮ ▰</span></div><div id="preview-canvas">${invitation(draft.selection)}</div><div class="device-homebar" aria-hidden="true"><i></i></div></div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
+  const filtered = filterTemplates(TEMPLATES, shared.data.favorites, local.filter, local.collection, local.search);
+  const sequence = filtered.some(item => item.id === template.id) ? filtered : TEMPLATES;
+  const index = sequence.findIndex(item => item.id === template.id);
+  const navigation = document.createElement('nav'); navigation.className = 'preview-sequence'; navigation.setAttribute('aria-label', '예시 이어보기');
+  navigation.innerHTML = `${index > 0 ? `<a href="#preview/${sequence[index - 1].id}">← ${sequence[index - 1].name}</a>` : '<span></span>'}${index < sequence.length - 1 ? `<a href="#preview/${sequence[index + 1].id}">${sequence[index + 1].name} →</a>` : '<span></span>'}`;
+  main.querySelector('.preview-disclaimer').after(navigation);
+  if (template.collection === 'immersive') { const guide = document.createElement('div'); guide.className = 'edition-guide'; guide.innerHTML = `<strong>${template.experienceHint}</strong><p>${template.description}</p>`; navigation.after(guide); }
+  updatePreviewDevice();
+  reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); editions.mount(dialog('preview-canvas')); updateDraftStatus();
 }
 function updateDraftStatus() {
   if (route.view !== 'preview') return;
@@ -90,7 +147,7 @@ function reveal() {
 }
 function renderRoute() {
   if (!active()) return;
-  experiences.dispose(); signatures.dispose();
+  experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect();
   document.querySelectorAll('dialog[open]').forEach(target => target.close());
   route = parseRoute(location.hash);
   document.body.dataset.view = route.view;
@@ -140,7 +197,7 @@ function latestChoiceMarkup() {
 function showConflict() { dialog('latest-choice').innerHTML = latestChoiceMarkup(); dialog('conflict-dialog').dataset.revision = String(shared.data.selectionRevision); dialog('conflict-dialog').showModal(); }
 function refreshPreview() {
   const selection = getDraft(route.templateId).selection, previousScroll = window.scrollY;
-  dialog('preview-canvas').innerHTML = invitation(selection); reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas'));
+  dialog('preview-canvas').innerHTML = invitation(selection); reveal(); experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); editions.mount(dialog('preview-canvas'));
   document.querySelectorAll('[data-option="paletteId"]').forEach(input => { input.checked = input.value === selection.paletteId; });
   document.querySelectorAll('[data-option="galleryLayout"]').forEach(input => { input.checked = input.value === selection.galleryLayout; input.closest('fieldset').disabled = !selection.sections.gallery; });
   document.querySelectorAll('[data-section-option]').forEach(input => { input.checked = selection.sections[input.dataset.sectionOption]; });
@@ -168,6 +225,12 @@ document.addEventListener('click', async event => {
   const target = event.target.closest('[data-action]'); if (!target) return;
   try {
     switch (target.dataset.action) {
+      case 'mobile-preview': {
+        previewDevice = 'mobile';
+        if (route.view === 'preview' && route.templateId === target.dataset.template) updatePreviewDevice();
+        break;
+      }
+      case 'preview-device': previewDevice = target.dataset.device === 'mobile' ? 'mobile' : 'default'; updatePreviewDevice(); break;
       case 'actor': break;
       case 'choose-actor': {
         local.actor = getMember()?.role; dialog('actor-dialog').close(); updateStateUI(); break;
@@ -175,7 +238,18 @@ document.addEventListener('click', async event => {
       case 'favorite': await withActor(() => favorite(target.dataset.template)); break;
       case 'save': await withActor(saveSelection); break;
       case 'collection': local.collection = target.dataset.collection; local.catalogScroll = 0; persist(); renderGrid(); break;
-      case 'filter': local.filter = target.dataset.filter; persist(); renderGrid(); break;
+      case 'filter': local.filter = target.dataset.filter; local.catalogScroll = 0; persist(); renderGrid(); break;
+      case 'density': local.density = target.dataset.density; persist(); renderGrid(); break;
+      case 'compare-toggle': {
+        const id = target.dataset.template;
+        if (local.compare.includes(id)) local.compare = local.compare.filter(value => value !== id);
+        else if (local.compare.length < 4) local.compare.push(id);
+        else { toast('한 번에 네 개까지 나란히 볼 수 있어요. 후보 하나를 빼고 담아주세요.'); break; }
+        persist(); renderGrid(); break;
+      }
+      case 'compare-open': showCompare(); break;
+      case 'compare-clear': local.compare = []; persist(); renderGrid(); break;
+      case 'browse-reset': local.filter = 'all'; local.collection = 'all'; local.search = ''; local.catalogScroll = 0; persist(); renderCatalog(); break;
       case 'options': dialog('mobile-options').innerHTML = optionsMarkup(getDraft(route.templateId).selection, 'mobile'); dialog('options-dialog').showModal(); break;
       case 'reset-draft': {
         getDraft(route.templateId).selection = defaultSelection(route.templateId); persist();
@@ -207,7 +281,14 @@ document.addEventListener('click', async event => {
   } catch (error) { toast(error.message || '반영하지 못했어요. 다시 시도해주세요.'); }
 });
 document.addEventListener('input', event => {
-  const input = event.target; if (route.view !== 'preview' || !(input.dataset.option || input.dataset.sectionOption)) return;
+  if (route.view === 'catalog' && event.target.id === 'catalog-search') { local.search = event.target.value; local.catalogScroll = 0; persist(); renderGrid(); return; }
+  const input = event.target;
+  if (input.id === 'preview-width') {
+    const width = Number(input.value);
+    if ([360, 390, 430].includes(width)) { previewWidth = width; updatePreviewDevice(); }
+    return;
+  }
+  if (route.view !== 'preview' || !(input.dataset.option || input.dataset.sectionOption)) return;
   const selection = getDraft(route.templateId).selection;
   if (input.dataset.sectionOption) selection.sections[input.dataset.sectionOption] = input.checked;
   else selection[input.dataset.option] = input.value;
@@ -223,16 +304,16 @@ dialog('large-photo').addEventListener('touchstart', event => { touchStart = eve
 dialog('large-photo').addEventListener('touchend', event => { const delta = event.changedTouches[0].clientX - touchStart; if (Math.abs(delta) > 45) showPhoto(photoIndex + (delta < 0 ? 1 : -1)); }, { passive: true });
 document.querySelectorAll('dialog').forEach(target => {
   target.addEventListener('click', event => { if (event.target !== target) return; const box = target.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) target.close(); });
-  target.addEventListener('close', () => { if (target.id === 'actor-dialog') pendingAction = null; });
+  target.addEventListener('close', () => { if (target.id === 'actor-dialog') pendingAction = null; if (target.id === 'compare-dialog') { dialog('compare-content')?.replaceChildren(); if (active() && route.view === 'catalog') fitPosters(); } });
 });
 window.addEventListener('hashchange', renderRoute);
-window.addEventListener('pagehide', () => { experiences.dispose(); signatures.dispose(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
-window.addEventListener('pageshow', event => { if (active() && event.persisted && route.view === 'preview') { experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); } });
+window.addEventListener('pagehide', () => { experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
+window.addEventListener('pageshow', event => { if (active() && event.persisted && route.view === 'preview') { experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); editions.mount(dialog('preview-canvas')); } else if (active() && event.persisted && route.view === 'catalog') fitPosters(); });
 async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260913-signature');
+    const { connect } = await import('./firebase.mjs?v=20260914-mobile-preview');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;
@@ -249,5 +330,5 @@ async function connectStore() {
   finally { connecting = false; }
 }
 renderRoute();
-registerPrivateCleanup(() => { disposed = true; store?.dispose(); experiences.dispose(); signatures.dispose(); revealObserver?.disconnect(); clearTimeout(toastTimer); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
+registerPrivateCleanup(() => { disposed = true; store?.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); dialog('compare-dialog')?.close(); dialog('compare-content')?.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();

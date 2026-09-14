@@ -201,5 +201,5 @@
 .experience-thumbnail .boarding-confirm>b{font:6px monospace;letter-spacing:.5px}
 .experience-thumbnail.is-active .boarding-stub{transform:translate(7px,13px) rotate(7deg)}
 .experience-thumbnail .ticket-footer{gap:10px;font-size:4px;padding-top:15px;margin-top:0}
-@media(max-width:360px){.paper-experience:not(.experience-thumbnail){padding-left:20px;padding-right:20px}.paper-experience:not(.experience-thumbnail) .ticket-title{font-size:54px}.paper-experience:not(.experience-thumbnail) .boarding-details dd{font-size:10px}}
+@container invitation-preview (max-width:360px){.paper-experience:not(.experience-thumbnail){padding-left:20px;padding-right:20px}.paper-experience:not(.experience-thumbnail) .ticket-title{font-size:54px}.paper-experience:not(.experience-thumbnail) .boarding-details dd{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.paper-experience *,.paper-experience *:before,.paper-experience *:after{animation:none!important;transition:none!important}.experience-camera.is-flashing .instant-print{transform:translate(-50%,62px) rotate(4deg);opacity:1}.experience-camera.is-flashing .instant-print-image img{filter:saturate(.92);opacity:1}}

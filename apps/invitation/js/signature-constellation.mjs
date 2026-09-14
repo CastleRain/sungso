@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260913-signature';
-import { escapeHtml as e } from './core.mjs?v=20260913-signature';
+import { PHOTOS } from './catalog.mjs?v=20260914-mobile-preview';
+import { escapeHtml as e } from './core.mjs?v=20260914-mobile-preview';
 
 // Editorial scenes are fictional. They do not describe real astronomical events.
 const SCENES = Object.freeze([

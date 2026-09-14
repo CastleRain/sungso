@@ -1,0 +1,395 @@
+/* Four complete, isolated invitation editions. Theme colors come from the parent. */
+.pe-edition,.pe-cover{color:var(--ink);background:var(--paper);font-family:var(--serif);position:relative;isolation:isolate}
+.pe-edition *,.pe-cover *{box-sizing:border-box}
+.pe-edition [hidden]{display:none!important}
+.pe-edition figure,.pe-cover figure{margin:0}
+.pe-edition img,.pe-cover img{display:block;width:100%;object-fit:cover}
+.pe-edition .pe-label,.pe-cover .pe-label{font:9px/1.6 var(--sans);letter-spacing:2.1px;color:var(--accent);margin:0 0 23px}
+.pe-edition .pe-sample{font:10px/1.8 var(--sans);opacity:.7;display:block;margin:24px 0 0;letter-spacing:0}
+.pe-edition .pe-section{padding:60px 30px;text-align:center;position:relative;overflow:hidden}
+.pe-edition .pe-section h2{font:400 27px/1.65 var(--serif);letter-spacing:-.8px;margin:0 0 25px}
+.pe-edition .pe-section h3{font:400 19px/1.7 var(--serif);margin:18px 0 12px}
+.pe-edition .pe-section p{font-size:12px;line-height:2.25;margin:0 0 19px}
+.pe-edition .pe-section .pe-label{font:9px/1.6 var(--sans);margin:0 0 23px}
+.pe-edition .pe-section .pe-sample{font:10px/1.8 var(--sans);margin:24px 0 0}
+.pe-edition .pe-names,.pe-cover .pe-names{font:22px var(--serif);display:flex;justify-content:center;gap:20px;align-items:center;letter-spacing:3px;margin:27px 0 18px}
+.pe-edition .pe-names i,.pe-cover .pe-names i{font:italic 24px var(--display);color:var(--accent)}
+.pe-cover.cover{min-height:620px;padding:36px 28px 30px;overflow:hidden;text-align:center}
+.pe-cover h2{font:500 66px/.97 var(--display);letter-spacing:-2px;position:relative;margin:0;z-index:2}
+.pe-cover h2 em{font-weight:400;color:var(--accent)}
+.pe-cover .pe-cover-korean{font:12px/1.8 var(--serif);margin:19px 0 24px;letter-spacing:.5px}
+.pe-cover .pe-cover-date{font:9px/1.7 var(--sans);letter-spacing:2px;margin:0}
+.pe-edition .pe-controls{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:24px 0}
+.pe-edition .pe-controls button,.pe-edition .pe-gesture{font:12px/1.5 var(--sans);color:var(--ink);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:var(--paper);min-height:44px;padding:10px 17px;cursor:pointer}
+.pe-edition .pe-controls button[aria-pressed=true]{background:var(--accent);color:var(--paper)}
+.pe-edition .pe-gesture{display:flex;align-items:center;justify-content:center;gap:16px;margin:25px auto;max-width:100%}
+.pe-edition .pe-gesture[aria-pressed=true]{background:var(--soft)}
+.pe-edition button:focus-visible,.pe-edition summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.pe-edition button:disabled{cursor:default;opacity:.5}
+.pe-edition .pe-choice-panel{min-width:0}
+.pe-edition .pe-date-numbers{margin:25px auto 35px;display:grid;justify-content:center;text-align:center}
+.pe-edition .pe-date-numbers>span{font:10px/1.5 var(--sans);letter-spacing:2.6px}
+.pe-edition .pe-date-numbers strong{font:400 66px/1.2 var(--display);letter-spacing:-2px;margin:9px 0 13px;white-space:nowrap}
+.pe-edition .pe-date-numbers strong span{font-size:35px;color:var(--accent);padding:0 4px}
+.pe-edition .pe-date-detail{font-size:11px!important;opacity:.8}
+.pe-edition .pe-practical{border-top:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding-top:20px;text-align:left;margin-top:30px}
+.pe-edition .pe-practical b{font:11px var(--sans)}
+.pe-edition .pe-practical p{font-size:11px;margin:10px 0 0}
+.pe-edition .pe-gallery{padding-top:32px}
+.pe-edition .pe-gallery>.pe-label{padding:0 25px;text-align:center;margin:0}
+.pe-edition .pe-gallery .invite-section{padding-top:24px;padding-bottom:40px}
+.pe-edition .pe-gallery .section-eyebrow{display:none}
+.pe-edition .pe-gallery .invite-section h2{font-size:25px;margin-bottom:26px}
+.pe-edition .pe-gallery .gallery-photo{flex-shrink:0}
+.pe-edition .pe-gallery .gallery-photo:focus-visible{outline-offset:-4px}
+.pe-edition .pe-gallery .gallery-help{font-size:10px!important;line-height:1.8}
+.pe-edition .pe-ending{padding:65px 30px 40px;text-align:center}
+.pe-edition .pe-ending .pe-ending-title{font:italic 46px/1.1 var(--display);opacity:1;margin:0 0 26px;color:var(--accent)}
+.pe-edition .pe-ending>.pe-label{display:block;margin-bottom:24px}
+.pe-edition .pe-ending>.pe-sample{font-size:9px;margin-top:25px}
+
+/* Greenhouse: an arched glasshouse, specimen windows and a growing flower. */
+.pe-cover-greenhouse{background:linear-gradient(180deg,var(--paper),var(--soft))}
+.pe-cover-greenhouse h2{font-size:61px;line-height:.95}
+.pe-cover-greenhouse h2 em{font-size:1.06em}
+.pe-cover-greenhouse .pe-glasshouse{height:310px;margin:25px auto 0;max-width:295px;position:relative;padding:12px 16px 0;border:1px solid var(--accent);border-radius:150px 150px 0 0}
+.pe-cover-greenhouse .pe-glasshouse-photo{height:100%;border-radius:140px 140px 0 0;overflow:hidden;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.pe-cover-greenhouse .pe-glasshouse-photo img{height:100%;object-position:50% 50%;filter:saturate(.8)}
+.pe-cover-greenhouse .pe-house-lines{position:absolute;inset:12px 16px 0;border-radius:140px 140px 0 0;background:linear-gradient(90deg,transparent 49.6%,color-mix(in srgb,var(--paper) 82%,transparent) 49.6% 50.4%,transparent 50.4%),linear-gradient(transparent 56%,color-mix(in srgb,var(--paper) 82%,transparent) 56% 56.8%,transparent 56.8%);pointer-events:none}
+.pe-cover-greenhouse .pe-leaf{position:absolute;display:block;width:110px;color:var(--accent);bottom:-13px;pointer-events:none}
+.pe-cover-greenhouse .pe-leaf svg{width:100%;stroke:currentColor;stroke-width:1.4}
+.pe-cover-greenhouse .pe-leaf g{opacity:.8}
+.pe-cover-greenhouse .pe-leaf-left{left:-33px;transform:rotate(-13deg)}
+.pe-cover-greenhouse .pe-leaf-right{right:-31px;transform:scaleX(-1) rotate(-14deg)}
+.pe-cover-greenhouse .pe-greenhouse-tag{position:absolute;right:0;bottom:22px;background:var(--paper);border:1px solid var(--accent);padding:13px 19px;font:italic 22px var(--display);transform:rotate(7deg)}
+.pe-cover-greenhouse .pe-greenhouse-tag small{font:7px var(--sans);letter-spacing:1.1px;display:block;margin-top:7px}
+.pe-greenhouse .pe-garden-letter{padding-top:83px;padding-bottom:78px}
+.pe-greenhouse .pe-letter-leaf{display:block;width:54px;margin:0 auto 25px;color:var(--accent);transform:rotate(20deg)}
+.pe-greenhouse .pe-letter-leaf svg{height:70px;stroke:currentColor;stroke-width:1.6}
+.pe-greenhouse .pe-letter-leaf g{opacity:.65}
+.pe-greenhouse .pe-season-room{margin:0 15px;background:var(--soft);border-radius:130px 130px 4px 4px;padding-top:60px}
+.pe-greenhouse .pe-controls button{border-radius:30px;min-width:68px}
+.pe-greenhouse .pe-season-window figure{position:relative;background:var(--paper);padding:10px 10px 0}
+.pe-greenhouse .pe-season-window img{height:270px;object-position:center 56%}
+.pe-greenhouse .pe-season-window figcaption{font:8px var(--sans);letter-spacing:2px;padding:13px 0;color:var(--accent)}
+.pe-greenhouse .pe-season-window h3{font-size:20px}
+.pe-greenhouse .pe-season-window p{font-size:12px;text-align:left;margin:0}
+.pe-greenhouse[data-season=summer] .pe-season-window img{filter:saturate(1.05)}
+.pe-greenhouse[data-season=autumn] .pe-season-window img{filter:sepia(.15)}
+.pe-greenhouse .pe-bloom-date{padding-top:35px;border-bottom:1px solid var(--soft)}
+.pe-greenhouse .pe-flower{width:165px;height:165px;margin:20px auto -20px;color:var(--accent)}
+.pe-greenhouse .pe-flower svg{width:100%;height:100%;overflow:visible}
+.pe-greenhouse .pe-flower-stem{stroke:currentColor;stroke-width:2;fill:var(--soft)}
+.pe-greenhouse .pe-flower-petals{transform:scale(.34,.7);transform-origin:100px 90px;transition:transform .65s ease}
+.pe-greenhouse .pe-flower-petals ellipse{fill:var(--soft);stroke:var(--accent);stroke-width:1}
+.pe-greenhouse .pe-flower-petals circle{fill:var(--accent)}
+.pe-greenhouse[data-bloom=on] .pe-flower-petals{transform:scale(1)}
+.pe-greenhouse .pe-bloom-date .pe-gesture{font-size:10px;border:0;background:none;text-decoration:underline;text-underline-offset:5px;margin-top:17px}
+.pe-greenhouse .pe-bloom-date .pe-date-numbers{margin-top:0}
+.pe-greenhouse .pe-herbarium{background:var(--soft);margin:15px}
+.pe-greenhouse .pe-herbarium .gallery-grid{gap:12px;align-items:start}
+.pe-greenhouse .pe-herbarium .gallery-photo{padding:6px;background:var(--paper);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.pe-greenhouse .pe-herbarium .gallery-grid .gallery-photo:first-child{border-radius:150px 150px 0 0}
+.pe-greenhouse .pe-herbarium .gallery-grid .gallery-photo:first-child img{border-radius:140px 140px 0 0}
+.pe-greenhouse .pe-garden-sign{display:flex;gap:20px;align-items:center;padding:22px 18px;border:1px solid var(--accent);text-align:left;margin:28px 0}
+.pe-greenhouse .pe-garden-sign>span{font:42px var(--display);color:var(--accent)}
+.pe-greenhouse .pe-garden-sign strong{font:16px var(--serif)}
+.pe-greenhouse .pe-garden-sign p{font-size:11px;margin:7px 0 0}
+.pe-greenhouse .pe-garden-way{padding:0;margin:30px 0 0;list-style:none;text-align:left}
+.pe-greenhouse .pe-garden-way li{display:flex;gap:17px;position:relative;padding:0 0 23px}
+.pe-greenhouse .pe-garden-way li:before{content:'';position:absolute;left:15px;top:35px;bottom:0;width:1px;background:var(--soft)}
+.pe-greenhouse .pe-garden-way li:last-child:before{display:none}
+.pe-greenhouse .pe-garden-way li>span{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--accent);border-radius:50%;font:11px var(--display);color:var(--accent)}
+.pe-greenhouse .pe-garden-way h3{font-size:14px;margin:1px 0 5px}
+.pe-greenhouse .pe-garden-way p{font-size:11px;margin:0}
+.pe-greenhouse .pe-garden-gratitude{border-top:1px solid var(--soft);padding-top:35px}
+.pe-greenhouse .pe-garden-gratitude>.pe-label{text-align:center;margin:0}
+.pe-greenhouse .pe-garden-gratitude .invite-section{padding-top:20px}
+.pe-greenhouse .pe-garden-gratitude .section-eyebrow{display:none}
+.pe-greenhouse .pe-garden-gratitude .sample-accounts details{border-radius:25px 4px 4px 4px}
+.pe-greenhouse .pe-garden-reply{background:var(--soft);margin:0 15px}
+.pe-greenhouse .pe-seed-packet{border:1px solid var(--accent);background:var(--paper);padding:25px 20px;margin:25px auto;width:min(225px,100%);position:relative;transform:rotate(-3deg)}
+.pe-greenhouse .pe-seed-packet:before{content:'';position:absolute;left:7px;right:7px;top:7px;height:6px;border-top:1px dashed var(--accent)}
+.pe-greenhouse .pe-seed-packet span{font:8px/1.8 var(--sans);letter-spacing:1.4px;display:block}
+.pe-greenhouse .pe-seed-packet strong{font:20px/1.8 var(--serif);font-weight:400;display:block;margin:23px 0;color:var(--accent)}
+.pe-greenhouse .pe-garden-wishes blockquote{border:1px solid var(--accent);border-radius:100px 100px 0 0;padding:45px 20px 30px;margin:25px 0;font-size:15px;line-height:2.2;background:var(--soft)}
+.pe-greenhouse .pe-garden-wishes cite{display:block;font:10px var(--sans);margin-top:20px}
+.pe-greenhouse .pe-garden-ending{margin:0 15px;background:var(--soft);border-radius:150px 150px 0 0;padding-top:85px}
+
+/* Scrapbook: taped prints, a lined letter, index pages and handwritten notes. */
+.pe-cover-scrapbook{background-image:linear-gradient(90deg,transparent 24px,var(--soft) 24px 26px,transparent 26px),repeating-linear-gradient(transparent 0 23px,color-mix(in srgb,var(--accent) 11%,transparent) 23px 24px)}
+.pe-cover-scrapbook .pe-label{font-size:8px;letter-spacing:1.4px;margin-left:12px}
+.pe-cover-scrapbook h2{font-size:49px;line-height:1.02;text-align:left;transform:rotate(-4deg);margin:5px 0 30px 15px}
+.pe-cover-scrapbook .pe-scrap-binding{position:absolute;top:25px;bottom:25px;left:7px;width:5px;background:radial-gradient(circle,var(--accent) 2px,transparent 2.5px) center top/5px 24px;opacity:.45}
+.pe-cover-scrapbook .pe-scrap-photo{padding:11px 11px 15px;background:var(--paper);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);box-shadow:1px 4px 8px #00000012;transform:rotate(5deg);position:relative;margin:0 0 0 12px}
+.pe-cover-scrapbook .pe-scrap-photo img{height:236px;object-position:50% 53%}
+.pe-cover-scrapbook .pe-scrap-photo p{font:19px/1.5 'Nanum Pen Script',cursive;margin:14px 0 0;letter-spacing:-.3px}
+.pe-cover-scrapbook .pe-tape,.pe-scrapbook .pe-tape{position:absolute;top:-10px;left:calc(50% - 42px);height:25px;width:84px;transform:rotate(-6deg);background:color-mix(in srgb,var(--accent) 23%,var(--paper));opacity:.85;clip-path:polygon(4% 0,98% 4%,95% 20%,100% 42%,95% 64%,99% 100%,2% 96%,5% 75%,0 48%,5% 25%)}
+.pe-cover-scrapbook .pe-heart-sticker{display:grid;place-content:center;position:absolute;right:6px;top:142px;width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--paper);border:4px solid var(--paper);transform:rotate(16deg);font:13px/1.05 var(--display);z-index:3;box-shadow:0 1px 3px #0002}
+.pe-cover-scrapbook .pe-cover-note{text-align:left;transform:rotate(-3deg);padding:20px 18px 17px;background:var(--soft);margin:26px 10px 0 25px;position:relative;z-index:2}
+.pe-cover-scrapbook .pe-cover-note>span{font:9px var(--sans);letter-spacing:.6px}
+.pe-cover-scrapbook .pe-cover-note p{font:30px/1.3 'Nanum Pen Script',cursive;margin:11px 0 13px}
+.pe-cover-scrapbook .pe-gesture{position:relative;margin-bottom:0;background:var(--paper);font-size:11px;z-index:4}
+.pe-cover-scrapbook .pe-added-sticker{position:absolute;right:18px;bottom:127px;display:grid;place-items:center;width:82px;height:82px;border-radius:48% 45% 47% 43%;font:16px/1 var(--display);background:var(--accent);color:var(--paper);border:4px solid var(--paper);transform:rotate(16deg) scale(.4);opacity:0;z-index:3;transition:transform .3s ease,opacity .3s ease;pointer-events:none}
+.pe-scrapbook[data-sticker=on] .pe-added-sticker{opacity:1;transform:rotate(-12deg) scale(1)}
+.pe-scrapbook .pe-scrap-letter{margin:35px 19px;background:repeating-linear-gradient(transparent 0 30px,var(--soft) 30px 31px);text-align:left;padding:48px 27px 35px;border-left:1px solid color-mix(in srgb,var(--accent) 28%,transparent);border-bottom:1px solid var(--soft)}
+.pe-scrapbook .pe-scrap-page-number{position:absolute;top:13px;right:13px;font:8px var(--sans);color:var(--accent)}
+.pe-scrapbook .pe-scrap-letter h2{font:34px/1.4 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-scrap-letter p:not(.pe-label){line-height:31px}
+.pe-scrapbook .pe-scrap-letter .pe-scrap-sign{font:24px 'Nanum Pen Script',cursive;text-align:right;margin-bottom:0}
+.pe-scrapbook .pe-memory-book{background:var(--soft);padding:44px 25px}
+.pe-scrapbook .pe-memory-book h2{font:34px 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-memory-book .pe-controls{justify-content:flex-start;margin-bottom:0;gap:3px}
+.pe-scrapbook .pe-memory-book .pe-controls button{border-bottom:0;border-radius:9px 9px 0 0;font-size:11px}
+.pe-scrapbook .pe-memory-pages{background:var(--paper);padding:27px 20px 22px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:0 12px 12px 0}
+.pe-scrapbook .pe-memory-print{padding:8px 8px 15px;border:1px solid var(--soft);transform:rotate(-3deg);box-shadow:1px 3px 4px #0000000d;margin-bottom:23px}
+.pe-scrapbook .pe-memory-print img{height:225px}
+.pe-scrapbook .pe-memory-print>span{font:8px var(--sans);letter-spacing:1.4px;display:block;margin-top:11px;color:var(--accent)}
+.pe-scrapbook .pe-memory-caption{text-align:left}
+.pe-scrapbook .pe-memory-caption h3{font:27px 'Nanum Pen Script',cursive;margin-bottom:15px}
+.pe-scrapbook .pe-memory-caption p{font-size:12px}
+.pe-scrapbook .pe-memory-caption>span{font:18px 'Nanum Pen Script',cursive;color:var(--accent)}
+.pe-scrapbook .pe-scrap-album{padding-top:45px;background:repeating-linear-gradient(90deg,transparent 0 19px,color-mix(in srgb,var(--accent) 7%,transparent) 19px 20px),repeating-linear-gradient(transparent 0 19px,color-mix(in srgb,var(--accent) 7%,transparent) 19px 20px)}
+.pe-scrapbook .pe-scrap-album .invite-section h2{font:33px 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-scrap-album .gallery-grid{gap:13px;align-items:start}
+.pe-scrapbook .pe-scrap-album .gallery-photo{padding:8px 8px 22px;background:var(--paper);border:1px solid var(--soft);box-shadow:1px 3px 7px #00000012}
+.pe-scrapbook .pe-scrap-album .gallery-grid .gallery-photo:nth-child(2){transform:rotate(-3deg)}
+.pe-scrapbook .pe-scrap-album .gallery-grid .gallery-photo:nth-child(3){transform:rotate(3deg);margin-top:18px}
+.pe-scrapbook .pe-scrap-album .gallery-filmstrip{border-style:dashed;background:var(--soft)}
+.pe-scrapbook .pe-scrap-date{padding:50px 27px 55px}
+.pe-scrapbook .pe-scrap-date-card{position:relative;background:var(--soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:28px 18px 22px;transform:rotate(-2deg)}
+.pe-scrapbook .pe-scrap-date-card h2{font:28px 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-scrap-date-card .pe-date-numbers{position:relative;z-index:1;margin:13px 0 32px}
+.pe-scrapbook .pe-date-doodle{position:absolute;right:14px;top:41px;font:110px/1 'Nanum Pen Script',cursive;color:var(--accent);transform:rotate(14deg);opacity:.65}
+.pe-scrapbook .pe-scrap-directions{border-top:1px dashed var(--accent);margin:0 22px;padding:44px 7px}
+.pe-scrapbook .pe-scrap-directions h2{font:30px 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-address-note{border:1px solid var(--accent);padding:20px 16px;text-align:left;background:var(--soft)}
+.pe-scrapbook .pe-address-note span{font:9px var(--sans);color:var(--accent)}
+.pe-scrapbook .pe-address-note strong{display:block;font:16px var(--serif);margin:12px 0}
+.pe-scrapbook .pe-address-note p{font-size:10px;margin:0}
+.pe-scrapbook .pe-scrap-transport{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:20px;text-align:left}
+.pe-scrapbook .pe-scrap-transport article{padding:20px 12px 10px;background:var(--soft);transform:rotate(-2deg)}
+.pe-scrapbook .pe-scrap-transport article:last-child{transform:rotate(2deg)}
+.pe-scrapbook .pe-scrap-transport article>span{font:25px var(--display);color:var(--accent)}
+.pe-scrapbook .pe-scrap-transport h3{font:24px 'Nanum Pen Script',cursive;margin:15px 0 8px}
+.pe-scrapbook .pe-scrap-transport p{font-size:10px;line-height:2}
+.pe-scrapbook .pe-scrap-envelope{margin:14px 19px;border:1px solid var(--accent);background:var(--soft);padding-top:30px}
+.pe-scrapbook .pe-scrap-envelope>.pe-label{text-align:center;margin:0}
+.pe-scrapbook .pe-scrap-envelope .invite-section{padding:25px 22px 35px}
+.pe-scrapbook .pe-scrap-envelope .section-eyebrow{display:none}
+.pe-scrapbook .pe-scrap-envelope .sample-accounts details{background:var(--paper)}
+.pe-scrapbook .pe-scrap-guestbook h2,.pe-scrapbook .pe-scrap-reply h2{font:33px 'Nanum Pen Script',cursive}
+.pe-scrapbook .pe-friend-note{background:var(--soft);position:relative;margin:35px 4px 0;padding:30px 22px 23px;transform:rotate(3deg);box-shadow:1px 3px 6px #0000000d}
+.pe-scrapbook .pe-friend-note blockquote{font:27px/1.4 'Nanum Pen Script',cursive;margin:0 0 20px}
+.pe-scrapbook .pe-friend-note cite{display:block;font:10px var(--sans);margin-top:20px}
+.pe-scrapbook .pe-friend-note>span:last-child{font:8px var(--sans);letter-spacing:1px;color:var(--accent)}
+.pe-scrapbook .pe-scrap-reply{padding-top:30px}
+.pe-scrapbook .pe-reply-postcard{margin-top:22px;text-align:left;padding:20px;border:1px solid var(--accent);background:var(--soft)}
+.pe-scrapbook .pe-reply-postcard>span{font:10px var(--sans)}
+.pe-scrapbook .pe-reply-postcard p{font:26px/1.5 'Nanum Pen Script',cursive;margin:18px 0}
+.pe-scrapbook .pe-reply-postcard strong{font:10px var(--sans);color:var(--accent)}
+.pe-scrapbook .pe-scrap-ending{background:var(--soft);margin:0 18px 20px;clip-path:polygon(0 2%,10% 0,19% 2%,28% 0,39% 2%,48% 0,60% 2%,69% 0,80% 2%,89% 0,100% 2%,100% 100%,0 100%)}
+.pe-scrapbook .pe-scrap-ending .pe-ending-title{font:48px/1.1 'Nanum Pen Script',cursive}
+
+/* Festival: an oversized poster, a readable program and a souvenir wristband. */
+.pe-cover-festival.cover{padding:24px 22px 0;background:var(--accent);color:var(--paper);min-height:615px}
+.pe-cover-festival .pe-fest-masthead{display:flex;justify-content:space-between;border-top:1px solid currentColor;border-bottom:1px solid currentColor;padding:10px 0;font:8px var(--sans);letter-spacing:1.6px;margin-bottom:27px}
+.pe-cover-festival h2{font:700 93px/.78 var(--display);letter-spacing:-5px;color:var(--paper);text-align:left}
+.pe-cover-festival h2 em{font-style:italic;color:var(--paper);font-weight:400}
+.pe-cover-festival .pe-fest-lineup{font:11px var(--sans);letter-spacing:3px;text-align:left;margin:21px 0 25px;border-top:1px solid color-mix(in srgb,var(--paper) 50%,transparent);padding-top:15px}
+.pe-cover-festival .pe-fest-stage{position:relative;margin:0 -1px}
+.pe-cover-festival .pe-fest-stage img{height:290px;object-position:50% 49%;border-radius:160px 160px 0 0;filter:saturate(.75)}
+.pe-cover-festival .pe-fest-rosette{position:absolute;right:-7px;top:14px;display:grid;place-items:center;width:85px;height:85px;background:var(--paper);color:var(--accent);font:12px/1.25 var(--sans);transform:rotate(12deg);clip-path:polygon(50% 0,60% 11%,74% 6%,80% 20%,95% 22%,93% 38%,100% 50%,90% 61%,94% 76%,78% 81%,74% 95%,60% 90%,50% 100%,39% 90%,24% 95%,20% 80%,5% 75%,10% 59%,0 50%,10% 39%,6% 24%,21% 20%,26% 5%,40% 10%)}
+.pe-cover-festival .pe-fest-banner{position:absolute;left:-12px;right:-12px;bottom:20px;padding:11px 3px;transform:rotate(-4deg);background:var(--paper);color:var(--accent);font:14px var(--serif);border-top:1px solid var(--accent);border-bottom:1px solid var(--accent)}
+.pe-cover-festival .pe-fest-bottom{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:22px 0}
+.pe-cover-festival .pe-fest-bottom>span{font:9px/1.8 var(--sans);letter-spacing:.7px}
+.pe-cover-festival .pe-fest-bottom strong{font:42px/1 var(--display);letter-spacing:-2px}
+.pe-festival .pe-section{font-family:var(--sans)}
+.pe-festival .pe-fest-invitation{border-bottom:10px solid var(--accent);padding-top:65px}
+.pe-festival .pe-fest-invitation h2{font-size:25px}
+.pe-festival .pe-fest-artists{display:flex;justify-content:center;align-items:center;gap:17px;border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);padding:16px 0;margin:30px 0 0;font:15px var(--display);letter-spacing:1px}
+.pe-festival .pe-fest-artists b{font:24px var(--display);color:var(--accent)}
+.pe-festival .pe-fest-program{background:var(--soft);padding:45px 24px}
+.pe-festival .pe-fest-program>h2{font:600 47px/.95 var(--display);text-align:left;letter-spacing:-1.7px}
+.pe-festival .pe-fest-program>h2 em{font-weight:400;color:var(--accent)}
+.pe-festival .pe-fest-date{text-align:left;margin:23px 0!important;font-size:12px!important}
+.pe-festival .pe-fest-date strong{font-weight:500}
+.pe-festival .pe-stage-selector{border-top:1px solid var(--accent)}
+.pe-festival .pe-stage-selector button{display:grid;grid-template-columns:54px 1fr 19px;gap:14px;align-items:center;text-align:left;padding:20px 14px;min-height:83px;border:0;border-bottom:1px solid var(--accent);background:transparent;color:var(--ink);width:100%;cursor:pointer}
+.pe-festival .pe-stage-selector button[aria-pressed=true]{background:var(--accent);color:var(--paper)}
+.pe-festival .pe-stage-selector time{font:24px var(--display)}
+.pe-festival .pe-stage-selector button>span:nth-child(2){font:8px var(--sans);letter-spacing:1.2px}
+.pe-festival .pe-stage-selector strong{display:block;font:15px var(--serif);margin-top:7px;letter-spacing:0}
+.pe-festival .pe-stage-detail{background:var(--paper);padding:23px 20px;text-align:left;min-height:212px;margin-top:18px;border:1px solid var(--accent)}
+.pe-festival .pe-stage-detail .pe-label{font-size:8px;margin:0 0 10px}
+.pe-festival .pe-stage-detail h3{font-size:19px;margin:0 0 14px}
+.pe-festival .pe-stage-detail p{font-size:11px;line-height:2.1;margin:0}
+.pe-festival .pe-fest-interview{text-align:left;padding:48px 28px}
+.pe-festival .pe-fest-interview article{border-top:1px solid var(--accent);padding:25px 0 20px}
+.pe-festival .pe-fest-interview article>span{font:11px var(--sans);color:var(--accent)}
+.pe-festival .pe-fest-interview article p{font:17px/1.9 var(--serif);margin:20px 0 14px}
+.pe-festival .pe-fest-interview article strong{font:10px var(--sans)}
+.pe-festival .pe-fest-contact-sheet{background:var(--accent);color:var(--paper);padding-top:40px}
+.pe-festival .pe-fest-contact-sheet>.pe-label{color:var(--paper)}
+.pe-festival .pe-fest-contact-sheet .gallery-grid{gap:8px}
+.pe-festival .pe-fest-contact-sheet .gallery-photo{border:5px solid var(--paper);background:var(--paper);color:var(--ink)}
+.pe-festival .pe-fest-contact-sheet .gallery-filmstrip{background:var(--soft);border-color:var(--accent)}
+.pe-festival .pe-fest-contact-sheet .gallery-photo>span{color:var(--ink);letter-spacing:1px;font-size:8px}
+.pe-festival .pe-fest-venue{text-align:left;padding:45px 25px}
+.pe-festival .pe-venue-poster{background:var(--soft);padding:24px;border:1px solid var(--accent);margin:30px 0}
+.pe-festival .pe-venue-poster>strong{font:600 49px/.9 var(--display);color:var(--accent);letter-spacing:-2px}
+.pe-festival .pe-venue-poster p{margin:20px 0 15px;font-size:13px}
+.pe-festival .pe-venue-poster>span{font:8px var(--sans);letter-spacing:.9px}
+.pe-festival .pe-fest-info{margin:0}
+.pe-festival .pe-fest-info>div{border-bottom:1px solid var(--soft);padding:15px 0}
+.pe-festival .pe-fest-info dt{font:9px var(--sans);letter-spacing:1px;color:var(--accent);margin-bottom:9px}
+.pe-festival .pe-fest-info dd{margin:0;font:11px/1.8 var(--sans)}
+.pe-festival .pe-fest-pass{background:var(--soft);padding:48px 24px}
+.pe-festival .pe-wristband{display:flex;align-items:center;gap:13px;border:1px solid var(--accent);background:var(--paper);color:var(--accent);padding:17px 12px;text-align:left;position:relative;margin:34px -8px;transform:rotate(-4deg) scale(.92);border-radius:40px;transition:transform .3s ease,border-radius .3s ease}
+.pe-festival .pe-wristband>span:first-child{writing-mode:vertical-rl;font:10px var(--sans);letter-spacing:1px;transform:rotate(180deg)}
+.pe-festival .pe-wristband strong{font:24px/1.25 var(--display);flex:1;border-left:1px dashed var(--accent);padding-left:14px}
+.pe-festival .pe-wristband>span:nth-child(3){font:17px/1.2 var(--display)}
+.pe-festival .pe-wristband i{height:45px;width:29px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 4px,var(--ink) 4px 6px,transparent 6px 8px);flex-shrink:0}
+.pe-festival[data-pass=on] .pe-wristband{transform:rotate(1deg) scale(1);border-radius:0}
+.pe-festival .pe-pass-message{font:18px/1.7 var(--display)!important;color:var(--accent);margin:25px 0 0}
+.pe-festival .pe-fest-thanks{padding-top:36px;border-top:1px solid var(--accent)}
+.pe-festival .pe-fest-thanks>.pe-label{text-align:center;margin:0}
+.pe-festival .pe-fest-thanks .section-eyebrow{display:none}
+.pe-festival .pe-fest-thanks .invite-section{padding-top:25px}
+.pe-festival .pe-fest-thanks .sample-accounts details{border:1px solid var(--accent);border-radius:0;background:transparent}
+.pe-festival .pe-fest-encore{padding-top:35px}
+.pe-festival .pe-fest-encore blockquote{font:20px/1.9 var(--serif);margin:25px 0;background:var(--soft);padding:30px 18px;border-top:6px solid var(--accent)}
+.pe-festival .pe-fest-encore cite{display:block;font:10px var(--sans);margin-top:20px}
+.pe-festival .pe-cheer-rule{font:10px var(--sans);letter-spacing:2px;border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);padding:11px 0}
+.pe-festival .pe-fest-ending{background:var(--accent);color:var(--paper);text-align:left;padding:50px 27px 35px}
+.pe-festival .pe-fest-ending .pe-label,.pe-festival .pe-fest-ending .pe-ending-title,.pe-festival .pe-fest-ending .pe-names i{color:var(--paper)}
+.pe-festival .pe-fest-ending .pe-ending-title{font:500 55px/.98 var(--display);letter-spacing:-1.9px}
+.pe-festival .pe-fest-ending .pe-names{justify-content:flex-start}
+
+/* Promenade: a walking journal, three route stops and an illustrated arrival map. */
+.pe-cover-promenade.cover{padding:38px 28px 22px;background:var(--paper)}
+.pe-cover-promenade .pe-label{letter-spacing:2.8px;font-size:8px}
+.pe-cover-promenade h2{font:400 45px/1.4 var(--serif);letter-spacing:-2px;text-align:left;margin-top:30px}
+.pe-cover-promenade h2 em{font-style:normal}
+.pe-cover-promenade .pe-cover-korean{text-align:left;margin:18px 0 30px;font-size:11px}
+.pe-cover-promenade .pe-walk-photo{height:325px;position:relative;margin:0 -10px}
+.pe-cover-promenade .pe-walk-photo img{height:100%;border-radius:3px 110px 3px 3px;object-position:center}
+.pe-cover-promenade .pe-walk-photo svg{position:absolute;inset:-15px -5px;width:calc(100% + 10px);height:calc(100% + 30px);stroke:var(--paper);stroke-width:2;pointer-events:none}
+.pe-cover-promenade .pe-walk-photo path{stroke-dasharray:6 5}
+.pe-cover-promenade .pe-walk-photo circle{fill:var(--paper);stroke:var(--accent);stroke-width:2}
+.pe-cover-promenade .pe-walk-note{position:absolute;bottom:15px;left:15px;font:9px/1.9 var(--sans);letter-spacing:1.5px;background:var(--paper);padding:10px 14px;color:var(--ink)}
+.pe-cover-promenade .pe-walk-cover-end{display:flex;justify-content:space-between;align-items:center;text-align:left;margin-top:28px;gap:15px}
+.pe-cover-promenade .pe-walk-cover-end p{font:17px var(--serif);margin:0}
+.pe-cover-promenade .pe-walk-cover-end p span{font:8px var(--sans);letter-spacing:1px;display:block;margin-top:10px}
+.pe-cover-promenade .pe-walk-cover-end>span:last-child{font:11px var(--display);white-space:nowrap;color:var(--accent)}
+.pe-cover-promenade .pe-compass{display:block;text-align:center;font:12px/1.2 var(--display);color:var(--accent)}
+.pe-promenade .pe-walk-letter{text-align:left;padding:67px 32px 56px;margin:0 20px;border-left:1px dashed color-mix(in srgb,var(--accent) 40%,transparent)}
+.pe-promenade .pe-walk-letter .pe-names{justify-content:flex-start;font-size:19px}
+.pe-promenade .pe-walk-marker{width:53px;height:68px;border:1px solid var(--accent);border-radius:26px 26px 0 0;display:grid;place-content:center;text-align:center;font:10px/1.5 var(--sans);color:var(--accent);margin-bottom:30px}
+.pe-promenade .pe-walk-story{background:var(--soft);padding:46px 24px}
+.pe-promenade .pe-route-stops{display:flex;gap:4px;position:relative;margin:30px 0}
+.pe-promenade .pe-route-stops:before{position:absolute;content:'';top:18px;left:15%;right:15%;height:1px;background:var(--accent)}
+.pe-promenade .pe-route-stops button{flex:1;min-width:0;padding:0 1px 5px;min-height:82px;border:0;background:transparent;color:var(--ink);position:relative;cursor:pointer}
+.pe-promenade .pe-route-stops button>span{display:grid;place-items:center;width:37px;height:37px;border-radius:50%;background:var(--paper);border:1px solid var(--accent);color:var(--accent);font:12px var(--display);margin:0 auto 12px}
+.pe-promenade .pe-route-stops button[aria-pressed=true]>span{background:var(--accent);color:var(--paper)}
+.pe-promenade .pe-route-stops strong{display:block;font:10px/1.8 var(--sans);word-break:keep-all}
+.pe-promenade .pe-walk-stop-panels{border:1px solid var(--accent);background:var(--paper);padding:13px 13px 22px;text-align:left}
+.pe-promenade .pe-walk-stop-panels figure{position:relative}
+.pe-promenade .pe-walk-stop-panels img{height:220px}
+.pe-promenade .pe-walk-stop-panels figcaption{padding:12px 3px;font:9px var(--sans);letter-spacing:1px;color:var(--accent);border-bottom:1px solid var(--soft)}
+.pe-promenade .pe-walk-stop-panels h3{font:19px/1.7 var(--serif);margin:22px 6px 13px}
+.pe-promenade .pe-walk-stop-panels p{font-size:11px;margin:0 6px;line-height:2.1}
+.pe-promenade .pe-walk-destination{padding:53px 28px}
+.pe-promenade .pe-destination-sign{display:grid;grid-template-columns:1fr 40px;text-align:left;border:1px solid var(--accent);background:var(--soft);padding:22px;position:relative;margin-bottom:37px}
+.pe-promenade .pe-destination-sign>span:first-child{font:10px var(--sans);color:var(--accent);grid-column:1;margin-bottom:12px}
+.pe-promenade .pe-destination-sign strong{font:21px var(--serif);font-weight:400}
+.pe-promenade .pe-destination-sign>span:last-child{grid-column:2;grid-row:1/3;align-self:center;justify-self:end;font:36px var(--display);color:var(--accent)}
+.pe-promenade .pe-walk-destination .pe-date-numbers{padding:23px 0;border-top:1px dashed var(--accent);border-bottom:1px dashed var(--accent)}
+.pe-promenade .pe-walk-directions{margin:0 17px;border:1px solid var(--accent);padding:38px 22px;text-align:left}
+.pe-promenade .pe-walk-directions h2{font-size:24px}
+.pe-promenade .pe-walk-map{margin:26px -5px;background:var(--soft);position:relative;border:1px solid var(--accent)}
+.pe-promenade .pe-walk-map svg{width:100%;height:auto;display:block}
+.pe-promenade .pe-map-street{stroke:var(--paper);stroke-width:24}
+.pe-promenade .pe-map-park{fill:var(--accent);opacity:.13}
+.pe-promenade .pe-map-route{stroke:var(--accent);stroke-width:3;stroke-dasharray:5 4}
+.pe-promenade .pe-walk-map circle{fill:var(--accent);stroke:var(--paper);stroke-width:3}
+.pe-promenade .pe-walk-map text{fill:var(--ink);font:10px var(--sans)}
+.pe-promenade .pe-walk-map>span{display:block;text-align:center;font:7px var(--sans);letter-spacing:1.2px;padding:11px;border-top:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.pe-promenade .pe-walk-route-notes p{font-size:11px;margin:12px 0}
+.pe-promenade .pe-walk-route-notes strong{font:12px var(--display);padding-right:10px;color:var(--accent)}
+.pe-promenade .pe-walk-views{padding-top:50px}
+.pe-promenade .pe-walk-views .gallery-grid{gap:9px}
+.pe-promenade .pe-walk-views .gallery-photo{border-bottom:11px solid var(--soft)}
+.pe-promenade .pe-walk-views .gallery-grid .gallery-photo:first-child{border-radius:3px 90px 3px 3px;overflow:hidden}
+.pe-promenade .pe-walk-kindness{border-top:1px dashed var(--accent);padding-top:35px;margin:0 19px}
+.pe-promenade .pe-walk-kindness>.pe-label{text-align:center;margin:0}
+.pe-promenade .pe-walk-kindness .invite-section{padding:25px 13px 45px}
+.pe-promenade .pe-walk-kindness .section-eyebrow{display:none}
+.pe-promenade .pe-walk-kindness .sample-accounts details{border-left:2px solid var(--accent);border-radius:0}
+.pe-promenade .pe-walk-reply{background:var(--soft)}
+.pe-promenade .pe-walk-companion{border:1px solid var(--accent);padding:20px 15px;background:var(--paper);text-align:left}
+.pe-promenade .pe-walk-companion>span{font:8px var(--sans);letter-spacing:1.2px;color:var(--accent)}
+.pe-promenade .pe-walk-companion strong{display:block;font:16px var(--serif);margin:16px 0}
+.pe-promenade .pe-walk-companion p{font-size:11px;margin:0}
+.pe-promenade .pe-walk-wishes blockquote{padding:25px 15px 25px 25px;border-left:1px solid var(--accent);text-align:left;font:18px/2 var(--serif);margin:30px 0}
+.pe-promenade .pe-walk-wishes cite{display:block;font:10px var(--sans);margin-top:20px;color:var(--accent)}
+.pe-promenade .pe-walk-ending{background:var(--soft);border-top:1px dashed var(--accent);padding:65px 28px 40px}
+.pe-promenade .pe-walk-ending .pe-ending-title{font-size:53px;line-height:1.05}
+
+/* Catalog covers keep their structure and legibility at 150–220px wide. */
+.pe-cover.pe-thumbnail{min-height:365px;padding:22px 14px 19px}
+.pe-cover.pe-thumbnail>.pe-label{font-size:6px;letter-spacing:1px;margin-bottom:18px}
+.pe-cover.pe-thumbnail h2{font-size:40px;letter-spacing:-1.5px}
+.pe-cover.pe-thumbnail .pe-cover-korean{font-size:8px;margin:11px 0 17px}
+.pe-cover.pe-thumbnail .pe-names{font-size:15px;gap:11px;letter-spacing:1px;margin:21px 0 12px}
+.pe-cover.pe-thumbnail .pe-names i{font-size:16px}
+.pe-cover.pe-thumbnail .pe-cover-date{font-size:6px;letter-spacing:1px}
+.pe-cover-greenhouse.pe-thumbnail .pe-glasshouse{height:200px;margin-top:16px;padding:8px 10px 0}
+.pe-cover-greenhouse.pe-thumbnail .pe-house-lines{inset:8px 10px 0}
+.pe-cover-greenhouse.pe-thumbnail .pe-leaf{width:70px;bottom:-5px}
+.pe-cover-greenhouse.pe-thumbnail .pe-leaf-left{left:-20px}
+.pe-cover-greenhouse.pe-thumbnail .pe-leaf-right{right:-20px}
+.pe-cover-greenhouse.pe-thumbnail .pe-greenhouse-tag{padding:8px 11px;font-size:15px;bottom:16px}
+.pe-cover-greenhouse.pe-thumbnail .pe-greenhouse-tag small{font-size:5px;letter-spacing:.5px;margin-top:4px}
+.pe-cover-scrapbook.pe-thumbnail h2{font-size:35px;margin:0 0 24px 11px}
+.pe-cover-scrapbook.pe-thumbnail .pe-scrap-photo{padding:7px 7px 9px;margin-left:10px}
+.pe-cover-scrapbook.pe-thumbnail .pe-scrap-photo img{height:155px}
+.pe-cover-scrapbook.pe-thumbnail .pe-scrap-photo p{font-size:12px;margin-top:9px}
+.pe-cover-scrapbook.pe-thumbnail .pe-tape{width:54px;height:19px;left:calc(50% - 27px)}
+.pe-cover-scrapbook.pe-thumbnail .pe-heart-sticker{width:49px;height:49px;font-size:9px;top:106px;right:1px;border-width:3px}
+.pe-cover-scrapbook.pe-thumbnail .pe-cover-note{padding:12px 10px;margin:20px 4px 5px 15px}
+.pe-cover-scrapbook.pe-thumbnail .pe-cover-note>span{font-size:6px}
+.pe-cover-scrapbook.pe-thumbnail .pe-cover-note p{font-size:23px;margin:7px 0 9px}
+.pe-cover-festival.pe-thumbnail{padding:15px 13px 0}
+.pe-cover-festival.pe-thumbnail .pe-fest-masthead{font-size:5px;letter-spacing:.8px;padding:7px 0;margin-bottom:20px}
+.pe-cover-festival.pe-thumbnail h2{font-size:59px;letter-spacing:-3px}
+.pe-cover-festival.pe-thumbnail .pe-fest-lineup{font-size:7px;letter-spacing:1.4px;margin:14px 0 17px;padding-top:10px}
+.pe-cover-festival.pe-thumbnail .pe-fest-stage img{height:175px}
+.pe-cover-festival.pe-thumbnail .pe-fest-rosette{width:57px;height:57px;font-size:8px;right:-4px;top:10px}
+.pe-cover-festival.pe-thumbnail .pe-fest-banner{font-size:9px;padding:8px 0;bottom:17px;left:-7px;right:-7px}
+.pe-cover-festival.pe-thumbnail .pe-fest-bottom{padding:17px 0}
+.pe-cover-festival.pe-thumbnail .pe-fest-bottom>span{font-size:6px;letter-spacing:0}
+.pe-cover-festival.pe-thumbnail .pe-fest-bottom strong{font-size:27px;letter-spacing:-1px}
+.pe-cover-promenade.pe-thumbnail h2{font-size:30px;line-height:1.35;letter-spacing:-1px;margin-top:20px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-photo{height:205px;margin:0 -3px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-photo img{border-top-right-radius:70px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-note{font-size:6px;padding:7px 10px;left:9px;bottom:10px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-cover-end{gap:8px;margin-top:20px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-cover-end p{font-size:12px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-cover-end p span{font-size:5px;letter-spacing:.5px;margin-top:6px}
+.pe-cover-promenade.pe-thumbnail .pe-walk-cover-end>span:last-child{font-size:8px}
+.pe-cover-promenade.pe-thumbnail .pe-compass{font-size:9px}
+@container invitation-preview (max-width:380px){
+  .pe-edition .pe-section{padding-left:24px;padding-right:24px}
+  .pe-cover:not(.pe-thumbnail) h2{font-size:57px}
+  .pe-cover-festival:not(.pe-thumbnail) h2{font-size:82px}
+  .pe-cover-promenade:not(.pe-thumbnail) h2{font-size:41px}
+  .pe-cover-scrapbook:not(.pe-thumbnail) h2{font-size:43px}
+  .pe-festival .pe-fest-program>h2{font-size:43px}
+  .pe-festival .pe-stage-selector button{gap:10px;padding-left:10px;padding-right:10px}
+  .pe-promenade .pe-walk-directions{padding-left:17px;padding-right:17px}
+  .pe-scrapbook .pe-scrap-directions{padding-left:5px;padding-right:5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pe-edition *,.pe-edition *:before,.pe-edition *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
