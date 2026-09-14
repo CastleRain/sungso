@@ -42,4 +42,9 @@ Firestore 변경은 본인 찜의 허용 ID 8개 추가와 목록 최대 12→20
 - `02:59:39Z` 운영본 재조회가 로컬 규칙과 일치했다. SHA-256: `3af6f352e2c1f88e5eae65d4aa510cceaea65274d3eb32cd9db671db7d20339d`.
 - Functions·요금제·운영 문서는 변경하지 않았다. Emulator 16개 결과는 앞선 검사 근거이며 이번 운영 규칙 배포와 구분한다.
 
-웹은 검증된 소스를 commit·push한 다음 실제 Pages 성공과 공개 파일 일치를 확인한다. 이 시점에는 규칙 배포만 완료했으며 웹 배포 결과는 후속 기록으로 남긴다.
+- 웹 소스 `4c6a5186bdae171c60e43cd6e7ee524c433d85a9`를 master에 커밋·푸시했다. [Pages 실행 34801138662](https://github.com/CastleRain/sungso/actions/runs/34801138662)의 validate가 `03:02:32Z`, deploy가 `03:02:45Z`에 성공했다. CI에서 루트 검사와 서비스 번들 세 개도 통과했다.
+- `03:03:53.168Z` `/sungso/invitation/`의 공개 파일 36개 전체가 HTTP 200·로컬 dist 해시 일치였다. 텍스트 CRLF만 LF로 정규화하고 바이너리는 원본 바이트로 비교했다. JS/CSS는 실제 앱의 `v=20260914-mobile-preview` query로 조회했다. 이 근거는 새 8종·검색·비교·모바일 보기의 정적 배포 반영을 확인한다.
+- 운영 `couplePicks/invitation_templates`의 익명 GET은 HTTP 403이었다. 실제 회원의 새 찜·공동 선택 저장은 운영 QA로 실행하지 않았다. 두 역할의 저장 동작은 앞선 Emulator/대역 결과이며 실제 두 계정의 운영 저장 검증과 구분한다.
+- 비민감 원본 근거는 임시 로컬의 `invitation-rules-after.json`, `invitation-public-release.json`, `invitation-pages-watch.log`에 보관했다. 운영 문서·Functions·요금제를 변경하지 않았고 정적 검증 중 운영 DB 쓰기는 없었다.
+
+청첩장 20종과 모바일 보기는 공개 사이트에 반영됐다. 실제 하객용 제작·응답 저장·개인 홈 계획의 다른 미완료 항목은 이번 완료에 포함하지 않는다.
