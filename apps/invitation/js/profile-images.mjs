@@ -1,4 +1,4 @@
-import { MAX_PHOTO_CHARS } from './profile-core.mjs?v=20260915-personal-invitation';
+import { MAX_PHOTO_CHARS } from './profile-core.mjs?v=20260915-venue-map';
 
 export async function preparePhoto(file, {document: doc = document, URL: urls = URL, Image: ImageClass = Image} = {}) {
   if (!file || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('JPG·PNG·WebP 사진을 선택해주세요.');

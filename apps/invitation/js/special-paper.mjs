@@ -1,7 +1,7 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { PHOTOS } from './catalog.mjs?v=20260915-personal-invitation';
-import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { PHOTOS } from './catalog.mjs?v=20260915-venue-map';
+import { getPhoto } from './personal-content.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const photograph = (index, thumbnail, attributes = '') => `<img src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" decoding="async" ${thumbnail ? 'loading="lazy"' : ''} ${attributes}>`;
 const names = '<span>성우</span><i>&</i><span>소희</span>';

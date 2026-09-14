@@ -1,4 +1,4 @@
-import { createReferenceScenes } from './reference-scenes.mjs?v=20260915-personal-invitation';
+import { createReferenceScenes } from './reference-scenes.mjs?v=20260915-venue-map';
 
 const REVEAL = '[data-reference-reveal]';
 

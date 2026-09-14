@@ -1,4 +1,4 @@
-import { PROFILE_PATH, MAX_TRANSACTION_PHOTO_CHARS, ProfileConflict, normalizeProfile, validatePhoto, validateProfileChange, profilePhotoIds, emptyProfileSnapshot, completeProfileSnapshot } from './profile-core.mjs?v=20260915-personal-invitation';
+import { PROFILE_PATH, MAX_TRANSACTION_PHOTO_CHARS, ProfileConflict, normalizeProfile, validatePhoto, validateProfileChange, profilePhotoIds, emptyProfileSnapshot, completeProfileSnapshot } from './profile-core.mjs?v=20260915-venue-map';
 
 /** No photo or profile document is created by subscription or retry. */
 export function profileAdapter(sdk, db, { member = () => null, online = () => true, events = null, timeout = 15000 } = {}) {

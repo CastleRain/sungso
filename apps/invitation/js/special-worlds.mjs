@@ -1,6 +1,6 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { getPhoto } from './personal-content.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const names = '<span>성우</span><i>&</i><span>소희</span>';
 const image = (index, className, thumbnail) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" decoding="async" ${thumbnail ? 'loading="lazy"' : 'fetchpriority="high"'}>`;

@@ -207,14 +207,16 @@ test('anonymous, nonmember, inactive, unverified and non-Google clients cannot r
 
 test('server profile validation rejects malformed IDs, duplicates, excess gallery entries and unsafe or oversized venue fields', async () => {
   const db = client(), id = photoId(1);
-  const venueLimits = { name: 80, hall: 80, address: 300, mapUrl: 1000, transport: 1000, parking: 1000 };
+  const venueLimits = { name: 80, hall: 80, address: 300, mapUrl: 1000, naverUrl: 1000, kakaoUrl: 1000, transport: 1000, parking: 1000 };
   const invalid = [
     profile({ coverId: 'not-a-photo-id' }), profile({ coverId: photoId(10).toUpperCase() }),
     profile({ coverId: id.replace('4000', '3000') }),
+    ...['not-a-photo-id', photoId(10).toUpperCase(), 1, {}].map(mapImageId => profile({ mapImageId })),
     profile({ galleryIds: [id, id] }), profile({ galleryIds: Array.from({ length: 21 }, (_, index) => photoId(index + 1)) }),
     profile({ galleryIds: [1] }), profile({ venue: { ...venue(), unexpected: 'not allowed' } }),
     profile({ venue: venue({ name: '' }) }), profile({ venue: venue({ name: 'invalid\u0000name' }) }),
-    ...['http://example.test/map', 'javascript:alert(1)', 'data:text/html,hello', 'https://user:pass@example.test/map', 'https://example.test/with space'].map(mapUrl => profile({ venue: venue({ mapUrl }) })),
+    ...['mapUrl', 'naverUrl', 'kakaoUrl'].flatMap(key => ['http://example.test/map', 'javascript:alert(1)', 'data:text/html,hello', 'https://user:pass@example.test/map', 'https://example.test/with space', 'https://example.test\\path'].map(value => profile({ venue: venue({ [key]: value }) }))),
+    ...['naverUrl', 'kakaoUrl'].flatMap(key => [profile({ venue: venue({ [key]: null }) }), profile({ venue: { name: '', hall: '', address: '', mapUrl: '', transport: '', parking: '', [key]: 'https://example.test/map' } })]),
     ...Object.entries(venueLimits).map(([key, limit]) => profile({ venue: venue({ [key]: 'x'.repeat(limit + 1) }) })),
   ];
   for (const values of invalid) await permissionDenied(sdk.setDoc(profileRef(db), rawProfile(db, values)));
@@ -266,7 +268,7 @@ test('photo writes require the same advanced parent commit and deletion requires
   createUnreferenced.set(profileRef(db), rawProfile(db, profile({ coverId: id }), 2));
   createUnreferenced.set(photoRef(db, unattached), rawPhoto(db));
   await permissionDenied(createUnreferenced.commit());
-  for (const remaining of [profile({ coverId: id }), profile({ galleryIds: [id] })]) {
+  for (const remaining of [profile({ coverId: id }), profile({ galleryIds: [id] }), profile({ mapImageId: id })]) {
     const deleteReferenced = sdk.writeBatch(db);
     deleteReferenced.set(profileRef(db), rawProfile(db, remaining, 2));
     deleteReferenced.delete(photoRef(db, id));
@@ -321,4 +323,96 @@ test('profile transactions preserve existing invitation favorites, selected desi
   assert.deepEqual((await sdk.getDoc(picksRef)).data(), beforePicks);
   assert.deepEqual((await sdk.getDoc(resortRef)).data(), beforeResort);
   assert.equal((await read(db)).updatedBy, 'sohee-uid');
+});
+
+test('legacy profiles omit map fields and normalize without writes before a member explicitly adds both links and a map', async () => {
+  const first = client(), second = client('sohee'), image = photoId(1);
+  await sdk.setDoc(profileRef(first), rawProfile(first));
+  const before = await read(first), loaded = await firstReady(second);
+  assert.equal(loaded.profile.mapImageId, null);
+  assert.equal(loaded.profile.venue.naverUrl, '');
+  assert.equal(loaded.profile.venue.kakaoUrl, '');
+  assert.deepEqual(await read(first), before, 'reading legacy data does not backfill optional fields');
+  await adapter(second).transact({
+    expectedRevision: 1,
+    profile: { ...loaded.profile, mapImageId: image, venue: { ...loaded.profile.venue, naverUrl: 'https://naver.me/fixture', kakaoUrl: 'https://map.kakao.com/?itemId=1&map_type=TYPE_MAP' } },
+    newPhotos: { [image]: photo() },
+  });
+  const saved = await firstReady(first);
+  assert.equal(saved.profile.revision, 2);
+  assert.equal(saved.profile.mapImageId, image);
+  assert.equal(saved.profile.venue.naverUrl, 'https://naver.me/fixture');
+  assert.equal(saved.profile.venue.kakaoUrl, 'https://map.kakao.com/?itemId=1&map_type=TYPE_MAP');
+  assert.equal(saved.profile.venue.mapUrl, before.venue.mapUrl);
+  assert.equal(saved.photos[image].dataUrl, photo().dataUrl);
+  assert.equal((await read(first, image)).updatedBy, 'sohee-uid');
+});
+
+test('twenty gallery images plus separate cover and map commit atomically and are available to the other member', async () => {
+  const first = client(), second = client('sohee'), ids = Array.from({ length: 22 }, (_, index) => photoId(index + 1));
+  await adapter(first).transact({
+    expectedRevision: 0,
+    profile: profile({ coverId: ids[20], galleryIds: ids.slice(0, 20), mapImageId: ids[21] }),
+    newPhotos: Object.fromEntries(ids.map(id => [id, photo()])),
+  });
+  const loaded = await firstReady(second);
+  assert.equal(Object.keys(loaded.photos).length, 22);
+  assert.equal(loaded.profile.coverId, ids[20]);
+  assert.equal(loaded.profile.mapImageId, ids[21]);
+  assert.deepEqual(loaded.profile.galleryIds, ids.slice(0, 20));
+  await adapter(second).transact({ expectedRevision: 1, profile: profile(), newPhotos: {} });
+  assert.equal((await read(first)).revision, 2);
+  for (const id of ids) assert.equal(await read(first, id), undefined);
+});
+
+test('a map image is immutable and removal preserves any cover or gallery reference', async () => {
+  const db = client(), firstMap = photoId(1), secondMap = photoId(2);
+  await adapter(db).transact({ expectedRevision: 0, profile: profile({ mapImageId: firstMap }), newPhotos: { [firstMap]: photo() } });
+  await permissionDenied(sdk.deleteDoc(photoRef(db, firstMap)));
+  await permissionDenied(sdk.updateDoc(photoRef(db, firstMap), { width: 1, updatedAt: sdk.serverTimestamp() }));
+  const original = await read(db, firstMap);
+  await adapter(db).transact({ expectedRevision: 1, profile: profile({ coverId: firstMap, mapImageId: secondMap }), newPhotos: { [secondMap]: photo() } });
+  assert.deepEqual(await read(db, firstMap), original);
+  await adapter(db).transact({ expectedRevision: 2, profile: profile({ galleryIds: [firstMap], mapImageId: secondMap }), newPhotos: {} });
+  assert.deepEqual(await read(db, firstMap), original);
+  await adapter(db).transact({ expectedRevision: 3, profile: profile({ galleryIds: [firstMap] }), newPhotos: {} });
+  assert.equal(await read(db, secondMap), undefined);
+  assert.deepEqual(await read(db, firstMap), original);
+  await adapter(db).transact({ expectedRevision: 4, profile: profile(), newPhotos: {} });
+  assert.equal(await read(db, firstMap), undefined);
+});
+
+test('missing maps and stale edits fail without changing saved links or leaving newly uploaded images', async () => {
+  const first = client(), second = client('sohee'), missing = photoId(1), fresh = photoId(2), original = photoId(3);
+  await assert.rejects(adapter(first).transact({ expectedRevision: 0, profile: profile({ mapImageId: missing, coverId: fresh }), newPhotos: { [fresh]: photo() } }), { code: 'profile-media-missing' });
+  assert.equal(await read(first), undefined);
+  assert.equal(await read(first, fresh), undefined);
+  await adapter(first).transact({ expectedRevision: 0, profile: profile({ mapImageId: original, venue: venue({ naverUrl: 'https://naver.me/original' }) }), newPhotos: { [original]: photo() } });
+  await adapter(second).transact({ expectedRevision: 1, profile: profile({ mapImageId: original, venue: venue({ naverUrl: 'https://naver.me/winner' }) }), newPhotos: {} });
+  await assert.rejects(adapter(first).transact({ expectedRevision: 1, profile: profile({ mapImageId: fresh, venue: venue({ kakaoUrl: 'https://map.kakao.com/?itemId=2' }) }), newPhotos: { [fresh]: photo() } }), { code: 'profile-conflict' });
+  const saved = await read(second);
+  assert.equal(saved.revision, 2);
+  assert.equal(saved.venue.naverUrl, 'https://naver.me/winner');
+  assert.equal(saved.mapImageId, original);
+  assert.equal(await read(second, fresh), undefined);
+  assert.ok(await read(second, original));
+});
+
+test('map-only media remains unavailable to nonmembers while old clients may omit optional fields on save', async () => {
+  const first = client(), second = client('sohee'), id = photoId(1);
+  await adapter(first).transact({ expectedRevision: 0, profile: profile({ mapImageId: id }), newPhotos: { [id]: photo() } });
+  for (const db of [environment.unauthenticatedContext().firestore(), environment.authenticatedContext('outside-uid', { email_verified: true, firebase: { sign_in_provider: 'google.com' } }).firestore()]) {
+    await permissionDenied(sdk.getDoc(profileRef(db)));
+    await permissionDenied(sdk.getDoc(photoRef(db, id)));
+    await permissionDenied(sdk.setDoc(profileRef(db), rawProfile(db, profile({ mapImageId: id }), 2)));
+  }
+  const legacy = sdk.writeBatch(second);
+  legacy.set(profileRef(second), rawProfile(second, profile(), 2));
+  legacy.delete(photoRef(second, id));
+  await legacy.commit();
+  const loaded = await firstReady(first);
+  assert.equal(loaded.profile.revision, 2);
+  assert.equal(loaded.profile.mapImageId, null);
+  assert.equal(loaded.profile.venue.naverUrl, '');
+  assert.equal(await read(first, id), undefined);
 });

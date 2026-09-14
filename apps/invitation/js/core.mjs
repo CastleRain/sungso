@@ -1,4 +1,4 @@
-import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-personal-invitation';
+import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-venue-map';
 
 export const DOCUMENT_PATH = 'couplePicks/invitation_templates';
 export const STORAGE_KEY = 'sungso_invitation_v1';

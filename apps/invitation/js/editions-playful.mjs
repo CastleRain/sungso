@@ -1,7 +1,7 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { getPhoto, hasVenue, venueName, venueLabel, venueCaption, venueDirections, contentDescription } from './personal-content.mjs?v=20260915-personal-invitation';
-import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { getPhoto, hasVenue, venueName, venueLabel, venueCaption, venueDirections, contentDescription } from './personal-content.mjs?v=20260915-venue-map';
+import { countdownMarkup } from './countdown.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const IDS = ['greenhouse', 'scrapbook', 'festival', 'promenade'];
 const photograph = (index, className = '', eager = false) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

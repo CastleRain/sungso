@@ -1,5 +1,5 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-venue-map';
 
 const flower = `<svg viewBox="0 0 90 130" fill="none" aria-hidden="true"><path d="M44 126C54 95 21 72 47 35M43 95C23 99 10 84 13 67C32 64 40 78 43 95ZM45 70C65 74 80 61 78 44C61 40 49 51 45 70Z" stroke="currentColor" stroke-width="1.1"/><path d="M47 37C20 32 20 10 36 11C38-6 57-3 58 12C77 7 82 26 65 35C62 49 48 50 47 37Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.1"/><circle cx="50" cy="25" r="4" fill="currentColor"/></svg>`;
 

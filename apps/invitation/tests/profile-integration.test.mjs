@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createProfileEditor, profileErrorMessage } from '../js/profile-editor.mjs';
 import { createProfileStore } from '../js/profile-store.mjs';
 import { emptyProfile, emptyVenue, ProfileConflict } from '../js/profile-core.mjs';
-import { applyPersonalContent, clearPersonalContent, getCoverPhoto, getVenue } from '../js/personal-content.mjs?v=20260915-personal-invitation';
+import { applyPersonalContent, clearPersonalContent, getCoverPhoto, getVenue } from '../js/personal-content.mjs?v=20260915-venue-map';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -42,7 +42,7 @@ function dialogSurface() {
         const textarea = value.match(new RegExp(`name="venue-${escaped}"[^>]*>([^<]*)</textarea>`));
         nodes.set(`[name="venue-${name}"]`, node(input?.[1] || textarea?.[1] || ''));
       }
-      for (const key of ['cover', 'gallery', 'count', 'status']) nodes.set(`[data-profile-${key}]`, node());
+      for (const key of ['cover', 'gallery', 'count', 'status', 'map']) nodes.set(`[data-profile-${key}]`, node());
       for (const action of ['save', 'close', 'reload']) nodes.set(`[data-profile-action="${action}"]`, node());
       nodes.get('[data-profile-action="reload"]').hidden = true;
     },
@@ -227,4 +227,45 @@ test('closing during image preparation releases its URL and cannot append a phot
   assert.equal(view.dialog.querySelector('[data-profile-count]').textContent, '1 / 20');
   assert.doesNotMatch(view.dialog.querySelector('[data-profile-gallery]').innerHTML, new RegExp(id(2)));
   assert.equal(view.changes.length, 0);
+});
+
+
+test('the editor preserves a separate map and provider links while editing the venue', async t => {
+  const view=setup(t), current=snapshot(4);
+  current.profile.mapImageId=id(3);
+  current.profile.venue.naverUrl='https://naver.me/test-venue';
+  current.profile.venue.kakaoUrl='https://place.map.kakao.com/1234';
+  current.photos[id(3)]=photo(3);
+  view.publish(current);view.editor.open();
+  assert.match(view.dialog.querySelector('[data-profile-map]').innerHTML,/등록한 약도/);
+  view.dialog.field('hall','3층');
+  view.setTransaction(async()=>({revision:5}));
+  await view.dialog.action('save');await tick();
+  const result=view.changes[0];
+  assert.equal(result.profile.mapImageId,id(3));
+  assert.equal(result.profile.coverId,id(1));
+  assert.deepEqual(result.profile.galleryIds,[id(1)]);
+  assert.equal(result.profile.venue.naverUrl,'https://naver.me/test-venue');
+  assert.equal(result.profile.venue.kakaoUrl,'https://place.map.kakao.com/1234');
+  assert.deepEqual(result.newPhotos,{});
+});
+
+test('uploading then removing a map never puts it in the gallery or uploads an unused image', async t => {
+  const view=setup(t);
+  const original=Object.fromEntries(['Image','document','URL'].map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
+  globalThis.Image=class{naturalWidth=372;naturalHeight=372;async decode(){}};
+  globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>({fillRect(){},drawImage(){}}),toDataURL:()=>photo(3).dataUrl})};
+  globalThis.URL={createObjectURL:()=> 'blob:test-map',revokeObjectURL(){}};
+  t.after(()=>{for(const [key,descriptor] of Object.entries(original))if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];});
+  view.editor.open();
+  await view.dialog.upload('map',[{type:'image/png',size:100}]);
+  assert.match(view.dialog.querySelector('[data-profile-map]').innerHTML,/등록한 약도/);
+  assert.equal(view.dialog.querySelector('[data-profile-count]').textContent,'1 / 20');
+  await view.dialog.action('remove-map');
+  view.setTransaction(async()=>({revision:2}));
+  await view.dialog.action('save');await tick();
+  assert.equal(view.changes[0].profile.mapImageId,null);
+  assert.deepEqual(view.changes[0].profile.galleryIds,[id(1)]);
+  assert.equal(view.changes[0].profile.coverId,id(1));
+  assert.deepEqual(view.changes[0].newPhotos,{});
 });

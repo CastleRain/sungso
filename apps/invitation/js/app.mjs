@@ -1,20 +1,20 @@
-import { createProfileStore } from './profile-store.mjs?v=20260915-personal-invitation';
-import { emptyProfileSnapshot } from './profile-core.mjs?v=20260915-personal-invitation';
-import { createProfileEditor, profileErrorMessage } from './profile-editor.mjs?v=20260915-personal-invitation';
-import { applyPersonalContent, clearPersonalContent, contentDescription, getCoverPhoto, getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
-import { createCountdown, countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260915-personal-invitation';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260915-personal-invitation';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260915-personal-invitation';
-import { createStore } from './store.mjs?v=20260915-personal-invitation';
-import { createExperiences } from './experiences.mjs?v=20260915-personal-invitation';
-import { createSignatures } from './signatures.mjs?v=20260915-personal-invitation';
-import { signatureGuide } from './signature-catalog.mjs?v=20260915-personal-invitation';
-import { createEditions } from './editions.mjs?v=20260915-personal-invitation';
-import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260915-personal-invitation';
-import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260915-personal-invitation';
-import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-personal-invitation';
-import { getScrollDesign } from './scroll-designs.mjs?v=20260915-personal-invitation';
+import { createProfileStore } from './profile-store.mjs?v=20260915-venue-map';
+import { emptyProfileSnapshot } from './profile-core.mjs?v=20260915-venue-map';
+import { createProfileEditor, profileErrorMessage } from './profile-editor.mjs?v=20260915-venue-map';
+import { applyPersonalContent, clearPersonalContent, contentDescription, getCoverPhoto, getPhoto, getMapImage } from './personal-content.mjs?v=20260915-venue-map';
+import { createCountdown, countdownMarkup } from './countdown.mjs?v=20260915-venue-map';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260915-venue-map';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260915-venue-map';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260915-venue-map';
+import { createStore } from './store.mjs?v=20260915-venue-map';
+import { createExperiences } from './experiences.mjs?v=20260915-venue-map';
+import { createSignatures } from './signatures.mjs?v=20260915-venue-map';
+import { signatureGuide } from './signature-catalog.mjs?v=20260915-venue-map';
+import { createEditions } from './editions.mjs?v=20260915-venue-map';
+import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260915-venue-map';
+import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260915-venue-map';
+import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-venue-map';
+import { getScrollDesign } from './scroll-designs.mjs?v=20260915-venue-map';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
@@ -47,6 +47,9 @@ const dialog = id => document.getElementById(id);
 // Authentication removes the private root before invoking cleanup. Retain the
 // media nodes so their data URLs can still be cleared after they are detached.
 const photoDialog = dialog('photo-dialog'), largePhoto = dialog('large-photo'), compareDialog = dialog('compare-dialog'), compareContent = dialog('compare-content');
+const venueMapDialog=dialog('venue-map-dialog'),largeVenueMap=dialog('large-venue-map'),venueMapCaption=dialog('venue-map-caption');
+const clearVenueMap=()=>{venueMapDialog.close();largeVenueMap.removeAttribute('src');largeVenueMap.removeAttribute('alt');venueMapCaption.textContent='';};
+venueMapDialog.addEventListener('close',()=>{largeVenueMap.removeAttribute('src');largeVenueMap.removeAttribute('alt');venueMapCaption.textContent='';});
 const profileConnection = document.createElement('div');
 profileConnection.className = 'connection-bar'; profileConnection.dataset.profileConnection = ''; profileConnection.style.display = 'none';
 main.before(profileConnection);
@@ -79,7 +82,7 @@ function profileGate() {
 function refreshPersonalContent() {
   const position=scrollStory.capture(),y=scrollY,comparing=compareDialog.open,compareY=compareDialog.scrollTop;
   scrollStory.dispose();experiences.dispose();signatures.dispose();editions.dispose();immersiveExperiences.dispose();
-  photoDialog.close();largePhoto.removeAttribute('src');
+  photoDialog.close();largePhoto.removeAttribute('src');clearVenueMap();
   if(route.view==='preview')renderPreview(position);else if(route.view==='selection')renderSelection();else renderCatalog();
   if(comparing){showCompare();compareDialog.scrollTop=compareY;}
   countdown.refresh();updateStateUI();
@@ -348,6 +351,7 @@ document.addEventListener('click', async event => {
         if (dialog('options-dialog').open) dialog('mobile-options').innerHTML = optionsMarkup(getDraft(route.templateId).selection, 'mobile');
         refreshPreview(); toast('기본 설정으로 돌렸어요. 공동 선택은 그대로예요.'); break;
       }
+      case 'venue-map': { const map=getMapImage();if(!map)break;largeVenueMap.src=map.src;largeVenueMap.alt=map.alt;venueMapCaption.textContent=map.alt;venueMapDialog.showModal();break;}
       case 'photo': showPhoto(Number(target.dataset.index)); break;
       case 'previous-photo': showPhoto(photoIndex - 1); break;
       case 'next-photo': showPhoto(photoIndex + 1); break;
@@ -405,7 +409,7 @@ async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260915-personal-invitation');
+    const { connect } = await import('./firebase.mjs?v=20260915-venue-map');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;
@@ -425,7 +429,7 @@ async function connectPersonalStore() {
   if(profileStore || profileConnecting || !active())return;
   profileConnecting=true;
   try{
-    const {connectProfile}=await import('./firebase.mjs?v=20260915-personal-invitation');
+    const {connectProfile}=await import('./firebase.mjs?v=20260915-venue-map');
     if(!active())return;
     const adapter=await connectProfile();
     if(!active()){adapter.dispose?.();return;}
@@ -447,6 +451,6 @@ async function connectPersonalStore() {
 }
 renderRoute();
 countdown.mount();
-registerPrivateCleanup(() => { disposed = true; profileStore?.dispose(); profileEditor.dispose(); countdown.dispose(); clearPersonalContent(); personal={data:emptyProfileSnapshot(),connection:'signed-out',saving:false,error:''}; profileReady=false; appliedProfileRevision=null; pendingProfileRevision=null; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); photoDialog.close(); largePhoto.removeAttribute('src'); largePhoto.removeAttribute('alt'); compareDialog.close(); compareContent.replaceChildren(); profileConnection.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
+registerPrivateCleanup(() => { disposed = true; profileStore?.dispose(); profileEditor.dispose(); countdown.dispose(); clearPersonalContent(); personal={data:emptyProfileSnapshot(),connection:'signed-out',saving:false,error:''}; profileReady=false; appliedProfileRevision=null; pendingProfileRevision=null; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); clearVenueMap(); photoDialog.close(); largePhoto.removeAttribute('src'); largePhoto.removeAttribute('alt'); compareDialog.close(); compareContent.replaceChildren(); profileConnection.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();
 void connectPersonalStore();

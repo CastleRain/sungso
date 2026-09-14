@@ -143,18 +143,23 @@ service cloud.firestore {
       return value is string && value.size() <= limit
         && value.matches('[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*');
     }
+    function invitationMapUrl(value) {
+      return invitationText(value, 1000)
+        && (value == '' || value.matches('https://[^\\s/@:\\\\]+(:[0-9]+)?([/?#][^\\s\\\\]*)?'));
+    }
     function invitationVenue(venue) {
-      return venue is map && venue.keys().hasOnly(['name', 'hall', 'address', 'mapUrl', 'transport', 'parking'])
+      return venue is map && venue.keys().hasOnly(['name', 'hall', 'address', 'mapUrl', 'naverUrl', 'kakaoUrl', 'transport', 'parking'])
         && invitationText(venue.name, 80) && invitationText(venue.hall, 80)
-        && invitationText(venue.address, 300) && invitationText(venue.mapUrl, 1000)
-        && (venue.mapUrl == '' || venue.mapUrl.matches('https://[^\\s/@:\\\\]+(:[0-9]+)?([/?#][^\\s\\\\]*)?'))
+        && invitationText(venue.address, 300) && invitationMapUrl(venue.mapUrl)
+        && invitationMapUrl(venue.get('naverUrl', '')) && invitationMapUrl(venue.get('kakaoUrl', ''))
         && invitationText(venue.transport, 1000) && invitationText(venue.parking, 1000)
-        && (venue.name.matches('.*\\S.*') || (venue.name == '' && venue.hall == '' && venue.address == '' && venue.mapUrl == '' && venue.transport == '' && venue.parking == ''));
+        && (venue.name.matches('.*\\S.*') || (venue.name == '' && venue.hall == '' && venue.address == '' && venue.mapUrl == '' && venue.get('naverUrl', '') == '' && venue.get('kakaoUrl', '') == '' && venue.transport == '' && venue.parking == ''));
     }
     function validInvitationProfile(next) {
-      return next.keys().hasOnly(['schemaVersion', 'revision', 'coverId', 'galleryIds', 'venue', 'updatedAt', 'updatedBy'])
+      return next.keys().hasOnly(['schemaVersion', 'revision', 'coverId', 'galleryIds', 'mapImageId', 'venue', 'updatedAt', 'updatedBy'])
         && next.schemaVersion == 1 && next.revision is int && next.revision > 0
         && (next.coverId == null || invitationPhotoId(next.coverId))
+        && (next.get('mapImageId', null) == null || invitationPhotoId(next.mapImageId))
         && invitationGallery(next.galleryIds) && invitationVenue(next.venue)
         && next.updatedBy == request.auth.uid && next.updatedAt == request.time;
     }
@@ -166,7 +171,7 @@ service cloud.firestore {
         && request.resource.data.revision == resource.data.revision + 1;
     }
     function invitationReferences(profile, id) {
-      return profile.coverId == id || id in profile.galleryIds;
+      return profile.coverId == id || id in profile.galleryIds || profile.get('mapImageId', null) == id;
     }
     // Every photo write must accompany a new shared revision. Immutable IDs
     // let readers finish loading all referenced photos before publishing it.

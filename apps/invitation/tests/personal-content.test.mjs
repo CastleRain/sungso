@@ -6,8 +6,8 @@ import { cover, invitation } from '../js/templates.mjs';
 import { salonCover } from '../js/reference-salon.mjs';
 import { guestCover } from '../js/reference-toourguest.mjs';
 import { initialEditorialState, transitionEditorialState } from '../js/editions-editorial.mjs';
-import { PHOTOS, applyPersonalContent, clearPersonalContent, getPhoto, getCoverPhoto, hasPersonalPhotos, hasVenue } from '../js/personal-content.mjs?v=20260915-personal-invitation';
-import { remainingTime, WEDDING_INSTANT } from '../js/countdown.mjs?v=20260915-personal-invitation';
+import { PHOTOS, applyPersonalContent, clearPersonalContent, getPhoto, getCoverPhoto, hasPersonalPhotos, hasVenue } from '../js/personal-content.mjs?v=20260915-venue-map';
+import { remainingTime, WEDDING_INSTANT } from '../js/countdown.mjs?v=20260915-venue-map';
 
 const asset = (name, index = 0) => ({ dataUrl: `data:image/jpeg;base64,${name}`, width: 800 + index, height: 1200 + index });
 function snapshot(count = 3, venue = {}) {

@@ -1,15 +1,15 @@
-import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { salonCover, salonBody } from './reference-salon.mjs?v=20260915-personal-invitation';
-import { guestCover, guestBody } from './reference-toourguest.mjs?v=20260915-personal-invitation';
-import { PHOTOS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
-import { paperCover } from './special-paper.mjs?v=20260915-personal-invitation';
-import { worldsCover } from './special-worlds.mjs?v=20260915-personal-invitation';
-import { signatureBody } from './signatures.mjs?v=20260915-personal-invitation';
-import { editionCover, editionBody } from './editions.mjs?v=20260915-personal-invitation';
-import { immersiveCover, immersiveBody } from './immersive-scenes.mjs?v=20260915-personal-invitation';
-import { getPhoto, hasPersonalPhotos, hasVenue, venueLabel, venueCaption, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
-import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
+import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-venue-map';
+import { salonCover, salonBody } from './reference-salon.mjs?v=20260915-venue-map';
+import { guestCover, guestBody } from './reference-toourguest.mjs?v=20260915-venue-map';
+import { PHOTOS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
+import { paperCover } from './special-paper.mjs?v=20260915-venue-map';
+import { worldsCover } from './special-worlds.mjs?v=20260915-venue-map';
+import { signatureBody } from './signatures.mjs?v=20260915-venue-map';
+import { editionCover, editionBody } from './editions.mjs?v=20260915-venue-map';
+import { immersiveCover, immersiveBody } from './immersive-scenes.mjs?v=20260915-venue-map';
+import { getPhoto, hasPersonalPhotos, hasVenue, venueLabel, venueCaption, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-venue-map';
+import { countdownMarkup } from './countdown.mjs?v=20260915-venue-map';
 
 export const heart = filled => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>`;
 const botanical = `<svg class="botanical" viewBox="0 0 160 180" fill="none" aria-hidden="true"><path d="M12 168C46 134 101 85 132 12M53 123C35 111 26 95 28 75M83 94C109 100 130 91 150 79M112 51C95 40 92 20 99 4" stroke="currentColor" stroke-width="1.2"/><g fill="currentColor" opacity=".5"><ellipse cx="39" cy="109" rx="7" ry="17" transform="rotate(-34 39 109)"/><ellipse cx="61" cy="116" rx="7" ry="18" transform="rotate(47 61 116)"/><ellipse cx="97" cy="75" rx="7" ry="19" transform="rotate(-29 97 75)"/><ellipse cx="116" cy="59" rx="7" ry="17" transform="rotate(45 116 59)"/><ellipse cx="126" cy="32" rx="6" ry="16" transform="rotate(28 126 32)"/><ellipse cx="111" cy="97" rx="5" ry="13" transform="rotate(74 111 97)"/></g></svg>`;

@@ -1,6 +1,6 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { getPhoto, hasVenue, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { getPhoto, hasVenue, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const photograph = (index, className, eager = false) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" decoding="async" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'}>`;
 const plane = '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="m5 18 13 3 12-13 5 1-8 15 6 7-3 3-8-5-12 6-3-2 6-12-8-1Z" fill="currentColor"/></svg>';

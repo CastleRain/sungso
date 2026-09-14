@@ -1,6 +1,6 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { getPhoto } from './personal-content.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 export const label = text => `<p class="imm-label">${e(text)}</p>`;
 export const photo = (index, classes = '', eager = false) => `<img class="${classes}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

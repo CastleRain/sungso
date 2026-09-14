@@ -206,3 +206,46 @@ test('store does not expose a partial new profile and disposal clears media and 
   assert.deepEqual(latest.data.photos, {});
   assert.deepEqual(latest.data.profile, emptyProfile());
 });
+
+test('legacy profile edits preserve old photos and atomically add, retain and replace a map image', async () => {
+  const venue = { name: '기존 홀', hall: '3층', address: '', mapUrl: 'https://example.test/old', transport: '', parking: '' };
+  const view = fixture({ [PROFILE_PATH]: saved(4, { coverId: id(1), galleryIds: [id(2)], venue }), [path(id(1))]: photo(), [path(id(2))]: photo() });
+  const initial = structuredClone(view.data.get(PROFILE_PATH));
+  await view.adapter.transact({ expectedRevision: 4, profile: settings({ coverId: id(1), galleryIds: [id(2)], mapImageId: id(3), venue: { ...venue, naverUrl: 'https://naver.me/fixture', kakaoUrl: 'https://map.kakao.com/?itemId=1' } }), newPhotos: { [id(3)]: photo() } });
+  assert.equal(view.data.get(PROFILE_PATH).mapImageId, id(3));
+  assert.equal(view.data.get(PROFILE_PATH).venue.mapUrl, initial.venue.mapUrl);
+  assert.deepEqual(view.data.get(path(id(1))), photo());
+  assert.deepEqual(view.data.get(path(id(2))), photo());
+  const map = structuredClone(view.data.get(path(id(3))));
+  await view.adapter.transact({ expectedRevision: 5, profile: settings({ coverId: id(3), mapImageId: id(3), venue }), newPhotos: {} });
+  assert.equal(view.data.has(path(id(1))), false);
+  assert.equal(view.data.has(path(id(2))), false);
+  assert.deepEqual(view.data.get(path(id(3))), map);
+  await view.adapter.transact({ expectedRevision: 6, profile: settings({ coverId: id(3), mapImageId: id(4), venue }), newPhotos: { [id(4)]: photo() } });
+  assert.deepEqual(view.data.get(path(id(3))), map, 'replaced map remains referenced by the cover');
+  await view.adapter.transact({ expectedRevision: 7, profile: settings({ venue }), newPhotos: {} });
+  assert.equal(view.data.has(path(id(3))), false);
+  assert.equal(view.data.has(path(id(4))), false);
+  assert.equal(view.data.get(PROFILE_PATH).mapImageId, null);
+  assert.equal(view.data.get(PROFILE_PATH).revision, 8);
+  assert.equal(view.commits.length, 4);
+  view.adapter.dispose();
+});
+
+test('a map must load completely and an old map response cannot appear after another member signs in', async () => {
+  const view = fixture(), values = [], errors = [], media = deferred();
+  const stop = view.adapter.subscribe(data => values.push(data), error => errors.push(error));
+  await view.subscribers[0].next(snapshot(saved(1, { mapImageId: id(1) })));
+  assert.equal(errors.at(-1).code, 'profile-media-missing');
+  assert.equal(values.some(value => value.ready), false);
+  view.mediaRead(() => media.promise);
+  const loading = view.subscribers[0].next(snapshot(saved(2, { mapImageId: id(2) })));
+  await tick();
+  assert.equal(values.at(-1).ready, false);
+  const count = values.length;
+  view.setIdentity({ uid: 'sohee-uid', role: 'sohee' });
+  media.resolve(snapshot(photo())); await loading;
+  assert.equal(values.length, count);
+  assert.equal(view.commits.length, 0);
+  stop();
+});

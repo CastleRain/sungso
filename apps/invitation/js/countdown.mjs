@@ -1,4 +1,4 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
 export const WEDDING_INSTANT = Date.parse(`${WEDDING.iso}T${WEDDING.time24}:00+09:00`);
 export function remainingTime(now = Date.now()) {
   const seconds = Math.max(0,Math.ceil((WEDDING_INSTANT - now) / 1000));

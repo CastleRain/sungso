@@ -10,6 +10,7 @@ test('missing shared content remains an empty unsaved profile with independent d
   const first = normalizeProfile(null), second = emptyProfile();
   assert.equal(first.revision, 0);
   assert.equal(first.coverId, null);
+  assert.equal(first.mapImageId, null);
   assert.deepEqual(first.galleryIds, []);
   first.venue.name = 'draft'; first.galleryIds.push(id(1));
   assert.deepEqual(second.venue, emptyVenue());
@@ -74,4 +75,41 @@ test('a complete snapshot exposes only referenced photos and missing or corrupt 
   const ready = completeProfileSnapshot(settings, { [id(1)]: photo(), [id(2)]: photo(), [id(3)]: photo() });
   assert.equal(ready.ready, true);
   assert.deepEqual(Object.keys(ready.photos).sort(), [id(1), id(2)]);
+});
+
+test('legacy profiles normalize optional map fields without changing saved content or revision', () => {
+  const venue = { name: '기존 홀', hall: '3층', address: '기존 주소', mapUrl: 'https://example.test/old-map', transport: '', parking: '' };
+  const raw = { ...profile({ venue }), schemaVersion: 1, revision: 9, updatedBy: 'member-uid', updatedAt: '2027-01-01T00:00:00Z' };
+  const before = structuredClone(raw), normalized = normalizeProfile(raw);
+  assert.equal(normalized.mapImageId, null);
+  assert.deepEqual(normalized.venue, { ...venue, naverUrl: '', kakaoUrl: '' });
+  assert.equal(normalized.revision, 9);
+  assert.deepEqual(raw, before);
+  assert.deepEqual(validateProfile(normalized).venue, normalized.venue);
+  const { hall: _hall, ...incomplete } = venue;
+  assert.throws(() => validateVenue(incomplete));
+});
+
+test('a separate map and twenty gallery photos plus a cover share immutable media validation', () => {
+  const galleryIds = Array.from({ length: 20 }, (_, index) => id(index + 1));
+  const value = profile({ coverId: id(21), galleryIds, mapImageId: id(22) });
+  const newPhotos = Object.fromEntries(profilePhotoIds(value).map(key => [key, photo()]));
+  assert.equal(Object.keys(validateProfileChange({ expectedRevision: 0, profile: value, newPhotos }).newPhotos).length, 22);
+  assert.deepEqual(profilePhotoIds(value), [id(21), ...galleryIds, id(22)]);
+  assert.equal(profilePhotoIds({ ...value, mapImageId: id(1) }).length, 21);
+  const { [id(22)]: _map, ...missingMap } = newPhotos;
+  assert.throws(() => completeProfileSnapshot(value, missingMap), { code: 'profile-media-missing' });
+  assert.equal(completeProfileSnapshot(value, newPhotos).photos[id(22)].dataUrl, photo().dataUrl);
+  for (const mapImageId of ['', '../map', 1, {}, undefined]) assert.throws(() => validateProfile(profile({ mapImageId })), { code: 'profile-invalid' });
+});
+
+test('both optional provider links use the existing strict HTTPS and venue name constraints', () => {
+  const values = { ...emptyVenue(), name: '웨딩홀', naverUrl: 'https://naver.me/fixture', kakaoUrl: 'https://map.kakao.com/?itemId=1&map_type=TYPE_MAP' };
+  assert.deepEqual(validateVenue(values), values);
+  for (const key of ['naverUrl', 'kakaoUrl']) {
+    for (const invalid of ['http://example.test', 'javascript:alert(1)', 'https://user:pass@example.test', 'https://example.test/with space', 'https://example.test\\path', 'https://example.test/\npath', 'x'.repeat(1001), null, undefined]) {
+      assert.throws(() => validateVenue({ ...values, [key]: invalid }), { code: 'profile-invalid' });
+    }
+    assert.throws(() => validateVenue({ ...emptyVenue(), [key]: 'https://example.test/map' }));
+  }
 });

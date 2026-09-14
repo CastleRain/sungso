@@ -1,8 +1,8 @@
-import { weddingLettering } from './wedding-lettering.mjs?v=20260915-personal-invitation';
-import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, venueLabel, venueCaption, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
-import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-venue-map';
+import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-venue-map';
+import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, venueLabel, venueCaption, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-venue-map';
+import { countdownMarkup } from './countdown.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const designs = new Set(['guest-seoul', 'guest-porto', 'guest-jeju']);
 const photo = (index, className = '', eager = false) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

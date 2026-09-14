@@ -18,6 +18,12 @@ JPG·PNG·WebP 입력은 브라우저에서 긴 변 최대 1,600px의 웹용 JPE
 
 편집 중인 사진과 예식장은 메모리에만 있으며 편집창을 닫거나 로그아웃하면 미저장 내용을 정리한다. 저장 실패나 동시 편집 충돌 때는 열린 편집창의 초안을 유지한다. **최신 설정 다시 불러오기**는 서버 내용을 다시 편집하도록 불러오는 동작이며 저장을 실행하지 않는다. 이 동작으로 편집창을 갱신한 뒤 필요한 변경을 다시 입력하고 저장한다. 새 사진과 예식장의 구현·검증·배포 상태는 [검증 기록](../../docs/invitation-personalization-verification.md)을 따른다.
 
+## 약도와 지도 연결
+
+공통 설정에서 **네이버지도 링크**, **카카오맵 링크**, **오시는 길 약도**를 함께 저장한다. 예식장의 공식 약도 JPG·PNG·WebP 1장을 선택하면 사진 갤러리에 섞이지 않고 29종의 오시는 길에 표시된다. 약도는 전체 비율을 유지하고 눌러 크게 볼 수 있다. 기존 지도 링크도 유지하며 같은 지도 서비스의 중복 버튼은 하나로 정리한다.
+
+`mapImageId`는 기존 회원 전용 `photos` 문서를 참조한다. 대표·갤러리·약도에서 더 이상 사용하지 않는 이미지만 명시 저장 때 원자적으로 정리한다. 기존 문서에 `mapImageId`, `venue.naverUrl`, `venue.kakaoUrl`이 없어도 새 앱에서 읽을 수 있다. 지도 검색 API·키·자동 위치 조회는 추가하지 않는다. 실제 예식장과 약도는 회원 설정으로만 보관하고 Git 자산에 넣지 않는다. [검증·배포 기록](../../docs/invitation-venue-verification.md)을 따른다.
+
 ## 원본 샘플 구성 여섯 가지
 
 [원본 대응표와 관찰 근거](../../docs/invitation-reference-research.md)에 공식 샘플 링크를 정리했다. 살롱드레터의 전면 사진 레터링·폴라로이드·네 모서리 타이포, 투아워게스트의 서울·포르투·제주를 긴 청첩장으로 재구성한다. 예식 날짜·시간은 사용자가 지정한 일정이며 사진·장소는 공통 설정을 따른다. 문구와 미설정 사진·장소는 예시다. 상용 사진·서체·원본 코드는 포함하지 않는다. 원본의 자동 참석 팝업과 상거래는 제외한다.
@@ -170,7 +176,7 @@ JPG·PNG·WebP 입력은 브라우저에서 긴 변 최대 1,600px의 웹용 JPE
 | `invitation_settings/shared` | `schemaVersion: 1`, 독립된 `revision`, `coverId`, 순서 있는 `galleryIds`, `venue`, 서버 시각·변경자 |
 | `invitation_settings/shared/photos/{photoId}` | 웹용 JPEG/WebP `dataUrl`, `width`, `height`, 서버 시각·변경자 |
 
-`photoId`는 새 UUID v4이며 저장된 사진 문서는 덮어쓰지 않는다. 대표사진과 갤러리가 같은 ID를 참조할 수 있으므로 최대 고유 사진 수는 21장이다. `venue`는 `name`, `hall`, `address`, `mapUrl`, `transport`, `parking`만 허용하며 이름이 없으면 나머지 필드도 비워야 한다. 이름·홀은 각각 80자, 주소는 300자, 지도 링크·교통·주차는 각각 1,000자 제한이다. HTTPS 이외의 지도 URL과 제어 문자는 거부하고, 화면에는 이스케이프한 텍스트로 표시한다.
+`photoId`는 새 UUID v4이며 저장된 사진 문서는 덮어쓰지 않는다. 대표사진과 갤러리가 같은 ID를 참조할 수 있으므로 별도 약도 1장을 포함한 최대 고유 이미지 수는 22장이다. `venue`는 `name`, `hall`, `address`, `mapUrl`, `naverUrl`, `kakaoUrl`, `transport`, `parking`만 허용하며 이름이 없으면 나머지 필드도 비워야 한다. 이름·홀은 각각 80자, 주소는 300자, 지도 링크·교통·주차는 각각 1,000자 제한이다. HTTPS 이외의 지도 URL과 제어 문자는 거부하고, 화면에는 이스케이프한 텍스트로 표시한다.
 
 어댑터는 `expectedRevision`과 현재 설정의 `revision`을 비교하고, 새 사진 생성·더 이상 참조하지 않는 사진 삭제·프로필 revision 증가를 하나의 트랜잭션으로 저장한다. 갤러리에서 뺀 사진도 대표사진으로 남아 있으면 삭제하지 않는다. 사진 추가·삭제는 부모 설정의 새 revision과 함께 수행하도록 규칙을 제한한다. 부모 설정의 직접 삭제와 사진 문서 수정·목록 조회는 허용하지 않는다. 사진을 모두 비우는 동작도 부모 설정을 삭제하지 않고 빈 참조를 명시적으로 저장한다.
 
@@ -193,7 +199,7 @@ node apps/invitation/tests/qa-server.mjs
 Emulator 테스트는 `services/homehunt/cloud`의 설치된 Firebase 테스트 SDK와 Java·Firebase CLI를 사용한다. [기존 Emulator 환경](../../docs/development.md#firestore-emulator)을 준비한 뒤 루트에서 실행한다.
 
 ```sh
-npx firebase-tools emulators:exec --only firestore --project demo-homehunt "node --test apps/invitation/tests/firestore.emulator.mjs apps/invitation/tests/profile.emulator.mjs"
+npx firebase-tools emulators:exec --only firestore --project demo-homehunt "node --test --test-concurrency=1 apps/invitation/tests/firestore.emulator.mjs apps/invitation/tests/profile.emulator.mjs"
 ```
 
 로컬 Emulator 주소가 없거나 localhost가 아니면 테스트가 중단된다. 조회 시 미생성, 두 사람 동시 찜, 공동 선택 충돌·재저장, 오프라인 실패에 더해 공통 사진·예식장의 회원 경계·충돌·원자적 삭제를 실제 어댑터와 저장소 규칙으로 검사한다. 합성 사진과 가상 예식장을 사용하며 운영 저장·공개 배포를 검증 목적으로 실행하지 않는다. 이전 디자인 검증은 [검증 결과](../../docs/invitation-verification.md)를 참고한다.

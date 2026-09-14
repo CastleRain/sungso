@@ -1,4 +1,4 @@
-import { emptyProfileSnapshot, validateProfileChange, completeProfileSnapshot } from './profile-core.mjs?v=20260915-personal-invitation';
+import { emptyProfileSnapshot, validateProfileChange, completeProfileSnapshot } from './profile-core.mjs?v=20260915-venue-map';
 
 export function createProfileStore(adapter) {
   let disposed = false;

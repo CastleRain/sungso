@@ -1,6 +1,6 @@
-import { createScrollStory, supportsScrollStory as supportsScenes } from './scroll-story.mjs?v=20260915-personal-invitation';
-import { createReferenceFlow } from './reference-flow.mjs?v=20260915-personal-invitation';
-import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-personal-invitation';
+import { createScrollStory, supportsScrollStory as supportsScenes } from './scroll-story.mjs?v=20260915-venue-map';
+import { createReferenceFlow } from './reference-flow.mjs?v=20260915-venue-map';
+import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-venue-map';
 
 export const supportsScrollStory = id => isReferenceTemplate(id) || supportsScenes(id);
 

@@ -1,5 +1,5 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260915-venue-map';
 
 export function signatureCollection() {
   return `<section class="signature-collection" aria-labelledby="signature-collection-title">

@@ -1,5 +1,5 @@
-import { getPhoto, hasPersonalPhotos } from './personal-content.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { getPhoto, hasPersonalPhotos } from './personal-content.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 // Editorial scenes are fictional. They do not describe real astronomical events.
 const SCENES = Object.freeze([

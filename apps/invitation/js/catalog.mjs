@@ -1,6 +1,6 @@
-import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260915-personal-invitation';
-import { EDITIONS } from './edition-catalog.mjs?v=20260915-personal-invitation';
-import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260915-personal-invitation';
+import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260915-venue-map';
+import { EDITIONS } from './edition-catalog.mjs?v=20260915-venue-map';
+import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260915-venue-map';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [
@@ -35,5 +35,5 @@ export const SIGNATURES = Object.freeze({
 export const GALLERIES = { grid: '격자', slide: '슬라이드', filmstrip: '필름 스트립' };
 export const SECTIONS = { story: '우리 이야기', gallery: '갤러리', directions: '오시는 길', accounts: '마음 전하실 곳', rsvp: '참석 여부', guestbook: '방명록' };
 export const DEFAULT_SECTIONS = { story: false, gallery: true, directions: true, accounts: true, rsvp: false, guestbook: false };
-export { PHOTOS } from './personal-content.mjs?v=20260915-personal-invitation';
+export { PHOTOS } from './personal-content.mjs?v=20260915-venue-map';
 export const getTemplate = id => TEMPLATES.find(template => template.id === id);

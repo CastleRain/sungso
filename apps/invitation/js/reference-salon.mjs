@@ -1,8 +1,8 @@
-import { weddingLettering } from './wedding-lettering.mjs?v=20260915-personal-invitation';
-import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
-import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, getVenue, venueLabel, venueCaption, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
-import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
-import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-venue-map';
+import { WEDDING } from './wedding-date.mjs?v=20260915-venue-map';
+import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, getVenue, venueLabel, venueCaption, personalizeCover } from './personal-content.mjs?v=20260915-venue-map';
+import { countdownMarkup } from './countdown.mjs?v=20260915-venue-map';
+import { escapeHtml as e } from './core.mjs?v=20260915-venue-map';
 
 const ids = ['salon-lettering','salon-polaroid','salon-editorial'];
 const photo = (i,cls='',eager=false) => `<img class="${cls}" src="${e(getPhoto(i).src)}" alt="${e(getPhoto(i).alt)}" width="${getPhoto(i).width}" height="${getPhoto(i).height}" ${eager?'fetchpriority="high"':'loading="lazy"'} decoding="async">`;

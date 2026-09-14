@@ -1,5 +1,5 @@
-import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260915-personal-invitation';
-import { collectReferenceScenes, referenceSceneKey, referenceSceneMotion, referenceTreatment } from './reference-scenes-core.mjs?v=20260915-personal-invitation';
+import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260915-venue-map';
+import { collectReferenceScenes, referenceSceneKey, referenceSceneMotion, referenceTreatment } from './reference-scenes-core.mjs?v=20260915-venue-map';
 
 const properties = ['--reference-pin-top', '--reference-screen-height', '--reference-track-height'];
 const labels = { cover: '초대의 시작', greeting: '소중한 분들께', quote: '우리의 약속', profiles: '두 사람의 소개', family: '함께하는 두 가족', date: '결혼하는 날', 'date-poster': '우리의 날짜', 'date-calendar': '그날의 약속', story: '우리의 이야기', about: '두 사람을 소개해요', timeline: '함께 걸어온 시간', gallery: '우리의 순간들', directions: '오시는 길', accounts: '감사의 마음', rsvp: '함께해 주세요', guestbook: '축하의 한마디', information: '당일 안내', ending: '오래도록, 함께', 'ending-photo': '함께한 순간', 'ending-copy': '오래도록, 함께' };
