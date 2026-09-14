@@ -1,4 +1,6 @@
 const MAX_MEASUREMENT = Number.MAX_SAFE_INTEGER;
+const DEFAULT_HOLD = 0.32;
+const MAX_HOLD = 4;
 
 function finiteMeasurement(value, fallback) {
   return typeof value === 'number' && Number.isFinite(value)
@@ -13,14 +15,18 @@ function bounded(value, minimum, maximum) {
 
 const smoothstep = value => value * value * (3 - 2 * value);
 
-/** Distances are CSS pixels of ordinary document scrolling, including long-page reading. */
-export function buildStoryTrack(heights, viewportHeight) {
+/** Holds are optional viewport multiples; distances remain ordinary document scroll pixels. */
+export function buildStoryTrack(heights, viewportHeight, holds = []) {
   const viewport = Math.max(1, finiteMeasurement(viewportHeight, 1));
   const pages = Array.isArray(heights) ? Array.from(heights) : [];
+  const factors = Array.isArray(holds) ? holds : [];
   let distance = 0;
   const segments = pages.map((value, index) => {
     const height = finiteMeasurement(value, viewport);
-    const hold = viewport * 0.32;
+    const factor = factors[index];
+    const hold = viewport * (typeof factor === 'number' && Number.isFinite(factor) && factor > 0
+      ? bounded(factor, DEFAULT_HOLD, MAX_HOLD)
+      : DEFAULT_HOLD);
     const pan = Math.max(0, height - viewport);
     const transition = index < pages.length - 1 ? viewport * 0.65 : 0;
     const duration = hold + pan + transition;

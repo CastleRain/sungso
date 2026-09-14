@@ -1,0 +1,78 @@
+/* The ticket's stateful wrapper stays mounted while its chapters share the stage. */
+main[data-scroll-story="on"] #preview-canvas .ticket-document { display: contents; }
+main[data-scroll-story="on"] #preview-canvas .ticket-masthead { display: none; }
+
+/* Album art follows the scroll; the player's explicit one-turn control stays intact. */
+main[data-scroll-story="on"][data-story-design="vinyl"] .ed-vinyl-cover .ed-vinyl-record {
+  transform: translateX(var(--record-sleeve-shift, 0px)) rotate(var(--record-scroll-turn, 0deg));
+  transition: none;
+}
+main[data-scroll-story="on"][data-story-design="vinyl"] .ed-album-sleeve { overflow: hidden; }
+main[data-scroll-story="on"][data-story-design="vinyl"] .ed-album-sticker {
+  transform: rotate(var(--record-sticker-turn, -5deg));
+}
+main[data-scroll-story="on"][data-story-design="vinyl"] .ed-record-wave i {
+  transform: scaleY(var(--record-wave-scale, 1));
+  transition: none;
+}
+main[data-scroll-story="on"][data-story-design="vinyl"] .ed-record-wave i:nth-child(even) {
+  transform: scaleY(var(--record-wave-alternate, 1));
+}
+
+/* A changing wash of gallery light and a slow approach to the first framed photo. */
+main[data-scroll-story="on"][data-story-design="museum"] .ed-museum-cover-frame img {
+  transform: scale(var(--exhibit-photo-scale, 1));
+  transition: none;
+}
+main[data-scroll-story="on"][data-story-design="museum"] .ed-gallery-wall {
+  background: radial-gradient(ellipse at var(--exhibit-light-x, 50%) 0%, color-mix(in srgb, var(--paper) 85%, transparent), transparent 75%), var(--soft);
+}
+main[data-scroll-story="on"][data-story-design="museum"] .ed-exhibit-art {
+  box-shadow: 5px var(--exhibit-mat-depth, 9px) 16px #0002;
+}
+
+/* The stage poster rises, with ornaments tied to the same reversible position. */
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-stage { isolation: isolate; }
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-stage img {
+  transform: scale(var(--festival-photo-scale, 1));
+  transform-origin: 50% 100%;
+  transition: none;
+}
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 160px 160px 0 0;
+  background: radial-gradient(ellipse at var(--festival-light-x, 50%) 0%, #fff7, transparent 60%);
+  mix-blend-mode: soft-light;
+}
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-rosette {
+  transform: rotate(var(--festival-rosette-turn, 12deg));
+  z-index: 2;
+}
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-banner {
+  transform: translateX(var(--festival-banner-x, 0px)) rotate(var(--festival-banner-turn, -4deg));
+  z-index: 2;
+}
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-ending { isolation: isolate; }
+main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-ending::after {
+  content: '';
+  position: absolute;
+  inset: 20px 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .22;
+  background: radial-gradient(ellipse at 10% 8%, var(--paper) 0 3px, transparent 4px), radial-gradient(ellipse at 87% 19%, var(--paper) 0 4px, transparent 5px), radial-gradient(ellipse at 72% 58%, var(--paper) 0 3px, transparent 4px), radial-gradient(ellipse at 15% 78%, var(--paper) 0 4px, transparent 5px), radial-gradient(ellipse at 84% 94%, var(--paper) 0 3px, transparent 4px);
+  transform: translateY(var(--festival-confetti-y, 0px)) rotate(var(--festival-confetti-turn, 0deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main[data-scroll-story="on"][data-story-design="vinyl"] .ed-vinyl-cover .ed-vinyl-record,
+  main[data-scroll-story="on"][data-story-design="vinyl"] .ed-record-wave i,
+  main[data-scroll-story="on"][data-story-design="museum"] .ed-museum-cover-frame img,
+  main[data-scroll-story="on"][data-story-design="festival"] .pe-fest-stage img {
+    transform: none;
+  }
+}

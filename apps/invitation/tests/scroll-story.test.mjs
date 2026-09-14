@@ -280,3 +280,51 @@ test('keyboard focus settles outgoing and incoming page turns before measuring a
     } finally { controller.dispose(); view.restore(); }
   }
 });
+
+test('a scene hold attribute drives reversible internal progress and survives viewport changes', t => {
+  const view = browserHarness(), controller = createScrollStory();
+  t.after(() => { controller.dispose(); view.restore(); });
+  view.pages[0].naturalHeight = 0;
+  view.pages[0].dataset.storyHold = '2.5';
+  controller.mount(view.main, { enabled: true });
+  const viewport = parseFloat(view.main.style.getPropertyValue('--story-screen-height'));
+  const anchor = view.main.querySelector('.preview-layout').documentTop - parseFloat(view.main.style.getPropertyValue('--story-pin-top'));
+  const progress = () => Number(view.pages[0].style.getPropertyValue('--scene-progress'));
+  view.win.scrollTo({ top: anchor + viewport * 1.25 }); view.flush();
+  assert.equal(controller.capture().key, 'cover');
+  assert.ok(Math.abs(progress() - .5) < 1e-9);
+  assert.equal(view.pages[0].style.getPropertyValue('--scene-y'), '0px');
+  const midway = controller.capture();
+  view.win.scrollTo({ top: anchor + viewport * 2 }); view.flush();
+  assert.ok(Math.abs(progress() - .8) < 1e-9);
+  view.win.scrollTo({ top: anchor + viewport * 1.25 }); view.flush();
+  assert.deepEqual(controller.capture(), midway);
+  view.canvas.clientWidth = 300; view.win.innerHeight = 700; view.win.visualViewport.height = 700;
+  view.win.emit('resize'); view.flush();
+  assert.ok(Math.abs(progress() - .5) < 1e-9);
+  assert.ok(Math.abs(controller.capture().fraction - midway.fraction) < 1e-9);
+  controller.dispose();
+  assert.equal(view.pages[0].dataset.storyHold, '2.5');
+});
+
+test('scene hold attributes accept bounded decimal values and reject malformed input', () => {
+  const cases = [
+    ['1.5', 1.5], [' 3 ', 3], ['.5', .5], ['90000', 4], ['.001', .32],
+    [undefined, .32], ['', .32], ['3px', .32], ['Infinity', .32], ['NaN', .32],
+    ['0x10', .32], ['1e3', .32], ['-2', .32], ['0', .32],
+  ];
+  for (const [attribute, expected] of cases) {
+    const view = browserHarness(), controller = createScrollStory();
+    try {
+      view.pages[0].naturalHeight = 0;
+      if (attribute !== undefined) view.pages[0].dataset.storyHold = attribute;
+      controller.mount(view.main, { enabled: true });
+      const viewport = parseFloat(view.main.style.getPropertyValue('--story-screen-height'));
+      const anchor = view.main.querySelector('.preview-layout').documentTop - parseFloat(view.main.style.getPropertyValue('--story-pin-top'));
+      const nav = view.main.querySelector('.story-controls');
+      nav.emit('click', { target: nav.querySelector('[data-story-step="1"]') }); view.flush();
+      assert.equal(view.main.dataset.storyScene, 'greeting');
+      assert.ok(Math.abs(view.win.scrollY - anchor - viewport * (expected + .65)) < 1e-8, `${attribute}: next scene begins after the bounded hold and transition`);
+    } finally { controller.dispose(); view.restore(); }
+  }
+});

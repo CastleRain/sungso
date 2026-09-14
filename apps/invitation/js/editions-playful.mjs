@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-scroll-editions';
-import { escapeHtml as e } from './core.mjs?v=20260914-scroll-editions';
+import { PHOTOS } from './catalog.mjs?v=20260914-immersive-worlds';
+import { escapeHtml as e } from './core.mjs?v=20260914-immersive-worlds';
 
 const IDS = ['greenhouse', 'scrapbook', 'festival', 'promenade'];
 const photograph = (index, className = '', eager = false) => `<img class="${className}" src="${e(PHOTOS[index].src)}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

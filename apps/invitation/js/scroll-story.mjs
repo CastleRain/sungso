@@ -1,8 +1,8 @@
-import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260914-scroll-editions';
-import { collectStoryNodes, storySceneKey as sceneKey, STORY_LABELS as LABELS } from './scroll-designs.mjs?v=20260914-scroll-editions';
-import { storyMotion } from './scroll-motion.mjs?v=20260914-scroll-editions';
+import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260914-immersive-worlds';
+import { collectStoryNodes, storySceneKey as sceneKey, STORY_LABELS as LABELS } from './scroll-designs.mjs?v=20260914-immersive-worlds';
+import { storyMotion } from './scroll-motion.mjs?v=20260914-immersive-worlds';
 
-export { supportsScrollStory } from './scroll-designs.mjs?v=20260914-scroll-editions';
+export { supportsScrollStory } from './scroll-designs.mjs?v=20260914-immersive-worlds';
 
 /** Document scrolling drives an existing invitation; no second scroll surface or stored state. */
 export function createScrollStory() {
@@ -54,7 +54,11 @@ export function createScrollStory() {
     main.style.setProperty('--story-pin-top', `${pinTop}px`);
     main.style.setProperty('--story-screen-height', `${viewport}px`);
     const heights = scenes.map(scene => scene.node.offsetHeight);
-    track = buildStoryTrack(heights, viewport);
+    const holds = scenes.map(({ node }) => {
+      const value = node.dataset.storyHold?.trim();
+      return value && /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(value) ? Number(value) : undefined;
+    });
+    track = buildStoryTrack(heights, viewport, holds);
     main.style.setProperty('--story-track-height', `${track.distance + viewport + chrome}px`);
     anchor = layout.getBoundingClientRect().top + window.scrollY - pinTop;
     lastWidth = canvas.clientWidth;

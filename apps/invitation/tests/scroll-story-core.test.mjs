@@ -95,3 +95,59 @@ test('restoring a logical segment and fraction adapts to new layout measurements
   assert.equal(storyDistanceAt(before, Infinity, Infinity), before.distance);
   assert.equal(storyDistanceAt(before, NaN, NaN), 0);
 });
+
+test('a longer fixed scene unfolds through its full hold and reverses before its page transition', () => {
+  const track = buildStoryTrack([600, 600], 600, [2.5]);
+  const first = track.segments[0];
+  assert.equal(first.hold, 1500);
+  assert.equal(first.pan, 0);
+  const positions = [0, 375, 750, 1125, 1500];
+  const forward = positions.map(distance => getStoryFrame(track, distance));
+  assert.deepEqual(forward.map(frame => frame.sceneProgress), [0, .25, .5, .75, 1]);
+  assert.ok(forward.every(frame => frame.index === 0 && frame.panY === 0 && frame.transition === 0));
+  assert.deepEqual(positions.toReversed().map(distance => getStoryFrame(track, distance)).toReversed(), forward);
+  near(getStoryFrame(track, first.hold + first.transition / 2).transition, .5);
+  assert.equal(getStoryFrame(track, first.end).index, 1);
+  assert.equal(track.segments[1].hold, 192, 'unspecified reading scenes keep their established timing');
+});
+
+test('a longer hold still reveals every pixel of a tall scene before leaving it', () => {
+  const track = buildStoryTrack([1800, 600], 600, [3]);
+  const first = track.segments[0];
+  assert.equal(getStoryFrame(track, 1700).panY, 0);
+  const reading = getStoryFrame(track, first.hold + 600);
+  assert.equal(reading.panY, -600);
+  assert.equal(reading.transition, 0);
+  const bottom = getStoryFrame(track, first.hold + first.pan);
+  assert.equal(bottom.panY, -1200);
+  assert.equal(bottom.sceneProgress, 1);
+  assert.equal(bottom.transition, 0);
+  near(getStoryFrame(track, first.hold + first.pan + first.transition / 2).transition, .5);
+});
+
+test('hold factors reject invalid values and cap excessive or tiny durations', () => {
+  const invalid = [undefined, null, NaN, Infinity, -Infinity, -1, 0, '3', {}, []];
+  const ordinary = buildStoryTrack([600, 800], 600);
+  for (const value of invalid) {
+    assert.deepEqual(buildStoryTrack([600, 800], 600, [value]), ordinary);
+  }
+  for (const value of [null, '3', { 0: 3 }]) {
+    assert.deepEqual(buildStoryTrack([600, 800], 600, value), ordinary);
+  }
+  const bounded = buildStoryTrack([600, 600, 600], 600, [Number.MAX_VALUE, .001, 1.5]);
+  assert.deepEqual(bounded.segments.map(segment => segment.hold), [2400, 192, 900]);
+  assert.ok(Number.isFinite(bounded.distance));
+});
+
+test('resizing a fixed unfolding scene preserves its internal progress when restoring its logical place', () => {
+  const before = buildStoryTrack([600, 600, 1200], 600, [2, 3]);
+  const after = buildStoryTrack([390, 390, 1000], 390, [2, 3]);
+  const original = getStoryFrame(before, before.segments[1].start + before.segments[1].hold * .7);
+  const fraction = original.local / before.segments[1].duration;
+  const restored = getStoryFrame(after, storyDistanceAt(after, 1, fraction));
+  assert.equal(restored.index, 1);
+  near(restored.sceneProgress, original.sceneProgress);
+  near(restored.sceneProgress, .7);
+  assert.equal(restored.panY, 0);
+  assert.equal(restored.transition, 0);
+});

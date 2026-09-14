@@ -7,7 +7,7 @@ import { invitation, cover } from '../js/templates.mjs';
 import { createStore } from '../js/store.mjs';
 
 test('each template offers valid palettes and defaults without shared mutable state', () => {
-  assert.equal(TEMPLATES.length, 20);
+  assert.equal(TEMPLATES.length, 23);
   for (const template of TEMPLATES) {
     assert.equal(template.palettes.length, 3);
     const first = defaultSelection(template.id), second = defaultSelection(template.id);
@@ -65,13 +65,16 @@ test('draft persistence tolerates corrupt data, unavailable storage and future s
 });
 test('route parsing is bounded and supports direct template and joint-choice links', () => {
   assert.deepEqual(parseRoute('#preview/cinema'), { view: 'preview', templateId: 'cinema' });
+  for (const templateId of ['paper-theater', 'memory-house', 'ribbon']) {
+    assert.deepEqual(parseRoute(`#preview/${templateId}`), { view: 'preview', templateId });
+  }
   assert.deepEqual(parseRoute('#selection'), { view: 'selection' });
-  for (const hash of ['', '#preview/missing', '#preview/../../', '#catalog', '#preview/photo?inject']) assert.deepEqual(parseRoute(hash), { view: 'catalog' });
+  for (const hash of ['', '#preview/missing', '#preview/../../', '#catalog', '#preview/photo?inject', '#preview/paper--theater', '#preview/-ribbon', '#preview/memory-house/', '#preview/paper-theater?inject']) assert.deepEqual(parseRoute(hash), { view: 'catalog' });
 });
 test('filters expose each persons favorites and their intersection', () => {
   const favorites = { sungwoo: ['minimal', 'garden'], sohee: ['garden', 'sketch'] };
   assert.deepEqual(filterTemplates(TEMPLATES, favorites, 'both').map(item => item.id), ['garden']);
-  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, 20);
+  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, 23);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sungwoo').length, 2);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sohee').length, 2);
 });

@@ -1,4 +1,4 @@
-import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-scroll-editions';
+import { TEMPLATES, COLLECTIONS, PEOPLE, GALLERIES, SECTIONS, DEFAULT_SECTIONS, SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-immersive-worlds';
 
 export const DOCUMENT_PATH = 'couplePicks/invitation_templates';
 export const STORAGE_KEY = 'sungso_invitation_v1';
@@ -54,7 +54,7 @@ export function selectionText(saved) {
 }
 export function parseRoute(hash) {
   if (hash === '#selection') return { view: 'selection' };
-  const match = /^#preview\/([a-z]+)$/.exec(hash);
+  const match = /^#preview\/([a-z]+(?:-[a-z]+)*)$/.exec(hash);
   if (match && getTemplate(match[1])) return { view: 'preview', templateId: match[1] };
   return { view: 'catalog' };
 }

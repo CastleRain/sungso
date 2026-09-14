@@ -29,7 +29,8 @@ const client = (role = 'sungwoo') => {
   return db;
 };
 const makeAdapter = (db, options = {}) => firestoreAdapter(sdk, db, { member: () => identities.get(db), ...options });
-const editionIds = ['magazine', 'film', 'vinyl', 'museum', 'greenhouse', 'scrapbook', 'festival', 'promenade'];
+const unfoldingIds = ['paper-theater', 'memory-house', 'ribbon'];
+const editionIds = ['magazine', 'film', 'vinyl', 'museum', 'greenhouse', 'scrapbook', 'festival', 'promenade', ...unfoldingIds];
 const allTemplateIds = ['minimal', 'letter', 'photo', 'garden', 'cinema', 'sketch',
   'envelope', 'constellation', 'camera', 'storybook', 'ticket', 'curtain', ...editionIds];
 
@@ -46,20 +47,20 @@ for (const templateId of editionIds) {
   });
 }
 
-test('a member can favorite all twenty templates without changing their partner favorites', async () => {
+test('a member can favorite all twenty-three templates without changing their partner favorites', async () => {
   const db = client(), partner = client('sohee');
   await makeAdapter(partner).transact({ type: 'favorite', actor: 'sohee', templateId: 'garden', enabled: true });
   for (const templateId of allTemplateIds) {
     await makeAdapter(db).transact({ type: 'favorite', actor: 'sungwoo', templateId, enabled: true });
   }
   const saved = (await sdk.getDoc(ref(db))).data();
-  assert.equal(saved.favorites.sungwoo.length, 20);
+  assert.equal(saved.favorites.sungwoo.length, 23);
   assert.deepEqual(new Set(saved.favorites.sungwoo), new Set(allTemplateIds));
   assert.deepEqual(saved.favorites.sohee, ['garden']);
   assert.equal('selection' in saved, false);
 });
 
-test('the server rejects unknown favorite IDs and more than twenty entries', async () => {
+test('the server rejects unknown favorite IDs and more than twenty-three entries', async () => {
   const db = client();
   const favoriteWrite = values => sdk.setDoc(ref(db), {
     schemaVersion: 1, favorites: { sungwoo: values },
@@ -73,10 +74,36 @@ test('the server rejects unknown favorite IDs and more than twenty entries', asy
 test('the expanded template list does not let a member replace partner favorites', async () => {
   const db = client(), partner = client('sohee');
   await makeAdapter(partner).transact({ type: 'favorite', actor: 'sohee', templateId: 'greenhouse', enabled: true });
-  await assert.rejects(sdk.setDoc(ref(db), {
-    favorites: { sohee: ['magazine'] }, updatedBy: 'sungwoo-uid', updatedAt: sdk.serverTimestamp(),
-  }, { merge: true }), { code: 'permission-denied' });
+  for (const templateId of ['magazine', ...unfoldingIds]) {
+    await assert.rejects(sdk.setDoc(ref(db), {
+      favorites: { sohee: [templateId] }, updatedBy: 'sungwoo-uid', updatedAt: sdk.serverTimestamp(),
+    }, { merge: true }), { code: 'permission-denied' });
+  }
   assert.deepEqual((await sdk.getDoc(ref(db))).data().favorites.sohee, ['greenhouse']);
+});
+
+test('new unfolding IDs do not grant anonymous or nonmember access to favorites or shared selections', async () => {
+  const owner = client();
+  await makeAdapter(owner).transact({ type: 'selection', actor: 'sungwoo', selection: defaultSelection('ribbon'), expectedRevision: 0 });
+  const outsider = environment.authenticatedContext('outside-uid', { email: 'outside@example.test', email_verified: true, firebase: { sign_in_provider: 'google.com' } }).firestore();
+  const anonymous = environment.unauthenticatedContext().firestore();
+  for (const db of [outsider, anonymous]) {
+    await assert.rejects(sdk.getDoc(ref(db)), { code: 'permission-denied' });
+    for (const templateId of unfoldingIds) {
+      await assert.rejects(sdk.setDoc(ref(db), {
+        schemaVersion: 1, favorites: { sungwoo: [templateId] },
+        updatedBy: 'outside-uid', updatedAt: sdk.serverTimestamp(),
+      }, { merge: true }), { code: 'permission-denied' });
+      await assert.rejects(sdk.setDoc(ref(db), {
+        schemaVersion: 1, selection: defaultSelection(templateId), selectionRevision: 2,
+        updatedBy: 'outside-uid', updatedAt: sdk.serverTimestamp(),
+      }, { merge: true }), { code: 'permission-denied' });
+    }
+  }
+  const saved = (await sdk.getDoc(ref(owner))).data();
+  assert.equal(saved.selection.templateId, 'ribbon');
+  assert.equal(saved.selectionRevision, 1);
+  assert.equal('favorites' in saved, false);
 });
 
 test('read-only subscription does not create a selection document', async () => {

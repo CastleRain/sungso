@@ -20,7 +20,9 @@ test('library preferences preserve old drafts and safely bound only simultaneous
   assert.equal(normalizeLocal(null).density, 'compact'); assert.deepEqual(normalizeLocal({ compare: {} }).compare, []);
 });
 test('every new edition supports direct links and the existing saved selection export', () => {
-  for (const template of TEMPLATES.filter(t => t.collection === 'immersive')) {
+  const editions = TEMPLATES.filter(t => t.collection === 'immersive');
+  assert.equal(editions.length, 11);
+  for (const template of editions) {
     const selection = defaultSelection(template.id);
     assert.equal(selection.sections.story, true);
     assert.equal(selection.sections.rsvp, true);
@@ -30,4 +32,22 @@ test('every new edition supports direct links and the existing saved selection e
     assert.deepEqual(exportSelection(patch.selection), selection);
     assert.deepEqual(Object.keys(selection).sort(), ['schemaVersion', 'templateId', 'paletteId', 'galleryLayout', 'sections', 'note'].sort());
   }
+});
+
+test('unfolding editions retain drafts and personal favorites while cosmetic state stays out of shared choices', () => {
+  const raw = { schemaVersion: 1, favorites: { sungwoo: ['film'], sohee: ['garden'] }, selection: defaultSelection('vinyl'), selectionRevision: 7 };
+  for (const templateId of ['paper-theater', 'memory-house', 'ribbon']) {
+    const selection = { ...defaultSelection(templateId), unfolded: 'on', choice: 'tomorrow', progress: .75, room: 'garden' };
+    const next = applyChange(raw, { type: 'selection', actor: 'sohee', expectedRevision: 7, selection });
+    assert.equal(next.selectionRevision, 8);
+    assert.equal(next.selection.templateId, templateId);
+    assert.deepEqual(Object.keys(next.selection).sort(), ['schemaVersion', 'templateId', 'paletteId', 'galleryLayout', 'sections', 'note'].sort());
+    const favorite = applyChange(raw, { type: 'favorite', actor: 'sungwoo', templateId, enabled: true });
+    assert.deepEqual(favorite.favorites, { sungwoo: ['film', templateId] });
+    const local = normalizeLocal({ drafts: { [templateId]: { selection, baseRevision: 7 } } });
+    assert.deepEqual(local.drafts[templateId], { selection: next.selection, baseRevision: 7 });
+  }
+  assert.deepEqual(raw.favorites, { sungwoo: ['film'], sohee: ['garden'] });
+  assert.equal(raw.selection.templateId, 'vinyl');
+  assert.equal(raw.selectionRevision, 7);
 });

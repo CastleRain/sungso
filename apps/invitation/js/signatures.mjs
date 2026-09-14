@@ -1,6 +1,6 @@
-import { renderSignatureEnvelope, createEnvelopeSignature } from './signature-envelope.mjs?v=20260914-scroll-editions';
-import { renderSignatureConstellation, createConstellationSignature } from './signature-constellation.mjs?v=20260914-scroll-editions';
-import { renderSignatureTicket, createTicketSignature } from './signature-ticket.mjs?v=20260914-scroll-editions';
+import { renderSignatureEnvelope, createEnvelopeSignature } from './signature-envelope.mjs?v=20260914-immersive-worlds';
+import { renderSignatureConstellation, createConstellationSignature } from './signature-constellation.mjs?v=20260914-immersive-worlds';
+import { renderSignatureTicket, createTicketSignature } from './signature-ticket.mjs?v=20260914-immersive-worlds';
 
 const renderers = { envelope: renderSignatureEnvelope, constellation: renderSignatureConstellation, ticket: renderSignatureTicket };
 

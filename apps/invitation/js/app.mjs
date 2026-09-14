@@ -1,14 +1,14 @@
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-scroll-editions';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-scroll-editions';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-scroll-editions';
-import { createStore } from './store.mjs?v=20260914-scroll-editions';
-import { createExperiences } from './experiences.mjs?v=20260914-scroll-editions';
-import { createSignatures } from './signatures.mjs?v=20260914-scroll-editions';
-import { signatureGuide } from './signature-catalog.mjs?v=20260914-scroll-editions';
-import { createEditions } from './editions.mjs?v=20260914-scroll-editions';
-import { createScrollStory, supportsScrollStory } from './scroll-story.mjs?v=20260914-scroll-editions';
-import { getScrollDesign } from './scroll-designs.mjs?v=20260914-scroll-editions';
-import { scrollShowcase, scrollPreviewLink } from './scroll-library.mjs?v=20260914-scroll-editions';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-immersive-worlds';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-immersive-worlds';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-immersive-worlds';
+import { createStore } from './store.mjs?v=20260914-immersive-worlds';
+import { createExperiences } from './experiences.mjs?v=20260914-immersive-worlds';
+import { createSignatures } from './signatures.mjs?v=20260914-immersive-worlds';
+import { signatureGuide } from './signature-catalog.mjs?v=20260914-immersive-worlds';
+import { createEditions } from './editions.mjs?v=20260914-immersive-worlds';
+import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260914-immersive-worlds';
+import { createScrollStory, supportsScrollStory } from './scroll-story.mjs?v=20260914-immersive-worlds';
+import { getScrollDesign } from './scroll-designs.mjs?v=20260914-immersive-worlds';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
@@ -16,6 +16,7 @@ const member = await requireMember();
 const experiences = createExperiences();
 const signatures = createSignatures();
 const editions = createEditions();
+const immersiveExperiences = createImmersiveExperiences();
 const scrollStory = createScrollStory();
 let scrollScenes = true;
 let bfcacheStoryPosition = null;
@@ -97,8 +98,7 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">한 권의 잡지, 작은 전시, 함께 듣는 음반.<br>처음부터 끝까지 다른 이야기를 펼쳐보세요.</p></div><div class="library-feature"><span>NEW STORIES</span><b>${TEMPLATES.filter(t => t.collection === 'immersive').length}</b><p>새로운 전체 페이지 예시</p><button type="button" data-action="collection" data-collection="immersive">새 이야기부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
-  main.querySelector('.catalog-intro').insertAdjacentHTML('afterend', scrollShowcase());
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">열리는 종이 무대, 우리라는 집, 리본 속 이야기.<br>처음부터 끝까지 다른 이야기를 펼쳐보세요.</p></div><div class="library-feature"><span>NEW STORIES</span><b>${TEMPLATES.filter(t => t.collection === 'immersive').length}</b><p>새로운 전체 페이지 예시</p><button type="button" data-action="collection" data-collection="immersive">새 이야기부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
@@ -106,7 +106,7 @@ function optionsMarkup(selection, scope = 'desktop') {
   return `<div class="options-content"><p class="eyebrow">MAKE IT OURS</p><h2>우리답게 꾸미기</h2><p class="options-description">마음에 드는 조합을 찾아보세요.<br>아래 저장 버튼을 눌러야 함께 반영돼요.</p><fieldset><legend>01 <span>색감</span></legend><div class="palette-options">${template.palettes.map(palette => `<label class="palette-option"><input type="radio" name="palette-${scope}-${selection.templateId}" data-option="paletteId" value="${palette.id}" ${selection.paletteId === palette.id ? 'checked' : ''}><span class="palette-swatch" style="--swatch:${palette.paper};--swatch-ink:${palette.accent}"><i></i></span><span>${palette.name}</span></label>`).join('')}</div></fieldset><fieldset ${selection.sections.gallery ? '' : 'disabled'}><legend>02 <span>갤러리 배치</span></legend><div class="gallery-options">${Object.entries(GALLERIES).map(([id,name]) => `<label><input type="radio" name="gallery-${scope}-${selection.templateId}" data-option="galleryLayout" value="${id}" ${selection.galleryLayout === id ? 'checked' : ''}><span>${name}</span></label>`).join('')}</div></fieldset><fieldset><legend>03 <span>담고 싶은 이야기</span></legend><p class="fixed-sections">표지·초대글·예식 정보·마무리는 함께 들어가요.</p><div class="section-options">${Object.entries(SECTIONS).map(([id,name]) => `<label><span>${name}</span><input type="checkbox" role="switch" data-section-option="${id}" ${selection.sections[id] ? 'checked' : ''}><span class="switch" aria-hidden="true"></span></label>`).join('')}</div></fieldset><label class="note-label"><span>04 <b>디자인 메모</b></span><textarea data-option="note" maxlength="1000" rows="3" placeholder="예: 사진은 더 크게, 문구는 조금 짧게…">${e(selection.note)}</textarea></label><p class="note-count">${selection.note.length} / 1,000</p><button class="text-button" data-action="reset-draft">이 템플릿의 기본 설정으로</button></div>`;
 }
 function mobilePreviewLink(template) {
-  return `<a class="mobile-preview-link" href="#preview/${template.id}" data-action="mobile-preview" data-template="${template.id}" aria-label="${template.name} 모바일로 보기"><span aria-hidden="true">▯</span> 모바일로 보기 <span aria-hidden="true">↗</span></a>${scrollPreviewLink(template)}`;
+  return `<a class="mobile-preview-link" href="#preview/${template.id}" data-action="mobile-preview" data-template="${template.id}" aria-label="${template.name} 모바일로 보기"><span aria-hidden="true">▯</span> 모바일로 보기 <span aria-hidden="true">↗</span></a>`;
 }
 function deviceToolbar() {
   return `<section class="preview-device-toolbar" aria-label="미리보기 화면 크기"><div class="device-modes" role="group" aria-label="보기 방식"><button type="button" data-action="preview-device" data-device="default" aria-pressed="${previewDevice === 'default'}">기본 보기</button><button type="button" data-action="preview-device" data-device="mobile" aria-pressed="${previewDevice === 'mobile'}"><span class="phone-icon" aria-hidden="true"></span>모바일로 보기</button></div>${supportsScrollStory(route.templateId) ? `<button type="button" class="scroll-mode-toggle" data-action="scroll-scenes" aria-pressed="${scrollScenes}">스크롤 연출</button><span class="story-preference-note">모션 줄이기 설정으로 길게 읽고 있어요.</span>` : ''}<label class="device-width" ${previewDevice === 'mobile' ? '' : 'hidden'}>화면 너비<select id="preview-width" aria-label="모바일 화면 너비">${[360,390,430].map(width => `<option value="${width}" ${width === previewWidth ? 'selected' : ''}>${width}px${width === 390 ? ' · 기본' : ''}</option>`).join('')}</select></label><p class="device-hint" role="status">${previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.'}</p></section>`;
@@ -122,7 +122,7 @@ function updatePreviewDevice() {
   scrollStory.refresh();
 }
 function mountPreviewEffects(restore = null) {
-  experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); editions.mount(dialog('preview-canvas'));
+  experiences.mount(dialog('preview-canvas')); signatures.mount(dialog('preview-canvas')); editions.mount(dialog('preview-canvas')); immersiveExperiences.mount(dialog('preview-canvas'));
   revealObserver?.disconnect();
   const mounted = scrollStory.mount(main, { enabled: supportsScrollStory(route.templateId) && scrollScenes, restore, templateId: route.templateId });
   if (!mounted) reveal();
@@ -169,7 +169,7 @@ function reveal() {
 }
 function renderRoute() {
   if (!active()) return;
-  scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect();
+  scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect();
   document.querySelectorAll('dialog[open]').forEach(target => target.close());
   route = parseRoute(location.hash);
   document.body.dataset.view = route.view;
@@ -338,13 +338,13 @@ document.querySelectorAll('dialog').forEach(target => {
   target.addEventListener('close', () => { if (target.id === 'actor-dialog') pendingAction = null; if (target.id === 'compare-dialog') { dialog('compare-content')?.replaceChildren(); if (active() && route.view === 'catalog') fitPosters(); } });
 });
 window.addEventListener('hashchange', renderRoute);
-window.addEventListener('pagehide', () => { bfcacheStoryPosition = scrollStory.capture(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
+window.addEventListener('pagehide', () => { bfcacheStoryPosition = scrollStory.capture(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
 window.addEventListener('pageshow', event => { if (active() && event.persisted && route.view === 'preview') { mountPreviewEffects(bfcacheStoryPosition); } else if (active() && event.persisted && route.view === 'catalog') fitPosters(); bfcacheStoryPosition = null; });
 async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260914-scroll-editions');
+    const { connect } = await import('./firebase.mjs?v=20260914-immersive-worlds');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;
@@ -361,5 +361,5 @@ async function connectStore() {
   finally { connecting = false; }
 }
 renderRoute();
-registerPrivateCleanup(() => { disposed = true; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); dialog('compare-dialog')?.close(); dialog('compare-content')?.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
+registerPrivateCleanup(() => { disposed = true; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); dialog('compare-dialog')?.close(); dialog('compare-content')?.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();

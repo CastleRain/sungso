@@ -1,4 +1,4 @@
-import { normalizeDocument, applyChange } from './core.mjs?v=20260914-scroll-editions';
+import { normalizeDocument, applyChange } from './core.mjs?v=20260914-immersive-worlds';
 
 export function createStore(adapter) {
   let disposed = false;
