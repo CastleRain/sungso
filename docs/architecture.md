@@ -13,10 +13,14 @@ sungso/
 │   ├── wecost/              → dist/wecost/            → /sungso/wecost/
 │   ├── honeymoon/           → dist/honeymoon/          → /sungso/honeymoon/
 │   ├── travel/              → dist/travel/             → /sungso/travel/
-│   └── homehunt/            → dist/homehunt/           → /sungso/homehunt/
+│   ├── homehunt/            → dist/homehunt/           → /sungso/homehunt/
+│   ├── table/               → dist/table/              → /sungso/table/
+│   ├── footprints/          → dist/footprints/         → /sungso/footprints/
+│   └── wedding/             → dist/wedding/            → /sungso/wedding/
 ├── shared/
 │   ├── firebase/            공개 설정·Google 회원 인증·앱 시작/정리
 │   ├── home/                앱 목록·공유 홈·메모
+│   ├── life/                생활 앱 공통 입력·로컬 기록·화면
 │   ├── finance/             재무 계산·목표 집값·여행 예산 연결
 │   ├── travel/              여행 기준·검증·공동 저장
 │   └── homehunt/            화면·서버 공통 순수 로직
@@ -47,7 +51,11 @@ Firebase·Render·GitHub 설정은 도구가 찾는 루트 위치에 둔다. 앱
 
 각 앱 HTML은 개인 루트를 숨긴 상태로 `shared/firebase/boot.mjs`만 실행한다. 회원 확인 후 기존 classic/module 스크립트를 순차 로드한다. `homehunt-private-cloud`를 기준으로 `[DEFAULT]`, `sungso-travel`, `sungso-travel-budget`, `sungso-invitation`에 같은 Google 사용자를 동기화한다. 회원 전용 개인 컬렉션과 HomeHunt 본인 UID 제한은 Firestore 규칙과 Render 서버에서 별도로 강제한다.
 
-`site_members/{uid}`는 관리자만 관리한다. `site_home/shared`는 3개 그룹·6개 앱의 순서/숨김 및 revision을 저장하고, 변경 전 revision을 비교해 충돌 시 초안을 보존한다. `home_notes`는 회원 일반 텍스트 메모이며 작성자만 삭제한다. 홈은 `events`를 읽어 다가오는 3개를 표시하고 기존 날짜 CRUD는 `/sungso/dates/`가 담당한다.
+`site_members/{uid}`는 관리자만 관리한다. `site_home/shared`는 3개 그룹·6개 앱의 순서/숨김 및 revision을 저장하고, 변경 전 revision을 비교해 충돌 시 초안을 보존한다. 홈의 `#home`은 저장된 앱 배열 중 숨기지 않은 앞 네 개를 바로가기로 요약한다. 바로가기를 명시적으로 적용할 때 선택한 앱을 배열 앞에 두고 나머지 앱은 홈에서 숨기며 새 필드를 추가하지 않는다. `#apps`는 홈 숨김과 무관하게 등록된 전체 앱을 검색·그룹·페이지로 탐색한다. 그룹 순서는 전체 앱 분류와 목록에 적용된다. 기존 여섯 앱이 모두 표시된 설정을 읽을 때 저장하거나 잘라내지 않는다.
+
+`home_notes`는 회원 일반 텍스트 메모이며 작성자만 삭제한다. 홈에서는 최신 메모 두 줄을 요약하고 전문·최근 3개·더보기·작성·삭제는 메모 대화상자에서 제공한다. 홈은 `events`를 읽어 다가오는 3개와 저장된 중요 일정 하나를 표시하고 기존 날짜 CRUD는 `/sungso/dates/`가 담당한다. 대문에 개인 예시 날짜나 미완성 앱을 넣지 않으며, 다른 앱의 개인 데이터 전체를 미리 구독하지 않는다.
+
+생활 앱 기본 틀 세 개는 `shared/life/registry.mjs`의 별도 등록부로 모든 앱 목록에 합쳐 표시한다. 기본 버전이라는 표시와 기기·계정별 저장 범위를 안내하며, 기존 여섯 앱만 허용하는 공유 홈 문서의 배열·바로가기에는 새 ID를 저장하지 않는다. `table`, `footprints`, `wedding`은 공통 회원 확인 후 같은 회원의 로컬 생활 기록을 읽는다. 장소·방문·앨범과 레시피·장보기는 ID로 연결하고, 기존 일정·재무·청첩장 데이터는 복제하지 않는다. 원본 사진 업로드·지도 API·운영 생활 컬렉션·새 규칙은 이 기본 틀에 포함하지 않는다.
 
 여행·리조트의 개인 기준은 `private_data/{travel_reference,honeymoon_reference}`에서 인증 후 읽는다. 기존 운영 일정·재무 문서는 기준 자료보다 우선하며 누락 문서를 자동 생성하지 않는다. 로그아웃/계정 전환은 구독·비동기 결과·개인 DOM을 정리한다. 명시적 로그아웃은 별도 비식별 잠금 표식을 두고 모든 SDK의 로그아웃 성공 뒤 메모리 Firestore를 종료하고 다시 연다. 실패하면 잠금과 재시도 화면을 유지하며 브라우저 저장소 제한에 따른 새로고침/새 탭 한계를 안내한다. 로컬 초안 키는 삭제하지 않고 비인증 상태에서 숨긴다. PDF 10개 공개 유지는 사용자 지정 예외이며 Drive 보호는 미완료다.
 

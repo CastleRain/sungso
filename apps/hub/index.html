@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#fffdf9">
   <title>우리의 공간 · sungso</title>
   <link rel="stylesheet" href="./css/style.css?v=couple-home-1">
   <script type="module" src="./shared/firebase/boot.mjs"></script>
@@ -11,55 +12,143 @@
 <body>
   <main data-private-root hidden>
     <header class="site-header">
-      <a class="brand" href="./" aria-label="sungso 홈">sungso<span>.</span></a>
-      <nav aria-label="주 메뉴"><a href="./" aria-current="page">우리의 공간</a><a href="./dates/">우리의 날짜</a></nav>
-      <div class="member-label"><span id="memberName"></span><span aria-hidden="true">♡</span></div>
+      <a class="brand" href="#home" data-home-view="home" aria-label="sungso 우리 홈">
+        <span class="brand-mark" aria-hidden="true">♡</span>
+        <span class="wordmark">sungso<span>.</span></span>
+      </a>
+      <nav aria-label="주 메뉴">
+        <a href="#home" data-home-view="home" aria-current="page">우리 홈</a>
+        <a href="#apps" data-home-view="apps">모든 앱</a>
+      </nav>
+      <div class="member-label"><span id="memberName"></span><span class="member-heart" aria-hidden="true">♡</span></div>
     </header>
+
     <div class="home-content">
-      <section class="welcome" aria-labelledby="welcomeTitle">
-        <div>
-          <p class="today" id="todayLabel"></p>
-          <p class="hello" id="helloLabel"></p>
-          <h1 id="welcomeTitle">우리의 오늘,<br><span>함께 채워가요.</span></h1>
-          <p class="welcome-copy">소소한 일상부터 설레는 여행까지.</p>
+      <p class="status home-status" id="homeStatus" role="status">우리의 공간을 불러오고 있어요.</p>
+
+      <section id="homeView" aria-label="우리 홈">
+        <div class="welcome">
+          <div class="welcome-text">
+            <div class="greeting-line"><p class="today" id="todayLabel"></p><p class="hello" id="helloLabel"></p></div>
+            <h1 id="welcomeTitle">둘이 쓰는, <span>작은 집.</span></h1>
+            <p class="welcome-copy">함께 만드는 도구로, 우리의 보통날을 조금 더 편하게.</p>
+          </div>
+          <a class="important-event" id="importantEvent" href="./dates/" hidden>
+            <span id="importantEventTitle"></span><strong id="importantEventDday"></strong>
+          </a>
         </div>
-        <div class="keepsake" aria-hidden="true"><div class="keepsake-back"></div><div class="keepsake-card"><div>S <small>&amp;</small> S</div><p>OUR EVERYDAY</p></div><span class="little-heart">♡</span></div>
-      </section>
-      <section class="apps-section" aria-labelledby="appsTitle">
-        <div class="section-heading"><h2 id="appsTitle">우리의 앱</h2><button class="quiet-button" id="editHome" disabled>☷ &nbsp;홈 편집</button></div>
-        <p class="status" id="homeStatus" role="status">우리의 공간을 불러오고 있어요.</p>
-        <div class="app-groups" id="appGroups"></div>
-      </section>
-      <div class="home-details">
-        <section aria-labelledby="eventsTitle">
-          <div class="section-heading"><h2 id="eventsTitle">다가오는 우리 일정</h2><a class="sub-link" href="./dates/">모두 보기 ↗</a></div>
-          <div id="upcomingEvents" class="upcoming-events"><p class="empty">일정을 불러오고 있어요.</p></div>
+
+        <section class="shortcuts-section" aria-labelledby="shortcutsTitle">
+          <div class="section-heading">
+            <h2 id="shortcutsTitle">우리의 바로가기</h2>
+            <div class="heading-actions">
+              <button type="button" class="text-button" id="editShortcuts" disabled>편집</button>
+              <a class="text-button" href="#apps" data-home-view="apps">모든 앱 <span id="allAppsCount"></span> ↗</a>
+            </div>
+          </div>
+          <div id="shortcuts" class="shortcut-grid"></div>
         </section>
-        <section aria-labelledby="notesTitle">
-          <div class="section-heading"><h2 id="notesTitle">서로에게 남긴 말</h2><span class="eyebrow">LITTLE NOTES</span></div>
-          <div id="notesList" class="notes-list"><p class="empty">메모를 불러오고 있어요.</p></div>
-          <p class="status" id="notesStatus" role="status"></p>
-          <button class="note-more quiet-button" id="moreNotes" hidden>이전 메모 더보기</button>
-          <button class="write-note" id="openNote">✎ &nbsp;한마디 남기기</button>
-          <form id="noteForm" class="note-form" hidden>
-            <label for="noteInput">서로에게 남길 말</label>
-            <textarea id="noteInput" rows="4" maxlength="500" placeholder="오늘 함께 나누고 싶은 이야기" required></textarea>
-            <div class="note-form-footer"><span id="noteCount">0 / 500</span><div><button type="button" id="cancelNote" class="quiet-button">취소</button><button class="primary-button" id="saveNote" type="submit">남기기</button></div></div>
-          </form>
-        </section>
-      </div>
-      <footer><span>성우 <b>♡</b> 소희</span><span>우리의 보통날이 특별해지는 곳.</span></footer>
+
+        <div class="home-details">
+          <section aria-labelledby="eventsTitle">
+            <div class="section-heading">
+              <h2 id="eventsTitle">다가오는 우리 일정</h2>
+              <a class="text-button" href="./dates/">전체 일정 <span id="allEventCount"></span> ↗</a>
+            </div>
+            <div id="upcomingEvents" class="upcoming-events"><p class="empty">일정을 불러오고 있어요.</p></div>
+          </section>
+
+          <section class="home-notes" aria-labelledby="notesTitle">
+            <div class="section-heading">
+              <h2 id="notesTitle">서로에게 남긴 말</h2>
+              <button type="button" class="text-button" id="openNote"><span aria-hidden="true">✎</span> 한마디 남기기</button>
+            </div>
+            <div id="notesPreview" class="notes-preview"></div>
+            <div class="note-preview-bottom"><button type="button" class="text-button" id="openNotes">이전 이야기 ↗</button></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="appsView" aria-labelledby="appsTitle" hidden>
+        <div class="library-heading">
+          <div>
+            <p class="eyebrow">OUR LITTLE TOOLBOX</p>
+            <h1 id="appsTitle">모든 앱</h1>
+            <p class="welcome-copy">둘이 쓰는 도구들을, 차곡차곡.<br>새 생활 앱은 우선 이 기기에 기록하며 써볼 수 있어요.</p>
+          </div>
+          <button type="button" class="quiet-button" id="editHome" disabled>앱 정리</button>
+        </div>
+        <div class="library-search-line">
+          <label class="library-search" for="appSearch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+            <input type="search" id="appSearch" placeholder="앱 이름이나 용도로 찾기" aria-label="앱 이름이나 용도 검색" autocomplete="off">
+          </label>
+          <div class="library-view-toggle" role="group" aria-label="앱 목록 모양">
+            <button type="button" id="libraryGridView" aria-label="카드 보기" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+            <button type="button" id="libraryListView" aria-label="목록 보기" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 5h13M8 12h13M8 19h13M3 5h1M3 12h1M3 19h1"/></svg></button>
+          </div>
+        </div>
+        <div id="appFilters" class="app-filters" role="group" aria-label="앱 분류"></div>
+        <p id="libraryResultCount" class="library-result-count" role="status"></p>
+        <div id="appGroups" class="library-grid" data-view="grid"></div>
+        <nav id="appPagination" class="app-pagination" aria-label="앱 목록 페이지" hidden>
+          <button type="button" class="quiet-button" id="prevApps">← 이전</button>
+          <span id="appPageLabel"></span>
+          <button type="button" class="quiet-button" id="nextApps">다음 →</button>
+        </nav>
+      </section>
+
+      <footer class="home-footer"><span>우리의 보통날을, 함께 <b>♡</b></span><span>작은 도구들이 모이는 우리 집</span></footer>
     </div>
+
+    <dialog id="shortcutDialog" aria-labelledby="shortcutDialogTitle">
+      <div class="dialog-content">
+        <div class="editor-heading">
+          <div><p class="eyebrow">CLOSE AT HAND</p><h2 id="shortcutDialogTitle">우리의 바로가기</h2></div>
+          <button type="button" class="icon-button" id="closeShortcut" aria-label="바로가기 편집 닫기">×</button>
+        </div>
+        <p class="editor-intro">홈에 둘 앱을 최대 네 개까지 고르세요.<br>선택한 순서로 두 사람의 홈에 함께 반영돼요.</p>
+        <div id="shortcutChoices" class="shortcut-choices"></div>
+        <div class="editor-conflict" id="shortcutConflict" hidden>
+          <strong>다른 기기에서 홈 구성이 바뀌었어요.</strong>
+          <p>고른 앱은 유지했어요. 최신 구성을 확인한 뒤 다시 골라 주세요.</p>
+          <p id="shortcutLatestSummary"></p>
+          <button type="button" class="quiet-button" id="loadLatestShortcuts">최신 구성으로 다시 고르기</button>
+        </div>
+        <p class="status" id="shortcutStatus" role="status"></p>
+        <div class="shortcut-footer"><button type="button" class="primary-button" id="saveShortcuts">바로가기 적용</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="notesDialog" aria-labelledby="notesDialogTitle">
+      <div class="dialog-content">
+        <div class="editor-heading">
+          <div><p class="eyebrow">LITTLE NOTES</p><h2 id="notesDialogTitle">서로에게 남긴 말</h2></div>
+          <button type="button" class="icon-button" id="closeNotes" aria-label="메모 닫기">×</button>
+        </div>
+        <button type="button" class="write-note" id="openNoteInDialog">✎ &nbsp;한마디 남기기</button>
+        <form id="noteForm" class="note-form" hidden>
+          <label for="noteInput">서로에게 남길 말</label>
+          <textarea id="noteInput" rows="4" maxlength="500" placeholder="오늘 함께 나누고 싶은 이야기" required></textarea>
+          <div class="note-form-footer"><span id="noteCount">0 / 500</span><div><button type="button" id="cancelNote" class="quiet-button">취소</button><button class="primary-button" id="saveNote" type="submit">남기기</button></div></div>
+        </form>
+        <p class="status" id="notesStatus" role="status"></p>
+        <div id="notesList" class="notes-list"><p class="empty">메모를 불러오고 있어요.</p></div>
+        <button type="button" class="note-more quiet-button" id="moreNotes" hidden>이전 메모 더보기</button>
+      </div>
+    </dialog>
+
     <dialog id="homeEditor" aria-labelledby="editorTitle">
       <form id="homeEditorForm">
-        <div class="editor-heading"><div><p class="eyebrow">OUR SHARED HOME</p><h2 id="editorTitle">우리에게 편한 홈으로</h2></div><button type="button" class="icon-button" id="closeEditor" aria-label="홈 편집 취소">×</button></div>
-        <p class="editor-intro">앱과 그룹의 순서를 바꾸고, 자주 쓰는 앱만 남겨보세요.<br>적용하면 두 사람의 모든 기기에 함께 반영돼요.</p>
+        <div class="editor-heading"><div><p class="eyebrow">OUR SHARED HOME</p><h2 id="editorTitle">우리에게 편한 앱 모음</h2></div><button type="button" class="icon-button" id="closeEditor" aria-label="홈 편집 취소">×</button></div>
+        <p class="editor-intro">그룹과 앱을 정리해요. 홈에는 표시한 앱 중 앞의 네 개가 나오고, 모든 앱에서는 전체 앱을 계속 열 수 있어요. 적용하면 두 사람에게 함께 반영돼요.</p>
         <div id="editorGroups"></div>
         <div class="editor-conflict" id="editorConflict" hidden><strong>다른 기기에서 홈 구성이 바뀌었어요.</strong><p>작성 중인 초안은 유지했어요. 아래 최신 구성을 확인한 뒤 다시 편집해 주세요.</p><p id="latestSummary"></p><button type="button" class="quiet-button" id="loadLatest">최신 구성으로 다시 편집</button></div>
         <p class="status" id="editorStatus" role="status"></p>
         <div class="editor-footer"><span>숨긴 앱은 언제든 다시 표시할 수 있어요.</span><div><button type="button" class="quiet-button" id="cancelEditor">취소</button><button type="submit" class="primary-button" id="saveHome">함께 적용</button></div></div>
       </form>
     </dialog>
+
     <dialog id="noteDeleteDialog" aria-labelledby="noteDeleteTitle" aria-describedby="noteDeleteDescription">
       <form id="noteDeleteForm" class="delete-note-form">
         <h2 id="noteDeleteTitle">내 메모 삭제</h2>

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { memberFromClaims, safeReturnPath, createAuthEpoch } from '../../shared/firebase/auth-core.mjs';
+import { loadRegistry } from '../../scripts/build-site.mjs';
 
 const claims = { email_verified: true, firebase: { sign_in_provider: 'google.com' } };
 test('only active verified Google members with known roles resolve to a display identity', () => {
@@ -21,7 +22,7 @@ test('auth epoch rejects stale asynchronous identity results', () => {
   const second = gate.next(); assert.equal(gate.valid(first), false); assert.equal(gate.valid(second), true);
 });
 test('every entry defers all application scripts until the common auth bootstrap', async () => {
-  for (const app of ['hub', 'dates', 'wecost', 'honeymoon', 'travel', 'invitation', 'homehunt']) {
+  for (const { id: app } of (await loadRegistry()).apps) {
     const html = await readFile(new URL(`../../apps/${app}/index.html`, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /sungso_pin_auth/);
     assert.match(html, /data-private-root[^>]*hidden/);

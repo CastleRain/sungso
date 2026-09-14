@@ -81,6 +81,33 @@
         "css",
         "js"
       ]
+    },
+    {
+      "id": "table",
+      "source": "apps/table",
+      "output": "table",
+      "files": [
+        "index.html",
+        "js"
+      ]
+    },
+    {
+      "id": "footprints",
+      "source": "apps/footprints",
+      "output": "footprints",
+      "files": [
+        "index.html",
+        "js"
+      ]
+    },
+    {
+      "id": "wedding",
+      "source": "apps/wedding",
+      "output": "wedding",
+      "files": [
+        "index.html",
+        "js"
+      ]
     }
   ],
   "shared": [
@@ -123,6 +150,13 @@
     {
       "source": "shared/home",
       "output": "shared/home",
+      "files": [
+        "."
+      ]
+    },
+    {
+      "source": "shared/life",
+      "output": "shared/life",
       "files": [
         "."
       ]

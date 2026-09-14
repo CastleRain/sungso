@@ -8,13 +8,16 @@
 
 | 소스 | 공개 경로 | 역할 |
 |---|---|---|
-| [apps/hub](apps/hub/README.md) | `/sungso/` | 공유 앱 그룹·홈 편집·다가오는 일정·메모 |
+| [apps/hub](apps/hub/README.md) | `/sungso/` | 밝은 우리 홈·공유 바로가기·모든 앱 검색·다가오는 일정·메모 |
 | [apps/dates](apps/dates/README.md) | `/sungso/dates/` | 기존 일정·달력·D-day |
 | [apps/invitation](apps/invitation/README.md) | `/sungso/invitation/` | 청첩장 20종·검색·나란히 비교·찜·공동 디자인 선택 |
 | [apps/wecost](apps/wecost/README.md) | `/sungso/wecost/` | 결혼비용·현금흐름·집 예산 |
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
 | [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·WeCost 연결 예산·출발 준비·변경 이력 |
 | [apps/homehunt](apps/homehunt/README.md) | `/sungso/homehunt/` | 아파트·실거래·통근·분양 |
+| [apps/table](apps/table/README.md) | `/sungso/table/` | 장보기·뭐 먹지·레시피 기본 버전, 기기·계정별 로컬 저장 |
+| [apps/footprints](apps/footprints/README.md) | `/sungso/footprints/` | 장소·데이트 방문·외부 앨범 기본 버전, 기기·계정별 로컬 저장 |
+| [apps/wedding](apps/wedding/README.md) | `/sungso/wedding/` | 하객노트·준비 목록 기본 버전, 기존 결혼 앱 연결 |
 
 ## 시작
 
@@ -48,5 +51,7 @@ npm run check
 ## 개발 계획
 
 [우리 둘의 홈·인증 전환 계획과 프로토타입](docs/development-plans/active/couple-home/README.md) · [계획 목록](docs/development-plans/README.md)
+
+[둘의 생활 앱 확장 계획](docs/development-plans/active/couple-life/README.md)은 장보기·레시피·장소와 데이트 기록·사진·하객노트를 생활 흐름으로 묶는다. 기존 여섯 앱과 새 생활 앱 세 개의 기본 틀을 구분하며, 생활 앱은 브라우저·회원별 저장부터 시작한다. 실제 공동 동기화·사진 업로드·지도 즐겨찾기 자동 연동은 후속 범위다.
 
 개인 PDF 10개는 사용자 요청으로 GitHub에 유지한다. NAVER 신규 키의 서버 설정·배포는 완료했으며 이전 키 폐기와 Drive 제한 공유, 남은 실제 회원 접근은 [진행 기록](docs/development-plans/active/couple-home/PROGRESS.md)의 후속 작업이다. 새 키를 설정해도 일정 기간 유효한 이전 키가 즉시 폐기되지는 않는다. 현재 소스에서 개인 기준 자료를 제거해도 과거 Git 이력의 노출이 해소되는 것은 아니다.

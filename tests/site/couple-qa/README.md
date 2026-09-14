@@ -6,6 +6,8 @@
 
 기본 Travel/Honeymoon reference는 간단한 가상 자료다. 실제 기존 화면 구조 전체가 필요한 QA는 `QA_PRIVATE_REFERENCE_INPUT` 환경변수에 **이미 Git 제외된 로컬** 마이그레이션 JSON 경로를 명시해 실행한다. 이 모드는 `private_data/travel_reference`와 `private_data/honeymoon_reference` 두 문서만 메모리로 읽으며 실제 회원·재무 문서는 가져오지 않는다. 원본 파일을 수정하거나 payload를 로그·검사 결과·Git에 기록하지 않는다. 이 모드의 화면 캡처는 Git 제외된 개인 QA 폴더에만 보관한다. 서버를 다시 시작하면 모든 대역 변경이 초기화된다.
 
+이 서버의 일정·회원·메모는 테스트 자료다. 사용자가 현재 실제 일정을 검토할 때는 `npm run dev -- --port 8796 --no-watch`의 정상 미리보기를 사용해 회원 로그인 후 공개 사이트와 같은 `events`를 읽는다. 과거 Git의 초기 일정을 사용자 일정 대신 주입하지 않는다. 정상 미리보기의 저장 버튼은 실제 운영 데이터에 반영되므로 자동 QA는 이 합성 대역에서만 수행한다. 생활 앱의 기기·계정별 로컬 저장 범위는 별개다.
+
 응답 CSP `connect-src 'self'`·`frame-src 'self'`가 실제 Firebase/검색/통근 연결을 차단한다. HomeHunt 지도는 대역 표시만 하고 위치·지도 타일·통근 공급자 API를 호출하지 않는다. 가상 API는 회원 health/quota 이외의 검색을 503으로 차단한다. `POST /__qa/control`의 fixture-doc은 로컬 메모리 문서를 교체해 실패·충돌 검증에 쓰며 운영 저장과 무관하다.
 
 이 대역은 전체 Firestore 규칙의 복제가 아니다. 실제 보안 허용/거절·권한 범위는 별도의 Emulator 검사로 검증한다. 외부 지도 표시·공급자 경로·실제 계정·실제 배포 확인을 완료한 것으로 기록하지 않는다.
