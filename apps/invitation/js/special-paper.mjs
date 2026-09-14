@@ -1,7 +1,9 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { PHOTOS } from './catalog.mjs?v=20260915-personal-invitation';
+import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
-const photograph = (index, thumbnail, attributes = '') => `<img src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : ''} ${attributes}>`;
+const photograph = (index, thumbnail, attributes = '') => `<img src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" decoding="async" ${thumbnail ? 'loading="lazy"' : ''} ${attributes}>`;
 const names = '<span>성우</span><i>&</i><span>소희</span>';
 const plane = '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m9 21 13 3 14-14 5 1-9 17 7 8-3 3-9-5-12 7-3-1 6-13-9-3Z" fill="currentColor"/></svg>';
 const rootAttributes = (id, thumbnail) => `class="cover paper-experience experience-${id}${thumbnail ? ' experience-thumbnail is-active' : ''}"${thumbnail ? '' : ` data-experience="${id}"`}${id === 'camera' ? ' data-shot="0"' : ''}`;
@@ -38,7 +40,7 @@ export function paperCover(templateId, thumbnail = false) {
         <div class="camera-top"><span>S & S</span><span>INSTANT LOVE</span></div>
         <div class="camera-flash-window" aria-hidden="true"></div><div class="camera-lens" aria-hidden="true"><span></span></div>
         <span class="camera-detail" aria-hidden="true">${WEDDING.monthPadded}<br>${WEDDING.dayPadded}</span>
-        ${thumbnail ? '<span class="camera-shutter" aria-hidden="true"><span>●</span></span>' : '<button class="camera-shutter" type="button" data-experience-action="shutter" aria-label="셔터를 눌러 예시 사진 꺼내기" aria-pressed="false" data-idle-label="찰칵" data-active-label="다음 사진"><span aria-hidden="true">●</span><span data-experience-label>찰칵</span></button>'}
+        ${thumbnail ? '<span class="camera-shutter" aria-hidden="true"><span>●</span></span>' : '<button class="camera-shutter" type="button" data-experience-action="shutter" aria-label="셔터를 눌러 사진 꺼내기" aria-pressed="false" data-idle-label="찰칵" data-active-label="다음 사진"><span aria-hidden="true">●</span><span data-experience-label>찰칵</span></button>'}
         <div class="camera-print-slot" aria-hidden="true"></div>
       </div>
       <div class="camera-waiting" aria-hidden="true"><span>↟</span><p>셔터 한 번,<br>기억 한 장.</p><small>PRESS TO MAKE A MEMORY</small></div>

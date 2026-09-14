@@ -1,6 +1,6 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
-import { escapeHtml } from './core.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { PHOTOS, getPhoto, contentDescription, hasPersonalPhotos, hasVenue } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml } from './core.mjs?v=20260915-personal-invitation';
 
 const postmark = `<svg viewBox="0 0 148 82" fill="none" aria-hidden="true"><circle cx="45" cy="41" r="31"/><circle cx="45" cy="41" r="27"/><path d="M71 27c17-9 24 9 41 0s24 9 36 0M74 36c14-9 21 9 38 0s24 9 36 0M74 45c14-9 21 9 38 0s24 9 36 0M71 54c17-9 24 9 41 0s24 9 36 0"/><text x="45" y="29">WITH LOVE</text><text x="45" y="44" class="env-postmark-day">${WEDDING.day} ${WEDDING.monthEn}</text><text x="45" y="58">${WEDDING.yearText}</text></svg>`;
 const letterIds = ['beginning', 'ordinary', 'promise'];
@@ -54,14 +54,14 @@ export function renderSignatureEnvelope(selection, parts) {
     </div>
     ${parts.story ? letters() : ''}
     <div class="env-date-sheet"><p class="env-date-annotation" aria-hidden="true">ONE DAY, A LIFETIME.</p><div class="env-date-frame">${parts.date || ''}</div><p class="env-date-footnote">당신과 함께 기억하고 싶은 날</p></div>
-    ${parts.gallery ? `<div class="env-photographs"><div class="env-section-index"><span>FROM OUR COLLECTION</span><span>PLATES 01—03</span></div><p class="env-script">Moments to keep</p>${parts.gallery}<p class="env-photo-caption"><span aria-hidden="true">S & S — PRIVATE ALBUM</span><span>오래 간직할, 지금의 우리.</span></p></div>` : ''}
+    ${parts.gallery ? `<div class="env-photographs"><div class="env-section-index"><span>FROM OUR COLLECTION</span><span>PLATES 01—${String(PHOTOS.length).padStart(2, '0')}</span></div><p class="env-script">Moments to keep</p>${parts.gallery}<p class="env-photo-caption"><span aria-hidden="true">S & S — PRIVATE ALBUM</span><span>오래 간직할, 지금의 우리.</span></p></div>` : ''}
     <div class="env-enclosures${parts.directions || parts.accounts || parts.rsvp || parts.guestbook ? '' : ' env-enclosures-empty'}">
       ${inset(parts.directions, 'directions', 'I', 'THE PLACE')}
       ${inset(parts.accounts, 'accounts', 'II', 'A KIND THOUGHT')}
       ${inset(parts.rsvp, 'rsvp', 'III', 'YOUR REPLY')}
       ${inset(parts.guestbook, 'guestbook', 'IV', 'A NOTE TO US')}
     </div>
-    <div class="env-last-page"><figure class="env-last-photograph"><img src="${escapeHtml(PHOTOS[1].src)}" alt="${escapeHtml(PHOTOS[1].alt)}" width="1536" height="1024" loading="lazy" decoding="async"><figcaption>Every ordinary day, with you.</figcaption></figure>${parts.ending || ''}<div class="env-postscript"><span>P.S. 당신의 자리도 남겨둘게요.</span><span aria-hidden="true">${postmark}</span></div><p class="env-print-colophon">SEALED WITH LOVE · SUNGWOO & SOHEE<br><span>사진·이야기·장소는 디자인 예시</span></p></div>`;
+    <div class="env-last-page"><figure class="env-last-photograph"><img src="${escapeHtml(getPhoto(1).src)}" alt="${escapeHtml(getPhoto(1).alt)}" width="${getPhoto(1).width}" height="${getPhoto(1).height}" loading="lazy" decoding="async"><figcaption>Every ordinary day, with you.</figcaption></figure>${parts.ending || ''}<div class="env-postscript"><span>P.S. 당신의 자리도 남겨둘게요.</span><span aria-hidden="true">${postmark}</span></div><p class="env-print-colophon">SEALED WITH LOVE · SUNGWOO & SOHEE<br><span>${hasPersonalPhotos() || hasVenue() ? `${escapeHtml(contentDescription())} · 이야기는 디자인 예시` : '사진·이야기·장소는 디자인 예시'}</span></p></div>`;
 }
 
 /** Native details supply keyboard behavior; only their open state survives rerenders. */

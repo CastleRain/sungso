@@ -1,15 +1,20 @@
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260915-wedding-date';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260915-wedding-date';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260915-wedding-date';
-import { createStore } from './store.mjs?v=20260915-wedding-date';
-import { createExperiences } from './experiences.mjs?v=20260915-wedding-date';
-import { createSignatures } from './signatures.mjs?v=20260915-wedding-date';
-import { signatureGuide } from './signature-catalog.mjs?v=20260915-wedding-date';
-import { createEditions } from './editions.mjs?v=20260915-wedding-date';
-import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260915-wedding-date';
-import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260915-wedding-date';
-import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-wedding-date';
-import { getScrollDesign } from './scroll-designs.mjs?v=20260915-wedding-date';
+import { createProfileStore } from './profile-store.mjs?v=20260915-personal-invitation';
+import { emptyProfileSnapshot } from './profile-core.mjs?v=20260915-personal-invitation';
+import { createProfileEditor, profileErrorMessage } from './profile-editor.mjs?v=20260915-personal-invitation';
+import { applyPersonalContent, clearPersonalContent, contentDescription, getCoverPhoto, getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
+import { createCountdown, countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260915-personal-invitation';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260915-personal-invitation';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260915-personal-invitation';
+import { createStore } from './store.mjs?v=20260915-personal-invitation';
+import { createExperiences } from './experiences.mjs?v=20260915-personal-invitation';
+import { createSignatures } from './signatures.mjs?v=20260915-personal-invitation';
+import { signatureGuide } from './signature-catalog.mjs?v=20260915-personal-invitation';
+import { createEditions } from './editions.mjs?v=20260915-personal-invitation';
+import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260915-personal-invitation';
+import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260915-personal-invitation';
+import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-personal-invitation';
+import { getScrollDesign } from './scroll-designs.mjs?v=20260915-personal-invitation';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
@@ -29,6 +34,9 @@ let storage; try { storage = window.localStorage; } catch { storage = null; }
 const local = readLocal(storage);
 local.actor = member.role;
 let shared = { data: normalizeDocument(null), connection: 'loading', saving: false, error: '' };
+let profileStore, profileConnecting = false, profileReady = false, appliedProfileRevision = null, pendingProfileRevision = null;
+let personal = {data:emptyProfileSnapshot(),connection:'loading',saving:false,error:''};
+const countdown = createCountdown();
 let store, route = parseRoute(location.hash), pendingAction, toastTimer, photoIndex = 0, localWarning = false;
 let revealObserver;
 let posterObserver;
@@ -36,8 +44,47 @@ let disposed = false, connecting = false;
 const active = () => !disposed && getMember()?.uid === member.uid && getMember()?.role === member.role;
 history.scrollRestoration = 'manual';
 const dialog = id => document.getElementById(id);
+// Authentication removes the private root before invoking cleanup. Retain the
+// media nodes so their data URLs can still be cleared after they are detached.
+const photoDialog = dialog('photo-dialog'), largePhoto = dialog('large-photo'), compareDialog = dialog('compare-dialog'), compareContent = dialog('compare-content');
+const profileConnection = document.createElement('div');
+profileConnection.className = 'connection-bar'; profileConnection.dataset.profileConnection = ''; profileConnection.style.display = 'none';
+main.before(profileConnection);
 const persist = () => { if (!writeLocal(storage, local) && !localWarning) { localWarning = true; toast('이 브라우저에서는 임시 설정을 보관할 수 없어요. 페이지를 닫기 전 우리의 선택으로 저장해주세요.'); } };
 function toast(message) { if (!active()) return; const target = dialog('toast'); target.textContent = message; target.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { target.hidden = true; }, 6000); }
+const profileEditor = createProfileEditor({dialog:dialog('profile-dialog'),getState:()=>personal,save:change=>profileStore.save(change),isActive:active,onSaved:result=>{
+  if(personal.data.ready && appliedProfileRevision>=result.revision) toast('사진과 예식장을 저장하고 모든 디자인에 적용했어요.');
+  else { pendingProfileRevision=result.revision; toast('사진과 예식장을 저장했어요. 화면에 새 설정을 불러오고 있어요.'); }
+  updateProfileStateUI();
+}});
+function updateProfileStateUI() {
+  if(!active())return;
+  const ready=personal.data.ready && personal.connection==='live';
+  const visible=profileReady && (personal.saving || !ready || !!personal.error || pendingProfileRevision!==null);
+  profileConnection.style.display=visible?'':'none';
+  if(!visible){profileConnection.replaceChildren();return;}
+  const message=personal.error?profileErrorMessage(personal.error):(personal.saving?'사진·예식장을 저장하고 있어요…':pendingProfileRevision!==null?'사진·예식장은 저장했어요. 새 설정을 화면에 반영하고 있어요…':personal.connection==='offline'?'연결이 끊겼어요. 마지막으로 불러온 사진·예식장을 보여드려요.':'새 사진·예식장을 불러오고 있어요. 마지막 설정은 계속 볼 수 있어요.');
+  profileConnection.innerHTML=`<span role="status" data-connection="${e(personal.connection)}">${e(message)}</span>${!ready&&!personal.saving?'<button type="button" data-action="profile-retry">사진·예식장 다시 불러오기</button>':''}`;
+  const summary=main.querySelector('.profile-summary');
+  if(summary)summary.dataset.connection=personal.connection;
+}
+function profileSummary() {
+  const photo = getCoverPhoto();
+  return `<section class="profile-summary" aria-label="청첩장 공통 설정"><div class="profile-summary-copy">${photo ? `<img src="${e(photo.src)}" alt="우리의 대표사진" width="64" height="76">` : '<span class="profile-summary-symbol" aria-hidden="true">♡</span>'}<div><p class="eyebrow">MADE FOR US</p><h2>우리의 사진, 우리의 초대</h2><p>${e(contentDescription())}</p></div></div><button class="button secondary" type="button" data-action="profile-settings">사진·예식장 설정 ↗</button>${countdownMarkup()}</section>`;
+}
+function profileGate() {
+  main.className='catalog-main';
+  main.innerHTML=`<section class="profile-loading" role="status"><span aria-hidden="true">♡</span><h1>${personal.error?'공통 설정에 연결하지 못했어요':'우리의 초대장을 준비하고 있어요'}</h1><p>${e(personal.error?profileErrorMessage(personal.error):'저장한 사진과 예식장을 불러옵니다.')}</p>${personal.error?'<button class="button secondary" data-action="profile-retry">다시 불러오기</button>':''}</section>`;
+}
+function refreshPersonalContent() {
+  const position=scrollStory.capture(),y=scrollY,comparing=compareDialog.open,compareY=compareDialog.scrollTop;
+  scrollStory.dispose();experiences.dispose();signatures.dispose();editions.dispose();immersiveExperiences.dispose();
+  photoDialog.close();largePhoto.removeAttribute('src');
+  if(route.view==='preview')renderPreview(position);else if(route.view==='selection')renderSelection();else renderCatalog();
+  if(comparing){showCompare();compareDialog.scrollTop=compareY;}
+  countdown.refresh();updateStateUI();
+  if(!position)requestAnimationFrame(()=>{if(active())window.scrollTo(0,y);});
+}
 function getDraft(id) {
   if (!local.drafts[id]) {
     const selection = shared.data.selection?.templateId === id ? structuredClone(shared.data.selection) : defaultSelection(id);
@@ -71,7 +118,7 @@ function showCompare() {
   if (local.compare.length < 2) return;
   const selected = local.compare.map(getTemplate);
   dialog('compare-content').innerHTML = `<p class="eyebrow">SIDE BY SIDE</p><h2 id="compare-title">우리의 후보, 나란히</h2><p>분위기와 페이지 흐름을 살펴보고 전체 예시로 이어가세요.</p><div class="compare-grid" style="--compare-columns:${selected.length}">${selected.map(template => `<section class="compare-item"><div class="template-thumb" aria-hidden="true"><div ${themeAttributes(defaultSelection(template.id))}>${cover(template.id, true)}</div></div><h3>${template.name}</h3><p>${template.mood}</p><dl><dt>직접 해볼 것</dt><dd>${template.experienceHint || '사진 확대와 갤러리 탐색'}</dd><dt>페이지의 흐름</dt><dd>${template.description}</dd><dt>기본 구성</dt><dd>${Object.entries(SECTIONS).filter(([key]) => defaultSelection(template.id).sections[key]).map(([, value]) => value).join(' · ')}</dd></dl><a class="button secondary" href="#preview/${template.id}">전체 예시 보기 ↗</a></section>`).join('')}</div>`;
-  dialog('compare-dialog').showModal(); fitPosters(dialog('compare-dialog'));
+  if(!compareDialog.open)compareDialog.showModal(); fitPosters(compareDialog);
 }
 function renderGrid() {
   const grid = dialog('template-grid'); if (!grid) return;
@@ -99,8 +146,8 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">원본에서 고른 여섯 가지 새로운 초대.<br>사진과 여백, 자연스럽게 이어지는 이야기를 만나보세요.</p></div><div class="library-feature"><span>REFERENCE SAMPLES</span><b>${TEMPLATES.filter(t => t.collection === 'reference').length}</b><p>원본 구성으로 만든 새 예시</p><button type="button" data-action="collection" data-collection="reference">새 예시부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">예식 날짜·시간을 반영했어요. 사진·장소는 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
-  renderGrid();
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">원본에서 고른 여섯 가지 새로운 초대.<br>사진과 여백, 자연스럽게 이어지는 이야기를 만나보세요.</p></div><div class="library-feature"><span>REFERENCE SAMPLES</span><b>${TEMPLATES.filter(t => t.collection === 'reference').length}</b><p>원본 구성으로 만든 새 예시</p><button type="button" data-action="collection" data-collection="reference">새 예시부터 보기 ↗</button></div></section>${profileSummary()}<div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">설정한 사진과 예식장이 모든 디자인에 반영돼요.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  renderGrid(); countdown.refresh();
 }
 function optionsMarkup(selection, scope = 'desktop') {
   const template = getTemplate(selection.templateId);
@@ -118,7 +165,7 @@ function updatePreviewDevice() {
   main.style.setProperty('--preview-width', `${previewWidth}px`);
   main.querySelectorAll('[data-action="preview-device"]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.device === previewDevice)));
   main.querySelector('.device-width').hidden = previewDevice !== 'mobile';
-  main.querySelector('.device-hint').textContent = supportsScrollStory(route.templateId) && scrollScenes ? (isReferenceTemplate(route.templateId) ? '처음 나타날 때 한 번, 자연스럽게 이어지는 초대' : '아래로 진행 · 위로 되돌리기') : previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.';
+  main.querySelector('.device-hint').textContent = supportsScrollStory(route.templateId) && scrollScenes ? (isReferenceTemplate(route.templateId) ? '글씨를 만난 뒤, 아래로 진행 · 위로 되돌리기' : '아래로 진행 · 위로 되돌리기') : previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.';
   main.querySelector('[data-action="scroll-scenes"]')?.setAttribute('aria-pressed', String(scrollScenes));
   scrollStory.refresh();
 }
@@ -127,11 +174,12 @@ function mountPreviewEffects(restore = null) {
   revealObserver?.disconnect();
   const mounted = scrollStory.mount(main, { enabled: supportsScrollStory(route.templateId) && scrollScenes, restore, templateId: route.templateId });
   if (!mounted) reveal();
+  countdown.refresh();
 }
-function renderPreview() {
+function renderPreview(restore = null) {
   const template = getTemplate(route.templateId), draft = getDraft(template.id);
   main.className = 'preview-main';
-  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">두 사람의 예식 날짜·시간 · 사진과 장소는 예시입니다.</p>${signatureGuide(template.id)}${deviceToolbar()}<div class="preview-layout"><div class="preview-stage"><div class="device-statusbar" aria-hidden="true"><span>9:41</span><i></i><span>▮▮▮ ▰</span></div><div id="preview-canvas">${invitation(draft.selection)}</div><div class="device-homebar" aria-hidden="true"><i></i></div></div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
+  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><div class="preview-disclaimer"><span>${e(contentDescription())}</span><button type="button" class="text-button" data-action="profile-settings">사진·예식장 설정</button></div>${signatureGuide(template.id)}${deviceToolbar()}<div class="preview-layout"><div class="preview-stage"><div class="device-statusbar" aria-hidden="true"><span>9:41</span><i></i><span>▮▮▮ ▰</span></div><div id="preview-canvas">${invitation(draft.selection)}</div><div class="device-homebar" aria-hidden="true"><i></i></div></div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
   const filtered = filterTemplates(TEMPLATES, shared.data.favorites, local.filter, local.collection, local.search);
   const sequence = filtered.some(item => item.id === template.id) ? filtered : TEMPLATES;
   const index = sequence.findIndex(item => item.id === template.id);
@@ -141,7 +189,7 @@ function renderPreview() {
   if (template.collection === 'immersive') { const guide = document.createElement('div'); guide.className = 'edition-guide'; guide.innerHTML = `<strong>${template.experienceHint}</strong><p>${template.description}</p>`; navigation.after(guide); }
   if (isReferenceTemplate(template.id)) {
     const guide = document.createElement('div'); guide.className = 'edition-guide reference-guide';
-    guide.innerHTML = `<strong>${e(template.experienceHint)}</strong><p>원본의 구성과 첫 등장 연출을 담았어요. 이미 본 장면은 다시 재생하지 않아요.</p><a href="${e(template.sourceUrl)}" target="_blank" rel="noopener noreferrer">${e(template.sourceBrand)} 원본 샘플 ↗</a>`;
+    guide.innerHTML = `<details><summary>${e(template.experienceHint)}</summary><p>오프닝 뒤에는 스크롤로 한 장씩. 긴 본문은 끝까지 읽고 다음 장면으로 이어져요.</p><a href="${e(template.sourceUrl)}" target="_blank" rel="noopener noreferrer">${e(template.sourceBrand)} 원본 샘플 ↗</a></details>`;
     navigation.after(guide);
   }
   const scrollDesign = getScrollDesign(template.id);
@@ -152,7 +200,7 @@ function renderPreview() {
     guide.innerHTML = `<strong>${scrollDesign.hint}</strong><p>내리면 다음 장면으로, 올리면 지나온 순간으로. 사진과 버튼도 직접 눌러보세요.</p>`;
   }
   updatePreviewDevice();
-  mountPreviewEffects(); updateDraftStatus();
+  mountPreviewEffects(restore); countdown.refresh(); updateDraftStatus();
 }
 function updateDraftStatus() {
   if (route.view !== 'preview') return;
@@ -181,11 +229,13 @@ function renderRoute() {
   document.body.dataset.view = route.view;
   dialog('nav-catalog').setAttribute('aria-current', route.view === 'catalog' ? 'page' : 'false');
   dialog('nav-selection').setAttribute('aria-current', route.view === 'selection' ? 'page' : 'false');
+  if (!profileReady) { profileGate(); updateStateUI(); return; }
   if (route.view === 'preview') renderPreview(); else if (route.view === 'selection') renderSelection(); else renderCatalog();
   updateStateUI();
   requestAnimationFrame(() => { window.scrollTo(0, route.view === 'catalog' ? local.catalogScroll : 0); main.focus({ preventScroll: true }); });
 }
 function updateStateUI() {
+  updateProfileStateUI();
   personButton();
   const status = dialog('sync-status');
   status.textContent = shared.saving ? '함께 저장하는 중…' : shared.error || (shared.connection === 'live' ? '두 사람의 선택이 함께 저장돼요' : shared.connection === 'loading' ? '공동 선택 연결 중… 예시는 바로 볼 수 있어요' : '연결을 확인해주세요. 임시 설정은 유지돼요.');
@@ -233,8 +283,9 @@ function refreshPreview() {
   if (!scrollStory.active) requestAnimationFrame(() => window.scrollTo(0, previousScroll));
 }
 function showPhoto(index) {
+  if(!active())return;
   photoIndex = (index + PHOTOS.length) % PHOTOS.length;
-  dialog('large-photo').src = PHOTOS[photoIndex].src; dialog('large-photo').alt = PHOTOS[photoIndex].alt;
+  dialog('large-photo').src = getPhoto(photoIndex).src; dialog('large-photo').alt = getPhoto(photoIndex).alt;
   dialog('photo-count').textContent = `${photoIndex + 1} / ${PHOTOS.length}`;
   if (!dialog('photo-dialog').open) dialog('photo-dialog').showModal();
 }
@@ -248,12 +299,15 @@ async function copyChoice() {
   }
 }
 document.addEventListener('click', async event => {
+  if(!active())return;
   const link = event.target.closest('a[href^="#"]');
   if (link?.getAttribute('href') === '#main') { event.preventDefault(); main.focus(); return; }
   if (link && route.view === 'catalog') { local.catalogScroll = window.scrollY; persist(); }
   const target = event.target.closest('[data-action]'); if (!target) return;
   try {
     switch (target.dataset.action) {
+      case 'profile-settings': if(!profileEditor.open())toast(personal.error?profileErrorMessage(personal.error):'사진·예식장을 불러오는 중이에요. 연결 안내에서 다시 불러올 수 있어요.'); break;
+      case 'profile-retry': if(profileStore)profileStore.retry();else await connectPersonalStore();break;
       case 'scroll-preview': {
         if (supportsScrollStory(target.dataset.template)) { scrollScenes = true; previewDevice = 'mobile'; }
         break;
@@ -318,6 +372,7 @@ document.addEventListener('click', async event => {
   } catch (error) { toast(error.message || '반영하지 못했어요. 다시 시도해주세요.'); }
 });
 document.addEventListener('input', event => {
+  if(!active())return;
   if (route.view === 'catalog' && event.target.id === 'catalog-search') { local.search = event.target.value; local.catalogScroll = 0; persist(); renderGrid(); return; }
   const input = event.target;
   if (input.id === 'preview-width') {
@@ -335,22 +390,22 @@ document.addEventListener('input', event => {
     document.querySelectorAll('.note-count').forEach(target => { target.textContent = `${selection.note.length} / 1,000`; });
   } else refreshPreview();
 });
-document.addEventListener('keydown', event => { if (dialog('photo-dialog').open) { if (event.key === 'ArrowLeft') showPhoto(photoIndex - 1); if (event.key === 'ArrowRight') showPhoto(photoIndex + 1); } });
+document.addEventListener('keydown', event => { if (active() && photoDialog.open) { if (event.key === 'ArrowLeft') showPhoto(photoIndex - 1); if (event.key === 'ArrowRight') showPhoto(photoIndex + 1); } });
 let touchStart;
 dialog('large-photo').addEventListener('touchstart', event => { touchStart = event.changedTouches[0].clientX; }, { passive: true });
 dialog('large-photo').addEventListener('touchend', event => { const delta = event.changedTouches[0].clientX - touchStart; if (Math.abs(delta) > 45) showPhoto(photoIndex + (delta < 0 ? 1 : -1)); }, { passive: true });
 document.querySelectorAll('dialog').forEach(target => {
-  target.addEventListener('click', event => { if (event.target !== target) return; const box = target.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) target.close(); });
+  target.addEventListener('click', event => { if (event.target !== target || (target.id === 'profile-dialog' && profileEditor.isBusy())) return; const box = target.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) target.close(); });
   target.addEventListener('close', () => { if (target.id === 'actor-dialog') pendingAction = null; if (target.id === 'compare-dialog') { dialog('compare-content')?.replaceChildren(); if (active() && route.view === 'catalog') fitPosters(); } });
 });
 window.addEventListener('hashchange', renderRoute);
-window.addEventListener('pagehide', () => { bfcacheStoryPosition = scrollStory.capture(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
-window.addEventListener('pageshow', event => { if (active() && event.persisted && route.view === 'preview') { mountPreviewEffects(bfcacheStoryPosition); } else if (active() && event.persisted && route.view === 'catalog') fitPosters(); bfcacheStoryPosition = null; });
+window.addEventListener('pagehide', () => { countdown.dispose(); bfcacheStoryPosition = scrollStory.capture(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); if (route.view === 'catalog') { local.catalogScroll = scrollY; persist(); } });
+window.addEventListener('pageshow', event => { if(active() && event.persisted) countdown.mount(); if (active() && event.persisted && route.view === 'preview') { mountPreviewEffects(bfcacheStoryPosition); } else if (active() && event.persisted && route.view === 'catalog') fitPosters(); bfcacheStoryPosition = null; });
 async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260915-wedding-date');
+    const { connect } = await import('./firebase.mjs?v=20260915-personal-invitation');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;
@@ -360,12 +415,38 @@ async function connectStore() {
       shared = value;
       if (shared.connection === 'live' && route.view === 'preview') { const draft = getDraft(route.templateId); if (draft.baseRevision === null) { draft.baseRevision = shared.data.selectionRevision; persist(); } }
       updateStateUI();
-      if (route.view === 'catalog') renderGrid();
-      if (route.view === 'selection') renderSelection();
+      if (profileReady && route.view === 'catalog') renderGrid();
+      if (profileReady && route.view === 'selection') renderSelection();
     });
   } catch { if (active()) { shared = { ...shared, connection: 'error', error: '공동 선택에 연결하지 못했어요. 예시와 임시 설정은 계속 사용할 수 있어요.' }; updateStateUI(); } }
   finally { connecting = false; }
 }
+async function connectPersonalStore() {
+  if(profileStore || profileConnecting || !active())return;
+  profileConnecting=true;
+  try{
+    const {connectProfile}=await import('./firebase.mjs?v=20260915-personal-invitation');
+    if(!active())return;
+    const adapter=await connectProfile();
+    if(!active()){adapter.dispose?.();return;}
+    profileStore=createProfileStore(adapter);
+    profileStore.subscribe(value=>{
+      if(!active())return;
+      personal=value;
+      if(value.data.ready && (appliedProfileRevision!==value.data.profile.revision || !profileReady)){
+        applyPersonalContent(value.data);appliedProfileRevision=value.data.profile.revision;
+        const first=!profileReady;profileReady=true;
+        if(first)renderRoute();else refreshPersonalContent();
+        countdown.refresh();
+      }else if(!profileReady)profileGate();
+      if(pendingProfileRevision!==null && value.data.ready && value.data.profile.revision>=pendingProfileRevision){pendingProfileRevision=null;toast('저장한 사진과 예식장이 모든 디자인에 적용됐어요.');}
+      updateProfileStateUI();
+    });
+  }catch(error){if(active()){personal={...personal,connection:'error',error:'사진과 예식장 설정을 불러오지 못했어요. 연결을 확인하고 다시 시도해주세요.'};if(!profileReady)profileGate();}}
+  finally{profileConnecting=false;}
+}
 renderRoute();
-registerPrivateCleanup(() => { disposed = true; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); dialog('compare-dialog')?.close(); dialog('compare-content')?.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
+countdown.mount();
+registerPrivateCleanup(() => { disposed = true; profileStore?.dispose(); profileEditor.dispose(); countdown.dispose(); clearPersonalContent(); personal={data:emptyProfileSnapshot(),connection:'signed-out',saving:false,error:''}; profileReady=false; appliedProfileRevision=null; pendingProfileRevision=null; bfcacheStoryPosition = null; store?.dispose(); scrollStory.dispose(); experiences.dispose(); signatures.dispose(); editions.dispose(); immersiveExperiences.dispose(); posterObserver?.disconnect(); revealObserver?.disconnect(); clearTimeout(toastTimer); photoDialog.close(); largePhoto.removeAttribute('src'); largePhoto.removeAttribute('alt'); compareDialog.close(); compareContent.replaceChildren(); profileConnection.replaceChildren(); main.replaceChildren(); shared = { data: normalizeDocument(null), connection: 'loading' }; });
 void connectStore();
+void connectPersonalStore();

@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
-import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
+import { getPhoto, hasPersonalPhotos } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 // Editorial scenes are fictional. They do not describe real astronomical events.
 const SCENES = Object.freeze([
@@ -11,18 +11,18 @@ const SCENES = Object.freeze([
 const orbit = `<svg class="cs-orbit-drawing" viewBox="0 0 360 190" fill="none" aria-hidden="true"><ellipse cx="180" cy="95" rx="149" ry="53" transform="rotate(-21 180 95)"/><ellipse cx="180" cy="95" rx="107" ry="79" transform="rotate(32 180 95)"/><path d="M24 95H336M180 13V177" stroke-dasharray="2 8"/><circle cx="180" cy="95" r="28"/><path class="cs-orbit-star" d="m180 69 5 21 21 5-21 5-5 21-5-21-21-5 21-5Z"/><circle class="cs-orbit-point" cx="48" cy="129" r="3"/><circle class="cs-orbit-point" cx="303" cy="56" r="3"/><circle cx="259" cy="136" r="2"/></svg>`;
 
 function scenes(includeStory) {
-  const first = SCENES[0], photo = PHOTOS[first.photo];
+  const first = SCENES[0], photo = getPhoto(first.photo);
   return `<section class="cs-scenes" aria-label="우리의 세 가지 예시 장면" data-constellation-scenes data-scene="0" data-glow="${first.glow}" data-show-story="${includeStory}">
     <div class="cs-chapter"><span>02</span><p>THE SEASONS OF US</p><span aria-hidden="true">✦</span></div>
     <div class="cs-scenes-heading"><p class="cs-kicker">우리의 계절을 펼쳐보세요</p><h2>Every season,<br><em>with you.</em></h2><p>작은 순간을 고르면<br>사진 속 우리의 계절이 바뀝니다.</p></div>
-    <div class="cs-scene-buttons" role="group" aria-label="예시 사진과 문구 선택">${SCENES.map((scene, index) => `<button type="button" data-constellation-scene="${index}" aria-pressed="${index === 0}" aria-controls="constellation-scene-stage"><span aria-hidden="true">0${index + 1}</span><span>${scene.label}</span><i aria-hidden="true">✧</i></button>`).join('')}</div>
+    <div class="cs-scene-buttons" role="group" aria-label="사진과 예시 문구 선택">${SCENES.map((scene, index) => `<button type="button" data-constellation-scene="${index}" aria-pressed="${index === 0}" aria-controls="constellation-scene-stage"><span aria-hidden="true">0${index + 1}</span><span>${scene.label}</span><i aria-hidden="true">✧</i></button>`).join('')}</div>
     <div class="cs-scene-stage" id="constellation-scene-stage">
       <div class="cs-scene-orbit" aria-hidden="true"></div>
       <p class="cs-scene-coordinate" data-constellation-coordinate>${first.coordinate}</p>
-      <figure class="cs-scene-figure"><img data-constellation-scene-photo src="${e(photo.src)}" alt="${e(photo.alt)}" width="${first.photo === 0 ? 1024 : 1536}" height="${first.photo === 0 ? 1536 : 1024}" loading="lazy" decoding="async"><span class="cs-photo-corner" aria-hidden="true">S <i>&</i> S</span><figcaption><span data-constellation-english>${first.english}</span><span data-constellation-counter>01 / 03</span></figcaption></figure>
+      <figure class="cs-scene-figure"><img data-constellation-scene-photo src="${e(photo.src)}" alt="${e(photo.alt)}" width="${photo.width}" height="${photo.height}" loading="lazy" decoding="async"><span class="cs-photo-corner" aria-hidden="true">S <i>&</i> S</span><figcaption><span data-constellation-english>${first.english}</span><span data-constellation-counter>01 / 03</span></figcaption></figure>
       <div class="cs-scene-copy" aria-live="polite" aria-atomic="true"><p class="cs-kicker" data-constellation-scene-label>${first.label}</p><h3 data-constellation-scene-title>${includeStory ? first.title : first.photoTitle}</h3>${includeStory ? `<p data-constellation-scene-line>${first.line}</p>` : ''}</div>
     </div>
-    <p class="cs-example-note">${includeStory ? '같은 가상 커플의 사진과 예시 이야기입니다.' : '같은 가상 커플의 사진을 활용한 세 장면입니다.'}</p>
+    <p class="cs-example-note">${hasPersonalPhotos() ? (includeStory ? '우리 사진과 디자인 예시 이야기입니다.' : '우리 사진으로 구성한 세 장면입니다.') : (includeStory ? '같은 가상 커플의 사진과 예시 이야기입니다.' : '같은 가상 커플의 사진을 활용한 세 장면입니다.')}</p>
   </section>`;
 }
 
@@ -45,7 +45,7 @@ export function createConstellationSignature() {
   const roots = new Set();
 
   function render(root) {
-    const scene = SCENES[selected], photo = PHOTOS[scene.photo];
+    const scene = SCENES[selected], photo = getPhoto(scene.photo);
     root.dataset.scene = String(selected);
     root.dataset.glow = scene.glow;
     root.querySelectorAll('button[data-constellation-scene]').forEach(button => {
@@ -54,8 +54,8 @@ export function createConstellationSignature() {
     const image = root.querySelector('[data-constellation-scene-photo]');
     if (image) {
       image.setAttribute('src', photo.src); image.setAttribute('alt', photo.alt);
-      image.setAttribute('width', scene.photo === 0 ? '1024' : '1536');
-      image.setAttribute('height', scene.photo === 0 ? '1536' : '1024');
+      image.setAttribute('width', String(photo.width));
+      image.setAttribute('height', String(photo.height));
     }
     for (const [name, value] of Object.entries({ coordinate: scene.coordinate, english: scene.english, counter: `0${selected + 1} / 03`, 'scene-label': scene.label, 'scene-title': root.dataset.showStory === 'true' ? scene.title : scene.photoTitle, 'scene-line': root.dataset.showStory === 'true' ? scene.line : '' })) {
       const target = root.querySelector(`[data-constellation-${name}]`);

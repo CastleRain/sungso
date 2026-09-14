@@ -50,3 +50,168 @@ main [data-reference-intro].ref-intro-seen * {
     animation: none !important;
   }
 }
+
+/* Reference samples keep the entire document as their scroll surface. The
+   stage clips only the viewport; the controller pans every tall section first. */
+main[data-reference-scenes="on"] .preview-layout {
+  height: var(--reference-track-height);
+  align-items: start;
+  overflow-anchor: none;
+}
+main[data-reference-scenes="on"] .preview-stage {
+  position: sticky;
+  top: var(--reference-pin-top);
+  align-self: start;
+}
+main[data-reference-scenes="on"] #preview-canvas { height: var(--reference-screen-height); }
+main[data-reference-scenes="on"] #preview-canvas > .invitation {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+}
+main[data-reference-scenes="on"] .ref-scene-group { display: contents; }
+main[data-reference-scenes="on"] .ref-scene {
+  position: absolute;
+  inset: 0 0 auto;
+  width: auto;
+  min-height: 100%;
+  margin-block: 0;
+  transform-origin: 50% 0;
+  transform: translateY(var(--ref-scene-y, 0px)) scale(var(--ref-scene-scale, 1));
+  opacity: var(--ref-scene-opacity, 1);
+  clip-path: var(--ref-scene-clip, inset(0));
+  background-color: var(--ref-scene-background, var(--paper));
+  transition: none !important;
+}
+main[data-reference-scenes="on"] .ref-scene.ref-reveal {
+  transform: translateY(var(--ref-scene-y, 0px)) scale(var(--ref-scene-scale, 1));
+  opacity: var(--ref-scene-opacity, 1);
+  transition: none !important;
+}
+main[data-reference-scenes="on"] .ref-scene .ref-reveal {
+  transform: none;
+  opacity: 1;
+  transition: none !important;
+}
+main[data-reference-scenes="on"] .ref-scene:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+
+/* Covers use the available stage, not the device's full screen behind the
+   preview controls. Flowing covers may still grow for a longer venue label. */
+main[data-reference-scenes="on"] .ref-scene.ref-cover {
+  box-sizing: border-box;
+  height: max(260px, var(--reference-screen-height));
+  min-height: 0;
+  max-height: none;
+}
+main[data-reference-scenes="on"] .ref-cover.rg-cover-jeju {
+  height: auto;
+  min-height: var(--reference-screen-height);
+  padding: clamp(16px, calc(var(--reference-screen-height) * .065), 48px) 24px;
+  justify-content: center;
+  gap: clamp(20px, calc(var(--reference-screen-height) * .09), 60px);
+}
+main[data-reference-scenes="on"] .rg-cover-jeju .rg-jeju-names {
+  font-size: clamp(28px, calc(var(--reference-screen-height) * .065), 48px);
+  gap: clamp(14px, calc(var(--reference-screen-height) * .065), 44px);
+}
+main[data-reference-scenes="on"] .rg-cover-jeju .rg-jeju-names i { font-size: 1em; }
+main[data-reference-scenes="on"] .rg-cover-jeju .rg-jeju-details {
+  margin-top: 0;
+  font-size: clamp(11px, calc(var(--reference-screen-height) * .026), 14px);
+}
+main[data-reference-scenes="on"] .rg-cover-jeju .rg-date-line { font: inherit; }
+
+main[data-reference-scenes="on"] .ref-cover.rg-cover-seoul {
+  height: auto;
+  min-height: var(--reference-screen-height);
+  padding: clamp(14px, calc(var(--reference-screen-height) * .04), 28px) 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+main[data-reference-scenes="on"] .rg-cover-seoul .rg-film-frame {
+  flex: none;
+  width: min(100%, max(80px, calc((var(--reference-screen-height) - 94px) * .5)));
+  height: auto;
+  aspect-ratio: 1;
+}
+main[data-reference-scenes="on"] .rg-cover-seoul .rg-film-second { margin-top: clamp(12px, calc(var(--reference-screen-height) * .03), 20px); }
+main[data-reference-scenes="on"] .rg-cover-seoul .rg-film-caption { margin-top: 12px; }
+main[data-reference-scenes="on"] .rg-cover-seoul .rg-film-side { font-size: clamp(8px, calc(var(--reference-screen-height) * .02), 11px); }
+main[data-reference-scenes="on"] .rg-cover-seoul .rg-film-names { top: 0; }
+
+main[data-reference-scenes="on"] .ref-cover.rs-polaroid {
+  height: auto;
+  min-height: var(--reference-screen-height);
+  padding: clamp(12px, calc(var(--reference-screen-height) * .03), 20px) 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(10px, calc(var(--reference-screen-height) * .03), 24px);
+}
+main[data-reference-scenes="on"] .rs-polaroid .rs-polaroid-paper { padding: clamp(12px, calc(var(--reference-screen-height) * .04), 28px) 30px; }
+main[data-reference-scenes="on"] .rs-polaroid .rs-polaroid-photo { height: clamp(100px, calc(var(--reference-screen-height) - 200px), 355px); }
+main[data-reference-scenes="on"] .rs-polaroid .rs-handwritten {
+  font-size: clamp(26px, calc(var(--reference-screen-height) * .07), 36px);
+  margin-top: clamp(12px, calc(var(--reference-screen-height) * .03), 24px);
+}
+main[data-reference-scenes="on"] .rs-polaroid .rs-vertical-names { top: clamp(24px, calc(var(--reference-screen-height) * .09), 55px); }
+main[data-reference-scenes="on"] .rs-polaroid > .rs-date-line { margin-top: 0; font-size: 12px; line-height: 1.85; }
+main[data-reference-scenes="on"] .rs-editorial .rs-side {
+  bottom: clamp(16px, calc(var(--reference-screen-height) * .04), 24px);
+  font-size: clamp(10px, calc(var(--reference-screen-height) * .025), 14px);
+  max-height: calc(var(--reference-screen-height) * .58);
+  overflow-wrap: anywhere;
+}
+
+/* Introductions remain inside the first screen on short phones as well. */
+main[data-reference-scenes="on"] .ref-scene .wl-script {
+  top: min(45%, calc(var(--reference-screen-height) * .48));
+}
+main[data-reference-scenes="on"] .rs-lettering .rs-writing {
+  top: min(73%, calc(var(--reference-screen-height) * .65));
+}
+main[data-reference-scenes="on"] .rs-opening > span {
+  position: absolute;
+  top: calc(var(--reference-screen-height) * .48);
+  left: 8px;
+  right: 8px;
+  transform: translateY(-50%) rotate(-5deg);
+}
+
+main[data-reference-scenes="on"][data-reference-treatment="photo"] .ref-scene :is(.rs-cover-photo,.rg-porto-photo) {
+  transform: scale(var(--ref-photo-scale, 1));
+  transform-origin: 50% 45%;
+  transition: none;
+}
+main[data-reference-scenes="on"][data-reference-treatment="paper"] .ref-scene :is(.rg-film-frame,.rs-polaroid-photo,.rg-about-photo) { overflow: hidden; }
+main[data-reference-scenes="on"][data-reference-treatment="paper"] .ref-scene :is(.rg-film-frame,.rs-polaroid-photo,.rg-about-photo) > img {
+  transform: translateY(var(--ref-photo-near, 0px)) scale(1.045);
+  transition: none;
+}
+main[data-reference-scenes="on"][data-reference-treatment="paper"] .ref-scene :is(.rg-film-second,.rg-about-card:nth-child(even) .rg-about-photo) > img {
+  transform: translateY(var(--ref-photo-far, 0px)) scale(1.045);
+}
+.ref-scene-guide {
+  position: absolute;
+  left: 12px;
+  top: 40px;
+  bottom: 40px;
+  width: 1px;
+  background: var(--soft);
+  pointer-events: none;
+}
+.ref-scene-guide > i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleY(var(--ref-reading-progress, 0));
+  transform-origin: top;
+}
+@media (prefers-reduced-motion: reduce) {
+  main[data-reference-scenes="on"] .ref-scene,
+  main[data-reference-scenes="on"] .ref-scene.ref-reveal,
+  main[data-reference-scenes="on"] .ref-scene img { transform: none; transition: none !important; }
+}

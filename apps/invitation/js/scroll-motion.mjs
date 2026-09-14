@@ -1,6 +1,6 @@
-import { editorialMotion } from './scroll-motion-editorial.mjs?v=20260915-wedding-date';
-import { romanticMotion } from './scroll-motion-romantic.mjs?v=20260915-wedding-date';
-import { collectionMotion } from './scroll-motion-collection.mjs?v=20260915-wedding-date';
+import { editorialMotion } from './scroll-motion-editorial.mjs?v=20260915-personal-invitation';
+import { romanticMotion } from './scroll-motion-romantic.mjs?v=20260915-personal-invitation';
+import { collectionMotion } from './scroll-motion-collection.mjs?v=20260915-personal-invitation';
 
 /** Every visual value is a function of position; there is no playback clock. */
 export function storyMotion(id, input) {

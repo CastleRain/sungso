@@ -1,11 +1,12 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
-import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { PHOTOS } from './catalog.mjs?v=20260915-personal-invitation';
+import { getPhoto, hasPersonalPhotos, contentDescription } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 const IDS = ['magazine', 'film', 'vinyl', 'museum'];
-const photo = (index, className = '', eager = false) => `<img class="${className}" src="${e(PHOTOS[index].src)}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+const photo = (index, className = '', eager = false) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 const rule = (left, right = 'SUNGWOO & SOHEE') => `<div class="ed-rule"><span>${left}</span><span>${right}</span></div>`;
-const sample = '<p class="ed-sample">사진·이야기·장소는 디자인 예시</p>';
+const sample = () => `<p class="ed-sample">${e(contentDescription())} · 이야기는 디자인 예시</p>`;
 const wrap = (part, className, label = '') => part ? `<div class="${className}">${label ? `<p class="ed-label">${label}</p>` : ''}${part}</div>` : '';
 const button = (action, value, text, pressed = false) => `<button type="button" data-editorial-action="${action}" data-value="${value}" aria-pressed="${pressed}">${text}</button>`;
 
@@ -48,7 +49,7 @@ function magazineStory() {
 }
 
 function filmDarkroom() {
-  return `<section class="ed-film-darkroom" data-editorial-stage="film" data-process="0">${rule('THE DARKROOM', 'NEGATIVE → MEMORY')}<h2>한 장을<br><em>기억으로 현상해요.</em></h2><p class="ed-lead">필름을 고르고, 빛을 더해보세요.<br>세 번의 과정이 지나면 색이 선명해집니다.</p><div class="ed-film-contact-sheet" role="group" aria-label="현상할 예시 필름 선택">${PHOTOS.map((_, index) => button('frame', index, `${photo(index)}<span>FRAME 0${index + 1}</span>`, index === 0)).join('')}</div><div class="ed-development-tray">${photo(0, 'ed-changing-photo')}<span class="ed-development-label" data-editorial-field="processLabel">01 / NEGATIVE</span></div><div class="ed-process-meter" aria-label="현상 과정"><span data-film-step="0">필름</span><i></i><span data-film-step="1">빛</span><i></i><span data-film-step="2">기억</span></div><div class="ed-action-row"><button type="button" data-editorial-action="develop" data-value="next" data-editorial-field="developButton">빛으로 현상하기 ↗</button><button type="button" data-editorial-action="reset" data-value="reset">처음으로</button></div><p class="ed-film-status" data-editorial-field="processStatus" aria-live="polite">선택한 필름을 빛에 꺼내볼까요?</p><p class="ed-sample">사진 연출 체험이며 원본 사진은 변경되지 않아요.</p></section>`;
+  return `<section class="ed-film-darkroom" data-editorial-stage="film" data-process="0">${rule('THE DARKROOM', 'NEGATIVE → MEMORY')}<h2>한 장을<br><em>기억으로 현상해요.</em></h2><p class="ed-lead">필름을 고르고, 빛을 더해보세요.<br>세 번의 과정이 지나면 색이 선명해집니다.</p><div class="ed-film-contact-sheet" role="group" aria-label="${hasPersonalPhotos() ? '우리' : '예시'} 필름 선택">${PHOTOS.map((_, index) => button('frame', index, `${photo(index)}<span>FRAME 0${index + 1}</span>`, index === 0)).join('')}</div><div class="ed-development-tray">${photo(0, 'ed-changing-photo')}<span class="ed-development-label" data-editorial-field="processLabel">01 / NEGATIVE</span></div><div class="ed-process-meter" aria-label="현상 과정"><span data-film-step="0">필름</span><i></i><span data-film-step="1">빛</span><i></i><span data-film-step="2">기억</span></div><div class="ed-action-row"><button type="button" data-editorial-action="develop" data-value="next" data-editorial-field="developButton">빛으로 현상하기 ↗</button><button type="button" data-editorial-action="reset" data-value="reset">처음으로</button></div><p class="ed-film-status" data-editorial-field="processStatus" aria-live="polite">선택한 필름을 빛에 꺼내볼까요?</p><p class="ed-sample">사진 연출 체험이며 원본 사진은 변경되지 않아요.</p></section>`;
 }
 
 function filmStory() {
@@ -62,7 +63,7 @@ function vinylPlayer() {
 
 function museumRooms() {
   const first = ROOMS[0];
-  return `<section class="ed-museum-exhibition" data-editorial-stage="museum" data-room="0">${rule('THE PERMANENT COLLECTION', 'THREE ROOMS')}<h2>천천히<br>둘러보아 주세요.</h2><p class="ed-lead">각 전시실에는 하나의 순간이 있습니다.<br>작품을 고르고, 그 옆의 작은 글을 읽어보세요.</p><div class="ed-room-switch" role="group" aria-label="전시실 선택">${ROOMS.map((_, index) => button('room', index, `<span>ROOM</span>0${index + 1}`, index === 0)).join('')}</div><div class="ed-gallery-wall"><button type="button" class="ed-exhibit-art" data-action="photo" data-index="0" aria-label="전시 예시 사진 1 크게 보기">${photo(first.photo, 'ed-changing-photo')}</button><span class="ed-wall-line" aria-hidden="true"></span></div><div class="ed-art-label" aria-live="polite" aria-atomic="true"><p class="ed-label" data-editorial-field="english">${first.english}</p><h3 data-editorial-field="title">${first.title}</h3><span data-editorial-field="material">${first.material}</span><p data-editorial-field="note">${first.note}</p></div></section>`;
+  return `<section class="ed-museum-exhibition" data-editorial-stage="museum" data-room="0">${rule('THE PERMANENT COLLECTION', 'THREE ROOMS')}<h2>천천히<br>둘러보아 주세요.</h2><p class="ed-lead">각 전시실에는 하나의 순간이 있습니다.<br>작품을 고르고, 그 옆의 작은 글을 읽어보세요.</p><div class="ed-room-switch" role="group" aria-label="전시실 선택">${ROOMS.map((_, index) => button('room', index, `<span>ROOM</span>0${index + 1}`, index === 0)).join('')}</div><div class="ed-gallery-wall"><button type="button" class="ed-exhibit-art" data-action="photo" data-index="0" aria-label="전시 ${hasPersonalPhotos() ? '우리' : '예시'} 사진 1 크게 보기">${photo(first.photo, 'ed-changing-photo')}</button><span class="ed-wall-line" aria-hidden="true"></span></div><div class="ed-art-label" aria-live="polite" aria-atomic="true"><p class="ed-label" data-editorial-field="english">${first.english}</p><h3 data-editorial-field="title">${first.title}</h3><span data-editorial-field="material">${first.material}</span><p data-editorial-field="note">${first.note}</p></div></section>`;
 }
 
 /** Each edition keeps shared essentials and gallery controls, with its own complete rhythm. */
@@ -72,10 +73,10 @@ export function editorialBody(selection, parts) {
   // Respect both the existing section contract and the already-filtered renderer parts.
   const p = { ...parts };
   for (const key of ['story', 'gallery', 'directions', 'accounts', 'rsvp', 'guestbook']) if (selection.sections?.[key] === false) p[key] = '';
-  if (id === 'magazine') return `${p.cover}<div class="ed-magazine-editor">${rule('01 / FROM THE EDITORS', 'A LETTER TO YOU')}<p class="ed-editor-initial" aria-hidden="true">Dear.</p>${p.greeting}<p class="ed-editor-signoff">With love, the two of us.</p></div>${p.story ? magazineStory() : ''}<div class="ed-magazine-date">${rule('THE DATE TO REMEMBER', 'SAVE THIS PAGE')}<p class="ed-date-poster" aria-hidden="true">${WEDDING.monthEn}<br><span>${WEDDING.dayPadded}.</span></p>${p.date}</div>${wrap(p.gallery, 'ed-magazine-gallery', 'THE PHOTO ESSAY / MOMENTS IN BETWEEN')}${wrap(p.directions, 'ed-magazine-insert', 'THE CITY GUIDE')}${wrap(p.accounts, 'ed-magazine-insert ed-magazine-soft', 'A NOTE OF GRATITUDE')}${wrap(p.rsvp, 'ed-magazine-insert', 'READER INVITATION')}${wrap(p.guestbook, 'ed-magazine-insert ed-magazine-soft', 'LETTERS TO THE EDITORS')}<div class="ed-magazine-ending"><p class="ed-end-masthead">US.</p><p class="ed-ending-line">The story goes on.</p>${p.ending}${sample}</div>`;
-  if (id === 'film') return `${p.cover}<div class="ed-film-intro">${rule('SCENE 01', 'THE INVITATION')}<span class="ed-film-flare" aria-hidden="true"></span><p class="ed-film-intro-title">Fade in.<br><em>To a life together.</em></p>${p.greeting}</div>${p.story ? filmStory() : ''}<div class="ed-film-screening">${rule('ONE DAY ONLY', 'A LIFETIME TO FOLLOW')}<p class="ed-screening-heading">THE PREMIERE<br><span>${WEDDING.dashes}</span></p>${p.date}</div>${p.gallery ? filmDarkroom() + wrap(p.gallery, 'ed-film-archive', 'THE CONTACT PRINTS / YOUR CHOSEN LAYOUT') : ''}${wrap(p.directions, 'ed-film-card', 'LOCATION NOTES')}${wrap(p.accounts, 'ed-film-card ed-film-card-light', 'SPECIAL THANKS')}${wrap(p.rsvp, 'ed-film-card', 'SEAT RESERVATION')}${wrap(p.guestbook, 'ed-film-card ed-film-card-light', 'FROM OUR AUDIENCE')}<div class="ed-film-ending"><p>THIS IS ONLY<br><em>the beginning.</em></p>${p.ending}<div class="ed-film-credits"><span>STARRING</span><strong>SUNGWOO · SOHEE</strong><span>WITH OUR FAVORITE PEOPLE</span><strong>그리고, 소중한 당신</strong></div>${sample}</div>`;
-  if (id === 'vinyl') return `${p.cover}<div class="ed-vinyl-invitation">${rule('AN INVITATION TO LISTEN', 'TO OUR LITTLE STORY')}<div class="ed-record-wave" aria-hidden="true">${Array.from({ length: 29 }, (_, index) => `<i style="--bar:${12 + (index * 17 % 43)}px"></i>`).join('')}</div>${p.greeting}</div>${p.story ? vinylPlayer() : ''}<div class="ed-vinyl-release">${rule('RELEASE DAY', `${WEDDING.weekdayEn} · ${WEDDING.time12}`)}<p class="ed-release-stamp">${WEDDING.dayPadded}<br><span>${WEDDING.monthEn} / ${WEDDING.yearText}</span></p>${p.date}<p class="ed-label ed-release-note">성우 & 소희 · 첫 번째 정규앨범 발매일</p></div>${wrap(p.gallery, 'ed-vinyl-booklet', 'ALBUM BOOKLET / PICTURES WE KEEP')}${wrap(p.directions, 'ed-vinyl-info', 'VENUE / LISTENING PARTY')}${wrap(p.accounts, 'ed-vinyl-info ed-vinyl-soft', 'THANK YOU CREDITS')}${wrap(p.rsvp, 'ed-vinyl-info', 'YOU ARE ON THE GUEST LIST')}${wrap(p.guestbook, 'ed-vinyl-info ed-vinyl-soft', 'YOUR LINER NOTES')}<div class="ed-vinyl-ending"><span class="ed-mini-record" aria-hidden="true"></span><p class="ed-ending-line">Forever,<br>on repeat.</p>${p.ending}${rule('S&S RECORDS', 'ALL OUR TOMORROWS')}${sample}</div>`;
-  return `${p.cover}<div class="ed-museum-intro">${rule('A NOTE FROM THE CURATORS', 'WELCOME')}<p class="ed-museum-opening">한 사람의 일상에<br>다른 한 사람이 들어와<br><em>새로운 풍경이 됩니다.</em></p>${p.greeting}</div>${p.story ? `<section class="ed-museum-curator" data-section="story">${rule('CURATOR’S NOTES', 'ON LOVE & EVERYDAY LIFE')}<h2>작품이 되기 전의<br>작은 순간들.</h2>${FEATURES.map((item, index) => `<div class="ed-curator-note"><span>0${index + 1}</span><div><h3>${item.label}</h3><p>${item.copy}</p></div></div>`).join('')}<p class="ed-sample">전시 구성을 살펴보기 위한 예시 이야기입니다.</p></section>` : ''}${p.gallery ? museumRooms() + wrap(p.gallery, 'ed-museum-archive', 'THE EXHIBITION CATALOGUE') : ''}<div class="ed-museum-event">${rule('OPENING RECEPTION', 'YOU ARE INVITED')}<div class="ed-museum-ticket"><span>ADMIT</span><strong>YOU<br><i>+ LOVE</i></strong><span>INVITATION No. ${WEDDING.code}</span></div>${p.date}</div>${wrap(p.directions, 'ed-museum-visit', 'PLAN YOUR VISIT')}${wrap(p.accounts, 'ed-museum-visit ed-museum-soft', 'WITH OUR GRATITUDE')}${wrap(p.rsvp, 'ed-museum-visit', 'JOIN THE OPENING')}${wrap(p.guestbook, 'ed-museum-visit ed-museum-soft', 'THE VISITOR’S BOOK')}<div class="ed-museum-ending"><p>The collection<br><em>continues.</em></p>${p.ending}${rule('GALLERY S&S', 'THANK YOU FOR BEING HERE')}${sample}</div>`;
+  if (id === 'magazine') return `${p.cover}<div class="ed-magazine-editor">${rule('01 / FROM THE EDITORS', 'A LETTER TO YOU')}<p class="ed-editor-initial" aria-hidden="true">Dear.</p>${p.greeting}<p class="ed-editor-signoff">With love, the two of us.</p></div>${p.story ? magazineStory() : ''}<div class="ed-magazine-date">${rule('THE DATE TO REMEMBER', 'SAVE THIS PAGE')}<p class="ed-date-poster" aria-hidden="true">${WEDDING.monthEn}<br><span>${WEDDING.dayPadded}.</span></p>${p.date}</div>${wrap(p.gallery, 'ed-magazine-gallery', 'THE PHOTO ESSAY / MOMENTS IN BETWEEN')}${wrap(p.directions, 'ed-magazine-insert', 'THE CITY GUIDE')}${wrap(p.accounts, 'ed-magazine-insert ed-magazine-soft', 'A NOTE OF GRATITUDE')}${wrap(p.rsvp, 'ed-magazine-insert', 'READER INVITATION')}${wrap(p.guestbook, 'ed-magazine-insert ed-magazine-soft', 'LETTERS TO THE EDITORS')}<div class="ed-magazine-ending"><p class="ed-end-masthead">US.</p><p class="ed-ending-line">The story goes on.</p>${p.ending}${sample()}</div>`;
+  if (id === 'film') return `${p.cover}<div class="ed-film-intro">${rule('SCENE 01', 'THE INVITATION')}<span class="ed-film-flare" aria-hidden="true"></span><p class="ed-film-intro-title">Fade in.<br><em>To a life together.</em></p>${p.greeting}</div>${p.story ? filmStory() : ''}<div class="ed-film-screening">${rule('ONE DAY ONLY', 'A LIFETIME TO FOLLOW')}<p class="ed-screening-heading">THE PREMIERE<br><span>${WEDDING.dashes}</span></p>${p.date}</div>${p.gallery ? filmDarkroom() + wrap(p.gallery, 'ed-film-archive', 'THE CONTACT PRINTS / YOUR CHOSEN LAYOUT') : ''}${wrap(p.directions, 'ed-film-card', 'LOCATION NOTES')}${wrap(p.accounts, 'ed-film-card ed-film-card-light', 'SPECIAL THANKS')}${wrap(p.rsvp, 'ed-film-card', 'SEAT RESERVATION')}${wrap(p.guestbook, 'ed-film-card ed-film-card-light', 'FROM OUR AUDIENCE')}<div class="ed-film-ending"><p>THIS IS ONLY<br><em>the beginning.</em></p>${p.ending}<div class="ed-film-credits"><span>STARRING</span><strong>SUNGWOO · SOHEE</strong><span>WITH OUR FAVORITE PEOPLE</span><strong>그리고, 소중한 당신</strong></div>${sample()}</div>`;
+  if (id === 'vinyl') return `${p.cover}<div class="ed-vinyl-invitation">${rule('AN INVITATION TO LISTEN', 'TO OUR LITTLE STORY')}<div class="ed-record-wave" aria-hidden="true">${Array.from({ length: 29 }, (_, index) => `<i style="--bar:${12 + (index * 17 % 43)}px"></i>`).join('')}</div>${p.greeting}</div>${p.story ? vinylPlayer() : ''}<div class="ed-vinyl-release">${rule('RELEASE DAY', `${WEDDING.weekdayEn} · ${WEDDING.time12}`)}<p class="ed-release-stamp">${WEDDING.dayPadded}<br><span>${WEDDING.monthEn} / ${WEDDING.yearText}</span></p>${p.date}<p class="ed-label ed-release-note">성우 & 소희 · 첫 번째 정규앨범 발매일</p></div>${wrap(p.gallery, 'ed-vinyl-booklet', 'ALBUM BOOKLET / PICTURES WE KEEP')}${wrap(p.directions, 'ed-vinyl-info', 'VENUE / LISTENING PARTY')}${wrap(p.accounts, 'ed-vinyl-info ed-vinyl-soft', 'THANK YOU CREDITS')}${wrap(p.rsvp, 'ed-vinyl-info', 'YOU ARE ON THE GUEST LIST')}${wrap(p.guestbook, 'ed-vinyl-info ed-vinyl-soft', 'YOUR LINER NOTES')}<div class="ed-vinyl-ending"><span class="ed-mini-record" aria-hidden="true"></span><p class="ed-ending-line">Forever,<br>on repeat.</p>${p.ending}${rule('S&S RECORDS', 'ALL OUR TOMORROWS')}${sample()}</div>`;
+  return `${p.cover}<div class="ed-museum-intro">${rule('A NOTE FROM THE CURATORS', 'WELCOME')}<p class="ed-museum-opening">한 사람의 일상에<br>다른 한 사람이 들어와<br><em>새로운 풍경이 됩니다.</em></p>${p.greeting}</div>${p.story ? `<section class="ed-museum-curator" data-section="story">${rule('CURATOR’S NOTES', 'ON LOVE & EVERYDAY LIFE')}<h2>작품이 되기 전의<br>작은 순간들.</h2>${FEATURES.map((item, index) => `<div class="ed-curator-note"><span>0${index + 1}</span><div><h3>${item.label}</h3><p>${item.copy}</p></div></div>`).join('')}<p class="ed-sample">전시 구성을 살펴보기 위한 예시 이야기입니다.</p></section>` : ''}${p.gallery ? museumRooms() + wrap(p.gallery, 'ed-museum-archive', 'THE EXHIBITION CATALOGUE') : ''}<div class="ed-museum-event">${rule('OPENING RECEPTION', 'YOU ARE INVITED')}<div class="ed-museum-ticket"><span>ADMIT</span><strong>YOU<br><i>+ LOVE</i></strong><span>INVITATION No. ${WEDDING.code}</span></div>${p.date}</div>${wrap(p.directions, 'ed-museum-visit', 'PLAN YOUR VISIT')}${wrap(p.accounts, 'ed-museum-visit ed-museum-soft', 'WITH OUR GRATITUDE')}${wrap(p.rsvp, 'ed-museum-visit', 'JOIN THE OPENING')}${wrap(p.guestbook, 'ed-museum-visit ed-museum-soft', 'THE VISITOR’S BOOK')}<div class="ed-museum-ending"><p>The collection<br><em>continues.</em></p>${p.ending}${rule('GALLERY S&S', 'THANK YOU FOR BEING HERE')}${sample()}</div>`;
 }
 
 export function initialEditorialState(id) {
@@ -87,12 +88,14 @@ export function initialEditorialState(id) {
 }
 
 /** Pure transitions keep transient design experiences out of persisted selections. */
-export function transitionEditorialState(id, state, action, value) {
+export function transitionEditorialState(id, state, action, value, photoCount = 3) {
   if (!state || !IDS.includes(id)) return state;
   const index = /^[0-2]$/.test(String(value)) ? Number(value) : null;
   if (id === 'magazine' && action === 'article' && index !== null) return { ...state, article: index };
   if (id === 'film') {
-    if (action === 'frame' && index !== null) return { ...state, frame: index };
+    const frame = /^(0|[1-9]\d*)$/.test(String(value)) ? Number(value) : -1;
+    const limit = Number.isSafeInteger(photoCount) && photoCount > 0 && photoCount <= 20 ? photoCount : 3;
+    if (action === 'frame' && frame >= 0 && frame < limit) return { ...state, frame };
     if (action === 'develop' && value === 'next') return { ...state, process: Math.min(2, state.process + 1) };
     if (action === 'reset' && value === 'reset') return { ...state, process: 0 };
   }
@@ -131,11 +134,11 @@ function renderStage(root, id, state) {
   if (id === 'museum') {
     const item = ROOMS[state.room]; index = item.photo; root.dataset.room = String(state.room); setFields(root, item);
     const enlarge = root.querySelector('.ed-exhibit-art');
-    if (enlarge) { enlarge.dataset.index = String(index); enlarge.setAttribute('aria-label', `전시 예시 사진 ${index + 1} 크게 보기`); }
+    if (enlarge) { enlarge.dataset.index = String(index); enlarge.setAttribute('aria-label', `전시 ${hasPersonalPhotos() ? '우리' : '예시'} 사진 ${index + 1} 크게 보기`); }
   }
   for (const image of root.querySelectorAll('.ed-changing-photo')) {
-    image.setAttribute('src', PHOTOS[index].src); image.setAttribute('alt', PHOTOS[index].alt);
-    image.setAttribute('width', index === 0 ? '1024' : '1536'); image.setAttribute('height', index === 0 ? '1536' : '1024');
+    image.setAttribute('src', getPhoto(index).src); image.setAttribute('alt', getPhoto(index).alt);
+    image.setAttribute('width', String(getPhoto(index).width)); image.setAttribute('height', String(getPhoto(index).height));
   }
   for (const control of root.querySelectorAll('button[data-editorial-action]')) {
     const action = control.dataset.editorialAction;
@@ -154,7 +157,7 @@ export function createEditorialEditions() {
     if (!control || control.disabled || !container?.contains(control)) return;
     const stage = control.closest('[data-editorial-stage]'), id = stages.get(stage);
     if (!id) return;
-    const next = transitionEditorialState(id, states.get(id), control.dataset.editorialAction, control.dataset.value);
+    const next = transitionEditorialState(id, states.get(id), control.dataset.editorialAction, control.dataset.value, PHOTOS.length);
     if (next === states.get(id)) return;
     states.set(id, next);
     for (const [root, currentId] of stages) if (id === currentId) renderStage(root, id, next);
@@ -166,7 +169,14 @@ export function createEditorialEditions() {
     container = root;
     const candidates = [...root.querySelectorAll('[data-editorial-stage]')];
     if (root.matches?.('[data-editorial-stage]')) candidates.unshift(root);
-    for (const stage of candidates) { const id = stage.dataset.editorialStage; if (IDS.includes(id)) { stages.set(stage, id); renderStage(stage, id, states.get(id)); } }
+    for (const stage of candidates) {
+      const id = stage.dataset.editorialStage;
+      if (!IDS.includes(id)) continue;
+      const state = states.get(id);
+      if (id === 'film' && state.frame >= PHOTOS.length) states.set(id, { ...state, frame: 0, process: 0 });
+      stages.set(stage, id);
+      renderStage(stage, id, states.get(id));
+    }
     if (stages.size) container.addEventListener('click', click);
   }
   return { mount, dispose };

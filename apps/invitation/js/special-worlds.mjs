@@ -1,8 +1,9 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 const names = '<span>성우</span><i>&</i><span>소희</span>';
-const image = (index, className, thumbnail) => `<img class="${className}" src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : 'fetchpriority="high"'}>`;
+const image = (index, className, thumbnail) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" decoding="async" ${thumbnail ? 'loading="lazy"' : 'fetchpriority="high"'}>`;
 const root = (id, thumbnail) => `class="cover cover-worlds cover-${id}${thumbnail ? ' experience-thumbnail is-active' : ''}"${thumbnail ? '' : ` data-experience="${id}"`}`;
 const starShape = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 19.4 12.6 30 16 19.4 19.4 16 30 12.6 19.4 2 16 12.6 12.6Z"/></svg>';
 const action = (kind, idleLabel, activeLabel) => `<button class="world-action" type="button" data-experience-action="${kind}" data-idle-label="${idleLabel}" data-active-label="${activeLabel}" aria-pressed="false"><span data-experience-label>${idleLabel}</span><span class="world-action-icon" aria-hidden="true">↗</span></button>`;

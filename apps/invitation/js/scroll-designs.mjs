@@ -1,4 +1,4 @@
-import { TEMPLATES } from './catalog.mjs?v=20260915-wedding-date';
+import { TEMPLATES } from './catalog.mjs?v=20260915-personal-invitation';
 
 // Viewing treatments reuse catalog IDs and never enter saved selections.
 const treatments = [

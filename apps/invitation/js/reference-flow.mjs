@@ -1,7 +1,10 @@
+import { createReferenceScenes } from './reference-scenes.mjs?v=20260915-personal-invitation';
+
 const REVEAL = '[data-reference-reveal]';
 
 /** Ordinary document flow with one appearance per sample and content key. */
 export function createReferenceFlow() {
+  const scenes = createReferenceScenes();
   const seen = new Map(), introsSeen = new Map(), galleryPositions = new Map();
   let main = null, article = null, nodes = [], originals = [], galleries = [], intros = [];
   let media = null, observer = null, introObserver = null, raf = 0, generation = 0, templateId = '';
@@ -39,6 +42,7 @@ export function createReferenceFlow() {
   }
   function capture() {
     if (!main?.isConnected || !article) return null;
+    if (scenes.active) return scenes.capture();
     const index = nodes.findIndex(node => node.getBoundingClientRect().bottom > 0);
     const selected = index < 0 ? nodes.length - 1 : index;
     const node = nodes[selected], bounds = article.getBoundingClientRect();
@@ -52,7 +56,7 @@ export function createReferenceFlow() {
     if (!position || (position.templateId && position.templateId !== templateId)) return;
     let top = Number.isFinite(position.y) ? position.y : null;
     if (position.pinned) {
-      const matched = nodes.find(node => node.dataset.referenceKey === position.key);
+      const matched = Array.from(article.querySelectorAll('[data-reference-key]')).find(node => node.dataset.referenceKey === position.key);
       const fallback = nodes[Math.max(0, Math.min(nodes.length - 1, position.index || 0))];
       const node = matched || fallback;
       if (node) top = node.getBoundingClientRect().top + window.scrollY - (matched && Number.isFinite(position.offset) ? position.offset : 0);
@@ -109,6 +113,9 @@ export function createReferenceFlow() {
   }
   function refresh() {
     if (!main) return;
+    if (scenes.active) {
+      coverHeight(); galleries.forEach(gallery => moveGallery(gallery, gallery.index)); scenes.refresh(); return;
+    }
     pendingPosition ||= capture();
     const token = generation;
     cancelAnimationFrame(raf);
@@ -155,7 +162,12 @@ export function createReferenceFlow() {
       node.classList.add('ref-reveal');
       if (!motion || known.has(node.dataset.referenceKey)) show(node, true);
     });
-    if (motion) {
+    const staged = motion && scenes.mount(main, {
+      templateId, restore: options.restore,
+      onFrame: state => { if (state.coverPassed) intros.forEach(finishIntro); },
+    });
+    if (staged) nodes.forEach(node => show(node, true));
+    if (motion && !staged) {
       const token = generation;
       observer = new IntersectionObserver(entries => {
         if (token !== generation || !main?.isConnected) return;
@@ -172,7 +184,7 @@ export function createReferenceFlow() {
         if (token !== generation || !main?.isConnected) return;
         entries.forEach(entry => {
           const intro = pendingIntros.find(item => item.trigger === entry.target);
-          if (intro && entry.isIntersecting && entry.intersectionRatio >= .5) startIntro(intro);
+          if (intro && !intro.root.inert && entry.isIntersecting && entry.intersectionRatio >= .5) startIntro(intro);
         });
       }, { threshold: .5, rootMargin: '0px 0px -6% 0px' });
       pendingIntros.forEach(intro => introObserver.observe(intro.trigger));
@@ -187,11 +199,13 @@ export function createReferenceFlow() {
       raf = 0;
       if (token !== generation || !main?.isConnected) return;
       galleries.forEach(gallery => moveGallery(gallery, gallery.index));
-      restorePosition(pendingPosition); pendingPosition = null;
+      if (!scenes.active) restorePosition(pendingPosition);
+      pendingPosition = null;
     });
     return true;
   }
   function dispose() {
+    scenes.dispose();
     generation++;
     cancelAnimationFrame(raf); raf = 0;
     observer?.disconnect(); observer = null;

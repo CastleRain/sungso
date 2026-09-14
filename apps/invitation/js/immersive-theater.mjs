@@ -1,5 +1,5 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-personal-invitation';
 
 function stage() {
   return `<div class="it-stage" aria-hidden="true"><div class="it-sky"><i></i><span>OUR LITTLE WORLD</span></div><div class="it-memory">${photo(1)}<span>처음, 우리</span></div><div class="it-arch it-arch-back"></div><div class="it-arch it-arch-middle"></div><div class="it-arch it-arch-front"></div><div class="it-leaves it-leaves-left">✿<i>✦</i></div><div class="it-leaves it-leaves-right">✿<i>✦</i></div><div class="it-door it-door-left"><span>S</span></div><div class="it-door it-door-right"><span>S</span></div><span class="it-stage-caption">A LITTLE PAPER WORLD · ${WEDDING.yearText}</span></div>`;

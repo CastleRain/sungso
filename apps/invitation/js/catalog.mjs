@@ -1,6 +1,6 @@
-import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260915-wedding-date';
-import { EDITIONS } from './edition-catalog.mjs?v=20260915-wedding-date';
-import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260915-wedding-date';
+import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260915-personal-invitation';
+import { EDITIONS } from './edition-catalog.mjs?v=20260915-personal-invitation';
+import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260915-personal-invitation';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [
@@ -35,9 +35,5 @@ export const SIGNATURES = Object.freeze({
 export const GALLERIES = { grid: '격자', slide: '슬라이드', filmstrip: '필름 스트립' };
 export const SECTIONS = { story: '우리 이야기', gallery: '갤러리', directions: '오시는 길', accounts: '마음 전하실 곳', rsvp: '참석 여부', guestbook: '방명록' };
 export const DEFAULT_SECTIONS = { story: false, gallery: true, directions: true, accounts: true, rsvp: false, guestbook: false };
-export const PHOTOS = [
-  { src: './assets/couple-garden.webp', alt: '정원에서 손을 잡은 가상 커플의 웨딩 예시 사진' },
-  { src: './assets/couple-walk.webp', alt: '함께 걸으며 웃는 가상 커플의 웨딩 예시 사진' },
-  { src: './assets/couple-close.webp', alt: '서로를 바라보는 가상 커플의 웨딩 예시 사진' },
-];
+export { PHOTOS } from './personal-content.mjs?v=20260915-personal-invitation';
 export const getTemplate = id => TEMPLATES.find(template => template.id === id);

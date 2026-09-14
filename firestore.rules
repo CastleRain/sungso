@@ -119,6 +119,83 @@ service cloud.firestore {
     match /resort_images/{document} { allow read, write: if siteMember(); }
     match /resort_notes/{resortId}/comments/{commentId} { allow read, write: if siteMember(); }
 
+    // Shared invitation content is independent of the existing design choice.
+    function invitationPhotoId(id) {
+      return id is string && id.matches('[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}');
+    }
+    function invitationGallerySlot(values, index) {
+      return values.size() <= index || invitationPhotoId(values[index]);
+    }
+    function invitationGallery(values) {
+      return values is list && values.size() <= 20 && values.toSet().size() == values.size()
+        && invitationGallerySlot(values, 0) && invitationGallerySlot(values, 1)
+        && invitationGallerySlot(values, 2) && invitationGallerySlot(values, 3)
+        && invitationGallerySlot(values, 4) && invitationGallerySlot(values, 5)
+        && invitationGallerySlot(values, 6) && invitationGallerySlot(values, 7)
+        && invitationGallerySlot(values, 8) && invitationGallerySlot(values, 9)
+        && invitationGallerySlot(values, 10) && invitationGallerySlot(values, 11)
+        && invitationGallerySlot(values, 12) && invitationGallerySlot(values, 13)
+        && invitationGallerySlot(values, 14) && invitationGallerySlot(values, 15)
+        && invitationGallerySlot(values, 16) && invitationGallerySlot(values, 17)
+        && invitationGallerySlot(values, 18) && invitationGallerySlot(values, 19);
+    }
+    function invitationText(value, limit) {
+      return value is string && value.size() <= limit
+        && value.matches('[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*');
+    }
+    function invitationVenue(venue) {
+      return venue is map && venue.keys().hasOnly(['name', 'hall', 'address', 'mapUrl', 'transport', 'parking'])
+        && invitationText(venue.name, 80) && invitationText(venue.hall, 80)
+        && invitationText(venue.address, 300) && invitationText(venue.mapUrl, 1000)
+        && (venue.mapUrl == '' || venue.mapUrl.matches('https://[^\\s/@:\\\\]+(:[0-9]+)?([/?#][^\\s\\\\]*)?'))
+        && invitationText(venue.transport, 1000) && invitationText(venue.parking, 1000)
+        && (venue.name.matches('.*\\S.*') || (venue.name == '' && venue.hall == '' && venue.address == '' && venue.mapUrl == '' && venue.transport == '' && venue.parking == ''));
+    }
+    function validInvitationProfile(next) {
+      return next.keys().hasOnly(['schemaVersion', 'revision', 'coverId', 'galleryIds', 'venue', 'updatedAt', 'updatedBy'])
+        && next.schemaVersion == 1 && next.revision is int && next.revision > 0
+        && (next.coverId == null || invitationPhotoId(next.coverId))
+        && invitationGallery(next.galleryIds) && invitationVenue(next.venue)
+        && next.updatedBy == request.auth.uid && next.updatedAt == request.time;
+    }
+    match /invitation_settings/shared {
+      allow get: if siteMember();
+      allow list, delete: if false;
+      allow create: if siteMember() && validInvitationProfile(request.resource.data) && request.resource.data.revision == 1;
+      allow update: if siteMember() && validInvitationProfile(request.resource.data)
+        && request.resource.data.revision == resource.data.revision + 1;
+    }
+    function invitationReferences(profile, id) {
+      return profile.coverId == id || id in profile.galleryIds;
+    }
+    // Every photo write must accompany a new shared revision. Immutable IDs
+    // let readers finish loading all referenced photos before publishing it.
+    function invitationProfileCommit() {
+      let path = /databases/$(database)/documents/invitation_settings/shared;
+      let next = getAfter(path).data;
+      return next.updatedBy == request.auth.uid && next.updatedAt == request.time
+        && next.revision == (exists(path) ? get(path).data.revision + 1 : 1);
+    }
+    function validInvitationPhoto(next) {
+      return next.keys().hasOnly(['dataUrl', 'width', 'height', 'updatedAt', 'updatedBy'])
+        && next.dataUrl is string && next.dataUrl.size() <= 360000
+        && next.dataUrl.matches('data:image/(jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}')
+        && (next.dataUrl.size() - 23) % 4 == 0
+        && next.width is int && next.width > 0 && next.width <= 4096
+        && next.height is int && next.height > 0 && next.height <= 4096
+        && next.updatedBy == request.auth.uid && next.updatedAt == request.time;
+    }
+    match /invitation_settings/shared/photos/{photoId} {
+      allow get: if siteMember();
+      allow list, update: if false;
+      allow create: if siteMember() && invitationPhotoId(photoId) && validInvitationPhoto(request.resource.data)
+        && invitationProfileCommit()
+        && invitationReferences(getAfter(/databases/$(database)/documents/invitation_settings/shared).data, photoId);
+      allow delete: if siteMember() && invitationProfileCommit()
+        && invitationReferences(get(/databases/$(database)/documents/invitation_settings/shared).data, photoId)
+        && !invitationReferences(getAfter(/databases/$(database)/documents/invitation_settings/shared).data, photoId);
+    }
+
     function validFavorites(values) {
       return values is list && values.size() <= 29
         && values.hasOnly(['minimal', 'letter', 'photo', 'garden', 'cinema', 'sketch',

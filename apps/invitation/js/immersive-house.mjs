@@ -1,5 +1,5 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-personal-invitation';
 
 const foliage = `<svg viewBox="0 0 48 80" fill="none" aria-hidden="true"><path d="M24 68V20M24 45 9 33M24 34 37 23" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><ellipse cx="11" cy="31" rx="8" ry="14" transform="rotate(-37 11 31)"/><ellipse cx="35" cy="22" rx="8" ry="14" transform="rotate(35 35 22)"/><ellipse cx="25" cy="12" rx="7" ry="12"/><ellipse cx="35" cy="46" rx="8" ry="13" transform="rotate(40 35 46)"/></g><path d="m14 61 3 17h15l3-17Z" fill="var(--accent)"/></svg>`;
 

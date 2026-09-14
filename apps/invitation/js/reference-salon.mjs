@@ -1,19 +1,22 @@
-import { weddingLettering } from './wedding-lettering.mjs?v=20260915-wedding-date';
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-personal-invitation';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, getVenue, venueLabel, venueCaption, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
+import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 const ids = ['salon-lettering','salon-polaroid','salon-editorial'];
-const photo = (i,cls='',eager=false) => `<img class="${cls}" src="${PHOTOS[i].src}" alt="${PHOTOS[i].alt}" width="${i===0?1024:1536}" height="${i===0?1536:1024}" ${eager?'fetchpriority="high"':'loading="lazy"'} decoding="async">`;
+const photo = (i,cls='',eager=false) => `<img class="${cls}" src="${e(getPhoto(i).src)}" alt="${e(getPhoto(i).alt)}" width="${getPhoto(i).width}" height="${getPhoto(i).height}" ${eager?'fetchpriority="high"':'loading="lazy"'} decoding="async">`;
 const mark = (id,key) => `data-reference-reveal data-reference-key="${id}-${key}"`;
 const section = (id,key,cls,html) => `<section class="rs-section ref-reveal ${cls}" data-section="${key}" ${mark(id,key)}>${html}</section>`;
 const title = text => `<h2 class="rs-title">${text}</h2>`;
-const dateLine = `<p class="rs-date-line">${WEDDING.koFull}<br>우리의 웨딩홀 · 가든홀</p>`;
+const dateLine = () => `<p class="rs-date-line">${WEDDING.koFull}<br>${e(venueLabel())}</p>`;
 
-export function salonCover(id,thumbnail=false) {
+export const salonCover = (id, thumbnail = false) => personalizeCover(renderSalonCover(id, thumbnail));
+function renderSalonCover(id,thumbnail=false) {
   if (!ids.includes(id)) return '';
   const attrs = thumbnail ? 'data-reference-thumbnail' : `${mark(id,'cover')} data-reference-intro`;
-  if (id==='salon-polaroid') return `<section class="cover ref-cover rs-cover rs-polaroid ref-reveal" ${attrs}>${thumbnail ? '' : weddingLettering({variant:'paper'})}<div class="rs-polaroid-paper"><div class="rs-polaroid-photo">${photo(2,'',!thumbnail)}</div><span class="rs-vertical-names">성우　소희</span><h2 class="rs-handwritten">Happy wedding day</h2></div>${dateLine}</section>`;
-  if (id==='salon-editorial') return `<section class="cover ref-cover rs-cover rs-editorial ref-reveal" ${attrs}>${photo(0,'rs-cover-photo',!thumbnail)}<div class="rs-corner rs-top-left"><h2>성우</h2><span>Sungwoo</span></div><div class="rs-corner rs-top-right"><h2>소희</h2><span>Sohee</span></div><p class="rs-side rs-side-left">우리의 웨딩홀　가든홀</p><p class="rs-side rs-side-right">${WEDDING.dotted}　${WEDDING.weekday} ${WEDDING.koTime}</p><div class="rs-opening" aria-hidden="true"><span data-reference-intro-trigger>We're getting<br>Married!</span></div></section>`;
+  if (id==='salon-polaroid') return `<section class="cover ref-cover rs-cover rs-polaroid ref-reveal" ${attrs}>${thumbnail ? '' : weddingLettering({variant:'paper'})}<div class="rs-polaroid-paper"><div class="rs-polaroid-photo">${photo(2,'',!thumbnail)}</div><span class="rs-vertical-names">성우　소희</span><h2 class="rs-handwritten">Happy wedding day</h2></div>${dateLine()}</section>`;
+  if (id==='salon-editorial') return `<section class="cover ref-cover rs-cover rs-editorial ref-reveal" ${attrs}>${photo(0,'rs-cover-photo',!thumbnail)}<div class="rs-corner rs-top-left"><h2>성우</h2><span>Sungwoo</span></div><div class="rs-corner rs-top-right"><h2>소희</h2><span>Sohee</span></div><p class="rs-side rs-side-left">${e(venueLabel())}</p><p class="rs-side rs-side-right">${WEDDING.dotted}　${WEDDING.weekday} ${WEDDING.koTime}</p><div class="rs-opening" aria-hidden="true"><span data-reference-intro-trigger>We're getting<br>Married!</span></div></section>`;
   return `<section class="cover ref-cover rs-cover rs-lettering ref-reveal" ${attrs}>${photo(2,'rs-cover-photo',!thumbnail)}<h2 class="rs-handwritten rs-writing" data-reference-intro-trigger>Happy wedding day</h2><p class="rs-cover-names">성우 & 소희</p></section>`;
 }
 
@@ -26,13 +29,13 @@ function profiles(id) {
 }
 function date(id,parts) {
   const calendar=parts.date.match(/<div class="wedding-calendar"[\s\S]*?<\/div><\/div>/)?.[0]||'';
-  return section(id,'date','rs-date',`${title(id==='salon-polaroid'?`${WEDDING.monthKo}의<br>${WEDDING.dayKo}`:'예식 안내')}${id==='salon-polaroid'?'':dateLine}${calendar}${id==='salon-polaroid'?dateLine:''}<p class="rs-date-caption">우리의 새로운 시작을<br>함께 기억해 주세요.</p><small class="sample-caption">예식 날짜와 시간은 두 사람의 일정이며 장소는 예시입니다.</small>`);
+  return section(id,'date','rs-date',`${title(id==='salon-polaroid'?`${WEDDING.monthKo}의<br>${WEDDING.dayKo}`:'예식 안내')}${id==='salon-polaroid'?'':dateLine()}${calendar}${id==='salon-polaroid'?dateLine():''}<p class="rs-date-caption">우리의 새로운 시작을<br>함께 기억해 주세요.</p>${countdownMarkup()}<small class="sample-caption">${e(venueCaption())}</small>`);
 }
 function gallery(id,selection) {
   if (!selection.sections.gallery) return '';
   const grid=selection.galleryLayout==='grid';
-  const row=`<div class="rs-gallery ${grid?'rs-gallery-grid':'rs-gallery-slide'} ${selection.galleryLayout==='filmstrip'?'rs-gallery-film':''}"${grid?'':' data-reference-gallery'}>${PHOTOS.map((_,i)=>`<button type="button" data-action="photo" data-index="${i}" aria-label="예시 사진 ${i+1} 크게 보기">${photo(i)}</button>`).join('')}</div>`;
-  const controls=grid?'':`<div class="rs-gallery-controls"><button type="button" data-reference-gallery-step="-1" aria-label="이전 사진">‹</button><output data-reference-gallery-count aria-live="polite">1 / 3</output><button type="button" data-reference-gallery-step="1" aria-label="다음 사진">›</button></div>`;
+  const row=`<div class="rs-gallery ${grid?'rs-gallery-grid':'rs-gallery-slide'} ${selection.galleryLayout==='filmstrip'?'rs-gallery-film':''}"${grid?'':' data-reference-gallery'}>${PHOTOS.map((_,i)=>`<button type="button" data-action="photo" data-index="${i}" aria-label="${hasPersonalPhotos() ? '우리' : '예시'} 사진 ${i+1} 크게 보기">${photo(i)}</button>`).join('')}</div>`;
+  const controls=grid?'':`<div class="rs-gallery-controls"><button type="button" data-reference-gallery-step="-1" aria-label="이전 사진">‹</button><output data-reference-gallery-count aria-live="polite">1 / ${PHOTOS.length}</output><button type="button" data-reference-gallery-step="1" aria-label="다음 사진">›</button></div>`;
   return section(id,'gallery','rs-gallery-section',`${title('갤러리')}<div${grid?'':` data-reference-gallery-root="${id}-gallery"`}>${row}${controls}</div><p class="rs-small">사진을 누르면 크게 볼 수 있어요.</p>`);
 }
 function interview(id) {
@@ -45,7 +48,7 @@ function snap(id) {
   return section(id,'guest-snap','rs-snap',`${title('게스트스냅 📷')}<p>당신의 시선으로 바라본<br>우리의 행복한 순간을 담아주세요.</p><div class="rs-snap-photo">${photo(2)}<span>OUR WEDDING<br><b>Guest snap</b></span></div><p class="rs-small">함께 웃고 반기는 순간들.<br>그날의 다정한 기억을 오래 간직하고 싶어요.</p><span class="rs-sample-button">사진 함께 모으기</span><small class="sample-caption">디자인 예시로 사진을 업로드하거나 수집하지 않아요.</small>`);
 }
 function guide(id) {
-  return section(id,'guest-guide','rs-guide',`<div class="rs-guide-slides" aria-label="옆으로 넘겨보는 하객 안내">${[[1,'포토부스','소중한 날을 기억할 수 있도록','함께 사진을 남길 공간을 준비할 예정이에요.'],[0,'주차 안내','편안한 발걸음이 되도록','예식장의 주차 안내를 이곳에 자세히 적어요.'],[2,'감사의 선물','함께해 주신 마음에 감사하며','준비한 작은 선물로 마음을 전하려 해요.']].map(([i,heading,first,text])=>`<article>${photo(i)}<h2>${heading}</h2><p>${first}<br>${text}</p></article>`).join('')}</div><p class="rs-small">옆으로 넘겨서 안내를 확인해 주세요.</p>`);
+  return section(id,'guest-guide','rs-guide',`<div class="rs-guide-slides" aria-label="옆으로 넘겨보는 하객 안내">${[[1,'포토부스','소중한 날을 기억할 수 있도록','함께 사진을 남길 공간을 준비할 예정이에요.'],[0,'주차 안내','편안한 발걸음이 되도록',hasVenue() ? e(getVenue().parking || '주차 안내를 준비하고 있어요.') : '예식장의 주차 안내를 이곳에 자세히 적어요.'],[2,'감사의 선물','함께해 주신 마음에 감사하며','준비한 작은 선물로 마음을 전하려 해요.']].map(([i,heading,first,text])=>`<article>${photo(i)}<h2>${heading}</h2><p>${first}<br>${text}</p></article>`).join('')}</div><p class="rs-small">옆으로 넘겨서 안내를 확인해 주세요.</p>`);
 }
 function restyle(html,cls) {return html?.replace('class="',`class="ref-reveal ${cls} `).replace(/ data-section="([^"]+)"/, ' data-reference-reveal data-reference-key="'+cls+'-$1" data-section="$1"')||'';}
 function ending(id) {return `<footer class="invitation-ending rs-ending ref-reveal" ${mark(id,'ending')}>${photo(0)}<div><p>저희 둘, 행복하게 잘 살겠습니다.</p><span>성우 & 소희</span><small>${WEDDING.dotted}</small></div></footer>`;}

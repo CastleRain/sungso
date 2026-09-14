@@ -1,4 +1,4 @@
-import { SCROLL_DESIGNS, getScrollDesign } from './scroll-designs.mjs?v=20260915-wedding-date';
+import { SCROLL_DESIGNS, getScrollDesign } from './scroll-designs.mjs?v=20260915-personal-invitation';
 
 export function scrollPreviewLink(template) {
   if (!getScrollDesign(template.id)) return '';

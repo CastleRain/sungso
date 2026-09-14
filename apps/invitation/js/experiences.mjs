@@ -24,7 +24,7 @@ export function transitionExperience(id, previous, action, detail = {}) {
     return { ...state, active: !state.active };
   }
   if (id === 'camera' && action === 'shutter') {
-    return { ...state, active: true, shot: state.active ? (state.shot + 1) % 3 : 0 };
+    return { ...state, active: true, shot: state.active ? (state.shot + 1) % (Number.isSafeInteger(detail.photoCount) && detail.photoCount > 0 ? detail.photoCount : 3) : 0 };
   }
   if (id === 'constellation') {
     if (action === 'constellation') return { ...state, active: !state.active, stars: state.active ? [] : [0, 1, 2, 3, 4] };
@@ -41,7 +41,7 @@ export function transitionExperience(id, previous, action, detail = {}) {
 function statusText(id, state) {
   switch (id) {
     case 'envelope': return state.active ? '봉투를 열었어요. 두 사람의 초대장을 만나보세요.' : '봉인을 눌러 두 사람의 초대를 펼쳐보세요.';
-    case 'camera': return state.active ? `${state.shot + 1}번째 예시 사진을 꺼냈어요. 다시 누르면 다음 사진이 나와요.` : '셔터를 누르면 두 사람의 순간이 사진으로 나와요.';
+    case 'camera': return state.active ? `${state.shot + 1}번째 사진을 꺼냈어요. 다시 누르면 다음 사진이 나와요.` : '셔터를 누르면 두 사람의 순간이 사진으로 나와요.';
     case 'ticket': return state.active ? '탑승 도장을 찍었어요. 함께할 여정에 초대합니다.' : '티켓을 눌러 우리의 다음 여정을 확인해보세요.';
     case 'constellation': return state.active ? '다섯 개의 별이 만나 우리의 별자리가 되었어요.' : state.stars.length ? `다섯 개 중 ${state.stars.length}개의 별을 이었어요. 남은 별도 눌러보세요.` : '별을 하나씩 눌러 두 사람의 별자리를 이어보세요.';
     case 'storybook': return state.active ? '두 사람의 이야기가 펼쳐졌어요. 다음 장도 천천히 내려보세요.' : '책을 펼쳐 두 사람이 함께 쓰는 이야기를 만나보세요.';
@@ -115,7 +115,7 @@ export function createExperiences({
     // A missing or blank star index must not silently light the first star.
     const rawStar = button.dataset.star;
     const star = rawStar === undefined || rawStar.trim() === '' ? NaN : Number(rawStar);
-    const next = transitionExperience(id, previous, action, { star });
+    const next = transitionExperience(id, previous, action, { star, photoCount: root.querySelectorAll('[data-camera-photo]').length });
     if (next === previous) return;
     states.set(id, next);
     for (const [target, targetId] of roots) {
@@ -147,6 +147,7 @@ export function createExperiences({
       if (!EXPERIENCE_IDS.includes(id)) continue;
       if (!states.has(id)) states.set(id, initialExperienceState(id));
       roots.set(root, id);
+      if(id === 'camera'){const count=root.querySelectorAll('[data-camera-photo]').length;states.set(id,{...states.get(id),shot:count?states.get(id).shot%count:0});}
       renderExperience(root, id, states.get(id));
     }
     container.addEventListener('click', handleClick);

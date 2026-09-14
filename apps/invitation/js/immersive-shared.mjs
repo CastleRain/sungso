@@ -1,9 +1,9 @@
-import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
-import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { getPhoto } from './personal-content.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 export const label = text => `<p class="imm-label">${e(text)}</p>`;
-export const photo = (index, classes = '', eager = false) => `<img class="${classes}" src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+export const photo = (index, classes = '', eager = false) => `<img class="${classes}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 export const sampleDate = `<p class="imm-date">성우 & 소희 <span>${WEDDING.dotted} · ${WEDDING.weekdayShort} · ${WEDDING.time24}</span></p>`;
 export function scene(key, classes, content, hold = 0, root = '') {
   return `<section class="imm-scene ${classes}" data-section="${key}"${hold ? ` data-story-hold="${hold}"` : ''}${root ? ` data-immersive-root="${root}"` : ''}>${content}</section>`;

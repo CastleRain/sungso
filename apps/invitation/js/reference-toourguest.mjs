@@ -1,17 +1,22 @@
-import { weddingLettering } from './wedding-lettering.mjs?v=20260915-wedding-date';
-import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-wedding-date';
-import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
-import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-personal-invitation';
+import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-personal-invitation';
+import { PHOTOS, getPhoto, hasPersonalPhotos, hasVenue, venueLabel, venueCaption, venueDirections, personalizeCover } from './personal-content.mjs?v=20260915-personal-invitation';
+import { countdownMarkup } from './countdown.mjs?v=20260915-personal-invitation';
+import { escapeHtml as e } from './core.mjs?v=20260915-personal-invitation';
 
 const designs = new Set(['guest-seoul', 'guest-porto', 'guest-jeju']);
-const photo = (index, className = '', eager = false) => `<img class="${className}" src="${PHOTOS[index].src}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+const photo = (index, className = '', eager = false) => `<img class="${className}" src="${e(getPhoto(index).src)}" alt="${e(getPhoto(index).alt)}" width="${getPhoto(index).width}" height="${getPhoto(index).height}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 const reveal = (id, key, className, content, tag = 'div', section = '') => `<${tag} class="${className} ref-reveal" data-reference-reveal data-reference-key="${id}-${key}"${section ? ` data-section="${section}"` : ''}>${content}</${tag}>`;
 const heading = (english, title = '', description = '') => `<header class="rg-heading"><h2>${english}</h2>${title ? `<p>${title}</p>` : ''}${description ? `<p class="rg-heading-note">${description}</p>` : ''}</header>`;
-const dateLine = `<p class="rg-date-line">${WEDDING.koLong} | ${WEDDING.koTime}</p>`;
-const venueLine = '<p class="rg-venue-line">우리의 웨딩홀 · 가든홀</p>';
+const dateLine = () => `<p class="rg-date-line">${WEDDING.koLong} | ${WEDDING.koTime}</p>`;
+const venueLine = () => `<p class="rg-venue-line">${e(venueLabel())}</p>`;
 const cross = '<span class="rg-cross" aria-hidden="true"></span>';
 
 export function guestCover(id, thumbnail = false) {
+  const markup = renderGuestCover(id, thumbnail);
+  return markup ? personalizeCover(markup) : markup;
+}
+function renderGuestCover(id, thumbnail = false) {
   if (!designs.has(id)) return null;
   const type = id.slice(6);
   const lettering = thumbnail ? '' : weddingLettering({ variant: type === 'jeju' ? 'rose' : type === 'porto' ? 'photo' : 'paper' });
@@ -26,7 +31,7 @@ export function guestCover(id, thumbnail = false) {
     <svg class="rg-porto-heart" viewBox="0 0 400 700" fill="none" aria-hidden="true"><path d="M202 679C169 583-93 326-54 167C-26 52 143 33 201 194C245 33 423 48 455 157C504 325 259 579 202 679Z"/><path d="M195 691C148 576-85 325-45 175C-13 52 154 46 207 190C254 51 421 60 446 165C484 320 251 588 195 691Z"/></svg>
     <div class="rg-porto-title"><h2>We are getting married</h2><p>SUNGWOO <span>|</span> ${WEDDING.dotted} ${WEDDING.weekdayShort} <span>|</span> SOHEE</p></div>
   </div>`;
-  return `<div ${attributes}>${lettering}<h2 class="rg-jeju-names"><span>성우</span><i>&</i><span>소희</span></h2><div class="rg-jeju-details">${dateLine}${venueLine}</div></div>`;
+  return `<div ${attributes}>${lettering}<h2 class="rg-jeju-names"><span>성우</span><i>&</i><span>소희</span></h2><div class="rg-jeju-details">${dateLine()}${venueLine()}</div></div>`;
 }
 
 function greeting(id) {
@@ -36,7 +41,7 @@ function greeting(id) {
 function dateSection(id) {
   const week = ['일', '월', '화', '수', '목', '금', '토'];
   const calendar = `<div class="rg-calendar" aria-label="${WEDDING.year}년 ${WEDDING.month}월 달력, 결혼식은 ${WEDDING.day}일 ${WEDDING.weekday}"><div class="rg-calendar-week">${week.map(day => `<span>${day}</span>`).join('')}</div><div class="rg-calendar-days">${weddingCalendarCells().map(day => day === null ? '<span aria-hidden="true"></span>' : `<span${day === WEDDING.day ? ` class="rg-wedding-day" aria-label="${day}일 결혼식"` : ''}>${day}</span>`).join('')}</div></div>`;
-  return `<section class="rg-date" data-section="date">${reveal(id, 'date-poster', 'rg-date-poster', `<p>${WEDDING.monthEn} ${WEDDING.day}</p><p>${WEDDING.yearText}</p>`)}${reveal(id, 'date-calendar', 'rg-block rg-calendar-block', `${heading('WEDDING DAY')}${dateLine}<p class="rg-english-date">${WEDDING.enLong} | ${WEDDING.time12}</p>${calendar}<div class="rg-date-cards" aria-label="예식 날짜와 시간">${[[WEDDING.yearText, 'YEAR'], [WEDDING.monthPadded, 'MONTH'], [WEDDING.dayPadded, 'DAY'], [WEDDING.time24, 'TIME']].map(([value, label]) => `<div><b>${value}</b><span>${label}</span></div>`).join('')}</div><p class="rg-date-notice">성우 <span>♥</span> 소희의 새로운 시작</p><small class="rg-sample">예식 날짜와 시간은 두 사람의 일정이며 장소는 예시입니다.</small>`)}</section>`;
+  return `<section class="rg-date" data-section="date">${reveal(id, 'date-poster', 'rg-date-poster', `<p>${WEDDING.monthEn} ${WEDDING.day}</p><p>${WEDDING.yearText}</p>`)}${reveal(id, 'date-calendar', 'rg-block rg-calendar-block', `${heading('WEDDING DAY')}${dateLine()}<p class="rg-english-date">${WEDDING.enLong} | ${WEDDING.time12}</p>${calendar}${countdownMarkup()}<p class="rg-date-notice">성우 <span>♥</span> 소희의 새로운 시작</p><small class="rg-sample">${e(venueCaption())}</small>`)}</section>`;
 }
 
 function family(id) {
@@ -61,12 +66,13 @@ function story(id) {
 function gallery(id, layout) {
   const galleryLayout = ['grid', 'slide', 'filmstrip'].includes(layout) ? layout : 'grid';
   const paged = galleryLayout !== 'grid';
-  const photos = `<div class="rg-gallery rg-gallery-${galleryLayout}"${paged ? ' data-reference-gallery' : ''}>${PHOTOS.map((_, index) => `<button type="button" class="rg-gallery-photo" data-action="photo" data-index="${index}" aria-label="예시 사진 ${index + 1} 크게 보기">${photo(index)}${galleryLayout === 'filmstrip' ? `<span>0${index + 1} / OUR MEMORIES</span>` : ''}</button>`).join('')}</div>`;
+  const photos = `<div class="rg-gallery rg-gallery-${galleryLayout}"${paged ? ' data-reference-gallery' : ''}>${PHOTOS.map((_, index) => `<button type="button" class="rg-gallery-photo" data-action="photo" data-index="${index}" aria-label="${hasPersonalPhotos() ? '우리' : '예시'} 사진 ${index + 1} 크게 보기">${photo(index)}${galleryLayout === 'filmstrip' ? `<span>0${index + 1} / OUR MEMORIES</span>` : ''}</button>`).join('')}</div>`;
   const controls = `<div class="rg-gallery-controls"><button type="button" data-reference-gallery-step="-1" aria-label="갤러리 이전 사진">←</button><output data-reference-gallery-count aria-live="polite" aria-label="현재 갤러리 사진">1 / ${PHOTOS.length}</output><button type="button" data-reference-gallery-step="1" aria-label="갤러리 다음 사진">→</button></div>`;
   return reveal(id, 'gallery', 'rg-block rg-gallery-block', `${heading('GALLERY', '사진을 누르면 크게 볼 수 있어요')}${paged ? `<div class="rg-gallery-view" data-reference-gallery-root="${id}-gallery">${photos}${controls}</div><p class="rg-gallery-help">사진을 옆으로 넘겨보세요</p>` : photos}`, 'section', 'gallery');
 }
 
 function directions(id) {
+  if (hasVenue()) return reveal(id, 'directions', 'rg-block rg-directions', `${heading('LOCATION')}${venueDirections()}`, 'section', 'directions');
   const map = `<div class="rg-map" role="img" aria-label="실제 장소가 아닌 예시 약도"><svg viewBox="0 0 340 215" aria-hidden="true"><rect width="340" height="215" fill="var(--soft)"/><path d="M-10 52H350M-10 169H350M67-10V225M249-10V225" stroke="white" stroke-width="22"/><path d="M126-10V225" stroke="white" stroke-width="6"/><rect x="154" y="82" width="67" height="53" rx="3" fill="var(--accent)" opacity=".15"/><circle cx="187" cy="96" r="14" fill="var(--accent)"/><path d="M180 93q7-9 14 0q0 6-7 10q-7-4-7-10" fill="white"/><text x="187" y="145" text-anchor="middle" fill="var(--ink)" font-size="12">우리의 웨딩홀</text><text x="17" y="35" fill="var(--ink)" font-size="11">예시역</text></svg><span>예시 약도</span></div>`;
   return reveal(id, 'directions', 'rg-block rg-directions', `${heading('LOCATION')}<h3>우리의 웨딩홀 · 가든홀</h3><p>예시 장소 · ${WEDDING.weekday} ${WEDDING.koTime}</p>${map}<div class="rg-map-options" aria-label="지도 연결 예시"><span>네이버 지도</span><span>카카오맵</span><span>티맵</span></div><div class="rg-transport"><article><b>대중교통</b><p>예시역 2번 출구에서 도보 5분</p></article><article><b>주차</b><p>예시 주차장 · 하객 2시간 무료</p></article><article><b>안내</b><p>자세한 교통편은 실제 제작할 때 입력해요.</p></article></div><small class="rg-sample">실제 위치 조회나 지도 연결은 하지 않아요.</small>`, 'section', 'directions');
 }
@@ -84,7 +90,7 @@ function information(id) {
 }
 
 function rsvp(id) {
-  return reveal(id, 'rsvp', 'rg-block rg-rsvp', `<span class="rg-tiny-heart" aria-hidden="true">♡</span>${heading('RSVP', '참석 의사', '모든 분들을 소중히 모실 수 있도록')}<div class="rg-rsvp-invitation"><p>신랑 성우 <span>♥</span> 신부 소희</p>${dateLine}${venueLine}</div><p class="rg-sample-action">참석 의사 체크하기</p><small class="rg-sample">미리보기에서는 응답을 받지 않아요.</small>`, 'section', 'rsvp');
+  return reveal(id, 'rsvp', 'rg-block rg-rsvp', `<span class="rg-tiny-heart" aria-hidden="true">♡</span>${heading('RSVP', '참석 의사', '모든 분들을 소중히 모실 수 있도록')}<div class="rg-rsvp-invitation"><p>신랑 성우 <span>♥</span> 신부 소희</p>${dateLine()}${venueLine()}</div><p class="rg-sample-action">참석 의사 체크하기</p><small class="rg-sample">미리보기에서는 응답을 받지 않아요.</small>`, 'section', 'rsvp');
 }
 
 function ending(id) {
