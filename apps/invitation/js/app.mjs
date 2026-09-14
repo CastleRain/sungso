@@ -1,14 +1,15 @@
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-immersive-worlds';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-immersive-worlds';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-immersive-worlds';
-import { createStore } from './store.mjs?v=20260914-immersive-worlds';
-import { createExperiences } from './experiences.mjs?v=20260914-immersive-worlds';
-import { createSignatures } from './signatures.mjs?v=20260914-immersive-worlds';
-import { signatureGuide } from './signature-catalog.mjs?v=20260914-immersive-worlds';
-import { createEditions } from './editions.mjs?v=20260914-immersive-worlds';
-import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260914-immersive-worlds';
-import { createScrollStory, supportsScrollStory } from './scroll-story.mjs?v=20260914-immersive-worlds';
-import { getScrollDesign } from './scroll-designs.mjs?v=20260914-immersive-worlds';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-reference-samples';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-reference-samples';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-reference-samples';
+import { createStore } from './store.mjs?v=20260914-reference-samples';
+import { createExperiences } from './experiences.mjs?v=20260914-reference-samples';
+import { createSignatures } from './signatures.mjs?v=20260914-reference-samples';
+import { signatureGuide } from './signature-catalog.mjs?v=20260914-reference-samples';
+import { createEditions } from './editions.mjs?v=20260914-reference-samples';
+import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260914-reference-samples';
+import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260914-reference-samples';
+import { isReferenceTemplate } from './reference-catalog.mjs?v=20260914-reference-samples';
+import { getScrollDesign } from './scroll-designs.mjs?v=20260914-reference-samples';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
@@ -17,7 +18,7 @@ const experiences = createExperiences();
 const signatures = createSignatures();
 const editions = createEditions();
 const immersiveExperiences = createImmersiveExperiences();
-const scrollStory = createScrollStory();
+const scrollStory = createPreviewScroll();
 let scrollScenes = true;
 let bfcacheStoryPosition = null;
 // Viewing preferences stay in this tab; they are not part of the couple's choice.
@@ -98,7 +99,7 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">열리는 종이 무대, 우리라는 집, 리본 속 이야기.<br>처음부터 끝까지 다른 이야기를 펼쳐보세요.</p></div><div class="library-feature"><span>NEW STORIES</span><b>${TEMPLATES.filter(t => t.collection === 'immersive').length}</b><p>새로운 전체 페이지 예시</p><button type="button" data-action="collection" data-collection="immersive">새 이야기부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">원본에서 고른 여섯 가지 새로운 초대.<br>사진과 여백, 자연스럽게 이어지는 이야기를 만나보세요.</p></div><div class="library-feature"><span>REFERENCE SAMPLES</span><b>${TEMPLATES.filter(t => t.collection === 'reference').length}</b><p>원본 구성으로 만든 새 예시</p><button type="button" data-action="collection" data-collection="reference">새 예시부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
@@ -117,7 +118,7 @@ function updatePreviewDevice() {
   main.style.setProperty('--preview-width', `${previewWidth}px`);
   main.querySelectorAll('[data-action="preview-device"]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.device === previewDevice)));
   main.querySelector('.device-width').hidden = previewDevice !== 'mobile';
-  main.querySelector('.device-hint').textContent = supportsScrollStory(route.templateId) && scrollScenes ? '아래로 진행 · 위로 되돌리기' : previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.';
+  main.querySelector('.device-hint').textContent = supportsScrollStory(route.templateId) && scrollScenes ? (isReferenceTemplate(route.templateId) ? '처음 나타날 때 한 번, 자연스럽게 이어지는 초대' : '아래로 진행 · 위로 되돌리기') : previewDevice === 'mobile' ? '휴대폰 너비로, 끝까지 내려보세요.' : '휴대폰에서 보이는 모습도 확인해보세요.';
   main.querySelector('[data-action="scroll-scenes"]')?.setAttribute('aria-pressed', String(scrollScenes));
   scrollStory.refresh();
 }
@@ -138,8 +139,13 @@ function renderPreview() {
   navigation.innerHTML = `${index > 0 ? `<a href="#preview/${sequence[index - 1].id}">← ${sequence[index - 1].name}</a>` : '<span></span>'}${index < sequence.length - 1 ? `<a href="#preview/${sequence[index + 1].id}">${sequence[index + 1].name} →</a>` : '<span></span>'}`;
   main.querySelector('.preview-disclaimer').after(navigation);
   if (template.collection === 'immersive') { const guide = document.createElement('div'); guide.className = 'edition-guide'; guide.innerHTML = `<strong>${template.experienceHint}</strong><p>${template.description}</p>`; navigation.after(guide); }
+  if (isReferenceTemplate(template.id)) {
+    const guide = document.createElement('div'); guide.className = 'edition-guide reference-guide';
+    guide.innerHTML = `<strong>${e(template.experienceHint)}</strong><p>원본의 구성과 첫 등장 연출을 담았어요. 이미 본 장면은 다시 재생하지 않아요.</p><a href="${e(template.sourceUrl)}" target="_blank" rel="noopener noreferrer">${e(template.sourceBrand)} 원본 샘플 ↗</a>`;
+    navigation.after(guide);
+  }
   const scrollDesign = getScrollDesign(template.id);
-  if (scrollDesign) {
+  if (scrollDesign && !isReferenceTemplate(template.id)) {
     let guide = main.querySelector('.edition-guide');
     if (!guide) { guide = document.createElement('div'); guide.className = 'edition-guide'; navigation.after(guide); }
     guide.classList.add('scroll-guide');
@@ -344,7 +350,7 @@ async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260914-immersive-worlds');
+    const { connect } = await import('./firebase.mjs?v=20260914-reference-samples');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;

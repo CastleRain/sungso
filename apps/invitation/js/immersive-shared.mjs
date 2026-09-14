@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-immersive-worlds';
-import { escapeHtml as e } from './core.mjs?v=20260914-immersive-worlds';
+import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
+import { escapeHtml as e } from './core.mjs?v=20260914-reference-samples';
 
 export const label = text => `<p class="imm-label">${e(text)}</p>`;
 export const photo = (index, classes = '', eager = false) => `<img class="${classes}" src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

@@ -148,23 +148,42 @@ test('each story choice reveals exactly its panel and pressed choice while leavi
   }
 });
 
-test('story choices preserve an explicit unfolded state and remain reversible after handing control back to scrolling', () => {
+test('story choices do not restart the cover unfolding and the cover can still return to scroll control', () => {
   const host = render('ribbon'), controller = createImmersiveExperiences();
   controller.mount(host);
-  const root = storyRoot(host), toggle = root.querySelector('[data-immersive-toggle]');
-  const choices = buttons(root);
+  const root = roots(host)[0], toggle = root.querySelector('[data-immersive-toggle]');
+  const story = storyRoot(host), choices = buttons(story);
   host.click(toggle);
   host.click(choices[1]);
   assert.equal(root.dataset.unfolded, 'on');
   assert.equal(toggle.getAttribute('aria-pressed'), 'true');
-  assert.equal(root.dataset.choice, 'daily');
+  assert.equal(story.dataset.choice, 'daily');
   host.click(toggle);
   host.click(choices[2]);
   assert.equal(root.dataset.unfolded, 'off');
   assert.equal(toggle.getAttribute('aria-pressed'), 'false');
-  assert.equal(root.dataset.choice, 'tomorrow');
-  assert.deepEqual(panels(root).map(panel => panel.hidden), [true, true, false]);
+  assert.equal(story.dataset.choice, 'tomorrow');
+  assert.deepEqual(panels(story).map(panel => panel.hidden), [true, true, false]);
   controller.dispose();
+});
+
+test('opening objects appear only on the cover while story scenes continue without a second opening', () => {
+  const openingClasses = {
+    'paper-theater': ['it-door'],
+    'memory-house': ['ih-front-door', 'ih-gate'],
+    ribbon: ['ir-triptych', 'ir-ribbon'],
+  };
+  for (const id of ids) {
+    const host = render(id), story = storyRoot(host);
+    const nodes = host.querySelectorAll('[class]');
+    const openingNodes = nodes.filter(node => openingClasses[id].some(name => node.getAttribute('class').split(' ').includes(name)));
+    assert.ok(openingNodes.length > 0, `${id}: the original cover opening remains`);
+    assert.ok(openingNodes.every(node => node.closest('[data-section="cover"]')), `${id}: the opening is not repeated later`);
+    assert.equal(story.querySelectorAll('[data-immersive-toggle]').length, 0, `${id}: no second unfolding prompt`);
+    assert.equal(story.hasAttribute('data-story-hold'), false, `${id}: reading does not wait through another opening animation`);
+    assert.equal(buttons(story).length, 3, `${id}: the three story choices remain`);
+    assert.ok(story.querySelectorAll('img').length >= 3, `${id}: the stories retain their photos`);
+  }
 });
 
 test('unfold buttons can hand control back to scrolling without changing a different scene', () => {

@@ -1,6 +1,6 @@
-import { editorialMotion } from './scroll-motion-editorial.mjs?v=20260914-immersive-worlds';
-import { romanticMotion } from './scroll-motion-romantic.mjs?v=20260914-immersive-worlds';
-import { collectionMotion } from './scroll-motion-collection.mjs?v=20260914-immersive-worlds';
+import { editorialMotion } from './scroll-motion-editorial.mjs?v=20260914-reference-samples';
+import { romanticMotion } from './scroll-motion-romantic.mjs?v=20260914-reference-samples';
+import { collectionMotion } from './scroll-motion-collection.mjs?v=20260914-reference-samples';
 
 /** Every visual value is a function of position; there is no playback clock. */
 export function storyMotion(id, input) {

@@ -1,4 +1,4 @@
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260914-immersive-worlds';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260914-reference-samples';
 
 const flower = `<svg viewBox="0 0 90 130" fill="none" aria-hidden="true"><path d="M44 126C54 95 21 72 47 35M43 95C23 99 10 84 13 67C32 64 40 78 43 95ZM45 70C65 74 80 61 78 44C61 40 49 51 45 70Z" stroke="currentColor" stroke-width="1.1"/><path d="M47 37C20 32 20 10 36 11C38-6 57-3 58 12C77 7 82 26 65 35C62 49 48 50 47 37Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.1"/><circle cx="50" cy="25" r="4" fill="currentColor"/></svg>`;
 
@@ -11,8 +11,8 @@ function band() {
   </svg>`;
 }
 
-function triptych(thumbnail = false, story = false) {
-  return `<div class="imm-art ir-art${story ? ' ir-memory-art' : ''}" aria-hidden="true">
+function triptych(thumbnail = false) {
+  return `<div class="imm-art ir-art" aria-hidden="true">
     <span class="ir-art-corner ir-art-corner-one">${flower}</span><span class="ir-art-corner ir-art-corner-two">${flower}</span>
     <div class="ir-card-table"><div class="ir-triptych">
       <div class="ir-card ir-center"><span class="ir-card-kicker">THE MIDDLE OF</span><div class="ir-center-photo">${photo(0, '', !thumbnail)}</div><strong>you & me</strong><span class="ir-card-foot">OUR NEXT CHAPTER</span></div>
@@ -22,8 +22,11 @@ function triptych(thumbnail = false, story = false) {
     </div></div>
     ${band()}
     <span class="ir-art-note">A little love, waiting to unfold.</span>
-    ${story ? '<svg class="ir-story-thread" viewBox="0 0 360 270" fill="none"><path pathLength="1" d="M42 172C73 211 122 229 180 209S263 233 322 173"/><circle class="ir-thread-first" cx="61" cy="188" r="5"/><circle class="ir-thread-daily" cx="180" cy="209" r="5"/><circle class="ir-thread-tomorrow" cx="304" cy="188" r="5"/></svg>' : ''}
   </div>`;
+}
+
+function memoryTimeline() {
+  return `<div class="ir-memory-timeline" aria-hidden="true"><svg viewBox="0 0 340 330" fill="none"><path d="M87 45C226 15 278 99 245 151S138 159 87 236C54 284 155 304 280 281"/></svg><figure class="ir-memory-moment ir-memory-first">${photo(1)}<figcaption>01 / A SMALL HELLO</figcaption></figure><figure class="ir-memory-moment ir-memory-daily">${photo(2)}<figcaption>02 / OUR EVERYDAY</figcaption></figure><figure class="ir-memory-moment ir-memory-tomorrow">${photo(0)}<figcaption>03 / ALL OUR TOMORROWS</figcaption></figure><span class="ir-timeline-note">You, me,<br>and all the days between.</span></div>`;
 }
 
 export function ribbonCover(thumbnail = false) {
@@ -33,7 +36,7 @@ export function ribbonCover(thumbnail = false) {
 }
 
 function ribbonStory() {
-  return scene('story', 'imm-stage ir-story', `${label('THREE FOLDS, ONE STORY')}<h2 class="imm-title">접혀 있던 날들을<br><em>하나씩 펼치면.</em></h2>${triptych(false, true)}${choices([['first', '작은 시작'], ['daily', '우리의 보통날'], ['tomorrow', '다음 계절']], '접힌 카드 속 우리 이야기 선택')}<div class="ir-story-copy" aria-live="polite">${panel('first', '<span class="ir-note-number">01 / A SMALL HELLO</span><h3>처음에는, 작은 인사였어요.</h3><p>좋아하는 계절을 묻고, 하루의 안부를 나누던 사이.<br>조금씩 길어진 대화가 우리를 같은 쪽으로 데려왔어요.</p>', true)}${panel('daily', '<span class="ir-note-number">02 / AN ORDINARY SUNDAY</span><h3>함께라서, 좋은 보통날.</h3><p>장을 보고 저녁을 고르고 조금 더 돌아서 걷는 길.<br>큰 사건 없는 하루에도 같이 웃을 일이 생겼습니다.</p>')}${panel('tomorrow', '<span class="ir-note-number">03 / ALL OUR TOMORROWS</span><h3>다음 장에는, 우리라는 이름을.</h3><p>언제나 쉬운 날만 있지는 않겠지요.<br>그래도 먼저 손을 내밀며, 같은 방향으로 이어지려 해요.</p>')}</div>${unfoldButton('세 면의 이야기 펼치기')}`, 2.4, 'ribbon-story');
+  return scene('story', 'imm-stage ir-story', `${label('A THREAD THROUGH OUR DAYS')}<h2 class="imm-title">너와 나 사이를<br><em>이어준 순간들.</em></h2>${memoryTimeline()}${choices([['first', '작은 시작'], ['daily', '우리의 보통날'], ['tomorrow', '다음 계절']], '리본으로 이어진 우리 이야기 선택')}<div class="ir-story-copy" aria-live="polite">${panel('first', '<span class="ir-note-number">01 / A SMALL HELLO</span><h3>처음에는, 작은 인사였어요.</h3><p>좋아하는 계절을 묻고, 하루의 안부를 나누던 사이.<br>조금씩 길어진 대화가 우리를 같은 쪽으로 데려왔어요.</p>', true)}${panel('daily', '<span class="ir-note-number">02 / AN ORDINARY SUNDAY</span><h3>함께라서, 좋은 보통날.</h3><p>장을 보고 저녁을 고르고 조금 더 돌아서 걷는 길.<br>큰 사건 없는 하루에도 같이 웃을 일이 생겼습니다.</p>')}${panel('tomorrow', '<span class="ir-note-number">03 / ALL OUR TOMORROWS</span><h3>다음 장에는, 우리라는 이름을.</h3><p>언제나 쉬운 날만 있지는 않겠지요.<br>그래도 먼저 손을 내밀며, 같은 방향으로 이어지려 해요.</p>')}</div>`, 0, 'ribbon-story');
 }
 
 function promise() {

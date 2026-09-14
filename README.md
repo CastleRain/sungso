@@ -10,7 +10,7 @@
 |---|---|---|
 | [apps/hub](apps/hub/README.md) | `/sungso/` | 밝은 우리 홈·공유 바로가기·모든 앱 검색·다가오는 일정·메모 |
 | [apps/dates](apps/dates/README.md) | `/sungso/dates/` | 기존 일정·달력·D-day |
-| [apps/invitation](apps/invitation/README.md) | `/sungso/invitation/` | 청첩장 23종·검색·나란히 비교·찜·공동 디자인 선택 |
+| [apps/invitation](apps/invitation/README.md) | `/sungso/invitation/` | 청첩장 29종·검색·나란히 비교·찜·공동 디자인 선택 |
 | [apps/wecost](apps/wecost/README.md) | `/sungso/wecost/` | 결혼비용·현금흐름·집 예산 |
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
 | [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·WeCost 연결 예산·출발 준비·변경 이력 |

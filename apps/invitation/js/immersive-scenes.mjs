@@ -1,6 +1,6 @@
-import { theaterCover, theaterBody } from './immersive-theater.mjs?v=20260914-immersive-worlds';
-import { houseCover, houseBody } from './immersive-house.mjs?v=20260914-immersive-worlds';
-import { ribbonCover, ribbonBody } from './immersive-ribbon.mjs?v=20260914-immersive-worlds';
+import { theaterCover, theaterBody } from './immersive-theater.mjs?v=20260914-reference-samples';
+import { houseCover, houseBody } from './immersive-house.mjs?v=20260914-reference-samples';
+import { ribbonCover, ribbonBody } from './immersive-ribbon.mjs?v=20260914-reference-samples';
 
 const renderers = {
   'paper-theater': [theaterCover, theaterBody],

@@ -1,4 +1,4 @@
-import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-immersive-worlds';
+import { SIGNATURES, getTemplate } from './catalog.mjs?v=20260914-reference-samples';
 
 export function signatureCollection() {
   return `<section class="signature-collection" aria-labelledby="signature-collection-title">

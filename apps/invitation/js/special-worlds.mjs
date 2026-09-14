@@ -1,4 +1,4 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-immersive-worlds';
+import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
 
 const names = '<span>성우</span><i>&</i><span>소희</span>';
 const image = (index, className, thumbnail) => `<img class="${className}" src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : 'fetchpriority="high"'}>`;

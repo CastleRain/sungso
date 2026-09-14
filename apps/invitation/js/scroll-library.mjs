@@ -1,4 +1,4 @@
-import { SCROLL_DESIGNS, getScrollDesign } from './scroll-designs.mjs?v=20260914-immersive-worlds';
+import { SCROLL_DESIGNS, getScrollDesign } from './scroll-designs.mjs?v=20260914-reference-samples';
 
 export function scrollPreviewLink(template) {
   if (!getScrollDesign(template.id)) return '';

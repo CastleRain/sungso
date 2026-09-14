@@ -1,4 +1,4 @@
-import { TEMPLATES } from './catalog.mjs?v=20260914-immersive-worlds';
+import { TEMPLATES } from './catalog.mjs?v=20260914-reference-samples';
 
 // Viewing treatments reuse catalog IDs and never enter saved selections.
 const treatments = [

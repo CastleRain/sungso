@@ -1,4 +1,4 @@
-import { normalizeDocument, applyChange } from './core.mjs?v=20260914-immersive-worlds';
+import { normalizeDocument, applyChange } from './core.mjs?v=20260914-reference-samples';
 
 export function createStore(adapter) {
   let disposed = false;

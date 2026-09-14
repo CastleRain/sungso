@@ -1,5 +1,6 @@
-import { EDITIONS } from './edition-catalog.mjs?v=20260914-immersive-worlds';
-import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260914-immersive-worlds';
+import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260914-reference-samples';
+import { EDITIONS } from './edition-catalog.mjs?v=20260914-reference-samples';
+import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260914-reference-samples';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [
@@ -17,8 +18,9 @@ export const TEMPLATES = [
   { collection: 'special', id: 'curtain', name: '우리의 첫 장면', english: 'The night is ours', number: '12', mood: '극적인 · 우아한', description: '막이 오르는 순간, 당신을 위한 초대가 시작돼요.', experienceHint: '커튼을 열어 첫 장면 만나기', photoHint: '스포트라이트 속 세로 커플 사진', galleryLayout: 'slide', palettes: [palette('velvet', '벨벳', '#341a24', '#fcf1db', '#d0a56c', '#512d39'), palette('emerald', '에메랄드', '#19342d', '#f2efda', '#bbbd81', '#2c4d42'), palette('navy', '네이비', '#1d2940', '#f4f0e6', '#b5bfd2', '#303f58')] },
 ];
 
-TEMPLATES.push(...IMMERSIVE_EDITIONS, ...EDITIONS);
+TEMPLATES.push(...REFERENCE_EDITIONS, ...IMMERSIVE_EDITIONS, ...EDITIONS);
 export const COLLECTIONS = {
+  reference: { name: '원본 샘플 구성', title: '원본에서 고른 여섯 가지 초대', english: 'THE REFERENCE SAMPLES', description: '살롱드레터 세 가지와 투아워게스트 서울·포르투·제주. 원본의 사진 배치와 긴 본문, 첫 등장 연출을 담았어요.' },
   immersive: { name: '새로운 이야기', title: '한 장을 넘어, 하나의 이야기', english: 'THE STORY EDITIONS', description: '종이 속 작은 무대, 함께 꾸민 집, 접힌 리본 편지. 안으로 펼쳐지는 새로운 이야기를 만나보세요.' },
   special: { name: '손으로 여는 초대', title: '직접 열어보는 초대', english: 'THE PLAYFUL COLLECTION', description: '봉투·별자리·탑승권의 전체 이야기와 사진·책·커튼의 오프닝.' },
   classic: { name: '사진과 여백', title: '오래 보아도 좋은 초대', english: 'THE CLASSIC COLLECTION', description: '여백과 사진, 서체로 전하는 담백한 초대.' },

@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-immersive-worlds';
-import { escapeHtml } from './core.mjs?v=20260914-immersive-worlds';
+import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
+import { escapeHtml } from './core.mjs?v=20260914-reference-samples';
 
 const postmark = `<svg viewBox="0 0 148 82" fill="none" aria-hidden="true"><circle cx="45" cy="41" r="31"/><circle cx="45" cy="41" r="27"/><path d="M71 27c17-9 24 9 41 0s24 9 36 0M74 36c14-9 21 9 38 0s24 9 36 0M74 45c14-9 21 9 38 0s24 9 36 0M71 54c17-9 24 9 41 0s24 9 36 0"/><text x="45" y="29">WITH LOVE</text><text x="45" y="44" class="env-postmark-day">18 MAY</text><text x="45" y="58">2030</text></svg>`;
 const letterIds = ['beginning', 'ordinary', 'promise'];

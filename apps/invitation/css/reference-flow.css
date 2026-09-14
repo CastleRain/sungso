@@ -1,0 +1,52 @@
+/* Every sample remains a complete readable document without its enhancement. */
+.ref-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+main[data-reference-motion="on"] .ref-reveal {
+  transition: opacity 800ms ease, transform 800ms cubic-bezier(.2, .65, .25, 1);
+}
+
+main[data-reference-motion="on"] .ref-reveal:not(.ref-visible) {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+main[data-reference-motion="on"] .ref-reveal.ref-seen {
+  transition: none;
+}
+
+main[data-reference-motion="off"] [data-reference-intro],
+main[data-reference-motion="reduced"] [data-reference-intro],
+main [data-reference-intro].ref-intro-seen {
+  animation: none !important;
+}
+
+main[data-reference-motion="off"] [data-reference-intro] *,
+main[data-reference-motion="reduced"] [data-reference-intro] *,
+main [data-reference-intro].ref-intro-seen * {
+  animation: none !important;
+}
+
+[data-reference-gallery] {
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+}
+
+[data-reference-gallery] > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main[data-reference-motion] .ref-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  main[data-reference-motion] [data-reference-intro],
+  main[data-reference-motion] [data-reference-intro] * {
+    animation: none !important;
+  }
+}

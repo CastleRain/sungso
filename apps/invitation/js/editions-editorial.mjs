@@ -1,5 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-immersive-worlds';
-import { escapeHtml as e } from './core.mjs?v=20260914-immersive-worlds';
+import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
+import { escapeHtml as e } from './core.mjs?v=20260914-reference-samples';
 
 const IDS = ['magazine', 'film', 'vinyl', 'museum'];
 const photo = (index, className = '', eager = false) => `<img class="${className}" src="${e(PHOTOS[index].src)}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;

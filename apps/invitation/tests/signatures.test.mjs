@@ -6,7 +6,9 @@ import { invitation, cover } from '../js/templates.mjs';
 
 test('signature editions enrich the existing three IDs while retaining all twelve saved designs', () => {
   assert.deepEqual(Object.keys(SIGNATURES), ['envelope', 'constellation', 'ticket']);
-  assert.equal(TEMPLATES.length, 23);
+  for (const id of ['minimal', 'photo', 'garden', 'letter', 'sketch', 'cinema', 'envelope', 'constellation', 'camera', 'storybook', 'ticket', 'curtain']) {
+    assert.ok(TEMPLATES.some(template => template.id === id), `${id}: the existing saved design remains`);
+  }
   for (const id of Object.keys(SIGNATURES)) {
     const selection = defaultSelection(id);
     assert.equal(selection.sections.story, true);

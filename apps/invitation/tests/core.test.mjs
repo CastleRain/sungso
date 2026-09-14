@@ -7,7 +7,7 @@ import { invitation, cover } from '../js/templates.mjs';
 import { createStore } from '../js/store.mjs';
 
 test('each template offers valid palettes and defaults without shared mutable state', () => {
-  assert.equal(TEMPLATES.length, 23);
+  assert.equal(TEMPLATES.length, 29);
   for (const template of TEMPLATES) {
     assert.equal(template.palettes.length, 3);
     const first = defaultSelection(template.id), second = defaultSelection(template.id);
@@ -74,7 +74,7 @@ test('route parsing is bounded and supports direct template and joint-choice lin
 test('filters expose each persons favorites and their intersection', () => {
   const favorites = { sungwoo: ['minimal', 'garden'], sohee: ['garden', 'sketch'] };
   assert.deepEqual(filterTemplates(TEMPLATES, favorites, 'both').map(item => item.id), ['garden']);
-  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, 23);
+  assert.equal(filterTemplates(TEMPLATES, favorites, 'all').length, TEMPLATES.length);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sungwoo').length, 2);
   assert.equal(filterTemplates(TEMPLATES, favorites, 'sohee').length, 2);
 });

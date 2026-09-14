@@ -1,5 +1,5 @@
-import { editorialCover, editorialBody, createEditorialEditions } from './editions-editorial.mjs?v=20260914-immersive-worlds';
-import { playfulCover, playfulBody, createPlayfulEditions } from './editions-playful.mjs?v=20260914-immersive-worlds';
+import { editorialCover, editorialBody, createEditorialEditions } from './editions-editorial.mjs?v=20260914-reference-samples';
+import { playfulCover, playfulBody, createPlayfulEditions } from './editions-playful.mjs?v=20260914-reference-samples';
 export const editionCover = (id, thumbnail) => editorialCover(id, thumbnail) || playfulCover(id, thumbnail);
 export const editionBody = (selection, parts) => editorialBody(selection, parts) || playfulBody(selection, parts);
 export function createEditions() {
