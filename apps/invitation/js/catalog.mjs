@@ -1,6 +1,6 @@
-import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260914-reference-samples';
-import { EDITIONS } from './edition-catalog.mjs?v=20260914-reference-samples';
-import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260914-reference-samples';
+import { REFERENCE_EDITIONS } from './reference-catalog.mjs?v=20260915-wedding-date';
+import { EDITIONS } from './edition-catalog.mjs?v=20260915-wedding-date';
+import { IMMERSIVE_EDITIONS } from './immersive-catalog.mjs?v=20260915-wedding-date';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [

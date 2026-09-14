@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { TEMPLATES, PHOTOS, getTemplate } from '../js/catalog.mjs';
 import { defaultSelection, normalizeSelection, normalizeDocument, parseRoute } from '../js/core.mjs';
 import { cover, invitation } from '../js/templates.mjs';
@@ -85,7 +86,7 @@ test('new registered invitations retain routes and selections while rendering di
       assert.equal(host.querySelectorAll(`[data-section="${key}"]`).length, 1, `${id}: ${key} appears once`);
     }
     const date = host.querySelector('[data-section="date"]');
-    assert.match(date.textContent, /2030년 5월 18일/);
+    assert.ok(date.textContent.includes(WEDDING.koDate));
     assert.match(date.textContent, /토요일 오후 2시/);
     assert.match(date.textContent, /우리의 웨딩홀 · 가든홀/);
     assert.equal(date.closest('[aria-hidden="true"]'), null);

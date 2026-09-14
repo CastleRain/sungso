@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { PHOTOS } from '../js/catalog.mjs';
 import { editorialCover, editorialBody, initialEditorialState, transitionEditorialState, createEditorialEditions } from '../js/editions-editorial.mjs';
 
@@ -13,7 +14,7 @@ test('each editorial world has a distinct cover and a complete body with readabl
   for (const id of ids) {
     const cover = editorialCover(id), body = editorialBody(select(id), { ...parts, cover });
     covers.add(cover);
-    assert.match(cover, /2030/);
+    assert.ok(cover.includes(WEDDING.yearText));
     assert.match(cover, /성우|SUNGWOO/);
     assert.ok(body.includes(cover));
     for (const key of ['greeting', 'date', 'ending', 'gallery', 'directions', 'accounts', 'rsvp', 'guestbook']) assert.ok(body.includes(parts[key]), `${id}: ${key} remains available`);

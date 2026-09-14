@@ -1,17 +1,19 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-wedding-date';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
 
 const ids = ['salon-lettering','salon-polaroid','salon-editorial'];
 const photo = (i,cls='',eager=false) => `<img class="${cls}" src="${PHOTOS[i].src}" alt="${PHOTOS[i].alt}" width="${i===0?1024:1536}" height="${i===0?1536:1024}" ${eager?'fetchpriority="high"':'loading="lazy"'} decoding="async">`;
 const mark = (id,key) => `data-reference-reveal data-reference-key="${id}-${key}"`;
 const section = (id,key,cls,html) => `<section class="rs-section ref-reveal ${cls}" data-section="${key}" ${mark(id,key)}>${html}</section>`;
 const title = text => `<h2 class="rs-title">${text}</h2>`;
-const dateLine = '<p class="rs-date-line">2030년 5월 18일 토요일 오후 2시<br>우리의 웨딩홀 · 가든홀</p>';
+const dateLine = `<p class="rs-date-line">${WEDDING.koFull}<br>우리의 웨딩홀 · 가든홀</p>`;
 
 export function salonCover(id,thumbnail=false) {
   if (!ids.includes(id)) return '';
   const attrs = thumbnail ? 'data-reference-thumbnail' : `${mark(id,'cover')} data-reference-intro`;
-  if (id==='salon-polaroid') return `<section class="cover ref-cover rs-cover rs-polaroid ref-reveal" ${attrs}><div class="rs-polaroid-paper"><div class="rs-polaroid-photo">${photo(2,'',!thumbnail)}</div><span class="rs-vertical-names">성우　소희</span><h2 class="rs-handwritten">Happy wedding day</h2></div>${dateLine}</section>`;
-  if (id==='salon-editorial') return `<section class="cover ref-cover rs-cover rs-editorial ref-reveal" ${attrs}>${photo(0,'rs-cover-photo',!thumbnail)}<div class="rs-corner rs-top-left"><h2>성우</h2><span>Sungwoo</span></div><div class="rs-corner rs-top-right"><h2>소희</h2><span>Sohee</span></div><p class="rs-side rs-side-left">우리의 웨딩홀　가든홀</p><p class="rs-side rs-side-right">2030. 05. 18　토요일 오후 2시</p><div class="rs-opening" aria-hidden="true"><span data-reference-intro-trigger>We're getting<br>Married!</span></div></section>`;
+  if (id==='salon-polaroid') return `<section class="cover ref-cover rs-cover rs-polaroid ref-reveal" ${attrs}>${thumbnail ? '' : weddingLettering({variant:'paper'})}<div class="rs-polaroid-paper"><div class="rs-polaroid-photo">${photo(2,'',!thumbnail)}</div><span class="rs-vertical-names">성우　소희</span><h2 class="rs-handwritten">Happy wedding day</h2></div>${dateLine}</section>`;
+  if (id==='salon-editorial') return `<section class="cover ref-cover rs-cover rs-editorial ref-reveal" ${attrs}>${photo(0,'rs-cover-photo',!thumbnail)}<div class="rs-corner rs-top-left"><h2>성우</h2><span>Sungwoo</span></div><div class="rs-corner rs-top-right"><h2>소희</h2><span>Sohee</span></div><p class="rs-side rs-side-left">우리의 웨딩홀　가든홀</p><p class="rs-side rs-side-right">${WEDDING.dotted}　${WEDDING.weekday} ${WEDDING.koTime}</p><div class="rs-opening" aria-hidden="true"><span data-reference-intro-trigger>We're getting<br>Married!</span></div></section>`;
   return `<section class="cover ref-cover rs-cover rs-lettering ref-reveal" ${attrs}>${photo(2,'rs-cover-photo',!thumbnail)}<h2 class="rs-handwritten rs-writing" data-reference-intro-trigger>Happy wedding day</h2><p class="rs-cover-names">성우 & 소희</p></section>`;
 }
 
@@ -24,7 +26,7 @@ function profiles(id) {
 }
 function date(id,parts) {
   const calendar=parts.date.match(/<div class="wedding-calendar"[\s\S]*?<\/div><\/div>/)?.[0]||'';
-  return section(id,'date','rs-date',`${title(id==='salon-polaroid'?'오월의<br>열여덟 번째 날.':'예식 안내')}${id==='salon-polaroid'?'':dateLine}${calendar}${id==='salon-polaroid'?dateLine:''}<p class="rs-date-caption">우리의 새로운 시작을<br>함께 기억해 주세요.</p><small class="sample-caption">날짜·시간·장소는 모두 예시입니다.</small>`);
+  return section(id,'date','rs-date',`${title(id==='salon-polaroid'?`${WEDDING.monthKo}의<br>${WEDDING.dayKo}`:'예식 안내')}${id==='salon-polaroid'?'':dateLine}${calendar}${id==='salon-polaroid'?dateLine:''}<p class="rs-date-caption">우리의 새로운 시작을<br>함께 기억해 주세요.</p><small class="sample-caption">예식 날짜와 시간은 두 사람의 일정이며 장소는 예시입니다.</small>`);
 }
 function gallery(id,selection) {
   if (!selection.sections.gallery) return '';
@@ -37,7 +39,7 @@ function interview(id) {
   return section(id,'interview','rs-interview',`${title('웨딩 인터뷰')}<p>서로에게 묻고 답한<br>두 사람의 이야기를 준비했습니다.</p><details><summary>인터뷰 읽어보기 <span>＋</span></summary><div><h3>함께할 미래는 어떤 모습인가요?</h3><p>크고 특별한 일보다, 하루 끝에 서로의 이야기를 들어주는 시간이 많았으면 좋겠어요.</p><h3>꼭 지키고 싶은 약속이 있나요?</h3><p>고맙다는 말을 아끼지 않고, 같은 편이라는 마음을 잊지 않으려고 해요.</p><small class="sample-caption">구성을 확인하기 위한 예시 인터뷰입니다.</small></div></details>`);
 }
 function timeline(id) {
-  return section(id,'story','rs-timeline',`${title(id==='salon-polaroid'?'Time line':'우리의 이야기')}<ol>${[[1,'처음 만난 날','작은 인사가 긴 대화가 되었어요.'],[2,'함께한 날들','평범한 주말도 특별한 기억이 되었어요.'],[0,'2030. 05. 18','이제 부부라는 이름으로 함께합니다.']].map(([i,heading,text])=>`<li>${photo(i)}<div><h3>${heading}</h3><p>${text}</p></div></li>`).join('')}</ol><small class="sample-caption">이야기와 날짜는 가상의 예시입니다.</small>`);
+  return section(id,'story','rs-timeline',`${title(id==='salon-polaroid'?'Time line':'우리의 이야기')}<ol>${[[1,'처음 만난 날','작은 인사가 긴 대화가 되었어요.'],[2,'함께한 날들','평범한 주말도 특별한 기억이 되었어요.'],[0,WEDDING.dotted,'이제 부부라는 이름으로 함께합니다.']].map(([i,heading,text])=>`<li>${photo(i)}<div><h3>${heading}</h3><p>${text}</p></div></li>`).join('')}</ol><small class="sample-caption">이야기는 구성을 살펴보기 위한 예시입니다.</small>`);
 }
 function snap(id) {
   return section(id,'guest-snap','rs-snap',`${title('게스트스냅 📷')}<p>당신의 시선으로 바라본<br>우리의 행복한 순간을 담아주세요.</p><div class="rs-snap-photo">${photo(2)}<span>OUR WEDDING<br><b>Guest snap</b></span></div><p class="rs-small">함께 웃고 반기는 순간들.<br>그날의 다정한 기억을 오래 간직하고 싶어요.</p><span class="rs-sample-button">사진 함께 모으기</span><small class="sample-caption">디자인 예시로 사진을 업로드하거나 수집하지 않아요.</small>`);
@@ -46,7 +48,7 @@ function guide(id) {
   return section(id,'guest-guide','rs-guide',`<div class="rs-guide-slides" aria-label="옆으로 넘겨보는 하객 안내">${[[1,'포토부스','소중한 날을 기억할 수 있도록','함께 사진을 남길 공간을 준비할 예정이에요.'],[0,'주차 안내','편안한 발걸음이 되도록','예식장의 주차 안내를 이곳에 자세히 적어요.'],[2,'감사의 선물','함께해 주신 마음에 감사하며','준비한 작은 선물로 마음을 전하려 해요.']].map(([i,heading,first,text])=>`<article>${photo(i)}<h2>${heading}</h2><p>${first}<br>${text}</p></article>`).join('')}</div><p class="rs-small">옆으로 넘겨서 안내를 확인해 주세요.</p>`);
 }
 function restyle(html,cls) {return html?.replace('class="',`class="ref-reveal ${cls} `).replace(/ data-section="([^"]+)"/, ' data-reference-reveal data-reference-key="'+cls+'-$1" data-section="$1"')||'';}
-function ending(id) {return `<footer class="invitation-ending rs-ending ref-reveal" ${mark(id,'ending')}>${photo(0)}<div><p>저희 둘, 행복하게 잘 살겠습니다.</p><span>성우 & 소희</span><small>2030. 05. 18</small></div></footer>`;}
+function ending(id) {return `<footer class="invitation-ending rs-ending ref-reveal" ${mark(id,'ending')}>${photo(0)}<div><p>저희 둘, 행복하게 잘 살겠습니다.</p><span>성우 & 소희</span><small>${WEDDING.dotted}</small></div></footer>`;}
 
 export function salonBody(selection,parts) {
   const id=selection.templateId;if(!ids.includes(id))return '';

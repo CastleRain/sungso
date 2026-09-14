@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { readFile } from 'node:fs/promises';
 import { TEMPLATES, SECTIONS } from '../js/catalog.mjs';
 import { defaultSelection, normalizeSelection, normalizeDocument, applyChange, SelectionConflict, exportSelection, selectionText, parseRoute, filterTemplates, normalizeLocal, readLocal, writeLocal, escapeHtml } from '../js/core.mjs';
@@ -163,6 +164,6 @@ test('special thumbnails are plain links content while full covers expose access
     assert.ok(full.includes('data-experience-status'));
     const page = invitation(defaultSelection(template.id));
     assert.ok(page.indexOf('data-section="greeting"') > page.indexOf('data-experience='));
-    assert.ok(page.includes('2030년 5월 18일'));
+    assert.ok(page.includes(WEDDING.koDate));
   }
 });

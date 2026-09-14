@@ -1,29 +1,32 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
-import { escapeHtml as e } from './core.mjs?v=20260914-reference-samples';
+import { weddingLettering } from './wedding-lettering.mjs?v=20260915-wedding-date';
+import { WEDDING, weddingCalendarCells } from './wedding-date.mjs?v=20260915-wedding-date';
+import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
 
 const designs = new Set(['guest-seoul', 'guest-porto', 'guest-jeju']);
 const photo = (index, className = '', eager = false) => `<img class="${className}" src="${PHOTOS[index].src}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 const reveal = (id, key, className, content, tag = 'div', section = '') => `<${tag} class="${className} ref-reveal" data-reference-reveal data-reference-key="${id}-${key}"${section ? ` data-section="${section}"` : ''}>${content}</${tag}>`;
 const heading = (english, title = '', description = '') => `<header class="rg-heading"><h2>${english}</h2>${title ? `<p>${title}</p>` : ''}${description ? `<p class="rg-heading-note">${description}</p>` : ''}</header>`;
-const dateLine = '<p class="rg-date-line">2030년 5월 18일 토요일 | 오후 2시</p>';
+const dateLine = `<p class="rg-date-line">${WEDDING.koLong} | ${WEDDING.koTime}</p>`;
 const venueLine = '<p class="rg-venue-line">우리의 웨딩홀 · 가든홀</p>';
 const cross = '<span class="rg-cross" aria-hidden="true"></span>';
 
 export function guestCover(id, thumbnail = false) {
   if (!designs.has(id)) return null;
   const type = id.slice(6);
+  const lettering = thumbnail ? '' : weddingLettering({ variant: type === 'jeju' ? 'rose' : type === 'porto' ? 'photo' : 'paper' });
   const attributes = `class="cover ref-cover rg-cover rg-cover-${type}${thumbnail ? ' rg-thumbnail' : ''}" data-reference-intro data-reference-key="${id}-cover"`;
-  if (type === 'seoul') return `<div ${attributes}>
-    <div class="rg-film-frame rg-film-first">${photo(2, '', !thumbnail)}<span class="rg-film-side rg-film-time">SAT · 2:00 PM</span><span class="rg-film-side rg-film-number">▲ 13A</span></div>
-    <div class="rg-film-frame rg-film-second">${photo(1, '', !thumbnail)}<span class="rg-film-side rg-film-date">MAY 18, 2030</span><span class="rg-film-side rg-film-names">SUNGWOO & SOHEE</span><span class="rg-film-side rg-film-number">▲ 12A</span></div>
+  if (type === 'seoul') return `<div ${attributes}>${lettering}
+    <div class="rg-film-frame rg-film-first">${photo(2, '', !thumbnail)}<span class="rg-film-side rg-film-time">${WEDDING.weekdayShort} · ${WEDDING.time12}</span><span class="rg-film-side rg-film-number">▲ 13A</span></div>
+    <div class="rg-film-frame rg-film-second">${photo(1, '', !thumbnail)}<span class="rg-film-side rg-film-date">${WEDDING.enMonthFirst}</span><span class="rg-film-side rg-film-names">SUNGWOO & SOHEE</span><span class="rg-film-side rg-film-number">▲ 12A</span></div>
     <span class="rg-film-caption">OUR WEDDING DAY</span>
   </div>`;
-  if (type === 'porto') return `<div ${attributes}>
+  if (type === 'porto') return `<div ${attributes}>${lettering}
     ${photo(0, 'rg-porto-photo', !thumbnail)}
     <svg class="rg-porto-heart" viewBox="0 0 400 700" fill="none" aria-hidden="true"><path d="M202 679C169 583-93 326-54 167C-26 52 143 33 201 194C245 33 423 48 455 157C504 325 259 579 202 679Z"/><path d="M195 691C148 576-85 325-45 175C-13 52 154 46 207 190C254 51 421 60 446 165C484 320 251 588 195 691Z"/></svg>
-    <div class="rg-porto-title"><h2>We are getting married</h2><p>SUNGWOO <span>|</span> 2030. 05. 18 SAT <span>|</span> SOHEE</p></div>
+    <div class="rg-porto-title"><h2>We are getting married</h2><p>SUNGWOO <span>|</span> ${WEDDING.dotted} ${WEDDING.weekdayShort} <span>|</span> SOHEE</p></div>
   </div>`;
-  return `<div ${attributes}><h2 class="rg-jeju-names"><span>성우</span><i>&</i><span>소희</span></h2><div class="rg-jeju-details">${dateLine}${venueLine}</div></div>`;
+  return `<div ${attributes}>${lettering}<h2 class="rg-jeju-names"><span>성우</span><i>&</i><span>소희</span></h2><div class="rg-jeju-details">${dateLine}${venueLine}</div></div>`;
 }
 
 function greeting(id) {
@@ -32,8 +35,8 @@ function greeting(id) {
 
 function dateSection(id) {
   const week = ['일', '월', '화', '수', '목', '금', '토'];
-  const calendar = `<div class="rg-calendar" aria-label="2030년 5월 달력, 예시 결혼식은 18일 토요일"><div class="rg-calendar-week">${week.map(day => `<span>${day}</span>`).join('')}</div><div class="rg-calendar-days">${'<span aria-hidden="true"></span>'.repeat(3)}${Array.from({ length: 31 }, (_, i) => `<span${i === 17 ? ' class="rg-wedding-day" aria-label="18일 예시 결혼식"' : ''}>${i + 1}</span>`).join('')}</div></div>`;
-  return `<section class="rg-date" data-section="date">${reveal(id, 'date-poster', 'rg-date-poster', '<p>MAY 18</p><p>2030</p>')}${reveal(id, 'date-calendar', 'rg-block rg-calendar-block', `${heading('WEDDING DAY')}${dateLine}<p class="rg-english-date">Saturday, May 18, 2030 | PM 2:00</p>${calendar}<div class="rg-date-cards" aria-label="예시 예식 날짜와 시간">${[['2030', 'YEAR'], ['05', 'MONTH'], ['18', 'DAY'], ['14:00', 'TIME']].map(([value, label]) => `<div><b>${value}</b><span>${label}</span></div>`).join('')}</div><p class="rg-date-notice">성우 <span>♥</span> 소희의 새로운 시작</p><small class="rg-sample">날짜·시간·장소는 모두 예시입니다.</small>`)}</section>`;
+  const calendar = `<div class="rg-calendar" aria-label="${WEDDING.year}년 ${WEDDING.month}월 달력, 결혼식은 ${WEDDING.day}일 ${WEDDING.weekday}"><div class="rg-calendar-week">${week.map(day => `<span>${day}</span>`).join('')}</div><div class="rg-calendar-days">${weddingCalendarCells().map(day => day === null ? '<span aria-hidden="true"></span>' : `<span${day === WEDDING.day ? ` class="rg-wedding-day" aria-label="${day}일 결혼식"` : ''}>${day}</span>`).join('')}</div></div>`;
+  return `<section class="rg-date" data-section="date">${reveal(id, 'date-poster', 'rg-date-poster', `<p>${WEDDING.monthEn} ${WEDDING.day}</p><p>${WEDDING.yearText}</p>`)}${reveal(id, 'date-calendar', 'rg-block rg-calendar-block', `${heading('WEDDING DAY')}${dateLine}<p class="rg-english-date">${WEDDING.enLong} | ${WEDDING.time12}</p>${calendar}<div class="rg-date-cards" aria-label="예식 날짜와 시간">${[[WEDDING.yearText, 'YEAR'], [WEDDING.monthPadded, 'MONTH'], [WEDDING.dayPadded, 'DAY'], [WEDDING.time24, 'TIME']].map(([value, label]) => `<div><b>${value}</b><span>${label}</span></div>`).join('')}</div><p class="rg-date-notice">성우 <span>♥</span> 소희의 새로운 시작</p><small class="rg-sample">예식 날짜와 시간은 두 사람의 일정이며 장소는 예시입니다.</small>`)}</section>`;
 }
 
 function family(id) {
@@ -49,7 +52,7 @@ function story(id) {
     [2, '처음 마주한 날', '첫 인연', '낯선 두 사람이 서로의 하루를<br>궁금해하기 시작했어요.'],
     [1, '함께 걸어온 계절', '평범하고 특별한 날들', '작은 여행과 평범한 주말이<br>소중한 기억이 되었어요.'],
     [0, '서로에게 건넨 약속', '같은 방향을 바라보며', '어떤 날에도 서로의 곁에<br>머무르기로 했어요.'],
-    [2, '2030년 5월 18일', '우리의 웨딩데이', '이제 더 많은 날을<br>우리라는 이름으로 함께해요.'],
+    [2, WEDDING.koDate, '우리의 웨딩데이', '이제 더 많은 날을<br>우리라는 이름으로 함께해요.'],
   ];
   const timeline = `${heading('OUR TIMELINE', '저희 연애의 타임라인입니다', '서로에게 참 소중하고 감사한 존재')}<div class="rg-timeline">${moments.map(([index, when, title, description], i) => reveal(id, `timeline-${i}`, `rg-timeline-row rg-timeline-row-${i}`, `<div class="rg-timeline-photo">${photo(index)}</div><div class="rg-timeline-copy"><span>${when}</span><h3>${title}</h3><p>${description}</p></div>`)).join('')}</div><small class="rg-sample">구성을 살펴보기 위한 예시 이야기입니다.</small>`;
   return `<section class="rg-story" data-section="story">${reveal(id, 'about', 'rg-block rg-about', about)}<div class="rg-block rg-timeline-block">${timeline}</div></section>`;
@@ -65,7 +68,7 @@ function gallery(id, layout) {
 
 function directions(id) {
   const map = `<div class="rg-map" role="img" aria-label="실제 장소가 아닌 예시 약도"><svg viewBox="0 0 340 215" aria-hidden="true"><rect width="340" height="215" fill="var(--soft)"/><path d="M-10 52H350M-10 169H350M67-10V225M249-10V225" stroke="white" stroke-width="22"/><path d="M126-10V225" stroke="white" stroke-width="6"/><rect x="154" y="82" width="67" height="53" rx="3" fill="var(--accent)" opacity=".15"/><circle cx="187" cy="96" r="14" fill="var(--accent)"/><path d="M180 93q7-9 14 0q0 6-7 10q-7-4-7-10" fill="white"/><text x="187" y="145" text-anchor="middle" fill="var(--ink)" font-size="12">우리의 웨딩홀</text><text x="17" y="35" fill="var(--ink)" font-size="11">예시역</text></svg><span>예시 약도</span></div>`;
-  return reveal(id, 'directions', 'rg-block rg-directions', `${heading('LOCATION')}<h3>우리의 웨딩홀 · 가든홀</h3><p>예시 장소 · 토요일 오후 2시</p>${map}<div class="rg-map-options" aria-label="지도 연결 예시"><span>네이버 지도</span><span>카카오맵</span><span>티맵</span></div><div class="rg-transport"><article><b>대중교통</b><p>예시역 2번 출구에서 도보 5분</p></article><article><b>주차</b><p>예시 주차장 · 하객 2시간 무료</p></article><article><b>안내</b><p>자세한 교통편은 실제 제작할 때 입력해요.</p></article></div><small class="rg-sample">실제 위치 조회나 지도 연결은 하지 않아요.</small>`, 'section', 'directions');
+  return reveal(id, 'directions', 'rg-block rg-directions', `${heading('LOCATION')}<h3>우리의 웨딩홀 · 가든홀</h3><p>예시 장소 · ${WEDDING.weekday} ${WEDDING.koTime}</p>${map}<div class="rg-map-options" aria-label="지도 연결 예시"><span>네이버 지도</span><span>카카오맵</span><span>티맵</span></div><div class="rg-transport"><article><b>대중교통</b><p>예시역 2번 출구에서 도보 5분</p></article><article><b>주차</b><p>예시 주차장 · 하객 2시간 무료</p></article><article><b>안내</b><p>자세한 교통편은 실제 제작할 때 입력해요.</p></article></div><small class="rg-sample">실제 위치 조회나 지도 연결은 하지 않아요.</small>`, 'section', 'directions');
 }
 
 function accounts(id) {
@@ -85,7 +88,7 @@ function rsvp(id) {
 }
 
 function ending(id) {
-  return `<footer class="invitation-ending rg-ending">${reveal(id, 'ending-photo', 'rg-ending-photo', photo(1))}${reveal(id, 'ending-copy', 'rg-ending-copy', '<p>함께여서 더 아름다울<br>우리의 모든 내일.</p><span class="rg-ending-rule" aria-hidden="true"></span><p>우리의 시작에 함께해 주셔서 감사합니다.</p><p class="rg-ending-names">성우 <span>&</span> 소희</p><small>2030. 05. 18</small>')}</footer>`;
+  return `<footer class="invitation-ending rg-ending">${reveal(id, 'ending-photo', 'rg-ending-photo', photo(1))}${reveal(id, 'ending-copy', 'rg-ending-copy', `<p>함께여서 더 아름다울<br>우리의 모든 내일.</p><span class="rg-ending-rule" aria-hidden="true"></span><p>우리의 시작에 함께해 주셔서 감사합니다.</p><p class="rg-ending-names">성우 <span>&</span> 소희</p><small>${WEDDING.dotted}</small>`)}</footer>`;
 }
 
 export function guestBody(selection, parts) {

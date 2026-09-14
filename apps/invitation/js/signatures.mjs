@@ -1,6 +1,6 @@
-import { renderSignatureEnvelope, createEnvelopeSignature } from './signature-envelope.mjs?v=20260914-reference-samples';
-import { renderSignatureConstellation, createConstellationSignature } from './signature-constellation.mjs?v=20260914-reference-samples';
-import { renderSignatureTicket, createTicketSignature } from './signature-ticket.mjs?v=20260914-reference-samples';
+import { renderSignatureEnvelope, createEnvelopeSignature } from './signature-envelope.mjs?v=20260915-wedding-date';
+import { renderSignatureConstellation, createConstellationSignature } from './signature-constellation.mjs?v=20260915-wedding-date';
+import { renderSignatureTicket, createTicketSignature } from './signature-ticket.mjs?v=20260915-wedding-date';
 
 const renderers = { envelope: renderSignatureEnvelope, constellation: renderSignatureConstellation, ticket: renderSignatureTicket };
 

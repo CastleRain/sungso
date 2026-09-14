@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { readFile } from 'node:fs/promises';
 import { renderSignatureTicket, createTicketSignature } from '../js/signature-ticket.mjs';
 import { paperCover } from '../js/special-paper.mjs';
@@ -22,7 +23,7 @@ test('full ticket keeps the existing stamp cover and shared gallery controls wit
   assert.doesNotMatch(html, /<article\b/);
   assert.ok(html.includes(PHOTOS[0].src));
   assert.ok(html.includes(PHOTOS[1].src));
-  assert.match(html, /2030/);
+  assert.ok(html.includes(WEDDING.yearText));
 });
 
 test('disabled optional sections have no leftover RSVP or route controls', () => {

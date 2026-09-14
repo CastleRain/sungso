@@ -1,4 +1,4 @@
-import { normalizeDocument, applyChange } from './core.mjs?v=20260914-reference-samples';
+import { normalizeDocument, applyChange } from './core.mjs?v=20260915-wedding-date';
 
 export function createStore(adapter) {
   let disposed = false;

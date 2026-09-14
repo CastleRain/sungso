@@ -1,7 +1,8 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
-import { escapeHtml } from './core.mjs?v=20260914-reference-samples';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { escapeHtml } from './core.mjs?v=20260915-wedding-date';
 
-const postmark = `<svg viewBox="0 0 148 82" fill="none" aria-hidden="true"><circle cx="45" cy="41" r="31"/><circle cx="45" cy="41" r="27"/><path d="M71 27c17-9 24 9 41 0s24 9 36 0M74 36c14-9 21 9 38 0s24 9 36 0M74 45c14-9 21 9 38 0s24 9 36 0M71 54c17-9 24 9 41 0s24 9 36 0"/><text x="45" y="29">WITH LOVE</text><text x="45" y="44" class="env-postmark-day">18 MAY</text><text x="45" y="58">2030</text></svg>`;
+const postmark = `<svg viewBox="0 0 148 82" fill="none" aria-hidden="true"><circle cx="45" cy="41" r="31"/><circle cx="45" cy="41" r="27"/><path d="M71 27c17-9 24 9 41 0s24 9 36 0M74 36c14-9 21 9 38 0s24 9 36 0M74 45c14-9 21 9 38 0s24 9 36 0M71 54c17-9 24 9 41 0s24 9 36 0"/><text x="45" y="29">WITH LOVE</text><text x="45" y="44" class="env-postmark-day">${WEDDING.day} ${WEDDING.monthEn}</text><text x="45" y="58">${WEDDING.yearText}</text></svg>`;
 const letterIds = ['beginning', 'ordinary', 'promise'];
 const storyLetters = [
   {
@@ -43,10 +44,10 @@ export function renderSignatureEnvelope(selection, parts) {
   // Selection is deliberately not copied into HTML; the shared renderer owns palette
   // validation, gallery layout, example markup and the original opening experience.
   void selection;
-  return `<div class="env-postal-header" aria-hidden="true"><span>THE WEDDING POST</span><span>VOL. 01 — MAY 2030</span></div>
+  return `<div class="env-postal-header" aria-hidden="true"><span>THE WEDDING POST</span><span>VOL. 01 — ${WEDDING.monthYear}</span></div>
     <div class="env-cover-sheet">${parts.cover || ''}<div class="env-cover-colophon" aria-hidden="true"><span>A PERSONAL INVITATION</span><span>WITH LOVE, S & S</span></div></div>
     <div class="env-greeting-sheet">
-      <div class="env-address-block"><div><span>DELIVER TO</span><p>우리의 소중한 당신께</p></div><div class="env-postage" aria-hidden="true"><span>THE WEDDING</span><strong>S<span>&</span>S</strong><span>LOVE · 0518</span></div></div>
+      <div class="env-address-block"><div><span>DELIVER TO</span><p>우리의 소중한 당신께</p></div><div class="env-postage" aria-hidden="true"><span>THE WEDDING</span><strong>S<span>&</span>S</strong><span>LOVE · ${WEDDING.code}</span></div></div>
       <div class="env-letter-heading" aria-hidden="true"><span>Dear, our beloved</span><span>01 / INVITATION</span></div>
       ${parts.greeting || ''}
       <div class="env-greeting-postmark" aria-hidden="true">${postmark}</div>
@@ -60,7 +61,7 @@ export function renderSignatureEnvelope(selection, parts) {
       ${inset(parts.rsvp, 'rsvp', 'III', 'YOUR REPLY')}
       ${inset(parts.guestbook, 'guestbook', 'IV', 'A NOTE TO US')}
     </div>
-    <div class="env-last-page"><figure class="env-last-photograph"><img src="${escapeHtml(PHOTOS[1].src)}" alt="${escapeHtml(PHOTOS[1].alt)}" width="1536" height="1024" loading="lazy" decoding="async"><figcaption>Every ordinary day, with you.</figcaption></figure>${parts.ending || ''}<div class="env-postscript"><span>P.S. 당신의 자리도 남겨둘게요.</span><span aria-hidden="true">${postmark}</span></div><p class="env-print-colophon">SEALED WITH LOVE · SUNGWOO & SOHEE<br><span>가상의 사진·날짜·장소를 사용한 디자인 예시</span></p></div>`;
+    <div class="env-last-page"><figure class="env-last-photograph"><img src="${escapeHtml(PHOTOS[1].src)}" alt="${escapeHtml(PHOTOS[1].alt)}" width="1536" height="1024" loading="lazy" decoding="async"><figcaption>Every ordinary day, with you.</figcaption></figure>${parts.ending || ''}<div class="env-postscript"><span>P.S. 당신의 자리도 남겨둘게요.</span><span aria-hidden="true">${postmark}</span></div><p class="env-print-colophon">SEALED WITH LOVE · SUNGWOO & SOHEE<br><span>사진·이야기·장소는 디자인 예시</span></p></div>`;
 }
 
 /** Native details supply keyboard behavior; only their open state survives rerenders. */

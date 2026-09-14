@@ -1,0 +1,104 @@
+.wl-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.wl-rose { color: #fff; background: var(--accent); }
+.wl-photo { color: #fff; background: #10151580; }
+.wl-paper { color: var(--ink); background: var(--paper); }
+
+.wl-script {
+  position: absolute;
+  top: min(45%, 350px);
+  right: 4%;
+  left: 4%;
+  transform: translateY(-50%) rotate(-4deg);
+}
+
+.wl-word { display: block; width: 100%; height: auto; overflow: visible; }
+.wl-stroke {
+  opacity: 1;
+  stroke: currentColor;
+  stroke-width: 2.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100 100;
+  stroke-dashoffset: 0;
+}
+
+/* Hold the background before the word reaches the viewport. Only the
+   lettering trigger starts the pen; entering the cover alone does not. */
+main[data-reference-motion="on"] [data-reference-intro]:not(.ref-intro-play):not(.ref-intro-seen) .wl-overlay {
+  opacity: 1;
+}
+main[data-reference-motion="on"] [data-reference-intro]:not(.ref-intro-play):not(.ref-intro-seen) .wl-stroke {
+  opacity: 0;
+  stroke-dashoffset: 100;
+}
+
+main[data-reference-motion="on"] [data-reference-intro].ref-intro-play:not(.ref-intro-seen) .wl-overlay {
+  animation: wl-finish 4.3s ease both;
+}
+main[data-reference-motion="on"] [data-reference-intro].ref-intro-play:not(.ref-intro-seen) .wl-stroke {
+  animation: wl-write var(--wl-duration) cubic-bezier(.4, .05, .2, 1) var(--wl-start) both;
+}
+
+@keyframes wl-write {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  1% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes wl-finish {
+  0%, 89.5% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+main[data-reference-motion="off"] .wl-overlay,
+main[data-reference-motion="reduced"] .wl-overlay,
+[data-reference-intro].ref-intro-seen .wl-overlay {
+  opacity: 0 !important;
+  animation: none !important;
+}
+main[data-reference-motion="off"] .wl-stroke,
+main[data-reference-motion="reduced"] .wl-stroke,
+[data-reference-intro].ref-intro-seen .wl-stroke {
+  stroke-dashoffset: 0;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-overlay { opacity: 0 !important; animation: none !important; }
+  .wl-stroke { stroke-dashoffset: 0 !important; animation: none !important; }
+}
+
+/* The photo stays visible behind the pen, but its existing headline waits
+   until the lettering fades so the two messages never compete. */
+.rg-cover-porto:has(.wl-overlay) .rg-porto-title { opacity: 1; }
+main[data-reference-motion="on"] .rg-cover-porto:has(.wl-overlay):not(.ref-intro-play):not(.ref-intro-seen) .rg-porto-title {
+  opacity: 0;
+}
+main[data-reference-motion="on"] .rg-cover-porto:has(.wl-overlay).ref-intro-play:not(.ref-intro-seen) .rg-porto-title {
+  animation: wl-porto-title 4.3s ease both;
+}
+@keyframes wl-porto-title {
+  0%, 89.5% { opacity: 0; }
+  100% { opacity: 1; }
+}
+main[data-reference-motion="off"] .rg-cover-porto:has(.wl-overlay) .rg-porto-title,
+main[data-reference-motion="reduced"] .rg-cover-porto:has(.wl-overlay) .rg-porto-title,
+.rg-cover-porto.ref-intro-seen:has(.wl-overlay) .rg-porto-title {
+  opacity: 1 !important;
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-cover-porto:has(.wl-overlay) .rg-porto-title {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}

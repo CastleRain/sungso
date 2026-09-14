@@ -1,6 +1,6 @@
-import { theaterCover, theaterBody } from './immersive-theater.mjs?v=20260914-reference-samples';
-import { houseCover, houseBody } from './immersive-house.mjs?v=20260914-reference-samples';
-import { ribbonCover, ribbonBody } from './immersive-ribbon.mjs?v=20260914-reference-samples';
+import { theaterCover, theaterBody } from './immersive-theater.mjs?v=20260915-wedding-date';
+import { houseCover, houseBody } from './immersive-house.mjs?v=20260915-wedding-date';
+import { ribbonCover, ribbonBody } from './immersive-ribbon.mjs?v=20260915-wedding-date';
 
 const renderers = {
   'paper-theater': [theaterCover, theaterBody],

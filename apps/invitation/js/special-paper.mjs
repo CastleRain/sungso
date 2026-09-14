@@ -1,4 +1,5 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
 
 const photograph = (index, thumbnail, attributes = '') => `<img src="${PHOTOS[index].src}" alt="${PHOTOS[index].alt}" width="${index === 0 ? 900 : 1200}" height="${index === 0 ? 1350 : 800}" decoding="async" ${thumbnail ? 'loading="lazy"' : ''} ${attributes}>`;
 const names = '<span>성우</span><i>&</i><span>소희</span>';
@@ -25,7 +26,7 @@ export function paperCover(templateId, thumbnail = false) {
       ${seal(thumbnail)}
     </div>
     ${status(thumbnail, '봉인을 눌러, 우리의 초대를 열어보세요.')}
-    <p class="couple-names paper-names">${names}</p><p class="paper-date">18 MAY 2030</p>
+    <p class="couple-names paper-names">${names}</p><p class="paper-date">${WEDDING.enDate}</p>
   </div>`;
 
   if (templateId === 'camera') return `<div ${rootAttributes(templateId, thumbnail)}>
@@ -36,12 +37,12 @@ export function paperCover(templateId, thumbnail = false) {
       <div class="instant-camera">
         <div class="camera-top"><span>S & S</span><span>INSTANT LOVE</span></div>
         <div class="camera-flash-window" aria-hidden="true"></div><div class="camera-lens" aria-hidden="true"><span></span></div>
-        <span class="camera-detail" aria-hidden="true">05<br>18</span>
+        <span class="camera-detail" aria-hidden="true">${WEDDING.monthPadded}<br>${WEDDING.dayPadded}</span>
         ${thumbnail ? '<span class="camera-shutter" aria-hidden="true"><span>●</span></span>' : '<button class="camera-shutter" type="button" data-experience-action="shutter" aria-label="셔터를 눌러 예시 사진 꺼내기" aria-pressed="false" data-idle-label="찰칵" data-active-label="다음 사진"><span aria-hidden="true">●</span><span data-experience-label>찰칵</span></button>'}
         <div class="camera-print-slot" aria-hidden="true"></div>
       </div>
       <div class="camera-waiting" aria-hidden="true"><span>↟</span><p>셔터 한 번,<br>기억 한 장.</p><small>PRESS TO MAKE A MEMORY</small></div>
-      <div class="instant-print"><div class="instant-print-image">${PHOTOS.map((_, index) => photograph(index, thumbnail, `data-camera-photo="${index}"${index === 0 ? '' : ' hidden'}`)).join('')}</div><p>our happiest little moment <span aria-hidden="true">♡</span></p><span class="instant-print-date">2030. 05. 18 · SUNGWOO & SOHEE</span></div>
+      <div class="instant-print"><div class="instant-print-image">${PHOTOS.map((_, index) => photograph(index, thumbnail, `data-camera-photo="${index}"${index === 0 ? '' : ' hidden'}`)).join('')}</div><p>our happiest little moment <span aria-hidden="true">♡</span></p><span class="instant-print-date">${WEDDING.dotted} · SUNGWOO & SOHEE</span></div>
     </div>
     ${status(thumbnail, '카메라의 셔터를 눌러보세요. 사진 3장을 꺼낼 수 있어요.')}
     <p class="couple-names paper-names">${names}</p><p class="paper-date">EVERY PICTURE, EVERY DAY, WITH YOU.</p>
@@ -56,8 +57,8 @@ export function paperCover(templateId, thumbnail = false) {
         <div class="boarding-main"><div class="boarding-header"><span>BOARDING PASS</span>${plane}</div>
           <div class="boarding-route"><div><small>FROM</small><strong>ME</strong><span>서로 다른 우리</span></div><span class="boarding-route-line" aria-hidden="true">${plane}</span><div><small>TO</small><strong>US</strong><span>함께할 모든 날</span></div></div>
           <p class="boarding-passengers"><small>PASSENGERS</small>성우 <span>&</span> 소희</p>
-          <dl class="boarding-details"><div><dt>DEPARTURE</dt><dd>18 MAY 2030</dd></div><div><dt>DESTINATION</dt><dd>FOREVER</dd></div><div><dt>FLIGHT</dt><dd>SS 0518</dd></div><div><dt>SEAT</dt><dd>TOGETHER</dd></div></dl>
-          <div class="boarding-stamp" aria-hidden="true"><span>OFFICIALLY</span><strong>MARRIED</strong><span>18 · MAY · 2030</span></div>
+          <dl class="boarding-details"><div><dt>DEPARTURE</dt><dd>${WEDDING.enDate}</dd></div><div><dt>DESTINATION</dt><dd>FOREVER</dd></div><div><dt>FLIGHT</dt><dd>SS ${WEDDING.code}</dd></div><div><dt>SEAT</dt><dd>TOGETHER</dd></div></dl>
+          <div class="boarding-stamp" aria-hidden="true"><span>OFFICIALLY</span><strong>MARRIED</strong><span>${WEDDING.day} · ${WEDDING.monthEn} · ${WEDDING.yearText}</span></div>
         </div>
         <div class="boarding-stub"><span class="boarding-barcode" aria-hidden="true"></span>${thumbnail ? '<span class="boarding-confirm" aria-hidden="true">BOARDING COMPLETE<br><b>WELCOME ABOARD ↗</b></span>' : '<button class="boarding-confirm" type="button" data-experience-action="stamp" aria-label="탑승권에 결혼 도장 찍기" aria-pressed="false" data-idle-label="탑승 확인 ↗" data-active-label="한 번 더 ↺"><small>YOUR INVITATION TO FOREVER</small><span data-experience-label>탑승 확인 ↗</span></button>'}</div>
       </div>

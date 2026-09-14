@@ -1,4 +1,5 @@
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260914-reference-samples';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-wedding-date';
 
 const foliage = `<svg viewBox="0 0 48 80" fill="none" aria-hidden="true"><path d="M24 68V20M24 45 9 33M24 34 37 23" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><ellipse cx="11" cy="31" rx="8" ry="14" transform="rotate(-37 11 31)"/><ellipse cx="35" cy="22" rx="8" ry="14" transform="rotate(35 35 22)"/><ellipse cx="25" cy="12" rx="7" ry="12"/><ellipse cx="35" cy="46" rx="8" ry="13" transform="rotate(40 35 46)"/></g><path d="m14 61 3 17h15l3-17Z" fill="var(--accent)"/></svg>`;
 
@@ -42,6 +43,6 @@ export function houseBody(selection, parts) {
   return `${parts.cover || houseCover()}
     ${scene('greeting', 'ih-letter', `${label('MAKE YOURSELF AT HOME')}<div class="ih-key" aria-hidden="true"><span>♡</span><i></i></div><h2 class="imm-title">좋아하는 사람이<br>돌아올 곳이 된다는 것.</h2><div class="imm-copy"><p>함께 밥을 먹고, 오늘을 묻고,<br>가끔은 아무 말 없이 쉬어도 되는 곳.</p><p>크고 근사한 집보다<br>서로의 마음을 먼저 살피는<br>다정한 하루를 짓고 싶습니다.</p><p>우리라는 집의 첫 문을 여는 날,<br>오래 기억할 손님으로 와주세요.</p></div><p class="ih-signature">성우 그리고 소희 드림</p><span class="ih-letter-stamp" aria-hidden="true">WITH<br>LOVE</span>`)}
     ${story ? scene('story', 'imm-stage ih-rooms', `${label('THREE ROOMS, ONE HEART')}<h2 class="imm-title">보통의 날을 담은<br><em>작은 방 세 개.</em></h2>${miniature(false, true)}${choices(rooms, '우리 집 이야기 방 선택')}<div class="ih-room-stories" aria-live="polite">${panel('living', '<span class="ih-room-number">ROOM 01 · LIVING</span><h3>하루의 끝에 만나는 우리</h3><p>각자의 하루를 가지고 돌아와<br>같은 소파에서 이야기를 나누는 저녁.<br>평범해서 더 좋아하는 미래예요.</p>', true)}${panel('photo', '<span class="ih-room-number">ROOM 02 · MEMORIES</span><h3>사진보다 더 오래 남는 것</h3><p>멋진 여행도, 우연한 산책도.<br>벽에 걸린 한 장의 사진 뒤에는<br>함께 웃었던 시간이 살고 있어요.</p>')}${panel('garden', '<span class="ih-room-number">ROOM 03 · GARDEN</span><h3>천천히 자라는 마음</h3><p>작은 화분을 돌보듯 서로를 아끼고,<br>새로운 계절이 찾아올 때마다<br>나란히 자라가는 우리가 되려고요.</p>')}</div><p class="ih-sample-note">함께 살아갈 날들을 그려본 이야기 예시입니다.</p>`, 0, 'house-rooms') : ''}
-    ${scene('garden-promise', 'imm-stage ih-garden-invitation', `${label('THE GARDEN IS OPEN')}<h2 class="imm-title">이 작은 정원에서,<br><em>우리의 시작을.</em></h2>${weddingGarden()}<p class="imm-copy">소중한 얼굴들로 가득할 오월의 오후.<br>당신의 자리를 따뜻하게 준비할게요.</p><p class="ih-garden-postscript">THERE IS A PLACE FOR YOU HERE.</p>`)}
+    ${scene('garden-promise', 'imm-stage ih-garden-invitation', `${label('THE GARDEN IS OPEN')}<h2 class="imm-title">이 작은 정원에서,<br><em>우리의 시작을.</em></h2>${weddingGarden()}<p class="imm-copy">소중한 얼굴들로 가득할 ${WEDDING.monthKo}의 오후.<br>당신의 자리를 따뜻하게 준비할게요.</p><p class="ih-garden-postscript">THERE IS A PLACE FOR YOU HERE.</p>`)}
     ${fixed(parts, 'ih-fixed')}`;
 }

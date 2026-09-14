@@ -1,15 +1,15 @@
-import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260914-reference-samples';
-import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260914-reference-samples';
-import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260914-reference-samples';
-import { createStore } from './store.mjs?v=20260914-reference-samples';
-import { createExperiences } from './experiences.mjs?v=20260914-reference-samples';
-import { createSignatures } from './signatures.mjs?v=20260914-reference-samples';
-import { signatureGuide } from './signature-catalog.mjs?v=20260914-reference-samples';
-import { createEditions } from './editions.mjs?v=20260914-reference-samples';
-import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260914-reference-samples';
-import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260914-reference-samples';
-import { isReferenceTemplate } from './reference-catalog.mjs?v=20260914-reference-samples';
-import { getScrollDesign } from './scroll-designs.mjs?v=20260914-reference-samples';
+import { TEMPLATES, COLLECTIONS, SIGNATURES, PEOPLE, GALLERIES, SECTIONS, PHOTOS, getTemplate } from './catalog.mjs?v=20260915-wedding-date';
+import { defaultSelection, normalizeDocument, escapeHtml as e, readLocal, writeLocal, parseRoute, filterTemplates, exportSelection, selectionText } from './core.mjs?v=20260915-wedding-date';
+import { cover, invitation, themeAttributes, heart } from './templates.mjs?v=20260915-wedding-date';
+import { createStore } from './store.mjs?v=20260915-wedding-date';
+import { createExperiences } from './experiences.mjs?v=20260915-wedding-date';
+import { createSignatures } from './signatures.mjs?v=20260915-wedding-date';
+import { signatureGuide } from './signature-catalog.mjs?v=20260915-wedding-date';
+import { createEditions } from './editions.mjs?v=20260915-wedding-date';
+import { createImmersiveExperiences } from './immersive-experiences.mjs?v=20260915-wedding-date';
+import { createPreviewScroll, supportsScrollStory } from './preview-scroll.mjs?v=20260915-wedding-date';
+import { isReferenceTemplate } from './reference-catalog.mjs?v=20260915-wedding-date';
+import { getScrollDesign } from './scroll-designs.mjs?v=20260915-wedding-date';
 import { requireMember, getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 
 const member = await requireMember();
@@ -99,7 +99,7 @@ function renderGrid() {
 }
 function renderCatalog() {
   main.className = 'catalog-main';
-  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">원본에서 고른 여섯 가지 새로운 초대.<br>사진과 여백, 자연스럽게 이어지는 이야기를 만나보세요.</p></div><div class="library-feature"><span>REFERENCE SAMPLES</span><b>${TEMPLATES.filter(t => t.collection === 'reference').length}</b><p>원본 구성으로 만든 새 예시</p><button type="button" data-action="collection" data-collection="reference">새 예시부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">사진·날짜·장소는 가상의 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
+  main.innerHTML = `<section class="catalog-heading"><div><p class="eyebrow">THE INVITATION LIBRARY</p><h1>우리다운 초대는<br>어떤 모습일까요<span class="heading-flower" aria-hidden="true">✳</span></h1><p class="heading-description">원본에서 고른 여섯 가지 새로운 초대.<br>사진과 여백, 자연스럽게 이어지는 이야기를 만나보세요.</p></div><div class="library-feature"><span>REFERENCE SAMPLES</span><b>${TEMPLATES.filter(t => t.collection === 'reference').length}</b><p>원본 구성으로 만든 새 예시</p><button type="button" data-action="collection" data-collection="reference">새 예시부터 보기 ↗</button></div></section><div class="catalog-intro"><p>마음에 드는 예시는 <strong>비교</strong>에 담아 나란히 살펴보세요.</p><span class="intro-note">예식 날짜·시간을 반영했어요. 사진·장소는 예시입니다.</span></div><section class="catalog-collection" aria-label="청첩장 템플릿"><div class="library-tools"><div class="collection-tabs" aria-label="디자인 모음">${[['all','모두',TEMPLATES.length],...Object.entries(COLLECTIONS).map(([id, value]) => [id,value.name,TEMPLATES.filter(t => t.collection === id).length])].map(([id,label,count]) => `<button type="button" data-action="collection" data-collection="${id}" aria-pressed="${local.collection === id}"><span>${label}</span><small>${count}</small></button>`).join('')}</div><label class="catalog-search"><span>어떤 초대를 찾나요?</span><input type="search" id="catalog-search" value="${e(local.search)}" maxlength="100" placeholder="예: 사진, 정원, 음반, 인터뷰" autocomplete="off"></label><div class="collection-toolbar"><div class="filters" aria-label="후보 필터">${[['all','전체'],['sungwoo','성우의 찜'],['sohee','소희의 찜'],['both','둘 다 찜']].map(([id,label]) => `<button type="button" data-action="filter" data-filter="${id}" aria-pressed="${local.filter === id}">${label}</button>`).join('')}</div><div class="density-options" aria-label="목록 크기"><button type="button" data-action="density" data-density="compact" aria-pressed="${local.density === 'compact'}">모아보기</button><button type="button" data-action="density" data-density="comfortable" aria-pressed="${local.density === 'comfortable'}">크게 보기</button></div></div><p id="template-count" role="status" aria-live="polite"></p></div><div id="template-grid" class="template-grid"></div></section><aside id="compare-tray" class="compare-tray" aria-label="비교할 후보" hidden></aside><footer class="catalog-footer"><span>sungso</span><p>함께 고르는 오늘도, 우리의 결혼 준비.</p><a href="#selection">우리의 선택 모아보기 →</a></footer>`;
   renderGrid();
 }
 function optionsMarkup(selection, scope = 'desktop') {
@@ -131,7 +131,7 @@ function mountPreviewEffects(restore = null) {
 function renderPreview() {
   const template = getTemplate(route.templateId), draft = getDraft(template.id);
   main.className = 'preview-main';
-  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">디자인 미리보기 · 사진, 시간, 장소는 예시입니다.</p>${signatureGuide(template.id)}${deviceToolbar()}<div class="preview-layout"><div class="preview-stage"><div class="device-statusbar" aria-hidden="true"><span>9:41</span><i></i><span>▮▮▮ ▰</span></div><div id="preview-canvas">${invitation(draft.selection)}</div><div class="device-homebar" aria-hidden="true"><i></i></div></div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
+  main.innerHTML = `<div class="preview-topbar"><a href="#catalog" aria-label="전체 예시로 돌아가기">← <span>전체 예시</span></a><h1>${template.name}</h1><div id="preview-favorite">${favoriteButton(template.id, true)}</div></div><p class="preview-disclaimer">두 사람의 예식 날짜·시간 · 사진과 장소는 예시입니다.</p>${signatureGuide(template.id)}${deviceToolbar()}<div class="preview-layout"><div class="preview-stage"><div class="device-statusbar" aria-hidden="true"><span>9:41</span><i></i><span>▮▮▮ ▰</span></div><div id="preview-canvas">${invitation(draft.selection)}</div><div class="device-homebar" aria-hidden="true"><i></i></div></div><aside class="desktop-options" aria-label="청첩장 옵션">${optionsMarkup(draft.selection)}<button class="button primary full-width save-button" data-action="save">우리의 선택으로 저장 <span>↗</span></button><a class="view-selection-link" href="#selection">함께 저장한 선택 보기</a><p class="draft-status" role="status"></p></aside></div><div class="mobile-preview-actions"><button class="button secondary" data-action="options">꾸미기</button><button class="button primary save-button" data-action="save">우리의 선택으로 저장</button></div>`;
   const filtered = filterTemplates(TEMPLATES, shared.data.favorites, local.filter, local.collection, local.search);
   const sequence = filtered.some(item => item.id === template.id) ? filtered : TEMPLATES;
   const index = sequence.findIndex(item => item.id === template.id);
@@ -350,7 +350,7 @@ async function connectStore() {
   if (store || connecting || !active()) return;
   connecting = true;
   try {
-    const { connect } = await import('./firebase.mjs?v=20260914-reference-samples');
+    const { connect } = await import('./firebase.mjs?v=20260915-wedding-date');
     if (!active()) return;
     const adapter = await connect();
     if (!active()) return;

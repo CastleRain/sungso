@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { playfulCover, playfulBody, createPlayfulEditions } from '../js/editions-playful.mjs';
 
 const ids = ['greenhouse', 'scrapbook', 'festival', 'promenade'];
@@ -16,7 +17,7 @@ test('four full editions always expose the example ceremony independently of the
   const bodies = ids.map(templateId => playfulBody({ templateId, sections: {} }, fixtureParts(templateId)));
   assert.equal(new Set(bodies).size, 4);
   for (const [index, html] of bodies.entries()) {
-    assert.match(html, /2030년 5월 18일/);
+    assert.ok(html.includes(WEDDING.koDate));
     assert.match(html, /오후 2시/);
     assert.match(html, /우리의 웨딩홀/);
     assert.match(html, /data-section="greeting"/);
@@ -57,7 +58,7 @@ test('thumbnails retain composition without interactive controls or selection co
   for (const templateId of ids) {
     const thumbnail = playfulCover(templateId, true);
     assert.match(thumbnail, /pe-thumbnail/);
-    assert.match(thumbnail, /2030/);
+    assert.ok(thumbnail.includes(WEDDING.yearText));
     assert.match(thumbnail, /loading="lazy"/);
     assert.doesNotMatch(thumbnail, /<button|data-playful-action|fetchpriority/);
     const html = playfulBody({ templateId, sections: {}, note: '<script>private note</script>', guestName: 'PRIVATE GUEST' }, fixtureParts(templateId));

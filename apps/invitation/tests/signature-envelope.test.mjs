@@ -23,7 +23,7 @@ test('optional sections stay absent and selection values are never interpolated 
   const html = renderSignatureEnvelope({ galleryLayout: '<script>bad()</script>', paletteId: '<img onerror=bad()>' }, { cover: '', greeting: 'greeting', date: 'date', ending: 'ending' });
   assert.doesNotMatch(html, /data-envelope-letter=|data-section="story"|env-photographs|env-insert-label|<script|onerror/);
   assert.match(html, /env-enclosures-empty/);
-  assert.match(html, /가상의 사진·날짜·장소/);
+  assert.match(html, /사진·이야기·장소는 디자인 예시/);
   assert.match(html, /가상 커플의 웨딩 예시 사진/);
 });
 

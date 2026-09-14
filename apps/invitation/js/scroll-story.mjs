@@ -1,8 +1,8 @@
-import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260914-reference-samples';
-import { collectStoryNodes, storySceneKey as sceneKey, STORY_LABELS as LABELS } from './scroll-designs.mjs?v=20260914-reference-samples';
-import { storyMotion } from './scroll-motion.mjs?v=20260914-reference-samples';
+import { buildStoryTrack, getStoryFrame, storyDistanceAt } from './scroll-story-core.mjs?v=20260915-wedding-date';
+import { collectStoryNodes, storySceneKey as sceneKey, STORY_LABELS as LABELS } from './scroll-designs.mjs?v=20260915-wedding-date';
+import { storyMotion } from './scroll-motion.mjs?v=20260915-wedding-date';
 
-export { supportsScrollStory } from './scroll-designs.mjs?v=20260914-reference-samples';
+export { supportsScrollStory } from './scroll-designs.mjs?v=20260915-wedding-date';
 
 /** Document scrolling drives an existing invitation; no second scroll surface or stored state. */
 export function createScrollStory() {

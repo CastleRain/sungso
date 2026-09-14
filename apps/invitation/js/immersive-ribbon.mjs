@@ -1,4 +1,5 @@
-import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260914-reference-samples';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { label, photo, sampleDate, scene, unfoldButton, choices, panel, fixed } from './immersive-shared.mjs?v=20260915-wedding-date';
 
 const flower = `<svg viewBox="0 0 90 130" fill="none" aria-hidden="true"><path d="M44 126C54 95 21 72 47 35M43 95C23 99 10 84 13 67C32 64 40 78 43 95ZM45 70C65 74 80 61 78 44C61 40 49 51 45 70Z" stroke="currentColor" stroke-width="1.1"/><path d="M47 37C20 32 20 10 36 11C38-6 57-3 58 12C77 7 82 26 65 35C62 49 48 50 47 37Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.1"/><circle cx="50" cy="25" r="4" fill="currentColor"/></svg>`;
 
@@ -17,7 +18,7 @@ function triptych(thumbnail = false) {
     <div class="ir-card-table"><div class="ir-triptych">
       <div class="ir-card ir-center"><span class="ir-card-kicker">THE MIDDLE OF</span><div class="ir-center-photo">${photo(0, '', !thumbnail)}</div><strong>you & me</strong><span class="ir-card-foot">OUR NEXT CHAPTER</span></div>
       <div class="ir-wing ir-wing-left"><div class="ir-card ir-face"><span class="ir-card-kicker">A SMALL HELLO</span>${photo(1)}<p>우연처럼 만나<br>일상이 된 우리.</p><span class="ir-card-foot">01 / THE BEGINNING</span></div><div class="ir-card ir-back"><span>LOVE,</span><strong>folded<br>inside.</strong>${flower}<small>S & S</small></div></div>
-      <div class="ir-wing ir-wing-right"><div class="ir-card ir-face"><span class="ir-card-kicker">ALL OUR TOMORROWS</span>${photo(2)}<p>다음 계절에도<br>너의 가장 가까이.</p><span class="ir-card-foot">03 / TO BE CONTINUED</span></div><div class="ir-card ir-back"><span>A PERSONAL</span><strong>invitation.</strong>${flower}<small>18 MAY 2030</small></div></div>
+      <div class="ir-wing ir-wing-right"><div class="ir-card ir-face"><span class="ir-card-kicker">ALL OUR TOMORROWS</span>${photo(2)}<p>다음 계절에도<br>너의 가장 가까이.</p><span class="ir-card-foot">03 / TO BE CONTINUED</span></div><div class="ir-card ir-back"><span>A PERSONAL</span><strong>invitation.</strong>${flower}<small>${WEDDING.enDate}</small></div></div>
       <span class="ir-fold-line ir-fold-line-left"></span><span class="ir-fold-line ir-fold-line-right"></span>
     </div></div>
     ${band()}

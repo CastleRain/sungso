@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { WEDDING } from '../js/wedding-date.mjs';
 import { TEMPLATES, PHOTOS, SECTIONS } from '../js/catalog.mjs';
 import { REFERENCE_EDITIONS } from '../js/reference-catalog.mjs';
 import { defaultSelection, normalizeLocal, normalizeDocument, normalizeSelection, parseRoute, filterTemplates, applyChange, exportSelection } from '../js/core.mjs';
@@ -86,7 +87,7 @@ test('every reference invitation retains one readable ceremony section and uniqu
       assert.equal(withAttr(root, 'data-section', key).length, 1, `${id}: ${key} occurs once`);
     }
     const date = withAttr(root, 'data-section', 'date')[0];
-    assert.match(content(date), /2030년 5월 18일 토요일/);
+    assert.ok(content(date).includes(WEDDING.koLong));
     assert.match(content(date), /오후 2시/);
     for (const key of ['greeting', 'date']) {
       const node = withAttr(root, 'data-section', key)[0];

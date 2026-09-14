@@ -1,5 +1,6 @@
-import { PHOTOS } from './catalog.mjs?v=20260914-reference-samples';
-import { escapeHtml as e } from './core.mjs?v=20260914-reference-samples';
+import { WEDDING } from './wedding-date.mjs?v=20260915-wedding-date';
+import { PHOTOS } from './catalog.mjs?v=20260915-wedding-date';
+import { escapeHtml as e } from './core.mjs?v=20260915-wedding-date';
 
 const photograph = (index, className, eager = false) => `<img class="${className}" src="${e(PHOTOS[index].src)}" alt="${e(PHOTOS[index].alt)}" width="${index === 0 ? 1024 : 1536}" height="${index === 0 ? 1536 : 1024}" decoding="async" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'}>`;
 const plane = '<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="m5 18 13 3 12-13 5 1-8 15 6 7-3 3-8-5-12 6-3-2 6-12-8-1Z" fill="currentColor"/></svg>';
@@ -14,7 +15,7 @@ function arrivals() {
   return `<section class="invite-section ticket-arrivals" data-section="directions">
     ${chapter('04', 'ARRIVAL GUIDE')}
     <h2>Every road<br><em>leads to us.</em></h2><p class="ticket-korean-title">당신의 걸음이 닿을 곳</p>
-    <div class="ticket-destination"><span>OUR DESTINATION</span><strong>우리의 웨딩홀</strong><p>가든홀 · 2030년 5월 18일 오후 2시</p></div>
+    <div class="ticket-destination"><span>OUR DESTINATION</span><strong>우리의 웨딩홀</strong><p>가든홀 · ${WEDDING.koDate} ${WEDDING.koTime}</p></div>
     <div class="ticket-transport-switch" role="group" aria-label="예시 교통수단 선택">${Object.entries(routeOptions).map(([id, route]) => `<button type="button" data-ticket-action="transport" data-ticket-value="${id}" aria-pressed="${id === 'rail'}">${route.name}</button>`).join('')}</div>
     <div class="ticket-route-map" data-ticket-map role="img" aria-label="지하철로 오는 예시 경로. 실제 지도가 아닙니다.">
       <svg viewBox="0 0 340 225" fill="none" aria-hidden="true">
@@ -48,7 +49,7 @@ function reply() {
     <div class="ticket-confirmation" data-ticket-result hidden>
       <div class="ticket-confirmation-top"><span>PREVIEW ONLY</span>${plane}</div><p class="ticket-confirmation-title">Dear, 하루</p>
       <p class="ticket-confirmation-message" data-ticket-confirmation-message></p>
-      <div class="ticket-confirmation-code"><span>SS · 0518</span><span>18 MAY 2030</span><span class="ticket-mini-barcode" aria-hidden="true"></span></div>
+      <div class="ticket-confirmation-code"><span>SS · ${WEDDING.code}</span><span>${WEDDING.enDate}</span><span class="ticket-mini-barcode" aria-hidden="true"></span></div>
       <small>화면에서만 만든 예시예요. 전송·저장되지 않았어요.</small><button type="button" data-ticket-action="reset">다시 체험하기 ↺</button>
     </div>
     <p class="ticket-rsvp-status" data-ticket-rsvp-status role="status" aria-live="polite" aria-atomic="true"></p>
@@ -63,13 +64,13 @@ export function renderSignatureTicket(selection, parts) {
     <section class="ticket-editorial-hero" aria-label="우리라는 여행의 시작">
       <div class="ticket-hero-copy"><p>A PASSPORT TO OUR FOREVER</p><h2>Life is a journey.<br><em>Love is the destination.</em></h2></div>
       <div class="ticket-hero-portrait">${photograph(0, 'ticket-portrait', true)}<div class="ticket-portrait-shade"></div><svg class="ticket-hero-route" viewBox="0 0 360 350" fill="none" aria-hidden="true"><path d="M34 282C18 185 178 174 227 223S169 310 139 216 228 76 316 64"/><circle cx="34" cy="282" r="5"/><circle cx="316" cy="64" r="5"/><path class="ticket-hero-plane" d="m301 53 9 3 9-9 3 1-6 11 4 5-2 2-6-3-8 4-2-1 4-9-6-2Z"/></svg><div class="ticket-portrait-label"><span>ME → US</span><strong>우리라는 목적지</strong><small>WITH SUNGWOO & SOHEE</small></div></div>
-      <div class="ticket-edition"><span>ONE WAY TO FOREVER</span><span>18 MAY 2030</span></div>
+      <div class="ticket-edition"><span>ONE WAY TO FOREVER</span><span>${WEDDING.enDate}</span></div>
     </section>
     <div class="ticket-boarding-page">${chapter('01', 'THE INVITATION')}${parts.cover}</div>
-    <div class="ticket-letter-page"><span class="ticket-postmark" aria-hidden="true">WITH LOVE<br>18 · MAY<br>2030</span>${parts.greeting}<p class="ticket-letter-signoff">Every day, a new adventure.</p></div>
+    <div class="ticket-letter-page"><span class="ticket-postmark" aria-hidden="true">WITH LOVE<br>${WEDDING.day} · ${WEDDING.monthEn}<br>${WEDDING.yearText}</span>${parts.greeting}<p class="ticket-letter-signoff">Every day, a new adventure.</p></div>
     ${enabled('story') ? `<div class="ticket-story-page">${parts.story}</div>` : ''}
     <div class="ticket-itinerary-page">${chapter('02', 'THE WEDDING ITINERARY')}<h2 class="ticket-display-title">One beautiful day.<br><em>A lifetime ahead.</em></h2><p class="ticket-page-subtitle">우리의 첫 여정, 그날의 작은 안내</p>
-      <div class="ticket-flight-board" role="table" aria-label="예시 예식 여정"><div class="ticket-flight-board-head" role="row"><span role="columnheader">TIME</span><span role="columnheader">DESTINATION</span><span role="columnheader">STATUS</span></div>${[['13:30', '반가운 만남', 'WELCOME'], ['14:00', '우리의 약속', 'TOGETHER'], ['15:00', '이어지는 축하', 'WITH LOVE']].map(([time, destination, status]) => `<div class="ticket-flight-row" role="row"><span role="cell">${time}</span><span role="cell">${destination}</span><span role="cell">${status}</span></div>`).join('')}</div><p class="ticket-example-note">예식 순서와 시간은 모두 디자인 확인용 예시입니다.</p>${parts.date}</div>
+      <div class="ticket-flight-board" role="table" aria-label="예시 예식 여정"><div class="ticket-flight-board-head" role="row"><span role="columnheader">TIME</span><span role="columnheader">DESTINATION</span><span role="columnheader">STATUS</span></div>${[['13:30', '반가운 만남', 'WELCOME'], [WEDDING.time24, '우리의 약속', 'TOGETHER'], ['15:00', '이어지는 축하', 'WITH LOVE']].map(([time, destination, status]) => `<div class="ticket-flight-row" role="row"><span role="cell">${time}</span><span role="cell">${destination}</span><span role="cell">${status}</span></div>`).join('')}</div><p class="ticket-example-note">예식 시작 외 식순과 시간은 디자인 확인용 예시입니다.</p>${parts.date}</div>
     ${enabled('gallery') ? `<div class="ticket-memories-page"><div class="ticket-memory-heading">${chapter('03', 'COLLECT MOMENTS')}<p>Little moments,<br><em>our favorite souvenirs.</em></p></div>${parts.gallery}</div>` : ''}
     ${enabled('directions') ? arrivals() : ''}
     ${enabled('accounts') ? `<div class="ticket-gratitude-page">${parts.accounts}</div>` : ''}
