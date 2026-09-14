@@ -192,7 +192,7 @@ function renderGrid() {
     grid.innerHTML = `<div class="no-results">
       <div class="no-results-icon">🔍</div>
       <div>조건에 맞는 리조트가 없습니다</div>
-      <button onclick="document.getElementById('priceReset').click(); document.getElementById('filterTransfer').value=''; document.getElementById('filterAtoll').value=''; document.getElementById('filterHammock').checked=false; window._renderCards();" style="margin-top:12px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:white;cursor:pointer;">필터 초기화</button>
+      <button onclick="document.getElementById('priceReset').click(); document.getElementById('filterTransfer').value=''; document.getElementById('filterAtoll').value=''; document.getElementById('filterHammock').checked=false; window._renderCards();" style="margin-top:12px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--ss-soft);color:var(--ss-link);cursor:pointer;">필터 초기화</button>
     </div>`;
     updateFilterSummary([]);
     return;

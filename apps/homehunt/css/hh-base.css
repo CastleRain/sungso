@@ -23,12 +23,12 @@
 
 /* Temporary palette bridge for v2 selectors while screens migrate to hh-* classes. */
 .hh-app.hh-v3 {
-  --navy: var(--hh-ink);
-  --forest: var(--hh-accent);
-  --forest-2: var(--hh-accent-pressed);
-  --mint: var(--hh-accent-soft);
-  --mint-2: var(--hh-accent-line);
-  --blue: var(--hh-accent);
+  --navy: var(--ss-text);
+  --forest: var(--ss-link);
+  --forest-2: var(--ss-link);
+  --mint: var(--ss-soft);
+  --mint-2: var(--ss-border-strong);
+  --blue: #1f5eff;
   --red: var(--hh-shortlist);
   --orange: var(--hh-estimated);
   --yellow: var(--hh-personal-accent);
@@ -46,24 +46,24 @@
   --gray-100: var(--hh-surface-3);
   --gray-50: var(--hh-surface-2);
   --white: var(--hh-surface);
-  --surface: var(--hh-surface);
-  --surface-soft: var(--hh-surface-2);
-  --canvas: var(--hh-canvas);
+  --surface: var(--ss-surface);
+  --surface-soft: var(--ss-soft);
+  --canvas: var(--ss-bg);
   --header-h: var(--hh-topbar-h);
   --radius-card: var(--hh-radius-lg);
   --shadow-card: var(--hh-shadow-sm);
   --shadow-sm: var(--hh-shadow-sm);
   --shadow-md: var(--hh-shadow-md);
-  --hh-brand: var(--hh-accent);
-  --hh-brand-strong: var(--hh-accent-pressed);
-  --hh-brand-soft: var(--hh-accent-soft);
-  --hh-ink-soft: var(--hh-text-muted);
+  --hh-brand: var(--ss-link);
+  --hh-brand-strong: var(--ss-link);
+  --hh-brand-soft: var(--ss-soft);
+  --hh-ink-soft: var(--ss-muted);
   --hh-focus: var(--hh-focus-ring);
-  --tblr-primary: var(--hh-accent);
-  --tblr-primary-rgb: 31, 94, 255;
-  --tblr-body-color: var(--hh-text);
-  --tblr-body-bg: var(--hh-surface);
-  --tblr-border-color: var(--hh-line);
+  --tblr-primary: var(--ss-link);
+  --tblr-primary-rgb: 53, 101, 138;
+  --tblr-body-color: var(--ss-text);
+  --tblr-body-bg: var(--ss-bg);
+  --tblr-border-color: var(--ss-border);
 }
 
 /* Legacy view-enter keeps a transform after the animation and turns every
@@ -99,7 +99,7 @@
 .hh-app :where(button, input, select, textarea, a, [tabindex]):focus-visible {
   position: relative;
   z-index: 1;
-  outline: 2px solid var(--hh-accent);
+  outline: 2px solid var(--ss-focus);
   outline-offset: 2px;
   box-shadow: var(--hh-focus-ring);
 }
@@ -125,13 +125,13 @@
 }
 
 .hh-app a {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
 }
 
 .hh-app a:hover {
-  color: var(--hh-accent-hover);
+  color: var(--ss-link);
 }
 
 .hh-heading-display,

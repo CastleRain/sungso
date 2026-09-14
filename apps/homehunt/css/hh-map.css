@@ -91,7 +91,7 @@
 
 .hh-map-control:hover,
 .hh-mapcontrol:hover {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   border-color: var(--hh-accent-line);
   background: var(--hh-surface);
 }
@@ -151,7 +151,7 @@
 
 .hh-layer-toggle.is-active,
 .hh-layer-toggle[aria-pressed="true"] {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
   border-color: var(--hh-accent-line);
 }
@@ -176,7 +176,7 @@
   gap: var(--hh-space-4);
   border: 1px solid var(--hh-accent-line);
   border-radius: var(--hh-radius-pill);
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: rgba(255, 255, 255, 0.97);
   box-shadow: var(--hh-shadow-md);
   font-size: var(--hh-text-ui);
@@ -242,8 +242,8 @@
   place-items: center;
   border: 2px solid var(--hh-surface);
   border-radius: 50%;
-  color: var(--hh-text-on-accent);
-  background: var(--hh-accent);
+  color: var(--hh-map-on-selected);
+  background: var(--hh-map-selected);
   box-shadow: 0 0 0 1px var(--hh-line-strong);
   font-family: var(--hh-font-mono);
   font-size: 12px;
@@ -265,7 +265,7 @@
 }
 
 .hh-map-legend__symbol--destination {
-  color: var(--hh-ink);
+  color: var(--hh-map-ink);
   background: var(--hh-personal-accent);
 }
 
@@ -336,7 +336,7 @@
 
 .hh-price-marker,
 .hh-marker--price {
-  --hh-marker-stroke: var(--hh-ink);
+  --hh-marker-stroke: var(--hh-map-ink);
   display: inline-flex;
   min-width: 48px;
   height: 29px;
@@ -345,7 +345,7 @@
   justify-content: center;
   border: 2px solid var(--hh-marker-stroke);
   border-radius: var(--hh-radius-pill);
-  color: var(--hh-ink);
+  color: var(--hh-map-ink);
   background: var(--hh-surface);
   box-shadow: 0 2px 8px rgba(11, 27, 43, 0.34);
   font-family: var(--hh-font-mono);
@@ -373,10 +373,10 @@
 .hh-price-marker.is-selected,
 .hh-marker--price.is-selected,
 .hh-price-marker[aria-selected="true"] {
-  --hh-marker-stroke: var(--hh-accent);
+  --hh-marker-stroke: var(--hh-map-selected);
   height: 36px;
   padding-inline: var(--hh-space-7);
-  background: var(--hh-accent);
+  background: var(--hh-map-selected);
   box-shadow: var(--hh-focus-ring), 0 5px 12px rgba(11, 27, 43, 0.34);
   font-size: 13px;
 }
@@ -399,9 +399,9 @@
 
 .hh-price-marker.is-shortlist.is-selected,
 .hh-marker--price.is-shortlist.is-selected {
-  --hh-marker-stroke: var(--hh-accent);
-  color: var(--hh-text-on-accent);
-  background: var(--hh-accent);
+  --hh-marker-stroke: var(--hh-map-selected);
+  color: var(--hh-map-on-selected);
+  background: var(--hh-map-selected);
 }
 
 .hh-price-marker.is-visited,
@@ -430,7 +430,7 @@
   place-items: center;
   border: 3px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
-  color: var(--hh-text-on-accent);
+  color: var(--hh-map-on-selected);
   background: var(--hh-cluster-low);
   box-shadow: 0 3px 11px rgba(11, 27, 43, 0.38);
   font-family: var(--hh-font-mono);
@@ -488,7 +488,7 @@
   place-items: center;
   border: 3px solid var(--hh-surface);
   border-radius: 50% 50% 50% 5px;
-  color: var(--hh-ink);
+  color: var(--hh-map-ink);
   background: var(--hh-personal-accent);
   box-shadow: 0 3px 10px rgba(11, 27, 43, 0.35);
   font-family: var(--hh-font-mono);
@@ -538,7 +538,7 @@
   border: 2px solid var(--hh-surface);
   border-radius: 50%;
   color: var(--hh-text-on-dark);
-  background: var(--hh-ink-2);
+  background: var(--hh-map-ink-2);
   box-shadow: 0 2px 8px rgba(11, 27, 43, 0.32);
   font-size: 13px;
   font-weight: 800;
@@ -738,7 +738,7 @@
 
 .hh-app.hh-v3 .recommendation-map-pane > .recommendation-layer-switcher > button.is-active,
 .hh-app.hh-v3 .recommendation-map-pane > .recommendation-layer-switcher > button[aria-pressed="true"] {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
   border-color: var(--hh-accent-line);
 }
@@ -776,7 +776,7 @@
 }
 
 .hh-app.hh-v3 .recommendation-map-pane > .recommendation-map-overlay > i {
-  color: var(--hh-accent);
+  color: var(--ss-link);
   font-size: 22px;
 }
 
@@ -852,8 +852,8 @@
   place-items: center;
   border: 2px solid var(--hh-surface);
   border-radius: 50%;
-  color: var(--hh-text-on-accent);
-  background: var(--hh-accent);
+  color: var(--hh-map-on-selected);
+  background: var(--hh-map-selected);
   box-shadow: 0 0 0 1px var(--hh-line-strong);
   font-size: 12px;
   font-style: normal;
@@ -893,7 +893,7 @@
 }
 
 .hh-app.hh-v3 .recommendation-price-marker {
-  --hh-marker-stroke: var(--hh-ink);
+  --hh-marker-stroke: var(--hh-map-ink);
   position: relative;
   display: inline-flex;
   min-width: 48px;
@@ -903,7 +903,7 @@
   justify-content: center;
   border: 2px solid var(--hh-marker-stroke);
   border-radius: var(--hh-radius-pill);
-  color: var(--hh-ink);
+  color: var(--hh-map-ink);
   background: var(--hh-surface);
   box-shadow: var(--hh-shadow-sm);
   font-family: var(--hh-font-mono);
@@ -929,12 +929,12 @@
 }
 
 .hh-app.hh-v3 .recommendation-price-marker.selected {
-  --hh-marker-stroke: var(--hh-accent);
+  --hh-marker-stroke: var(--hh-map-selected);
   z-index: var(--hh-z-marker-selected);
   height: 36px;
   padding-inline: var(--hh-space-6);
-  color: var(--hh-text-on-accent);
-  background: var(--hh-accent);
+  color: var(--hh-map-on-selected);
+  background: var(--hh-map-selected);
   box-shadow: var(--hh-focus-ring), var(--hh-shadow-md);
   font-size: 13px;
   transform: translate(-50%, -100%) scale(1.08);
@@ -967,7 +967,7 @@
   place-items: center;
   border: 3px solid var(--hh-surface);
   border-radius: 50%;
-  color: var(--hh-text-on-accent);
+  color: var(--hh-map-on-selected);
   background: var(--hh-cluster-1);
   box-shadow: 0 3px 11px rgba(11, 27, 43, 0.38);
   font-family: var(--hh-font-mono);
@@ -996,7 +996,7 @@
   border: 2px solid var(--hh-surface);
   border-radius: var(--hh-radius-pill);
   color: var(--hh-text-on-dark);
-  background: var(--hh-ink-2);
+  background: var(--hh-map-ink-2);
   box-shadow: var(--hh-shadow-sm);
   font-size: 12px;
   font-weight: 800;
@@ -1006,9 +1006,9 @@
 
 .hh-app.hh-v3 .recommendation-context-marker.apartment,
 .hh-app.hh-v3 .recommendation-context-marker.apartments {
-  color: var(--hh-ink);
+  color: var(--hh-map-ink);
   background: var(--hh-surface);
-  border-color: var(--hh-ink);
+  border-color: var(--hh-map-ink);
 }
 
 .hh-app.hh-v3 .recommendation-context-marker.supply {

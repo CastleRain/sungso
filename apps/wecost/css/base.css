@@ -1,18 +1,18 @@
 /* ===== 토큰 & 리셋 ===== */
 :root {
   /* 배경 / 서피스 */
-  --bg:           #f4f5fb;
-  --surface:      #ffffff;
-  --surface-soft: #f8f8ff;
-  --line:         #ececf4;
+  --bg:           var(--ss-bg);
+  --surface:      var(--ss-surface);
+  --surface-soft: var(--ss-soft);
+  --line:         var(--ss-border);
 
   /* 텍스트 */
-  --text:         #111827;
-  --text-muted:   #8b90a0;
+  --text:         var(--ss-text);
+  --text-muted:   var(--ss-muted);
 
   /* 의미 색상 */
-  --primary:      #6c63ff;
-  --primary-soft: #eeeaff;
+  --primary:      var(--ss-link);
+  --primary-soft: var(--ss-soft);
   --income:       #2ecc71;
   --income-soft:  #eafaf1;
   --expense:      #ef4444;
@@ -27,8 +27,8 @@
   /* 기타 */
   --radius:     10px;
   --radius-lg:  20px;
-  --shadow:     0 4px 16px rgba(31,35,80,0.07);
-  --shadow-md:  0 8px 24px rgba(31,35,80,0.12);
+  --shadow:     0 4px 16px rgba(64,94,115,0.07);
+  --shadow-md:  0 8px 24px rgba(64,94,115,0.12);
   --nav-w:      220px;
   color-scheme: light;
 }
@@ -36,13 +36,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', sans-serif;
+  font-family: var(--ss-font-sans);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   font-size: 14px;
   line-height: 1.5;
 }
+
+button, input, textarea, select { font-family: inherit; }
 
 /* ===== 공통 유틸 ===== */
 .hidden { display: none !important; }
@@ -89,7 +91,7 @@ input, select, textarea {
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
 }
-.input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,99,255,0.10); }
+.input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ss-border); }
 .input-field::placeholder { color: var(--text-muted); font-weight: 400; }
 
 /* ===== 버튼 공통 ===== */
@@ -108,8 +110,8 @@ input, select, textarea {
   white-space: nowrap;
 }
 .btn:hover:not(:disabled) { transform: translateY(-1px); }
-.btn-primary  { background: var(--primary); color: #fff; }
-.btn-primary:hover  { background: #5a52e0; }
+.btn-primary  { background: var(--ss-accent); color: var(--ss-on-accent); }
+.btn-primary:hover  { background: var(--ss-hover); }
 .btn-ghost    { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
 .btn-ghost:hover    { background: var(--primary-soft); }
 .btn-danger   { background: transparent; color: var(--expense); border: 1.5px solid var(--expense-soft); }

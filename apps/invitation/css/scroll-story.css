@@ -74,10 +74,10 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
   grid-template-columns: 42px minmax(0, 1fr) 42px;
   align-items: center;
   min-height: 42px;
-  color: #654d6b;
-  background: #fff;
-  border-top: 1px solid #ece3ec;
-  font-family: var(--sans);
+  color: var(--ss-muted);
+  background: var(--ss-surface);
+  border-top: 1px solid var(--ss-border);
+  font-family: var(--ss-font-sans);
 }
 
 .story-controls > button {
@@ -92,18 +92,17 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
 }
 
 .story-controls > button:hover:not(:disabled) {
-  background: #f6eff7;
-}
+  background: var(--ss-hover);color:var(--ss-on-accent);}
 
 .story-controls > button:disabled {
-  color: #b6aaba;
+  color: var(--ss-muted);
   cursor: default;
   opacity: 0.7;
 }
 
 .story-controls > button:focus-visible,
 .scroll-mode-toggle:focus-visible {
-  outline: 2px solid #795582;
+  outline: 2px solid var(--ss-focus);
   outline-offset: -4px;
 }
 
@@ -119,7 +118,7 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
 
 [data-story-counter] {
   flex-shrink: 0;
-  color: #8d7595;
+  color: var(--ss-muted);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -127,7 +126,7 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
 
 [data-story-label] {
   overflow: hidden;
-  color: #69566f;
+  color: var(--ss-muted);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,7 +139,7 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
   left: 0;
   height: 2px;
   overflow: hidden;
-  background: #f0e8f1;
+  background: var(--ss-soft);
   pointer-events: none;
 }
 
@@ -148,7 +147,7 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
   display: block;
   width: var(--story-progress, 0%);
   height: 100%;
-  background: #9d75a6;
+  background: var(--ss-accent);
 }
 
 .scroll-mode-toggle {
@@ -158,9 +157,9 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
   gap: 6px;
   min-height: 40px;
   padding: 8px 13px;
-  color: #735779;
-  background: #fff;
-  border: 1px solid #dfd1e2;
+  color: var(--ss-link);
+  background: var(--ss-surface);
+  border: 1px solid var(--ss-border);
   border-radius: 7px;
   font-size: 12px;
   line-height: 1.4;
@@ -168,18 +167,17 @@ main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
 }
 
 .scroll-mode-toggle[aria-pressed="true"] {
-  color: #fff;
-  background: #73536c;
-  border-color: #73536c;
+  color: var(--ss-on-accent);
+  background: var(--ss-accent);
+  border-color: var(--ss-border-strong);
 }
 
 .scroll-mode-toggle:hover:not([aria-pressed="true"]) {
-  background: #f6eef8;
-}
+  background: var(--ss-hover);color:var(--ss-on-accent);}
 
 .story-preference-note {
   display: none;
-  color: #827483;
+  color: var(--ss-muted);
   font-size: 11px;
   line-height: 1.7;
 }

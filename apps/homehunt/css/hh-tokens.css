@@ -1,38 +1,38 @@
-/* HomeHunt 3.0 — Data Navy design tokens */
+/* HomeHunt 3.0 — sungso cotton blue shell and preserved evidence tokens */
 :root {
   color-scheme: light;
 
   /* Brand and text */
-  --hh-ink: #0b1b2b;
-  --hh-ink-2: #173c5e;
-  --hh-ink-3: #243447;
-  --hh-text: #39485c;
-  --hh-text-mute: #55657a;
-  --hh-text-soft: #66768a;
-  --hh-text-faint: #66768a;
+  --hh-ink: var(--ss-text);
+  --hh-ink-2: var(--ss-on-accent);
+  --hh-ink-3: var(--ss-text);
+  --hh-text: var(--ss-text);
+  --hh-text-mute: var(--ss-muted);
+  --hh-text-soft: var(--ss-muted);
+  --hh-text-faint: var(--ss-muted);
   --hh-text-muted: var(--hh-text-mute);
   --hh-text-on-dark: #ffffff;
-  --hh-text-on-accent: #ffffff;
+  --hh-text-on-accent: var(--ss-on-accent);
 
   /* Surfaces and rules */
-  --hh-surface: #ffffff;
-  --hh-surface-2: #f7f9fc;
-  --hh-surface-3: #f1f4f8;
-  --hh-canvas: #f4f6f9;
+  --hh-surface: var(--ss-surface);
+  --hh-surface-2: var(--ss-soft);
+  --hh-surface-3: var(--ss-soft);
+  --hh-canvas: var(--ss-bg);
   --hh-map-base: #e9eef3;
-  --hh-line: #e3e9f0;
-  --hh-line-strong: #cfd8e4;
-  --hh-line-soft: #eef2f7;
+  --hh-line: var(--ss-border);
+  --hh-line-strong: var(--ss-border-strong);
+  --hh-line-soft: var(--ss-border);
   --hh-overlay: rgba(11, 27, 43, 0.48);
 
   /* Action */
-  --hh-accent: #1f5eff;
-  --hh-accent-hover: #174fd8;
-  --hh-accent-press: #0b3fbf;
+  --hh-accent: var(--ss-accent);
+  --hh-accent-hover: var(--ss-hover);
+  --hh-accent-press: var(--ss-hover);
   --hh-accent-pressed: var(--hh-accent-press);
-  --hh-accent-soft: #e8efff;
-  --hh-accent-line: #b9cdff;
-  --hh-accent-on-ink: #8fb8ff;
+  --hh-accent-soft: var(--ss-soft);
+  --hh-accent-line: var(--ss-border-strong);
+  --hh-accent-on-ink: var(--ss-link);
 
   /* Evidence tiers */
   --hh-verified: #0b7a5b;
@@ -50,6 +50,12 @@
   --hh-personal-accent: #ffc247;
   --hh-personal-bg: #fffdf6;
   --hh-personal-line: #ead28e;
+
+  /* Map semantics stay independent of the application brand. */
+  --hh-map-ink: #0b1b2b;
+  --hh-map-ink-2: #173c5e;
+  --hh-map-selected: #1f5eff;
+  --hh-map-on-selected: #fff;
 
   /* Domain colors */
   --hh-cluster-1: #3d74ff;
@@ -77,10 +83,8 @@
   --hh-warning: #9a6200;
 
   /* Typography */
-  --hh-font-sans: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  --hh-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono",
-    monospace;
+  --hh-font-sans: var(--ss-font-sans);
+  --hh-font-mono: var(--ss-font-mono);
   --hh-fs-display: 26px;
   --hh-fs-price-xl: 28px;
   --hh-fs-price-l: 22px;
@@ -139,7 +143,7 @@
   --hh-sh-1: 0 5px 12px -6px rgba(11, 27, 43, 0.28);
   --hh-sh-2: 0 8px 22px -14px rgba(11, 27, 43, 0.4);
   --hh-sh-3: 0 16px 36px -18px rgba(11, 27, 43, 0.55);
-  --hh-sh-focus: 0 0 0 3px rgba(31, 94, 255, 0.32);
+  --hh-sh-focus: 0 0 0 3px color-mix(in srgb, var(--ss-focus) 25%, transparent);
   --hh-shadow-sm: var(--hh-sh-1);
   --hh-shadow-md: var(--hh-sh-2);
   --hh-shadow-lg: var(--hh-sh-3);

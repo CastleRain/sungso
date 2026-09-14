@@ -46,7 +46,7 @@
   height: 6px;
   border: 1px solid #fff;
   border-radius: 50%;
-  background: #a4ada9;
+  background: var(--ss-soft);
   box-shadow: 0 0 0 2px rgba(164, 173, 169, .13);
 }
 
@@ -67,7 +67,7 @@
   align-items: center;
   gap: 3px;
   padding: 4px;
-  border: 1px solid #dfe5e2;
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
   background: rgba(255, 255, 255, .97);
   box-shadow: 0 8px 24px rgba(24, 45, 37, .11);
@@ -84,24 +84,24 @@
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: #65736e;
+  color: var(--ss-link);
   font-size: 10px;
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
 }
 
-.records-view-switcher button:hover { background: #f3f6f4; color: #153f33; }
+.records-view-switcher button:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 .records-view-switcher button.is-active,
 .records-view-switcher button[aria-pressed="true"] {
-  background: #153f33;
-  color: #fff;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   box-shadow: 0 4px 12px rgba(21, 63, 51, .18);
 }
 
 .records-view-switcher button:focus-visible,
 .supply-quick-nav button:focus-visible {
-  outline: 3px solid rgba(20, 102, 76, .25);
+  outline: 3px solid rgba(53, 101, 138, .25);
   outline-offset: 2px;
 }
 
@@ -148,7 +148,7 @@
   margin: 0 auto 14px;
   padding: 4px;
   overflow-x: auto;
-  border: 1px solid #dfe5e2;
+  border: 1px solid var(--ss-border);
   border-radius: 14px;
   background: rgba(255, 255, 255, .96);
   box-shadow: 0 8px 24px rgba(24, 45, 37, .08);
@@ -169,17 +169,17 @@
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: #65736e;
+  color: var(--ss-link);
   font-size: 10px;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.supply-quick-nav button:hover { background: #f3f6f4; color: #153f33; }
+.supply-quick-nav button:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 .supply-quick-nav button.is-active,
 .supply-quick-nav button[aria-pressed="true"] {
-  background: #e8f3ee;
-  color: #0f5d45;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
 }
 
 /* Keep information density high on the two list-oriented screens. */
@@ -249,10 +249,10 @@
   justify-content: center;
   gap: 5px;
   padding: 0 10px;
-  border: 1px solid #dce3df;
+  border: 1px solid var(--ss-border);
   border-radius: 999px;
   background: rgba(255, 255, 255, .96);
-  color: #5e6c67;
+  color: var(--ss-link);
   box-shadow: 0 4px 12px rgba(24, 45, 37, .07);
   font-size: 9px;
   font-weight: 800;
@@ -261,9 +261,9 @@
 
 .hh-app button[data-recommendation-layer][aria-pressed="true"],
 .hh-app button[data-recommendation-layer].is-active {
-  border-color: #9dc9b8;
-  background: #e8f4ef;
-  color: #0f5d45;
+  border-color: var(--ss-border-strong);
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
 }
 
 .recommendation-context-marker {
@@ -421,10 +421,10 @@
     justify-content: center;
     gap: 1px;
     padding: 2px 0 1px;
-    border: 1px solid #e0e5e2;
+    border: 1px solid var(--ss-border);
     border-radius: 12px;
     background: #fff;
-    color: #52615c;
+    color: var(--ss-link);
   }
 
   .hh-app .header-actions > .header-guide-button .mobile-action-label,
@@ -438,7 +438,7 @@
   .hh-app .header-actions > .header-guide-button .ti,
   .hh-app .header-actions > .connection-pill .ti { font-size: 17px; line-height: 1; }
   .hh-app .header-actions > .header-guide-button.is-current,
-  .hh-app .header-actions > .connection-pill.is-current { border-color: #9fc7b8; background: #eaf4ef; color: #0f5d45; }
+  .hh-app .header-actions > .connection-pill.is-current { border-color: var(--ss-border-strong); background: var(--ss-soft); color: var(--ss-link); }
 
   .hh-app .header-actions > .connection-pill .connection-dot {
     position: absolute;

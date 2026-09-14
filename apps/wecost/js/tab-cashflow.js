@@ -76,6 +76,9 @@ export function renderCashflow(st) {
   if (_savChartInst) _savChartInst.destroy();
   const canvas = document.getElementById('savings-chart');
   if (canvas) {
+    const chartStyle = getComputedStyle(canvas);
+    const theme = (token) => chartStyle.getPropertyValue(token).trim();
+    const fontFamily = chartStyle.fontFamily;
     _savChartInst = new Chart(canvas, {
       type: 'line',
       data: {
@@ -92,10 +95,12 @@ export function renderCashflow(st) {
         animation: { duration: 900, easing: 'easeOutQuart' },
         plugins: {
           tooltip: {
-            backgroundColor: '#fff',
-            titleColor: '#111827',
-            bodyColor: '#8b90a0',
-            borderColor: '#ececf4',
+            backgroundColor: theme('--ss-surface'),
+            titleColor: theme('--ss-text'),
+            bodyColor: theme('--ss-muted'),
+            borderColor: theme('--ss-border'),
+            titleFont: { family: fontFamily },
+            bodyFont: { family: fontFamily },
             borderWidth: 1,
             cornerRadius: 12,
             padding: 10,
@@ -107,18 +112,19 @@ export function renderCashflow(st) {
               pointStyle: 'circle',
               boxWidth: 8,
               padding: 16,
-              font: { size: 12 },
+              font: { size: 12, family: fontFamily },
+              color: theme('--ss-muted'),
             },
           },
         },
         scales: {
           y: {
-            ticks: { callback: v => won(v), font: { size: 10 } },
+            ticks: { callback: v => won(v), font: { size: 10, family: fontFamily }, color: theme('--ss-muted') },
             beginAtZero: true,
-            grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+            grid: { color: theme('--ss-border'), drawBorder: false },
           },
           x: {
-            ticks: { font: { size: 10 }, maxTicksLimit: 12 },
+            ticks: { font: { size: 10, family: fontFamily }, color: theme('--ss-muted'), maxTicksLimit: 12 },
             grid: { display: false },
           },
         },

@@ -58,7 +58,8 @@ export async function mountLifeApp(definition) {
   const disposers = [];
   const shell = node('div', 'life-shell');
   const header = node('header', 'life-header');
-  const brand = link('sungso', '../', 'life-brand'); brand.append(node('span', '', '.')); brand.setAttribute('aria-label', 'sungso 우리 홈');
+  const brand = link('', '../', 'life-brand'); brand.setAttribute('aria-label', 'sungso 우리 홈');
+  const wordmark = node('img', 'sungso-wordmark'); wordmark.src = new URL('../theme/sungso-wordmark-sky.png', import.meta.url).href; wordmark.alt = 'sungso'; wordmark.width = 2091; wordmark.height = 752; brand.append(wordmark);
   const spaceNav = node('nav', 'life-space-nav'); spaceNav.setAttribute('aria-label', '생활 공간');
   for (const space of spaces) {
     const anchor = link(space.title, space.href); if (space.id === definition.id) anchor.setAttribute('aria-current', 'page'); spaceNav.append(anchor);

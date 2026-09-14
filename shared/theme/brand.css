@@ -1,0 +1,33 @@
+/* Shared sungso chrome. Content-specific palettes and semantic state colors stay in each app. */
+:root {
+  --ss-font-sans: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --ss-font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --ss-bg: #FAFDFF;
+  --ss-surface: #FFFFFF;
+  --ss-accent: #B9DEF6;
+  --ss-on-accent: #405E73;
+  --ss-link: #35658A;
+  --ss-text: #343B44;
+  --ss-soft: #EDF7FE;
+  --ss-muted: #657380;
+  --ss-border: #DFECF5;
+  --ss-border-strong: #B6CFDF;
+  --ss-focus: #35658A;
+  --ss-hover: #C8E7FA;
+  --ss-shadow: rgb(52 91 120 / 10%);
+  --ss-backdrop: rgb(40 58 75 / 34%);
+}
+
+/* Lift near-white image pixels before blending the wordmark into our light surfaces. */
+img.sungso-wordmark {
+  display: block;
+  width: 144px;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: brightness(1.04);
+  mix-blend-mode: multiply;
+}
+@media (max-width: 480px) {
+  img.sungso-wordmark { width: 116px; }
+}

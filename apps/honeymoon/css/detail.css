@@ -36,7 +36,7 @@
   right: 0;
   bottom: 0;
   width: min(640px, 55vw);
-  background: #FAFBFC;
+  background: var(--ss-bg);
   z-index: 4500;
   display: flex;
   flex-direction: column;
@@ -156,8 +156,8 @@
 .detail-overlay.open { display: flex; flex-direction: column; }
 .detail-overlay-header {
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -165,9 +165,9 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 .detail-close-btn {
-  background: rgba(255,255,255,0.15);
+  background: var(--ss-surface);
   border: none;
-  color: white;
+  color: var(--ss-on-accent);
   padding: 5px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -176,7 +176,7 @@
   align-items: center;
   gap: 5px;
 }
-.detail-close-btn:hover { background: rgba(255,255,255,0.25); }
+.detail-close-btn:hover { background: var(--ss-soft); }
 
 .detail-body {
   flex: 1;
@@ -258,7 +258,7 @@
   flex-direction: column;
   align-items: center;
   background: var(--primary-pale);
-  border: 1px solid rgba(29,158,117,0.18);
+  border: 1px solid var(--ss-border-strong);
   border-radius: 12px;
   padding: 8px 14px 6px;
   min-width: 68px;
@@ -274,7 +274,7 @@
 
 .resort-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
 .meta-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid transparent; }
-.pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: rgba(29,158,117,0.25); }
+.pill-blue { background: var(--ocean-light); color: var(--ocean-deep); border-color: var(--ss-border-strong); }
 .pill-teal { background: var(--teal-light); color: #085041; border-color: #9FE1CB; }
 .pill-coral { background: var(--coral-light); color: #712B13; border-color: #F5C4B3; }
 .pill-amber { background: var(--amber-light); color: #633806; border-color: #FAC775; }
@@ -302,7 +302,7 @@
   font-size: 11px;
   font-weight: 600;
 }
-.qs-ok { background: var(--primary-light); color: var(--primary-deep); }
+.qs-ok { background: var(--teal-light); color: var(--teal-deep); }
 .qs-warn { background: var(--amber-light); color: #92400E; }
 .qs-icon { font-size: 11px; }
 
@@ -354,11 +354,11 @@
 .price-card { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
 .price-card-header { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .price-card-header.real { background: var(--coral-light); border-bottom: 1px solid #F5C4B3; }
-.price-card-header.honey { background: var(--ocean-light); border-bottom: 1px solid rgba(29,158,117,0.25); }
+.price-card-header.honey { background: var(--teal-light); border-bottom: 1px solid rgba(29,158,117,0.25); }
 .price-card-header.tour { background: #f0faf6; border-bottom: 1px solid rgba(29,158,117,0.18); }
 .price-agency { font-size: 13px; font-weight: 700; }
 .price-agency.real { color: var(--coral); }
-.price-agency.honey { color: var(--ocean-deep); }
+.price-agency.honey { color: var(--teal-deep); }
 .price-agency.tour { color: #0a7a5a; }
 .price-plan { font-size: 10px; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; }
 
@@ -377,7 +377,7 @@
 .prow-prices { display: flex; align-items: baseline; gap: 6px; }
 .prow-original { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
 .prow-final { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
-.prow-final.is-discount { color: var(--primary-deep); }
+.prow-final.is-discount { color: var(--teal-deep); }
 .prow-unit { font-size: 10px; color: var(--text-light); }
 
 /* 레거시 price-table (가격비교 탭 용) */
@@ -388,7 +388,7 @@
 .price-table td:first-child { color: var(--text-muted); }
 .price-table td:last-child { text-align: right; font-weight: 600; color: var(--text); }
 .price-main { font-size: 15px !important; color: var(--text) !important; }
-.price-discount { color: var(--primary) !important; }
+.price-discount { color: var(--teal) !important; }
 .price-original { text-decoration: line-through; color: var(--text-light) !important; font-size: 11px !important; font-weight: 400 !important; }
 .promo-badge { margin: 8px 12px; padding: 6px 10px; background: var(--amber-light); border-radius: var(--radius); font-size: 11px; color: #633806; border: 1px solid #FAC775; }
 .promo-badge strong { color: #412402; }
@@ -415,7 +415,7 @@
 .hm-icon { color: #e91e8c; font-size: 13px; flex-shrink: 0; }
 .hm-comment { padding: 8px 12px; border-radius: var(--radius); font-size: 12px; line-height: 1.6; border-left: 3px solid; }
 .hm-comment.good { background: var(--teal-light); border-color: var(--teal); color: #085041; }
-.hm-comment.ok { background: var(--ocean-light); border-color: var(--ocean-mid); color: var(--ocean-deep); }
+.hm-comment.ok { background: var(--teal-light); border-color: var(--teal); color: var(--teal-deep); }
 .hm-comment.weak { background: var(--amber-light); border-color: var(--amber); color: #633806; }
 
 /* 유튜브/이미지 섹션 (상세 뷰) */
@@ -463,7 +463,7 @@
 .gallery-main {
   width: 100%;
   height: 320px;
-  background: linear-gradient(135deg, var(--ocean-deep), var(--teal));
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
   overflow: hidden;
 }
 .gallery-main img {
@@ -510,14 +510,14 @@
 .gallery-thumb:hover .gallery-set-btn { opacity: 1; }
 .gallery-empty {
   height: 200px;
-  background: linear-gradient(135deg, var(--ocean-deep), var(--teal));
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
   flex-direction: column;
   gap: 8px;
-  color: rgba(255,255,255,0.6);
+  color: var(--ss-on-accent);
 }
 .gallery-empty small { font-size: 12px; }
 
@@ -666,7 +666,7 @@
   white-space: nowrap;
   transition: background 0.15s;
 }
-.img-add-btn:hover { background: var(--primary); color: white; }
+.img-add-btn:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 
 .img-edit-footer {
   display: flex;
@@ -677,8 +677,8 @@
 }
 .img-save-btn {
   padding: 8px 22px;
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 10px;
   font-size: 13px;
@@ -847,7 +847,7 @@
   font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 8px;
 }
 .loc-type-sea  { background: #e8e6ff; color: #4740c5; }
-.loc-type-boat { background: var(--primary-light); color: var(--primary-deep); }
+.loc-type-boat { background: var(--teal-light); color: var(--teal-deep); }
 
 .loc-access-desc {
   font-size: 12px;
@@ -888,7 +888,7 @@
   transition: all 0.15s;
   white-space: nowrap;
 }
-.pick-trigger-btn:hover { background: var(--primary); color: white; }
+.pick-trigger-btn:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 .pick-trigger-btn:active { transform: scale(0.96); }
 
 /* 메모 트리거 버튼 (상세 헤더 우측) */
@@ -907,4 +907,4 @@
   margin-top: 4px;
   white-space: nowrap;
 }
-.memo-trigger-btn:hover { background: var(--primary); color: white; }
+.memo-trigger-btn:hover { background: var(--ss-hover); color: var(--ss-on-accent); }

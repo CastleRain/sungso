@@ -2664,8 +2664,10 @@ function destroyChart(name) {
 
 function chartDefaults() {
   if (!window.Chart) return;
-  Chart.defaults.font.family = 'Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif';
-  Chart.defaults.color = '#6f7d78';
+  const theme = getComputedStyle(document.documentElement);
+  Chart.defaults.font.family = theme.getPropertyValue('--ss-font-sans').trim();
+  Chart.defaults.color = theme.getPropertyValue('--ss-muted').trim();
+  Chart.defaults.borderColor = theme.getPropertyValue('--ss-border').trim();
 }
 
 async function loadMarketSummary(forceStatic = false) {
@@ -2781,7 +2783,7 @@ function renderTrendChart(series, unit, provisionalMonths = 0) {
       } } },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 10, font: { size: 9 } } },
-        y: { title: { display: true, text: unit === 'total' ? '평균 거래가격 · 총액' : '평균 평당가격 · 3.3㎡ 기준' }, border: { display: false }, grid: { color: '#edf0ee' }, ticks: { font: { size: 10 }, callback: (value) => unit === 'total' ? formatCompactPrice(value) : `${Math.round(value).toLocaleString('ko-KR')}만` } },
+        y: { title: { display: true, text: unit === 'total' ? '평균 거래가격 · 총액' : '평균 평당가격 · 3.3㎡ 기준' }, border: { display: false }, grid: { color: Chart.defaults.borderColor }, ticks: { font: { size: 10 }, callback: (value) => unit === 'total' ? formatCompactPrice(value) : `${Math.round(value).toLocaleString('ko-KR')}만` } },
       },
     },
   });
@@ -2804,7 +2806,7 @@ function renderForecastChart(series, forecast, areaM2 = null) {
     ] }, options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 16, filter: (item) => item.datasetIndex === 0 || (item.datasetIndex === 3 && forecast.eligible) } }, tooltip: { callbacks: { label: (context) => context.parsed.y ? `${context.dataset.label} ${total ? formatPrice(context.parsed.y) : formatP33(context.parsed.y)}` : '' } } },
-      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 9, font: { size: 9 } } }, y: { title: { display: true, text: total ? '평균 거래가격 · 총액' : '평균 평당가격 · 3.3㎡ 기준' }, border: { display: false }, grid: { color: '#edf0ee' }, ticks: { font: { size: 10 }, callback: (value) => total ? formatCompactPrice(value) : `${Math.round(value).toLocaleString('ko-KR')}만` } } },
+      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 9, font: { size: 9 } } }, y: { title: { display: true, text: total ? '평균 거래가격 · 총액' : '평균 평당가격 · 3.3㎡ 기준' }, border: { display: false }, grid: { color: Chart.defaults.borderColor }, ticks: { font: { size: 10 }, callback: (value) => total ? formatCompactPrice(value) : `${Math.round(value).toLocaleString('ko-KR')}만` } } },
     },
   });
 }

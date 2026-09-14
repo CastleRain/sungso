@@ -25,16 +25,16 @@
   gap: 6px;
   min-height: 36px;
   padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, .4);
+  border: 1px solid var(--ss-border-strong);
   border-radius: 8px;
-  color: #fff;
-  background: rgba(255, 255, 255, .12);
+  color: var(--ss-link);
+  background: var(--ss-surface);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
-.honeymoon-home-link:hover { opacity: 1; background: rgba(255, 255, 255, .24); }
-.honeymoon-home-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.honeymoon-home-link:hover { opacity: 1; background: var(--ss-soft); }
+.honeymoon-home-link:focus-visible { outline: 3px solid var(--ss-focus); outline-offset: 3px; }
 .memo-center-drawer:not(.mcd-open) { display: none; }
 .plan-current-link {
   display: inline-flex;
@@ -42,33 +42,33 @@
   padding: 12px 16px;
   border-radius: 12px;
   background: #fff;
-  color: #0b5b45;
+  color: var(--ss-link);
   text-decoration: none;
   font-size: 13px;
   font-weight: 750;
 }
-.plan-current-link:hover { background: #e6f6f1; }
+.plan-current-link:hover { background: var(--ss-soft); }
 .plan-current-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .plan-current-links a {
-  color: #0b5b45;
+  color: var(--ss-link);
   background: #fff;
-  border: 1px solid #cce5dc;
+  border: 1px solid var(--ss-border-strong);
   border-radius: 10px;
   padding: 9px 12px;
   font-size: 12px;
   text-decoration: none;
 }
-.plan-current-links a:hover { background: #e6f6f1; }
+.plan-current-links a:hover { background: var(--ss-soft); }
 .plan-current-overview { margin-top: 16px; color: var(--text); }
 .plan-current-overview summary, .plan-archive summary { cursor: pointer; font-size: 13px; font-weight: 700; }
 .plan-current-overview ol { list-style: none; padding: 0; margin: 16px 0; }
 .plan-current-overview li { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.plan-current-overview li > span { color: #0b5b45; font-size: 12px; font-weight: 700; flex: 0 0 40px; }
+.plan-current-overview li > span { color: var(--ss-link); font-size: 12px; font-weight: 700; flex: 0 0 40px; }
 .plan-current-overview li strong { font-size: 13px; }
 .plan-current-overview li p { font-size: 12px; color: var(--text-muted); margin: 5px 0 0; line-height: 1.7; }
 .plan-resort-focus {
   background: #fff;
-  border: 1px solid #cce5dc;
+  border: 1px solid var(--ss-border-strong);
   border-radius: 18px;
   padding: 22px;
   display: flex;
@@ -76,14 +76,14 @@
   justify-content: space-between;
   gap: 18px;
 }
-.plan-focus-label { font-size: 11px; color: #0b5b45; background: #e6f6f1; padding: 4px 8px; border-radius: 6px; font-weight: 700; }
+.plan-focus-label { font-size: 11px; color: var(--ss-link); background: var(--ss-soft); padding: 4px 8px; border-radius: 6px; font-weight: 700; }
 .plan-resort-focus h2 { margin: 12px 0 8px; font-size: 22px; color: var(--text); }
 .plan-resort-focus p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin: 0; }
 .plan-focus-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; flex-shrink: 0; }
-.plan-text-link { color: #0b5b45; font-size: 12px; font-weight: 700; text-underline-offset: 3px; }
+.plan-text-link { color: var(--ss-link); font-size: 12px; font-weight: 700; text-underline-offset: 3px; }
 .plan-section-intro { font-size: 13px; line-height: 1.8; color: var(--text-muted); margin: 0; }
-.plan-section-intro a { color: #0b5b45; font-weight: 700; }
-.plan-archive { background: #f9faf9; border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+.plan-section-intro a { color: var(--ss-link); font-weight: 700; }
+.plan-archive { background: var(--ss-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
 .plan-archive summary span { margin-left: 8px; color: var(--text-muted); font-size: 11px; font-weight: 400; }
 .plan-archive > p { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin: 12px 0 18px; }
 .plan-legacy-days { list-style: none; padding: 0; margin: 0; }
@@ -104,27 +104,27 @@
   .plan-current-link { justify-content: center; }
   .plan-resort-focus { flex-direction: column; align-items: stretch; padding: 18px; }
   .plan-focus-actions { align-items: stretch; }
-  .hero-topbar-title { display: none; }
+  .hero-topbar-title { display: none; opacity: 1; }
 }
 @media (max-width: 480px) {
   .hero-stat-item { display: none; }
   .hero-stat-dday { padding: 9px 10px; }
-  .hero-subline { flex-wrap: wrap; font-size: 11px; }
-  .hero-title { font-size: 21px; }
-  .hero-eyebrow { font-size: 8px; }
+  .hero-subline { flex-wrap: wrap; font-size: 11px; opacity: 1; }
+  .hero-title { font-size: 21px; text-shadow: none; }
+  .hero-eyebrow { font-size: 8px; opacity: 1; }
 }
 
 /* ── 여행 요약 헤더 ── */
 .plan-trip-header {
-  background: linear-gradient(135deg, #0B5B45 0%, #1D9E75 60%, #2EC495 100%);
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
   border-radius: 20px;
   padding: 24px 28px;
-  color: white;
+  color: var(--ss-on-accent);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 8px 32px rgba(29,158,117,0.30);
+  box-shadow: 0 8px 32px rgba(64,94,115,0.10);
 }
 .plan-trip-main {
   display: flex;
@@ -157,17 +157,17 @@
 }
 .plan-trip-dest {
   font-size: 12px;
-  opacity: 0.72;
+  opacity: 1;
 }
 .plan-trip-right { flex-shrink: 0; }
 .plan-status-badge {
-  background: rgba(255,255,255,0.20);
+  background: var(--ss-surface);
   border: 1px solid rgba(255,255,255,0.35);
   border-radius: 20px;
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: white;
+  color: var(--ss-on-accent);
   white-space: nowrap;
 }
 
@@ -210,8 +210,8 @@
   transition: box-shadow 0.15s, border-color 0.15s;
 }
 .route-node.rn-confirmed {
-  border-color: var(--primary);
-  background: var(--primary-pale);
+  border-color: var(--teal);
+  background: var(--teal-pale);
 }
 .rn-top {
   display: flex;
@@ -223,7 +223,7 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.dot-confirmed { background: var(--primary); }
+.dot-confirmed { background: var(--teal); }
 .dot-pending   { background: var(--gray-400); }
 .rn-emoji { font-size: 18px; }
 .rn-city  { font-size: 13px; font-weight: 700; color: var(--text); }
@@ -406,7 +406,7 @@
   cursor: pointer;
   transition: background 0.12s;
 }
-.common-pick-badge:hover { background: var(--primary); color: white; }
+.common-pick-badge:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 .final-toggle-badge {
   border-radius: 20px;
   padding: 4px 12px;
@@ -437,7 +437,7 @@
   border-radius: 18px;
   overflow: hidden;
   border: 2px solid var(--primary);
-  box-shadow: 0 4px 24px rgba(29,158,117,0.15);
+  box-shadow: 0 4px 24px var(--ss-border-strong);
   background: white;
 }
 .confirmed-img {
@@ -489,8 +489,8 @@
 }
 .confirmed-detail-btn {
   padding: 8px 16px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 10px;
   font-size: 13px;
@@ -557,8 +557,8 @@
   transition: border-color 0.15s;
 }
 .final-candidate-row.final-confirmed {
-  border-color: var(--primary);
-  background: var(--primary-pale);
+  border-color: var(--teal);
+  background: var(--teal-pale);
 }
 .final-cand-name {
   font-size: 14px;
@@ -580,8 +580,8 @@
 }
 .final-confirm-btn {
   padding: 6px 13px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 8px;
   font-size: 12px;
@@ -595,9 +595,9 @@
 .final-confirmed-badge {
   font-size: 12px;
   font-weight: 700;
-  color: var(--primary-deep);
+  color: var(--teal-deep);
   padding: 5px 11px;
-  background: var(--primary-light);
+  background: var(--teal-light);
   border-radius: 8px;
   white-space: nowrap;
 }
@@ -712,8 +712,8 @@
 .iti-autofill-btn {
   margin-top: 16px;
   padding: 11px 24px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 12px;
   font-size: 14px;
@@ -801,7 +801,7 @@
   align-items: center;
   justify-content: center;
 }
-.day-add-btn:hover { background: var(--primary); color: white; }
+.day-add-btn:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 
 /* ════════════════════════════════════════════════════════════════
    일정표 — View / Edit 모드 (확장 편집 UI)
@@ -936,7 +936,7 @@
   font-size: 11px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
-  font-family: monospace;
+  font-family: var(--ss-font-mono);
   flex-shrink: 0;
 }
 .item-text-display {
@@ -982,8 +982,8 @@
 .day-save-close-btn {
   flex-shrink: 0;
   padding: 6px 14px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 10px;
   font-size: 12px;
@@ -1076,7 +1076,7 @@
   width: 58px;
   flex-shrink: 0;
   font-size: 11px;
-  font-family: monospace;
+  font-family: var(--ss-font-mono);
   font-variant-numeric: tabular-nums;
   padding: 4px 6px;
   border: none;
@@ -1167,7 +1167,7 @@
   width: 64px;
   flex-shrink: 0;
   font-size: 11px;
-  font-family: monospace;
+  font-family: var(--ss-font-mono);
   font-variant-numeric: tabular-nums;
   padding: 5px 7px;
   border: 1px solid var(--border);

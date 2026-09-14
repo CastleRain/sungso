@@ -3,25 +3,28 @@
    기존 maldives_report.html 스타일 추출 + 탭/카드/토너먼트 확장
    ════════════════════════════════════════════════════════════════ */
 
-/* ── 디자인 토큰 — 에메랄드/뉴트럴 테마 ── */
+/* ── 디자인 토큰 — 솜사탕 블루 공통 테마 ── */
 :root {
-  /* primary: 에메랄드 그린 */
-  --primary:        #1D9E75;
-  --primary-deep:   #15785A;
-  --primary-light:  #E6F6F1;
-  --primary-pale:   #F0FAF6;
+  /* primary: 읽기 쉬운 브랜드 텍스트; 채운 버튼은 --ss-accent 사용 */
+  --primary:        var(--ss-link);
+  --primary-deep:   var(--ss-on-accent);
+  --primary-light:  var(--ss-soft);
+  --primary-pale:   var(--ss-bg);
 
   /* secondary: 소프트 퍼플 */
   --secondary:      #7F77DD;
   --secondary-light: #EEEDFA;
 
-  /* backward-compat ocean-* → 에메랄드 */
-  --ocean-deep:    #15785A;
-  --ocean-mid:     #1D9E75;
-  --ocean-light:   #E6F6F1;
-  --ocean-pale:    #F0FAF6;
+  /* backward-compat ocean-* → 공통 브랜드 */
+  --ocean-deep:    var(--primary-deep);
+  --ocean-mid:     var(--primary);
+  --ocean-light:   var(--primary-light);
+  --ocean-pale:    var(--primary-pale);
 
+  /* 리조트 등급·가격·확정 상태의 녹색은 브랜드와 독립적으로 유지한다. */
   --teal:          #1D9E75;
+  --teal-deep:     #15785A;
+  --teal-pale:     #F0FAF6;
   --teal-light:    #E6F6F1;
   --coral:         #DC4E38;
   --coral-light:   #FEF0ED;
@@ -31,18 +34,18 @@
   --amber-light:   #FEF3C7;
 
   /* 중성 그레이 */
-  --gray-50:       #F9FAFB;
-  --gray-100:      #F3F4F6;
-  --gray-200:      #E5E7EB;
-  --gray-400:      #9CA3AF;
-  --gray-600:      #6B7280;
-  --gray-800:      #374151;
+  --gray-50:       var(--ss-bg);
+  --gray-100:      var(--ss-soft);
+  --gray-200:      var(--ss-border);
+  --gray-400:      var(--ss-muted);
+  --gray-600:      var(--ss-muted);
+  --gray-800:      var(--ss-text);
 
-  --text:          #1F2937;
-  --text-muted:    #6B7280;
-  --text-light:    #9CA3AF;
-  --border:        rgba(0, 0, 0, 0.06);
-  --border-mid:    rgba(0, 0, 0, 0.11);
+  --text:          var(--ss-text);
+  --text-muted:    var(--ss-muted);
+  --text-light:    var(--ss-muted);
+  --border:        var(--ss-border);
+  --border-mid:    var(--ss-border-strong);
 
   --radius:        10px;
   --radius-lg:     16px;
@@ -81,13 +84,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
-  font-family: 'Apple SD Gothic Neo', 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  font-family: var(--ss-font-sans);
   font-size: 14px;
   color: var(--text);
-  background: #FAFBFC;
+  background: var(--ss-bg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+button, input, select, textarea { font-family: inherit; }
+
+/* 인증 뒤 열린 루트가 본문 탭까지 남은 화면 높이를 전달한다. */
+body[data-app="honeymoon"] > [data-private-root]:not([hidden]) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* ── 공통 유틸리티 ── */
@@ -114,11 +127,11 @@ body {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #0B5B45 0%, #1D9E75 60%, #2EC495 100%);
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
   background-size: cover;
   background-position: center 35%;
   transform: scale(1.06);
-  filter: brightness(0.72);
+  filter: brightness(1);
   transition: background-image 0.5s ease;
 }
 
@@ -126,14 +139,10 @@ body {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(11,91,69,0.70) 0%,
-    rgba(29,158,117,0.45) 100%
-  );
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ss-bg) 98%, transparent), color-mix(in srgb, var(--ss-accent) 94%, transparent));
   display: flex;
   flex-direction: column;
-  color: white;
+  color: var(--ss-on-accent);
 }
 
 /* 상단 내비 바 */
@@ -145,14 +154,14 @@ body {
   font-size: 11px;
 }
 .hero-back {
-  color: rgba(255,255,255,0.80);
+  color: var(--ss-link);
   text-decoration: none;
   font-weight: 500;
   transition: opacity 0.15s;
 }
 .hero-back:hover { opacity: 0.6; }
 .hero-topbar-sep { opacity: 0.35; }
-.hero-topbar-title { opacity: 0.60; font-size: 11px; }
+.hero-topbar-title { opacity: 1; font-size: 11px; }
 
 /* 메인 콘텐츠 */
 .hero-body {
@@ -169,21 +178,21 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  opacity: 0.65;
+  opacity: 1;
 }
 .hero-title {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
   line-height: 1.1;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.25);
+  text-shadow: none;
 }
 .hero-subline {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  opacity: 0.82;
+  opacity: 1;
   margin-top: 1px;
 }
 .hero-sep { opacity: 0.4; }
@@ -215,7 +224,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.10em;
-  opacity: 0.70;
+  opacity: 1;
 }
 .hero-stat-num {
   font-size: 20px;
@@ -264,9 +273,10 @@ body {
 }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active {
-  color: var(--ocean-mid);
+  color: var(--ss-link);
   border-bottom-color: var(--ocean-mid);
   font-weight: 600;
+  background: var(--ss-soft);
 }
 .tab-icon { font-size: 14px; }
 
@@ -324,7 +334,7 @@ body {
   animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   pointer-events: none;
 }
-.toast-msg.toast-success { background: var(--primary); }
+.toast-msg.toast-success { background: var(--teal); }
 .toast-msg.toast-error   { background: #DC2626; }
 .toast-msg.toast-out     { animation: toastOut 0.22s ease both; }
 
@@ -354,7 +364,7 @@ body {
 .resize-handle:hover::after,
 .resize-handle.dragging::after { opacity: 1; }
 .resize-handle:hover,
-.resize-handle.dragging { background: rgba(29,158,117,0.15); }
+.resize-handle.dragging { background: var(--ss-border-strong); }
 
 /* 카드 탭: 분할 상태 아닐 때 핸들 숨김 */
 #tab-cards:not(.detail-open) .resize-handle { display: none; }

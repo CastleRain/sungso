@@ -1,28 +1,28 @@
 .mobile-preview-link {
   display:flex;align-items:center;justify-content:center;gap:8px;
   margin-top:12px;padding:9px 10px;min-height:42px;
-  color:#73536c;background:#f8f1f6;border:1px solid #ebdeea;border-radius:6px;
+  color:var(--ss-link);background:var(--ss-soft);border:1px solid var(--ss-border);border-radius:6px;
   font-size:12px;
 }
-.mobile-preview-link:hover {background:#f0e4ef;border-color:#d5bbcf}
+.mobile-preview-link:hover {background:var(--ss-hover);border-color:var(--ss-border-strong);color:var(--ss-on-accent);}
 .mobile-preview-link>span:first-child {font-size:22px;line-height:1}
 .mobile-preview-link>span:last-child {margin-left:auto}
 .preview-device-toolbar {
   position:sticky;top:0;z-index:21;display:flex;align-items:center;flex-wrap:wrap;
   gap:12px 18px;padding:14px 16px;margin:20px 0 28px;
-  background:#ffffffed;backdrop-filter:blur(16px);border:1px solid #e8dee7;border-radius:12px;
+  background:var(--ss-surface);backdrop-filter:blur(16px);border:1px solid var(--ss-border);border-radius:12px;
 }
-.device-modes {display:flex;gap:4px;padding:4px;background:#f5f0f5;border-radius:8px}
+.device-modes {display:flex;gap:4px;padding:4px;background:var(--ss-soft);border-radius:8px}
 .device-modes button {
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  min-height:40px;padding:8px 14px;font-size:12px;border-radius:5px;color:#827483;
+  min-height:40px;padding:8px 14px;font-size:12px;border-radius:5px;color:var(--ss-link);
 }
-.device-modes button[aria-pressed=true] {background:#73536c;color:white;box-shadow:0 2px 5px #422d4315}
+.device-modes button[aria-pressed=true] {background:var(--ss-accent);color:var(--ss-on-accent);box-shadow:0 2px 5px #422d4315}
 .phone-icon {width:11px;height:17px;border:1.4px solid currentColor;border-radius:3px;display:inline-block}
-.device-width {display:flex;align-items:center;gap:9px;font-size:11px;color:#706274}
+.device-width {display:flex;align-items:center;gap:9px;font-size:11px;color:var(--ss-muted)}
 .device-width[hidden] {display:none}
-.device-width select {padding:9px 24px 9px 10px;border:1px solid #e8dee7;border-radius:6px;background:#fff;color:#5f4c62;font:12px var(--sans);min-height:40px}
-.device-hint {font-size:11px;color:#827483;margin-left:auto}
+.device-width select {padding:9px 24px 9px 10px;border:1px solid var(--ss-border);border-radius:6px;background:var(--ss-soft);color:var(--ss-muted);font:12px var(--ss-font-sans);min-height:40px}
+.device-hint {font-size:11px;color:var(--ss-link);margin-left:auto}
 .preview-stage {min-width:0}
 .device-statusbar,.device-homebar {display:none}
 .preview-main[data-preview-device=mobile] .preview-layout {display:block;width:min(100%,calc(var(--preview-width) + 18px));margin:0 auto}
@@ -31,7 +31,7 @@
 .preview-main[data-preview-device=mobile] .device-statusbar {
   display:flex;align-items:center;justify-content:space-between;position:relative;
   height:40px;padding:0 23px;background:white;color:#302934;
-  border-radius:29px 29px 0 0;font:600 11px var(--sans);
+  border-radius:29px 29px 0 0;font:600 11px var(--ss-font-sans);
 }
 .device-statusbar>i {position:absolute;left:50%;top:9px;transform:translateX(-50%);width:88px;height:22px;background:#28252e;border-radius:20px}
 .preview-main[data-preview-device=mobile] .device-homebar {display:flex;justify-content:center;padding:14px 0 9px;background:#fff;border-radius:0 0 29px 29px}
@@ -41,7 +41,7 @@
 .preview-main[data-preview-device=mobile] .mobile-preview-actions {
   display:flex;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:25;
   width:min(440px,calc(100% - 30px));gap:10px;padding:12px;
-  background:#fffffff5;backdrop-filter:blur(14px);border:1px solid #e8dee7;border-radius:12px;
+  background:var(--ss-surface);backdrop-filter:blur(14px);border:1px solid var(--ss-border);border-radius:12px;
   box-shadow:0 4px 24px #422d431c;
 }
 .preview-main[data-preview-device=mobile] .mobile-preview-actions .primary {flex:1}

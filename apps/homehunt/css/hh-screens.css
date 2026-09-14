@@ -516,7 +516,7 @@
 
 .hh-guide__toc-link.is-active,
 .hh-guide__toc-link[aria-current="location"] {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
   border-inline-start-color: var(--hh-accent);
 }
@@ -1029,7 +1029,7 @@
 }
 
 .hh-app.hh-v3 .condition-range.hh-range:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--hh-accent) 24%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--ss-focus) 24%, transparent);
   outline-offset: 2px;
 }
 
@@ -1079,7 +1079,7 @@
 
 .hh-app.hh-v3 .district-suggestion-list button:hover,
 .hh-app.hh-v3 .district-suggestion-list button.is-active {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
 }
 
@@ -1131,7 +1131,7 @@
   gap: 6px;
   border: 1px solid color-mix(in srgb, var(--hh-accent) 32%, var(--hh-line));
   border-radius: 9px;
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
   font-size: 10px;
   font-weight: 800;
@@ -1139,7 +1139,7 @@
 }
 
 .hh-app.hh-v3 .map-info .map-info-action:hover {
-  color: var(--hh-text-on-dark);
+  color: var(--ss-on-accent);
   background: var(--hh-accent);
 }
 
@@ -1270,7 +1270,7 @@
 .hh-app .flatpickr-day.selected:hover,
 .hh-app .flatpickr-day.selected:focus {
   border-color: var(--hh-accent);
-  color: var(--hh-text-on-dark);
+  color: var(--ss-on-accent);
   background: var(--hh-accent);
 }
 
@@ -1494,7 +1494,7 @@
 }
 
 .hh-app.hh-v3 .archive-guide li > span {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   font-family: var(--hh-font-mono);
   font-weight: 800;
 }
@@ -1936,7 +1936,7 @@
 }
 
 .hh-app.hh-v3 .guide-jump > a:hover {
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   background: var(--hh-accent-soft);
 }
 
@@ -2058,8 +2058,8 @@
   height: 40px;
   place-items: center;
   border-radius: var(--hh-radius-md);
-  color: var(--hh-text-on-dark);
-  background: var(--hh-ink-2);
+  color: var(--ss-on-accent);
+  background: var(--ss-accent);
   font-size: 18px;
   font-weight: 800;
 }
@@ -2903,7 +2903,7 @@
   display: block;
   min-height: 18px;
   margin-block-start: var(--hh-space-2);
-  color: var(--hh-accent-pressed);
+  color: var(--ss-link);
   font-size: var(--hh-text-meta);
   font-weight: 750;
   line-height: 1.4;

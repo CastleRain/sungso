@@ -72,7 +72,7 @@
   position: relative;
   transition: background 0.2s;
 }
-.toggle-switch.on { background: linear-gradient(135deg, var(--primary-deep), var(--primary)); }
+.toggle-switch.on { background: var(--ss-accent); }
 .toggle-knob {
   width: 14px; height: 14px;
   background: white;
@@ -95,8 +95,8 @@
   box-shadow: var(--shadow);
 }
 .compare-table th {
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
@@ -104,8 +104,8 @@
   cursor: pointer;
   user-select: none;
 }
-.compare-table th:hover { background: linear-gradient(135deg, #a83558, #e8507a); }
-.compare-table th.sorted { background: linear-gradient(135deg, var(--teal), #1D9E75); }
+.compare-table th:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
+.compare-table th.sorted { background: var(--ss-hover); color: var(--ss-on-accent); }
 .sort-indicator { margin-left: 4px; opacity: 0.7; }
 .compare-table td {
   padding: 10px 12px;
@@ -182,8 +182,8 @@
 /* 티어 도트 */
 .tier-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 3px; }
 .tier-best-dot { background: var(--teal); }
-.tier-mid-dot { background: var(--ocean-mid); }
-.tier-simple-dot { background: var(--gray-400); }
+.tier-mid-dot { background: var(--teal); }
+.tier-simple-dot { background: #9CA3AF; }
 .tier-legend { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 
 /* 개선된 테이블 셀 */
@@ -240,8 +240,8 @@
   border-radius: 2px;
   transition: width 0.35s ease;
 }
-.bar-best { background: var(--primary); }
-.bar-good { background: var(--primary); opacity: 0.55; }
+.bar-best { background: var(--teal); }
+.bar-good { background: var(--teal); opacity: 0.55; }
 .bar-mid  { background: #F59E0B; opacity: 0.7; }
 .bar-low  { background: var(--gray-300); }
 
@@ -249,8 +249,8 @@
 .price-cell-row { margin-bottom: 4px; display: flex; align-items: center; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
 .price-cell-row:last-child { margin-bottom: 0; }
 .ag-label { font-size: 9px; color: var(--text-light); }
-.best-price { color: var(--primary-deep); font-weight: 700; background: var(--primary-light); padding: 1px 5px; border-radius: 4px; }
-.best-badge { font-size: 9px; background: var(--primary-light); color: var(--primary-deep); padding: 1px 5px; border-radius: 4px; font-weight: 700; }
+.best-price { color: var(--teal-deep); font-weight: 700; background: var(--teal-light); padding: 1px 5px; border-radius: 4px; }
+.best-badge { font-size: 9px; background: var(--teal-light); color: var(--teal-deep); padding: 1px 5px; border-radius: 4px; font-weight: 700; }
 .orig { font-size: 10px; color: var(--text-light); text-decoration: line-through; }
 
 /* ════════════════════════════════════════════════════════════════
@@ -350,8 +350,8 @@
 .map-rating-row span:first-child { color: var(--text-muted); }
 
 .map-info-hammock { font-size: 11px; color: var(--teal); font-weight: 600; margin-bottom: 10px; padding: 5px 8px; background: var(--teal-light); border-radius: 6px; }
-.map-detail-btn { width: 100%; padding: 9px; background: var(--ocean-mid); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.map-detail-btn:hover { background: var(--ocean-deep); }
+.map-detail-btn { width: 100%; padding: 9px; background: var(--ss-accent); color: var(--ss-on-accent); border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.map-detail-btn:hover { background: var(--ss-hover); }
 
 /* SVG 핀 애니메이션 */
 @keyframes pinPop {
@@ -440,7 +440,7 @@
   color: var(--primary-deep); line-height: 1;
   transition: background 0.15s;
 }
-.minimap-btn:hover { background: var(--primary); color: white; }
+.minimap-btn:hover { background: var(--ss-hover); color: var(--ss-on-accent); }
 
 .minimap-body {
   overflow: hidden;
@@ -479,9 +479,9 @@
   margin-top: 3px; flex-shrink: 0;
 }
 .airport-dot { background: var(--gray-500, #6B7280); border: 2px solid var(--gray-300, #D1D5DB); }
-.resort-dot  { background: var(--primary); border: 2px solid var(--primary-light); }
+.resort-dot  { background: var(--teal); border: 2px solid var(--teal-light); }
 .route-stop-label { font-size: 11px; font-weight: 600; color: var(--text); }
-.route-stop-label.resort-label { color: var(--primary-deep); }
+.route-stop-label.resort-label { color: var(--teal-deep); }
 .route-stop-sub { font-size: 10px; color: var(--text-light); margin-top: 1px; }
 .route-connector {
   display: flex;
@@ -492,7 +492,7 @@
 }
 .route-conn-line {
   width: 2px; height: 26px;
-  background: linear-gradient(to bottom, var(--gray-300, #D1D5DB), var(--primary-light));
+  background: linear-gradient(to bottom, var(--gray-300, #D1D5DB), var(--teal-light));
   border-radius: 1px;
   flex-shrink: 0;
 }
@@ -501,7 +501,7 @@
   align-items: center;
   gap: 4px;
   background: var(--primary-pale);
-  border: 1px solid rgba(29,158,117,0.2);
+  border: 1px solid var(--ss-border-strong);
   border-radius: 10px;
   padding: 3px 9px;
   font-size: 10px;
@@ -512,8 +512,8 @@
   width: 100%;
   margin-top: 10px;
   padding: 7px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 8px;
   font-size: 11px;
@@ -522,7 +522,7 @@
   transition: background 0.15s;
   letter-spacing: 0.2px;
 }
-.map-route-detail-btn:hover { background: var(--primary-deep); }
+.map-route-detail-btn:hover { background: var(--ss-hover); }
 
 /* ════════════════════════════════════════════════════════════════
    탭 4: 토너먼트
@@ -588,8 +588,8 @@
 .tdb-back-btn:hover { border-color: var(--primary); color: var(--primary-deep); }
 .tdb-pick-btn {
   padding: 7px 18px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: 9px;
   font-size: 12px; font-weight: 700;
@@ -597,7 +597,7 @@
   transition: background 0.15s, transform 0.1s;
   letter-spacing: 0.2px;
 }
-.tdb-pick-btn:hover { background: var(--primary-deep); }
+.tdb-pick-btn:hover { background: var(--ss-hover); }
 .tdb-pick-btn:active { transform: scale(0.96); }
 
 /* split 상태에서 wrap max-width 해제 */
@@ -650,8 +650,8 @@
 .setup-start-btn {
   width: 100%;
   padding: 12px;
-  background: var(--ocean-mid);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   border-radius: var(--radius);
   font-size: 14px;
@@ -659,11 +659,11 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.setup-start-btn:hover { background: var(--ocean-deep); }
+.setup-start-btn:hover { background: var(--ss-hover); }
 
 .tournament-actions { display: flex; gap: 10px; justify-content: center; }
-.tournament-start-btn { padding: 12px 28px; background: var(--ocean-mid); color: white; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.tournament-start-btn:hover { background: var(--ocean-deep); }
+.tournament-start-btn { padding: 12px 28px; background: var(--ss-accent); color: var(--ss-on-accent); border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.tournament-start-btn:hover { background: var(--ss-hover); }
 .tournament-resume-btn { padding: 12px 20px; background: var(--gray-100); color: var(--text-muted); border: 1px solid var(--border-mid); border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .tournament-resume-btn:hover { background: var(--gray-200); color: var(--text); }
 
@@ -744,12 +744,12 @@
   box-shadow: var(--shadow-lg);
 }
 .match-resort-card.selected {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(29,158,117,0.2);
+  border-color: var(--ss-link);
+  box-shadow: 0 0 0 3px var(--ss-border-strong);
 }
 .match-card-img {
   height: 140px;
-  background: linear-gradient(135deg, #185FA5, #1D9E75);
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -757,7 +757,7 @@
   position: relative;
 }
 .match-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.match-card-image { height: 140px; background: linear-gradient(135deg, var(--primary), #6EC8A8); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
+.match-card-image { height: 140px; background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent)); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
 .match-card-image img { width: 100%; height: 100%; object-fit: cover; }
 .match-card-placeholder { font-size: 36px; }
 .match-card-body { padding: 14px; }
@@ -791,8 +791,8 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   transition: all 0.15s;
 }
 .match-pick-btn:hover { opacity: 0.85; transform: translateY(-1px); }
@@ -817,12 +817,12 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  background: var(--ocean-mid);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   transition: background 0.15s;
   margin-top: 12px;
 }
-.match-select-btn:hover { background: var(--ocean-deep); }
+.match-select-btn:hover { background: var(--ss-hover); }
 
 .tournament-footer-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
 .skip-match-btn { padding: 7px 16px; background: var(--gray-100); border: 1px solid var(--border-mid); border-radius: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
@@ -842,8 +842,8 @@
 }
 .tournament-result.active { display: block; }
 .result-winner {
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border-radius: var(--radius-lg);
   padding: 32px;
   text-align: center;
@@ -862,8 +862,8 @@
   cursor: pointer;
   border: none;
 }
-.result-btn.primary { background: var(--teal); color: white; }
-.result-btn.secondary { background: rgba(255,255,255,0.2); color: white; }
+.result-btn.primary { background: var(--ss-surface); color: var(--ss-on-accent); }
+.result-btn.secondary { background: var(--ss-surface); color: var(--ss-on-accent); }
 .result-rounds {
   background: white;
   border: 1px solid var(--border);
@@ -893,8 +893,8 @@
 .result-price-row span:first-child { color: var(--text-muted); }
 .result-price-row span:last-child { font-weight: 600; color: var(--ocean-deep); }
 .result-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.7; }
-.result-detail-btn { padding: 10px 20px; background: var(--ocean-mid); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.result-detail-btn:hover { background: var(--ocean-deep); }
+.result-detail-btn { padding: 10px 20px; background: var(--ss-accent); color: var(--ss-on-accent); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.result-detail-btn:hover { background: var(--ss-hover); }
 .result-restart-btn { padding: 10px 20px; background: var(--gray-100); color: var(--text-muted); border: 1px solid var(--border-mid); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .result-restart-btn:hover { background: var(--gray-200); color: var(--text); }
 
@@ -911,15 +911,15 @@
 .result-pick-btn {
   padding: 8px 20px;
   border-radius: 10px;
-  background: var(--primary);
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border: none;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
-.result-pick-btn:hover  { background: var(--primary-deep); }
+.result-pick-btn:hover  { background: var(--ss-hover); }
 .result-pick-btn:active { transform: scale(0.96); }
 
 .tournament-reset-btn {

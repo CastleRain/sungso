@@ -160,6 +160,14 @@
       "files": [
         "."
       ]
+    },
+    {
+      "source": "shared/theme",
+      "output": "shared/theme",
+      "files": [
+        "brand.css",
+        "sungso-wordmark-sky.png"
+      ]
     }
   ],
   "compatibility": {

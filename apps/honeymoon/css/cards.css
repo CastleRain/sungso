@@ -46,8 +46,8 @@
 }
 .sort-btn:hover { border-color: var(--primary); color: var(--primary); }
 .sort-btn.active {
-  background: linear-gradient(135deg, var(--primary-deep), var(--primary));
-  color: white;
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
   border-color: var(--primary);
   box-shadow: 0 2px 8px rgba(0,0,0,0.14);
 }
@@ -109,8 +109,8 @@
   gap: 7px;
   padding: 7px 14px;
   background: var(--primary-pale);
-  border-top: 1px solid rgba(29,158,117,0.10);
-  border-bottom: 1px solid rgba(29,158,117,0.10);
+  border-top: 1px solid var(--ss-border-strong);
+  border-bottom: 1px solid var(--ss-border-strong);
 }
 .ctx-icon {
   font-size: 11px;
@@ -215,7 +215,7 @@
 }
 .resort-card.selected {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(29,158,117,0.20);
+  box-shadow: 0 0 0 3px var(--ss-border-strong);
 }
 
 /* 카드 그리드: 기본 3열 */
@@ -259,7 +259,7 @@
 .resort-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.13);
-  border-color: rgba(29,158,117,0.28);
+  border-color: var(--ss-border-strong);
 }
 .resort-card:hover .card-image img {
   transform: scale(1.06);
@@ -267,7 +267,7 @@
 
 .card-image {
   height: 210px;
-  background: linear-gradient(90deg, #c2e4d8 25%, #d9f0e6 50%, #c2e4d8 75%);
+  background: linear-gradient(90deg, var(--ss-soft) 25%, var(--ss-accent) 50%, var(--ss-soft) 75%);
   background-size: 1200px 100%;
   animation: shimmer 1.6s ease-in-out infinite;
   position: relative;
@@ -275,7 +275,7 @@
 }
 .card-image.img-ready {
   animation: none;
-  background: linear-gradient(135deg, #6EC8A8 0%, #3BB08A 50%, #15785A 100%);
+  background: linear-gradient(135deg, var(--ss-soft), var(--ss-accent));
 }
 .card-image img {
   width: 100%;
@@ -380,10 +380,10 @@
   line-height: 22px; text-align: center;
 }
 .rdot-5 { background: #0B5B45; color: white; }
-.rdot-4 { background: var(--primary); color: white; }
+.rdot-4 { background: var(--teal); color: white; }
 .rdot-3 { background: var(--amber); color: white; }
-.rdot-2 { background: var(--gray-200); color: var(--gray-600); }
-.rdot-1 { background: var(--gray-100); color: var(--text-light); }
+.rdot-2 { background: #E5E7EB; color: #6B7280; }
+.rdot-1 { background: #F3F4F6; color: #9CA3AF; }
 
 /* 가격 블록 */
 .card-price-block {
@@ -398,7 +398,7 @@
   color: var(--text);
   letter-spacing: -0.5px;
 }
-.card-price-value.price-best { color: var(--primary-deep); }
+.card-price-value.price-best { color: var(--teal-deep); }
 .card-price-unit { font-size: 10px; color: var(--text-light); }
 .price-na { font-size: 11px; color: var(--text-light); font-style: italic; }
 
@@ -412,9 +412,9 @@
   font-size: 10px;
   font-weight: 700;
 }
-.tier-best { background: var(--primary-light); color: var(--primary-deep); border: 1px solid rgba(29,158,117,0.20); }
+.tier-best { background: var(--teal-light); color: var(--teal-deep); border: 1px solid rgba(29,158,117,0.20); }
 .tier-mid { background: var(--amber-light); color: #92400E; border: 1px solid rgba(217,119,6,0.20); }
-.tier-simple { background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--border); }
+.tier-simple { background: #F3F4F6; color: #6B7280; border: 1px solid rgba(0, 0, 0, 0.06); }
 
 .card-footer {
   display: flex;
@@ -456,7 +456,7 @@
   border-radius: 10px;
   letter-spacing: -0.2px;
 }
-.fit-high { background: var(--primary-light); color: var(--primary-deep); }
+.fit-high { background: var(--teal-light); color: var(--teal-deep); }
 .fit-mid  { background: #FEF3C7; color: #92400E; }
 .fit-low  { background: var(--gray-100); color: var(--gray-600); }
 
@@ -547,7 +547,7 @@
 .prefs-panel {
   display: none;
   background: var(--primary-pale);
-  border: 1px solid rgba(29,158,117,0.15);
+  border: 1px solid var(--ss-border-strong);
   border-radius: 12px;
   padding: 14px 16px;
   margin-top: 8px;
