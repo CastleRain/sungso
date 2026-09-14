@@ -1,4 +1,4 @@
-import { normalizeDocument, applyChange } from './core.mjs?v=20260914-mobile-preview';
+import { normalizeDocument, applyChange } from './core.mjs?v=20260914-scroll-editions';
 
 export function createStore(adapter) {
   let disposed = false;

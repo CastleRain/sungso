@@ -1,4 +1,4 @@
-import { EDITIONS } from './edition-catalog.mjs?v=20260914-mobile-preview';
+import { EDITIONS } from './edition-catalog.mjs?v=20260914-scroll-editions';
 const palette = (id, name, paper, ink, accent, soft) => ({ id, name, paper, ink, accent, soft });
 
 export const TEMPLATES = [

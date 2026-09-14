@@ -1,0 +1,235 @@
+/* The document owns scrolling; only the invitation stage stays in the viewport. */
+main[data-scroll-story="on"] .preview-layout {
+  height: var(--story-track-height);
+  align-items: start;
+  overflow-anchor: none;
+}
+
+main[data-scroll-story="on"] .preview-stage {
+  position: sticky;
+  top: var(--story-pin-top);
+  align-self: start;
+}
+
+main[data-scroll-story="on"] #preview-canvas {
+  height: var(--story-screen-height);
+}
+
+main[data-scroll-story="on"] #preview-canvas > .invitation {
+  position: relative;
+  height: 100%;
+  overflow: clip;
+  perspective: 1200px;
+}
+
+main[data-scroll-story="on"] #preview-canvas .pe-edition,
+main[data-scroll-story="on"] #preview-canvas .env-enclosures,
+main[data-scroll-story="on"] #preview-canvas .cs-warm-wishes { display: contents; }
+main[data-scroll-story="on"] #preview-canvas .env-postal-header,
+main[data-scroll-story="on"] #preview-canvas .cs-edition { display: none; }
+
+main[data-scroll-story="on"] #preview-canvas .scroll-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  margin-block: 0;
+  min-height: 100%;
+  opacity: var(--scene-opacity, 1);
+  transform: translate3d(var(--scene-x, 0px), var(--scene-y, 0px), 0) rotate(var(--scene-rotate, 0deg)) rotateY(var(--scene-rotate-y, 0deg)) scale(var(--scene-scale, 1));
+  transform-origin: var(--scene-origin, center top);
+  clip-path: var(--scene-clip, inset(0));
+  filter: brightness(var(--scene-brightness, 1));
+  transition: none !important;
+}
+
+
+main[data-scroll-story="on"] .scroll-scene:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+
+/* One-shot reveal effects must not conceal a scene when the reader scrolls back. */
+main[data-scroll-story="on"] .scroll-scene .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-magazine-cover-image img {
+  transform: scale(var(--photo-scale, 1));
+  transform-origin: 50% 45%;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
+  transform: translateY(calc(var(--scene-progress, 0) * -5px));
+  transition: none !important;
+}
+
+.story-controls {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  min-height: 42px;
+  color: #654d6b;
+  background: #fff;
+  border-top: 1px solid #ece3ec;
+  font-family: var(--sans);
+}
+
+.story-controls > button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  min-height: 42px;
+  padding: 0;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.story-controls > button:hover:not(:disabled) {
+  background: #f6eff7;
+}
+
+.story-controls > button:disabled {
+  color: #b6aaba;
+  cursor: default;
+  opacity: 0.7;
+}
+
+.story-controls > button:focus-visible,
+.scroll-mode-toggle:focus-visible {
+  outline: 2px solid #795582;
+  outline-offset: -4px;
+}
+
+.story-controls > div:not(.story-progress) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 0 3px;
+  line-height: 1.4;
+}
+
+[data-story-counter] {
+  flex-shrink: 0;
+  color: #8d7595;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-story-label] {
+  overflow: hidden;
+  color: #69566f;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.story-controls > .story-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  background: #f0e8f1;
+  pointer-events: none;
+}
+
+.story-progress > i {
+  display: block;
+  width: var(--story-progress, 0%);
+  height: 100%;
+  background: #9d75a6;
+}
+
+.scroll-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 13px;
+  color: #735779;
+  background: #fff;
+  border: 1px solid #dfd1e2;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.scroll-mode-toggle[aria-pressed="true"] {
+  color: #fff;
+  background: #73536c;
+  border-color: #73536c;
+}
+
+.scroll-mode-toggle:hover:not([aria-pressed="true"]) {
+  background: #f6eef8;
+}
+
+.story-preference-note {
+  display: none;
+  color: #827483;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+main[data-scroll-story="reduced"] .story-preference-note { display: inline; }
+
+@media (max-width: 700px) {
+  .preview-device-toolbar:has(.scroll-mode-toggle) {
+    column-gap: 6px;
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .preview-device-toolbar:has(.scroll-mode-toggle) .device-modes {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .preview-device-toolbar:has(.scroll-mode-toggle) .device-modes button {
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 7px;
+    gap: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .preview-device-toolbar .scroll-mode-toggle {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 8px 9px;
+    font-size: 11px;
+  }
+
+  .story-preference-note {
+    flex-basis: 100%;
+    padding: 0 3px;
+    font-size: 10px;
+  }
+}
+
+/* The controller also restores ordinary flow when this preference changes. */
+@media (prefers-reduced-motion: reduce) {
+  main[data-scroll-story="on"] .scroll-scene,
+  main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-magazine-cover-image img,
+  main[data-scroll-story="on"] .scroll-scene.ed-magazine-cover .ed-masthead {
+    transform: none;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,123 @@
+/* Reading content keeps its geometry. Only decorative layers follow the scroll. */
+main[data-scroll-story="on"][data-story-design="constellation"] #preview-canvas > .invitation {
+  background-image: radial-gradient(ellipse at 50% 42%, var(--soft), var(--paper) 74%);
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .scroll-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 5% 15%, var(--accent) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 95% 59%, var(--accent) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 9% 81%, var(--accent) 0 .8px, transparent 1.5px),
+    radial-gradient(circle at 93% 26%, var(--accent) 0 .7px, transparent 1.5px);
+  background-size: 100% 233px, 100% 347px, 100% 191px, 100% 283px;
+  background-position: 0 var(--sky-drift-y, 0px);
+  opacity: var(--sky-sparkle, .44);
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .constellation-sky span {
+  transform: translate(var(--sky-drift-x, 0px), var(--sky-drift-y, 0px));
+  transition: none !important;
+  animation: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .constellation-sky span:nth-child(even) {
+  transform: translate(calc(var(--sky-drift-x, 0px) * -.6), calc(var(--sky-drift-y, 0px) * .5));
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .constellation-orbit {
+  transform: translate(-50%, -35%) rotate(calc(-25deg + var(--sky-orbit-turn, 0deg))) scaleY(.68);
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .cs-orbit-drawing {
+  transform: rotate(var(--sky-orbit-turn, 0deg)) scale(var(--sky-depth, 1));
+  transform-origin: center;
+  transition: none !important;
+  animation: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .cs-date-orbits i {
+  transform: rotate(calc(28deg + var(--sky-orbit-turn, 0deg)));
+}
+
+main[data-scroll-story="on"][data-story-design="constellation"] .cs-date-orbits i + i {
+  transform: rotate(calc(-31deg - var(--sky-orbit-turn, 0deg)));
+}
+
+main[data-scroll-story="on"][data-story-design="envelope"] #preview-canvas > .invitation {
+  background-image: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--ink) 2%, transparent) 3px 4px);
+}
+
+main[data-scroll-story="on"][data-story-design="envelope"] .scroll-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: linear-gradient(106deg, transparent 36%, #fff 47%, color-mix(in srgb, var(--ink) 40%, transparent) 50%, #fff 53%, transparent 64%);
+  background-size: 220% 100%;
+  background-position: var(--paper-fold-position, 112%) 0;
+  opacity: var(--paper-fold-opacity, .07);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent);
+}
+
+main[data-scroll-story="on"][data-story-design="envelope"] .env-postage {
+  transform: rotate(var(--paper-stamp-turn, 4deg));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="envelope"] .env-last-photograph {
+  transform: rotate(var(--paper-photo-turn, -3deg));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] #preview-canvas > .invitation {
+  background-image: repeating-linear-gradient(90deg, transparent 0 10px, color-mix(in srgb, var(--accent) 32%, transparent) 10px 17px, transparent 17px 25px);
+  background-size: 100% 1px;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] .scroll-scene::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 7px;
+  width: 7px;
+  z-index: 3;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--accent) 0 2px, transparent 3px),
+    repeating-linear-gradient(180deg, transparent 0 7px, color-mix(in srgb, var(--accent) 26%, transparent) 7px 11px);
+  background-size: 7px 7px, 1px 100%;
+  background-position: 50% var(--walk-marker, 8%), 50% 0;
+  background-repeat: no-repeat;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] .pe-walk-photo path,
+main[data-scroll-story="on"][data-story-design="promenade"] .pe-map-route {
+  stroke-dashoffset: var(--walk-route-offset, 0);
+  transition: none !important;
+  animation: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] .pe-compass {
+  transform: rotate(var(--walk-compass-turn, -18deg));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] .pe-walk-photo img {
+  object-position: var(--walk-photo-shift, 45%) center;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="promenade"] .pe-route-stops::before {
+  transform: scaleX(calc(.15 + .85 * var(--walk-route-progress, 0)));
+  transform-origin: left center;
+  transition: none !important;
+}

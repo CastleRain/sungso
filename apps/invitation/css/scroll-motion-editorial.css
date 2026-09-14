@@ -1,0 +1,117 @@
+/* Scroll-only treatments. The ordinary invitation and catalog remain unchanged. */
+main[data-scroll-story="on"][data-story-design="film"] #preview-canvas > .invitation {
+  background: #211e1b;
+}
+
+main[data-scroll-story="on"][data-story-design="film"] :is(.ed-film-scenes, .ed-film-archive, .ed-film-card:not(.ed-film-card-light)) {
+  background: var(--paper);
+}
+
+main[data-scroll-story="on"][data-story-design="film"] .ed-negative-frame {
+  overflow: hidden;
+}
+
+main[data-scroll-story="on"][data-story-design="film"] .ed-negative-frame img {
+  filter: grayscale(var(--film-grayscale, 1)) brightness(var(--film-photo-brightness, .86));
+  transform: scale(var(--film-photo-scale, 1.1));
+  transform-origin: 50% 55%;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="film"] .ed-negative-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 15%, #ffb783 48%, #fff7db 52%, transparent 85%);
+  transform: translateX(var(--film-light-x, 0px));
+  opacity: var(--film-light-opacity, 0);
+  pointer-events: none;
+}
+
+main[data-scroll-story="on"][data-story-design="film"] .ed-film-flare {
+  transform: translateY(var(--film-flare-y, 0px)) rotate(20deg);
+}
+
+/* The darkroom's explicit negative/light/memory controls retain their filters. */
+main[data-scroll-story="on"][data-story-design="film"] .ed-development-tray img {
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-cover-greenhouse .pe-leaf {
+  transform-origin: 50% 100%;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-leaf-left {
+  transform: rotate(var(--leaf-left-rotation, -27deg)) scale(var(--leaf-scale, .8));
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-leaf-right {
+  transform: scaleX(-1) rotate(var(--leaf-right-rotation, -28deg)) scale(var(--leaf-scale, .8));
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-glasshouse-photo img {
+  transform: scale(var(--garden-photo-scale, 1.1));
+  filter: saturate(var(--garden-saturation, .6));
+  transform-origin: 50% 55%;
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-house-lines {
+  transform: scaleX(var(--garden-glass-scale, 1));
+  opacity: var(--garden-glass-opacity, .9);
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-greenhouse-tag {
+  transform: rotate(var(--garden-tag-rotation, 7deg));
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-flower-petals {
+  transform: rotate(var(--flower-turn, -18deg)) scale(var(--flower-bud-x, .34), var(--flower-bud-y, .7));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="greenhouse"] .pe-greenhouse[data-bloom="on"] .pe-flower-petals {
+  transform: rotate(var(--flower-turn, -18deg)) scale(1);
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] #preview-canvas > .invitation {
+  perspective: 1100px;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .scroll-scene {
+  backface-visibility: hidden;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .scroll-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 35%, transparent), transparent 38%, #fff8 94%, #fff0);
+  opacity: var(--paper-fold-opacity, 0);
+  pointer-events: none;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .pe-cover-scrapbook .pe-scrap-photo {
+  transform: translate(var(--scrap-photo-x, 8px), var(--scrap-photo-y, -6px)) rotate(var(--scrap-photo-rotation, 5deg));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .pe-cover-note {
+  transform: rotate(var(--scrap-note-rotation, -3deg));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .pe-heart-sticker {
+  transform: rotate(var(--scrap-sticker-rotation, 16deg)) scale(var(--scrap-heart-scale, .85));
+  transition: none !important;
+}
+
+main[data-scroll-story="on"][data-story-design="scrapbook"] .pe-tape {
+  transform: rotate(var(--scrap-tape-rotation, -6deg));
+}
+
+/* A manually placed sticker remains an independent, reversible click state. */
+main[data-scroll-story="on"][data-story-design="scrapbook"] .pe-added-sticker {
+  transition: none !important;
+}

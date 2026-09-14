@@ -1,4 +1,4 @@
-import { DOCUMENT_PATH, applyChange } from './core.mjs?v=20260914-mobile-preview';
+import { DOCUMENT_PATH, applyChange } from './core.mjs?v=20260914-scroll-editions';
 
 // Inject the SDK so the exact transaction code can also run against the Emulator.
 export function firestoreAdapter(sdk, db, { online = () => true, events = null, timeout = 15000, member = () => null } = {}) {
