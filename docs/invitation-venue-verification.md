@@ -25,7 +25,7 @@
 
 ## 운영 반영
 
-2026-09-14 23:13:31Z에 Firestore 규칙을 배포했고 23:13:43Z 재조회에서 로컬 규칙과 SHA-256 `55bf6d1ac994d702ddc40c2cb38c6a1d78abcf04aad24c1318c9d09b68bbd48f` 일치를 확인했다. Functions·요금제·운영 문서는 변경하지 않았다. 
+2026-09-14 23:13:31Z에 Firestore 규칙을 배포했고 23:13:43Z 재조회에서 로컬 규칙과 SHA-256 `55bf6d1ac994d702ddc40c2cb38c6a1d78abcf04aad24c1318c9d09b68bbd48f` 일치를 확인했다. Functions·요금제·운영 문서는 변경하지 않았다.
 
 `2d30d0b`을 master에 반영했다. [Pages 34908183546](https://github.com/CastleRain/sungso/actions/runs/34908183546)의 전체 검사·서비스 번들은 23:18:12Z, 배포는 23:18:27Z에 성공했다. 23:18:44Z 공개 청첩장 81/81 파일이 HTTP 200이고 검증한 분리 빌드와 SHA-256이 일치했다. 원격의 최신 공공자료 갱신을 보존했다.
 
