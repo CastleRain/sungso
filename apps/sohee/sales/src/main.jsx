@@ -15,6 +15,7 @@ import './polish.css';
 import './compact.css';
 import './menu-compact.css';
 import './prep-compact.css';
+import './ledger-source.css';
 import {MenuRuleContext} from './menu-editor.jsx';
 import {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';
 

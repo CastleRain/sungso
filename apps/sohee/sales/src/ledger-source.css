@@ -1,0 +1,19 @@
+.ledger-header-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ledger-header-actions .mantine-SegmentedControl-root{background:var(--ss-soft);border:1px solid var(--ss-border);border-radius:9px}
+.ledger-header-actions .mantine-SegmentedControl-label{font-size:11px;padding:5px 13px;color:var(--ss-muted)}
+.ledger-header-actions .mantine-SegmentedControl-label[data-active]{color:var(--ss-link);font-weight:650}
+.ledger-header-actions .mantine-SegmentedControl-indicator{background:var(--ss-surface);border-radius:6px;box-shadow:0 1px 3px var(--ss-shadow)}
+.ledger-source-description{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline}.ledger-source-description small{font-size:10px;color:var(--ss-muted);white-space:nowrap}
+.source-badge{display:inline-flex;align-items:center;border-radius:5px;padding:2px 6px;font-size:10px;white-space:nowrap;line-height:1.4;border:1px solid var(--ss-border)}
+.source-toss{background:var(--ss-soft);color:var(--ss-link);border-color:var(--ss-border-strong)}
+.source-payhere{background:var(--ss-surface);color:var(--ss-muted);border-style:dashed}
+.day-menu-link.sales-button{min-height:26px;height:26px;padding:0 5px;gap:2px;color:var(--ss-link);background:var(--ss-soft);border:0;font-size:11px}
+.detail-availability{font-size:10px;color:var(--ss-muted);white-space:nowrap}.detail-availability.partial{padding:3px 6px;border:1px dashed var(--ss-border-strong);border-radius:4px}
+.calendar-source-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px}.calendar-source-tools .calendar-mode{margin:0}.calendar-source-label{display:flex;gap:4px}
+.sales-day{position:relative}.calendar-detail-dot{position:absolute;top:2px;right:1px;width:5px;height:5px;border-radius:50%;border:1px solid var(--ss-muted);background:var(--ss-surface)}.calendar-detail-dot.available{background:var(--ss-link);border-color:var(--ss-link)}.calendar-detail-dot.partial{border-radius:1px;border-style:dashed}
+.calendar-availability{font-size:10px;color:var(--ss-muted);line-height:1.5;margin:6px 0 0}
+.archive-menu-link{display:inline-flex;align-items:center;margin-top:12px;padding:10px 13px;border:1px solid var(--ss-border-strong);border-radius:8px;color:var(--ss-link);background:var(--ss-soft);font-size:12px;font-weight:600;text-decoration:none}
+.archive-menu-link:focus-visible{outline:2px solid var(--ss-link);outline-offset:3px}
+@media(min-width:1150px){.page-overview .page-head>div:first-child{gap:14px}.page-overview .page-head p{font-size:11px;max-width:460px}.ledger-header-actions>.sales-button{min-height:32px;height:32px;font-size:11px}.page-overview .ledger-day-layout td:first-child{white-space:nowrap}.page-overview .ledger-day-layout th,.page-overview .ledger-day-layout td{padding-inline:8px}.page-overview .ledger-day-layout th .sales-button{font-size:10px;padding-inline:0}.page-overview .ledger-day-layout .table-scroll{max-height:345px}}
+@media(max-width:1149px){.ledger-header-actions{flex-wrap:wrap;justify-content:flex-end}.ledger-source-description{display:grid;gap:3px}.calendar-source-tools{flex-wrap:wrap}}
+@media(max-width:700px){.ledger-header-actions{width:100%;justify-content:space-between;gap:8px}.ledger-header-actions>.sales-button{font-size:11px;padding-inline:10px;min-height:36px;height:36px}.ledger-header-actions .mantine-SegmentedControl-label{padding:7px 12px}.ledger-source-description{font-size:12px}.ledger-source-description small{font-size:10px}.calendar-availability{font-size:10px}.day-menu-link.sales-button{height:32px;min-height:32px}.page-overview .ledger-day-layout .table-scroll table{min-width:550px}}

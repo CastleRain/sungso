@@ -104,6 +104,32 @@ try {
   }
   cleanup();
  }
+ // A calendar browsed to the archive must follow a new cross-month analysis range.
+ const sourceView=mount(React.createElement(SalesApp,{data:fixture(),route:'overview'}));
+ await user.click(screen.getByRole('textbox',{name:'월',exact:true}));await user.click(screen.getByRole('option',{name:'2026-01',exact:true}));
+ await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));
+ await user.click(screen.getByRole('button',{name:'선택 달력 다음 달',exact:true}));await user.click(screen.getByRole('button',{name:'선택 달력 다음 달',exact:true}));
+ await user.click(screen.getByRole('button',{name:'분석일 2026-03-30',exact:true}));await user.click(screen.getByRole('button',{name:'선택 달력 다음 달',exact:true}));
+ await user.click(screen.getByRole('button',{name:'분석일 2026-04-02',exact:true}));await user.click(screen.getByRole('button',{name:'선택 적용',exact:true}));
+ assert.match(sourceView.container.querySelector('.sales-calendar').textContent,/2026년 4월/);
+ await user.click(screen.getByRole('button',{name:'이전 매출 월',exact:true}));
+ assert.match(sourceView.container.querySelector('.sales-calendar').textContent,/2026년 3월/);
+ assert.match(sourceView.container.querySelector('.period-title').textContent,/2026-03-30 – 2026-04-02/);
+ assert.equal(screen.getByRole('button',{name:/^2026-03-29 ·/}).disabled,true);
+ await user.click(screen.getByRole('button',{name:/^2026-03-30 ·/}));
+ assert.ok(await screen.findByRole('dialog',{name:'2026-03-30 판매 상세'}));await user.click(screen.getByRole('button',{name:'판매 상세 닫기'}));
+ await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));
+ assert.ok(screen.getByRole('button',{name:'2026년 4월',exact:true}));
+ await user.click(screen.getByRole('button',{name:'날짜 선택 닫기',exact:true}));
+ await user.click(screen.getByRole('radio',{name:'페이히어',exact:true}));
+ assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-01');
+ assert.match(sourceView.container.querySelector('.calendar-availability').textContent,/페이히어 기록.*메뉴는 월별/);
+ assert.ok([...sourceView.container.querySelectorAll('.ledger-day-layout .data-table tbody tr')].every(row=>row.textContent.includes('페이히어')&&row.textContent.includes('월별만')));
+ assert.equal(sourceView.container.querySelector('.ledger-summary strong').textContent,'3,363,500원');
+ await user.click(screen.getByRole('button',{name:'2026-01-31 판매 상세',exact:true}));
+ assert.match(screen.getByRole('dialog').textContent,/저장된 페이히어 자료/);
+ await user.click(screen.getByRole('link',{name:'2026-01 월별 메뉴 판매 보기 →',exact:true}));
+ assert.ok(screen.getByRole('heading',{name:'메뉴 판매',exact:true}));assert.match(sourceView.container.querySelector('.period-title').textContent,/2026-01/);cleanup();
  // Explicit editing changes reporting quantities, keeps revenue, and restores originals.
  const rawMenus=fixture();let writes=0;
  function RulesHarness(){const [rules,setRules]=React.useState([]);return React.createElement(MenuRuleContext.Provider,{value:{rawData:rawMenus,rules,saveRule:async(draft,revision)=>{writes++;const saved={...draft,revision:revision+1};setRules([saved]);return saved;}}},React.createElement(SalesApp,{data:applyMenuRules(rawMenus,rules),route:'menus'}));}

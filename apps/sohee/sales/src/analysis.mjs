@@ -19,7 +19,7 @@ export function selectedDates(data, selection) {
     const [year, month] = selection.month.split('-').map(Number);
     dates = dateRange(selection.month + '-01', new Date(Date.UTC(year, month, 0)).toISOString().slice(0,10));
   }
-  return [...new Set(dates)].filter(date => date >= data.start && date <= data.end).sort();
+  return [...new Set(dates)].filter(date => date >= data.start && date <= data.end && (!data.scopeDates || data.scopeDates.has(date))).sort();
 }
 export function selectionLabel(selection) {
   if (selection.mode === 'month') return selection.month + ' · 월 전체';
@@ -72,7 +72,7 @@ export function groupMenus(rows, key = 'menu_group') {
 export function dayMenuDetails(data,date){
   const day=data.daily.find(row=>row.date===date);
   if(!day)return {day:null,rows:[],reason:'해당 날짜의 매출 기록이 없습니다.'};
-  if(day.source!=='toss')return {day,rows:[],reason:'페이히어는 메뉴별 날짜 기록이 없어 이 날의 판매 메뉴를 만들 수 없습니다. 월별 메뉴 판매를 확인해주세요.'};
+  if(day.source!=='toss')return {day,rows:[],reason:'저장된 페이히어 자료는 일별 매출과 월별 메뉴 집계입니다. 날짜별 메뉴 상세는 보관되어 있지 않으며, 월별 메뉴 판매에서 확인할 수 있습니다.'};
   if(day.partial_day)return {day,rows:[],reason:'부분일의 메뉴 상세는 검증된 저장 집계에서 제외되어 있습니다. 새 토스 원본으로 완결일을 갱신한 뒤 확인할 수 있습니다.'};
   const rows=groupMenus(data.menu_toss.filter(row=>row.date===date));
   return {day,rows:rows.sort((a,b)=>b.amount-a.amount),reason:rows.length?'':'이 날짜에 저장된 메뉴 상세가 없습니다. 상세가 없다는 이유만으로 판매 0개로 판단하지 않습니다.'};
