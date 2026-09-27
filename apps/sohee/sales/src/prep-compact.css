@@ -1,0 +1,85 @@
+/* Keep the active preparation decision on one desktop surface. Detail drawers
+   and keyboard-focusable table scroll areas retain every source limitation. */
+.page-prep .prep-brief{display:grid;grid-template-columns:1.1fr .85fr 1.2fr 1fr;align-items:center;gap:20px;border:1px solid var(--ss-border);border-radius:12px;background:var(--ss-surface);padding:13px 18px;margin-bottom:12px}
+.page-prep .prep-brief .prep-total{display:flex;align-items:center;gap:18px;padding:0;border:0;min-width:0;margin:0}
+.page-prep .prep-brief .prep-total>span{font-size:12px;max-width:90px;line-height:1.6;color:var(--ss-muted)}
+.page-prep .prep-brief .prep-total strong{font-size:32px;line-height:1.2;white-space:nowrap}
+.page-prep .prep-brief .prep-total strong small{font-size:13px;margin-left:4px}
+.page-prep .prep-brief-item{display:grid;gap:3px;border-left:1px solid var(--ss-border);padding-left:18px;min-width:0}
+.page-prep .prep-brief-item>span,.page-prep .prep-brief-item>small{font-size:11px;color:var(--ss-muted)}
+.page-prep .prep-brief-item>strong{font-size:21px;font-weight:650;line-height:1.25;white-space:nowrap;font-variant-numeric:tabular-nums}
+.page-prep .prep-brief-item strong small{font-size:11px;margin-left:5px;font-weight:450;color:var(--ss-muted)}
+.page-prep .prep-training>strong{font-size:17px}
+.page-prep .prep-brief-rule{display:grid;gap:4px;border-left:1px solid var(--ss-border);padding-left:18px;font-size:11px;color:var(--ss-muted)}
+.page-prep .prep-brief-rule strong{font-size:12px;color:var(--ss-link)}
+.page-prep .prep-controls{gap:16px;padding:0;margin:0 0 12px;min-height:55px}
+.page-prep .weekday-buttons{gap:5px;align-items:center}
+.page-prep .weekday-buttons .sales-button{width:43px;min-height:43px;height:43px;border-radius:8px;font-size:13px}
+.page-prep .weekday-buttons small{font-size:9px}
+.page-prep .adjust-controls{gap:20px;align-items:center}
+.page-prep .buffer-control{width:160px;padding-bottom:12px;font-size:11px}
+.page-prep .buffer-control>div:first-child{display:flex;justify-content:space-between;margin-bottom:6px}
+.page-prep .lead-control{display:flex;align-items:center;width:auto;gap:9px;font-size:11px}
+.page-prep .lead-control .quantity-field{width:115px}
+.page-prep .quantity-field .mantine-Input-input{min-height:34px;height:34px;font-size:12px}
+.page-prep .quantity-step{min-width:27px;width:27px;height:34px}
+.page-prep .prep-error-strip{display:flex;align-items:center;gap:10px;background:var(--ss-soft);border:1px solid var(--ss-border);border-radius:9px;padding:9px 12px;margin-bottom:9px;font-size:11px;line-height:1.6}
+.page-prep .prep-error-strip>svg{flex:none;color:var(--ss-link)}
+.page-prep .prep-error-strip>div{display:flex;align-items:center;flex-wrap:wrap;gap:3px 18px;flex:1;min-width:0}
+.page-prep .prep-error-strip strong{font-size:11px;font-weight:600}
+.page-prep .prep-error-strip>.sales-button{height:28px;min-height:28px;padding:0 9px;font-size:11px;border-color:transparent;background:var(--ss-surface)}
+.page-prep .prep-rules-note{margin:0 2px 8px;font-size:11px;color:var(--ss-muted);line-height:1.65}
+.page-prep .prep-view-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.page-prep .local-tabs{margin:0;gap:3px;padding:3px}
+.page-prep .local-tabs .sales-button{height:32px;min-height:32px;padding:5px 14px;font-size:11px}
+.page-prep .prep-reference-actions{display:flex;gap:7px}
+.page-prep .prep-reference-actions .sales-button{min-height:30px;height:30px;padding:0 10px;font-size:11px}
+.page-prep .prep-plan-grid{display:grid;grid-template-columns:minmax(0,3.2fr) minmax(240px,1fr);gap:14px;align-items:stretch}
+.page-prep .prep-plan-grid>.panel,.page-prep .prep-week-panel,.page-prep .prep-accuracy-panel,.page-prep .prep-empty-panel{padding:16px;margin-bottom:0;min-width:0}
+.page-prep .prep-plan-grid .section-head,.page-prep .prep-week-panel .section-head,.page-prep .prep-accuracy-panel .section-head{margin-bottom:12px;gap:12px;align-items:center}
+.page-prep .prep-plan-grid .section-head h2,.page-prep .prep-week-panel .section-head h2,.page-prep .prep-accuracy-panel .section-head h2{font-size:16px}
+.page-prep .prep-plan-grid .section-head p,.page-prep .prep-week-panel .section-head p,.page-prep .prep-accuracy-panel .section-head p{font-size:11px;margin-top:4px}
+.page-prep .prep-plan-panel .section-head>.sales-button{height:29px;min-height:29px;font-size:10px;padding:0 8px;flex-shrink:0}
+.page-prep .prep-plan-panel .table-hint,.page-prep .prep-week-panel .table-hint{display:block;font-size:10px;color:var(--ss-muted);margin:0 0 5px;line-height:1.4}
+.page-prep .prep-table,.page-prep .prep-week-scroll{max-height:300px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--ss-border-strong) var(--ss-bg)}
+.page-prep .prep-table table{min-width:875px}
+.page-prep .prep-table th,.page-prep .prep-table td{padding:9px 7px;font-size:12px}
+.page-prep .prep-table th{font-size:10px;position:sticky;top:0;z-index:2;background:var(--ss-bg)}
+.page-prep .prep-table th small{font-size:9px;margin-top:3px;white-space:nowrap}
+.page-prep .prep-table td small{font-size:10px;margin-top:2px;line-height:1.4}
+.page-prep .prep-table td:first-child strong{font-size:11px;font-weight:600;line-height:1.45;display:block;overflow-wrap:anywhere}
+.page-prep .prep-table th:first-child,.page-prep .prep-table td:first-child{position:sticky;left:0;min-width:130px;max-width:160px;white-space:normal;background:var(--ss-surface);border-right:1px solid var(--ss-border);z-index:1}
+.page-prep .prep-table th:first-child{background:var(--ss-bg);z-index:3}
+.page-prep .prep-table .quantity-field{width:110px}
+.page-prep .prep-table .has-qty{font-size:14px}
+.page-prep .prep-table tfoot td{position:sticky;bottom:0;background:var(--ss-bg);z-index:2;font-size:11px;white-space:nowrap}
+.page-prep .prep-table tfoot td:first-child{left:auto;max-width:none;background:var(--ss-bg)}
+.page-prep .prep-table-caption{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:8px;min-height:26px;font-size:10px;color:var(--ss-muted)}
+.page-prep .prep-table-caption .sales-button{height:25px;min-height:25px;padding:0 8px;font-size:10px}
+.page-prep .prep-flow-panel{display:flex;flex-direction:column}
+.page-prep .prep-flow-panel .prep-flow-chart{height:255px;min-height:230px;flex:1}
+.page-prep .prep-flow-panel>.footnote{font-size:10px;line-height:1.6;margin-top:8px}
+.page-prep .prep-week-scroll .week-heatmap{min-width:670px}
+.page-prep .prep-week-scroll th,.page-prep .prep-week-scroll td{padding:10px;font-size:15px}
+.page-prep .prep-week-scroll th{position:sticky;top:0;background:var(--ss-surface);z-index:1;font-size:11px}
+.page-prep .prep-week-scroll td:first-child{font-size:12px}
+.page-prep .prep-week-scroll small{font-size:10px}
+.page-prep .prep-validation-summary{display:flex;align-items:center;gap:14px;font-size:11px;white-space:nowrap;color:var(--ss-muted)}
+.page-prep .prep-validation-summary b{font-size:16px;color:var(--ss-text);margin-left:3px}
+.page-prep .prep-accuracy-panel .table-scroll{max-height:275px;overflow:auto}
+.page-prep .prep-week-panel>.footnote,.page-prep .prep-accuracy-panel>.footnote{font-size:11px;line-height:1.6;margin:9px 0 0}
+.page-prep .prep-session-note{font-size:10px;line-height:1.65;color:var(--ss-muted);margin:9px 2px 0}
+.page-prep .prep-reference-drawer .rare-grid{grid-template-columns:1fr;gap:12px}
+.page-prep .prep-reference-drawer .rare-grid small{display:block;font-size:11px;line-height:1.6;color:var(--ss-muted);margin-top:4px}
+.page-prep .prep-reference-drawer .prep-drawer-done{margin-top:24px}
+.page-prep .prep-reference-drawer .panel{padding:18px;margin-bottom:18px}
+.page-prep .prep-reference-drawer .prep-notes{margin:0;padding:0;border:0;gap:16px}
+.page-prep .prep-reference-drawer .range-list>div{padding:11px 0;gap:10px}
+.page-prep .prep-reference-drawer .range-list strong{font-size:17px}
+.page-prep .prep-reference-drawer .date-filter{grid-template-columns:minmax(0,1fr)}
+.page-prep .prep-reference-drawer .period-actions{display:flex;flex-wrap:wrap;justify-content:flex-start}
+.page-prep .prep-reference-drawer .period-footer{display:flex;flex-wrap:wrap;justify-content:flex-start}
+@media(min-width:1200px) and (min-height:800px){.page-prep .prep-table{max-height:clamp(190px,calc(100dvh - 665px),400px)}.page-prep .prep-week-scroll{max-height:clamp(190px,calc(100dvh - 640px),400px)}}
+@media(max-width:1199px){.page-prep .prep-plan-grid{grid-template-columns:minmax(0,1fr)}.page-prep .prep-plan-grid .prep-flow-panel{display:block}.page-prep .prep-flow-panel .prep-flow-chart{height:235px;min-height:0}.page-prep .prep-brief{gap:12px;padding:13px}.page-prep .prep-brief .prep-total{gap:9px}.page-prep .prep-brief-item,.page-prep .prep-brief-rule{padding-left:12px}.page-prep .prep-brief-item>small{font-size:10px}.page-prep .prep-controls{gap:12px}.page-prep .prep-view-row{flex-wrap:wrap}}
+@media(max-width:700px){.page-prep .prep-brief{grid-template-columns:1fr 1fr;gap:14px;padding:14px}.page-prep .prep-brief .prep-total{gap:12px;display:flex}.page-prep .prep-brief .prep-total>span{font-size:11px;max-width:73px}.page-prep .prep-brief .prep-total strong{font-size:30px}.page-prep .prep-brief-item{gap:3px}.page-prep .prep-training{padding-left:0;border-left:0}.page-prep .prep-training>strong{font-size:15px}.page-prep .prep-brief-rule{font-size:10px}.page-prep .prep-brief-rule strong{font-size:11px}.page-prep .prep-controls{gap:14px;margin-bottom:16px;flex-wrap:wrap}.page-prep .weekday-buttons{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.page-prep .weekday-buttons .sales-button{width:100%;height:43px;min-height:43px}.page-prep .adjust-controls{width:100%;display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:center}.page-prep .buffer-control{width:100%;padding-bottom:12px;max-width:150px}.page-prep .lead-control{display:block;font-size:10px}.page-prep .lead-control>span{display:block;margin-bottom:4px}.page-prep .lead-control .quantity-field{width:106px}.page-prep .adjust-controls>.sales-button{grid-column:auto;font-size:10px;padding:0 7px;width:auto;justify-self:end}.page-prep .adjust-controls>.sales-button svg{width:12px}.page-prep .prep-error-strip{align-items:flex-start;padding:10px;gap:8px;font-size:10px}.page-prep .prep-error-strip>svg{margin-top:2px}.page-prep .prep-error-strip>div{display:grid;gap:4px}.page-prep .prep-error-strip strong{font-size:10px}.page-prep .prep-error-strip>.sales-button{font-size:10px;padding:0 7px}.page-prep .prep-view-row{gap:10px;margin-bottom:13px}.page-prep .local-tabs{display:grid;width:100%;grid-template-columns:1.25fr 1fr 1fr}.page-prep .local-tabs .sales-button{font-size:10px;padding:0 5px;height:35px;min-height:35px}.page-prep .prep-reference-actions{width:100%;justify-content:flex-end;gap:7px}.page-prep .prep-reference-actions .sales-button{font-size:10px;height:28px;min-height:28px}.page-prep .prep-plan-grid{gap:14px}.page-prep .prep-plan-grid>.panel,.page-prep .prep-week-panel,.page-prep .prep-accuracy-panel{padding:15px 12px}.page-prep .prep-plan-panel .section-head{display:block}.page-prep .prep-plan-panel .section-head>.sales-button{margin-top:9px}.page-prep .prep-table{max-height:335px}.page-prep .prep-table th:first-child,.page-prep .prep-table td:first-child{min-width:110px;max-width:125px}.page-prep .prep-table-caption{flex-wrap:wrap;font-size:10px}.page-prep .prep-flow-panel .prep-flow-chart{height:245px}.page-prep .prep-week-scroll{max-height:360px}.page-prep .prep-validation-summary{gap:16px}.page-prep .prep-session-note{font-size:10px;margin-top:12px}.page-prep .prep-reference-drawer .prep-notes,.page-prep .prep-reference-drawer .method-list{grid-template-columns:1fr}.page-prep .prep-reference-drawer .period-actions{display:grid;grid-template-columns:1fr 1fr}.page-prep .prep-reference-drawer .period-footer{display:grid;grid-template-columns:1fr auto}}
+@media print{.page-prep .prep-reference-actions,.page-prep .prep-view-row,.page-prep .prep-table-caption .sales-button,.page-prep .prep-error-strip>.sales-button,.page-prep .prep-plan-panel .section-head>.sales-button,.page-prep .prep-reference-drawer{display:none!important}.page-prep .prep-brief{padding:10px;margin-bottom:12px}.page-prep .prep-plan-grid{display:block}.page-prep .prep-plan-grid>.panel{margin-bottom:12px}.page-prep .prep-table,.page-prep .prep-week-scroll,.page-prep .prep-accuracy-panel .table-scroll{max-height:none;overflow:visible}.page-prep .prep-table table{min-width:0}.page-prep .prep-table th,.page-prep .prep-table td,.page-prep .prep-table th:first-child,.page-prep .prep-table td:first-child,.page-prep .prep-table tfoot td{position:static;font-size:9px;padding:7px 3px}.page-prep .prep-table th:first-child,.page-prep .prep-table td:first-child{min-width:75px}.page-prep .prep-table .quantity-field{width:40px}.page-prep .quantity-step{display:none}.page-prep .prep-flow-panel .prep-flow-chart{height:190px;min-height:0}}

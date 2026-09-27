@@ -1,0 +1,71 @@
+/* The menu overview keeps comparison visible; deeper history opens on demand. */
+.page-menus .menu-compact-board{min-width:0;min-height:0;display:flex;flex-direction:column;gap:10px}
+.page-menus .menu-compact-board .menu-context{margin:0;min-height:32px;gap:10px}
+.page-menus .menu-context-actions{display:flex;align-items:center;gap:14px;min-width:0}
+.page-menus .menu-detail-trigger.sales-button{height:30px;min-height:30px;padding-inline:10px;font-size:11px}
+.page-menus .menu-compact-board .menu-workbench{margin:0;min-height:0}
+.page-menus .menu-ranking-panel>.ranking-help{display:none}
+.page-menus .menu-ranking-caption{margin:8px 0 0;padding-top:8px;border-top:1px solid var(--ss-border);font-size:11px;color:var(--ss-muted);line-height:1.5}
+.page-menus .menu-compact-board .menu-source-note .note{margin:0;padding:0 2px;font-size:11px;line-height:1.55}
+.page-menus .menu-compact-board .menu-source-note .note>svg{margin-top:1px}
+.menu-analysis-drawer .menu-analysis-choice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.menu-analysis-drawer .menu-analysis-choice>.select-label{flex:1;max-width:600px}
+.menu-analysis-drawer .menu-analysis-choice .sales-select{flex:1;width:auto;max-width:100%;min-width:0}
+.menu-analysis-drawer .menu-analysis-choice p{font-size:11px;color:var(--ss-muted);white-space:nowrap}
+.menu-analysis-summary{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:20px;padding:18px 20px;border-radius:12px;background:var(--ss-soft);margin-bottom:18px}
+.menu-analysis-summary>div{min-width:0}.menu-analysis-summary span{display:block;font-size:11px;color:var(--ss-muted);margin-bottom:5px}.menu-analysis-summary strong{display:block;font-size:23px;font-weight:650;line-height:1.4;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.menu-analysis-summary strong small{font-size:12px;margin-left:4px}
+.menu-analysis-drawer .panel{padding:20px;margin-bottom:18px}.menu-analysis-drawer .section-head{margin-bottom:16px}.menu-analysis-drawer .section-head h2{overflow-wrap:anywhere;font-size:18px}.menu-analysis-drawer .section-head p{font-size:11px}.menu-analysis-drawer .menu-analysis-daily{gap:18px}.menu-analysis-drawer .menu-analysis-daily>.panel{min-width:0;margin:0}.menu-analysis-drawer .menu-analysis-daily .table-scroll table{min-width:280px}.menu-analysis-drawer .menu-analysis-daily td:last-child{white-space:nowrap}
+
+@media(min-width:1100px) and (min-height:720px){
+  .page-menus .menu-compact-board{flex:1}
+  .page-menus .menu-compact-board .menu-workbench{flex:1;grid-template-columns:minmax(0,1.38fr) minmax(360px,1fr);align-items:stretch;gap:14px}
+  .page-menus .menu-compact-board .menu-workbench>.panel{display:flex;flex-direction:column;min-height:0;padding:16px;margin:0}
+  .page-menus .menu-workbench .section-head{flex-shrink:0;gap:10px;margin-bottom:10px;min-height:0}
+  .page-menus .menu-workbench .section-head h2{font-size:17px}
+  .page-menus .menu-workbench .section-head p{font-size:11px;margin-top:3px}
+  .page-menus .menu-ranking-panel .section-head{flex-wrap:nowrap}
+  .page-menus .menu-ranking-panel .eyebrow{display:none}
+  .page-menus .menu-ranking-panel .segmented .sales-button{height:29px;min-height:29px;padding:5px 10px;font-size:11px}
+  .page-menus .menu-ledger-panel>.data-table{display:flex;flex-direction:column;min-height:0;flex:1}
+  .page-menus .menu-workbench .table-tools{margin-bottom:8px;flex-shrink:0}
+  .page-menus .menu-workbench .table-tools .sales-button{height:30px;min-height:30px}
+  .page-menus .menu-workbench .table-tools .mantine-Input-input{height:32px;min-height:32px;font-size:12px}
+  .page-menus .menu-workbench .table-hint{display:none}
+  .page-menus .menu-workbench .table-scroll{min-height:0;overflow:auto;overscroll-behavior:contain}
+  .page-menus .menu-workbench .table-scroll th{position:sticky;top:0;z-index:1}
+  .page-menus .menu-workbench .table-scroll th,.page-menus .menu-workbench .table-scroll td{padding:8px}
+  .page-menus .menu-workbench .table-scroll td{font-size:12px}
+  .page-menus .menu-workbench .menu-link{font-size:12px;min-height:26px;height:auto;line-height:1.4}
+  .page-menus .menu-workbench td:first-child{max-width:210px}
+  .page-menus .menu-workbench .pagination{margin-top:auto;padding-top:10px;flex-shrink:0}
+  .page-menus .menu-rankings{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;grid-template-columns:1fr;gap:1px;align-content:start;scrollbar-width:thin;scrollbar-color:var(--ss-border-strong) transparent}
+  .page-menus .ranking-item{padding:4px 7px;gap:9px}
+  .page-menus .ranking-number{font-size:10px;min-width:15px;line-height:17px}
+  .page-menus .ranking-label{margin-bottom:3px;gap:8px}
+  .page-menus .ranking-label strong,.page-menus .ranking-label b{font-size:11px;line-height:1.35}
+  .page-menus .ranking-item .mantine-Progress-root{height:3px}
+  .page-menus .ranking-caption{font-size:10px;line-height:1.3;margin-top:2px;gap:8px}
+  .page-menus .menu-ranking-caption{flex-shrink:0;font-size:10px;margin-top:6px;padding-top:6px}
+}
+
+@media(max-width:700px){
+  .page-menus .menu-context-actions{width:100%;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .page-menus .menu-compact-board{gap:14px}
+  .page-menus .menu-compact-board .menu-source-note .note{font-size:10px;line-height:1.7;margin-bottom:8px}
+  .menu-analysis-drawer .menu-analysis-choice{display:block}
+  .menu-analysis-drawer .menu-analysis-choice>.select-label{display:block;max-width:none;white-space:normal}
+  .menu-analysis-drawer .menu-analysis-choice .sales-select{margin-top:6px;width:100%}
+  .menu-analysis-drawer .menu-analysis-choice p{margin-top:7px;font-size:10px}
+  .menu-analysis-summary{gap:10px;padding:14px 12px;grid-template-columns:1.25fr 1fr 1fr}
+  .menu-analysis-summary span{font-size:10px}.menu-analysis-summary strong{font-size:18px}.menu-analysis-summary strong small{font-size:10px;display:block;margin:0}
+  .menu-analysis-drawer .panel{padding:16px 12px}
+  .menu-analysis-drawer .section-head h2{font-size:16px}
+  .menu-analysis-drawer .menu-analysis-daily{grid-template-columns:1fr}
+  .menu-analysis-drawer .menu-analysis-daily .table-scroll th,.menu-analysis-drawer .menu-analysis-daily .table-scroll td{padding:10px 6px}
+}
+
+@media print{
+  .page-menus .menu-compact-board,.page-menus .menu-compact-board .menu-workbench,.page-menus .menu-compact-board .menu-workbench>.panel,.page-menus .menu-ledger-panel>.data-table{display:block;height:auto;max-height:none;overflow:visible}
+  .page-menus .menu-workbench .table-scroll,.page-menus .menu-rankings{height:auto;max-height:none;overflow:visible}
+  .page-menus .menu-context-actions{display:none}
+}

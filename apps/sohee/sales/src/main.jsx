@@ -12,6 +12,9 @@ import './dashboard.css';
 import './owner.css';
 import './menu-edit.css';
 import './polish.css';
+import './compact.css';
+import './menu-compact.css';
+import './prep-compact.css';
 import {MenuRuleContext} from './menu-editor.jsx';
 import {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';
 

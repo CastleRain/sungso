@@ -63,6 +63,15 @@ try {
    assert.equal(screen.queryByRole('heading',{name:'매출 달력'}),null);
    const expected=fixture().daily.filter(row=>row.month==='2026-04').reduce((sum,row)=>sum+row.amount,0);
    assert.equal(r.container.querySelector('.owner-sales strong').textContent,expected.toLocaleString('ko-KR')+'원');
+   const completeDays=fixture().daily.filter(row=>row.month==='2026-04'&&!row.partial_day&&row.record_day);
+   const average=completeDays.reduce((sum,row)=>sum+row.amount,0)/completeDays.length;
+   assert.equal(r.container.querySelector('.average-metric>strong').textContent,average.toLocaleString('ko-KR',{maximumFractionDigits:0})+'원');
+   assert.equal(r.container.querySelector('.record-metric>strong').textContent,completeDays.length+'일');
+   await user.click(screen.getByRole('button',{name:'매출 기록일 상세 보기',exact:true}));
+   assert.ok(await screen.findByRole('dialog',{name:'선택 기간의 기록일',exact:true}));
+   assert.match(screen.getByRole('dialog',{name:'선택 기간의 기록일'}).textContent,/근무·출퇴근 기록은 없습니다/);
+   assert.match(screen.getByRole('dialog',{name:'선택 기간의 기록일'}).textContent,/토스 주문 시간대/);
+   await user.click(screen.getByRole('button',{name:'기록일 상세 닫기',exact:true}));
    await user.click(screen.getByRole('button',{name:'누적',exact:true}));assert.equal(screen.getByRole('button',{name:'누적',exact:true}).getAttribute('aria-pressed'),'true');
    await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));assert.ok(screen.getByText('이 화면의 자료 범위'));assert.equal(screen.getByRole('button',{name:'저장된 분석 다시 불러오기'}).disabled,true);
    await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));
@@ -74,6 +83,7 @@ try {
    const input=screen.getByRole('textbox',{name:'예시 마들렌 4구 당일 준비 수량',exact:true});await user.clear(input);await user.type(input,'0');await user.tab();assert.equal(input.value,'0');assert.match(r.container.querySelector('.prep-total').textContent,/3개/);
    fireEvent.keyDown(screen.getByRole('slider',{name:'준비 여유분'}),{key:'ArrowRight'});assert.equal(screen.getByRole('slider',{name:'준비 여유분'}).getAttribute('aria-valuenow'),'5');
    await user.click(screen.getByRole('button',{name:'신규·소량·최근 미판매 메뉴 1종'}));await user.click(await screen.findByRole('checkbox',{name:/예시 신메뉴/}));assert.equal(r.container.querySelectorAll('.prep-table tbody tr').length,3);
+   await user.click(screen.getByRole('button',{name:'준비 참고 닫기',exact:true}));
    await user.click(screen.getByRole('button',{name:'요일 비교',exact:true}));assert.ok(screen.getByRole('heading',{name:'같은 메뉴, 다른 요일'}));
    await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));assert.match(r.container.textContent,/정확하지 않았습니다/);
    await user.click(screen.getByRole('button',{name:'일 요일',exact:true}));await user.click(screen.getByRole('button',{name:'시간대별 준비표',exact:true}));assert.ok(screen.getByRole('heading',{name:'이 요일은 계산할 기록이 부족합니다'}));
@@ -83,6 +93,7 @@ try {
    assert.equal(r.container.querySelector('.menu-rankings .ranking-label strong').textContent,'예시 쿠키');
    await user.click(screen.getByRole('button',{name:'예시 신메뉴 상세 보기',exact:true}));
    assert.ok(screen.getByRole('heading',{name:'예시 신메뉴 · 월별 변화',exact:true}));
+   await user.click(screen.getByRole('button',{name:'메뉴 상세 닫기',exact:true}));
    await user.click(screen.getByRole('button',{name:'매출순',exact:true}));
    const shareSort=screen.getByRole('button',{name:/메뉴 금액 비중/});
    await user.click(shareSort);assert.equal(shareSort.closest('th').getAttribute('aria-sort'),'descending');
