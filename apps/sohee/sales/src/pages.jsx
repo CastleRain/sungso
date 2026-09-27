@@ -41,7 +41,7 @@ function DataPage(){
  <Section title="원본 대조 기록"><div className="validation-grid">{D.files.map(f=><div key={f.file}><Check size={20}/><div><strong>{f.file}</strong><p>{f.start}–{f.end}</p><small>SHA-256 {f.sha256.slice(0,16)}…</small></div></div>)}</div><div className="download-row"><Button className="outline" onClick={()=>download('통합_일별매출.csv',csv(D.daily))}><Download size={16}/> 일별 매출 CSV</Button><Button className="outline" onClick={()=>download('통합_메뉴월별.csv',csv(D.menu_monthly))}>메뉴 월별 CSV</Button><Button className="outline" onClick={()=>download('예측검증.csv',csv(D.forecast.metrics))}>예측 검증 CSV</Button></div><Note>다운로드 파일에는 비공개 매출이 포함됩니다. 파일의 공유 범위를 직접 확인하세요.</Note></Section>
  <Section title="해석의 한계"><ul className="plain-list"><li>기록 없는 날은 휴무로 단정하지 않습니다.</li><li>원가·폐기·품절 기록이 없어 이익이나 놓친 수요를 계산하지 않습니다.</li><li>기여 시점·운영 변경일은 미확인입니다.</li><li>예측 오차와 표본 부족을 준비 화면에서 함께 표시합니다.</li></ul></Section></>
 }
-const pages=[{id:'changes',label:'대시보드',component:Changes},{id:'overview',label:'매출 내역',component:SalesLedger},{id:'menus',label:'메뉴 판매',component:MenuSales},{id:'prep',label:'디저트 준비',component:DessertPrep},{id:'data',label:'자료 기준',component:DataPage,hidden:true}];
+const pages=[{id:'changes',label:'대시보드',component:Changes},{id:'overview',label:'매출 내역',component:SalesLedger},{id:'menus',label:'메뉴 전략',component:MenuSales},{id:'prep',label:'디저트 준비',component:DessertPrep},{id:'data',label:'자료 기준',component:DataPage,hidden:true}];
 export function SalesApp({data,route:initialRoute='changes',status='Firebase 회원 전용'}){
  const [navOpen,setNavOpen]=useState(false),[route,setRoute]=useState(initialRoute);
  const [selection,setSelection]=useState(()=>data?initialSelection(data):null);

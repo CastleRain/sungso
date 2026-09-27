@@ -1,14 +1,22 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import {Progress,UnstyledButton} from '@mantine/core';
 import {ResponsiveContainer,ComposedChart,BarChart,Bar,Line,XAxis,YAxis,CartesianGrid,Tooltip,Cell,LabelList} from 'recharts';
 import {num,money} from './report-ui.jsx';
+import {salesDateLabel} from './owner-insights.mjs';
+import {WEEKDAYS} from './planning.mjs';
 
 export const chartAxis={axisLine:false,tickLine:false,tick:{fontSize:11,fill:'var(--ss-muted)'},minTickGap:24};
 export const amountAxis={...chartAxis,width:48,tickFormatter:value=>Math.abs(value)>=10000?num(value/10000,1)+'만':num(value)};
-export function ChartTip({active,payload,label,formatter}){
+export function ChartTip({active,payload,label,formatter,onActiveDate}){
+  const activeDate=payload?.find(item=>item.value!=null)?.payload?.date;
+  // Recharts keyboard navigation updates Tooltip context without sending the
+  // chart's pointer event. Notify after commit and depend on the date scalar,
+  // not the payload array recreated by every parent render.
+  useEffect(()=>{if(active&&activeDate)onActiveDate?.(activeDate);},[active,activeDate,onActiveDate]);
   if(!active||!payload?.length)return null;
   const entries=payload.filter(item=>item.value!=null);
-  return <div className="sales-chart-tip"><strong>{entries[0]?.payload?.date||label}</strong>{entries.map((item,index)=>{const result=formatter?formatter(item.value,item.name,item):[num(item.value),item.name];return <div key={item.dataKey||index}><span><i style={{background:item.color||'var(--ss-link)'}}/>{Array.isArray(result)?result[1]:item.name}</span><b>{Array.isArray(result)?result[0]:result}</b></div>;})}</div>;
+  const row=entries[0]?.payload;
+  return <div className="sales-chart-tip" role="status"><strong>{row?.date?salesDateLabel(row.date):label}</strong>{entries.map((item,index)=>{const result=formatter?formatter(item.value,item.name,item):[num(item.value),item.name];return <div key={item.dataKey||index}><span><i style={{background:row?.semanticColor||item.color||'var(--ss-link)'}}/>{Array.isArray(result)?result[1]:item.name}</span><b>{Array.isArray(result)?result[0]:result}</b></div>;})}{row?.date&&<small>{row.source==='toss'?'토스':row.source==='payhere'?'페이히어':''}{row.partial_day?' · 부분일':row.source?' · 완결일':''}{row.bulkCount?` · 큰 주문 ${row.bulkCount}건 포함`:''}</small>}</div>;
 }
 export function ChartLegend({items}){return <div className="sales-chart-legend">{items.map(item=><span key={item.label}><i className={item.line?'line':''} style={{background:item.color||'var(--ss-link)'}}/>{item.label}</span>)}</div>}
 export function RankedMenuChart({rows,metric,selected,onSelect}){
@@ -19,6 +27,10 @@ export function RankedMenuChart({rows,metric,selected,onSelect}){
 }
 export function MenuTrend({rows,unit}){
   return <><ChartLegend items={[{label:'매출 · 왼쪽 축',color:'var(--ss-accent)'},{label:`수량 (${unit}) · 오른쪽 축`,color:'var(--ss-link)',line:true}]}/><div className="chart menu-trend-chart"><ResponsiveContainer><ComposedChart data={rows} margin={{top:20,right:0,left:0,bottom:0}} accessibilityLayer><CartesianGrid vertical={false} stroke="var(--ss-border)" strokeDasharray="3 5"/><XAxis {...chartAxis} dataKey="label"/><YAxis {...amountAxis} yAxisId="amount"/><YAxis {...chartAxis} yAxisId="quantity" orientation="right" width={40}/><Tooltip cursor={{fill:'var(--ss-soft)'}} content={<ChartTip formatter={(value,name)=>[name==='매출'?money(value):num(value)+unit,name]}/>}/><Bar yAxisId="amount" name="매출" dataKey="amount" fill="var(--ss-accent)" radius={[5,5,0,0]} maxBarSize={46} isAnimationActive={false}/><Line yAxisId="quantity" name="판매 수량" dataKey="quantity" type="linear" stroke="var(--ss-link)" strokeWidth={2.5} dot={{r:4,fill:'var(--ss-surface)',strokeWidth:2}} activeDot={{r:6}} isAnimationActive={false}/></ComposedChart></ResponsiveContainer></div></>;
+}
+export function MenuWeekdayChart({rows,unit}){
+  const maximum=Math.max(0,...rows.map(row=>row.average||0));
+  return <><div className="chart strategy-weekday-chart"><ResponsiveContainer><BarChart data={rows.map(row=>({...row,label:WEEKDAYS[row.weekday]}))} margin={{top:20,right:8,left:8,bottom:0}} accessibilityLayer><XAxis {...chartAxis} dataKey="label" interval={0}/><YAxis hide domain={[0,'auto']}/><Tooltip cursor={{fill:'var(--ss-soft)'}} content={<ChartTip formatter={(value,name,item)=>[num(value,1)+unit,`${item.payload.days}개 기록일 평균`]}/>}/><Bar dataKey="average" radius={[5,5,0,0]} maxBarSize={27} isAnimationActive={false}>{rows.map(row=><Cell key={row.weekday} fill={row.weekday>=5?'var(--sales-positive)':'var(--ss-link)'} fillOpacity={row.average===maximum?1:.65}/>)}<LabelList dataKey="average" position="top" formatter={value=>value==null?'—':num(value,1)} fill="var(--ss-text)" fontSize={11}/></Bar></BarChart></ResponsiveContainer></div><div className="strategy-weekday-samples">{rows.map(row=><span key={row.weekday}>{row.days}일 표본</span>)}</div><div className="sales-chart-legend"><span><i/>평일</span><span><i style={{background:'var(--sales-positive)'}}/>주말</span></div></>;
 }
 export function HourBars({rows,unit='개'}){
   const max=Math.max(0,...rows.map(r=>r.quantity));

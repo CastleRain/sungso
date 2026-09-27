@@ -39,7 +39,7 @@ try {
    await user.click(screen.getByRole('button',{name:'2026-04-16 · 132,000원 · 부분일',exact:true}));assert.match(r.container.querySelector('.calendar-reading').textContent,/부분일/);
    assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'132,000원');
    await user.click(screen.getByRole('button',{name:/^2026-04-15 ·/}));assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
-   await user.click(screen.getByRole('link',{name:'메뉴 판매',exact:true}));assert.ok(screen.getByRole('heading',{name:'메뉴 판매',exact:true}));
+   await user.click(screen.getByRole('link',{name:'메뉴 전략',exact:true}));assert.ok(screen.getByRole('heading',{name:'메뉴 전략',exact:true}));
    assert.equal(window.location.pathname,'/sungso/sohee/sales/menus/');assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);assert.match(r.container.textContent,/부분일 1일은 메뉴 집계에서 제외/);
    window.history.replaceState(null,'','/sungso/sohee/sales/overview/');fireEvent(window,new window.PopStateEvent('popstate'));assert.ok(screen.getByRole('heading',{name:'매출 내역'}));
    assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
@@ -58,7 +58,7 @@ try {
   if(route==='changes'){
    assert.ok(screen.getByRole('heading',{name:'대시보드',exact:true}));
    const navigation=screen.getByRole('navigation',{name:'매출 분석'});
-   assert.deepEqual([...navigation.querySelectorAll('a')].map(a=>a.textContent),['대시보드','매출 내역','메뉴 판매','디저트 준비']);
+   assert.deepEqual([...navigation.querySelectorAll('a')].map(a=>a.textContent),['대시보드','매출 내역','메뉴 전략','디저트 준비']);
    assert.equal(screen.queryByRole('link',{name:'데이터 관리'}),null);
    assert.equal(screen.queryByRole('heading',{name:'매출 달력'}),null);
    const expected=fixture().daily.filter(row=>row.month==='2026-04').reduce((sum,row)=>sum+row.amount,0);
@@ -80,18 +80,50 @@ try {
   if(route==='prep'){
    assert.equal(screen.queryByRole('button',{name:'날짜 선택',exact:true}),null);
    await user.click(screen.getByRole('button',{name:'월 요일',exact:true}));
-   const input=screen.getByRole('textbox',{name:'예시 마들렌 4구 당일 준비 수량',exact:true});await user.clear(input);await user.type(input,'0');await user.tab();assert.equal(input.value,'0');assert.match(r.container.querySelector('.prep-total').textContent,/3개/);
-   fireEvent.keyDown(screen.getByRole('slider',{name:'준비 여유분'}),{key:'ArrowRight'});assert.equal(screen.getByRole('slider',{name:'준비 여유분'}).getAttribute('aria-valuenow'),'5');
-   await user.click(screen.getByRole('button',{name:'신규·소량·최근 미판매 메뉴 1종'}));await user.click(await screen.findByRole('checkbox',{name:/예시 신메뉴/}));assert.equal(r.container.querySelectorAll('.prep-table tbody tr').length,3);
+   const input=screen.getByRole('textbox',{name:'예시 마들렌 4구 팩 (4개) 당일 준비 수량',exact:true});
+   await user.clear(input);await user.type(input,'0');await user.tab();assert.equal(input.value,'0');
+   const base=r.container.querySelector('.prep-total strong').textContent;
+   await user.click(screen.getByRole('button',{name:'예시 마들렌 4구 팩 (4개) 확정 주문 입력',exact:true}));
+   const reservation=screen.getByRole('textbox',{name:'확정 주문 추가 수량',exact:true});await user.clear(reservation);await user.type(reservation,'2');await user.tab();
+   assert.notEqual(r.container.querySelector('.prep-total strong').textContent,base);
+   assert.match(screen.getByRole('dialog').textContent,/시간대에 임의로 나누지/);
    await user.click(screen.getByRole('button',{name:'준비 참고 닫기',exact:true}));
+   const adjustedTotal=r.container.querySelector('.prep-total strong').textContent;
+   await user.click(screen.getByRole('button',{name:'월 요일',exact:true}));
+   assert.equal(input.value,'0','reselecting the current day must keep a deliberate zero');
+   assert.equal(r.container.querySelector('.prep-total strong').textContent,adjustedTotal,'reselecting the current day must keep confirmed reservations');
+   async function exportedPrepRows(){
+    let captured;const createUrl=URL.createObjectURL,clickAnchor=HTMLAnchorElement.prototype.click;
+    URL.createObjectURL=blob=>{captured=blob;return 'blob:synthetic-prep-export'};HTMLAnchorElement.prototype.click=()=>{};
+    try{
+     await user.click(screen.getByRole('button',{name:'준비표 저장',exact:true}));
+     const lines=(await captured.text()).replace(/^\ufeff/,'').split('\r\n').map(line=>[...line.matchAll(/"((?:[^"]|"")*)"(?:,|$)/g)].map(match=>match[1].replaceAll('""','"')));
+     return lines.slice(1).map(values=>Object.fromEntries(lines[0].map((name,index)=>[name,values[index]])));
+    }finally{URL.createObjectURL=createUrl;HTMLAnchorElement.prototype.click=clickAnchor;}
+   }
+   const manualExport=(await exportedPrepRows()).find(row=>row.메뉴==='예시 마들렌 4구');
+   assert.equal(manualExport.준비성향,'직접 조절');assert.equal(manualExport.분위수,'');
+   assert.equal(manualExport.일반준비,'0');assert.equal(manualExport.확정주문별도,'2');assert.equal(manualExport.총준비,'2');assert.equal(manualExport.실물개수,'8');
+   const cookieBefore=screen.getByRole('textbox',{name:'예시 쿠키 개 당일 준비 수량',exact:true}).value;
+   await user.click(screen.getByRole('button',{name:/^예시 마들렌 4구 넉넉히 준비 /}));
+   assert.equal(screen.getByRole('textbox',{name:'예시 쿠키 개 당일 준비 수량',exact:true}).value,cookieBefore,'local policy must not change another menu');
+   const localExports=await exportedPrepRows(),localExport=localExports.find(row=>row.메뉴==='예시 마들렌 4구');
+   assert.equal(localExport.준비성향,'넉넉히 준비');assert.equal(localExport.분위수,'70');
+   assert.equal(localExport.일반준비,input.value);assert.equal(Number(localExport.총준비),Number(input.value)+2);
+   assert.equal(['오전','점심오후','늦은오후'].reduce((sum,key)=>sum+Number(localExport[key]),0),Number(input.value));
+   assert.equal(localExports.find(row=>row.메뉴==='예시 쿠키').준비성향,'기준 준비');
+   await user.click(screen.getByRole('radio',{name:/적게 준비/}));
+   assert.equal(screen.getByRole('radio',{name:/적게 준비/}).checked,true);
    await user.click(screen.getByRole('button',{name:'요일 비교',exact:true}));assert.ok(screen.getByRole('heading',{name:'같은 메뉴, 다른 요일'}));
-   await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));assert.match(r.container.textContent,/정확하지 않았습니다/);
-   await user.click(screen.getByRole('button',{name:'일 요일',exact:true}));await user.click(screen.getByRole('button',{name:'시간대별 준비표',exact:true}));assert.ok(screen.getByRole('heading',{name:'이 요일은 계산할 기록이 부족합니다'}));
+   await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));assert.match(r.container.textContent,/실제 로스·품절은 아닙니다/);
+   assert.match(r.container.querySelector('.prep-policy-validation').textContent,/최근 평균 반올림/);
+   await user.click(screen.getByRole('button',{name:'표본·계산 기준',exact:true}));assert.match(screen.getByRole('dialog').textContent,/생산량·판매량·폐기량·품절 시각/);
+   await user.click(screen.getByRole('button',{name:'준비 참고 닫기',exact:true}));
   }
   if(route==='menus'){
    await user.click(screen.getByRole('button',{name:'수량순',exact:true}));
-   assert.equal(r.container.querySelector('.menu-rankings .ranking-label strong').textContent,'예시 쿠키');
-   await user.click(screen.getByRole('button',{name:'예시 신메뉴 상세 보기',exact:true}));
+   assert.equal(r.container.querySelector('.menu-workbench tbody tr button').textContent,'예시 쿠키');
+   await user.click(screen.getByRole('button',{name:'예시 신메뉴',exact:true}));
    assert.ok(screen.getByRole('heading',{name:'예시 신메뉴 · 월별 변화',exact:true}));
    await user.click(screen.getByRole('button',{name:'메뉴 상세 닫기',exact:true}));
    await user.click(screen.getByRole('button',{name:'매출순',exact:true}));
@@ -129,7 +161,7 @@ try {
  await user.click(screen.getByRole('button',{name:'2026-01-31 판매 상세',exact:true}));
  assert.match(screen.getByRole('dialog').textContent,/저장된 페이히어 자료/);
  await user.click(screen.getByRole('link',{name:'2026-01 월별 메뉴 판매 보기 →',exact:true}));
- assert.ok(screen.getByRole('heading',{name:'메뉴 판매',exact:true}));assert.match(sourceView.container.querySelector('.period-title').textContent,/2026-01/);cleanup();
+ assert.ok(screen.getByRole('heading',{name:'메뉴 전략',exact:true}));assert.match(sourceView.container.querySelector('.period-title').textContent,/2026-01/);cleanup();
  // User-defined composition: two different products can contribute to a new menu name.
  const rawMenus=fixture();let writes=0;
  function RulesHarness(){const [rules,setRules]=React.useState([]);return React.createElement(MenuRuleContext.Provider,{value:{rawData:rawMenus,rules,saveRule:async(draft,revision)=>{writes++;const saved={...draft,revision:revision+1};setRules(old=>[...old.filter(rule=>rule.sourceName!==draft.sourceName),saved]);return saved;}}},React.createElement(SalesApp,{data:applyMenuRules(rawMenus,rules),route:'menus'}));}
@@ -150,14 +182,14 @@ try {
  await user.click(screen.getByRole('button',{name:'Firebase에 저장',exact:true}));await screen.findByText('Firebase에 저장했습니다. 판매 분석에 적용되었습니다.');assert.equal(writes,2);
  assert.match(edited.container.querySelector('.menu-workbench tbody tr').textContent,/예시 구움과자321개1,032,000원/);
  await user.click(screen.getByRole('button',{name:'메뉴 수정 닫기',exact:true}));await user.click(screen.getByRole('link',{name:'디저트 준비',exact:true}));await user.click(screen.getByRole('button',{name:'월 요일',exact:true}));
- assert.equal(edited.container.querySelectorAll('.prep-table tbody tr').length,1);
- assert.match(edited.container.querySelector('.prep-table tbody tr').textContent,/예시 구움과자.*원본 2종 합산.*17.5/);
- const mergedPrep=screen.getByRole('textbox',{name:'예시 구움과자 당일 준비 수량',exact:true});assert.equal(mergedPrep.value,'18');
- await user.clear(mergedPrep);await user.type(mergedPrep,'0');await user.tab();assert.match(edited.container.querySelector('.prep-total').textContent,/0개/);
+ assert.equal([...edited.container.querySelectorAll('.prep-table tbody tr')].filter(row=>row.textContent.includes('예시 구움과자')).length,1);
+ assert.match(edited.container.querySelector('.prep-table tbody tr').textContent,/예시 구움과자.*원본 2종 합산/);
+ const mergedPrep=screen.getByRole('textbox',{name:'예시 구움과자 개 당일 준비 수량',exact:true});assert.ok(Number.isInteger(Number(mergedPrep.value))&&Number(mergedPrep.value)>0);
+ await user.clear(mergedPrep);await user.type(mergedPrep,'0');await user.tab();assert.equal(mergedPrep.value,'0');
  await user.click(screen.getByRole('button',{name:'요일 비교',exact:true}));assert.match(edited.container.querySelector('.week-heatmap').textContent,/예시 구움과자/);assert.ok(!edited.container.querySelector('.week-heatmap').textContent.includes('4구'));
  await user.click(screen.getByRole('button',{name:'과거 판매와 비교하기',exact:true}));assert.match(screen.getByRole('dialog').textContent,/예시 구움과자/);await user.click(screen.getByRole('button',{name:'준비 참고 닫기',exact:true}));
- await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));assert.match(edited.container.querySelector('.prep-accuracy-panel').textContent,/원본 메뉴·판매단위 기준/);
- await user.click(screen.getByRole('link',{name:'메뉴 판매',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));
+ await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));await user.click(screen.getByRole('button',{name:'기존에 저장한 예측 검증도 확인하기',exact:true}));assert.match(edited.container.querySelector('.prep-accuracy-panel').textContent,/이전 원본 메뉴·판매단위 기준/);
+ await user.click(screen.getByRole('link',{name:'메뉴 전략',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));
 
  await user.click(screen.getByRole('button',{name:'메뉴 수정 닫기',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));await waitFor(()=>assert.equal(sourceSelect.disabled,false));
  await user.click(screen.getByRole('textbox',{name:'원본 메뉴',exact:true}));await user.click(screen.getByRole('option',{name:'예시 마들렌 4구',exact:true}));
@@ -206,5 +238,5 @@ try {
   assert.equal(host.textContent,'');flushSync(()=>root.unmount());
   assert.equal(errors.length,0,`${id}: React cleanup must survive auth shell removal`);assert.equal(container.textContent,'');host.remove();
  }
- console.log('PASS: four primary pages plus compatible source route, stored-data-only reload, real Mantine controls, month/date selection, calendar boundaries, pack zero override, buffer/extra menus, empty sample/search, Korea-time picker, explicit source review → save, auth-shell removal before React cleanup. Charts alone use doubles.');
-} finally {cleanup();dom.window.close();await rm(output,{force:true});}
+ console.log('PASS: four primary pages plus compatible source route, stored-data-only reload, real Mantine controls, month/date selection, calendar boundaries, pack zero override, policy/reservation controls, legacy validation, empty sample/search, Korea-time picker, explicit source review → save, auth-shell removal before React cleanup. Charts alone use doubles.');
+} finally {cleanup();dom.window.close();await rm(output,{force:true});await rm(output.replace(/\.cjs$/,'.css'),{force:true});}

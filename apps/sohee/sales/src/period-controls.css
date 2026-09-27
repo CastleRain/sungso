@@ -1,0 +1,66 @@
+/* Scoped specificity keeps the compact control consistent in pages and drawers. */
+.date-filter.period-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 18px;min-height:0;padding:11px 14px;margin-bottom:10px;border:1px solid var(--ss-border-strong);border-radius:12px;background:var(--ss-surface);box-shadow:none}
+.period-controls .period-title{min-width:0;gap:10px}
+.period-controls .period-title .period-calendar-mark{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;margin:0;border-radius:10px;background:var(--ss-soft);color:var(--ss-link)}
+.period-controls .period-title>div{min-width:0}
+.period-controls .period-title>div>span{display:flex;align-items:center;gap:10px;margin:0 0 3px;font-size:10px;color:var(--ss-muted)}
+.period-controls .period-title b{font-size:10px;font-weight:500;padding-left:10px;border-left:1px solid var(--ss-border)}
+.period-controls .period-title strong{display:block;font-size:16px;font-weight:650;line-height:1.3;color:var(--ss-text);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.period-controls .period-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;width:auto;flex-wrap:nowrap}
+.period-controls .period-month-stepper{display:flex;align-items:center;gap:0;border:1px solid var(--ss-border);border-radius:8px;min-width:0;background:var(--ss-bg)}
+.period-controls .period-month-stepper>.sales-button{width:31px;min-width:31px;min-height:32px;height:32px;padding:0;border:0;background:transparent;border-radius:7px;box-shadow:none;color:var(--ss-link)}
+.period-controls .period-month-stepper>.sales-button:disabled{color:var(--ss-muted);opacity:.4}
+.period-controls .period-month-stepper .select-label{display:block;min-width:0;width:auto}
+.period-controls .period-month-stepper .select-label>span{display:none}
+.period-controls .period-month-stepper .sales-select{width:140px;min-width:0;max-width:none}
+.period-controls .period-month-stepper .mantine-Input-input{height:32px;min-height:32px;border:0;background:transparent;border-radius:0;font-size:12px;font-weight:600;text-align:center;padding-left:12px;padding-right:28px;box-shadow:none}
+.period-controls .period-actions>.sales-button{width:auto;height:34px;min-height:34px;font-size:11px;padding-inline:12px}
+.period-controls .period-custom.active{border-color:var(--ss-link);background:var(--ss-soft);color:var(--ss-link)}
+.period-controls .period-footer{display:flex;grid-column:1/-1;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 0;border-top:1px solid var(--ss-border);width:100%;min-width:0}
+.period-controls .period-quick-picks{display:flex;align-items:center;gap:4px;min-width:0;order:0}
+.period-controls .period-quick-picks .sales-button{height:28px;min-height:28px;padding-inline:10px;font-size:11px;border:1px solid transparent;background:var(--ss-bg);color:var(--ss-muted);box-shadow:none;border-radius:6px;flex:initial;grid-row:auto}
+.period-controls .period-quick-picks .sales-button:hover{background:var(--ss-hover);color:var(--ss-on-accent)}
+.period-controls .period-quick-picks .sales-button[aria-pressed="true"]{background:var(--ss-soft);color:var(--ss-link);border-color:var(--ss-border-strong);font-weight:650}
+.period-controls .period-footer>.period-data-anchor{display:flex;align-items:center;gap:4px;order:1;margin:0 0 0 auto;max-width:none;width:auto;text-align:right;font-size:10px;color:var(--ss-muted);line-height:1.5}
+.period-controls .period-data-anchor b{font-weight:500;font-variant-numeric:tabular-nums;color:var(--ss-text)}
+.period-controls .period-data-anchor small{font-size:10px;padding-left:10px;margin-left:6px;border-left:1px solid var(--ss-border)}
+.period-controls .period-footer>.mantine-Checkbox-root{order:2;flex:0 0 auto;margin:0}
+.period-controls .period-footer .mantine-Checkbox-label{font-size:10px;padding-left:7px;white-space:nowrap;color:var(--ss-muted)}
+.period-controls .period-footer .mantine-Checkbox-inner,.period-controls .period-footer .mantine-Checkbox-input{width:16px;height:16px}
+.period-controls .sales-button:focus-visible,.period-controls .mantine-Input-input:focus-visible{outline:2px solid var(--ss-focus);outline-offset:2px}
+@media(min-width:1150px){
+ .date-filter.period-controls{padding-block:6px;row-gap:3px}
+ .period-controls .period-title>div>span{line-height:1.2;margin-bottom:2px}
+ .period-controls .period-footer{padding-top:5px}
+}
+@media(max-width:1250px){.period-controls .period-data-anchor small{display:none}}
+@media(max-width:700px){
+ .date-filter.period-controls{grid-template-columns:minmax(0,1fr);gap:12px;padding:14px;margin-bottom:16px}
+ .period-controls .period-title{min-width:0;width:100%}
+ .period-controls .period-title strong{font-size:16px}
+ .period-controls .period-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;justify-content:stretch;width:100%}
+ .period-controls .period-month-stepper{width:100%}
+ .period-controls .period-month-stepper .select-label{flex:1}
+ .period-controls .period-month-stepper .sales-select{width:100%}
+ .period-controls .period-month-stepper>.sales-button{width:30px;min-width:30px;height:36px;min-height:36px}
+ .period-controls .period-month-stepper .mantine-Input-input{height:36px;min-height:36px;font-size:11px;padding-left:3px;padding-right:23px}
+ .period-controls .period-actions>.sales-button{height:38px;min-height:38px;padding-inline:9px;font-size:11px}
+ .period-controls .period-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 8px;padding-top:10px}
+ .period-controls .period-quick-picks{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:100%}
+ .period-controls .period-quick-picks .sales-button{height:34px;min-height:34px;width:100%;padding-inline:2px;font-size:10px}
+ .period-controls .period-footer>.period-data-anchor{display:block;grid-column:auto;order:1;margin:0;max-width:none;font-size:9px;text-align:left;line-height:1.7}
+ .period-controls .period-data-anchor b{font-size:9px}
+ .period-controls .period-footer>.mantine-Checkbox-root{order:2;justify-self:end}
+}
+.prep-reference-drawer .date-filter.period-controls{grid-template-columns:minmax(0,1fr);gap:12px}
+.prep-reference-drawer .period-controls .period-actions{display:flex;justify-content:flex-start;flex-wrap:nowrap}
+.prep-reference-drawer .period-controls .period-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:9px}
+.prep-reference-drawer .period-controls .period-quick-picks{width:100%;display:flex;flex-wrap:wrap}
+.prep-reference-drawer .period-controls .period-footer>.period-data-anchor{margin:0;text-align:left}
+.prep-reference-drawer .period-controls .period-data-anchor small{display:none}
+@media print{.date-filter.period-controls{display:none}}
+@media(min-width:1150px){
+ .page-overview .page-content{padding-top:8px;padding-bottom:4px}
+ .page-overview .ledger-summary{margin-bottom:8px}
+ .page-overview .ledger-day-layout>.panel{margin-bottom:8px}
+}

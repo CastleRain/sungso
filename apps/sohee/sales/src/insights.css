@@ -1,0 +1,96 @@
+/* Semantic chart colors: exceptional volume, weekend/normal demand, and shortfall.
+   General UI continues to inherit the shared brand palette. */
+.app{--sales-caution:#A7651C;--sales-positive:#267B70;--sales-negative:#AD5151}
+.sales-chart-tip>small{display:block;color:var(--ss-muted);font-size:11px;margin-top:7px;line-height:1.5}
+.page-changes .owner-trend-bottom{gap:8px;margin-top:4px!important}
+.page-changes .owner-trend-bottom .chart-legend{flex-wrap:wrap;gap:5px 10px}
+.chart-date-reading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:6px 8px;margin-top:7px;background:var(--ss-soft);border-radius:7px}
+.chart-date-reading>div:first-child{display:flex;align-items:baseline;gap:10px;min-width:0;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.chart-date-reading span{font-size:11px;color:var(--ss-text)}
+.chart-date-reading strong{font-size:13px;color:var(--ss-link)}
+.chart-date-reading small{font-size:10px;color:var(--ss-muted)}
+.chart-date-buttons{display:flex;gap:4px;flex-shrink:0}
+.chart-date-buttons .sales-button{width:24px;height:24px;min-height:24px;padding:0}
+.page-changes .dashboard-bottom .insights-trigger{border-color:var(--ss-link);color:var(--ss-link);font-weight:650}
+.owner-insights-drawer .insights-intro{font-size:13px;line-height:1.8;color:var(--ss-muted);margin:0 0 20px}
+.owner-insights-drawer .panel{padding:20px;margin-bottom:16px}
+.owner-insights-drawer .section-head h2{font-size:17px}
+.owner-insights-drawer .section-head p{font-size:12px}
+.owner-insights-drawer .owner-insight-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.owner-insight-metrics>div{min-width:0}
+.owner-insight-metrics span{display:block;font-size:12px;color:var(--ss-muted)}
+.owner-insight-metrics strong{display:block;font-size:24px;font-weight:650;letter-spacing:-.035em;margin:6px 0;color:var(--ss-link);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.owner-insight-metrics .insight-range{font-size:18px;line-height:1.7}
+.owner-insight-metrics small{display:block;font-size:11px;color:var(--ss-muted);line-height:1.7}
+.insight-explainer{font-size:12px;line-height:1.8;color:var(--ss-text);margin-top:18px}
+.insight-basis{font-size:10px;line-height:1.7;color:var(--ss-muted);margin-top:9px}
+.menu-concentration{margin-top:16px}
+.menu-concentration>div:first-child{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12px;color:var(--ss-muted);margin-bottom:10px}
+.menu-concentration strong{font-size:28px;color:var(--ss-link);font-variant-numeric:tabular-nums}
+.page-menus .menu-context>span{font-size:11px;color:var(--ss-muted)}
+.page-menus .menu-ledger-panel .section-head{flex-wrap:wrap}
+.page-menus .menu-ledger-panel .section-head .segmented{margin-left:auto;flex-shrink:0}
+.page-menus .menu-ledger-panel .section-head .segmented .sales-button{font-size:11px;min-height:29px;height:29px;padding:5px 9px}
+.page-menus .menu-strategy-panel>.select-label{display:flex;align-items:center;gap:12px;font-size:11px;margin-bottom:13px}
+.page-menus .menu-strategy-panel>.select-label>.sales-select{min-width:0;flex:1;max-width:none}
+.page-menus .menu-strategy-panel .mantine-Input-input{font-size:12px}
+.menu-strategy-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;padding:14px;background:var(--ss-soft);border-radius:10px;margin-bottom:14px}
+.menu-strategy-metrics>div{min-width:0}
+.menu-strategy-metrics span{display:block;font-size:11px;color:var(--ss-muted)}
+.menu-strategy-metrics strong{display:block;font-size:23px;font-weight:650;letter-spacing:-.035em;line-height:1.4;color:var(--ss-link);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.menu-strategy-metrics strong small{margin-left:4px;font-size:11px;font-weight:500}
+.menu-strategy-metrics>div>small{display:block;font-size:10px;color:var(--ss-muted);line-height:1.6}
+.strategy-weekday-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.strategy-weekday-head strong{font-size:12px;font-weight:600}
+.strategy-weekday-head span{font-size:10px;color:var(--ss-muted)}
+.page-menus .strategy-weekday-chart{height:96px;min-height:96px;flex:none;margin-top:4px}
+.strategy-weekday-samples{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding-inline:8px;color:var(--ss-muted);font-size:9px;text-align:center}
+.page-menus .menu-strategy-panel .sales-chart-legend{font-size:10px;gap:10px;margin-top:8px}
+.strategy-reading,.strategy-empty{font-size:11px;line-height:1.8;color:var(--ss-muted);margin-top:10px}
+.strategy-empty{padding:20px 10px;background:var(--ss-bg);border-radius:8px}
+.strategy-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:12px}
+.strategy-actions .sales-button{font-size:11px;height:30px;min-height:30px;padding-inline:10px}
+.strategy-actions a{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;white-space:nowrap}
+@media(min-width:1150px){
+ .page-changes .page-content{padding-top:8px;padding-bottom:4px}
+ .page-changes .page-head{margin-bottom:8px}
+ .page-changes .owner-summary{margin-bottom:4px}
+ .page-changes .owner-main-grid{margin-bottom:8px}
+ .page-changes .owner-secondary-grid{margin-bottom:6px}
+ .page-changes .owner-secondary-grid>.panel{padding-block:9px}
+ .page-changes .owner-main-grid .owner-trend{height:129px;min-height:129px}
+ .page-changes .chart-date-reading{margin-top:5px;padding:3px 7px}
+ .page-changes .chart-date-reading strong{font-size:12px}
+ .page-menus .menu-compact-board .menu-workbench{grid-template-columns:minmax(0,1.45fr) minmax(390px,1fr)}
+ .page-menus .menu-workbench>.menu-strategy-panel{overflow:auto;overscroll-behavior:contain}
+ .page-menus .menu-strategy-panel .section-head{margin-bottom:10px;flex-shrink:0}
+ .page-menus .menu-strategy-panel>.select-label{margin-bottom:10px;flex-shrink:0}
+ .page-menus .menu-strategy-metrics{padding:10px 12px;gap:8px 14px;flex-shrink:0;margin-bottom:11px}
+ .page-menus .menu-strategy-metrics strong{font-size:21px}
+ .page-menus .strategy-reading{margin-top:8px;font-size:10px}
+ .page-menus .strategy-actions{padding-top:9px}
+}
+@media(max-width:700px){
+ .chart-date-reading{align-items:flex-start;padding:8px}
+ .chart-date-reading>div:first-child{gap:3px 8px}
+ .chart-date-reading span{flex-basis:100%}
+ .chart-date-reading strong{font-size:14px}
+ .chart-date-buttons .sales-button{width:32px;height:32px;min-height:32px}
+ .page-changes .owner-trend-bottom .chart-legend{font-size:10px}
+ .owner-insights-drawer .panel{padding:16px 13px}
+ .owner-insights-drawer .section-head h2{font-size:16px}
+ .owner-insights-drawer .owner-insight-metrics{grid-template-columns:1fr;gap:14px;margin-top:14px}
+ .owner-insight-metrics>div{border-bottom:1px solid var(--ss-border);padding-bottom:10px}
+ .owner-insight-metrics>div:last-child{border-bottom:0;padding-bottom:0}
+ .owner-insight-metrics strong{font-size:24px;margin:3px 0}
+ .owner-insight-metrics .insight-range{font-size:22px}
+ .menu-strategy-metrics{gap:12px;padding:12px}
+ .menu-strategy-metrics strong{font-size:22px}
+ .page-menus .strategy-weekday-chart{height:115px;min-height:115px}
+ .page-menus .menu-strategy-panel>.select-label{align-items:flex-start;flex-direction:column;gap:6px}
+ .page-menus .menu-strategy-panel>.select-label>.sales-select{width:100%}
+ .strategy-actions{flex-wrap:wrap;gap:12px}
+ .strategy-actions .sales-button{height:36px;min-height:36px}
+ .strategy-actions a{min-height:32px}
+ .page-changes .dashboard-bottom>div{flex-wrap:wrap;justify-content:flex-end}
+}
