@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile, rm, cp } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildSales } from './sales/build.mjs';
@@ -12,7 +13,11 @@ export async function buildApp({ outdir = path.join(here, 'dist') } = {}) {
   await rm(outdir, { recursive: true, force: true });
   await mkdir(path.join(outdir, 'assets'), { recursive: true });
   await build({ entryPoints: [path.join(here, 'workspace/main.jsx')], outfile: path.join(outdir, 'assets/workspace.js'), bundle: true, minify: true, format: 'esm', target: ['chrome110', 'safari16'], legalComments: 'eof', loader: { '.png': 'file' }, assetNames: 'example-[hash]', publicPath: '/sungso/sohee/assets', define: { 'process.env.NODE_ENV': '"production"' }, alias: { react: path.dirname(require.resolve('react/package.json')), 'react-dom': path.dirname(require.resolve('react-dom/package.json')) }, plugins: [{ name: 'shared-auth', setup(api) { api.onResolve({ filter: /site-auth\.mjs$/ }, () => ({ path: '../../shared/firebase/site-auth.mjs', external: true })); } }] });
-  const html = await readFile(path.join(here, 'workspace/index.html'), 'utf8');
+  let html = await readFile(path.join(here, 'workspace/index.html'), 'utf8');
+  for (const ext of ['js', 'css']) {
+    const version = createHash('sha256').update(await readFile(path.join(outdir, `assets/workspace.${ext}`))).digest('hex').slice(0, 16);
+    html = html.replace(`/assets/workspace.${ext}"`, `/assets/workspace.${ext}?v=${version}"`);
+  }
   for (const route of ['', 'workspace', 'portfolio', 'portfolio/cases/dessert-set', 'portfolio/about']) {
     await mkdir(path.join(outdir, route), { recursive: true });
     await writeFile(path.join(outdir, route, 'index.html'), html);
