@@ -74,6 +74,11 @@ try {
    await user.click(screen.getByRole('button',{name:'일 요일',exact:true}));await user.click(screen.getByRole('button',{name:'시간대별 준비표',exact:true}));assert.ok(screen.getByRole('heading',{name:'이 요일은 계산할 기록이 부족합니다'}));
   }
   if(route==='menus'){
+   const shareSort=screen.getByRole('button',{name:/메뉴 금액 비중/});
+   await user.click(shareSort);assert.equal(shareSort.closest('th').getAttribute('aria-sort'),'descending');
+   const shares=()=>[...r.container.querySelectorAll('.menu-workbench tbody tr')].map(row=>parseFloat(row.children[4].textContent));
+   assert.deepEqual(shares(),[...shares()].sort((a,b)=>b-a));
+   await user.click(shareSort);assert.deepEqual(shares(),[...shares()].sort((a,b)=>a-b));
    await user.type(screen.getAllByRole('textbox',{name:'표 검색'})[0],'없는 메뉴');assert.ok(screen.getByText('해당 조건에 맞는 기록이 없습니다.'));
   }
   cleanup();
