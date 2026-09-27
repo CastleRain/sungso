@@ -29,4 +29,6 @@
 
 공통 글꼴은 기기의 시스템 글꼴이다. 외부 폰트가 로드된 앱과 그렇지 않은 앱의 기본 UI 차이를 줄인다. 청첩장 예시의 개별 글꼴은 별도다. 기존 폰트 CDN·스크립트의 버전 및 로드 순서는 유지한다.
 
-`config/apps.json`은 이 폴더의 `brand.css`와 `sungso-wordmark-sky.png`만 `/sungso/shared/theme/`로 출력한다. 로고는 이미지 파일 하나를 공유한다. 새 앱의 HTML도 공통 테마를 앱 스타일보다 먼저 로드한다. 변경 후 루트 build/test/check와 `/sungso/` 경로의 PC·모바일 검증을 수행한다.
+사용자가 범위를 지정한 소희 앱은 선택형 `reading-font.css`를 앱 스타일 뒤에 불러와 `--ss-font-sans`만 Pretendard Variable로 바꾼다. 작업실·포트폴리오·매출 화면에 적용하며 다른 앱의 시스템 글꼴은 유지한다. [공식 Pretendard v1.3.9](https://github.com/orioncactus/pretendard/tree/v1.3.9)의 WOFF2를 같은 사이트에서 제공하고 `font-display: swap`과 시스템 대체 글꼴을 사용한다. [SIL OFL 1.1 고지](fonts/Pretendard-LICENSE.txt)를 함께 보관한다.
+
+`config/apps.json`은 `brand.css`, `sungso-wordmark-sky.png`와 선택형 글꼴 CSS·WOFF2·라이선스만 `/sungso/shared/theme/`로 출력한다. 로고는 이미지 파일 하나를 공유한다. 새 앱의 HTML도 공통 테마를 앱 스타일보다 먼저 로드한다. 변경 후 루트 build/test/check와 `/sungso/` 경로의 PC·모바일 검증을 수행한다.

@@ -1,0 +1,70 @@
+.date-filter { position:relative; z-index:3; padding:18px 20px 13px; margin-bottom:28px; border:1px solid var(--ss-border-strong); border-radius:14px; background:var(--ss-surface); display:flex; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:0 4px 16px var(--ss-shadow) }
+.period-title {display:flex; align-items:center; gap:12px; min-width:180px; flex:1; color:var(--ss-link)}
+.period-title span {display:block; font-size:11px; color:var(--ss-muted); margin-bottom:2px}
+.period-title strong {font-size:15px; font-weight:650; color:var(--ss-text)}
+.period-actions {display:flex; align-items:center; flex-wrap:wrap; gap:8px}
+.period-actions .select-label {display:flex; align-items:center; gap:9px}
+.period-actions .select-label>span {font-size:12px}
+.period-actions .sales-select {min-width:145px; max-width:185px}
+.period-footer {width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:10px; border-top:1px solid var(--ss-border); font-size:12px; color:var(--ss-muted)}
+.period-footer .mantine-Checkbox-label {font-size:12px}
+.period-popover {width:326px!important; max-width:calc(100vw - 28px); background:var(--ss-surface); color:var(--ss-text); border:1px solid var(--ss-border); padding:16px; border-radius:14px}
+.period-picker-head,.period-picker-footer {display:flex; align-items:center; justify-content:space-between; gap:10px}
+.period-picker-head {margin-bottom:12px}.period-picker-head .sales-button{padding:0;width:30px;min-height:30px;height:30px}
+.period-popover .footnote {font-size:12px; margin:12px 0}
+.period-popover .mantine-DatePicker-calendarHeader {max-width:none}
+.period-popover .mantine-DatePicker-month {width:100%; table-layout:fixed}
+.period-popover .mantine-DatePicker-monthCell {padding:2px!important; text-align:center}
+.period-popover .mantine-DatePicker-day {width:36px; height:36px; font-family:var(--ss-font-sans); font-size:13px; border-radius:8px; padding:0; color:var(--ss-text)}
+.period-popover .mantine-DatePicker-day[data-in-range] {background:var(--ss-soft)}
+.period-popover .mantine-DatePicker-day[data-selected] {background:var(--ss-link);color:var(--ss-surface)}
+.period-popover .mantine-DatePicker-day[data-disabled] {opacity:.3}
+.period-popover .mantine-DatePicker-weekday {text-align:center; font-size:12px; color:var(--ss-muted); padding:8px 0; border:0}
+.period-popover .mantine-SegmentedControl-root {background:var(--ss-soft); border-radius:8px}
+.period-popover .mantine-SegmentedControl-label {font-size:12px; color:var(--ss-text)}
+.period-picker-footer {border-top:1px solid var(--ss-border); margin-top:12px; padding-top:12px; font-size:11px; color:var(--ss-muted)}
+.dashboard-stats {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:18px}
+.dashboard-stats .stat {display:block; border-radius:12px; padding:19px 20px; min-width:0}
+.dashboard-stats .stat.accent {background:var(--ss-soft); border-color:var(--ss-border-strong)}
+.dashboard-stats .stat-value {font-size:clamp(21px,2.05vw,31px); font-weight:720; letter-spacing:-.04em; line-height:1.35; margin:12px 0 8px; white-space:nowrap}
+.dashboard-stats .stat-label {font-size:13px;font-weight:550}
+.dashboard-stats .stat p {font-size:11px;line-height:1.7}
+.period-comparison {display:grid; grid-template-columns:1.4fr 1fr 1fr auto; gap:22px; align-items:center; padding:21px 24px; border-radius:12px; border:1px solid var(--ss-border); background:var(--ss-surface)}
+.period-comparison .eyebrow {font-size:11px; display:block; margin-bottom:5px}
+.period-comparison h2 {font-size:23px; color:var(--ss-link)}
+.period-comparison p,.period-comparison small {font-size:12px; color:var(--ss-muted); margin-top:5px; display:block}
+.period-comparison>div>span:not(.eyebrow){font-size:12px;color:var(--ss-muted)}
+.period-comparison strong {display:block;font-size:21px;letter-spacing:-.025em;font-variant-numeric:tabular-nums;margin-top:3px}
+.period-comparison>a {font-size:12px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.comparison-explainer {margin:10px 4px 25px;font-size:11px}
+.dashboard-chart-grid {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
+.dashboard-chart-grid>.panel {min-width:0}
+.dashboard-chart-grid .section-head h2 {font-size:18px}
+.dashboard-chart-grid .section-head p {font-size:12px}
+.dashboard-main-chart {height:280px!important}
+.chart-legend {display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--ss-muted);padding-top:7px}
+.chart-legend span {display:flex;align-items:center;gap:5px}
+.chart-legend i {width:8px;height:8px;border-radius:2px;background:var(--ss-link)}
+.chart-legend i.partial {opacity:.4}
+.weekday-samples {display:grid;grid-template-columns:repeat(7,1fr);font-size:11px;text-align:center;color:var(--ss-muted);padding-top:7px;margin-left:52px}
+.recharts-wrapper {font-family:var(--ss-font-sans)}
+.recharts-default-tooltip {background:var(--ss-surface)!important;color:var(--ss-text)!important;border-radius:10px!important;line-height:1.65!important}
+.recharts-tooltip-label {font-weight:650;font-size:12px;color:var(--ss-text)}
+.recharts-legend-item-text {font-size:12px!important;color:var(--ss-muted)!important}
+.recharts-surface:focus-visible {outline:2px solid var(--ss-focus);outline-offset:3px;border-radius:4px}
+.top-menu-list {display:grid;gap:15px;padding:4px 0}
+.top-menu-list>div {display:flex;gap:12px;align-items:start}
+.top-menu-list>div>div {flex:1;min-width:0}
+.top-menu-list .rank {color:var(--ss-muted);font-size:12px;padding-top:2px;width:13px;font-variant-numeric:tabular-nums}
+.top-menu-list strong {font-size:13px;font-weight:600;display:block}
+.top-menu-list small {font-size:11px;color:var(--ss-muted)}
+.menu-meter {height:5px;background:var(--ss-soft);border-radius:4px;margin:7px 0 5px;overflow:hidden}
+.menu-meter span {display:block;height:100%;background:var(--ss-accent);border-radius:4px}
+.top-menu-list>div:first-child .menu-meter span {background:var(--ss-link)}
+.dashboard-reading {display:flex;gap:13px;align-items:center;border:1px solid var(--ss-border);border-radius:12px;background:var(--ss-soft);padding:18px 22px;margin:0 0 22px;color:var(--ss-link)}
+.dashboard-reading strong {display:block;font-size:14px;font-weight:600}.dashboard-reading span {display:block;color:var(--ss-muted);font-size:12px;margin-top:3px}
+.sales-calendar .mantine-Calendar-day[data-selected] {outline:2px solid var(--ss-link);outline-offset:-2px;box-shadow:inset 0 0 0 2px var(--ss-surface)}
+@media(max-width:1100px){.dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-stats .stat-value{font-size:28px}.dashboard-chart-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.period-comparison{grid-template-columns:1fr 1fr}.period-comparison>a{justify-self:end}}
+@media(max-width:700px){.dashboard-chart-grid{grid-template-columns:minmax(0,1fr)}.date-filter{padding:15px 13px;margin-bottom:23px;gap:13px}.period-title{min-width:100%;gap:10px}.period-title strong{font-size:14px}.period-actions{width:100%;gap:7px}.period-actions .select-label{flex:1}.period-actions .sales-select{min-width:125px;max-width:none}.period-actions .select-label>span{display:none}.period-preset{flex:1}.period-footer{align-items:flex-start;font-size:11px}.period-footer>span{max-width:57%}.dashboard-stats{gap:9px}.dashboard-stats .stat{padding:14px 12px;border-radius:10px}.dashboard-stats .stat-label{font-size:11px}.dashboard-stats .stat-label svg{width:15px}.dashboard-stats .stat-value{font-size:23px;margin:9px 0 6px}.dashboard-stats .stat p{font-size:10px}.period-comparison{padding:17px 16px;gap:16px}.period-comparison>div:first-child{grid-column:1/-1}.period-comparison h2{font-size:23px}.period-comparison strong{font-size:18px}.period-comparison small{font-size:10px}.period-comparison>a{grid-column:1/-1}.dashboard-main-chart{height:240px!important}.weekday-samples{font-size:10px}.dashboard-reading{padding:14px 15px}.dashboard-reading svg{flex-shrink:0}.dashboard-reading strong{font-size:13px}.dashboard-reading span{font-size:11px}.comparison-explainer{line-height:1.7}.page-head h1{font-size:26px}}
+@media print{.date-filter,.period-comparison>a{display:none}.dashboard-chart-grid{display:block}.dashboard-stats{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:700px){.period-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.period-actions .select-label{min-width:0}.period-actions .sales-select{min-width:0;width:100%}.period-actions>.sales-button,.period-actions>.mantine-Popover-target{width:100%;white-space:nowrap}.period-actions .period-preset{grid-row:2}.dashboard-stats .stat-value{font-size:clamp(19px,5.4vw,23px);white-space:normal;overflow-wrap:anywhere}.dashboard-stats .stat-label{display:flex;min-height:18px}.dashboard-stats .stat p{line-height:1.7}}

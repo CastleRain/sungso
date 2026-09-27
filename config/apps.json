@@ -180,7 +180,10 @@
       "output": "shared/theme",
       "files": [
         "brand.css",
-        "sungso-wordmark-sky.png"
+        "sungso-wordmark-sky.png",
+        "reading-font.css",
+        "fonts/PretendardVariable.woff2",
+        "fonts/Pretendard-LICENSE.txt"
       ]
     }
   ],

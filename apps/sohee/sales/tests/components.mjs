@@ -13,7 +13,7 @@ for(const name of ['window','document','navigator','HTMLElement','Element','Shad
 globalThis.requestAnimationFrame=fn=>setTimeout(fn,0);globalThis.cancelAnimationFrame=clearTimeout;
 globalThis.ResizeObserver=class{observe(){}unobserve(){}disconnect(){}};
 window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
-Element.prototype.scrollIntoView=()=>{};
+Element.prototype.scrollIntoView=()=>{};window.scrollTo=()=>{};
 const {render,screen,fireEvent,cleanup,waitFor}=await import('@testing-library/react');
 const user=(await import('@testing-library/user-event')).default.setup({document});
 const here=path.dirname(fileURLToPath(import.meta.url)),output=path.join(here,'.component-test.cjs');
@@ -28,11 +28,24 @@ try {
   if(route==='overview'){
    await user.click(screen.getByRole('button',{name:'2026-01',exact:true}));
    assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-01');
-   assert.equal(r.container.querySelector('.selected-month-summary strong').textContent,'수집 완료 · 총 3,363,500원');
+   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,'3,363,500원');
    await user.click(screen.getByRole('textbox',{name:'월',exact:true}));await user.click(screen.getByRole('option',{name:'2026-04',exact:true}));
-   assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-04');
    await user.click(screen.getByRole('button',{name:'2026-04-16 · 132,000원 · 부분일',exact:true}));assert.match(r.container.querySelector('.calendar-reading').textContent,/부분일/);
-   await user.click(screen.getByRole('button',{name:'이전 매출 월',exact:true}));assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-03');
+   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,'132,000원');
+   await user.click(screen.getByRole('button',{name:/^2026-04-15 ·/}));assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
+   await user.click(screen.getByRole('link',{name:'메뉴 분석',exact:true}));assert.ok(screen.getByRole('heading',{name:'메뉴별 판매 분석',exact:true}));
+   assert.equal(window.location.pathname,'/sungso/sohee/sales/menus/');assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);assert.match(r.container.textContent,/부분일 1일은 메뉴 집계에서 제외/);
+   window.history.replaceState(null,'','/sungso/sohee/sales/overview/');fireEvent(window,new window.PopStateEvent('popstate'));assert.ok(screen.getByRole('heading',{name:'매출 원장과 추이'}));
+   assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
+   await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));
+   await user.click(screen.getByRole('radio',{name:'연속 기간',exact:true}));
+   await user.click(screen.getByRole('button',{name:'분석일 2026-04-01',exact:true}));await user.click(screen.getByRole('button',{name:'분석일 2026-04-03',exact:true}));
+   await user.click(screen.getByRole('button',{name:'선택 적용',exact:true}));assert.match(r.container.querySelector('.period-title').textContent,/2026-04-01 – 2026-04-03/);
+   const expected=fixture().daily.filter(row=>row.date>='2026-04-01'&&row.date<='2026-04-03').reduce((sum,row)=>sum+row.amount,0);
+   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,expected.toLocaleString('ko-KR')+'원');
+   await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));await user.click(screen.getByRole('radio',{name:'여러 날짜',exact:true}));
+   await user.click(screen.getByRole('button',{name:'분석일 2026-04-02',exact:true}));await user.click(screen.getByRole('button',{name:'분석일 2026-04-06',exact:true}));await user.click(screen.getByRole('button',{name:'선택 적용',exact:true}));
+   assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
    await user.click(screen.getByRole('button',{name:'기록일당',exact:true}));assert.equal(screen.getByRole('button',{name:'기록일당',exact:true}).getAttribute('aria-pressed'),'true');
   }
   if(route==='prep'){
