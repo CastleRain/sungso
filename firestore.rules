@@ -21,6 +21,20 @@ service cloud.firestore {
       allow get: if googleUser() && request.auth.uid == uid;
       allow list, write: if false;
     }
+    // Private cafe sales: authenticated members read published analysis only.
+    // Import and immutable version publication run on the authenticated server.
+    match /sohee_sales/current {
+      allow get: if siteMember();
+      allow list, write: if false;
+    }
+    match /sohee_sales_versions/{version} {
+      allow get: if siteMember();
+      allow list, write: if false;
+      match /chunks/{chunk} {
+        allow get: if siteMember();
+        allow list, write: if false;
+      }
+    }
     function validHomehuntSnapshot(uid) {
       let next = request.resource.data;
       return next.keys().hasOnly(['snapshot', 'revision', 'updatedAt', 'updatedBy'])

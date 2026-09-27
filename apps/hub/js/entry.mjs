@@ -88,6 +88,7 @@ function renderLibrary() {
       link.querySelector('.app-copy').append(el('span', 'local-app-label', '기본 버전 · 이 기기에 저장'));
       item.append(link); container.append(item); continue;
     }
+    if (definition.pinnable === false) { item.append(link); container.append(item); continue; }
     const pin = button('⌖', `${definition.title} ${shortcuts.has(definition.id) ? '바로가기에서 빼기' : '바로가기에 두기'}`, () => openShortcutEditor(definition.id), 'pin-button');
     pin.dataset.appId = definition.id; pin.setAttribute('aria-pressed', String(shortcuts.has(definition.id))); pin.disabled = !homeReady;
     item.append(link, pin); container.append(item);

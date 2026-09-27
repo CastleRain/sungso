@@ -108,6 +108,20 @@
         "index.html",
         "js"
       ]
+    },
+    {
+      "id": "sohee",
+      "source": "apps/sohee/dist",
+      "output": "sohee",
+      "build": "apps/sohee/build.mjs",
+      "files": [
+        "index.html",
+        "workspace",
+        "portfolio",
+        "assets",
+        "sales",
+        "THIRD_PARTY_NOTICES.txt"
+      ]
     }
   ],
   "shared": [

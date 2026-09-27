@@ -13,3 +13,12 @@ test-results/
 firebase-debug.log
 firestore-debug.log
 .private-migration/
+
+# Private sales archive and local import candidates; never publish.
+/sohee/
+services/sohee/.local/
+services/sohee/import/__pycache__/
+services/sohee/tests/__pycache__/
+
+# Local previews, QA captures and generated work artifacts.
+/.local/

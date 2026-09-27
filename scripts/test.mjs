@@ -1,9 +1,12 @@
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { PROJECT_ROOT } from './build-site.mjs';
+import { PROJECT_ROOT, prepareAppBuilds } from './build-site.mjs';
 
-const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/invitation/tests'];
+// Generate registered compiled shells once, before parallel test workers read them.
+await prepareAppBuilds();
+
+const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/invitation/tests', 'apps/sohee/sales/tests', 'services/sohee/tests'];
 const files = [];
 for (const directory of directories) {
   for (const file of (await readdir(path.join(PROJECT_ROOT, directory))).sort()) {

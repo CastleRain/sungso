@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { init, parse } from 'es-module-lexer';
 
 export const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
-const WEB_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json', '.xml', '.csv', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.pdf', '.woff', '.woff2', '.webmanifest']);
+const WEB_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json', '.xml', '.csv', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.pdf', '.woff', '.woff2', '.webmanifest', '.txt']);
 const PRIVATE_PARTS = new Set(['node_modules', 'tests', 'docs', 'server', 'scripts', 'cloud', 'render', 'state', 'archive']);
 
 function relativePath(value, label, { empty = false } = {}) {
@@ -41,6 +41,10 @@ export async function loadRegistry(rootDir = PROJECT_ROOT, registryFile = 'confi
     if (!/^[a-z][a-z0-9-]*$/.test(app.id) || ids.has(app.id)) throw new Error(`Duplicate or invalid app id: ${app.id}`);
     ids.add(app.id);
     relativePath(app.source, `App ${app.id} source`);
+    if (app.build) {
+      relativePath(app.build, `App ${app.id} builder`);
+      if (!app.build.startsWith(`apps/${app.id}/`) || !app.build.endsWith('.mjs') || app.source !== `apps/${app.id}/dist`) throw new Error('A compiled app must own its builder and dist directory.');
+    }
     const output = relativePath(app.output, `App ${app.id} output`, { empty: true });
     if (destinations.has(output)) throw new Error(`Duplicate app output: ${output || '/'}`);
     destinations.add(output);
@@ -50,6 +54,14 @@ export async function loadRegistry(rootDir = PROJECT_ROOT, registryFile = 'confi
 }
 
 /** The registry is an allowlist; discovery never scans the repository root. */
+export async function prepareAppBuilds({ rootDir = PROJECT_ROOT, registry } = {}) {
+  registry ||= await loadRegistry(rootDir);
+  for (const app of registry.apps.filter(app => app.build)) {
+    const builder = await import(pathToFileURL(path.join(rootDir, app.build)).href);
+    await builder.buildApp({ outdir: path.join(rootDir, app.source) });
+  }
+}
+
 export async function createFilePlan({ rootDir = PROJECT_ROOT, registry } = {}) {
   registry ||= await loadRegistry(rootDir);
   const files = new Map();
@@ -62,7 +74,8 @@ export async function createFilePlan({ rootDir = PROJECT_ROOT, registry } = {}) 
     const info = await lstat(absolute);
     if (!info.isFile() || info.isSymbolicLink()) throw new Error(`Public source must be a regular file: ${source}`);
     if (!explicitCompatibility && !WEB_EXTENSIONS.has(path.extname(source).toLowerCase())) return;
-    files.set(output, { source, output, compatibility: explicitCompatibility });
+    const generated = registry.apps.some(app => app.build && source.startsWith(`${app.source}/`));
+    files.set(output, { source, output, compatibility: explicitCompatibility, generated });
     if (!explicitCompatibility) {
       if (sourceOutputs.has(absolute)) throw new Error(`A runtime module needs one canonical output: ${source}`);
       sourceOutputs.set(absolute, output);
@@ -131,11 +144,23 @@ export async function buildSite({ rootDir = PROJECT_ROOT, distDir = path.join(ro
     throw new Error('The site builder only replaces its dedicated dist directory.');
   }
   registry ||= await loadRegistry(rootDir);
+  await prepareAppBuilds({ rootDir, registry });
   const { files, sourceOutputs } = await createFilePlan({ rootDir, registry });
   const prepared = new Map();
   // Resolve and validate every module before replacing the previous build.
   for (const [output, entry] of files) {
     if (!entry.compatibility && /\.(?:js|mjs)$/.test(output)) {
+      if (entry.generated) {
+        const compiled = await readFile(path.join(rootDir, entry.source), 'utf8');
+        await init;
+        for (const spec of parse(compiled, output)[0]) {
+          if (spec.d === -2 || spec.n === undefined || /^https?:/.test(spec.n)) continue;
+          const target = path.posix.normalize(path.posix.join(path.posix.dirname(output), spec.n.split(/[?#]/)[0]));
+          if (!/^\.\.?\//.test(spec.n) || !files.has(target)) throw new Error(`Compiled import is outside the public allowlist: ${output}: ${spec.n}`);
+        }
+        prepared.set(output, compiled);
+        continue;
+      }
       prepared.set(output, await rewriteModuleImports(await readFile(path.join(rootDir, entry.source), 'utf8'), {
         sourceFile: path.resolve(rootDir, entry.source), outputFile: output, sourceOutputs,
       }));

@@ -99,3 +99,11 @@ Travel의 명시적 예산 저장은 같은 트랜잭션에서 기존 장부의 
 모듈을 옮길 때 소스 import와 공개 경로 매핑을 함께 확인한다. 소스 위치가 같더라도 서로 다른 query는 기존 브라우저 모듈 구분의 일부이므로 빌드에서 제거하거나 합치지 않는다.
 
 Firestore 컬렉션, localStorage/IndexedDB 키, API 주소·함수명과 값의 단위는 변경하지 않는다. 폴더 이동을 데이터 마이그레이션으로 취급하지 않으며 로컬 `.env`·캐시·사용량 장부도 계승한다.
+
+## 소희 작업실·매출 앱
+
+`apps/sohee/sales`는 기존 독립 작업실에서 들어가는 React 분석 앱이다. 각 경로에 인증 셸을 생성하고 공통 `boot.mjs` 이후 기존 `homehunt-private-cloud` 앱의 회원 인증을 동기화해 Firestore만 조회한다. `sohee_sales/current`와 해시별 `sohee_sales_versions/{version}/chunks/{index}`는 회원 get만 허용하고 브라우저 list·쓰기는 막는다. 원본은 정적 번들에 포함하지 않는다.
+
+`services/sohee`는 새 토스 ZIP을 비공개 후보 폴더에서 검증한 뒤 버전별 Firestore 조각과 현재 포인터를 저장하는 로컬 서비스다. 원본 검증과 명시적 저장을 나누며, 현재 버전 비교·원본 SHA-256·부분 실패 보존을 적용한다. Payhere는 과거 자료로 유지한다.
+
+`config/apps.json`의 `build` 항목으로 `apps/sohee/build.mjs`를 실행해 회원 셸·번들만 생성한다. 컴파일된 모듈은 공개 경로 기준으로 검증하고 기존 공통 인증 URL을 유지한다. 대문·모든 앱에 작업실을 연결하되 기존 공유 홈의 여섯 앱 저장 계약은 바꾸지 않는다. 공개 매출 화면은 Firestore를 읽고, 원본 처리는 PC에서만 수동 실행한다. 원격 갱신 API는 필요하지 않다. [구조와 실행](../apps/sohee/sales/README.md), [검증](../apps/sohee/sales/verification.md), [서비스 조건](../services/sohee/README.md)을 따른다.

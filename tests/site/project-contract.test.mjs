@@ -7,9 +7,9 @@ import { PROJECT_ROOT, createFilePlan, loadRegistry } from '../../scripts/build-
 test('production registry adds local life apps without losing historical routes', async () => {
   const registry = await loadRegistry();
   const { files } = await createFilePlan({ registry });
-  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'travel', 'invitation', 'dates', 'table', 'footprints', 'wedding']);
+  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'travel', 'invitation', 'dates', 'table', 'footprints', 'wedding', 'sohee']);
   for (const pathname of ['index.html', 'wecost/index.html', 'honeymoon/index.html', 'homehunt/index.html', 'travel/index.html', 'invitation/index.html',
-    'dates/index.html', 'table/index.html', 'footprints/index.html', 'wedding/index.html', 'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json']) {
+    'dates/index.html', 'table/index.html', 'footprints/index.html', 'wedding/index.html', 'sohee/workspace/index.html', 'sohee/sales/overview/index.html', 'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json']) {
     assert.ok(files.has(pathname), `Missing public URL: ${pathname}`);
   }
   assert.equal([...files.keys()].filter(filename => filename.endsWith('.pdf')).length, 10);
@@ -46,8 +46,10 @@ test('moved sources keep their original public module URLs without wrappers or d
 });
 
 test('only Travel loads the decision panel and its site root remains output-relative', async () => {
-  for (const { id } of (await loadRegistry()).apps) {
-    const html = await readFile(path.join(PROJECT_ROOT, 'apps', id, 'index.html'), 'utf8');
+  const registry = await loadRegistry();
+  await createFilePlan({ registry });
+  for (const { id, source } of registry.apps) {
+    const html = await readFile(path.join(PROJECT_ROOT, source, 'index.html'), 'utf8');
     assert.equal(html.includes('decision-panel'), id === 'travel', id);
   }
   const panel = await readFile(path.join(PROJECT_ROOT, 'apps/travel/decision-panel.mjs'), 'utf8');

@@ -19,12 +19,18 @@
 | [apps/footprints](apps/footprints/README.md) | `/sungso/footprints/` | 장소·데이트 방문·외부 앨범 기본 버전, 기기·계정별 로컬 저장 |
 | [apps/wedding](apps/wedding/README.md) | `/sungso/wedding/` | 하객노트·준비 목록 기본 버전, 기존 결혼 앱 연결 |
 
+## 소희 앱
+
+[소희 작업실·포트폴리오와 양정커피 매출 분석](apps/sohee/README.md)은 `/sungso/sohee/workspace/`에서 연다. 매출은 공통 회원 인증 뒤 Firestore의 검증된 버전을 조회한다. 실제 매출 원본은 Git 제외된 `sohee/`에만 보관하며 공개 파일에는 코드만 포함한다. 갱신은 Codex에 요청할 때 PC에서 토스 원본을 받는 수동 절차다.
+
 ## 시작
 
 Node.js 22에서 저장소 루트의 명령을 실행한다.
 
 ```sh
 npm ci
+npm ci --prefix apps/sohee/sales
+npm ci --prefix services/sohee
 npm run dev
 ```
 

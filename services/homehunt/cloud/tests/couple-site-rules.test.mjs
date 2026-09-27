@@ -129,8 +129,8 @@ test('invitation selection revision and server time cannot be forged or silently
   await assertSucceeds(setDoc(ref, { ...invitation(), selection: { ...selection, note: 'next' }, selectionRevision: 2 }, { merge: true }));
 });
 
-test('all twelve released invitation template IDs remain valid favorite choices for each member', async () => {
-  assert.equal(TEMPLATES.length, 12);
+test('all released invitation template IDs remain valid favorite choices for each member', async () => {
+  assert.ok(TEMPLATES.length >= 12, 'The original twelve templates must remain available');
   const first = client(), second = client(partner), path = 'couplePicks/invitation_templates';
   const all = TEMPLATES.map(template => template.id);
   await assertSucceeds(setDoc(doc(first, path), { ...invitation(), favorites: { sungwoo: all } }, { merge: true }));

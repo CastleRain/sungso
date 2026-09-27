@@ -1,0 +1,36 @@
+import React, { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { connectSales } from './firebase.mjs';
+import { SalesApp, ErrorBoundary, BASE } from './pages.jsx';
+import { UpdateContext } from './update-panel.jsx';
+import {SalesUI, Button} from './ui.jsx';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import './style.css';
+import './ui.css';
+
+function App({ connection }) {
+  const [state, setState] = useState({ loading: true, data: null, error: '' });
+  async function reload() {
+    setState(old => ({ ...old, loading: true, error: '' }));
+    try { const result = await connection.load(); setState({ ...result, loading: false, error: '' }); }
+    catch { setState({ data: null, loading: false, error: '매출을 불러오지 못했습니다. 회원 권한과 연결 상태를 확인해주세요.' }); }
+  }
+  useEffect(() => { void reload(); }, []);
+  if (state.loading) return <div className="empty" role="status">회원 전용 매출을 불러오고 있습니다…</div>;
+  if (state.error) return <div className="empty" role="alert"><h1>연결을 확인해주세요</h1><p>{state.error}</p><Button className="primary" onClick={reload}>다시 불러오기</Button><a href="/sungso/sohee/workspace/">작업실로</a></div>;
+  const route = location.pathname.slice(BASE.length).replace(/\/$/, '') || 'overview';
+  return <UpdateContext.Provider value={{ connection, reload, manifest: state.manifest }}><SalesApp data={state.data} route={route} status={connection.label||"Firebase 회원 전용"}/></UpdateContext.Provider>;
+}
+
+const root = createRoot(document.getElementById('sales-root'));
+try {
+  const connection = await connectSales(() => {
+    root.unmount();
+    // Recharts measures tick/tooltip text in a body-level span outside React.
+    document.getElementById('recharts_measurement_span')?.remove();
+  });
+  root.render(<SalesUI><ErrorBoundary><App connection={connection}/></ErrorBoundary></SalesUI>);
+} catch {
+  root.render(<div className="empty" role="alert">회원 연결을 완료하지 못했습니다. 새로고침해 다시 확인해주세요.</div>);
+}

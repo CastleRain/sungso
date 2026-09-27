@@ -29,6 +29,10 @@ jobs:
           node-version: "22"
       - name: Install site build dependencies from the lockfile
         run: npm ci
+      - name: Install Sohee app and local import test dependencies
+        run: |
+          npm ci --prefix apps/sohee/sales
+          npm ci --prefix services/sohee
       - name: Install service build dependencies from lockfiles
         run: |
           npm ci --include=dev --prefix services/firebase-default
@@ -36,6 +40,10 @@ jobs:
           npm ci --include=dev --prefix services/homehunt/cloud
       - name: Build the site, check public paths, and run regression tests
         run: npm run check
+      - name: Verify Sohee controls and private deployment boundary
+        run: |
+          npm run test:components --prefix apps/sohee/sales
+          npm run test:boundary --prefix apps/sohee/sales
       - name: Verify all service bundles
         run: npm run build:services
       - name: Upload the validated public artifact

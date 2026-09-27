@@ -181,3 +181,17 @@ test('output checker catches broken document-relative data paths and CSS imports
   await f.put('dist/sample/style.css', '@import url("missing.css");');
   await assert.rejects(checkSite(f), /Missing public URL.*missing.css/);
 });
+
+test('registered compiled apps preserve public module identity and reject private imports before replacing site output', async t => {
+  const f = await fixture(t);
+  f.registry.apps.push({ id: 'compiled', source: 'apps/compiled/dist', output: 'compiled', build: 'apps/compiled/build.mjs', files: ['index.html', 'assets'] });
+  await f.put('apps/compiled/build.mjs', `import {mkdir,writeFile,readFile} from 'node:fs/promises';import path from 'node:path';export async function buildApp({outdir}){await mkdir(path.join(outdir,'assets'),{recursive:true});await writeFile(path.join(outdir,'index.html'),'<script type="module" src="./assets/main.js"></script>');await writeFile(path.join(outdir,'assets/main.js'),await readFile(new URL('./input.txt',import.meta.url),'utf8'));}`);
+  const code="import { token } from '../../shared/state.mjs'; export { token };";
+  await f.put('apps/compiled/input.txt', code);
+  await buildSite(f);
+  assert.equal(await readFile(path.join(f.distDir,'compiled/assets/main.js'),'utf8'),code);
+  await checkSite(f);
+  await f.put('apps/compiled/input.txt',"import '../../services/private.mjs';");
+  await assert.rejects(buildSite(f),/Compiled import is outside the public allowlist/);
+  assert.equal(await readFile(path.join(f.distDir,'compiled/assets/main.js'),'utf8'),code);
+});
