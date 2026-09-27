@@ -149,6 +149,16 @@ try {
  assert.equal(multiple.value,'1');assert.match(edited.container.querySelector('.composition-linked').textContent,/예시 마들렌 4구/);
  await user.click(screen.getByRole('button',{name:'Firebase에 저장',exact:true}));await screen.findByText('Firebase에 저장했습니다. 판매 분석에 적용되었습니다.');assert.equal(writes,2);
  assert.match(edited.container.querySelector('.menu-workbench tbody tr').textContent,/예시 구움과자321개1,032,000원/);
+ await user.click(screen.getByRole('button',{name:'메뉴 수정 닫기',exact:true}));await user.click(screen.getByRole('link',{name:'디저트 준비',exact:true}));await user.click(screen.getByRole('button',{name:'월 요일',exact:true}));
+ assert.equal(edited.container.querySelectorAll('.prep-table tbody tr').length,1);
+ assert.match(edited.container.querySelector('.prep-table tbody tr').textContent,/예시 구움과자.*원본 2종 합산.*17.5/);
+ const mergedPrep=screen.getByRole('textbox',{name:'예시 구움과자 당일 준비 수량',exact:true});assert.equal(mergedPrep.value,'18');
+ await user.clear(mergedPrep);await user.type(mergedPrep,'0');await user.tab();assert.match(edited.container.querySelector('.prep-total').textContent,/0개/);
+ await user.click(screen.getByRole('button',{name:'요일 비교',exact:true}));assert.match(edited.container.querySelector('.week-heatmap').textContent,/예시 구움과자/);assert.ok(!edited.container.querySelector('.week-heatmap').textContent.includes('4구'));
+ await user.click(screen.getByRole('button',{name:'과거 판매와 비교하기',exact:true}));assert.match(screen.getByRole('dialog').textContent,/예시 구움과자/);await user.click(screen.getByRole('button',{name:'준비 참고 닫기',exact:true}));
+ await user.click(screen.getByRole('button',{name:'예측 검증',exact:true}));assert.match(edited.container.querySelector('.prep-accuracy-panel').textContent,/원본 메뉴·판매단위 기준/);
+ await user.click(screen.getByRole('link',{name:'메뉴 판매',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));
+
  await user.click(screen.getByRole('button',{name:'메뉴 수정 닫기',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));await waitFor(()=>assert.equal(sourceSelect.disabled,false));
  await user.click(screen.getByRole('textbox',{name:'원본 메뉴',exact:true}));await user.click(screen.getByRole('option',{name:'예시 마들렌 4구',exact:true}));
  assert.equal(screen.getByRole('textbox',{name:'집계할 메뉴',exact:true}).value,'예시 구움과자');assert.equal(screen.getByRole('textbox',{name:'들어있는 수량',exact:true}).value,'4');assert.equal(screen.getByRole('textbox',{name:'수량 단위',exact:true}).value,'개');

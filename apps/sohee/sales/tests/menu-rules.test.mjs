@@ -32,3 +32,14 @@ test('account switch during reads or before transactional writes cannot publish 
  let member={uid:'a',role:'sohee'},release,writes=0;const gate=new Promise(resolve=>release=resolve);const store=createMenuRuleStore({getMember:()=>member,digest,timestamp:()=>1,list:async()=>{await gate;return [];},transact:async(id,update)=>{await gate;const next=update(null);writes++;return next;}});
  const read=store.load(),write=store.save(draft,0);await Promise.resolve();member={uid:'b',role:'sungwoo'};release();await assert.rejects(read,/STALE_SESSION/);await assert.rejects(write,/STALE_SESSION/);assert.equal(writes,0);
 });
+test('saving the same rule twice replaces one document and never multiplies sales twice',async()=>{
+ const docs=new Map();let writes=0;
+ const store=createMenuRuleStore({getMember:()=>({uid:'synthetic-member',role:'sohee'}),digest,timestamp:()=>1,list:async()=>[...docs].map(([id,data])=>({id,data})),transact:async(id,update)=>{const next=update(docs.get(id));docs.set(id,next);writes++;return next;}});
+ const raw=fixture(),before=JSON.stringify(raw);
+ await store.save(draft,0);const once=applyMenuRules(raw,await store.load());
+ await store.save(draft,1);const twice=applyMenuRules(raw,await store.load());
+ assert.equal(writes,2);assert.equal(docs.size,1);assert.equal((await store.load())[0].revision,2);
+ assert.deepEqual(twice,once);assert.equal(JSON.stringify(raw),before);
+ assert.equal(twice.menu_monthly.reduce((n,row)=>n+row.amount,0),raw.menu_monthly.reduce((n,row)=>n+row.amount,0));
+ await assert.rejects(store.save(draft,1),/MENU_RULE_CONFLICT/);assert.equal(docs.size,1);assert.equal(writes,2);
+});

@@ -13,7 +13,8 @@ export function planRow(p,buffer=0,manual=null){
   const target=manual===null?Math.max(0,Math.round(p.expected*(1+buffer/100))):Math.max(0,Math.round(manual));
   const expected=WINDOWS.map(w=>p.hours.slice(w.start,w.end).reduce((a,b)=>a+b,0));
   const units=distribute(expected,target);
-  return {...p,target,windows:units,expected_windows:expected,physical:target*(p.unit.includes('4개')?4:1)};
+  const factor=Object.hasOwn(p,'physical_factor')?p.physical_factor:(p.unit.includes('4개')?4:1);
+  return {...p,target,windows:units,expected_windows:expected,physical:target===0?0:factor==null?null:target*factor};
 }
 export function deadline(hour,minutes){
   const t=hour*60-minutes;

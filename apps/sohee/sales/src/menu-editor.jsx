@@ -29,10 +29,10 @@ export function MenuRuleEditor({opened,onClose}){
         </section>
       </div>
       <div className="menu-edit-preview composition-preview" aria-live="polite"><span>저장 후 판매 집계</span><div className="composition-equation"><span>{source||'판매 상품'} <b>1{saleUnit}</b></span><ArrowDown size={16} aria-hidden="true"/><strong>{targetName||'집계할 메뉴'} {validQuantity?`${multiplier}${unit}`:'· 수량을 입력하세요'}</strong></div><p>전체 이력 {num(quantity)}{sourceUnit} → <b>{validQuantity?`${num(quantity*multiplier)}${unit}`:'수량 입력 필요'}</b></p><p>매출 금액 {money(sum(original,'amount'))}은 그대로 유지합니다.</p></div>
-      <div className="composition-help"><p>다른 상품도 같은 집계 메뉴·단위로 지정하면 함께 합산합니다. 낱개 상품은 들어있는 수량을 1로 지정하세요.</p>{linkedSources.length>0&&<p className="composition-linked">같이 모을 상품: {linkedSources.map(rule=>rule.sourceName).join(', ')}</p>}<p>과거 전체 기간과 앞으로 들어오는 같은 원본 상품에 적용됩니다. 다른 원본 상품의 설정과 디저트 준비 예측은 각각 유지됩니다.</p></div>
+      <div className="composition-help"><p>다른 상품도 같은 집계 메뉴·단위로 지정하면 함께 합산합니다. 낱개 상품은 들어있는 수량을 1로 지정하세요.</p>{linkedSources.length>0&&<p className="composition-linked">같이 모을 상품: {linkedSources.map(rule=>rule.sourceName).join(', ')}</p>}<p>과거 전체 기간과 앞으로 들어오는 같은 원본 상품에 적용됩니다. 준비표에도 이름·수량 환산을 적용합니다. 예측 재학습과 검증 오차는 원본 기준을 유지합니다.</p></div>
       {error&&<Alert color="red" role="alert">{error}</Alert>}{message&&<Alert icon={<Check size={16}/>} role="status">{message}</Alert>}
       <div className="menu-edit-actions"><Button className="primary" disabled={busy||!ready||!context?.saveRule||!source||!targetName||!validQuantity} onClick={()=>save()}><Save size={16}/>{busy?'저장 중…':'Firebase에 저장'}</Button><Button disabled={busy||!ready||!enabled} onClick={()=>save(true)}><RotateCcw size={15}/> 원본 집계로 되돌리기</Button></div>
-      <p className="footnote">회원끼리 공유되는 설정입니다. 적용 설정 {revision?`${revision}차`:'없음'} · 버튼을 누를 때만 저장합니다.</p>
+      <p className="footnote">회원끼리 공유되는 설정입니다. 적용 설정 {revision?`${revision}차`:'없음'} · 같은 원본의 설정을 갱신하며 새 매출을 추가하지 않습니다.</p>
     </div>
   </Drawer>;
 }
