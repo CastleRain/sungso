@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { rm } from 'node:fs/promises';
+import { rm, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -84,5 +84,18 @@ try {
  mount(React.createElement(UpdateContext.Provider,{value:readOnlyContext},React.createElement(UpdatePanel)));
  await screen.findByText('저장된 분석을 조회하고 있습니다. 새 토스 원본은 요청할 때 Codex가 PC에서 가져와 반영합니다.');
  assert.equal(screen.queryByRole('button',{name:'새 원본 검증하기'}),null);cleanup();
- console.log('PASS: five routes with real Mantine controls, month/date selection, calendar boundaries, pack zero override, buffer/extra menus, empty sample/search, Korea-time picker, explicit source review → save. Charts alone use doubles.');
+ // The shared auth layer removes private shell children before calling React cleanup.
+ // Unmount must also succeed after that removal (logout and bfcache restoration).
+ const {createRoot}=await import('react-dom/client');const {flushSync}=await import('react-dom');
+ for(const [file,id] of [['../index.html','sales-root'],['../../workspace/index.html','workspace-root']]){
+  const parsed=new JSDOM(await readFile(path.resolve(here,file),'utf8'));
+  const host=document.createElement('div');host.innerHTML=parsed.window.document.querySelector('[data-private-root]').outerHTML;document.body.append(host);parsed.window.close();
+  const container=host.querySelector('#'+id),shell=host.querySelector('[data-private-root]'),errors=[];
+  const root=createRoot(container,{onUncaughtError:error=>errors.push(error)});
+  flushSync(()=>root.render(React.createElement('strong',null,'합성 회원 화면')));
+  shell.hidden=true;shell.inert=true;shell.replaceChildren();
+  assert.equal(host.textContent,'');flushSync(()=>root.unmount());
+  assert.equal(errors.length,0,`${id}: React cleanup must survive auth shell removal`);assert.equal(container.textContent,'');host.remove();
+ }
+ console.log('PASS: five routes with real Mantine controls, month/date selection, calendar boundaries, pack zero override, buffer/extra menus, empty sample/search, Korea-time picker, explicit source review → save, auth-shell removal before React cleanup. Charts alone use doubles.');
 } finally {cleanup();dom.window.close();await rm(output,{force:true});}
