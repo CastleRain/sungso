@@ -11,6 +11,7 @@ import './ui.css';
 import './dashboard.css';
 import './owner.css';
 import './menu-edit.css';
+import './polish.css';
 import {MenuRuleContext} from './menu-editor.jsx';
 import {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';
 

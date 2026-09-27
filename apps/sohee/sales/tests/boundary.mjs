@@ -10,7 +10,7 @@ for(const [page,name] of [['sohee/workspace/index.html','workspace'],['sohee/sal
 assert.ok(plan.files.has('sohee/workspace/index.html'));assert.ok(plan.files.has('sohee/sales/data/index.html'));
 const out=await buildSales();const html=await readFile(out+'/index.html','utf8'),js=await readFile(out+'/assets/app.js','utf8');
 assert.ok(html.includes('data-private-root hidden inert'));assert.ok(html.includes('application/x-sungso-script'));assert.ok(html.includes('/shared/firebase/boot.mjs'));
-for(const marker of ['sales-data','dashboard-data.json','synthetic-example.xlsx','synthetic-member','qa-connection'])assert.ok(!html.includes(marker)&&!js.includes(marker),marker);
+for(const marker of ['sales-data','dashboard-data.json','synthetic-example.xlsx','synthetic-member','qa-connection','layout-fixture','가상 시즌 한정 디저트 컬렉션'])assert.ok(!html.includes(marker)&&!js.includes(marker),marker);
 assert.ok(js.includes('../../../shared/firebase/site-auth.mjs'));assert.ok(!js.includes('../../../../shared/firebase/site-auth.mjs'));
 assert.equal((await readdir(out+'/assets')).some(name=>name.endsWith('.json')||name.endsWith('.csv')||name.endsWith('.map')),false);
 // Compare private numeric sentinels locally without printing the values.

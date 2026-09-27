@@ -17,7 +17,7 @@ Element.prototype.scrollIntoView=()=>{};window.scrollTo=()=>{};
 const {render,screen,fireEvent,cleanup,waitFor}=await import('@testing-library/react');
 const user=(await import('@testing-library/user-event')).default.setup({document});
 const here=path.dirname(fileURLToPath(import.meta.url)),output=path.join(here,'.component-test.cjs');
-const charts=['ResponsiveContainer','AreaChart','Area','BarChart','Bar','LineChart','Line','XAxis','YAxis','CartesianGrid','Tooltip','Legend','Cell','ReferenceLine','Brush'];
+const charts=['ComposedChart','LabelList','ResponsiveContainer','AreaChart','Area','BarChart','Bar','LineChart','Line','XAxis','YAxis','CartesianGrid','Tooltip','Legend','Cell','ReferenceLine','Brush'];
 await build({stdin:{contents:"export * from '../src/pages.jsx'; export * from '../src/update-panel.jsx'; export * from '../src/ui.jsx'; export * from '../src/menu-editor.jsx'; export {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';",loader:'jsx',resolveDir:here},bundle:true,platform:'node',format:'cjs',outfile:output,external:['react','react-dom','react-dom/*'],plugins:[{name:'charts-only',setup(api){api.onResolve({filter:/^recharts$/},()=>({path:'charts',namespace:'test'}));api.onLoad({filter:/.*/,namespace:'test'},()=>({contents:"import React from 'react';"+charts.map(name=>`export function ${name}(props){return React.createElement('div',null,props.children)}`).join('\n'),resolveDir:here}));}}]});
 const {SalesApp,SalesUI,SourceDateTime,UpdateContext,UpdatePanel,MenuRuleContext,applyMenuRules}=createRequire(import.meta.url)(output);
 const mount=child=>render(React.createElement(SalesUI,{env:'test'},child));
@@ -79,6 +79,11 @@ try {
    await user.click(screen.getByRole('button',{name:'일 요일',exact:true}));await user.click(screen.getByRole('button',{name:'시간대별 준비표',exact:true}));assert.ok(screen.getByRole('heading',{name:'이 요일은 계산할 기록이 부족합니다'}));
   }
   if(route==='menus'){
+   await user.click(screen.getByRole('button',{name:'수량순',exact:true}));
+   assert.equal(r.container.querySelector('.menu-rankings .ranking-label strong').textContent,'예시 쿠키');
+   await user.click(screen.getByRole('button',{name:'예시 신메뉴 상세 보기',exact:true}));
+   assert.ok(screen.getByRole('heading',{name:'예시 신메뉴 · 월별 변화',exact:true}));
+   await user.click(screen.getByRole('button',{name:'매출순',exact:true}));
    const shareSort=screen.getByRole('button',{name:/메뉴 금액 비중/});
    await user.click(shareSort);assert.equal(shareSort.closest('th').getAttribute('aria-sort'),'descending');
    const shares=()=>[...r.container.querySelectorAll('.menu-workbench tbody tr')].map(row=>parseFloat(row.children[4].textContent));
