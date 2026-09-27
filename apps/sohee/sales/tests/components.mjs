@@ -18,8 +18,8 @@ const {render,screen,fireEvent,cleanup,waitFor}=await import('@testing-library/r
 const user=(await import('@testing-library/user-event')).default.setup({document});
 const here=path.dirname(fileURLToPath(import.meta.url)),output=path.join(here,'.component-test.cjs');
 const charts=['ResponsiveContainer','AreaChart','Area','BarChart','Bar','LineChart','Line','XAxis','YAxis','CartesianGrid','Tooltip','Legend','Cell','ReferenceLine','Brush'];
-await build({stdin:{contents:"export * from '../src/pages.jsx'; export * from '../src/update-panel.jsx'; export * from '../src/ui.jsx';",loader:'jsx',resolveDir:here},bundle:true,platform:'node',format:'cjs',outfile:output,external:['react','react-dom','react-dom/*'],plugins:[{name:'charts-only',setup(api){api.onResolve({filter:/^recharts$/},()=>({path:'charts',namespace:'test'}));api.onLoad({filter:/.*/,namespace:'test'},()=>({contents:"import React from 'react';"+charts.map(name=>`export function ${name}(props){return React.createElement('div',null,props.children)}`).join('\n'),resolveDir:here}));}}]});
-const {SalesApp,SalesUI,SourceDateTime,UpdateContext,UpdatePanel}=createRequire(import.meta.url)(output);
+await build({stdin:{contents:"export * from '../src/pages.jsx'; export * from '../src/update-panel.jsx'; export * from '../src/ui.jsx'; export * from '../src/menu-editor.jsx'; export {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';",loader:'jsx',resolveDir:here},bundle:true,platform:'node',format:'cjs',outfile:output,external:['react','react-dom','react-dom/*'],plugins:[{name:'charts-only',setup(api){api.onResolve({filter:/^recharts$/},()=>({path:'charts',namespace:'test'}));api.onLoad({filter:/.*/,namespace:'test'},()=>({contents:"import React from 'react';"+charts.map(name=>`export function ${name}(props){return React.createElement('div',null,props.children)}`).join('\n'),resolveDir:here}));}}]});
+const {SalesApp,SalesUI,SourceDateTime,UpdateContext,UpdatePanel,MenuRuleContext,applyMenuRules}=createRequire(import.meta.url)(output);
 const mount=child=>render(React.createElement(SalesUI,{env:'test'},child));
 try {
  for(const route of ['overview','menus','prep','changes','data']){
@@ -31,6 +31,11 @@ try {
    assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-01');
    assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'3,363,500원');
    await user.click(screen.getByRole('textbox',{name:'월',exact:true}));await user.click(screen.getByRole('option',{name:'2026-04',exact:true}));
+   await user.click(screen.getByRole('button',{name:'2026-04-15 판매 상세',exact:true}));
+   assert.ok(await screen.findByRole('dialog',{name:'2026-04-15 판매 상세'}));
+   assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'1,718,500원');
+   await user.click(screen.getByRole('button',{name:'판매 상세 닫기'}));
+   await user.click(screen.getByRole('radio',{name:'여러 날짜 선택',exact:true}));
    await user.click(screen.getByRole('button',{name:'2026-04-16 · 132,000원 · 부분일',exact:true}));assert.match(r.container.querySelector('.calendar-reading').textContent,/부분일/);
    assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'132,000원');
    await user.click(screen.getByRole('button',{name:/^2026-04-15 ·/}));assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
@@ -83,6 +88,18 @@ try {
   }
   cleanup();
  }
+ // Explicit editing changes reporting quantities, keeps revenue, and restores originals.
+ const rawMenus=fixture();let writes=0;
+ function RulesHarness(){const [rules,setRules]=React.useState([]);return React.createElement(MenuRuleContext.Provider,{value:{rawData:rawMenus,rules,saveRule:async(draft,revision)=>{writes++;const saved={...draft,revision:revision+1};setRules([saved]);return saved;}}},React.createElement(SalesApp,{data:applyMenuRules(rawMenus,rules),route:'menus'}));}
+ const edited=mount(React.createElement(RulesHarness));
+ await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));
+ const sourceSelect=await screen.findByRole('textbox',{name:'원본 메뉴',exact:true});await waitFor(()=>assert.equal(sourceSelect.disabled,false));await user.click(sourceSelect);await user.click(screen.getByRole('option',{name:'예시 마들렌 4구',exact:true}));
+ await user.clear(screen.getByRole('textbox',{name:'집계할 메뉴 이름',exact:true}));await user.type(screen.getByRole('textbox',{name:'집계할 메뉴 이름',exact:true}),'예시 쿠키');
+ await user.click(screen.getByRole('textbox',{name:'집계 단위',exact:true}));await user.click(screen.getByRole('option',{name:'개',exact:true}));
+ const multiple=screen.getByRole('textbox',{name:'원본 1단위당 수량',exact:true});await user.clear(multiple);await user.type(multiple,'4');await user.tab();
+ assert.equal(writes,0);await user.click(screen.getByRole('button',{name:'Firebase에 저장',exact:true}));await screen.findByText('Firebase에 저장했습니다. 판매 분석에 적용되었습니다.');assert.equal(writes,1);
+ assert.match(edited.container.querySelector('.menu-workbench tbody tr').textContent,/예시 쿠키321개1,032,000원/);
+ await user.click(screen.getByRole('button',{name:'원본 집계로 되돌리기'}));await screen.findByText('원본 이름과 수량으로 되돌렸습니다.');assert.equal(writes,2);assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 마들렌 4구63팩/);cleanup();
  // The compact source panel only reloads stored data; it never starts collection.
  let sourceReloads=0,sourceRequests=0;
  const missingBulk=fixture();delete missingBulk.bulk;

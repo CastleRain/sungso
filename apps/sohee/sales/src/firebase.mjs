@@ -1,8 +1,10 @@
 import { getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDocFromServer } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDocFromServer, collection, getDocsFromServer, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getMember, syncAppAuth, registerPrivateCleanup } from '../../../../shared/firebase/site-auth.mjs';
 import { createSalesStore } from './store.mjs';
+import {createMenuRuleStore} from './menu-rule-store.mjs';
+import {MENU_RULES_COLLECTION} from '../../../../services/sohee/menu-rules.mjs';
 
 export async function connectSales(onClear) {
   const app = getApps().find(item => item.name === 'homehunt-private-cloud');
@@ -13,11 +15,18 @@ export async function connectSales(onClear) {
     read: async path => { const value = await getDocFromServer(doc(db, path)); return value.exists() ? value.data() : null; },
     digest: async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), byte => byte.toString(16).padStart(2, '0')).join('')
   });
+  const digest=async text=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))),byte=>byte.toString(16).padStart(2,'0')).join('');
+  const menuRules=createMenuRuleStore({getMember,digest,timestamp:serverTimestamp,
+    list:async()=>{const result=await getDocsFromServer(collection(db,MENU_RULES_COLLECTION));return result.docs.map(item=>({id:item.id,data:item.data()}));},
+    transact:async(id,update)=>runTransaction(db,async transaction=>{const ref=doc(db,MENU_RULES_COLLECTION,id),snapshot=await transaction.get(ref),next=update(snapshot.exists()?snapshot.data():null);transaction.set(ref,next);return next;})
+  });
   const controllers = new Set();
   let retired = false;
-  registerPrivateCleanup(() => { retired = true; store.clear(); for (const c of controllers) c.abort(); onClear(); });
+  registerPrivateCleanup(() => { retired = true; store.clear(); menuRules.clear(); for (const c of controllers) c.abort(); onClear(); });
   return {
-    load: () => store.load(),
+    async load(){const [snapshot,rules]=await Promise.all([store.load(),menuRules.load()]);return {...snapshot,menuRules:rules};},
+    loadMenuRules:()=>menuRules.load(),
+    saveMenuRule:(draft,revision)=>menuRules.save(draft,revision),
     async request(path, body) {
       if (!['127.0.0.1', 'localhost'].includes(location.hostname)) {
         if (path === 'status') return { mode: 'local-only', writesEnabled: false };

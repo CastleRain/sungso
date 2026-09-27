@@ -35,6 +35,27 @@ service cloud.firestore {
         allow list, write: if false;
       }
     }
+    // Members explicitly map an original menu name to a reporting name/unit.
+    // Imported sales and immutable published versions remain read-only.
+    function validSoheeMenuRule() {
+      let next = request.resource.data;
+      return next.keys().hasOnly(['sourceName','targetName','unit','multiplier','enabled','revision','updatedBy','updatedAt'])
+        && next.sourceName is string && next.sourceName.size() > 0 && next.sourceName.size() <= 160
+        && next.targetName is string && next.targetName.size() > 0 && next.targetName.size() <= 120
+        && next.unit in ['개','잔','팩','세트']
+        && next.multiplier is int && next.multiplier >= 1 && next.multiplier <= 100
+        && next.enabled is bool && next.revision is int
+        && next.updatedBy == request.auth.uid && next.updatedAt == request.time;
+    }
+    match /sohee_menu_rules/{id} {
+      allow read: if siteMember();
+      allow create: if siteMember() && id.matches('^[a-f0-9]{64}$')
+        && validSoheeMenuRule() && request.resource.data.revision == 1;
+      allow update: if siteMember() && validSoheeMenuRule()
+        && request.resource.data.sourceName == resource.data.sourceName
+        && request.resource.data.revision == resource.data.revision + 1;
+      allow delete: if false;
+    }
     function validHomehuntSnapshot(uid) {
       let next = request.resource.data;
       return next.keys().hasOnly(['snapshot', 'revision', 'updatedAt', 'updatedBy'])

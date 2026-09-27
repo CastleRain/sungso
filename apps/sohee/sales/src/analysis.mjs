@@ -1,3 +1,4 @@
+import {menuUnit,menuKey} from '../../../../services/sohee/menu-rules.mjs';
 // Pure calculations over the authenticated snapshot. No fetching or storage.
 const DAY = 86400000;
 const epoch = date => Date.parse(date + 'T00:00:00Z');
@@ -21,7 +22,7 @@ export function selectedDates(data, selection) {
   return [...new Set(dates)].filter(date => date >= data.start && date <= data.end).sort();
 }
 export function selectionLabel(selection) {
-  if (selection.mode === 'month') return selection.month + ' 월별';
+  if (selection.mode === 'month') return selection.month + ' · 월 전체';
   if (selection.mode === 'all') return '전체 수집 기간';
   const dates = selection.mode === 'multiple' ? [...selection.dates].sort() : selection.range.filter(Boolean);
   if (!dates.length) return '날짜를 선택하세요';
@@ -64,12 +65,17 @@ export function selectedMenuData(data, selection) {
   };
 }
 export function groupMenus(rows, key = 'menu_group') {
-  const groups = new Map();
-  for (const row of rows) {
-    const name = row[key], current = groups.get(name) || {menu:name, amount:0, quantity:0};
-    current.amount += row.amount; current.quantity += row.quantity; groups.set(name, current);
-  }
-  return [...groups.values()].map(row => ({...row, unit:row.menu.includes('4구') ? '팩 (4개)' : '개', average:row.quantity > 0 ? row.amount / row.quantity : null}));
+  const groups=new Map(),unitsByName=new Map();
+  for(const row of rows){const name=row[key],unit=menuUnit(row),id=menuKey(name,unit),current=groups.get(id)||{menu:name,menu_name:name,menu_key:id,unit,amount:0,quantity:0};current.amount+=row.amount;current.quantity+=row.quantity;groups.set(id,current);if(!unitsByName.has(name))unitsByName.set(name,new Set());unitsByName.get(name).add(unit);}
+  return [...groups.values()].map(row=>({...row,menu:unitsByName.get(row.menu_name).size>1?`${row.menu_name} · ${row.unit}`:row.menu_name,average:row.quantity>0?row.amount/row.quantity:null}));
+}
+export function dayMenuDetails(data,date){
+  const day=data.daily.find(row=>row.date===date);
+  if(!day)return {day:null,rows:[],reason:'해당 날짜의 매출 기록이 없습니다.'};
+  if(day.source!=='toss')return {day,rows:[],reason:'페이히어는 메뉴별 날짜 기록이 없어 이 날의 판매 메뉴를 만들 수 없습니다. 월별 메뉴 판매를 확인해주세요.'};
+  if(day.partial_day)return {day,rows:[],reason:'부분일의 메뉴 상세는 검증된 저장 집계에서 제외되어 있습니다. 새 토스 원본으로 완결일을 갱신한 뒤 확인할 수 있습니다.'};
+  const rows=groupMenus(data.menu_toss.filter(row=>row.date===date));
+  return {day,rows:rows.sort((a,b)=>b.amount-a.amount),reason:rows.length?'':'이 날짜에 저장된 메뉴 상세가 없습니다. 상세가 없다는 이유만으로 판매 0개로 판단하지 않습니다.'};
 }
 export function selectedBulk(data, selection) {
   const analysis = analyzeSelection(data, selection), dates = new Set(analysis.complete.filter(row => row.source === 'toss').map(row => row.date));

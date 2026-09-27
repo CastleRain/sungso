@@ -3,7 +3,7 @@ import {Popover, SegmentedControl} from '@mantine/core';
 import {DatePicker} from '@mantine/dates';
 import {CalendarDays, ChevronDown, X} from 'lucide-react';
 import {Button, Select, CheckField} from './ui.jsx';
-import {selectedDates, selectionLabel, shiftDate} from './analysis.mjs';
+import {selectedDates, selectionLabel, shiftDate, initialSelection} from './analysis.mjs';
 
 export const PeriodContext = createContext(null);
 export const usePeriod = () => useContext(PeriodContext);
@@ -36,6 +36,6 @@ export function DateFilter({data}) {
       <Button className="period-preset" onClick={()=>change({mode:'range',range:[shiftDate(data.complete_through,-6),data.complete_through]})}>최근 7일</Button>
       <Button className="period-preset" onClick={()=>change({mode:'all'})}>전체 기간</Button>
     </div>
-    <div className="period-footer"><span>{count}일 선택 · 화면 이동 시 유지</span><CheckField label="부분일 포함" checked={selection.includePartial} onChange={event=>change({includePartial:event.target.checked})}/></div>
+    <div className="period-footer"><Button className="period-month-reset" onClick={()=>setSelection(initialSelection(data))}>최신 월 전체</Button><span>{count}일 선택 · 화면 이동 시 유지</span><CheckField label="부분일 포함" checked={selection.includePartial} onChange={event=>change({includePartial:event.target.checked})}/></div>
   </section>;
 }

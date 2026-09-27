@@ -60,3 +60,7 @@ SOHEE_PYTHON=python3 node services/sohee/tests/full-import.mjs
 ```
 
 합성 XLSX/ZIP과 임시 폴더를 사용하며 실제 매출 파일을 읽거나 수정하지 않는다. 기존 서비스와 새 매출 규칙의 Emulator 명령은 [화면 검증 기록](../../apps/sohee/sales/verification.md)을 따른다.
+
+## 회원의 메뉴 집계 설정
+
+`menu-rules.mjs`는 브라우저에서도 사용하는 순수 변환·검증 계약이다. 실제 원본 이름이나 자동 수정 규칙을 포함하지 않는다. 회원이 `sohee_menu_rules`에 명시적으로 저장한 이름·단위·배수를 조회 화면에서 적용하며 수입 원본·분석 버전·예측은 수정하지 않는다. 원본 갱신/이전은 이 컬렉션을 쓰거나 지우지 않는다. 저장·수정 권한은 검증된 Google 활성 회원과 revision 비교로 제한한다.
