@@ -71,3 +71,32 @@ final result: passed
 - 1440px/390px 다섯 경로의 문서 가로 넘침 0, 실제 월·달력·슬라이더·수량·시간 입력, 열린 팝업의 로그아웃 제거를 확인했다. 모든 공개용 버튼/입력은 라이브러리 컨트롤이며 QA 전용 로그아웃은 검증 바에만 존재한다.
 - 새 근거: `ui-qa/{overview,menus,prep,changes,data}-desktop.png`, 같은 경로의 `*-mobile-top.png`, `month-select-desktop.png`, `calendar-desktop.png`, `prep-mobile.png`, `datetime-desktop.png`, `datetime-mobile.png`. 모두 합성 자료이며 운영 번들 밖이다. 라이브러리 조작은 실제 Mantine을 쓴 컴포넌트 검사도 통과했다.
 - 실제 사장 평가·실계정 운영 Firebase·실물 휴대전화·인쇄 검증은 여전히 남아 있다. 이번에는 운영 데이터 이전과 Git/공개 배포를 수행하지 않았다.
+
+## 사장용 대시보드와 네 메뉴 — 2026-09-27
+
+final result: passed
+
+- **시각 기준:** 사용자가 선택한 2번 시안 `.local/sohee-redesign/qa/reference.png` (1487×1058)와 직전 구현 `.local/sohee-owner/qa/before-desktop.png` (1440×1000). 밝은 공통 블루·상단 탐색·Pretendard·숫자 위계를 유지한다. 사용자가 승인한 네 메뉴 역할에 따라 원장/달력을 매출 내역으로 옮긴 것은 의도한 구성 변경이며 픽셀 복제를 목표로 하지 않는다.
+- **구현 근거:** `.local/sohee-owner/qa/dashboard-desktop.png` (1440×1000), `dashboard-desktop-detail.png`, `ledger-desktop.png`, `menus-desktop.png`, `prep-desktop.png`. 모바일은 390×844의 `dashboard-mobile.png`, `date-mobile.png`, `calendar-mobile.png`, `ledger-mobile.png`, `menus-mobile.png`, `prep-mobile.png`, `trend-mobile.png`, `status-mobile.png`다. 캡처는 모두 합성 자료다.
+- **비교:** 같은 폴더의 `comparison-full.png`와 `comparison-focus.png`는 1600×900 브라우저 비교 화면이다. 원본 이미지를 738 CSS px 너비에 비율대로 축소했다(시안 약 0.496, 구현 약 0.513 배율). 확대 비교는 변경 전/후 1440px 화면을 동일 배율로 표시하고 상단 430 CSS px를 대조했다. viewport 캡처는 CSS px와 이미지 px가 1:1이다. fullPage 캡처는 차트 합성 잔상이 발생해 최종 근거에서 제외하고 개별 viewport 캡처를 사용했다.
+
+**확인한 표면**
+
+- Pretendard Variable 계산값, 제목 30px/모바일 27px, 주 매출 43px/35px, 작은 단위와 보조 설명의 구분을 확인했다. 숫자는 tabular, 핵심 금액은 공통 링크색을 사용한다.
+- 주 매출 + 세 보조 지표, 약 63:37 매출 흐름/메뉴 순위, 아래 세 분석 카드로 위계를 구성했다. 390px에서는 세로 배치와 접는 네 메뉴, 표 내부 스크롤을 사용하며 문서 가로 넘침은 0이었다.
+- 새 브랜드 색이나 사진을 추가하지 않았다. 기존 Lucide·Recharts·Mantine을 사용했고 원본의 컵/버튼/차트 스타일과 공통 토큰을 유지했다. 시안을 이미지 배경으로 구현하지 않았다.
+- 부분일은 합계/막대/달력에서 표시한다. 비교는 완결일만, 날짜별 메뉴와 큰 주문은 토스만 집계한다. 메뉴 비중의 분모는 메뉴 금액 합계이며 팩/개를 보존한다. 큰 주문 상세가 없는 상태는 0건 대신 자료 없음으로 표시한다. 기존 예측 오차/최근 평균 대비 한계를 숨기지 않는다.
+
+**수정 이력**
+
+- [P2, 해결] 모바일 날짜 선택 팝오버의 하단 적용 버튼이 viewport 밖에 놓였다. 모바일에서 화면 중앙의 높이 제한 팝오버로 바꾸고 내부 스크롤을 제공했다. 최종 `date-mobile.png`에서 달력과 적용 버튼이 함께 보인다. 측정한 top 170.5 / bottom 673.5px로 844px 안에 들어온다.
+- 최종 비교에서 남은 P0/P1/P2는 없다. 자료 기준 팝오버도 390px 화면 안에 표시된다.
+
+**동작 검증**
+
+- 기본 `/sales/`→대시보드, 네 메뉴 이동과 기존 직접 URL, 두 개의 떨어진 날짜 선택→대시보드/원장 금액 일치→메뉴 판매의 같은 선택 유지, 모바일 연속 기간 선택과 달력 부분일을 확인했다.
+- 일별/누적 Recharts 실렌더, 메뉴 금액 비중, 요일 표본, 월 결제 시각/날짜별 메뉴 주문 시각의 설명 전환, 과거 비교 펼침, 준비 요일·고정 학습 기준과 과거 판매 필터 분리를 확인했다.
+- 자료 기준 팝오버를 연 채 QA 로그아웃한 뒤 개인 본문·dialog·Recharts body 측정 요소가 제거됐다. 읽은 브라우저 error/warn 로그는 비어 있었다.
+- 실제 Mantine 검사와 저장된 분석 재조회가 수집 API를 호출하지 않는 검사, 공개 번들 경계 검사를 통과했다. 서버/규칙/운영 자료를 수정하지 않았다.
+
+**남은 범위:** 실제 사장 사용성 평가, 실물 휴대전화·다른 브라우저·인쇄는 이번 범위에서 미검증이다. 새 원본 수집과 모델 정확도 개선을 수행한 것은 아니다. 원격 반영은 별도 아래 배포 기록을 따른다.

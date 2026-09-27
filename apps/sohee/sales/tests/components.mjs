@@ -9,7 +9,7 @@ import { JSDOM } from 'jsdom';
 import { fixture } from './fixture.mjs';
 
 const dom=new JSDOM('<!doctype html><html><body></body></html>',{url:'http://localhost/sungso/sohee/sales/',pretendToBeVisual:true});
-for(const name of ['window','document','navigator','HTMLElement','Element','ShadowRoot','Document','Node','HTMLInputElement','HTMLButtonElement','HTMLSelectElement','Event','MouseEvent','MutationObserver','getComputedStyle'])Object.defineProperty(globalThis,name,{configurable:true,value:typeof dom.window[name]==='function'&&name==='getComputedStyle'?dom.window[name].bind(dom.window):dom.window[name]});
+for(const name of ['window','document','navigator','HTMLElement','Element','ShadowRoot','Document','Node','HTMLInputElement','HTMLAnchorElement','HTMLButtonElement','HTMLSelectElement','Event','MouseEvent','MutationObserver','getComputedStyle'])Object.defineProperty(globalThis,name,{configurable:true,value:typeof dom.window[name]==='function'&&name==='getComputedStyle'?dom.window[name].bind(dom.window):dom.window[name]});
 globalThis.requestAnimationFrame=fn=>setTimeout(fn,0);globalThis.cancelAnimationFrame=clearTimeout;
 globalThis.ResizeObserver=class{observe(){}unobserve(){}disconnect(){}};
 window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
@@ -26,29 +26,45 @@ try {
   const r=mount(React.createElement(SalesApp,{data:fixture(),route,status:'synthetic'}));
   assert.equal(screen.getAllByRole('heading',{level:1}).length,1);assert.ok(!r.container.textContent.includes('NaN'));
   if(route==='overview'){
-   await user.click(screen.getByRole('button',{name:'2026-01',exact:true}));
+   await user.click(screen.getByRole('button',{name:'월별 매출 원장',exact:true}));
+   await user.click(await screen.findByRole('button',{name:'2026-01',exact:true}));
    assert.equal(screen.getByRole('textbox',{name:'월',exact:true}).value,'2026-01');
-   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,'3,363,500원');
+   assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'3,363,500원');
    await user.click(screen.getByRole('textbox',{name:'월',exact:true}));await user.click(screen.getByRole('option',{name:'2026-04',exact:true}));
    await user.click(screen.getByRole('button',{name:'2026-04-16 · 132,000원 · 부분일',exact:true}));assert.match(r.container.querySelector('.calendar-reading').textContent,/부분일/);
-   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,'132,000원');
+   assert.equal(r.container.querySelector('.ledger-summary strong').textContent,'132,000원');
    await user.click(screen.getByRole('button',{name:/^2026-04-15 ·/}));assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
-   await user.click(screen.getByRole('link',{name:'메뉴 분석',exact:true}));assert.ok(screen.getByRole('heading',{name:'메뉴별 판매 분석',exact:true}));
+   await user.click(screen.getByRole('link',{name:'메뉴 판매',exact:true}));assert.ok(screen.getByRole('heading',{name:'메뉴 판매',exact:true}));
    assert.equal(window.location.pathname,'/sungso/sohee/sales/menus/');assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);assert.match(r.container.textContent,/부분일 1일은 메뉴 집계에서 제외/);
-   window.history.replaceState(null,'','/sungso/sohee/sales/overview/');fireEvent(window,new window.PopStateEvent('popstate'));assert.ok(screen.getByRole('heading',{name:'매출 원장과 추이'}));
+   window.history.replaceState(null,'','/sungso/sohee/sales/overview/');fireEvent(window,new window.PopStateEvent('popstate'));assert.ok(screen.getByRole('heading',{name:'매출 내역'}));
    assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
    await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));
    await user.click(screen.getByRole('radio',{name:'연속 기간',exact:true}));
    await user.click(screen.getByRole('button',{name:'분석일 2026-04-01',exact:true}));await user.click(screen.getByRole('button',{name:'분석일 2026-04-03',exact:true}));
    await user.click(screen.getByRole('button',{name:'선택 적용',exact:true}));assert.match(r.container.querySelector('.period-title').textContent,/2026-04-01 – 2026-04-03/);
    const expected=fixture().daily.filter(row=>row.date>='2026-04-01'&&row.date<='2026-04-03').reduce((sum,row)=>sum+row.amount,0);
-   assert.equal(r.container.querySelector('.dashboard-stats .stat-value').textContent,expected.toLocaleString('ko-KR')+'원');
+   assert.equal(r.container.querySelector('.ledger-summary strong').textContent,expected.toLocaleString('ko-KR')+'원');
    await user.click(screen.getByRole('button',{name:'날짜 선택',exact:true}));await user.click(screen.getByRole('radio',{name:'여러 날짜',exact:true}));
    await user.click(screen.getByRole('button',{name:'분석일 2026-04-02',exact:true}));await user.click(screen.getByRole('button',{name:'분석일 2026-04-06',exact:true}));await user.click(screen.getByRole('button',{name:'선택 적용',exact:true}));
    assert.match(r.container.querySelector('.period-title').textContent,/2일 선택/);
-   await user.click(screen.getByRole('button',{name:'기록일당',exact:true}));assert.equal(screen.getByRole('button',{name:'기록일당',exact:true}).getAttribute('aria-pressed'),'true');
+   await user.click(screen.getByRole('button',{name:'월별 매출 원장',exact:true}));
+   await user.click(await screen.findByRole('button',{name:'기록일당',exact:true}));assert.equal(screen.getByRole('button',{name:'기록일당',exact:true}).getAttribute('aria-pressed'),'true');
+  }
+  if(route==='changes'){
+   assert.ok(screen.getByRole('heading',{name:'대시보드',exact:true}));
+   const navigation=screen.getByRole('navigation',{name:'매출 분석'});
+   assert.deepEqual([...navigation.querySelectorAll('a')].map(a=>a.textContent),['대시보드','매출 내역','메뉴 판매','디저트 준비']);
+   assert.equal(screen.queryByRole('link',{name:'데이터 관리'}),null);
+   assert.equal(screen.queryByRole('heading',{name:'매출 달력'}),null);
+   const expected=fixture().daily.filter(row=>row.month==='2026-04').reduce((sum,row)=>sum+row.amount,0);
+   assert.equal(r.container.querySelector('.owner-sales strong').textContent,expected.toLocaleString('ko-KR')+'원');
+   await user.click(screen.getByRole('button',{name:'누적',exact:true}));assert.equal(screen.getByRole('button',{name:'누적',exact:true}).getAttribute('aria-pressed'),'true');
+   await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));assert.ok(screen.getByText('이 화면의 자료 범위'));assert.equal(screen.getByRole('button',{name:'저장된 분석 다시 불러오기'}).disabled,true);
+   await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));
+   await user.click(screen.getByRole('button',{name:'과거 변화와 비교 근거'}));assert.ok(await screen.findByRole('heading',{name:'월별 대량 주문 이력'}));
   }
   if(route==='prep'){
+   assert.equal(screen.queryByRole('button',{name:'날짜 선택',exact:true}),null);
    await user.click(screen.getByRole('button',{name:'월 요일',exact:true}));
    const input=screen.getByRole('textbox',{name:'예시 마들렌 4구 당일 준비 수량',exact:true});await user.clear(input);await user.type(input,'0');await user.tab();assert.equal(input.value,'0');assert.match(r.container.querySelector('.prep-total').textContent,/3개/);
    fireEvent.keyDown(screen.getByRole('slider',{name:'준비 여유분'}),{key:'ArrowRight'});assert.equal(screen.getByRole('slider',{name:'준비 여유분'}).getAttribute('aria-valuenow'),'5');
@@ -62,6 +78,14 @@ try {
   }
   cleanup();
  }
+ // The compact source panel only reloads stored data; it never starts collection.
+ let sourceReloads=0,sourceRequests=0;
+ const missingBulk=fixture();delete missingBulk.bulk;
+ mount(React.createElement(UpdateContext.Provider,{value:{reload:async()=>sourceReloads++,connection:{request:async()=>sourceRequests++}}},React.createElement(SalesApp,{data:missingBulk,route:'changes'})));
+ assert.ok(screen.getByText('분리 자료 없음'));
+ await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));
+ await user.click(await screen.findByRole('button',{name:'저장된 분석 다시 불러오기'}));
+ await waitFor(()=>assert.equal(sourceReloads,1));assert.equal(sourceRequests,0);cleanup();
  // Real date picker: selecting a wall-clock time must keep its date even across UTC boundaries.
  let picked;function DateHarness(){const [value,setValue]=React.useState('2026-05-02T00:30');return React.createElement(SourceDateTime,{value,onChange:v=>{picked=v;setValue(v)}})}mount(React.createElement(DateHarness));
  await user.click(screen.getByRole('button',{name:/원본 추출 시각/}));
@@ -97,5 +121,5 @@ try {
   assert.equal(host.textContent,'');flushSync(()=>root.unmount());
   assert.equal(errors.length,0,`${id}: React cleanup must survive auth shell removal`);assert.equal(container.textContent,'');host.remove();
  }
- console.log('PASS: five routes with real Mantine controls, month/date selection, calendar boundaries, pack zero override, buffer/extra menus, empty sample/search, Korea-time picker, explicit source review → save, auth-shell removal before React cleanup. Charts alone use doubles.');
+ console.log('PASS: four primary pages plus compatible source route, stored-data-only reload, real Mantine controls, month/date selection, calendar boundaries, pack zero override, buffer/extra menus, empty sample/search, Korea-time picker, explicit source review → save, auth-shell removal before React cleanup. Charts alone use doubles.');
 } finally {cleanup();dom.window.close();await rm(output,{force:true});}

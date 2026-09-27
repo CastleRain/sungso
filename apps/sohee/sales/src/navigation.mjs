@@ -2,7 +2,7 @@ export const SALES_BASE = '/sungso/sohee/sales/';
 const routes = new Set(['overview','menus','prep','changes','data']);
 export function salesRoute(pathname) {
   if (!pathname.startsWith(SALES_BASE)) return null;
-  const route = pathname.slice(SALES_BASE.length).replace(/\/$/, '') || 'overview';
+  const route = pathname.slice(SALES_BASE.length).replace(/\/$/, '') || 'changes';
   return routes.has(route) ? route : null;
 }
 export function internalSalesLink(event, origin) {

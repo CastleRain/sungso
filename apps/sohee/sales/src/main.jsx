@@ -9,6 +9,7 @@ import '@mantine/dates/styles.css';
 import './style.css';
 import './ui.css';
 import './dashboard.css';
+import './owner.css';
 
 function App({ connection }) {
   const [state, setState] = useState({ loading: true, data: null, error: '' });
@@ -20,7 +21,7 @@ function App({ connection }) {
   useEffect(() => { void reload(); }, []);
   if (state.loading && !state.data) return <div className="empty" role="status">회원 전용 매출을 불러오고 있습니다…</div>;
   if (state.error) return <div className="empty" role="alert"><h1>연결을 확인해주세요</h1><p>{state.error}</p><Button className="primary" onClick={reload}>다시 불러오기</Button><a href="/sungso/sohee/workspace/">작업실로</a></div>;
-  const route = location.pathname.slice(BASE.length).replace(/\/$/, '') || 'overview';
+  const route = location.pathname.slice(BASE.length).replace(/\/$/, '') || 'changes';
   return <UpdateContext.Provider value={{ connection, reload, manifest: state.manifest }}><SalesApp data={state.data} route={route} status={connection.label||"Firebase 회원 전용"}/></UpdateContext.Provider>;
 }
 
