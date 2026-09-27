@@ -130,18 +130,29 @@ try {
  assert.match(screen.getByRole('dialog').textContent,/저장된 페이히어 자료/);
  await user.click(screen.getByRole('link',{name:'2026-01 월별 메뉴 판매 보기 →',exact:true}));
  assert.ok(screen.getByRole('heading',{name:'메뉴 판매',exact:true}));assert.match(sourceView.container.querySelector('.period-title').textContent,/2026-01/);cleanup();
- // Explicit editing changes reporting quantities, keeps revenue, and restores originals.
+ // User-defined composition: two different products can contribute to a new menu name.
  const rawMenus=fixture();let writes=0;
- function RulesHarness(){const [rules,setRules]=React.useState([]);return React.createElement(MenuRuleContext.Provider,{value:{rawData:rawMenus,rules,saveRule:async(draft,revision)=>{writes++;const saved={...draft,revision:revision+1};setRules([saved]);return saved;}}},React.createElement(SalesApp,{data:applyMenuRules(rawMenus,rules),route:'menus'}));}
+ function RulesHarness(){const [rules,setRules]=React.useState([]);return React.createElement(MenuRuleContext.Provider,{value:{rawData:rawMenus,rules,saveRule:async(draft,revision)=>{writes++;const saved={...draft,revision:revision+1};setRules(old=>[...old.filter(rule=>rule.sourceName!==draft.sourceName),saved]);return saved;}}},React.createElement(SalesApp,{data:applyMenuRules(rawMenus,rules),route:'menus'}));}
  const edited=mount(React.createElement(RulesHarness));
  await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));
  const sourceSelect=await screen.findByRole('textbox',{name:'원본 메뉴',exact:true});await waitFor(()=>assert.equal(sourceSelect.disabled,false));await user.click(sourceSelect);await user.click(screen.getByRole('option',{name:'예시 마들렌 4구',exact:true}));
- await user.clear(screen.getByRole('textbox',{name:'집계할 메뉴 이름',exact:true}));await user.type(screen.getByRole('textbox',{name:'집계할 메뉴 이름',exact:true}),'예시 쿠키');
- await user.click(screen.getByRole('textbox',{name:'집계 단위',exact:true}));await user.click(screen.getByRole('option',{name:'개',exact:true}));
- const multiple=screen.getByRole('textbox',{name:'원본 1단위당 수량',exact:true});await user.clear(multiple);await user.type(multiple,'4');await user.tab();
+ const targetInput=screen.getByRole('textbox',{name:'집계할 메뉴',exact:true});await user.clear(targetInput);await user.type(targetInput,'예시 구움과자');
+ await user.click(screen.getByRole('textbox',{name:'수량 단위',exact:true}));await user.click(screen.getByRole('option',{name:'개',exact:true}));
+ const multiple=screen.getByRole('textbox',{name:'들어있는 수량',exact:true});await user.clear(multiple);assert.equal(screen.getByRole('button',{name:'Firebase에 저장',exact:true}).disabled,true);await user.type(multiple,'4');await user.tab();
+ assert.match(edited.container.querySelector('.composition-equation').textContent,/예시 마들렌 4구 1팩예시 구움과자 4개/);
  assert.equal(writes,0);await user.click(screen.getByRole('button',{name:'Firebase에 저장',exact:true}));await screen.findByText('Firebase에 저장했습니다. 판매 분석에 적용되었습니다.');assert.equal(writes,1);
- assert.match(edited.container.querySelector('.menu-workbench tbody tr').textContent,/예시 쿠키321개1,032,000원/);
- await user.click(screen.getByRole('button',{name:'원본 집계로 되돌리기'}));await screen.findByText('원본 이름과 수량으로 되돌렸습니다.');assert.equal(writes,2);assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 마들렌 4구63팩/);cleanup();
+ assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 구움과자252개756,000원/);
+ // An unrelated original remains separate until the user explicitly assigns it too.
+ assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 쿠키69개276,000원/);
+ await user.click(sourceSelect);await user.click(screen.getByRole('option',{name:'예시 쿠키',exact:true}));
+ await user.clear(targetInput);await user.type(targetInput,'예시 구움');await user.click(screen.getByRole('option',{name:'예시 구움과자',exact:true}));
+ assert.equal(multiple.value,'1');assert.match(edited.container.querySelector('.composition-linked').textContent,/예시 마들렌 4구/);
+ await user.click(screen.getByRole('button',{name:'Firebase에 저장',exact:true}));await screen.findByText('Firebase에 저장했습니다. 판매 분석에 적용되었습니다.');assert.equal(writes,2);
+ assert.match(edited.container.querySelector('.menu-workbench tbody tr').textContent,/예시 구움과자321개1,032,000원/);
+ await user.click(screen.getByRole('button',{name:'메뉴 수정 닫기',exact:true}));await user.click(screen.getByRole('button',{name:'메뉴 이름·수량 수정',exact:true}));await waitFor(()=>assert.equal(sourceSelect.disabled,false));
+ await user.click(screen.getByRole('textbox',{name:'원본 메뉴',exact:true}));await user.click(screen.getByRole('option',{name:'예시 마들렌 4구',exact:true}));
+ assert.equal(screen.getByRole('textbox',{name:'집계할 메뉴',exact:true}).value,'예시 구움과자');assert.equal(screen.getByRole('textbox',{name:'들어있는 수량',exact:true}).value,'4');assert.equal(screen.getByRole('textbox',{name:'수량 단위',exact:true}).value,'개');
+ await user.click(screen.getByRole('button',{name:'원본 집계로 되돌리기'}));await screen.findByText('원본 이름과 수량으로 되돌렸습니다.');assert.equal(writes,3);assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 마들렌 4구63팩/);assert.match(edited.container.querySelector('.menu-workbench tbody').textContent,/예시 구움과자69개276,000원/);cleanup();
  // The compact source panel only reloads stored data; it never starts collection.
  let sourceReloads=0,sourceRequests=0;
  const missingBulk=fixture();delete missingBulk.bulk;
