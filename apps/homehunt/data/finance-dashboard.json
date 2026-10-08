@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-07T06:23:10.083Z",
-  "lastAttemptAt": "2026-10-07T06:23:10.083Z",
-  "status": "partial",
+  "generatedAt": "2026-10-08T06:35:08.838Z",
+  "lastAttemptAt": "2026-10-08T06:35:08.838Z",
+  "status": "ok",
   "collectionNote": "공식 공개 자료를 하루 한 번 확인합니다. 관측월·적용일과 확인시각은 다르며, 수집 실패 시 이전 자료의 기준일을 유지합니다.",
   "series": [
     {
@@ -59,10 +59,10 @@
       "dataUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202601/202610/BECBLA0302",
       "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11065098",
       "publicationBasis": "bok_press_release_registered_at",
-      "checkedAt": "2026-10-06T06:48:15.735Z",
-      "lastAttemptAt": "2026-10-07T06:23:10.083Z",
-      "status": "stale",
-      "statusReason": "source_check_failed",
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastAttemptAt": "2026-10-08T06:35:08.838Z",
+      "status": "ok",
+      "statusReason": null,
       "publicationNote": null
     },
     {
@@ -178,8 +178,8 @@
       ],
       "publicationBasis": null,
       "publicationSourceUrl": null,
-      "checkedAt": "2026-10-07T06:23:10.083Z",
-      "lastAttemptAt": "2026-10-07T06:23:10.083Z",
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastAttemptAt": "2026-10-08T06:35:08.838Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다."
@@ -235,8 +235,8 @@
           "value": 5.2
         }
       ],
-      "checkedAt": "2026-10-07T06:23:10.083Z",
-      "lastAttemptAt": "2026-10-07T06:23:10.083Z",
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastAttemptAt": "2026-10-08T06:35:08.838Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": null
@@ -245,22 +245,21 @@
   "sources": [
     {
       "id": "bok_mortgage",
-      "status": "failed",
-      "checkedAt": "2026-10-07T06:23:10.083Z",
-      "lastSuccessAt": "2026-10-06T06:48:15.735Z",
-      "error": "source_check_failed"
+      "status": "ok",
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastSuccessAt": "2026-10-08T06:35:08.838Z"
     },
     {
       "id": "bok_base",
       "status": "ok",
-      "checkedAt": "2026-10-07T06:23:10.083Z",
-      "lastSuccessAt": "2026-10-07T06:23:10.083Z"
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastSuccessAt": "2026-10-08T06:35:08.838Z"
     },
     {
       "id": "hf_bogeumjari",
       "status": "ok",
-      "checkedAt": "2026-10-07T06:23:10.083Z",
-      "lastSuccessAt": "2026-10-07T06:23:10.083Z"
+      "checkedAt": "2026-10-08T06:35:08.838Z",
+      "lastSuccessAt": "2026-10-08T06:35:08.838Z"
     }
   ]
 }
