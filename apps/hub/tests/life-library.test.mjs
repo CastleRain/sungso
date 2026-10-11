@@ -7,7 +7,7 @@ test('local life starters can be found without changing the shared six-app confi
   const config = normalizeHomeConfig();
   const before = structuredClone(config);
   const all = getBrowsableApps(config);
-  assert.equal(all.length, 10);
+  assert.equal(all.length, 11);
   assert.equal(all.filter(app => app.local).length, 3);
   assert.equal(getBrowsableApps(config, { query: '장보기' })[0].id, 'table');
   assert.equal(getBrowsableApps(config, { query: '사진첩' })[0].id, 'footprints');
@@ -23,11 +23,25 @@ test('local life starters can be found without changing the shared six-app confi
   assert.throws(() => withHomeShortcuts(config, ['sohee']));
 });
 
-test('the ten-app mobile library keeps the last four apps reachable on page two', () => {
+test('the eleven-app mobile library keeps both HomeHunt versions and all apps reachable', () => {
   const apps = getBrowsableApps(normalizeHomeConfig());
   const first = paginateApps(apps, { page: 1, pageSize: 6 });
   const second = paginateApps(apps, { page: 2, pageSize: 6 });
   assert.equal(first.pageCount, 2);
-  assert.equal(second.items.length, 4);
-  assert.equal(new Set([...first.items, ...second.items].map(app => app.id)).size, 10);
+  assert.equal(second.items.length, 5);
+  assert.equal(new Set([...first.items, ...second.items].map(app => app.id)).size, 11);
+  assert.ok(apps.some(app => app.id === 'homehunt' && app.href === './homehunt/'));
+  assert.ok(apps.some(app => app.id === 'homehunt-v2' && app.href === './homehunt-v2/'));
+});
+
+test('Ver2 is a non-stored entry without changing six-app settings or shortcuts', () => {
+  const config = normalizeHomeConfig({ revision: 9 });
+  const before = structuredClone(config);
+  const v2 = getBrowsableApps(config, { query: 'HomeHunt Ver2', groupId: 'daily' })[0];
+  assert.equal(v2?.id, 'homehunt-v2');
+  assert.equal(v2?.href, './homehunt-v2/');
+  assert.equal(v2?.pinnable, false);
+  assert.deepEqual(config, before);
+  assert.equal(validateHomeConfig(config).apps.length, 6);
+  assert.throws(() => withHomeShortcuts(config, ['homehunt-v2']));
 });

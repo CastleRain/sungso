@@ -91,6 +91,21 @@ test('the actual app fetch boundary forwards only matching cloud API URLs to the
   assert.deepEqual(calls.map(item => item[0]), ['authenticated', 'authenticated', 'plain', 'plain', 'plain']);
 });
 
+test('a local owner change prevents backup capture before private state or storage is read', () => {
+  let reads = 0;
+  const sandbox = {
+    getMember: () => ({ uid: 'current-member' }),
+    getLocalRecordAccess: () => ({ locked: true, reason: '합성 다른 계정 기록' }),
+    CloudSnapshotError,
+    localStorage: { getItem: () => { reads += 1; return '{}'; } },
+    readRecommendationForm: () => { reads += 1; return {}; },
+    state: {}, normalizeCloudSnapshot: safe,
+  };
+  vm.createContext(sandbox); vm.runInContext(actualFunction('captureCloudSnapshot'), sandbox);
+  assert.throws(() => sandbox.captureCloudSnapshot(), error => error.code === 'LOCAL_RECORD_OWNER_MISMATCH');
+  assert.equal(reads, 0);
+});
+
 function restoreHarness({ failAt = '' } = {}) {
   const keys = ['homehunt_visits_v1', 'homehunt_shortlist_v1', 'homehunt_compare_ids_v1',
     'homehunt_recommendation_filters_v1', 'homehunt_supply_favorites_v1', 'homehunt_parking_observations_v1'];
@@ -109,6 +124,7 @@ function restoreHarness({ failAt = '' } = {}) {
   const write = key => value => storage.setItem(key, JSON.stringify(value));
   const sandbox = {
     normalizeCloudSnapshot: safe, CloudSnapshotError, state, localStorage: storage,
+    getMember: () => ({ uid: 'synthetic-member' }), resolveHomehuntPersonalStorageKey: key => key,
     saveVisits: write(keys[0]), saveShortlist: write(keys[1]), saveCompareIds: write(keys[2]),
     saveRecommendationFilters: write(keys[3]), saveSupplyFavorites: write(keys[4]),
     cancelRecommendation: async () => { cancellations += 1; state.recommendationRunning = false; },

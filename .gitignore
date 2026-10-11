@@ -22,3 +22,5 @@ services/sohee/tests/__pycache__/
 
 # Local previews, QA captures and generated work artifacts.
 /.local/
+services/homehunt/research/v2/__pycache__/
+services/homehunt/research/v2/.venv/

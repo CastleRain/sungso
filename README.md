@@ -15,6 +15,7 @@
 | [apps/honeymoon](apps/honeymoon/README.md) | `/sungso/honeymoon/` | 리조트 비교·견적 PDF·커플 picks |
 | [apps/travel](apps/travel/README.md) | `/sungso/travel/` | 현재 여행 일정·숙소·WeCost 연결 예산·출발 준비·변경 이력 |
 | [apps/homehunt](apps/homehunt/README.md) | `/sungso/homehunt/` | 아파트·실거래·통근·분양 |
+| [apps/homehunt-v2](apps/homehunt-v2/README.md) | `/sungso/homehunt-v2/` | 별도 매수 판단 보드·공유 기록·검증된 전망 연구 |
 | [apps/table](apps/table/README.md) | `/sungso/table/` | 장보기·뭐 먹지·레시피 기본 버전, 기기·계정별 로컬 저장 |
 | [apps/footprints](apps/footprints/README.md) | `/sungso/footprints/` | 장소·데이트 방문·외부 앨범 기본 버전, 기기·계정별 로컬 저장 |
 | [apps/wedding](apps/wedding/README.md) | `/sungso/wedding/` | 하객노트·준비 목록 기본 버전, 기존 결혼 앱 연결 |

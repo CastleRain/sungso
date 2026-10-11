@@ -45,6 +45,17 @@
       ]
     },
     {
+      "id": "homehunt-v2",
+      "source": "apps/homehunt-v2",
+      "output": "homehunt-v2",
+      "files": [
+        "index.html",
+        "css",
+        "js",
+        "data"
+      ]
+    },
+    {
       "id": "travel",
       "source": "apps/travel",
       "output": "travel",

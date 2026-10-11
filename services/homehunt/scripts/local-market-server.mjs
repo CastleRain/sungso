@@ -337,6 +337,7 @@ function validHistoryPayload(payload, criteria) {
     && payload.partial === false
     && Array.isArray(payload.records)
     && String(payload.lawdCd || '') === criteria.lawdCd
+    && (criteria.lawdCd !== '41590' || payload.regionAliasVersion === 1)
     && Number(payload.months) === criteria.months
     && payload.endMonth === criteria.endMonth
     && payload.rangeStart === criteria.rangeStart
@@ -420,6 +421,7 @@ function validMonthCache(value, { lawdCd, dealYmd, type }) {
     && String(value.lawdCd || '') === lawdCd
     && String(value.dealYmd || '') === dealYmd
     && value.type === type
+    && (lawdCd !== '41590' || value.regionAliasVersion === 1)
     && Number.isFinite(Date.parse(String(value.updatedAt || '')));
 }
 

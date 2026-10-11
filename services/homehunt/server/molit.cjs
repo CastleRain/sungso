@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const zlib = require('zlib');
 const { setTimeout: delay } = require('node:timers/promises');
+const { HWASEONG_REGION_ALIAS_VERSION, sourceRegionCodes, normalizeCatalogRegion } = require('./molit-region-codes.cjs');
 
 const ENDPOINTS = {
   sale: 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
@@ -228,7 +229,7 @@ async function fetchPage(serviceKey, lawdCd, dealYmd, type, pageNo, beforeReques
   };
 }
 
-async function fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal) {
+async function fetchSingleRegionMonth(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal) {
   const first = await fetchPage(serviceKey, lawdCd, dealYmd, type, 1, beforeRequest, signal);
   const totalPages = Math.max(1, Math.ceil(first.totalCount / first.numOfRows));
   if (totalPages > 200) throw new Error('MOLIT pagination exceeded the safety limit');
@@ -242,6 +243,18 @@ async function fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequ
   return { records, totalCount: first.totalCount || records.length };
 }
 
+async function fetchMonthFromMolit(serviceKey, lawdCd, dealYmd, type, beforeRequest, signal) {
+  const codes = sourceRegionCodes(lawdCd);
+  const results = [];
+  for (const code of codes) {
+    const result = await fetchSingleRegionMonth(serviceKey, code, dealYmd, type, beforeRequest, signal);
+    results.push({ ...result, records: result.records.map(record => normalizeCatalogRegion(record, lawdCd, code)) });
+  }
+  return { records: results.flatMap(result => result.records),
+    totalCount: results.reduce((sum, result) => sum + result.totalCount, 0),
+    ...(codes.length > 1 ? { sourceRegionCodes: codes, regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}) };
+}
+
 function monthCachePayload({ lawdCd, dealYmd, type, records, totalCount, fetchedAt }) {
   return {
     schemaVersion: MONTH_CACHE_SCHEMA_VERSION,
@@ -251,6 +264,7 @@ function monthCachePayload({ lawdCd, dealYmd, type, records, totalCount, fetched
     records,
     totalCount,
     fetchedAt,
+    ...(lawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
   };
 }
 
@@ -277,6 +291,7 @@ async function readMonthCache(ref, serviceKey, identity) {
   if (!snap.exists) return null;
   const data = snap.data() || {};
   if (data.schemaVersion !== MONTH_CACHE_SCHEMA_VERSION
+      || identity.lawdCd === '41590' && data.regionAliasVersion !== HWASEONG_REGION_ALIAS_VERSION
       || data.lawdCd !== identity.lawdCd
       || data.dealYmd !== identity.dealYmd
       || data.type !== identity.type
@@ -331,6 +346,7 @@ async function writeMonthCache(db, ref, serviceKey, identity, result) {
     expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     encoding: 'gzip+base64+json',
     signature,
+    ...(identity.lawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
   };
 
   if (Buffer.byteLength(encoded, 'utf8') <= MONTH_CACHE_INLINE_LIMIT) {
@@ -484,7 +500,15 @@ function compareRecords(left, right) {
 
 function selectComplex(records, normalizedTarget, aptSeqQuery, dongQuery) {
   const eligible = records.filter((record) => {
-    if (aptSeqQuery && record.aptSeq && String(record.aptSeq) !== aptSeqQuery) return false;
+    if (aptSeqQuery && record.aptSeq && String(record.aptSeq) !== aptSeqQuery) {
+      // Only a proven administrative-prefix change with the same suffix and
+      // same dong may retain an old saved sequence. Never use a loose name as
+      // an automatic identity fallback across unrelated apartments.
+      const legacy = /^41590[-_]/.test(aptSeqQuery) && dongQuery
+        && record.sourceRegionCode && sourceRegionCodes('41590').includes(record.sourceRegionCode)
+        && String(record.aptSeq) === aptSeqQuery.replace(/^41590/, record.sourceRegionCode);
+      if (!legacy) return false;
+    }
     if (dongQuery && normalizeDong(record.dong) !== dongQuery) return false;
     return true;
   });
@@ -516,6 +540,7 @@ function selectComplex(records, normalizedTarget, aptSeqQuery, dongQuery) {
 function apartmentCachePayload(data) {
   return {
     schemaVersion: APARTMENT_CACHE_SCHEMA_VERSION,
+    ...(data.lawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
     lawdCd: data.lawdCd,
     normalizedQuery: data.normalizedQuery,
     months: data.months,
@@ -538,6 +563,7 @@ function readApartmentCache(snap, serviceKey, criteria) {
   if (!snap?.exists) return null;
   const data = snap.data() || {};
   if (data.schemaVersion !== APARTMENT_CACHE_SCHEMA_VERSION
+      || criteria.lawdCd === '41590' && data.regionAliasVersion !== HWASEONG_REGION_ALIAS_VERSION
       || data.lawdCd !== criteria.lawdCd
       || data.normalizedQuery !== criteria.normalizedQuery
       || Number(data.months) !== criteria.months
@@ -566,6 +592,7 @@ function apartmentResponse(cached, extra = {}) {
     dong: cached.selectedDong,
     builtYear: cached.builtYear,
     lawdCd: cached.lawdCd,
+    ...(cached.lawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
     records: cached.records,
     months: cached.months,
     endMonth: cached.endMonth,
@@ -741,6 +768,7 @@ function createApartmentHistoryHandler({ db }) {
       builtYear: candidate?.builtYear || 0,
       lawdCd,
       records: selection.records,
+      ...(lawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
       months,
       endMonth,
       rangeStart,
@@ -873,6 +901,7 @@ async function fetchApartmentHistoryDirect({
     builtYear: candidate?.builtYear || 0,
     lawdCd: normalizedLawdCd,
     records: selection.records,
+    ...(normalizedLawdCd === '41590' ? { regionAliasVersion: HWASEONG_REGION_ALIAS_VERSION } : {}),
     partial: missingRequests.length > 0,
     missingRequests,
     months: requestedMonths,

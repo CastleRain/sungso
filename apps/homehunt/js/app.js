@@ -9,13 +9,14 @@ import { createCommuteAutoRunner } from './commute-auto-runner.mjs?v=4.13.1';
 import { createCommuteAutoControl } from './controllers/commute-auto-control.js?v=4.13.1';
 import { rankPersonalizedCandidates } from './personalized-ranking-core.mjs?v=4.19.0';
 import { recommendationBudget, effectiveRecommendationDestinations, reconcileCandidateRecommendationContext, orderLocationVerificationQueue, destinationLetter } from './personalized-context-core.mjs?v=4.4.0';
-import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.19.0';
+import { createPersonalizedScoreCard, createParkingEditor, parkingForCandidate } from './controllers/personalized-recommendation-ui.js?v=4.19.0&account=3';
 import { homeTargetPriceBridge } from '../../../shared/finance/home-target-price.mjs?v=4.4.0';
 import { createWecostTargetPriceService } from './wecost-target-price-service.mjs?v=4.4.0';
 import { createCandidateLocationService } from './candidate-location-service.mjs?v=4.4.0';
-import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.19.0';
-import { registerPrivateCleanup, signOutMember } from '../../../shared/firebase/site-auth.mjs';
-import { mountCloudPanel } from './cloud-panel.js?v=4.19.0';
+import { createCloudSession, cloudSessionErrorMessage } from './cloud-session.js?v=4.19.0&records=3';
+import { getMember, registerPrivateCleanup, signOutMember } from '../../../shared/firebase/site-auth.mjs';
+import { createVersionStore, getLocalRecordAccess, claimLocalLegacyRecords } from '../../../shared/homehunt/homehunt-version-store.mjs?v=20261011';
+import { mountCloudPanel } from './cloud-panel.js?v=4.19.0&records=3';
 import { normalizeCloudSnapshot, CloudSnapshotError } from '../../../shared/homehunt/cloud-snapshot-core.mjs?v=4.19.0';
 import { candidateRegionKey, candidateRegionGroups, renderLocationDiscovery } from './controllers/location-discovery.js?v=4.4.0';
 import { createDecisionWorkspace } from './controllers/decision-workspace.js?v=4.19.0';
@@ -37,7 +38,9 @@ import {
   loadRecommendationFilters, saveRecommendationFilters, loadGeocodeResult, saveGeocodeResult,
   loadSupplyPreferences, saveSupplyPreferences, loadSupplyFavorites, saveSupplyFavorites,
   loadSupplySeen, saveSupplySeen, loadSubscriptionProfile, saveSubscriptionProfile, clearSubscriptionProfile,
-} from './storage.js?v=2.5.0';
+  configureHomehuntStorageAccount,
+  resolveHomehuntPersonalStorageKey,
+} from './storage.js?v=2.5.0&account=3';
 import { HomeMap, loadNaverMaps } from './naver-map.js?v=4.13.1';
 import { createSupplyLocationService } from './supply-location-service.mjs?v=4.13.1';
 import { createSupplyLocationPanel } from './controllers/supply-location-panel.js?v=4.13.1';
@@ -90,6 +93,7 @@ import {
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+configureHomehuntStorageAccount({ getUid: () => getMember()?.uid || null });
 
 const cloudSession = createCloudSession({
   apiBaseUrl: APP_CONFIG.cloudApiBaseUrl,
@@ -119,6 +123,8 @@ let candidateReview;
 let recommendationPriceCoverage;
 let recommendationQuickFilters;
 let recommendationQuickApplyPending = false;
+let sharedVisitEditingSignature = null;
+let sharedVisitPinEditingSignature = null;
 const state = {
   visits: initialVisits,
   compareIds: pruneCompareIds(loadCompareIds(), initialVisits),
@@ -1648,7 +1654,7 @@ function makeSupplyBadge(text, className = '') {
 
 function toggleSupplyFavorite(id) {
   const value = String(id || '');
-  const ids = new Set(state.supplyFavorites);
+  const ids = new Set(loadSupplyFavorites());
   if (ids.has(value)) ids.delete(value); else ids.add(value);
   state.supplyFavorites = saveSupplyFavorites([...ids]);
   renderSupply();
@@ -2391,6 +2397,10 @@ function visitNumberError() {
 }
 
 function openVisitModal(visit = null, coords = null, address = '', isDraft = false) {
+  if (!visit?.id || isDraft) sharedVisitEditingSignature = null;
+  else {
+    sharedVisitEditingSignature = JSON.stringify((loadVisits() || []).find(item => item.id === visit.id) || null);
+  }
   resetVisitForm();
   if (visit) fillVisitForm(visit);
   if (coords) {
@@ -2495,6 +2505,12 @@ function persistVisits() {
 
 function saveVisitFromForm(event) {
   event.preventDefault();
+  const editingId = $('#visitId').value;
+  if (editingId && sharedVisitEditingSignature !== null
+    && sharedVisitEditingSignature !== JSON.stringify((loadVisits() || []).find(item => item.id === editingId) || null)) {
+    return showToast('다른 화면에서 이 방문 기록을 변경했어요. 최신 기록을 다시 열어 확인해주세요. 입력 중인 내용은 유지됩니다.', 'error');
+  }
+  state.visits = loadVisits() || [];
   const requiredFields = [$('#visitName'), $('#visitDate'), $('#visitAddress')];
   requiredFields.forEach((field) => field.setAttribute('aria-invalid', String(!field.value.trim())));
   const numericError = visitNumberError();
@@ -2527,13 +2543,18 @@ async function deleteCurrentVisit() {
     confirmLabel: '기록 삭제',
   });
   if (!accepted) return;
-  state.visits = state.visits.filter((visit) => visit.id !== id);
+  const latestVisits = loadVisits() || [];
+  if (sharedVisitEditingSignature !== null && sharedVisitEditingSignature !== JSON.stringify(latestVisits.find(item => item.id === id) || null)) {
+    return showToast('다른 화면에서 이 방문 기록을 변경했어요. 최신 기록을 다시 확인해주세요.', 'error');
+  }
+  state.visits = latestVisits.filter((visit) => visit.id !== id);
   persistVisits();
   closeVisitModal();
   showToast('방문 기록을 삭제했어요.');
 }
 
 async function startPinMode() {
+  sharedVisitPinEditingSignature = sharedVisitEditingSignature;
   state.formDraftIsNew = !$('#visitId').value;
   state.formDraft = readVisitForm();
   if (state.formDraftIsNew) state.formDraft.id = '';
@@ -2544,6 +2565,7 @@ async function startPinMode() {
     const address = await homeMap.reverse(coords.lat, coords.lng);
     const draft = { ...state.formDraft, ...coords, coordinateSource: 'manual', address: address || state.formDraft.address };
     openVisitModal(draft, null, '', state.formDraftIsNew);
+    sharedVisitEditingSignature = sharedVisitPinEditingSignature;
     $('#coordinateStatus').textContent = `위치 지정됨 · ${Number(coords.lat).toFixed(5)}, ${Number(coords.lng).toFixed(5)}`;
   });
   showToast('지도에서 집 위치를 클릭하세요.');
@@ -2553,6 +2575,7 @@ function cancelPinMode() {
   homeMap.cancelPinMode();
   $('#pinModeBanner').hidden = true;
   if (state.formDraft) openVisitModal(state.formDraft, null, '', state.formDraftIsNew);
+  sharedVisitEditingSignature = sharedVisitPinEditingSignature;
 }
 
 async function searchMap(event) {
@@ -5148,6 +5171,8 @@ function updateTargetPriceConnection({ apply = false } = {}) {
 }
 
 function captureCloudSnapshot() {
+  const access = getLocalRecordAccess({ uid: getMember()?.uid });
+  if (access.locked) throw new CloudSnapshotError(access.reason, 'LOCAL_RECORD_OWNER_MISMATCH');
   let parkingObservations;
   try { parkingObservations = JSON.parse(localStorage.getItem('homehunt_parking_observations_v1') || '{}'); }
   catch (_) { throw new CloudSnapshotError('이 기기의 주차 확인값을 읽지 못했습니다. 로컬 기록을 먼저 확인해주세요.'); }
@@ -5160,8 +5185,10 @@ function captureCloudSnapshot() {
 
 async function applyCloudSnapshot(input) {
   const snapshot = normalizeCloudSnapshot(input);
+  const memberUid = getMember()?.uid;
+  if (!memberUid) throw new CloudSnapshotError('로그인한 계정을 다시 확인해주세요.', 'CLOUD_SESSION_CHANGED');
   const keys = ['homehunt_visits_v1', 'homehunt_shortlist_v1', 'homehunt_compare_ids_v1',
-    'homehunt_recommendation_filters_v1', 'homehunt_supply_favorites_v1', 'homehunt_parking_observations_v1'];
+    'homehunt_recommendation_filters_v1', 'homehunt_supply_favorites_v1', 'homehunt_parking_observations_v1'].map(key => resolveHomehuntPersonalStorageKey(key, { writing: true }));
   const previous = new Map(keys.map(key => [key, localStorage.getItem(key)]));
   try {
     saveVisits(snapshot.visits); saveShortlist(snapshot.shortlist); saveCompareIds(snapshot.compareIds);
@@ -8113,7 +8140,7 @@ async function verifyReviewedCandidate(candidate) {
 }
 
 function saveReviewCandidates(candidates) {
-  const next = [...state.shortlist];
+  const next = loadShortlist();
   let saved = 0;
   const snapshot = state.recommendationRunSnapshot || currentCandidateReviewSnapshot();
   for (const candidate of candidates) {
@@ -8131,7 +8158,7 @@ function saveReviewCandidates(candidates) {
 }
 
 function removeReviewCandidate(candidate) {
-  const next = state.shortlist.filter(item => recommendationCandidateId(item) !== recommendationCandidateId(candidate));
+  const next = loadShortlist().filter(item => recommendationCandidateId(item) !== recommendationCandidateId(candidate));
   try { saveShortlist(next); } catch (_) { return showToast('저장한 후보를 지우지 못했습니다.', 'error'); }
   state.shortlist = next;
   locationRankingCache = null;
@@ -8659,6 +8686,55 @@ function trapModalFocus(event, modal) {
 }
 
 function bindEvents() {
+  const sharedRecordKeys = ['homehunt_visits_v1', 'homehunt_shortlist_v1', 'homehunt_supply_favorites_v1', 'homehunt_parking_observations_v1'];
+  let sharedRecordStorage = null;
+  try { sharedRecordStorage = window.localStorage; } catch (_) { /* The page remains usable if storage is unavailable. */ }
+  const sharedRecordSignature = key => {
+    try { return sharedRecordStorage?.getItem(key) ?? null; } catch (_) { return null; }
+  };
+  const sharedRecordSignatures = new Map(sharedRecordKeys.map(key => [key, sharedRecordSignature(key)]));
+  const synchronizeVersionRecords = (event) => {
+    if (event?.type === 'storage' && event.key !== null && !sharedRecordKeys.includes(event.key) && !['homehunt_shared_records_owner_uid_v1', 'homehunt_legacy_personal_owner_uid_v1'].includes(event.key)) return;
+    if (getLocalRecordAccess({ uid: getMember()?.uid }).locked) { showLocalRecordLock(); return; }
+    if (event?.storageArea && event.storageArea !== sharedRecordStorage) return;
+    const changedKeys = sharedRecordKeys.filter(key => sharedRecordSignatures.get(key) !== sharedRecordSignature(key));
+    if (!changedKeys.length) return;
+    changedKeys.forEach(key => sharedRecordSignatures.set(key, sharedRecordSignature(key)));
+    const visits = loadVisits() || [];
+    const shortlist = loadShortlist();
+    const favorites = loadSupplyFavorites();
+    const visitsChanged = changedKeys.includes('homehunt_visits_v1') && JSON.stringify(visits) !== JSON.stringify(state.visits);
+    const shortlistChanged = changedKeys.includes('homehunt_shortlist_v1');
+    const favoritesChanged = changedKeys.includes('homehunt_supply_favorites_v1') && JSON.stringify(favorites) !== JSON.stringify(state.supplyFavorites);
+    if (visitsChanged) {
+      state.visits = visits;
+      state.compareIds = pruneCompareIds(state.compareIds, visits);
+      state.visitBenchmarks = new Map();
+      if (state.selectedVisitId && !visits.some(item => item.id === state.selectedVisitId)) state.selectedVisitId = null;
+      renderAllVisits();
+    }
+    if (shortlistChanged) {
+      const ids = new Set(shortlist.map(recommendationCandidateId));
+      state.shortlist = mergeLiveReviewCandidates(shortlist, state.shortlist.filter(item => ids.has(recommendationCandidateId(item))));
+    }
+    if (favoritesChanged) { state.supplyFavorites = favorites; renderSupply(); }
+    if (shortlistChanged || changedKeys.includes('homehunt_parking_observations_v1')) {
+      locationRankingCache = null;
+      renderRecommendationResults();
+      candidateReview?.render();
+      decisionWorkspace?.render();
+    }
+    if ((visitsChanged || shortlistChanged || favoritesChanged) && state.recommendationMapReady) void refreshRecommendationMapLayers();
+  };
+  window.addEventListener('storage', synchronizeVersionRecords);
+  window.addEventListener('homehunt:shared-records-changed', synchronizeVersionRecords);
+  window.addEventListener('focus', synchronizeVersionRecords);
+  registerPrivateCleanup(() => {
+    window.removeEventListener('storage', synchronizeVersionRecords);
+    window.removeEventListener('homehunt:shared-records-changed', synchronizeVersionRecords);
+    window.removeEventListener('focus', synchronizeVersionRecords);
+    sharedRecordSignatures.clear();
+  });
   bindRecommendationRanges();
   const desktopPanelQuery = window.matchMedia('(min-width: 1024px)');
   desktopPanelQuery.addEventListener?.('change', () => setRecommendationPanel(''));
@@ -9413,4 +9489,59 @@ async function init() {
   if (savedView !== 'supply') window.setTimeout(() => ensureSupplyFeed().finally(() => decisionWorkspace?.render()), 450);
 }
 
-init();
+let localRecordLock = null;
+function showLocalRecordLock() {
+  const uid = getMember()?.uid;
+  const access = getLocalRecordAccess({ uid });
+  if (!access.locked || localRecordLock) return;
+  // A storage event can change ownership while this page is already running.
+  // Stop further private work without deleting a shared server job or records.
+  commuteAutoRunner.stop(); officialComplexQueue.pause();
+  recommendationRunToken += 1; window.clearTimeout(state.recommendationPollTimer);
+  state.recommendationGeocodeToken += 1; recommendationMapRefreshToken += 1;
+  companyGeocodeToken += 1; companyPickerSearchToken += 1; companyPickerClickToken += 1;
+  state.commuteVerificationRunning = false;
+  state.recommendationRunning = false; state.recommendationRunSnapshot = null;
+  state.complexAbortController?.abort(); state.complexRequestToken += 1;
+  const privateRoot = document.querySelector('[data-private-root]');
+  const shell = privateRoot?.querySelector('.hh-shell');
+  if (shell) { shell.hidden = true; shell.inert = true; shell.style.setProperty('display', 'none', 'important'); }
+  localRecordLock = document.createElement('section');
+  localRecordLock.className = 'page-wrap wide';
+  localRecordLock.style.cssText = 'max-width:760px;margin:8vh auto;background:var(--ss-surface);padding:32px;border:1px solid var(--ss-border);border-radius:22px;';
+  const title = createElement('h1', '', '이 기기 기록의 계정을 확인해주세요');
+  const reason = createElement('p', '', access.reason);
+  const explanation = createElement('p', '', '원본 기록과 이전 회사 조건은 삭제하거나 자동 이전하지 않습니다. 원래 계정으로 돌아가면 그대로 볼 수 있습니다. 복원은 현재 계정의 백업으로 공유 기록을 교체하며, 교체 전 원본은 이 기기의 복구 스냅샷으로 보관합니다.');
+  const status = createElement('p', 'cloud-panel-status', ''); status.setAttribute('role', 'status');
+  const actions = createElement('div', 'modal-actions');
+  const switchButton = createElement('button', 'outline-btn', '원래 계정으로 돌아가기'); switchButton.type = 'button';
+  switchButton.addEventListener('click', () => { void signOutMember(); }); actions.append(switchButton);
+  if (access.canClaimLegacy) {
+    const claim = createElement('button', 'record-btn', '기존 기록이 내 것임을 확인하고 열기'); claim.type = 'button';
+    claim.addEventListener('click', () => {
+      try { if (getMember()?.uid !== uid) throw new Error('계정이 바뀌었습니다.'); claimLocalLegacyRecords({ uid }); location.reload(); }
+      catch (error) { status.textContent = error.message || '소유 확인을 완료하지 못했습니다.'; }
+    }); actions.append(claim);
+  }
+  const restore = createElement('button', 'outline-btn', '현재 계정 백업으로 명시 복원'); restore.type = 'button';
+  restore.addEventListener('click', async () => {
+    restore.disabled = true; status.textContent = '현재 계정의 백업을 확인하고 있습니다.';
+    const localStore = createVersionStore({ accountUid: () => getMember()?.uid, eventTarget: null });
+    try {
+      const expectedFingerprint = localStore.getSharedFingerprint();
+      const remote = await cloudSession.loadSnapshot({ expectedUid: uid });
+      if (getMember()?.uid !== uid) throw new Error('계정이 바뀌었습니다. 다시 확인해주세요.');
+      if (!remote.snapshot) { status.textContent = '현재 계정의 백업이 없습니다. 기존 원본은 그대로 보존했습니다.'; return; }
+      localStore.applyBackupSnapshot(remote.snapshot, { explicitRestore: true, accountUid: uid, expectedFingerprint });
+      // Personal non-shared values use this UID's new keys, never the old originals.
+      saveRecommendationFilters(remote.snapshot.recommendationFilters); saveCompareIds(remote.snapshot.compareIds);
+      location.reload();
+    } catch (error) { status.textContent = cloudSessionErrorMessage(error); }
+    finally { localStore.dispose(); restore.disabled = false; }
+  }); actions.append(restore);
+  const v2 = createElement('a', 'outline-btn', 'Ver2 공개 조건으로 둘러보기'); v2.href = '../homehunt-v2/'; actions.append(v2);
+  localRecordLock.append(title, reason, explanation, status, actions); privateRoot?.append(localRecordLock);
+  registerPrivateCleanup(() => { localRecordLock?.remove(); localRecordLock = null; configureHomehuntStorageAccount({ getUid: () => null }); });
+}
+if (getLocalRecordAccess({ uid: getMember()?.uid }).locked) showLocalRecordLock();
+else init();

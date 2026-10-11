@@ -65,7 +65,7 @@ function appIcon(definition) {
 }
 function appCopy(definition) {
   const copy = el('span', 'app-copy');
-  copy.append(el('strong', '', definition.title), el('small', '', definition.description)); return copy;
+  copy.append(el('strong', '', definition.id === 'homehunt' ? `${definition.title} · Ver1` : definition.title), el('small', '', definition.description)); return copy;
 }
 function rememberLibraryFocus() {
   const active = document.activeElement;

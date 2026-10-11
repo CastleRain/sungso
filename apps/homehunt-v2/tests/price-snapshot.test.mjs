@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { snapshotCandidates } from '../js/price-snapshot.mjs';
+const catalog=[{catalogId:'one',name:'확인 단지',regionCode:'41117',households:500,builtYear:2010},{catalogId:'two',name:'다른 단지',regionCode:'11110',households:5,builtYear:1990}];
+const fact={catalogId:'one',areaM2:59.96,referencePriceManWon:65000,referenceMonth:'2026-08',sampleCount:3,status:'complete'};
+const conditions={regions:['seoul','gyeonggi'],maxPriceManWon:70000,minAreaM2:59,minHouseholds:null,maxAgeYears:null};
+const now=new Date('2026-10-11');
+test('archived exact-area prices join official identities and preserve observation dates',()=>{const rows=snapshotCandidates(catalog,{asOfMonth:'2026-10',window:{start:'2026-06',end:'2026-08'},prices:[fact,{...fact,areaM2:84.9,referencePriceManWon:69000}]},conditions,now);assert.equal(rows.length,1);assert.equal(rows[0].areas.length,2);assert.equal(rows[0].bestArea.areaM2,59.96);assert.equal(rows[0].bestArea.latestMonth,'2026-08');assert.equal(rows[0].priceSnapshot,true);assert.equal(rows[0].name,'확인 단지');});
+test('insufficient, future, unidentified and budget-exceeding evidence is excluded',()=>{const variants=[{...fact,sampleCount:2},{...fact,referenceMonth:'2027-01'},{...fact,catalogId:'unknown'},{...fact,referencePriceManWon:80000},{...fact,status:'unknown'},{...fact,areaM2:49}];assert.deepEqual(snapshotCandidates(catalog,{prices:variants},conditions,now),[]);});
+test('new conditions are reapplied instead of treating prior results as current',()=>{assert.equal(snapshotCandidates(catalog,{prices:[fact]},conditions,now).length,1);assert.equal(snapshotCandidates(catalog,{prices:[fact]},{...conditions,maxPriceManWon:60000},now).length,0);assert.equal(snapshotCandidates(catalog,{prices:[fact]},{...conditions,regions:['seoul']},now).length,0);});

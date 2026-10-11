@@ -114,7 +114,10 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
   const apiFetch = async (input, options = {}) => {
     // Validate BEFORE reading a token or initializing an authentication SDK.
     const url = requestUrl(base, input);
+    const requestedOwner = options.expectedUid ?? user?.uid ?? null;
     await init();
+    assertActive();
+    if (requestedOwner && user?.uid !== requestedOwner) throw retiredError();
     const caller = user; const epoch = generation;
     if (!caller) throw new CloudSnapshotError('온라인 검색과 저장에는 Google 로그인이 필요합니다.', 'CLOUD_AUTH_REQUIRED', 401);
     if (readiness) {
@@ -132,7 +135,8 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
     headers.set('Authorization', `Bearer ${token}`);
     let response;
     try {
-      response = await fetchImpl(url, { ...options, headers, credentials: 'omit', redirect: 'error', cache: 'no-store' });
+      const { expectedUid: _expectedUid, ...requestOptions } = options;
+      response = await fetchImpl(url, { ...requestOptions, headers, credentials: 'omit', redirect: 'error', cache: 'no-store' });
       if (response.status >= 500) readiness?.invalidate();
       else readiness?.touch();
     } catch (error) { readiness?.invalidate(); throw error; }
@@ -180,18 +184,24 @@ export function createCloudSession({ apiBaseUrl = '', snapshotTransport = 'fires
       }
       await init(); if (auth) await sdk.signOut(auth);
     },
-    async loadSnapshot() {
-      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot'));
+    async loadSnapshot({ expectedUid } = {}) {
+      const requestedOwner = expectedUid ?? user?.uid ?? null;
       await init();
+      assertActive();
+      if (requestedOwner && user?.uid !== requestedOwner) throw retiredError();
+      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot', { expectedUid: requestedOwner }));
       if (!privateStore) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
       return privateStore.load();
     },
-    async saveSnapshot(snapshot, expectedRevision) {
+    async saveSnapshot(snapshot, expectedRevision, { expectedUid } = {}) {
+      const requestedOwner = expectedUid ?? user?.uid ?? null;
       const safe = normalizeCloudSnapshot(snapshot);
-      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot', {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ snapshot: safe, expectedRevision }),
-      }));
       await init();
+      assertActive();
+      if (requestedOwner && user?.uid !== requestedOwner) throw retiredError();
+      if (snapshotTransport === 'api') return snapshotResponse(await apiFetch('/household/snapshot', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ snapshot: safe, expectedRevision }), expectedUid: requestedOwner,
+      }));
       if (!privateStore) throw new CloudSnapshotError('Firebase 연결 설정이 필요합니다.', 'CLOUD_UNCONFIGURED', 503);
       return privateStore.save(safe, expectedRevision);
     },
