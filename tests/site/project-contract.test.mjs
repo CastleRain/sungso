@@ -7,9 +7,9 @@ import { PROJECT_ROOT, createFilePlan, loadRegistry } from '../../scripts/build-
 test('production registry adds local life apps without losing historical routes', async () => {
   const registry = await loadRegistry();
   const { files } = await createFilePlan({ registry });
-  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'travel', 'invitation', 'dates', 'table', 'footprints', 'wedding', 'sohee']);
+  assert.deepEqual(registry.apps.map(app => app.output), ['', 'wecost', 'honeymoon', 'homehunt', 'homehunt-v2', 'travel', 'invitation', 'dates', 'table', 'footprints', 'wedding', 'sohee']);
   for (const pathname of ['index.html', 'wecost/index.html', 'honeymoon/index.html', 'homehunt/index.html', 'travel/index.html', 'invitation/index.html',
-    'dates/index.html', 'table/index.html', 'footprints/index.html', 'wedding/index.html', 'sohee/workspace/index.html', 'sohee/sales/overview/index.html', 'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json']) {
+    'homehunt-v2/index.html', 'dates/index.html', 'table/index.html', 'footprints/index.html', 'wedding/index.html', 'sohee/workspace/index.html', 'sohee/sales/overview/index.html', 'homehunt/data/apartment-catalog.json', 'homehunt/data/rail-stations.json']) {
     assert.ok(files.has(pathname), `Missing public URL: ${pathname}`);
   }
   assert.equal([...files.keys()].filter(filename => filename.endsWith('.pdf')).length, 10);

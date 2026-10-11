@@ -46,6 +46,15 @@ jobs:
           npm run test:boundary --prefix apps/sohee/sales
       - name: Verify all service bundles
         run: npm run build:services
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/homehunt/research/v2/requirements.txt
+      - name: Verify research time boundaries and safe publication without API calls
+        run: |
+          python -m pip install -r services/homehunt/research/v2/requirements.txt
+          python -m unittest discover -s services/homehunt/research/v2 -p 'test_*.py'
       - name: Upload the validated public artifact
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v4

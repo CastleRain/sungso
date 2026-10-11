@@ -1,0 +1,883 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "direction-6m-1.1.0",
+  "asOfMonth": "2026-09",
+  "verificationLevel": "reconstructed",
+  "checkedAt": "2026-10-11T05:38:54.231122+00:00",
+  "featureAssumptions": [
+    {
+      "feature": "households",
+      "verificationLevel": "reconstructed",
+      "message": "현재 세대수를 과거에도 같다고 가정한 정적 대리변수입니다. 세대수 변동 이력을 확보하지 못했습니다. strict 실험에서는 당시 공표가 검증된 값만 사용합니다."
+    }
+  ],
+  "selectionMethod": "prospective catalog year/household strata, deterministic hash, no price/performance selection",
+  "targets": [
+    {
+      "catalogId": "41117120130914",
+      "regionCode": "41117",
+      "regionName": "경기도 수원시 영통구",
+      "name": "그대가프리미어",
+      "aliases": [
+        "그대가 프리미어"
+      ],
+      "dong": "망포동",
+      "address": "경기도 수원시 영통구 망포동 720",
+      "builtYear": 2010,
+      "households": 602,
+      "analysisGroup": "영통·망포",
+      "status": "included"
+    },
+    {
+      "catalogId": "41117120356741",
+      "regionCode": "41117",
+      "regionName": "경기도 수원시 영통구",
+      "name": "힐스테이트영통",
+      "aliases": [
+        "힐스테이트 영통"
+      ],
+      "dong": "망포동",
+      "address": "경기도 수원시 영통구 망포동 728",
+      "builtYear": 2017,
+      "households": 2140,
+      "analysisGroup": "영통·망포",
+      "status": "included"
+    },
+    {
+      "catalogId": "41117120344902",
+      "regionCode": "41117",
+      "regionName": "경기도 수원시 영통구",
+      "name": "e편한세상영통2차(1단지)",
+      "aliases": [
+        "e편한세상 영통2차 1단지",
+        "e편한세상영통2차아파트"
+      ],
+      "dong": "망포동",
+      "address": "경기도 수원시 영통구 망포동 726",
+      "builtYear": 2016,
+      "households": 392,
+      "analysisGroup": "영통·망포",
+      "status": "included"
+    },
+    {
+      "catalogId": "41117100006140",
+      "regionCode": "41117",
+      "regionName": "경기도 수원시 영통구",
+      "name": "영통센트럴파크뷰",
+      "aliases": [
+        "영통 센트럴파크뷰"
+      ],
+      "dong": "영통동",
+      "address": "경기도 수원시 영통구 영통동 948-4",
+      "builtYear": 1999,
+      "households": 1190,
+      "analysisGroup": "영통·망포",
+      "status": "included"
+    },
+    {
+      "catalogId": "41463120102589",
+      "regionCode": "41463",
+      "regionName": "경기도 용인시 기흥구",
+      "name": "휴먼시아물푸레마을3단지",
+      "aliases": [
+        "휴먼시아 물푸레마을"
+      ],
+      "dong": "청덕동",
+      "address": "경기도 용인시 기흥구 청덕동 488",
+      "builtYear": 2008,
+      "households": 988,
+      "analysisGroup": "구성·마북",
+      "status": "included"
+    },
+    {
+      "catalogId": "41463120450375",
+      "regionCode": "41463",
+      "regionName": "경기도 용인시 기흥구",
+      "name": "e편한세상구성역플랫폼시티",
+      "aliases": [
+        "e편한세상 구성역 플랫폼시티"
+      ],
+      "dong": "마북동",
+      "address": "경기도 용인시 기흥구 마북동 659",
+      "builtYear": 2024,
+      "households": 999,
+      "analysisGroup": "구성·마북",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41463100051215",
+      "regionCode": "41463",
+      "regionName": "경기도 용인시 기흥구",
+      "name": "장미마을삼성래미안2",
+      "aliases": [
+        "장미마을 삼성 래미안 2차아파트"
+      ],
+      "dong": "언남동",
+      "address": "경기도 용인시 기흥구 언남동 495",
+      "builtYear": 2003,
+      "households": 1219,
+      "analysisGroup": "구성·마북",
+      "status": "included"
+    },
+    {
+      "catalogId": "41463100051190",
+      "regionCode": "41463",
+      "regionName": "경기도 용인시 기흥구",
+      "name": "용화마을태영데시앙1",
+      "aliases": [
+        "용화마을태영데시앙아파트"
+      ],
+      "dong": "마북동",
+      "address": "경기도 용인시 기흥구 마북동 619",
+      "builtYear": 2003,
+      "households": 321,
+      "analysisGroup": "구성·마북",
+      "status": "included"
+    },
+    {
+      "catalogId": "41610120132666",
+      "regionCode": "41610",
+      "regionName": "경기도 광주시",
+      "name": "태전동우림필유",
+      "aliases": [
+        "광주 태전동 우림필유"
+      ],
+      "dong": "태전동",
+      "address": "경기도 광주시 태전동 692",
+      "builtYear": 2010,
+      "households": 475,
+      "analysisGroup": "태전·고산",
+      "status": "included"
+    },
+    {
+      "catalogId": "41610120449446",
+      "regionCode": "41610",
+      "regionName": "경기도 광주시",
+      "name": "더샵오포센트리체",
+      "aliases": [
+        "더샵 오포 센트리체"
+      ],
+      "dong": "고산동",
+      "address": "경기도 광주시 고산동 695",
+      "builtYear": 2023,
+      "households": 1475,
+      "analysisGroup": "태전·고산",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41610120450056",
+      "regionCode": "41610",
+      "regionName": "경기도 광주시",
+      "name": "오포자이디오브(4단지)",
+      "aliases": [
+        "오포자이 디 오브"
+      ],
+      "dong": "고산동",
+      "address": "경기도 광주시 고산동 705",
+      "builtYear": 2024,
+      "households": 448,
+      "analysisGroup": "태전·고산",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41610100050944",
+      "regionCode": "41610",
+      "regionName": "경기도 광주시",
+      "name": "쌍용스윗닷홈3",
+      "aliases": [
+        "쌍용 스윗닷홈아파트"
+      ],
+      "dong": "태전동",
+      "address": "경기도 광주시 태전동 687",
+      "builtYear": 2004,
+      "households": 409,
+      "analysisGroup": "태전·고산",
+      "status": "included"
+    },
+    {
+      "catalogId": "41590120329957",
+      "regionCode": "41590",
+      "regionName": "경기도 화성시",
+      "name": "동탄2엘에이치4단지",
+      "aliases": [],
+      "dong": "영천동",
+      "address": "경기도 화성시 영천동 722",
+      "builtYear": 2015,
+      "households": 2147,
+      "analysisGroup": "동탄2",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41590120316795",
+      "regionCode": "41590",
+      "regionName": "경기도 화성시",
+      "name": "시범대원칸타빌아파트",
+      "aliases": [
+        "동탄역시범대원칸타빌아파트"
+      ],
+      "dong": "청계동",
+      "address": "경기도 화성시 청계동 516",
+      "builtYear": 2015,
+      "households": 498,
+      "analysisGroup": "동탄2",
+      "status": "included"
+    },
+    {
+      "catalogId": "41590120384757",
+      "regionCode": "41590",
+      "regionName": "경기도 화성시",
+      "name": "동탄더샵레이크에듀타운",
+      "aliases": [
+        "동탄 더샵 레이크에듀타운"
+      ],
+      "dong": "산척동",
+      "address": "경기도 화성시 산척동 699",
+      "builtYear": 2019,
+      "households": 1538,
+      "analysisGroup": "동탄2",
+      "status": "included"
+    },
+    {
+      "catalogId": "41590120360838",
+      "regionCode": "41590",
+      "regionName": "경기도 화성시",
+      "name": "동탄파크푸르지오",
+      "aliases": [],
+      "dong": "영천동",
+      "address": "경기도 화성시 영천동 884",
+      "builtYear": 2018,
+      "households": 913,
+      "analysisGroup": "동탄2",
+      "status": "included"
+    },
+    {
+      "catalogId": "41370120123516",
+      "regionCode": "41370",
+      "regionName": "경기도 오산시",
+      "name": "죽미마을휴먼시아(10단지)",
+      "aliases": [
+        "죽미마을휴먼시아"
+      ],
+      "dong": "금암동",
+      "address": "경기도 오산시 금암동 485",
+      "builtYear": 2009,
+      "households": 1167,
+      "analysisGroup": "세교",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41370120277914",
+      "regionCode": "41370",
+      "regionName": "경기도 오산시",
+      "name": "오산대역엘크루",
+      "aliases": [
+        "오산대역 엘크루"
+      ],
+      "dong": "수청동",
+      "address": "경기도 오산시 수청동 625",
+      "builtYear": 2013,
+      "households": 498,
+      "analysisGroup": "세교",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41370120452543",
+      "regionCode": "41370",
+      "regionName": "경기도 오산시",
+      "name": "중흥S-클래스에듀파크",
+      "aliases": [
+        "중흥 S-클래스 에듀파크"
+      ],
+      "dong": "궐동",
+      "address": "경기도 오산시 궐동 824",
+      "builtYear": 2024,
+      "households": 1245,
+      "analysisGroup": "세교",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41370120411290",
+      "regionCode": "41370",
+      "regionName": "경기도 오산시",
+      "name": "더샵오산센트럴",
+      "aliases": [
+        "더샵 오산센트럴"
+      ],
+      "dong": "수청동",
+      "address": "경기도 오산시 수청동 622",
+      "builtYear": 2020,
+      "households": 596,
+      "analysisGroup": "세교",
+      "status": "included"
+    },
+    {
+      "catalogId": "41135120135494",
+      "regionCode": "41135",
+      "regionName": "경기도 성남시 분당구",
+      "name": "백현마을3단지(주공)임대",
+      "aliases": [
+        "백현마을"
+      ],
+      "dong": "백현동",
+      "address": "경기도 성남시 분당구 백현동 546",
+      "builtYear": 2011,
+      "households": 1722,
+      "analysisGroup": "분당",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41135120328885",
+      "regionCode": "41135",
+      "regionName": "경기도 성남시 분당구",
+      "name": "판교알파리움2단지",
+      "aliases": [
+        "알파리움"
+      ],
+      "dong": "백현동",
+      "address": "경기도 성남시 분당구 백현동 530",
+      "builtYear": 2015,
+      "households": 514,
+      "analysisGroup": "분당",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41135120452888",
+      "regionCode": "41135",
+      "regionName": "경기도 성남시 분당구",
+      "name": "판교해링턴플레이스",
+      "aliases": [],
+      "dong": "대장동",
+      "address": "경기도 성남시 분당구 대장동 636",
+      "builtYear": 2024,
+      "households": 1123,
+      "analysisGroup": "분당",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41135120430310",
+      "regionCode": "41135",
+      "regionName": "경기도 성남시 분당구",
+      "name": "판교풍경채어바니티(7단지)",
+      "aliases": [
+        "판교 풍경채 어바니티 7단지"
+      ],
+      "dong": "대장동",
+      "address": "경기도 성남시 분당구 대장동 지구BL 7",
+      "builtYear": 2021,
+      "households": 444,
+      "analysisGroup": "분당",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41465120169697",
+      "regionCode": "41465",
+      "regionName": "경기도 용인시 수지구",
+      "name": "광교자이더클래스",
+      "aliases": [
+        "광교자이 더 클래스"
+      ],
+      "dong": "상현동",
+      "address": "경기도 용인시 수지구 상현동 1134",
+      "builtYear": 2012,
+      "households": 1035,
+      "analysisGroup": "수지",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41465120129359",
+      "regionCode": "41465",
+      "regionName": "경기도 용인시 수지구",
+      "name": "래미안이스트팰리스3단지",
+      "aliases": [
+        "한빛마을 래미안 이스트팰리스 3단지"
+      ],
+      "dong": "동천동",
+      "address": "경기도 용인시 수지구 동천동 932",
+      "builtYear": 2010,
+      "households": 885,
+      "analysisGroup": "수지",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41465120356280",
+      "regionCode": "41465",
+      "regionName": "경기도 용인시 수지구",
+      "name": "e편한세상수지",
+      "aliases": [
+        "e편한세상 수지"
+      ],
+      "dong": "풍덕천동",
+      "address": "경기도 용인시 수지구 풍덕천동 1209",
+      "builtYear": 2017,
+      "households": 1237,
+      "analysisGroup": "수지",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41465120392881",
+      "regionCode": "41465",
+      "regionName": "경기도 용인시 수지구",
+      "name": "동천파크자이",
+      "aliases": [],
+      "dong": "동천동",
+      "address": "경기도 용인시 수지구 동천동 930",
+      "builtYear": 2019,
+      "households": 388,
+      "analysisGroup": "수지",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11230100257843",
+      "regionCode": "11230",
+      "regionName": "서울특별시 동대문구",
+      "name": "래미안장안2차",
+      "aliases": [
+        "래미안장안2차아파트"
+      ],
+      "dong": "장안동",
+      "address": "서울특별시 동대문구 장안동 329-3",
+      "builtYear": 2007,
+      "households": 1786,
+      "analysisGroup": "11230",
+      "status": "included"
+    },
+    {
+      "catalogId": "11230120115856",
+      "regionCode": "11230",
+      "regionName": "서울특별시 동대문구",
+      "name": "롯데캐슬피렌체",
+      "aliases": [],
+      "dong": "용두동",
+      "address": "서울특별시 동대문구 용두동 790",
+      "builtYear": 2009,
+      "households": 435,
+      "analysisGroup": "11230",
+      "status": "included"
+    },
+    {
+      "catalogId": "11230120446536",
+      "regionCode": "11230",
+      "regionName": "서울특별시 동대문구",
+      "name": "청량리역한양수자인그라시엘",
+      "aliases": [
+        "청량리역 한양수자인 그라시엘"
+      ],
+      "dong": "용두동",
+      "address": "서울특별시 동대문구 용두동 39-1",
+      "builtYear": 2023,
+      "households": 1152,
+      "analysisGroup": "11230",
+      "status": "included"
+    },
+    {
+      "catalogId": "11230120400422",
+      "regionCode": "11230",
+      "regionName": "서울특별시 동대문구",
+      "name": "동대문더퍼스트데시앙",
+      "aliases": [],
+      "dong": "장안동",
+      "address": "서울특별시 동대문구 장안동 587",
+      "builtYear": 2019,
+      "households": 469,
+      "analysisGroup": "11230",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11545120146069",
+      "regionCode": "11545",
+      "regionName": "서울특별시 금천구",
+      "name": "남서울힐스테이트",
+      "aliases": [],
+      "dong": "시흥동",
+      "address": "서울특별시 금천구 시흥동 1026",
+      "builtYear": 2014,
+      "households": 1764,
+      "analysisGroup": "11545",
+      "status": "included"
+    },
+    {
+      "catalogId": "11545120344418",
+      "regionCode": "11545",
+      "regionName": "서울특별시 금천구",
+      "name": "금천롯데캐슬골드파크1차",
+      "aliases": [
+        "금천 롯데캐슬 골드파크 1차"
+      ],
+      "dong": "독산동",
+      "address": "서울특별시 금천구 독산동 1147",
+      "builtYear": 2016,
+      "households": 1743,
+      "analysisGroup": "11545",
+      "status": "included"
+    },
+    {
+      "catalogId": "11545120395786",
+      "regionCode": "11545",
+      "regionName": "서울특별시 금천구",
+      "name": "e편한세상독산더타워",
+      "aliases": [
+        "e편한세상 독산 더타워"
+      ],
+      "dong": "독산동",
+      "address": "서울특별시 금천구 독산동 1007-13",
+      "builtYear": 2019,
+      "households": 432,
+      "analysisGroup": "11545",
+      "status": "included"
+    },
+    {
+      "catalogId": "11545120027158",
+      "regionCode": "11545",
+      "regionName": "서울특별시 금천구",
+      "name": "독산주공13단지",
+      "aliases": [
+        "주공아파트"
+      ],
+      "dong": "독산동",
+      "address": "서울특별시 금천구 독산동 1088-1",
+      "builtYear": 1990,
+      "households": 1226,
+      "analysisGroup": "11545",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11680120286800",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "래미안포레(3단지)",
+      "aliases": [
+        "래미안포레"
+      ],
+      "dong": "자곡동",
+      "address": "서울특별시 강남구 자곡동 687",
+      "builtYear": 2014,
+      "households": 1070,
+      "analysisGroup": "11680",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11680120138906",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "세곡리엔파크(1단지)",
+      "aliases": [
+        "강남신동아파밀리에1단지"
+      ],
+      "dong": "세곡동",
+      "address": "서울특별시 강남구 세곡동 508",
+      "builtYear": 2011,
+      "households": 395,
+      "analysisGroup": "11680",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11680120450506",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "LH수서2단지아파트",
+      "aliases": [],
+      "dong": "자곡동",
+      "address": "서울특별시 강남구 자곡동 138-2",
+      "builtYear": 2024,
+      "households": 1080,
+      "analysisGroup": "11680",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11680120383946",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "래미안개포루체하임",
+      "aliases": [
+        "래미안 개포 루체하임"
+      ],
+      "dong": "일원동",
+      "address": "서울특별시 강남구 일원동 741",
+      "builtYear": 2018,
+      "households": 850,
+      "analysisGroup": "11680",
+      "status": "included"
+    },
+    {
+      "catalogId": "11710120100792",
+      "regionCode": "11710",
+      "regionName": "서울특별시 송파구",
+      "name": "파크리오",
+      "aliases": [],
+      "dong": "신천동",
+      "address": "서울특별시 송파구 신천동 17",
+      "builtYear": 2008,
+      "households": 6864,
+      "analysisGroup": "11710",
+      "status": "included"
+    },
+    {
+      "catalogId": "11710120071754",
+      "regionCode": "11710",
+      "regionName": "서울특별시 송파구",
+      "name": "송파파인타운11단지",
+      "aliases": [
+        "송파파인타운 11단지"
+      ],
+      "dong": "장지동",
+      "address": "서울특별시 송파구 장지동 854",
+      "builtYear": 2007,
+      "households": 333,
+      "analysisGroup": "11710",
+      "status": "included"
+    },
+    {
+      "catalogId": "11710120357731",
+      "regionCode": "11710",
+      "regionName": "서울특별시 송파구",
+      "name": "위례포레샤인23단지",
+      "aliases": [],
+      "dong": "장지동",
+      "address": "서울특별시 송파구 장지동 905",
+      "builtYear": 2017,
+      "households": 2200,
+      "analysisGroup": "11710",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11710120333000",
+      "regionCode": "11710",
+      "regionName": "서울특별시 송파구",
+      "name": "송파와이즈더샵",
+      "aliases": [],
+      "dong": "장지동",
+      "address": "서울특별시 송파구 장지동 895",
+      "builtYear": 2016,
+      "households": 390,
+      "analysisGroup": "11710",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41111120108282",
+      "regionCode": "41111",
+      "regionName": "경기도 수원시 장안구",
+      "name": "화서역푸르지오더에듀포레",
+      "aliases": [],
+      "dong": "천천동",
+      "address": "경기도 수원시 장안구 천천동 333",
+      "builtYear": 2009,
+      "households": 2571,
+      "analysisGroup": "41111",
+      "status": "included"
+    },
+    {
+      "catalogId": "41111120040631",
+      "regionCode": "41111",
+      "regionName": "경기도 수원시 장안구",
+      "name": "수원로얄팰리스",
+      "aliases": [],
+      "dong": "송죽동",
+      "address": "경기도 수원시 장안구 송죽동 514",
+      "builtYear": 2006,
+      "households": 614,
+      "analysisGroup": "41111",
+      "status": "included"
+    },
+    {
+      "catalogId": "41111120447938",
+      "regionCode": "41111",
+      "regionName": "경기도 수원시 장안구",
+      "name": "포레나북수원",
+      "aliases": [
+        "포레나 북수원"
+      ],
+      "dong": "파장동",
+      "address": "경기도 수원시 장안구 파장동 640",
+      "builtYear": 2023,
+      "households": 1063,
+      "analysisGroup": "41111",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41111120436816",
+      "regionCode": "41111",
+      "regionName": "경기도 수원시 장안구",
+      "name": "더샵광교산퍼스트파크",
+      "aliases": [],
+      "dong": "조원동",
+      "address": "경기도 수원시 장안구 조원동 925",
+      "builtYear": 2022,
+      "households": 666,
+      "analysisGroup": "41111",
+      "status": "included"
+    },
+    {
+      "catalogId": "41113120312992",
+      "regionCode": "41113",
+      "regionName": "경기도 수원시 권선구",
+      "name": "호매실마을13단지",
+      "aliases": [],
+      "dong": "호매실동",
+      "address": "경기도 수원시 권선구 호매실동 1371",
+      "builtYear": 2015,
+      "households": 1428,
+      "analysisGroup": "41113",
+      "status": "included"
+    },
+    {
+      "catalogId": "41113120324139",
+      "regionCode": "41113",
+      "regionName": "경기도 수원시 권선구",
+      "name": "수원아이파크시티5단지",
+      "aliases": [],
+      "dong": "권선동",
+      "address": "경기도 수원시 권선구 권선동 1355",
+      "builtYear": 2015,
+      "households": 704,
+      "analysisGroup": "41113",
+      "status": "included"
+    },
+    {
+      "catalogId": "41113120436587",
+      "regionCode": "41113",
+      "regionName": "경기도 수원시 권선구",
+      "name": "수원하늘채더퍼스트1단지",
+      "aliases": [
+        "수원 하늘채 더퍼스트 1단지"
+      ],
+      "dong": "곡반정동",
+      "address": "경기도 수원시 권선구 곡반정동 652",
+      "builtYear": 2022,
+      "households": 1403,
+      "analysisGroup": "41113",
+      "status": "included"
+    },
+    {
+      "catalogId": "41113120445920",
+      "regionCode": "41113",
+      "regionName": "경기도 수원시 권선구",
+      "name": "쌍용더플래티넘오목천역",
+      "aliases": [],
+      "dong": "오목천동",
+      "address": "경기도 수원시 권선구 오목천동 1192",
+      "builtYear": 2023,
+      "households": 930,
+      "analysisGroup": "41113",
+      "status": "included"
+    },
+    {
+      "catalogId": "41171120125226",
+      "regionCode": "41171",
+      "regionName": "경기도 안양시 만안구",
+      "name": "현대아이파크",
+      "aliases": [
+        "석수아이파크"
+      ],
+      "dong": "석수동",
+      "address": "경기도 안양시 만안구 석수동 794",
+      "builtYear": 2009,
+      "households": 1134,
+      "analysisGroup": "41171",
+      "status": "included"
+    },
+    {
+      "catalogId": "41171120123589",
+      "regionCode": "41171",
+      "regionName": "경기도 안양시 만안구",
+      "name": "석수역푸르지오",
+      "aliases": [
+        "석수역푸르지오아파트"
+      ],
+      "dong": "석수동",
+      "address": "경기도 안양시 만안구 석수동 374-5",
+      "builtYear": 2009,
+      "households": 542,
+      "analysisGroup": "41171",
+      "status": "included"
+    },
+    {
+      "catalogId": "41171120418873",
+      "regionCode": "41171",
+      "regionName": "경기도 안양시 만안구",
+      "name": "안양씨엘포레자이",
+      "aliases": [],
+      "dong": "안양동",
+      "address": "경기도 안양시 만안구 안양동 1416",
+      "builtYear": 2021,
+      "households": 1394,
+      "analysisGroup": "41171",
+      "status": "included"
+    },
+    {
+      "catalogId": "41171120402324",
+      "regionCode": "41171",
+      "regionName": "경기도 안양시 만안구",
+      "name": "한양수자인리버파크",
+      "aliases": [
+        "안양역한양수자인리버파크"
+      ],
+      "dong": "안양동",
+      "address": "경기도 안양시 만안구 안양동 1411",
+      "builtYear": 2019,
+      "households": 419,
+      "analysisGroup": "41171",
+      "status": "included"
+    },
+    {
+      "catalogId": "11680100001468",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "상록수",
+      "aliases": [
+        "상록수아파트",
+        "상록수아파트104동"
+      ],
+      "dong": "일원동",
+      "address": "서울특별시 강남구 일원동 734",
+      "builtYear": 1993,
+      "households": 740,
+      "analysisGroup": "11680",
+      "status": "included"
+    },
+    {
+      "catalogId": "41465100008357",
+      "regionCode": "41465",
+      "regionName": "경기도 용인시 수지구",
+      "name": "벽산블루밍4단지",
+      "aliases": [
+        "벽산타운4단지아파트"
+      ],
+      "dong": "죽전동",
+      "address": "경기도 용인시 수지구 죽전동 952",
+      "builtYear": 1999,
+      "households": 465,
+      "analysisGroup": "수지",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "11680120145451",
+      "regionCode": "11680",
+      "regionName": "서울특별시 강남구",
+      "name": "청담자이",
+      "aliases": [
+        "청담자이아파트"
+      ],
+      "dong": "청담동",
+      "address": "서울특별시 강남구 청담동 134-38",
+      "builtYear": 2011,
+      "households": 708,
+      "analysisGroup": "11680",
+      "status": "insufficient_history"
+    },
+    {
+      "catalogId": "41111100005941",
+      "regionCode": "41111",
+      "regionName": "경기도 수원시 장안구",
+      "name": "백설에듀빌",
+      "aliases": [
+        "백설 에듀빌"
+      ],
+      "dong": "정자동",
+      "address": "경기도 수원시 장안구 정자동 871-4",
+      "builtYear": 2001,
+      "households": 348,
+      "analysisGroup": "41111",
+      "status": "included"
+    }
+  ]
+}

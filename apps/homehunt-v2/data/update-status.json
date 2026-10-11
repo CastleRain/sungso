@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "attemptAsOfMonth": "2026-09",
+  "publishedForecastAsOfMonth": "2026-09",
+  "modelVersion": "direction-6m-1.1.0",
+  "lastAttemptAt": "2026-10-11T05:38:54.544000+00:00",
+  "previousValidatedRetained": false,
+  "lastValidatedAsOfMonth": null,
+  "latestExperimentStatus": "tested_withheld",
+  "reasons": [
+    "Macro F1 did not beat the strongest simple baseline by 0.02",
+    "Change error did not improve on the strongest simple baseline",
+    "Paired month-block improvement uncertainty includes zero",
+    "Under 30 true cases in one direction class",
+    "Unseen-region verification missing or below chance"
+  ],
+  "message": "최신 실험 결과와 실제 자료 현황을 반영했습니다."
+}

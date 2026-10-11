@@ -1,5 +1,29 @@
 import { normalizeGeoPoint } from '../../../shared/homehunt/transport-core.mjs?v=2.1.0';
 import { sanitizeHomehuntPersistence } from '../../../shared/homehunt/recommendation-persistence-core.mjs';
+import { getLocalRecordAccess, accountStorageKey, RECORD_OWNER_KEY, LEGACY_PERSONAL_OWNER_KEY } from '../../../shared/homehunt/homehunt-version-store.mjs?v=20261011';
+
+let accountContext = null;
+export function configureHomehuntStorageAccount({ getUid } = {}) {
+  accountContext = typeof getUid === 'function' ? getUid : null;
+}
+const scopedPersonalKeys = new Set(['homehunt_compare_ids_v1', 'homehunt_recent_complexes_v1',
+  'homehunt_recommendation_filters_v1', 'homehunt_supply_preferences_v1', 'homehunt_supply_seen_v1', 'homehunt_subscription_profile_v1']);
+const sharedPersonalKeys = new Set(['homehunt_visits_v1', 'homehunt_shortlist_v1', 'homehunt_supply_favorites_v1', 'homehunt_parking_observations_v1']);
+function personalStorageKey(key, writing = false) {
+  if (!accountContext || !scopedPersonalKeys.has(key) && !sharedPersonalKeys.has(key)) return key;
+  const uid = accountContext();
+  const access = getLocalRecordAccess({ storage: localStorage, uid });
+  if (access.locked) { if (writing) throw new Error(access.reason); return null; }
+  if (sharedPersonalKeys.has(key)) {
+    if (writing && !access.ownerUid) localStorage.setItem(RECORD_OWNER_KEY, uid);
+    return key;
+  }
+  const scoped = accountStorageKey(key, uid);
+  if (writing || localStorage.getItem(scoped) !== null) return scoped;
+  const legacyOwner = localStorage.getItem(LEGACY_PERSONAL_OWNER_KEY) || access.ownerUid;
+  return legacyOwner === uid ? key : null;
+}
+export const resolveHomehuntPersonalStorageKey = (key, { writing = false } = {}) => personalStorageKey(key, writing);
 
 const VISITS_KEY = 'homehunt_visits_v1';
 const COMPARE_IDS_KEY = 'homehunt_compare_ids_v1';
@@ -16,14 +40,17 @@ const DB_STORE = 'datasets';
 
 function readJson(key, fallback = null) {
   try {
-    const raw = localStorage.getItem(key);
+    const selectedKey = personalStorageKey(key);
+    if (!selectedKey) return fallback;
+    const raw = localStorage.getItem(selectedKey);
     if (raw === null) return fallback;
     const value = JSON.parse(raw);
     const safe = sanitizeHomehuntPersistence(value);
     if (JSON.stringify(safe) !== JSON.stringify(value)) {
       // Migrate old Kakao evidence without making a blocked storage write
       // prevent the user from reading their cleaned personal/price records.
-      try { localStorage.setItem(key, JSON.stringify(safe)); } catch (_) { /* Read remains sanitized. */ }
+      // Scoped personal reads never rewrite the untouched legacy original.
+      try { if (!scopedPersonalKeys.has(key) || selectedKey !== key) localStorage.setItem(selectedKey, JSON.stringify(safe)); } catch (_) { /* Read remains sanitized. */ }
     }
     return safe;
   } catch (_) {
@@ -32,7 +59,7 @@ function readJson(key, fallback = null) {
 }
 
 function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(sanitizeHomehuntPersistence(value)));
+  localStorage.setItem(personalStorageKey(key, true), JSON.stringify(sanitizeHomehuntPersistence(value)));
 }
 
 export function loadVisits() {
@@ -54,7 +81,7 @@ export function saveCompareIds(ids) {
 }
 
 export function clearVisits() {
-  localStorage.removeItem(VISITS_KEY);
+  localStorage.removeItem(personalStorageKey(VISITS_KEY, true));
 }
 
 export function loadRecentComplexes() {
@@ -170,7 +197,8 @@ export function saveSubscriptionProfile(profile) {
 }
 
 export function clearSubscriptionProfile() {
-  localStorage.removeItem(SUBSCRIPTION_PROFILE_KEY);
+  const selectedKey = personalStorageKey(SUBSCRIPTION_PROFILE_KEY, true);
+  localStorage.removeItem(selectedKey);
 }
 
 export function loadSupplyFavorites() {

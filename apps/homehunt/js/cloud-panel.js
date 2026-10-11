@@ -1,7 +1,13 @@
-import { normalizeCloudSnapshot } from '../../../shared/homehunt/cloud-snapshot-core.mjs?v=4.18.0';
-import { cloudSessionErrorMessage } from './cloud-session.js?v=4.18.0';
+import { normalizeCloudSnapshot, CloudSnapshotError } from '../../../shared/homehunt/cloud-snapshot-core.mjs?v=4.18.0';
+import { cloudSessionErrorMessage } from './cloud-session.js?v=4.19.0&records=3';
 
-export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot, onAuthChange = () => {} }) {
+const OWNER_KEY = 'homehunt_shared_records_owner_uid_v1';
+const browserStorage = () => { try { return globalThis.localStorage || null; } catch (_) { return null; } };
+const hasInputs = snapshot => snapshot.visits.length || snapshot.shortlist.length || snapshot.supplyFavorites.length
+  || Object.keys(snapshot.parkingObservations).length || snapshot.recommendationFilters.workplaces.length;
+const fingerprint = snapshot => JSON.stringify(normalizeCloudSnapshot(snapshot));
+
+export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot, onAuthChange = () => {}, storage = browserStorage() }) {
   if (!root || !session) throw new TypeError('Cloud panel root and session are required.');
   const doc = root.ownerDocument;
   const element = (tag, className, label) => {
@@ -32,10 +38,33 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
   replacementActions.append(replace, cancelReplace);
   replacement.append(replacementSummary, replacementActions);
   const status = element('p', 'cloud-panel-status'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
-  const detail = element('p', 'cloud-panel-note', '로그인만으로 기록을 바꾸지 않습니다. 불러오면 이 기기의 해당 기록을 교체합니다. 통근 경로·추천 점수는 저장하지 않습니다. 주소로 선택한 위치는 다시 확인합니다.');
+  const detail = element('p', 'cloud-panel-note', '로그인만으로 기록을 바꾸거나 다른 계정 기록을 병합하지 않습니다. 다른 계정의 기록이 남아 있으면 해당 계정으로 돌아가거나 클라우드 복원을 먼저 선택하세요. 통근 경로·추천 점수는 저장하지 않습니다. 주소로 선택한 위치는 다시 확인합니다.');
   root.replaceChildren(heading, intro, account, apiStatus, actions, replacement, status, detail);
   let state = session.getState(); let busy = false; let revision = null; let owner = state.user?.uid || null; let epoch = 0;
   let replacementRevision = null;
+  let replacementSnapshot = null;
+  let knownRemoteSnapshot = null;
+  const readOwner = () => {
+    try { return storage?.getItem(OWNER_KEY) || null; }
+    catch (_) { throw new CloudSnapshotError('이 기기 기록의 계정을 확인하지 못했습니다. 저장 공간 설정을 확인해주세요.', 'LOCAL_STORAGE_UNAVAILABLE'); }
+  };
+  const bindOwner = uid => {
+    try { storage?.setItem(OWNER_KEY, uid); }
+    catch (_) { throw new CloudSnapshotError('기록을 처리했지만 이 기기의 계정 표시를 저장하지 못했습니다. 저장 공간을 확인해주세요.', 'LOCAL_STORAGE_UNAVAILABLE'); }
+  };
+  const authorizeSave = (snapshot, remote = null) => {
+    const uid = state.user?.uid;
+    const localOwner = readOwner();
+    if (hasInputs(snapshot) && localOwner && localOwner !== uid) {
+      throw new CloudSnapshotError('이 기기에는 다른 계정의 기록이 남아 있습니다. 그 계정으로 돌아가거나 현재 계정의 클라우드 기록을 먼저 복원해주세요.', 'LOCAL_RECORD_OWNER_MISMATCH');
+    }
+    if (remote && !hasInputs(snapshot) && hasInputs(remote)) {
+      throw new CloudSnapshotError('이 기기의 기록이 비어 있어 기존 클라우드 기록을 교체할 수 없습니다. 클라우드 복원을 먼저 선택해주세요.', 'EMPTY_LOCAL_SNAPSHOT');
+    }
+    if (storage && remote && !localOwner && fingerprint(snapshot) !== fingerprint(remote)) {
+      throw new CloudSnapshotError('이 기기 기록의 계정이 아직 확인되지 않았습니다. 기존 클라우드 기록을 먼저 복원한 뒤 저장해주세요.', 'LOCAL_RECORD_OWNER_UNVERIFIED');
+    }
+  };
   const render = () => {
     const signedIn = state.status === 'signed-in' && state.user;
     login.hidden = Boolean(signedIn); logout.hidden = !signedIn;
@@ -55,6 +84,7 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
   };
   const showReplacement = (remote, { conflict = false } = {}) => {
     const existing = remote.snapshot === null ? null : normalizeCloudSnapshot(remote.snapshot);
+    replacementSnapshot = knownRemoteSnapshot = existing;
     replacementRevision = remote.revision;
     const timestamp = remote.updatedAt && Number.isFinite(Date.parse(remote.updatedAt))
       ? new Date(remote.updatedAt).toLocaleString('ko-KR') : '저장일 미기록';
@@ -64,19 +94,31 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
     status.textContent = `${conflict ? '다른 기기의 변경을 확인했습니다.' : '기존 클라우드 기록을 확인했습니다.'} 이 기기 기록은 유지했습니다. 현재 기록으로 클라우드를 교체하거나, 클라우드 기록을 불러올 수 있습니다.`;
   };
   const saveCurrentSnapshot = async (snapshot, expectedRevision, current) => {
+    if (!current()) return;
+    authorizeSave(snapshot, knownRemoteSnapshot);
+    const callerUid = state.user?.uid;
     let saved;
-    try { saved = await session.saveSnapshot(snapshot, expectedRevision); }
+    try { saved = await session.saveSnapshot(snapshot, expectedRevision, { expectedUid: callerUid }); }
     catch (error) {
       if (error?.code !== 'CLOUD_SNAPSHOT_CONFLICT' && error?.status !== 409) throw error;
       if (!current()) return;
-      revision = null; replacementRevision = null;
+      revision = null; replacementRevision = null; replacementSnapshot = null;
       // Inspect the new version without applying it or retrying a write.
       const latest = await session.loadSnapshot();
       if (current()) showReplacement(latest, { conflict: true });
       return;
     }
     if (!current()) return;
+    if (fingerprint(await captureSnapshot()) !== fingerprint(snapshot)) {
+      if (!current()) return;
+      revision = saved.revision; knownRemoteSnapshot = normalizeCloudSnapshot(snapshot); replacementRevision = null; replacementSnapshot = null;
+      status.textContent = '클라우드에는 저장을 시작한 당시 기록을 보관했습니다. 그동안 변경한 이 기기 기록은 유지했으니 최신 내용을 다시 확인해주세요.';
+      return;
+    }
+    if (!current()) return;
+    bindOwner(callerUid);
     revision = saved.revision; replacementRevision = null;
+    knownRemoteSnapshot = normalizeCloudSnapshot(snapshot); replacementSnapshot = null;
     status.textContent = `클라우드 저장 완료 · 버전 ${revision} · ${snapshot.visits.length}개 방문 · ${snapshot.shortlist.length}개 관심 후보`;
   };
   const run = async (message, work) => {
@@ -91,9 +133,14 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
   save.addEventListener('click', () => run('클라우드 기록을 확인하는 중…', async current => {
     const snapshot = normalizeCloudSnapshot(await captureSnapshot());
     if (!current()) return;
+    authorizeSave(snapshot);
     if (revision === null) {
       const remote = await session.loadSnapshot();
       if (!current()) return;
+      if (fingerprint(await captureSnapshot()) !== fingerprint(snapshot)) throw new CloudSnapshotError('조회 중 이 기기 기록이 변경됐습니다. 최신 내용을 확인하고 다시 저장해주세요.', 'LOCAL_RECORDS_CHANGED');
+      if (!current()) return;
+      const remoteSnapshot = remote.snapshot === null ? null : normalizeCloudSnapshot(remote.snapshot);
+      authorizeSave(snapshot, remoteSnapshot);
       if (remote.snapshot !== null) { showReplacement(remote); return; }
       revision = remote.revision;
     }
@@ -104,30 +151,42 @@ export function mountCloudPanel({ root, session, captureSnapshot, applySnapshot,
     const expectedRevision = replacementRevision;
     void run('확인한 클라우드 버전에 이 기기 기록을 저장하는 중…', async current => {
       const snapshot = normalizeCloudSnapshot(await captureSnapshot());
-      if (current()) await saveCurrentSnapshot(snapshot, expectedRevision, current);
+      if (current()) { authorizeSave(snapshot, replacementSnapshot); await saveCurrentSnapshot(snapshot, expectedRevision, current); }
     });
   });
   cancelReplace.addEventListener('click', () => {
     if (busy) return;
-    replacementRevision = null;
+    replacementRevision = null; replacementSnapshot = null;
     status.textContent = '클라우드 교체를 취소했습니다. 이 기기와 클라우드 기록은 그대로 유지됩니다.';
     render();
   });
   load.addEventListener('click', () => run('클라우드 기록을 불러오는 중…', async current => {
-    replacementRevision = null;
+    replacementRevision = null; replacementSnapshot = null;
+    const callerUid = state.user?.uid;
+    const localBefore = fingerprint(await captureSnapshot());
     const remote = await session.loadSnapshot();
     if (!current()) return;
     if (remote.snapshot === null) { revision = 0; status.textContent = '아직 저장한 클라우드 기록이 없습니다. 이 기기 기록은 유지됩니다.'; return; }
     const snapshot = normalizeCloudSnapshot(remote.snapshot);
-    await applySnapshot(snapshot);
+    if (localBefore !== fingerprint(await captureSnapshot())) throw new CloudSnapshotError('불러오는 동안 이 기기 기록이 변경됐습니다. 최신 기록을 확인하고 다시 복원해주세요.', 'LOCAL_RECORDS_CHANGED');
+    if (!current()) return;
+    const previousOwner = readOwner();
+    bindOwner(callerUid);
+    try { await applySnapshot(snapshot); }
+    catch (error) {
+      try { if (readOwner() === callerUid) { if (previousOwner) bindOwner(previousOwner); else storage?.removeItem(OWNER_KEY); } }
+      catch (_) { /* Preserve the original restore failure. */ }
+      throw error;
+    }
     if (!current()) return;
     revision = remote.revision;
+    knownRemoteSnapshot = snapshot;
     const unresolved = snapshot.recommendationFilters.workplaces.filter(item => item.needsLocationResolution).length;
     status.textContent = `불러오기 완료 · 버전 ${revision}${unresolved ? ` · 회사 ${unresolved}곳의 주소 위치를 다시 확인해주세요.` : ''}`;
   }));
   const unsubscribe = session.subscribe(next => {
     const nextOwner = next.user?.uid || null;
-    if (nextOwner !== owner) { owner = nextOwner; revision = null; replacementRevision = null; epoch += 1; status.textContent = ''; }
+    if (nextOwner !== owner) { owner = nextOwner; revision = null; replacementRevision = null; replacementSnapshot = null; knownRemoteSnapshot = null; epoch += 1; status.textContent = ''; }
     state = next; render(); onAuthChange(next);
   });
   void session.init().catch(error => { status.textContent = cloudSessionErrorMessage(error); render(); });

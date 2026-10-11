@@ -1,5 +1,6 @@
 import { normalizeParkingEvidence } from '../../../../shared/homehunt/parking-evidence-core.mjs';
 import { destinationLetter } from '../personalized-context-core.mjs';
+import { resolveHomehuntPersonalStorageKey } from '../storage.js?v=2.5.0&account=3';
 
 const el = (tag, cls, text) => { const n = document.createElement(tag); n.className = cls || ''; if (text != null) n.textContent = text; return n; };
 const metric = (value, unit) => Number.isFinite(value) ? `${Math.round(value * 10) / 10}${unit}` : '미확인';
@@ -18,7 +19,7 @@ const GATE_LABELS = {
 
 export function parkingForCandidate(candidate) {
   let saved;
-  try { saved = JSON.parse(localStorage.getItem(PARKING_KEY) || '{}')[candidateKey(candidate)]; } catch (_) { /* Local storage can be unavailable. */ }
+  try { const key = resolveHomehuntPersonalStorageKey(PARKING_KEY); if (key) saved = JSON.parse(localStorage.getItem(key) || '{}')[candidateKey(candidate)]; } catch (_) { /* Local storage can be unavailable. */ }
   return normalizeParkingEvidence(saved || candidate.parkingEvidence || {}, { households: candidate.households });
 }
 
@@ -42,10 +43,11 @@ export function createParkingEditor(candidate, onChange) {
   const reset = el('button', '', '사용자 확인값 지우기'); reset.type = 'button';
   const persist = value => {
     const key = candidateKey(candidate); if (!key) throw new Error('단지 식별 정보를 확인해주세요.');
-    let records = {}; try { records = JSON.parse(localStorage.getItem(PARKING_KEY) || '{}'); } catch (_) { /* Recover a damaged record. */ }
+    const storageKey = resolveHomehuntPersonalStorageKey(PARKING_KEY, { writing: true });
+    let records = {}; try { records = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) { /* Recover a damaged record. */ }
     if (!records || typeof records !== 'object' || Array.isArray(records)) records = {};
     if (value) records[key] = value; else delete records[key];
-    localStorage.setItem(PARKING_KEY, JSON.stringify(records)); onChange();
+    localStorage.setItem(storageKey, JSON.stringify(records)); onChange();
   };
   form.addEventListener('submit', event => {
     event.preventDefault();

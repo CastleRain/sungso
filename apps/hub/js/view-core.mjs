@@ -3,6 +3,8 @@ import { LIFE_APP_REGISTRY } from '../../../shared/life/registry.mjs';
 
 export const SHORTCUT_LIMIT = 4;
 const WORKSPACE_APPS = [{ id: 'sohee', groupId: 'daily', title: '소희 작업실', name: '양정커피 매출 · 포트폴리오', description: '매출 흐름과 당일 디저트 준비', href: './sohee/workspace/', icon: 'wallet', pinnable: false }];
+// Two HomeHunt entry points do not add an ID to the saved six-app home schema.
+const VERSION_APPS = [{ id: 'homehunt-v2', groupId: 'daily', title: '우리 집 판단 · Ver2', name: 'HomeHunt Ver2', description: '예산·통근·가격 근거를 나란히', href: './homehunt-v2/', icon: 'home', pinnable: false }];
 
 const definitions = new Map(APP_REGISTRY.map(app => [app.id, app]));
 const searchText = value => String(value ?? '').normalize('NFKC').toLocaleLowerCase('ko-KR').replace(/\s+/gu, ' ').trim();
@@ -36,7 +38,7 @@ export function getBrowsableApps(config, { query = '', groupId = 'all' } = {}) {
   const shared = getLibraryApps(clean);
   const needle = searchText(query);
   return clean.groups.filter(group => groupId === 'all' || group.id === groupId)
-    .flatMap(group => [...shared.filter(app => app.groupId === group.id), ...[...LIFE_APP_REGISTRY, ...WORKSPACE_APPS].filter(app => app.groupId === group.id).map(app => ({ ...app, groupName: group.name }))])
+    .flatMap(group => [...shared.filter(app => app.groupId === group.id), ...[...LIFE_APP_REGISTRY, ...WORKSPACE_APPS, ...VERSION_APPS].filter(app => app.groupId === group.id).map(app => ({ ...app, groupName: group.name }))])
     .filter(app => !needle || searchText(`${app.title} ${app.name} ${app.description} ${app.groupName}`).includes(needle));
 }
 

@@ -14,6 +14,7 @@ sungso/
 │   ├── honeymoon/           → dist/honeymoon/          → /sungso/honeymoon/
 │   ├── travel/              → dist/travel/             → /sungso/travel/
 │   ├── homehunt/            → dist/homehunt/           → /sungso/homehunt/
+│   ├── homehunt-v2/         → dist/homehunt-v2/        → /sungso/homehunt-v2/
 │   ├── table/               → dist/table/              → /sungso/table/
 │   ├── footprints/          → dist/footprints/         → /sungso/footprints/
 │   └── wedding/             → dist/wedding/            → /sungso/wedding/
@@ -83,6 +84,8 @@ Travel의 명시적 예산 저장은 같은 트랜잭션에서 기존 장부의 
 등록 예시는 현재 `config/apps.json`의 앱 항목을 복사해 source/output과 허용 파일을 변경한다. 신규 앱 때문에 빌드 스크립트의 앱 목록을 하드코딩하지 않는다.
 
 ## 보관과 호환
+
+HomeHunt Ver2는 별도 앱 출력이며 Ver1 화면을 교체하지 않는다. 공유 기록은 `shared/homehunt/homehunt-version-store.mjs`로 연결하고 검색 조건·비교·화면 상태는 버전 및 계정 경계를 유지한다. 연구 코드는 `services/homehunt/research/v2`, 비공개 원자료는 서비스 `.local`에 두며 공개 결과 JSON만 `apps/homehunt-v2/data`에 포함한다. 현재 확률이 보류된 재구성 실험도 실제 성능과 한계를 공개한다. 두 버전이 같은 API·공급자 호출 장부를 사용하므로 버전 전환이 호출 한도를 초기화하지 않는다.
 
 [archive](../archive/README.md)는 이전 문서·WeCost 백업·몰디브 독립 보고서/XML·HomeHunt 2.5 인계자료를 보관한다. 기존 공개 자료 중 유지할 파일만 호환 출력으로 명시한다. 전국 단지 카탈로그·메타 JSON 두 파일도 서비스의 원천자료 위치에서 기존 `homehunt/data/` 공개 URL로 출력하는 명시적 예외다. archive 전체, 서비스 구현·자격증명·상태 장부·테스트·등록부는 웹에 공개하지 않는다.
 

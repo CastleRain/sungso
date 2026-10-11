@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "direction-6m-1.1.0",
+  "asOfMonth": "2026-09",
+  "verificationLevel": "reconstructed",
+  "checkedAt": "2026-10-11T05:38:54.231122+00:00",
+  "featureAssumptions": [
+    {
+      "feature": "households",
+      "verificationLevel": "reconstructed",
+      "message": "현재 세대수를 과거에도 같다고 가정한 정적 대리변수입니다. 세대수 변동 이력을 확보하지 못했습니다. strict 실험에서는 당시 공표가 검증된 값만 사용합니다."
+    }
+  ],
+  "sources": [
+    {
+      "id": "molit",
+      "label": "국토부 매매·전월세",
+      "status": "partial",
+      "periodStart": "2019-08",
+      "periodEnd": "2026-10",
+      "missingReason": "Latest normalized snapshots lack historical report/cancellation vintages; focal-region history may be sparse",
+      "sourceUrl": "https://www.data.go.kr/data/15126469/openapi.do"
+    },
+    {
+      "id": "bok",
+      "label": "한국은행 금리",
+      "status": "partial",
+      "periodStart": "2015-06",
+      "periodEnd": "2026-09",
+      "missingReason": "Base-rate decision history available; mortgage-rate history only 8 months, older publication vintages not proven",
+      "sourceUrl": "https://ecos.bok.or.kr/"
+    },
+    {
+      "id": "catalog",
+      "label": "공식 단지 특성",
+      "status": "partial",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "Construction year/area are usable in reconstruction; historical households changes not known",
+      "sourceUrl": "https://www.reb.or.kr/"
+    },
+    {
+      "id": "rail",
+      "label": "역·노선·업무지역 접근",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "Current station references lack historical opening/transfer vintages and actual walking paths; excluded from historic model",
+      "sourceUrl": "https://data.kric.go.kr/"
+    },
+    {
+      "id": "reb",
+      "label": "지역 가격지수",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "No compatible historical observations acquired; official dated CSV import supported",
+      "sourceUrl": "https://www.reb.or.kr/r-one/portal/openapi/openApiDevPage.do"
+    },
+    {
+      "id": "supply",
+      "label": "입주·미분양",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "No compatible historical observations acquired; official dated CSV import supported",
+      "sourceUrl": "https://stat.molit.go.kr/portal/cate/statMetaView.do?hRsId=32"
+    },
+    {
+      "id": "kosis",
+      "label": "인구·가구·일자리",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "No compatible historical observations acquired; official dated CSV import supported",
+      "sourceUrl": "https://kosis.kr/openapi/"
+    },
+    {
+      "id": "auction",
+      "label": "법원 경매",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "No compatible historical observations acquired; official dated CSV import supported",
+      "sourceUrl": "https://www.courtauction.go.kr/"
+    },
+    {
+      "id": "listings",
+      "label": "매물 수·호가",
+      "status": "unavailable",
+      "periodStart": null,
+      "periodEnd": null,
+      "missingReason": "No permitted free historical listing archive; not generated",
+      "sourceUrl": null
+    }
+  ],
+  "exclusions": {
+    "catalog_ambiguous_or_unmatched": 27178,
+    "monthly_rent_not_deposit_series": 175439,
+    "cancelled_latest_snapshot": 7314
+  },
+  "seriesExclusions": {
+    "under_6_active_months": 661,
+    "reference_under_3_trades": 7672,
+    "insufficient_trend_history": 985
+  },
+  "strictValidation": {
+    "status": "unavailable",
+    "reason": "Historical publication-time and cancellation/revision vintages are not proven. Forward raw snapshots are preserved from first acquisition."
+  },
+  "regionalCoverage": [
+    {
+      "regionCode": "11110",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11140",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11170",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11200",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11215",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11230",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "11260",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11290",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11305",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11320",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11350",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11380",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11410",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11440",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11470",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11500",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11530",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11545",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "11560",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11590",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11620",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11650",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "11680",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "11710",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "11740",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41111",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "41113",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "41115",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41117",
+      "periodStart": "2019-08",
+      "periodEnd": "2026-10",
+      "saleMonths": 87,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41131",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41133",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41135",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41150",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41171",
+      "periodStart": "2021-10",
+      "periodEnd": "2026-09",
+      "saleMonths": 60,
+      "rentMonths": 60
+    },
+    {
+      "regionCode": "41173",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41192",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41194",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41196",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41210",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41220",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41250",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41271",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41273",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41281",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41285",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41287",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41290",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41310",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41360",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41370",
+      "periodStart": "2019-09",
+      "periodEnd": "2026-09",
+      "saleMonths": 85,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41390",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41410",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41430",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41450",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41461",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41463",
+      "periodStart": "2019-08",
+      "periodEnd": "2026-09",
+      "saleMonths": 86,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41465",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41480",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41500",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41550",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41570",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41590",
+      "periodStart": "2023-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 39,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41597",
+      "periodStart": "2019-09",
+      "periodEnd": "2026-09",
+      "saleMonths": 85,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41610",
+      "periodStart": "2019-09",
+      "periodEnd": "2026-09",
+      "saleMonths": 85,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41630",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41650",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41670",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41800",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41820",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    },
+    {
+      "regionCode": "41830",
+      "periodStart": "2026-07",
+      "periodEnd": "2026-09",
+      "saleMonths": 3,
+      "rentMonths": 0
+    }
+  ]
+}
