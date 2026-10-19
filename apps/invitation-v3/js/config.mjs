@@ -1,0 +1,44 @@
+export const wedding = Object.freeze({
+  title: '성우와 소희, 결혼합니다', groom: '성우', bride: '소희',
+  startsAt: '2027-03-06T15:30:00+09:00', endsAt: null, timezone: 'Asia/Seoul',
+  canonicalUrl: 'https://castlerain.github.io/sungso/invitation-v3/',
+  venue: '부산 목화웨딩홀', venueSearchName: '목화웨딩컨벤션', room: '15층 벨리스홀',
+  address: '부산광역시 연제구 중앙대로 1125 시티타워', phone: '051-714-2243',
+  map: { timestamp: '1792422272379', key: '3jhadz839rm' },
+});
+export const content = Object.freeze({
+  invitation: ['3월 6일, 저희 결혼식에 초대합니다.', '함께해 주시면 정말 기쁠 것 같아요.', '그날, 반가운 얼굴로 만나요.'],
+  story: [
+    { photo: 'walk', title: '나란히 걷고', caption: '같은 길을, 손을 잡고.' },
+    { photo: 'bouquet', title: '서로를 보고', caption: '꽃다발 사이로 눈을 맞추고.' },
+    { photo: 'date', title: '결혼 소식을 전해요', caption: '저희 결혼 날짜는 3월 6일이에요.' },
+  ],
+  questions: [], // Optional { question, answer }; use only the couple's actual answers.
+  promises: [],
+  faq: [
+    { question: '예식은 몇 층에서 하나요?', answer: '시티타워 15층 벨리스홀입니다. 예식은 오후 3시 30분에 시작해요.' },
+    { question: '가까운 지하철역은 어디인가요?', answer: '부산 지하철 1·3호선 연산역 7번 출구 인근입니다. 정확한 도보 경로는 지도 앱에서 확인해 주세요.' },
+    { question: '주차·식사 등 이용 안내가 궁금해요.', answer: '예식장 안내를 확인해 주세요. 아래 번호를 누르면 목화웨딩컨벤션으로 연결됩니다.', phone: true },
+  ],
+});
+export const accountGroups = [
+  { id: 'groom', label: '신랑 측', accounts: [
+    { relation: '신랑', holder: '성우', bank: '', number: '' },
+    { relation: '아버지', holder: '', bank: '', number: '' },
+    { relation: '어머니', holder: '', bank: '', number: '' },
+  ] },
+  { id: 'bride', label: '신부 측', accounts: [
+    { relation: '신부', holder: '소희', bank: '', number: '' },
+    { relation: '아버지', holder: '', bank: '', number: '' },
+    { relation: '어머니', holder: '', bank: '', number: '' },
+  ] },
+];
+export const music = Object.freeze({ title: '하늘빛 약속', description: '잔잔한 피아노', src: null, volume: 0.25 });
+export const photos = Object.freeze([
+  { id: 'forest', src: './assets/photos/forest-1440.webp', thumb: './assets/photos/forest-640.webp', width: 1440, height: 2159, alt: '초록빛 산책길에서 손을 잡고 나란히 걷는 성우와 소희' },
+  { id: 'bouquet', src: './assets/photos/bouquet-1440.webp', thumb: './assets/photos/bouquet-640.webp', width: 1440, height: 2159, alt: '작은 꽃다발을 사이에 두고 서로를 바라보는 두 사람' },
+  { id: 'promise', src: './assets/photos/promise-1440.webp', thumb: './assets/photos/promise-640.webp', width: 1440, height: 2159, alt: '색색의 꽃다발 옆에서 손을 포개는 두 사람' },
+  { id: 'date', src: './assets/photos/date-1440.webp', thumb: './assets/photos/date-640.webp', width: 1440, height: 2159, alt: '나무 아래에서 0306 풍선을 들고 결혼 날짜를 전하는 두 사람' },
+  { id: 'walk', src: './assets/photos/walk-1440.webp', thumb: './assets/photos/walk-640.webp', width: 1440, height: 2159, alt: '햇살이 비치는 골목에서 손을 잡고 나란히 걷는 두 사람' },
+  { id: 'sea', src: './assets/photos/sea-1440.webp', thumb: './assets/photos/sea-640.webp', width: 1440, height: 2159, alt: '바닷가에서 빨간 하트 풍선을 들고 마주 보는 두 사람' },
+]);

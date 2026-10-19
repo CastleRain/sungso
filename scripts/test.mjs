@@ -6,7 +6,7 @@ import { PROJECT_ROOT, prepareAppBuilds } from './build-site.mjs';
 // Generate registered compiled shells once, before parallel test workers read them.
 await prepareAppBuilds();
 
-const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/homehunt-v2/tests', 'apps/homehunt-v2/js', 'apps/invitation/tests', 'apps/invitation-v2/tests', 'apps/sohee/sales/tests', 'services/sohee/tests'];
+const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/homehunt-v2/tests', 'apps/homehunt-v2/js', 'apps/invitation/tests', 'apps/invitation-v2/tests', 'apps/invitation-v3/tests', 'apps/sohee/sales/tests', 'services/sohee/tests'];
 const files = [];
 for (const directory of directories) {
   for (const file of (await readdir(path.join(PROJECT_ROOT, directory))).sort()) {

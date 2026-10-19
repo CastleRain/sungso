@@ -90,6 +90,12 @@
       "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets"]
     },
     {
+      "id": "invitation-v3",
+      "source": "apps/invitation-v3",
+      "output": "invitation-v3",
+      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets"]
+    },
+    {
       "id": "dates",
       "source": "apps/dates",
       "output": "dates",
