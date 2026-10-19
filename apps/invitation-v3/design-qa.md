@@ -36,4 +36,15 @@ Physical phone app handoff, OS calendar import, actual OS clipboard readback and
 
 ## Production
 
-Baseline 3a62429: GitHub Pages workflow 39286455326 completed successfully. VER3.1 production results are added after push.
+Baseline 3a62429: GitHub Pages workflow 39286455326 completed successfully. VER3.1.1 production verification is recorded below.
+
+
+### Production verification — 2026-10-20
+
+- Final UI source db47b0d: [Pages workflow 39290367818](https://github.com/CastleRain/sungso/actions/runs/39290367818) validate/deploy both successful. Feature release 885fccb workflow39289986029 also successful; Node22 CI includes all site/service/research checks.
+- 21 published files (HTML, scripts, fonts, icons and six photographs) returned200 and matched local content; text comparisons normalize line endings only. No runtime/member backend file is copied into Pages.
+- Live public GET /api/invitation/v3/guestbook returned200 with an empty list and correct castlerain.github.io CORS header. Existing private /api/health remained401 AUTH_REQUIRED. No production message was created/deleted.
+- Real public browser: v3.1.1 modules and fonts loaded, no horizontal overflow or console errors, public guestbook loaded0 messages and the consent form. Local-preview label is hidden. Official YouTube player uses the selected video/loop configuration. Starting music keeps the current cover position.
+- Final screenshots: public-mobile-guestbook.png and public-mobile-cover.png under the working project's docs/invitation-v3-review/.
+
+Next: fill only the actual account/parent details the couple provides, and review OS map/calendar/share behavior on their own phones.
