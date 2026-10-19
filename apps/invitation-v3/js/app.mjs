@@ -1,7 +1,7 @@
-import { wedding, photos, accountGroups, music } from './config.mjs?v=3.1.0';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.1.0';
-import { InvitationMusic } from './music.mjs?v=3.1.0';
-import './guestbook.mjs?v=3.1.0';
+import { wedding, photos, accountGroups, music } from './config.mjs?v=3.1.1';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.1.1';
+import { InvitationMusic } from './music.mjs?v=3.1.1';
+import './guestbook.mjs?v=3.1.1';
 
 const root = document.documentElement;
 const storySlides = [...document.querySelectorAll('.story-slide')];
@@ -238,8 +238,7 @@ volumeInput.value = String(preferredVolume * 100);
 document.querySelector('#volume-value').textContent = `${Math.round(preferredVolume * 100)}%`;
 function startMusic(){
   const host=document.querySelector('#youtube-host');
-  const first=host.hidden;host.hidden=false;
-  if(first)document.querySelector('#wedding-music').scrollIntoView({behavior:motionOn?'smooth':'instant',block:'start'});
+  host.hidden=false;
   player.play();
 }
 musicToggle.addEventListener('click', () => player.playing || player.pending ? player.pause() : startMusic());

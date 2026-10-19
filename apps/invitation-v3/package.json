@@ -1,1 +1,1 @@
-{"name":"sungso-invitation-v3","version":"3.1.0","private":true,"type":"module","scripts":{"build":"node scripts/build.mjs","dev":"node scripts/preview.mjs","test":"node --test tests/*.test.mjs"}}
+{"name":"sungso-invitation-v3","version":"3.1.1","private":true,"type":"module","scripts":{"build":"node scripts/build.mjs","dev":"node scripts/preview.mjs","test":"node --test tests/*.test.mjs"}}
