@@ -99,6 +99,17 @@ test('copies only approved archive URLs and public runtime assets', async t => {
   assert.ok(!files.includes('config/apps.json'));
 });
 
+test('publishes an explicitly allowed calendar download and keeps app source private', async t => {
+  const f = await fixture(t);
+  f.registry.apps[1].files.push('wedding.ics');
+  const calendar = 'BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nDTSTART:20270306T063000Z\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n';
+  await f.put('apps/sample/wedding.ics', calendar);
+  await f.put('apps/sample/src/index.template.html', 'not public');
+  await buildSite(f);
+  assert.equal(await readFile(path.join(f.distDir, 'sample/wedding.ics'), 'utf8'), calendar);
+  assert.ok(!(await listFiles(f.distDir)).includes('sample/src/index.template.html'));
+});
+
 test('repeated builds are deterministic and remove stale output', async t => {
   const f = await fixture(t);
   await buildSite(f);

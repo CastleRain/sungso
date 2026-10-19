@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { init, parse } from 'es-module-lexer';
 
 export const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
-const WEB_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json', '.xml', '.csv', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.pdf', '.woff', '.woff2', '.webmanifest', '.txt']);
+const WEB_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json', '.xml', '.csv', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico', '.pdf', '.ics', '.woff', '.woff2', '.webmanifest', '.txt']);
 const PRIVATE_PARTS = new Set(['node_modules', 'tests', 'docs', 'server', 'scripts', 'cloud', 'render', 'state', 'archive']);
 
 function relativePath(value, label, { empty = false } = {}) {

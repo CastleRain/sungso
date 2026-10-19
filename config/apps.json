@@ -84,6 +84,12 @@
       ]
     },
     {
+      "id": "invitation-v2",
+      "source": "apps/invitation-v2",
+      "output": "invitation-v2",
+      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets"]
+    },
+    {
       "id": "dates",
       "source": "apps/dates",
       "output": "dates",

@@ -21,12 +21,23 @@ test('auth epoch rejects stale asynchronous identity results', () => {
   const gate = createAuthEpoch(), first = gate.next(); assert.equal(gate.valid(first), true);
   const second = gate.next(); assert.equal(gate.valid(first), false); assert.equal(gate.valid(second), true);
 });
-test('every entry defers all application scripts until the common auth bootstrap', async () => {
+test('every private entry defers scripts until auth; only the explicit guest invitation is public', async () => {
   const registry = await loadRegistry();
   await createFilePlan({ registry });
   for (const { id: app, source } of registry.apps) {
     const html = await readFile(new URL(`../../${source}/index.html`, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /sungso_pin_auth/);
+    if (app === 'invitation-v2') {
+      assert.doesNotMatch(html, /firebase\/boot\.mjs|firebasejs|data-private-root/);
+      assert.match(html, /js\/app\.mjs\?v=2\.1\.0/);
+      const { files } = await createFilePlan({ registry });
+      const guestModules = [...files].filter(([output]) => output.startsWith('invitation-v2/') && /\.(?:js|mjs)$/.test(output));
+      for (const [, entry] of guestModules) {
+        const js = await readFile(new URL(`../../${entry.source}`, import.meta.url), 'utf8');
+        assert.doesNotMatch(js, /firebasejs|firestore|private_data|site_members|shared\/firebase/);
+      }
+      continue;
+    }
     assert.match(html, /data-private-root[^>]*hidden/);
     const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
     assert.ok(scripts.some(([, attrs]) => attrs.includes('firebase/boot.mjs')), app);

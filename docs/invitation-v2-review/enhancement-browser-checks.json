@@ -1,0 +1,30 @@
+[
+  {
+    "cover": 900.6875,
+    "height": 932,
+    "scrollWidth": 430,
+    "sheet": 430,
+    "width": 430
+  },
+  {
+    "cover": 975.28125,
+    "height": 1000,
+    "scrollWidth": 1425,
+    "sheet": 480,
+    "width": 1440
+  },
+  {
+    "cover": 691.78125,
+    "height": 700,
+    "scrollWidth": 320,
+    "sheet": 320,
+    "width": 320
+  },
+  {
+    "cover": 842.609375,
+    "height": 844,
+    "scrollWidth": 390,
+    "sheet": 390,
+    "width": 390
+  }
+]
