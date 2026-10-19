@@ -1,3 +1,24 @@
+# VER3.2 — typography, unboxed actions and countdown motion
+
+**final result: passed (local implementation)**
+
+User request: refine all typography; remove basic calendar/heart icons and box-shaped actions; animate the decreasing time; remove YouTube.
+
+- Pinyon remains on the selected photo/script cover and section titles. Gowun Batang is now used for Korean text, names, labels and forms. Cormorant Garamond supplies the fine numerals and English small type. Official OFL files accompany compressed self-hosted WOFF2s (536,316 and 209,380 bytes). No generated/edited couple images.
+- Date actions, guestbook write and footer sharing now use script lettering with readable Korean labels and a light underline. Filled button boxes, pill filters, form cards and calendar-date circle are removed. The public guestbook keeps explicit consent and validation; its write contract is unchanged. Official map icons stay recognizable.
+- Real remaining time still comes from the same timezone-aware core. Only changed digits roll; temporary layers were observed with intermediate opacity/translation and cleaned on finish, pause and motion off. A paused value stayed unchanged across a long interval, then resumed to the actual current time. Countdown's accessible label contains the real value while duplicate visual layers are hidden from assistive reading.
+- The progress line advances with seconds and resets immediately on a minute boundary. Offscreen/hidden/reduced-motion updates settle immediately. Midnight/event-time arithmetic remains covered by the existing core tests.
+- YouTube section, toolbar, script loader, configuration and module are removed. New media regression guard ensures shipped HTML/JS do not request a YouTube player. A Kakao map iframe is still supported intentionally.
+- 320/390/430/1440px: no horizontal overflow; new fonts loaded; script actions fit; counter pause/resume/motion off, date tabs, selection of 6, celebration feedback and link copy work. Calendar download and account data remain unchanged. Browser console: 0 errors. Full root check: 1,907 passed, 693 local references, 206 JS syntax checks.
+
+Evidence in the calling workspace docs/invitation-v3-review/type-polish/: before-date.png, after-date-390.png, after-date-desktop.png, after-greeting-430.png, after-footer-390.png. Production checks are recorded in the calling workspace after deployment.
+
+Remaining limits: physical phone OS map/calendar/share actions and actual account numbers remain for user review. No production test message was created. No P0/P1/P2 finding remains in the inspected views.
+
+---
+
+## Previous VER3.1 verification history
+
 # Invitation VER3.1 — implementation and visual QA
 
 **final result: passed (local implementation); production verification recorded below**

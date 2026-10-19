@@ -1,7 +1,7 @@
-import { wedding, photos, accountGroups, music } from './config.mjs?v=3.1.1';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.1.1';
-import { InvitationMusic } from './music.mjs?v=3.1.1';
-import './guestbook.mjs?v=3.1.1';
+import { wedding, photos, accountGroups } from './config.mjs?v=3.2.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.2.0';
+import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.2.0';
+import './guestbook.mjs?v=3.2.0';
 
 const root = document.documentElement;
 const storySlides = [...document.querySelectorAll('.story-slide')];
@@ -48,7 +48,7 @@ function applyMotion() {
   root.dataset.motion = motionOn ? 'on' : 'off';
   document.body.classList.toggle('motion-on', motionOn);
   document.body.classList.toggle('motion-off', !motionOn);
-  if (!motionOn) document.getAnimations().forEach(animation => animation.cancel());
+  if (!motionOn) { document.getAnimations().forEach(animation => animation.cancel()); document.querySelectorAll('.digit-outgoing').forEach(node=>node.remove()); }
   motionButton.hidden = false;
   motionButton.disabled = reducedMotion.matches;
   motionButton.textContent = reducedMotion.matches ? '움직임 줄이는 중' : motionOn ? '효과 끄기' : '효과 켜기';
@@ -102,17 +102,25 @@ const message = document.querySelector('#day-message');
 let timerPaused = false;
 const timerToggle = document.querySelector('#timer-toggle');
 timerToggle.hidden = false;
-function updateDay() {
+function updateDay({animate = true} = {}) {
   if (timerPaused || document.hidden) return;
   const time = countdown(wedding.startsAt), days = time.calendarDaysLeft;
   const counter = document.querySelector('#countdown');
+  const rect = counter.getBoundingClientRect();
+  const moving = animate && motionOn && !document.querySelector('#countdown-panel').hidden && rect.bottom > 0 && rect.top < innerHeight;
   ['days', 'hours', 'minutes', 'seconds'].forEach(unit => {
     const field = counter.querySelector(`[data-unit="${unit}"]`), next = String(time[unit]).padStart(2, '0');
-    if (field.textContent !== next) field.textContent = next;
+    renderNumber(field,next,{animate:moving});
   });
+  const progress = document.querySelector('#second-progress');
+  progress.style.transition = moving && time.seconds < Number(progress.dataset.second) ? '' : 'none';
+  progress.style.transform = `scaleX(${(60-time.seconds)/60})`;
+  progress.dataset.second = String(time.seconds);
   counter.setAttribute('aria-label', `예식 시작까지 ${time.days}일 ${time.hours}시간 ${time.minutes}분 ${time.seconds}초`);
   document.querySelector('#countdown-caption').textContent = time.phase === 'waiting' ? '결혼식까지 남은 시간' : time.phase === 'today' ? '바로 오늘, 결혼식 날이에요' : '함께해 주신 모든 마음에 감사드립니다';
   timerToggle.hidden = time.phase !== 'waiting';
+  if (message.dataset.day === String(days) && message.dataset.phase === time.phase) return;
+  message.dataset.day = String(days); message.dataset.phase = time.phase;
   message.replaceChildren();
   const emphasis = document.createElement('strong');
   if (days > 0) {
@@ -126,12 +134,14 @@ function updateDay() {
 }
 updateDay();
 setInterval(updateDay, 1000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) updateDay(); });
+document.addEventListener('visibilitychange', () => { settleDigits(document.querySelector('#countdown')); if (!document.hidden) updateDay({animate:false}); });
 timerToggle.addEventListener('click', () => {
   timerPaused = !timerPaused;
+  settleDigits(document.querySelector('#countdown'));
+  document.querySelector('#second-progress').getAnimations().forEach(animation => animation.cancel());
   timerToggle.setAttribute('aria-pressed', String(timerPaused));
   timerToggle.textContent = timerPaused ? '실시간 다시 보기' : '초 단위 멈춤';
-  updateDay();
+  updateDay({animate:false});
 });
 const dateTabs = [...document.querySelectorAll('.date-tabs [role="tab"]')];
 function selectDateTab(tab, focus = false) {
@@ -154,15 +164,15 @@ dateTabs.forEach((tab, index) => {
 const celebrate = document.querySelector('#celebrate');
 let lastCelebration = 0;
 celebrate.addEventListener('click', () => {
-  document.querySelector('#celebrate-label').textContent = '고맙습니다!';
-  if (!motionOn || Date.now() - lastCelebration < 1600) return;
-  lastCelebration = Date.now();
-  [-45,-22,0,24,47].forEach((drift, index) => {
-    const heart = document.createElement('img'); heart.src = './assets/icons/heart-fill.svg';
-    heart.className = 'floating-heart icon blue'; heart.alt = ''; heart.setAttribute('aria-hidden', 'true');
-    heart.style.setProperty('--drift', `${drift}px`); heart.style.setProperty('--turn', `${drift / 2}deg`);
-    heart.style.animationDelay = `${index * 70}ms`; celebrate.append(heart);
-    setTimeout(() => heart.remove(), 1900);
+  document.querySelector('#celebrate-label').textContent = '마음 잘 받았어요';
+  document.querySelector('#celebrate-script').textContent = 'Thank you';
+  if (!motionOn || Date.now() - lastCelebration < 1800) return;
+  lastCelebration=Date.now();
+  [-36,-8,27].forEach((drift,index)=>{
+    const word=document.createElement('span');
+    word.className='love-note';word.textContent=['love','merci','고마워요'][index];word.setAttribute('aria-hidden','true');
+    word.style.setProperty('--drift',drift+'px');word.style.animationDelay=index*140+'ms';
+    celebrate.append(word);setTimeout(()=>word.remove(),2100);
   });
 });
 
@@ -215,47 +225,6 @@ async function copyText(text, success) {
 accountGroups.forEach(group => publishedAccounts(group).forEach((account, index) => {
   document.querySelector(`[data-account="${group.id}-${index}"]`)?.addEventListener('click', () => copyText(account.number, `${account.bank} ${account.holder} 계좌번호를 복사했어요.`));
 }));
-
-const musicToolbar = document.querySelector('#music-toolbar'), musicToggle = document.querySelector('#music-toggle');
-const musicStatus = document.querySelector('#music-status'), musicPanel = document.querySelector('#music-panel');
-const musicSettings = document.querySelector('#music-settings'), volumeInput = document.querySelector('#music-volume');
-let preferredVolume = music.volume;
-try { const saved = localStorage.getItem('sungso_invitation_v3_volume'); if (saved !== null && Number.isFinite(Number(saved))) preferredVolume = Math.max(0, Math.min(1, Number(saved))); } catch { /* A preference is optional. */ }
-const player = new InvitationMusic({ ...music, volume: preferredVolume }, (playing, error) => {
-  musicToggle.setAttribute('aria-pressed', String(playing));
-  musicToggle.setAttribute('aria-label', playing ? '음악 일시정지' : '음악 재생');
-  document.querySelector('#music-label').textContent = playing ? 'NOW PLAYING' : 'TAP TO PLAY';
-  document.querySelector('#music-icon').src = `./assets/icons/${playing ? 'pause-fill' : 'play-fill'}.svg`;
-  document.querySelector('#listen-music').setAttribute('aria-label', playing ? '웨딩 음악 일시정지' : '웨딩 음악 듣기');
-  document.querySelector('#listen-music img').src = `./assets/icons/${playing ? 'pause-fill' : 'play-fill'}.svg`;
-  musicToolbar.dataset.playing = String(playing);
-  musicStatus.textContent = error || (playing ? '음악을 재생하고 있어요.' : '재생 버튼을 누르면 음악이 시작됩니다.');
-  if (error) toast(error);
-});
-musicToolbar.hidden = false;
-document.querySelector('.music-title').textContent = music.title;
-volumeInput.value = String(preferredVolume * 100);
-document.querySelector('#volume-value').textContent = `${Math.round(preferredVolume * 100)}%`;
-function startMusic(){
-  const host=document.querySelector('#youtube-host');
-  host.hidden=false;
-  player.play();
-}
-musicToggle.addEventListener('click', () => player.playing || player.pending ? player.pause() : startMusic());
-document.querySelector('#listen-music').addEventListener('click',()=>player.playing?player.pause():startMusic());
-musicSettings.addEventListener('click', () => {
-  musicPanel.hidden = !musicPanel.hidden;
-  musicSettings.setAttribute('aria-expanded', String(!musicPanel.hidden));
-});
-volumeInput.addEventListener('input', () => {
-  const value = Number(volumeInput.value) / 100; player.setVolume(value);
-  document.querySelector('#volume-value').textContent = `${volumeInput.value}%`;
-  try { localStorage.setItem('sungso_invitation_v3_volume', String(value)); } catch { /* Session-only volume. */ }
-});
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && !musicPanel.hidden) { musicPanel.hidden = true; musicSettings.setAttribute('aria-expanded', 'false'); musicSettings.focus(); } });
-document.addEventListener('click', event => { if (!musicToolbar.contains(event.target)) { musicPanel.hidden = true; musicSettings.setAttribute('aria-expanded', 'false'); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden) player.pause(); });
-addEventListener('pagehide', () => player.pause());
 
 // Official Kakao rough-map source generated from the public venue page (24484800).
 // Load only near this section; scroll is never trapped by the map.
