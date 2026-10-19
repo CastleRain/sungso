@@ -15,6 +15,7 @@ services:
         - services/homehunt/server/**
         - services/homehunt/scripts/**
         - services/homehunt/paths.mjs
+        - services/invitation/server/**
         - apps/homehunt/data/apartment-catalog-seoul-gyeonggi.json
         - shared/homehunt/**
         - render.yaml

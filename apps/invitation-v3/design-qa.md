@@ -1,65 +1,39 @@
-# VER3 — selected Porto reference / implementation QA
+# Invitation VER3.1 — implementation and visual QA
 
-**final result: passed**
+**final result: passed (local implementation); production verification recorded below**
 
-## Target and scope
+## Selected direction
 
-The user explicitly rejected the olive/cream concepts and the subsequent bold Korean sans posters, selected white with blue accents, and identified `https://toourguest.com/preview/porto` as the desired photo-and-script reference. This is a visual adaptation using the user's photos and content, not a pixel-for-pixel clone of the vendor's template.
+User-selected Porto reference: https://toourguest.com/preview/porto .
+White and clear blue, a real couple photograph, flowing English script, small names/date and restrained Korean SUIT. Pinyon Script is the licensed substitute, not the reference's Dulcinea. Existing six photographs and actual wedding facts are preserved.
 
-- Source visual truth: `C:/Users/c/Desktop/sungso/docs/invitation-v3-review/reference-porto-mobile.png` and `reference-porto-letter.png`.
-- Implementation: `http://127.0.0.1:8024/sungso/invitation-v3/`.
-- Final screenshots: same evidence folder, `mobile-final-390.png`, `letter-390.png`, `full-mobile-390.png`, `calendar-390.png`, `map-390.png`, `story-390.png`, `mobile-320.png`, `mobile-430.png`, `desktop-1440.png`.
-- Full-view comparisons, opened together: `hero-comparison.jpg`, `body-comparison.jpg`.
-- Focused lettering comparison, opened together: `type-comparison.jpg`.
+## Comparison
 
-## Dimensions and state
+The new cover keeps the same forest composition, lettering scale and blue palette as the published VER3 baseline. The flat music pill is now a small blue play circle, script track name, playback bars and a rounded volume panel. The title reveals word by word and can replay. Album filters and a thumbnail strip extend the existing photographs. Public guestbook and music sections use the same small Korean type, script headings and spacing.
 
-The in-app browser was requested at 390×844. Its native desktop scrollbar leaves a 375px content width; screenshot output captures the 375×812 visible content surface. Source and final hero/body comparison images are both exactly 375×812, no density rescaling. Device scale is the default and both are captured with the same browser pipeline. No phone frame was introduced because the requested deliverable is an existing-project static GitHub Pages website.
+Evidence in the working project's docs/invitation-v3-review/: upgrade-before.png, upgrade-mobile-390-cover.png, upgrade-mobile-320-cover.png, upgrade-mobile-430-cover.png, upgrade-mobile-album.png, upgrade-mobile-map.png, upgrade-mobile-guestbook.png. Screenshots show real browser output, including the labelled local-only guestbook.
 
-Hero state: settled lettering, music paused, all text visible. Body state: invitation paragraph in view. The comparison uses matching content roles rather than identical words, because the user requested shorter copy and their own photographs. The source photograph, ornamental frame, animated petals and poem are intentionally replaced/omitted.
+## Verified behavior
 
-| Requested viewport | Content client / scroll width | Hero height / sheet |
-| --- | --- | --- |
-| 320×700 | 305 / 305 | hero 602px |
-| 390×844 | 375 / 375 | hero 725.83px |
-| 430×932 | 415 / 415 | hero 801.52px |
-| 1440×1000 | 1425 / 1425 | sheet 480px |
+- 320/390/430px requested mobile viewports: no horizontal document overflow, no clipped cover words, self-hosted Pinyon and SUIT loaded. Browser scrollbars reduce client width by 15px. Album modal, forms and map links fit this smaller content width.
+- Native dialog album: category filters, six-photo thumbnail selection, 06/06 sea image, matching download URL, Escape close and focus return. Keyboard/swipe handlers remain present.
+- Actual official Kakao preview map loaded. Three official map icons loaded at 44px. TMAP opens an explicit helper dialog and configured app-search link; address copy feedback succeeds.
+- The user-specified YouTube video yhAJdMuR55c loaded in a visible 428x240 player on desktop. Player state became PLAYING, floating control became NOW PLAYING, pause worked, volume UI and correct playlist repeat parameters were verified. No audio extraction and no synthesizer substitution.
+- Separate local JSON guestbook: blank state -> name + multiline literal <test> text -> public consent -> actual server acceptance. A new tab reads the same message; own-device delete dialog removes it; total returns to zero. No production message was posted.
+- Form inputs are 16px to avoid iOS zoom. Errors preserve the draft and retry ID. New public API contract tests cover Unicode bounds, XSS-safe text DTO, idempotency, own-delete proof, quotas, concurrent daily limit, pagination, storage failures, origin/body caps and preservation of private API authentication.
+- Motion off leaves all title words visible. System reduced-motion CSS is retained. Root check: 1,906 tests; static references and JavaScript syntax passed. All Render/Firebase bundles built successfully.
 
-The smaller 305px content case is narrower than the requested 320px mobile minimum and still has no horizontal overflow or title clipping. The full mobile screenshot is 375×6798 with all six gallery images loaded. Desktop capture is 1425×990. Native screenshot/viewport height differences are recorded instead of being treated as layout defects.
+## Findings fixed
 
-## Comparison history and fixes
+- The first body anchor stopped 32px below the cover due to scroll padding; the quick navigation threshold now accounts for that gap.
+- Playback state now updates both music controls.
+- Local JSON preview storage is explicitly excluded from Git and site output.
+- No new P0/P1/P2 visual issue remains in inspected views.
 
-1. Initial implementation inspection found [P2] long script clipping at the phone edge and lettering/name/date crossing the couple's heads and pale shirts. The initial desktop evidence is `hero-first.png`; the initial phone state was inspected in the browser. Result remained blocked.
-2. Reduced the title from the initial 11.9vw/57px maximum to 10.15vw/47px, tightened the lettering group, removed the redundant overline and moved it to the upper forest area. Names/date now sit in the dark foliage. The photo itself is unchanged. Re-captured `hero-revised-390.png`, `mobile-final-390.png`, 320/430/desktop views; compared final source and implementation together. No clipping or head overlap remains.
-3. [P2] review of the optional account state found the hidden section could take active-navigation priority. Filtered hidden sections out of navigation. The currently empty account panel and its link remain hidden. Existing member authentication and private-data contracts are not touched.
-4. Source body capture was initially mid-reveal; recaptured after its animation settled and regenerated `body-comparison.jpg`. Both source and implementation now show readable body text in the same comparison input.
+## Limits
 
-## Required fidelity surfaces
+Physical phone app handoff, OS calendar import, actual OS clipboard readback and speaker quality remain unverified. Music is the user's selected full playlist video, not an independently extracted single track. Actual account numbers are still pending and the empty section is hidden. Browser preview test messages were removed. Production guestbook writes are deliberately not exercised by QA.
 
-- **Fonts / typography:** inspected the real source DOM: Dulcinea at 36px/400 with 40px leading on the hero, SUIT at 15.2px/400 and 28.8px leading in the body. Implementation uses licensed Pinyon Script (not claimed to be Dulcinea), and actual self-hosted SUIT Regular/Medium. Browser computed family and `document.fonts.check` confirm loading. The script is a similar flowing calligraphic style; Korean text remains 15px/400, not the rejected heavy poster type. Source and adaptation are intentionally different in exact letterforms and script vertical position; the chosen position protects the user's photograph and legibility. No system-font fallback was active during captures.
-- **Spacing / rhythm:** generous white invitation margins, small names/date, photo-led cover and continuous sections. Practical date/map controls use light rules and modest tints. Full-page and 320/430/desktop views have no horizontal overflow. English section lettering remains secondary to the photos, without dense feature grids.
-- **Color / tokens:** white surfaces, blue `#2857cf` headings/actions, dark readable body text. No olive UI, yellowed paper, grain or botanical illustration. Green is the real user's forest photo, not a UI theme. White hero lettering has a restrained shadow against the photo. Focus states and selected date/story states are visible.
-- **Image quality:** six actual user-selected photographs. Existing WebP variants retained, forest source reduced to 640/960/1440 with EXIF counts 0. No generated faces, recoloring, vendor photos, fake map artwork or substitute assets. Existing Bootstrap icon originals and MIT license retained. Main photo crops keep the couple visible.
-- **Copy / content:** short invitation written for this couple; no poem or invented relationship history. Correct 2027-03-06 Saturday 15:30 KST, Mokhwa 15F Bellis hall and address. Unconfirmed parent names/accounts/Q&A/promises are hidden. Parking/meal terms are not invented. Footer thanks and practical labels are consistent with the restrained tone.
+## Production
 
-## Functional browser verification
-
-- Cover → invitation anchor, photo-story next/previous and keyboard ArrowRight selection with picture/caption/pressed state synchronized.
-- Gallery opens correct photo 02/06, advances to 03/06, Escape closes and restores focus to the triggering photo button.
-- Calendar tab shows Monday March 1 and Saturday March 6; keyboard moves back to countdown. Countdown pause state works and calendar-day arithmetic is covered by tests.
-- ICS download completed to the host Downloads folder. SHA-256 of the downloaded file equals the generated source; CRLF, UTC 06:30 (KST 15:30), venue and unknown end-time omission verified in tests.
-- Music starts only on button click, pressed/status states update; volume keyboard controls and pause/settings closing work. Final playback is off and volume restored to 25%.
-- Official Kakao iframe loads, venue marker is correct, zoom and reset controls work, loading overlay hides. Address-copy action reports success. Map app links carry the venue name or confirmed Kakao place ID.
-- FAQ disclosure expands with the correct floor and time. No empty account or Q&A content is shown.
-- Motion toggle works; CSS respects reduced-motion preference. Default effect is restored to on after QA. No production data access or writes.
-- Browser console error/warning collection returned 0. Node syntax and 14 app tests passed.
-
-## Remaining test limits / follow-up polish
-
-- Physical phone gesture handling, real speaker quality, OS share sheet and importing ICS into a calendar app were not independently tested.
-- Clipboard action feedback reports success, but the browser clipboard adapter returned a previously stored local URL rather than an independently verifiable OS readback. Treat actual OS clipboard contents as unverified; source handler receives the correct configured address. No claim of OS clipboard verification is made.
-- No actual account number has been provided; ready-account filtering is unit-tested and copy handlers are wired, but no real bank/account copy was exercised.
-- Exact Dulcinea letterforms differ from Pinyon Script. A licensed original could replace the font later if the user wants an exact typeface match; no purchase is required for the current working preview.
-- This local app is not registered for production or published. Root-wide release checks are not claimed for this isolated preview. All existing public/member apps remain unchanged.
-
-No actionable visual P0/P1/P2 findings remain. Next review is the user's assessment of lettering size and placement on their own photos.
+Baseline 3a62429: GitHub Pages workflow 39286455326 completed successfully. VER3.1 production results are added after push.

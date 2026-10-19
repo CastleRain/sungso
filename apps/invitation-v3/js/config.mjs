@@ -33,7 +33,7 @@ export const accountGroups = [
     { relation: '어머니', holder: '', bank: '', number: '' },
   ] },
 ];
-export const music = Object.freeze({ title: '하늘빛 약속', description: '잔잔한 피아노', src: null, volume: 0.25 });
+export const music = Object.freeze({ title: 'Ever After, Us', description: '우리가 고른 웨딩 플레이리스트', videoId: 'yhAJdMuR55c', url: 'https://www.youtube.com/watch?v=yhAJdMuR55c', volume: 0.25 });
 export const photos = Object.freeze([
   { id: 'forest', src: './assets/photos/forest-1440.webp', thumb: './assets/photos/forest-640.webp', width: 1440, height: 2159, alt: '초록빛 산책길에서 손을 잡고 나란히 걷는 성우와 소희' },
   { id: 'bouquet', src: './assets/photos/bouquet-1440.webp', thumb: './assets/photos/bouquet-640.webp', width: 1440, height: 2159, alt: '작은 꽃다발을 사이에 두고 서로를 바라보는 두 사람' },

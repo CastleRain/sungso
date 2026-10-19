@@ -7,6 +7,7 @@ import { createConfiguredHomehuntApi } from '../server/create-api.mjs';
 import { createFirestoreMaintenance } from '../server/firestore-maintenance.mjs';
 import { readRenderConfiguration } from './config.mjs';
 import { createRenderServer } from './node-server.mjs';
+import { createGuestbookApi, createGuestbookStore } from '../../invitation/server/guestbook.mjs';
 
 async function start() {
   const config = readRenderConfiguration();
@@ -16,7 +17,8 @@ async function start() {
   const db = getFirestore(app);
   const api = createConfiguredHomehuntApi({ db, auth: getAuth(app), env: config.providers,
     loadCatalog: async () => catalog, runtime: 'render', keySource: 'server-environment' });
-  const server = createRenderServer({ api });
+  const guestbook = createGuestbookApi({ store: createGuestbookStore({ db }) });
+  const server = createRenderServer({ api, guestbook });
   const maintenance = createFirestoreMaintenance({ db });
   const clean = () => { void maintenance.runIfDue().catch(() => {}); };
   const interval = setInterval(clean, 6 * 60 * 60 * 1000);

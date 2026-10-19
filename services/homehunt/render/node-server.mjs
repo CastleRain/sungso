@@ -6,8 +6,8 @@ const failure = (res, status, code, error) => {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
   res.end(JSON.stringify({ ok: false, code, error }));
 };
-async function readBody(req) {
-  if (Number(req.headers['content-length'] || 0) > MAX_BODY_BYTES) throw new RangeError('BODY_TOO_LARGE');
+async function readBody(req, limit = MAX_BODY_BYTES) {
+  if (Number(req.headers['content-length'] || 0) > limit) throw new RangeError('BODY_TOO_LARGE');
   return new Promise((resolve, reject) => {
     const chunks = []; let size = 0;
     const cleanup = () => { req.off('data', data); req.off('end', end); req.off('error', error); req.off('aborted', error); };
@@ -15,14 +15,14 @@ async function readBody(req) {
     const end = () => { cleanup(); resolve(Buffer.concat(chunks)); };
     const data = chunk => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) { cleanup(); req.resume(); reject(new RangeError('BODY_TOO_LARGE')); }
+      if (size > limit) { cleanup(); req.resume(); reject(new RangeError('BODY_TOO_LARGE')); }
       else chunks.push(chunk);
     };
     req.on('data', data); req.on('end', end); req.on('error', error); req.on('aborted', error);
   });
 }
 /** Node adapter; liveness proves the process is awake, never API access. */
-export function createRenderServer({ api, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
+export function createRenderServer({ api, guestbook, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
   if (typeof api !== 'function') throw new TypeError('An API handler is required');
   if (!Number.isSafeInteger(maxActiveRequests) || maxActiveRequests < 1
     || !Number.isSafeInteger(maxQueuedRequests) || maxQueuedRequests < 0) throw new RangeError('Invalid request limits');
@@ -45,15 +45,17 @@ export function createRenderServer({ api, maxActiveRequests = 2, maxQueuedReques
     }
   };
   const server = createServer(async (req, res) => {
-    const origin = String(req.headers.origin || '');
-    res.setHeader('Vary', 'Origin');
-    if (origin && !ALLOWED_ORIGINS.has(origin)) {
-      req.resume(); return failure(res, 403, 'ORIGIN_DENIED', '허용되지 않은 페이지입니다.');
-    }
-    if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
     let pathname;
     try { pathname = new URL(req.url, 'http://homehunt.invalid').pathname; }
     catch { req.resume(); return failure(res, 400, 'INVALID_URL', '요청 주소를 확인해주세요.'); }
+    const publicGuestbook = typeof guestbook === 'function' && /^\/api\/invitation\/v3\/guestbook(?:\/[0-9a-f-]{36})?$/i.test(pathname);
+    const origin = String(req.headers.origin || '');
+    res.setHeader('Vary', 'Origin');
+    const guestLocal = publicGuestbook && ['http://127.0.0.1:8024','http://localhost:8024'].includes(origin);
+    if (origin && !ALLOWED_ORIGINS.has(origin) && !guestLocal) {
+      req.resume(); return failure(res, 403, 'ORIGIN_DENIED', '허용되지 않은 페이지입니다.');
+    }
+    if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
     if (pathname === '/healthz' && ['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       req.resume();
       if (req.method === 'OPTIONS') {
@@ -68,7 +70,7 @@ export function createRenderServer({ api, maxActiveRequests = 2, maxQueuedReques
       req.resume(); return failure(res, 404, 'NOT_FOUND', '지원하지 않는 요청입니다.');
     }
     let rawBody;
-    try { rawBody = await readBody(req); }
+    try { rawBody = await readBody(req, publicGuestbook ? 6144 : MAX_BODY_BYTES); }
     catch (error) {
       req.resume();
       return failure(res, error instanceof RangeError ? 413 : 400,
@@ -87,7 +89,7 @@ export function createRenderServer({ api, maxActiveRequests = 2, maxQueuedReques
       req.body = rawBody.length ? rawBody : {};
       res.status = status => { res.statusCode = status; return res; };
       res.json = value => { res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(value)); return res; };
-      await api(req, res);
+      await (publicGuestbook ? guestbook : api)(req, res);
     } catch { failure(res, 503, 'SERVICE_UNAVAILABLE', '서비스에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.'); }
     finally { release(heavy); }
   });

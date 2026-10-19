@@ -1,6 +1,7 @@
-import { wedding, photos, accountGroups, music } from './config.mjs?v=3.0.0';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.0.0';
-import { InvitationMusic } from './music.mjs?v=3.0.0';
+import { wedding, photos, accountGroups, music } from './config.mjs?v=3.1.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.1.0';
+import { InvitationMusic } from './music.mjs?v=3.1.0';
+import './guestbook.mjs?v=3.1.0';
 
 const root = document.documentElement;
 const storySlides = [...document.querySelectorAll('.story-slide')];
@@ -47,6 +48,7 @@ function applyMotion() {
   root.dataset.motion = motionOn ? 'on' : 'off';
   document.body.classList.toggle('motion-on', motionOn);
   document.body.classList.toggle('motion-off', !motionOn);
+  if (!motionOn) document.getAnimations().forEach(animation => animation.cancel());
   motionButton.hidden = false;
   motionButton.disabled = reducedMotion.matches;
   motionButton.textContent = reducedMotion.matches ? '움직임 줄이는 중' : motionOn ? '효과 끄기' : '효과 켜기';
@@ -93,7 +95,7 @@ replay.addEventListener('click', () => {
   if (!motionOn) { toast('효과를 켜면 손글씨가 쓰이는 모습을 볼 수 있어요.'); return; }
   const title = document.querySelector('.hero h1');
   title.getAnimations().forEach(animation => animation.cancel());
-  title.animate([{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0)'}],{duration:2000,fill:'both',easing:'ease-in-out'});
+  title.querySelectorAll('.ink-word').forEach((word,index)=>{word.getAnimations().forEach(a=>a.cancel());word.animate([{clipPath:'inset(0 100% -30% -10%)',opacity:0},{clipPath:'inset(0 -10% -30% -10%)',opacity:1}],{duration:1100,delay:index*650,fill:'both',easing:'cubic-bezier(.4,0,.2,1)'});});
 });
 
 const message = document.querySelector('#day-message');
@@ -166,12 +168,14 @@ celebrate.addEventListener('click', () => {
 
 const nav = document.querySelector('#quick-nav');
 const cover = document.querySelector('.cover');
-const sections = [...document.querySelectorAll('#story, #wedding-day, #gallery, #location, #accounts')].filter(section => !section.hidden);
+const sections = [...document.querySelectorAll('#story, #wedding-day, #gallery, #location, #guestbook, #accounts')].filter(section => !section.hidden);
 const navLinks = [...nav.querySelectorAll('a')];
 let scrollFrame = 0;
 function updateNavigation() {
   scrollFrame = 0;
-  nav.hidden = cover.getBoundingClientRect().bottom > 10;
+  const distance=document.documentElement.scrollHeight-innerHeight;
+  document.querySelector('#reading-progress').style.transform='scaleX('+(distance>0?Math.min(1,Math.max(0,scrollY/distance)):0)+')';
+  nav.hidden = cover.getBoundingClientRect().bottom > 64;
   const current = sections.filter(section => section.getBoundingClientRect().top < innerHeight * .5).at(-1);
   navLinks.forEach(link => {
     if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
@@ -220,8 +224,10 @@ try { const saved = localStorage.getItem('sungso_invitation_v3_volume'); if (sav
 const player = new InvitationMusic({ ...music, volume: preferredVolume }, (playing, error) => {
   musicToggle.setAttribute('aria-pressed', String(playing));
   musicToggle.setAttribute('aria-label', playing ? '음악 일시정지' : '음악 재생');
-  document.querySelector('#music-label').textContent = playing ? '음악 끄기' : '음악 재생';
+  document.querySelector('#music-label').textContent = playing ? 'NOW PLAYING' : 'TAP TO PLAY';
   document.querySelector('#music-icon').src = `./assets/icons/${playing ? 'pause-fill' : 'play-fill'}.svg`;
+  document.querySelector('#listen-music').setAttribute('aria-label', playing ? '웨딩 음악 일시정지' : '웨딩 음악 듣기');
+  document.querySelector('#listen-music img').src = `./assets/icons/${playing ? 'pause-fill' : 'play-fill'}.svg`;
   musicToolbar.dataset.playing = String(playing);
   musicStatus.textContent = error || (playing ? '음악을 재생하고 있어요.' : '재생 버튼을 누르면 음악이 시작됩니다.');
   if (error) toast(error);
@@ -230,7 +236,14 @@ musicToolbar.hidden = false;
 document.querySelector('.music-title').textContent = music.title;
 volumeInput.value = String(preferredVolume * 100);
 document.querySelector('#volume-value').textContent = `${Math.round(preferredVolume * 100)}%`;
-musicToggle.addEventListener('click', () => player.playing ? player.pause() : player.play());
+function startMusic(){
+  const host=document.querySelector('#youtube-host');
+  const first=host.hidden;host.hidden=false;
+  if(first)document.querySelector('#wedding-music').scrollIntoView({behavior:motionOn?'smooth':'instant',block:'start'});
+  player.play();
+}
+musicToggle.addEventListener('click', () => player.playing || player.pending ? player.pause() : startMusic());
+document.querySelector('#listen-music').addEventListener('click',()=>player.playing?player.pause():startMusic());
 musicSettings.addEventListener('click', () => {
   musicPanel.hidden = !musicPanel.hidden;
   musicSettings.setAttribute('aria-expanded', String(!musicPanel.hidden));
@@ -242,7 +255,7 @@ volumeInput.addEventListener('input', () => {
 });
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && !musicPanel.hidden) { musicPanel.hidden = true; musicSettings.setAttribute('aria-expanded', 'false'); musicSettings.focus(); } });
 document.addEventListener('click', event => { if (!musicToolbar.contains(event.target)) { musicPanel.hidden = true; musicSettings.setAttribute('aria-expanded', 'false'); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden && player.playing) player.pause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) player.pause(); });
 addEventListener('pagehide', () => player.pause());
 
 // Official Kakao rough-map source generated from the public venue page (24484800).
@@ -295,6 +308,18 @@ document.querySelector('#share-invitation').addEventListener('click', async () =
   } else await copyText(shareUrl(wedding, location), '청첩장 링크를 복사했어요.');
 });
 
+const tmapDialog=document.querySelector('#tmap-dialog');
+document.querySelector('#open-tmap').addEventListener('click',()=>{tmapDialog.showModal();document.querySelector('#close-tmap').focus();});
+document.querySelector('#close-tmap').addEventListener('click',()=>tmapDialog.close());
+tmapDialog.addEventListener('close',()=>document.querySelector('#open-tmap').focus({preventScroll:true}));
+document.querySelector('#tmap-copy').addEventListener('click',()=>copyText(wedding.address,'예식장 주소를 복사했어요.'));
+const albumButtons=[...document.querySelectorAll('[data-album]')];
+albumButtons.forEach(button=>button.addEventListener('click',()=>{
+  albumButtons.forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+  let count=0;document.querySelectorAll('.gallery-item').forEach(item=>{item.hidden=button.dataset.album!=='all'&&item.dataset.scene!==button.dataset.album;if(!item.hidden){count++;if(motionOn)item.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:450});}});
+  document.querySelector('#album-count').textContent=count+'장의 순간';
+}));
+
 const dialog = document.querySelector('#lightbox');
 const fullImage = document.querySelector('#lightbox-image');
 let currentPhoto = 0, trigger;
@@ -303,6 +328,10 @@ function showPhoto(index) {
   const photo = photos[currentPhoto];
   fullImage.src = photo.src;
   fullImage.alt = photo.alt;
+  document.querySelector('#photo-download').href=photo.src;
+  document.querySelector('#photo-download').download=`성우와소희-${photo.id}.webp`;
+  document.querySelectorAll('[data-thumbnail]').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===currentPhoto)));
+  document.querySelector(`[data-thumbnail="${currentPhoto}"]`)?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
   document.querySelector('#photo-count').textContent = `${String(currentPhoto + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
   document.querySelector('#photo-description').textContent = photo.alt;
   if (motionOn) fullImage.animate([{ opacity: .45 }, { opacity: 1 }], { duration: 240 });
@@ -315,6 +344,7 @@ document.querySelectorAll('[data-photo]').forEach(button => {
     document.querySelector('#close-photo').focus();
   });
 });
+document.querySelectorAll('[data-thumbnail]').forEach(button=>button.addEventListener('click',()=>showPhoto(Number(button.dataset.thumbnail))));
 document.querySelector('#close-photo').addEventListener('click', () => dialog.close());
 document.querySelector('#previous-photo').addEventListener('click', () => showPhoto(currentPhoto - 1));
 document.querySelector('#next-photo').addEventListener('click', () => showPhoto(currentPhoto + 1));
