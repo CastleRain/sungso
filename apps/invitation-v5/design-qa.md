@@ -62,3 +62,5 @@ The early boot includes a 4.5-second fail-open deadline if modules fail, plus pa
 Root check: 1,950 passed,829 local references,242 JavaScript files. One first-run pre-existing server test selected an ephemeral port rejected by Node fetch (“bad port”); unchanged retry and the final post-edit full run both passed. No production writes and no VER3/4 source changes.
 
 Result: passed locally. Evidence: docs/invitation-v5-review/v5-2-opening.png, v5-2-cover.png, v5-2-wedding-day.png. Public release verification follows deployment.
+
+VER5.2 public verification (2026-10-21): commit55f4148, Pages39444453545 validate/deploy success. Public body5.2.0, initial intro lock/ink/veil, completed cover details opacity1, ready notice disappearance, scroll release, muted ink and timeline/story adjacency verified. Large date scene and guest RSVP absent. Public390px no overflow, fixed sound dock top8px after scrolling, console errors0. Six served HTML/CSS/JS contents match local dist after CRLF/LF normalization. Screenshot: docs/invitation-v5-review/v5-2-public-cover.png. Result: passed.
