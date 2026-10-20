@@ -41,11 +41,14 @@ npm ci
 npm run check
 npm run build:invitation
 npx vercel@64.7.0 login
-npx vercel@64.7.0 link --cwd deploy/invitation/dist --project sungso-wedding --scope ktsungwoo-5678s-projects --yes
-npx vercel@64.7.0 deploy --cwd deploy/invitation/dist --prod --yes --scope ktsungwoo-5678s-projects
+npx vercel@64.7.0 deploy --cwd deploy/invitation/dist --project sungso-wedding --prod --yes --scope ktsungwoo-5678s-projects --dry --json
+npx vercel@64.7.0 deploy --cwd deploy/invitation/dist --project sungso-wedding --prod --yes --scope ktsungwoo-5678s-projects
+node scripts/verify-invitation-live.mjs
 ```
 
-CLI login이 안내하는 공식 Vercel 로그인 화면에서 본인의 계정 연결을 완료한다. 로그인 토큰을 채팅이나 Git에 넣지 않는다. 업로드 대상은 반드시 **`deploy/invitation/dist`**이며 저장소 루트나 전체 사이트의 `dist`가 아니다. 빌드마다 프로젝트 연결 파일도 새로 생성해야 한다.
+CLI login이 안내하는 공식 Vercel 로그인 화면에서 본인의 계정 연결을 완료한다. 로그인 토큰을 채팅이나 Git에 넣지 않는다. 업로드 대상은 반드시 **`deploy/invitation/dist`**이며 저장소 루트나 전체 사이트의 `dist`가 아니다. `--project`로 기존 프로젝트를 지정한다. `--dry --json` 결과를 `.local/invitation-vercel-manifest.json`과 대조해 실제 업로드 파일이 일치하는지 먼저 확인한다.
+
+최초 작업에서 `vercel link`가 로컬 `.env.local`과 `.vercel` 연결 자료를 만들었다. Vercel의 실제 업로드 검사에서 이 항목과 `.gitignore`가 제외되고 76개 공개 파일만 업로드됨을 확인했다. 새 빌드는 해당 연결 자료를 포함하지 않는다.
 
 추후 새 버전은 완료 검증 뒤 빌더의 기준 앱·버전과 경계 테스트를 함께 갱신한다. 이번 배포는 VER5.6을 재현한다. Vercel Git 자동배포는 연결하지 않으므로 GitHub push만으로 Vercel이 갱신되지 않는다.
 

@@ -56,6 +56,8 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
     if (!/\.(html|mjs|js|ics|css)$/.test(file)) continue;
     let text = await readFile(path.join(distDir, file), 'utf8');
     text = text.replaceAll(OLD_URL, INVITATION_ORIGIN + '/');
+    // iCalendar requires CRLF even when a Linux checkout supplies LF text.
+    if (file.endsWith('.ics')) text = text.replace(/\r?\n/g, '\r\n');
     if (file.endsWith('.html')) text = text.replaceAll('../shared/', './shared/');
     if (['accounts.html', 'manage.html'].includes(file)) {
       text = text.replace('./shared/firebase/boot.mjs', './standalone/auth-boot.mjs');
@@ -81,7 +83,8 @@ export async function verifyInvitation(distDir) {
   const files = await listFiles(distDir), allowed = new Set(files);
   const forbidden = /(?:^|\/)(?:homehunt(?:-v2)?|wecost|honeymoon|hub|sohee|travel|services|config|tests|archive|node_modules)(?:\/|$)/;
   for (const file of files) {
-    if (forbidden.test(file) || /(?:AGENTS|README|package(?:-lock)?)\.(?:md|json)$/.test(file)) throw Error(`Forbidden output: ${file}`);
+    if (forbidden.test(file) || file.split('/').some(part => part.startsWith('.') && file !== '.nojekyll')
+      || /(?:AGENTS|README|package(?:-lock)?)\.(?:md|json)$/.test(file)) throw Error(`Forbidden output: ${file}`);
   }
   function verify(value, from) {
     if (!value || /^(?:#|[a-z][\w+.-]*:|\/\/)/i.test(value)) return;
