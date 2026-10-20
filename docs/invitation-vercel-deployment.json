@@ -19,7 +19,8 @@
   "foreignAppPaths404Verified": 19,
   "unauthenticatedManagementDenied": true,
   "memberRoleBoundaryTestsPassed": true,
-  "actualMemberSignInConfirmed": false,
+  "actualMemberSignInConfirmed": true,
+  "actualManagementPagesVerified": ["manage.html", "accounts.html"],
   "actualDeviceClipboardConfirmed": false,
   "agentProductionDataWrites": 0
 }
