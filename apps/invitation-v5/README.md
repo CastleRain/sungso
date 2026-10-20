@@ -26,3 +26,9 @@ Seychelles 참고: https://toourguest.com/preview/seychelles
 ## 자산
 
 사용자 사진과 제공 MP3는 기존 VER4에서 그대로 사용한다. 한글 SUIT와 Antic Didone는 각 OFL을 fonts 폴더에 포함한다. 원본 페이지에서 관찰한 작은 기능 아이콘과 꽃잎의 출처는 `assets/SOURCES.txt`에 기록한다. 웹사이트 브랜드 로고나 커플 사진·샘플 사연은 사용하지 않는다.
+
+## VER5.1 모션과 색상
+
+사용자 후속 선택으로 웜 화이트·하늘색·블루 잉크를 혼합했다. 표지는 OFL Pinyon Script의 벡터 손글씨 With love이며, 본문 영문은 Antic Didone를 유지한다. 손글씨를 변경할 때 Python fontTools/Pillow/NumPy/OpenCV가 있는 환경에서 `scripts/generate-handwriting.py` 후 `scripts/build.mjs`를 실행한다. 생성 SVG는 저장소에 보관하므로 일반 사이트 빌드에는 Python이 필요 없다.
+
+`js/editorial-motion.mjs`가 글자/줄 순차 등장과 사진/날짜의 스크롤 이동을 관리한다. 화면 효과 끄기·prefers-reduced-motion에서는 본문과 손글씨가 완성된 채 보이며, 탭이 숨겨지면 획 애니메이션과 예약 프레임을 해제한다. 원본 Seychelles와 최초 색감/서체의 버전은 5.0.0 기록을 참고한다.

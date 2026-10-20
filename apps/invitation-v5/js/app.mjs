@@ -5,12 +5,14 @@ import { connectPublicAlbum } from './public-album.mjs?v=5.0.0';
 import './background-audio.mjs?v=5.0.0';
 import './guestbook.mjs?v=5.0.0';
 import './rsvp.mjs?v=5.0.0';
+import { setupEditorialMotion } from './editorial-motion.mjs?v=5.1.0';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');let effects=true;try{effects=localStorage.getItem('sungso_invitation_v5_motion')!=='off';}catch{}
 const motion=()=>effects&&!reduced.matches;
-function updateEffects(){document.documentElement.classList.toggle('motion-off',!motion());$('#motion-toggle').setAttribute('aria-pressed',String(!effects));$('#motion-toggle').textContent=effects?'화면 효과 끄기':'화면 효과 켜기';if(!motion())$$('.countdown strong').forEach(settleDigits);}
+let editorialMotion;
+function updateEffects(){document.documentElement.classList.toggle('motion-off',!motion());$('#motion-toggle').setAttribute('aria-pressed',String(!effects));$('#motion-toggle').textContent=effects?'화면 효과 끄기':'화면 효과 켜기';if(!motion())$$('.countdown strong').forEach(settleDigits);editorialMotion?.setEnabled(motion());}
 updateEffects();reduced.addEventListener('change',updateEffects);$('#motion-toggle').addEventListener('click',()=>{effects=!effects;try{localStorage.setItem('sungso_invitation_v5_motion',effects?'on':'off');}catch{}updateEffects();});
-if('IntersectionObserver'in window){document.documentElement.classList.add('js-motion');const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');observer.unobserve(e.target);}}),{threshold:.08});$$('.reveal').forEach(e=>observer.observe(e));}
+editorialMotion=setupEditorialMotion({enabled:motion()});
 for(let i=0;i<13;i++){const p=document.createElement('img');p.src=`./assets/petals/tuliip_${i%4+1}.png`;p.alt='';p.className='petal';p.style.cssText=`--x:${(i*37)%100}%;--size:${8+(i%4)*3}px;--duration:${12+i%5*2}s;--delay:${-i*1.9}s;--drift:${(i%2?1:-1)*(25+i*3)}px`;$('.petals').append(p);}
 let toastTimer;export function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
 async function copy(text,message){try{await navigator.clipboard.writeText(text);toast(message);return true;}catch{const input=document.createElement('textarea');input.value=text;input.style.cssText='position:fixed;left:-9999px';document.body.append(input);input.select();const ok=document.execCommand('copy');input.remove();toast(ok?message:'복사하지 못했어요. 길게 눌러 직접 복사해 주세요.');return ok;}}

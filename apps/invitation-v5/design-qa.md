@@ -36,3 +36,11 @@ Commercial display fonts substituted as above. Personal names/story/date/venue/p
 ## Public release verification
 
 Commit e9ed9d6c86d3f7c5df43ea88c6c5f1ed8c7f9ba6 deployed successfully in Pages run39436500078. Public assets match the built files; VER3/4 stay unchanged. Public390px browser verified fonts, no overflow, album2→3/6 navigation, guestbook/RSVP dialogs, music after a gesture, official Kakao map and zero observed console errors. Render availability returns200 with available:true; anonymous management returns401. No production test submissions or private document contents inspected. Authenticated response management and native OS integrations remain the practical checks stated above.
+
+## VER5.1 — requested blue and editorial motion
+
+User explicitly requested blue mixed into the warm palette and handwritten/scrolling text. Preserve the arch, photography and content order; supersede exact-reference palette and hero typography with warm-white to sky-blue, blue ink and vector Pinyon With love. Antic Didone remains on section headings. No new unrelated layout or backend changes.
+
+Verified 320/390/430/1440px with no horizontal overflow; actual ink middle frame first stroke0.94, remaining strokes1; date scroll Y1866→2161 produces X−2.57→10.02px and scale0.992→1.031. Effects-off leaves zero hidden lettering/lines, no date transform and complete ink; console errors0. Core check1,950 passed,829 local references,241 JS files. No production writes. Phone OS reduced-motion switching remains a device check; CSS media query and JS change listener both implemented.
+
+Result: passed. Evidence: docs/invitation-v5-review/blue-cover.png and blue-date.png.
