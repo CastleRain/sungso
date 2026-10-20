@@ -44,3 +44,5 @@ User explicitly requested blue mixed into the warm palette and handwritten/scrol
 Verified 320/390/430/1440px with no horizontal overflow; actual ink middle frame first stroke0.94, remaining strokes1; date scroll Y1866→2161 produces X−2.57→10.02px and scale0.992→1.031. Effects-off leaves zero hidden lettering/lines, no date transform and complete ink; console errors0. Core check1,950 passed,829 local references,241 JS files. No production writes. Phone OS reduced-motion switching remains a device check; CSS media query and JS change listener both implemented.
 
 Result: passed. Evidence: docs/invitation-v5-review/blue-cover.png and blue-date.png.
+
+VER5.1 release f6cd28a deployed successfully via Pages39439810691. Public browser confirms body5.1.0, final muted#5f7085, live ink stroke0.94/next1, no horizontal overflow or console errors. Supporting text contrast4.54:1; replay5.0:1.
