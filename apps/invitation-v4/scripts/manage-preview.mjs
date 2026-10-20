@@ -1,0 +1,4 @@
+import { mountAlbumManager } from './js/manage-ui.mjs?v=4.0.0';
+const base='http://127.0.0.1:8025/api/invitation/v3/album';
+async function request(path,{method='GET',body,blob=false}={}){const response=await fetch(base+path,{method,headers:{Authorization:'Bearer local-preview',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',credentials:'omit'});if(blob&&response.ok)return response.blob();const data=await response.json();if(!response.ok||data.ok!==true)throw Error(data.error||'연결하지 못했어요.');return data;}
+mountAlbumManager({root:document.querySelector('#album-manager'),preview:true,api:{request,photo:id=>request(`/manage/photos/${id}/thumb`,{blob:true})}});

@@ -1,0 +1,14 @@
+{
+  "preserved": {
+    "version": "3.5.0",
+    "commit": "b5e6f1a33c7f7d1c13d9954bd42dff0aa89e3921",
+    "sourceTree": "d21a148f82284ec5e6b3acd1735dc817d0ea2ce0",
+    "url": "https://castlerain.github.io/sungso/invitation-v3/",
+    "note": "VER3 source unchanged. Public album and guestbook data remain shared, not frozen snapshots."
+  },
+  "next": {
+    "version": "4.0.0",
+    "path": "apps/invitation-v4",
+    "url": "https://castlerain.github.io/sungso/invitation-v4/"
+  }
+}

@@ -1,0 +1,351 @@
+import { wedding, photos as defaultPhotos, accountGroups } from './config.mjs?v=4.0.0';
+import { connectPublicAlbum } from './public-album.mjs?v=4.0.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=4.0.0';
+import { renderNumber, settleDigits } from './countdown-view.mjs?v=4.0.0';
+import './guestbook.mjs?v=4.0.0';
+import './story-view.mjs?v=4.0.0';
+import './background-audio.mjs?v=4.0.0';
+import { initScrollScenes } from './scroll-scenes.mjs?v=4.0.0';
+
+const root = document.documentElement;
+let photos = defaultPhotos, pendingAlbum, albumExpanded = false;
+const motionButton = document.querySelector('#motion-toggle');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const motionKey = 'sungso_invitation_v3_motion';
+let motionPreference;
+try { motionPreference = localStorage.getItem(motionKey); } catch { /* Session-only preferences still work. */ }
+let motionOn = false, revealObserver;
+
+function applyMotion() {
+  motionOn = !reducedMotion.matches && motionPreference !== 'off';
+  root.dataset.motion = motionOn ? 'on' : 'off';
+  dispatchEvent(new Event('invitation:motionchange'));
+  document.body.classList.toggle('motion-on', motionOn);
+  document.body.classList.toggle('motion-off', !motionOn);
+  if (!motionOn) { document.getAnimations().forEach(animation => animation.cancel()); document.querySelectorAll('.digit-outgoing').forEach(node=>node.remove()); }
+  motionButton.hidden = false;
+  motionButton.disabled = reducedMotion.matches;
+  motionButton.textContent = reducedMotion.matches ? '움직임 줄이는 중' : motionOn ? '효과 끄기' : '효과 켜기';
+  motionButton.setAttribute('aria-pressed', String(motionOn));
+  motionButton.setAttribute('aria-label', reducedMotion.matches ? '기기 설정에 따라 움직임을 줄이고 있습니다' : motionOn ? '사진과 스크롤 효과 끄기' : '사진과 스크롤 효과 켜기');
+  revealObserver?.disconnect();
+  const elements = [...document.querySelectorAll('.reveal')].filter(element => !element.closest('[hidden]'));
+  if (!motionOn || !('IntersectionObserver' in window)) {
+    elements.forEach(element => element.removeAttribute('data-waiting'));
+    return;
+  }
+  revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(({ target, isIntersecting }) => {
+      if (!isIntersecting) return;
+      target.removeAttribute('data-waiting');
+      target.dataset.seen = 'true';
+      revealObserver.unobserve(target);
+      const image = target.querySelector('img:not(.icon)');
+      if (image && motionOn) image.animate([{ transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 1700, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    });
+  }, { rootMargin: '0px 0px -22px 0px', threshold: .04 });
+  elements.forEach(element => {
+    if (element.dataset.seen || element.getBoundingClientRect().top < innerHeight - 24) {
+      element.removeAttribute('data-waiting');
+      element.dataset.seen = 'true';
+    } else {
+      element.dataset.waiting = '';
+      revealObserver.observe(element);
+    }
+  });
+}
+motionButton.addEventListener('click', () => {
+  motionPreference = motionOn ? 'off' : 'on';
+  try { localStorage.setItem(motionKey, motionPreference); } catch { /* Keep the current session usable. */ }
+  applyMotion();
+});
+reducedMotion.addEventListener('change', applyMotion);
+document.addEventListener('focusin', event => event.target.closest?.('.reveal')?.removeAttribute('data-waiting'));
+applyMotion();
+
+const replay = document.querySelector('#replay-intro');
+replay.hidden = false;
+replay.addEventListener('click', () => {
+  if (!motionOn) { toast('효과를 켜면 손글씨가 쓰이는 모습을 볼 수 있어요.'); return; }
+  document.querySelector('.hero').scrollIntoView({block:'start',behavior:'instant'});
+  const lettering = document.querySelector('.hero-handwriting');
+  lettering.replaceWith(lettering.cloneNode(true));
+});
+
+const message = document.querySelector('#day-message');
+let timerPaused = false;
+const timerToggle = document.querySelector('#timer-toggle');
+timerToggle.hidden = false;
+function updateDay({animate = true} = {}) {
+  if (timerPaused || document.hidden) return;
+  const time = countdown(wedding.startsAt), days = time.calendarDaysLeft;
+  const counter = document.querySelector('#countdown');
+  const rect = counter.getBoundingClientRect();
+  const moving = animate && motionOn && !document.querySelector('#countdown-panel').hidden && rect.bottom > 0 && rect.top < innerHeight;
+  ['days', 'hours', 'minutes', 'seconds'].forEach(unit => {
+    const field = counter.querySelector(`[data-unit="${unit}"]`), next = String(time[unit]).padStart(2, '0');
+    renderNumber(field,next,{animate:moving});
+  });
+  const progress = document.querySelector('#second-progress');
+  progress.style.transition = moving && time.seconds < Number(progress.dataset.second) ? '' : 'none';
+  progress.style.transform = `scaleX(${(60-time.seconds)/60})`;
+  progress.dataset.second = String(time.seconds);
+  counter.setAttribute('aria-label', `예식 시작까지 ${time.days}일 ${time.hours}시간 ${time.minutes}분 ${time.seconds}초`);
+  document.querySelector('#countdown-caption').textContent = time.phase === 'waiting' ? '결혼식까지 남은 시간' : time.phase === 'today' ? '바로 오늘, 결혼식 날이에요' : '함께해 주신 모든 마음에 감사드립니다';
+  timerToggle.hidden = time.phase !== 'waiting';
+  if (message.dataset.day === String(days) && message.dataset.phase === time.phase) return;
+  message.dataset.day = String(days); message.dataset.phase = time.phase;
+  message.replaceChildren();
+  const emphasis = document.createElement('strong');
+  if (days > 0) {
+    emphasis.textContent = `${days}일`;
+    message.append('앞으로 ', emphasis, ', 곧 만나요.');
+  } else if (days === 0) {
+    message.textContent = '바로 오늘이에요. 결혼식에서 만나요.';
+  } else {
+    message.textContent = '함께해 주셔서 고맙습니다.';
+  }
+}
+updateDay();
+setInterval(updateDay, 1000);
+document.addEventListener('visibilitychange', () => { settleDigits(document.querySelector('#countdown')); if (!document.hidden) updateDay({animate:false}); });
+timerToggle.addEventListener('click', () => {
+  timerPaused = !timerPaused;
+  settleDigits(document.querySelector('#countdown'));
+  document.querySelector('#second-progress').getAnimations().forEach(animation => animation.cancel());
+  timerToggle.setAttribute('aria-pressed', String(timerPaused));
+  timerToggle.textContent = timerPaused ? '실시간 다시 보기' : '초 단위 멈춤';
+  updateDay({animate:false});
+});
+const dateTabs = [...document.querySelectorAll('.date-tabs [role="tab"]')];
+function selectDateTab(tab, focus = false) {
+  dateTabs.forEach(item => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1;
+    document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+  });
+  if (focus) tab.focus();
+  updateDay();
+}
+dateTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectDateTab(tab));
+  tab.addEventListener('keydown', event => {
+    if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+    event.preventDefault();
+    selectDateTab(dateTabs[event.key === 'Home' ? 0 : event.key === 'End' ? dateTabs.length - 1 : (index + 1) % dateTabs.length], true);
+  });
+});
+const nav = document.querySelector('#quick-nav');
+const cover = document.querySelector('.cover');
+const sections = [...document.querySelectorAll('#story, #wedding-day, #gallery, #guestbook, #accounts')].filter(section => !section.hidden);
+const navLinks = [...nav.querySelectorAll('a')];
+let scrollFrame = 0;
+function updateNavigation() {
+  scrollFrame = 0;
+  const distance=document.documentElement.scrollHeight-innerHeight;
+  document.querySelector('#reading-progress').style.transform='scaleX('+(distance>0?Math.min(1,Math.max(0,scrollY/distance)):0)+')';
+  nav.hidden = !document.querySelector('#our-story').hidden || cover.getBoundingClientRect().bottom > innerHeight * .25;
+  const current = sections.filter(section => !section.hidden && section.getBoundingClientRect().top < innerHeight * .5).at(-1);
+  navLinks.forEach(link => {
+    if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  });
+}
+addEventListener('scroll', () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateNavigation); }, { passive: true });
+addEventListener('resize', updateNavigation);
+updateNavigation();
+addEventListener('invitation:viewchange', () => { applyMotion(); updateNavigation(); });
+
+let toastTimer;
+function toast(text) {
+  const element = document.querySelector('#toast');
+  clearTimeout(toastTimer);
+  element.textContent = text;
+  element.hidden = false;
+  toastTimer = setTimeout(() => { element.hidden = true; }, 3200);
+}
+async function copyText(text, success) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(success); return true;
+  } catch { /* Some in-app browsers restrict the asynchronous Clipboard API. */ }
+  const field = document.createElement('textarea');
+  field.value = text;
+  field.tabIndex = -1;
+  field.style.cssText = 'position:fixed;top:0;left:-9999px;font-size:16px;';
+  document.body.append(field);
+  const previous = document.activeElement;
+  field.select();
+  let copied = false;
+  try { copied = document.execCommand('copy'); } catch { /* Keep a useful failure state. */ }
+  field.remove(); previous?.focus({ preventScroll: true });
+  toast(copied ? success : '복사가 제한되어 있어요. 기기의 공유 기능을 이용해 주세요.');
+  return copied;
+}
+accountGroups.forEach(group => publishedAccounts(group).forEach((account, index) => {
+  document.querySelector(`[data-account="${group.id}-${index}"]`)?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    const copied = await copyText(account.number.replace(/\D/g, ''), '계좌번호를 복사했어요. 은행 앱에 붙여넣어 주세요.');
+    if (copied) { button.textContent = '복사 완료 ✓'; setTimeout(() => { button.textContent = '번호 복사'; }, 2500); }
+    else toast('번호를 길게 눌러 선택한 뒤 복사해 주세요.');
+  });
+}));
+
+// Official Kakao rough-map source generated from the public venue page (24484800).
+// Load only near this section; scroll is never trapped by the map.
+let mapLoading = false, mapReady = false;
+const mapHost = document.querySelector('#venue-map'), mapStatus = document.querySelector('#map-status');
+const loadMapButton = document.querySelector('#load-map');
+async function loadMap() {
+  if (mapLoading || mapReady) return;
+  mapLoading = true; loadMapButton.disabled = true;
+  mapStatus.querySelector('p').textContent = '예식장 주변 지도를 불러오고 있어요.';
+  try {
+    const container = document.getElementById(`daumRoughmapContainer${wedding.map.timestamp}`);
+    container.hidden = true;
+    mapHost.querySelector('iframe')?.remove();
+    const frame = document.createElement('iframe');
+    frame.title = '부산 목화웨딩컨벤션 카카오 지도';
+    frame.src = './map.html'; frame.loading = 'eager';
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => { removeEventListener('message', onMessage); reject(new Error('map-timeout')); }, 16000);
+      const onMessage = event => {
+        if (event.origin !== location.origin || event.source !== frame.contentWindow || !['sungso-map-ready', 'sungso-map-error'].includes(event.data?.type)) return;
+        clearTimeout(timeout); removeEventListener('message', onMessage);
+        event.data.type === 'sungso-map-ready' ? resolve() : reject(new Error('map-unavailable'));
+      };
+      addEventListener('message', onMessage); mapHost.append(frame);
+    });
+    mapReady = true; mapStatus.hidden = true;
+    // This is a preview map. A tap on the official marker opens Kakao; page scrolling stays natural.
+  } catch {
+    mapStatus.hidden = false; mapStatus.querySelector('p').textContent = '지도를 불러오지 못했어요. 아래 지도 앱에서도 위치를 확인할 수 있어요.';
+    loadMapButton.textContent = '지도 다시 불러오기';
+  } finally { mapLoading = false; loadMapButton.disabled = false; }
+}
+loadMapButton.addEventListener('click', loadMap);
+if ('IntersectionObserver' in window) {
+  const mapObserver = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) { mapObserver.disconnect(); loadMap(); } }, { rootMargin: '250px' });
+  mapObserver.observe(mapHost);
+}
+document.querySelector('#copy-address').addEventListener('click', () => copyText(wedding.address, '예식장 주소를 복사했어요.'));
+document.querySelector('#copy-link').addEventListener('click', () => copyText(shareUrl(wedding, location), '청첩장 링크를 복사했어요.'));
+document.querySelector('#share-invitation').addEventListener('click', async () => {
+  const format = formatWedding(wedding.startsAt);
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: wedding.title, text: `${format.dateKorean} ${format.time}\n${wedding.venue} ${wedding.room}`, url: shareUrl(wedding, location) });
+    } catch (error) {
+      if (error.name !== 'AbortError') await copyText(shareUrl(wedding, location), '청첩장 링크를 복사했어요.');
+    }
+  } else await copyText(shareUrl(wedding, location), '청첩장 링크를 복사했어요.');
+});
+
+const tmapDialog=document.querySelector('#tmap-dialog');
+document.querySelector('#open-tmap').addEventListener('click',()=>{tmapDialog.showModal();document.querySelector('#close-tmap').focus();});
+document.querySelector('#close-tmap').addEventListener('click',()=>tmapDialog.close());
+tmapDialog.addEventListener('close',()=>document.querySelector('#open-tmap').focus({preventScroll:true}));
+document.querySelector('#tmap-copy').addEventListener('click',()=>copyText(wedding.address,'예식장 주소를 복사했어요.'));
+const dialog = document.querySelector('#lightbox');
+const fullImage = document.querySelector('#lightbox-image');
+let currentPhoto = 0, trigger;
+function showPhoto(index) {
+  currentPhoto = photoIndex(index, photos.length);
+  const photo = photos[currentPhoto];
+  fullImage.src = photo.src;
+  fullImage.alt = photo.alt;
+  document.querySelector('#photo-download').href=photo.src+(photo.kind==='upload'?'?download=1':'');
+  document.querySelector('#photo-download').download=`성우와소희-${photo.id}.${photo.kind==='upload'?'jpg':'webp'}`;
+  document.querySelectorAll('[data-thumbnail]').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===currentPhoto)));
+  document.querySelector(`[data-thumbnail="${currentPhoto}"]`)?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+  document.querySelector('#photo-count').textContent = `${String(currentPhoto + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
+  document.querySelector('#photo-description').textContent = photo.alt;
+  if (motionOn) fullImage.animate([{ opacity: .45 }, { opacity: 1 }], { duration: 240 });
+}
+document.querySelector('.gallery').addEventListener('click', event => {
+    const button=event.target.closest('[data-photo]');if(!button)return;
+    trigger = button;
+    showPhoto(Number(button.dataset.photo));
+    dialog.showModal();
+    document.querySelector('#close-photo').focus();
+});
+document.querySelector('#album-strip').addEventListener('click',event=>{const button=event.target.closest('[data-thumbnail]');if(button)showPhoto(Number(button.dataset.thumbnail));});
+document.querySelector('#close-photo').addEventListener('click', () => dialog.close());
+document.querySelector('#previous-photo').addEventListener('click', () => showPhoto(currentPhoto - 1));
+document.querySelector('#next-photo').addEventListener('click', () => showPhoto(currentPhoto + 1));
+dialog.addEventListener('keydown', event => {
+  if (event.key === 'ArrowLeft') { event.preventDefault(); showPhoto(currentPhoto - 1); }
+  if (event.key === 'ArrowRight') { event.preventDefault(); showPhoto(currentPhoto + 1); }
+  if (event.key === 'Home') { event.preventDefault(); showPhoto(0); }
+  if (event.key === 'End') { event.preventDefault(); showPhoto(photos.length - 1); }
+});
+dialog.addEventListener('close', () => {
+  fullImage.removeAttribute('src');
+  trigger?.focus({ preventScroll: true });
+  if(pendingAlbum){const next=pendingAlbum;pendingAlbum=undefined;applyAlbum(next);}
+});
+let pointerStart;
+fullImage.addEventListener('pointerdown', event => { if (event.isPrimary) pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId }; });
+fullImage.addEventListener('pointerup', event => {
+  if (!pointerStart || pointerStart.id !== event.pointerId) return;
+  const dx = event.clientX - pointerStart.x, dy = event.clientY - pointerStart.y;
+  pointerStart = null;
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) showPhoto(currentPhoto + (dx < 0 ? 1 : -1));
+});
+fullImage.addEventListener('pointercancel', () => { pointerStart = null; });
+fullImage.addEventListener('dragstart', event => event.preventDefault());
+fullImage.addEventListener('error', () => toast('사진을 불러오지 못했어요. 다음 사진을 보거나 다시 열어 주세요.'));
+
+// Uploaded thumbnails share the bounded API; load only visible images, two at a time.
+const albumThumbQueue=[];let activeAlbumThumbs=0;
+function pumpAlbumThumbs(){
+  while(activeAlbumThumbs<2&&albumThumbQueue.length){
+    const image=albumThumbQueue.shift();if(!image.isConnected)continue;
+    activeAlbumThumbs++;const done=()=>{activeAlbumThumbs--;pumpAlbumThumbs();};
+    image.addEventListener('load',done,{once:true});image.addEventListener('error',done,{once:true});
+    image.loading='eager';image.src=image.dataset.albumThumb;
+  }
+}
+const albumThumbObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){albumThumbObserver.unobserve(entry.target);albumThumbQueue.push(entry.target);}});pumpAlbumThumbs();
+},{rootMargin:'240px'}):null;
+function loadAlbumThumb(image,p){
+  if(p.kind!=='upload'){image.src=p.thumb;image.loading='lazy';return;}
+  image.dataset.albumThumb=p.thumb;
+  if(albumThumbObserver)albumThumbObserver.observe(image);else{albumThumbQueue.push(image);pumpAlbumThumbs();}
+}
+function applyAlbum(next) {
+  if(dialog.open){pendingAlbum=next;return;}
+  photos=next;
+  const gallery=document.querySelector('.gallery'),strip=document.querySelector('#album-strip');
+  const restoreFocus=gallery.contains(document.activeElement);
+  albumThumbObserver?.disconnect();albumThumbQueue.length=0;
+  gallery.replaceChildren();strip.replaceChildren();
+  document.querySelector('#gallery').hidden=!photos.length;
+  document.querySelector('#quick-nav a[href="#gallery"]').hidden=!photos.length;
+  photos.forEach((p,index)=>{
+    const button=document.createElement('button');button.type='button';button.className='gallery-item';button.dataset.photo=String(index);button.setAttribute('aria-label',`${p.alt} · 크게 보기`);
+    const image=document.createElement('img');image.alt=p.alt;image.width=p.width;image.height=p.height;image.decoding='async';button.append(image);gallery.append(button);loadAlbumThumb(image,p);
+    const thumb=document.createElement('button');thumb.type='button';thumb.dataset.thumbnail=String(index);thumb.setAttribute('aria-label',`${index+1}번째 사진, ${p.alt}`);
+    const small=document.createElement('img');small.alt='';small.width=48;small.height=64;thumb.append(small);strip.append(thumb);loadAlbumThumb(small,p);
+  });
+  if(restoreFocus)gallery.querySelector('button')?.focus({preventScroll:true});
+  updateAlbumLayout();
+  updateNavigation();
+}
+const albumLoader=connectPublicAlbum(applyAlbum,failed=>{document.querySelector('#album-retry').hidden=!failed;});
+document.querySelector('#album-retry').addEventListener('click',()=>{void albumLoader.refresh();});
+
+function updateAlbumLayout() {
+  const buttons = [...document.querySelectorAll('.gallery-item')];
+  buttons.forEach((button, index) => { button.hidden = !albumExpanded && index >= 6; });
+  const expand = document.querySelector('#album-expand');
+  expand.hidden = buttons.length <= 6;
+  expand.setAttribute('aria-expanded', String(albumExpanded));
+  expand.textContent = albumExpanded ? '사진 접기 −' : `사진 ${buttons.length - 6}장 더 보기 ＋`;
+  document.querySelector('#album-count').textContent = String(buttons.length).padStart(2, '0');
+  dispatchEvent(new Event('invitation:albumchange'));
+}
+document.querySelector('#album-expand').addEventListener('click', () => { albumExpanded = !albumExpanded; updateAlbumLayout(); });
+updateAlbumLayout();
+initScrollScenes();

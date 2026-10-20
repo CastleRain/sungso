@@ -1,0 +1,6 @@
+Map app icons (only used beside labelled outbound app links)
+NAVER Map: https://ssl.pstatic.net/static/maps/assets/icons/apple-icon-180x180.png
+Kakao Map: https://map.kakao.com/favicon.ico (PNG format conversion, no visual edits)
+TMAP Mobility: https://www.tmapmobility.com/favicon.ico (PNG format conversion, no visual edits)
+Retrieved 2026-10-20. Respective owners retain their trademarks.
+Bootstrap UI icons retain LICENSE.txt in this directory.

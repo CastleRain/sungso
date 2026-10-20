@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//sungso//Wedding Invitation//KO
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:sungso-wedding-20270306@sungso
+DTSTAMP:20261019T000000Z
+DTSTART:20270306T063000Z
+SUMMARY:성우와 소희\, 결혼합니다
+LOCATION:부산 목화웨딩홀 15층 벨리스홀\, 부산광역시 연제
+ 구 중앙대로 1125 시티타워
+DESCRIPTION:성우와 소희의 결혼식에 초대합니다.\n15층 벨리
+ 스홀
+URL:https://castlerain.github.io/sungso/invitation-v4/
+END:VEVENT
+END:VCALENDAR

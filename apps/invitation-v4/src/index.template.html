@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#ffffff">
+  <title>{{title}}</title><meta name="description" content="{{description}}"><link rel="canonical" href="{{canonical}}">
+  <meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="{{title}}"><meta property="og:description" content="{{description}}"><meta property="og:url" content="{{canonical}}"><meta property="og:image" content="{{canonical}}assets/photos/share.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" as="font" href="./assets/fonts/PinyonScript-Regular.ttf" type="font/ttf" crossorigin>
+  <link rel="preload" as="font" href="./assets/fonts/GowunBatang-Regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" href="./assets/photos/forest-960.webp" imagesrcset="./assets/photos/forest-640.webp 640w, ./assets/photos/forest-960.webp 960w, ./assets/photos/forest-1440.webp 1440w" imagesizes="(min-width:480px) 480px,100vw">
+  <link rel="stylesheet" href="./css/style.css?v=4.0.0"><link rel="stylesheet" href="./css/edition.css?v=4.0.0"><script type="module" src="./js/app.mjs?v=4.0.0"></script>
+  <noscript><style>.date-tabs,#countdown-panel,#load-map{display:none!important}#calendar-panel[hidden],#our-story[hidden]{display:block!important}</style></noscript>
+</head>
+<body>
+  <a class="skip-link" id="skip-link" href="#invitation">초대글로 바로가기</a>
+  {{audioPlayer}}
+  <main class="invitation" id="top">
+    <header class="cover" aria-label="성우와 소희의 결혼식 초대장">
+      <div class="hero">
+        <img class="hero-photo" src="./assets/photos/forest-960.webp" srcset="./assets/photos/forest-640.webp 640w, ./assets/photos/forest-960.webp 960w, ./assets/photos/forest-1440.webp 1440w" sizes="(min-width:480px) 480px,100vw" width="1440" height="2159" alt="초록빛 산책길에서 손을 잡고 나란히 걷는 성우와 소희" fetchpriority="high" decoding="async">
+        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="true" hidden>효과 끄기</button>
+        <div class="hero-letter"><h1 aria-label="We are getting married">{{heroHandwriting}}</h1></div>
+        <div class="hero-details"><p class="hero-names">{{groom}} <span>&amp;</span> {{bride}}</p><p class="hero-date"><span>2027. 03. 06 <small>SAT</small></span><span class="hero-time">{{time}}</span></p></div>
+        <a class="hero-scroll" href="#invitation" aria-label="초대글 읽기"><span>SCROLL TO OPEN</span></a>
+        <button id="replay-intro" class="replay-intro" type="button" aria-label="손글씨 다시 보기" hidden><span aria-hidden="true">Replay</span></button>
+      </div>
+
+    </header>
+
+    <section class="story-entry" id="invitation" aria-labelledby="story-title">
+      <div class="story-portal reveal" id="story"><p class="eyebrow">A LITTLE ABOUT US</p><h2 class="script" id="story-title">Our story</h2><p class="portal-question">커피 한 잔에서 시작된 우리.</p>
+        <a class="story-door" href="#our-story" data-open-story aria-label="문을 열고 우리의 이야기 보기"><span class="door-inside" aria-hidden="true"><span class="script">Come on in</span><span>성우 &amp; 소희</span></span><span class="door-leaf door-left" aria-hidden="true"><svg viewBox="0 0 120 300"><path d="M20 298V118C20 58 61 12 120 12V298Z"/><path class="door-inlay" d="M31 287V119C31 67 66 25 109 24V287Z"/></svg><span class="door-name">성우</span></span><span class="door-leaf door-right" aria-hidden="true"><svg viewBox="0 0 120 300"><path d="M20 298V118C20 58 61 12 120 12V298Z"/><path class="door-inlay" d="M31 287V119C31 67 66 25 109 24V287Z"/></svg><span class="door-name">소희</span></span><span class="door-caption">우리 이야기 열기 <span aria-hidden="true">↗</span></span></a>
+      </div>
+    </section>
+
+    <section class="section questions-section" id="questions" {{questionsHidden}}><h2 class="script">About us</h2><div class="disclosures">{{questions}}</div></section>
+    <section class="section promises-section" {{promisesHidden}}><h2 class="script">Our promises</h2><div class="prose">{{promises}}</div></section>
+
+    <section class="section date-section" id="wedding-day" aria-labelledby="day-title">
+      <div class="section-heading reveal"><p class="eyebrow">SAVE THE DATE</p><h2 class="script" id="day-title">Wedding day</h2><p class="section-subtitle">저희의 시작에 함께해 주세요.</p><p class="event-datetime"><time datetime="{{iso}}"><span class="event-date">2027. 03. 06</span><span>토요일 · {{time}}</span></time></p></div>
+      <div class="date-widget reveal">
+        <div class="date-tabs" role="tablist" aria-label="예식 날짜 보기"><button id="countdown-tab" role="tab" aria-selected="true" aria-controls="countdown-panel" type="button">남은 시간</button><button id="calendar-tab" role="tab" aria-selected="false" aria-controls="calendar-panel" tabindex="-1" type="button">예식 달력</button></div>
+        <div id="countdown-panel" role="tabpanel" aria-labelledby="countdown-tab" tabindex="0"><p class="countdown-caption" id="countdown-caption">결혼식까지 남은 시간</p><div class="countdown" id="countdown" role="timer" aria-live="off"><div><strong data-unit="days" class="rolling-number" aria-hidden="true">—</strong><span>DAYS</span></div><div><strong data-unit="hours" class="rolling-number" aria-hidden="true">—</strong><span>HOURS</span></div><div><strong data-unit="minutes" class="rolling-number" aria-hidden="true">—</strong><span>MIN</span></div><div><strong data-unit="seconds" class="rolling-number" aria-hidden="true">—</strong><span>SEC</span></div></div><div class="second-line" aria-hidden="true"><span id="second-progress"></span></div><p class="day-message sr-only" id="day-message">3월 6일에 만나요.</p><button class="timer-toggle text-link" id="timer-toggle" type="button" aria-pressed="false" hidden>초 단위 멈춤</button></div>
+        <div id="calendar-panel" class="calendar-wrap" role="tabpanel" aria-labelledby="calendar-tab" tabindex="0" hidden><p class="calendar-month">MARCH <span>2027</span></p><table class="calendar" aria-label="2027년 3월 달력, 6일 토요일 결혼식"><thead><tr><th scope="col">일</th><th scope="col">월</th><th scope="col">화</th><th scope="col">수</th><th scope="col">목</th><th scope="col">금</th><th scope="col">토</th></tr></thead><tbody>{{calendarRows}}</tbody></table></div>
+      </div><details class="calendar-save reveal"><summary>일정에 담아두기 <span aria-hidden="true">＋</span></summary><div class="calendar-options"><a href="./wedding.ics" download="성우와소희-결혼식.ics">Apple · 기기 캘린더 <span aria-hidden="true">↓</span></a><a href="{{googleCalendarUrl}}" target="_blank" rel="noopener noreferrer">Google 캘린더 <span aria-hidden="true">↗</span></a></div><p class="form-hint">기기 캘린더는 내려받은 일정을 열어 저장해 주세요.</p></details>
+    <div class="location-section" id="location" aria-label="오시는 길"><p class="location-label reveal">THE PLACE / 오시는 길</p><div class="venue-info reveal"><h3>{{venue}}</h3><p class="venue-room">{{room}}</p><p class="venue-address">{{address}}</p><button class="text-link" id="copy-address" type="button">주소 복사<img class="icon" src="./assets/icons/copy.svg" alt="" width="14" height="14"></button><a class="text-link venue-phone" href="tel:{{venuePhone}}">예식장 전화 <span aria-hidden="true">↗</span></a></div><div class="venue-map reveal" id="venue-map"><div class="map-status" id="map-status"><p>예식장 주변 지도를 준비하고 있어요.</p><button id="load-map" class="text-link" type="button">지도 불러오기</button></div><div id="daumRoughmapContainer{{mapTimestamp}}" class="root_daum_roughmap" aria-label="부산 목화웨딩컨벤션 카카오 약도"></div></div><div class="map-apps reveal" aria-label="지도 앱 선택"><a href="{{naverUrl}}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도, 새 창"><img src="./assets/icons/naver-map.png" alt="" width="44" height="44"><span>네이버 지도</span></a><a href="{{kakaoUrl}}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵, 새 창"><img src="./assets/icons/kakao-map.png" alt="" width="44" height="44"><span>카카오맵</span></a><button type="button" id="open-tmap" aria-haspopup="dialog"><img src="./assets/icons/tmap.png" alt="" width="44" height="44"><span>TMAP</span></button></div><div class="transport disclosures reveal"><details><summary>대중교통<img class="icon" src="./assets/icons/chevron-down.svg" width="15" height="15" alt=""></summary><p>지하철 1·3호선 연산역 7번 출구 인근<br>시티타워 15층으로 와 주세요.</p></details><details><summary>차량 이용<img class="icon" src="./assets/icons/chevron-down.svg" width="15" height="15" alt=""></summary><p>내비게이션에 ‘목화웨딩컨벤션’을 검색해 주세요.<br>주차장 이용은 예식장 현장 안내를 따라 주세요.</p></details>{{visitGuide}}</div>{{guestContacts}}{{attendance}}</div>
+    </section>
+
+    <section class="gallery-section" id="gallery" aria-labelledby="gallery-title"><div class="section-heading reveal"><p class="eyebrow">OUR MOMENTS</p><h2 class="script" id="gallery-title">Photo album</h2><p class="section-subtitle">사진첩 <span class="album-count" id="album-count">{{photoCount}}</span></p></div><div class="gallery reveal" aria-label="두 사람의 사진첩">{{gallery}}</div><button type="button" class="album-expand text-link" id="album-expand" hidden aria-expanded="false">사진 더 보기 ＋</button><button type="button" class="text-link album-retry" id="album-retry" hidden>사진첩 다시 불러오기</button></section>
+
+
+
+    <section class="section accounts-section" id="accounts" {{accountHidden}} aria-labelledby="accounts-title"><div class="section-heading reveal"><p class="eyebrow">WITH YOUR LOVE</p><h2 class="script" id="accounts-title">Thank you</h2><p class="section-subtitle">마음 전하실 곳</p></div><div class="accounts reveal">{{accounts}}</div><p class="account-help">번호를 복사한 뒤, 은행 앱의 계좌 입력란에<br>길게 눌러 붙여넣어 주세요.</p></section>
+
+    <section class="section guestbook-section" id="guestbook" aria-labelledby="guestbook-title">
+      <div class="section-heading reveal"><p class="eyebrow">WORDS WE WILL KEEP</p><h2 class="script" id="guestbook-title">Dear us</h2><p class="section-subtitle">오래 간직할, 여러분의 한마디</p></div>
+      <div class="guestbook-intro reveal"><p>두 사람에게 전하고 싶은 마음을 남겨 주세요.<br>축하의 말도, 짧은 인사도 모두 좋아요.</p><button type="button" id="guestbook-write" class="ink-action" aria-expanded="false" aria-controls="guestbook-composer"><span class="action-script" aria-hidden="true">Leave a little love</span><span class="action-caption">축하 메시지 쓰기 <span aria-hidden="true">↗</span></span></button></div>
+      <p id="guestbook-preview" class="preview-note" hidden>미리보기 방명록 · 공개본과 분리되어 있어요</p>
+      <div id="guestbook-composer" class="guestbook-composer" hidden><form id="guestbook-form">
+        <label for="guest-name">이름</label><input id="guest-name" name="name" autocomplete="name" maxlength="40" required placeholder="어떤 이름으로 남길까요?">
+        <label for="guest-text">축하 메시지 <span><output id="guest-count">0</output> / 300</span></label><textarea id="guest-text" name="text" rows="4" maxlength="600" required placeholder="두 사람에게 전하고 싶은 말"></textarea>
+        <div class="guest-honeypot" aria-hidden="true"><label for="guest-website">웹사이트</label><input id="guest-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <label class="guest-consent"><input id="guest-consent" type="checkbox" required><span>이름과 메시지가 이 청첩장에 공개되는 것에 동의해요.</span></label>
+        <p class="form-hint">개인 연락처나 계좌번호는 적지 말아 주세요.<br>작성한 기기에서 내 글을 삭제할 수 있어요.</p>
+        <button id="guest-submit" type="submit" class="button primary">마음 남기기</button><p id="guest-form-status" class="form-status" role="status"></p>
+      </form></div>
+      <div class="guestbook-list-heading"><p>도착한 마음 <span id="guestbook-count">—</span></p><button id="guestbook-refresh" class="text-link" type="button" aria-label="방명록 새로고침">새로고침</button></div>
+      <p id="guestbook-status" class="guestbook-status" role="status">축하 메시지를 준비하고 있어요.</p><ol id="guestbook-list" class="guestbook-list" aria-label="공개 축하 메시지"></ol><button id="guestbook-more" class="text-link guestbook-more" type="button" hidden>메시지 더 보기 ＋</button>
+      <noscript><p class="form-hint">방명록은 자바스크립트를 켜면 읽고 작성할 수 있어요.</p></noscript>
+    </section>
+    <footer class="ending"><div class="share-area"><p class="script ending-title">See you soon</p><p class="ending-note">함께해 주셔서 고맙습니다.</p><div class="share-actions"><button class="ink-action" id="share-invitation" type="button"><span class="action-script" aria-hidden="true">Share our day</span><span class="action-caption">청첩장 공유 <span aria-hidden="true">↗</span></span></button><button class="ink-action" id="copy-link" type="button"><span class="action-script" aria-hidden="true">Copy the link</span><span class="action-caption">링크 복사 <span aria-hidden="true">＋</span></span></button></div><a class="back-top text-link" href="#top">처음으로 돌아가기</a></div></footer>
+  </main>
+  <main class="story-page invitation" id="our-story" aria-labelledby="our-story-title" hidden>
+    <nav class="story-page-nav" aria-label="이야기 화면"><a href="#story" data-close-story aria-label="초대장으로 돌아가기">초대장으로</a><span>성우 &amp; 소희</span></nav>
+    <header class="story-page-header"><p class="eyebrow">THE MOMENT I KNEW</p><h1 class="script" id="our-story-title" tabindex="-1">Our story</h1><p class="story-byline">{{storyByline}}</p></header>
+    <div class="story-letter"><section class="story-meeting reveal" aria-labelledby="meeting-title"><p class="eyebrow">01 / THE BEGINNING</p><h2 id="meeting-title">{{meetingTitle}}</h2><p>{{meetingText}}</p></section><p class="story-note script reveal" aria-hidden="true"><span class="ink-word" style="--word:0">With you,</span> <span class="ink-word" style="--word:1">anything.</span></p><p class="eyebrow reveal">02 / THE MOMENT I KNEW</p><h2 class="story-quote reveal">{{storyQuote}}<svg viewBox="0 0 240 14" aria-hidden="true"><path d="M4 9C55 3 140 12 234 5M45 12C93 7 151 8 198 10"/></svg></h2><div class="story-prose reveal">{{storyParagraphs}}</div><p class="story-closing reveal">{{storyClosing}}</p><time class="story-date" datetime="{{iso}}">2027. 03. 06</time><p class="story-signature script">Sungwoo &amp; Sohee</p></div>
+    <footer class="story-page-footer"><a class="ink-action" href="#story" data-close-story><span class="action-script" aria-hidden="true">Back to our day</span><span class="action-caption">초대장으로 돌아가기</span></a></footer>
+  </main>
+  {{audioElement}}
+  <nav class="quick-nav" id="quick-nav" aria-label="청첩장 빠른 이동" hidden><a href="#story">이야기</a><a href="#wedding-day">예식 안내</a><a href="#gallery">사진첩</a><a href="#guestbook">방명록</a>{{accountLink}}</nav>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-progress"></span></div>
+  <dialog class="small-dialog" id="tmap-dialog" aria-labelledby="tmap-title"><button id="close-tmap" class="dialog-close icon-button" type="button" aria-label="TMAP 안내 닫기"><img class="icon" src="./assets/icons/x-lg.svg" width="18" height="18" alt=""></button><img class="tmap-app-icon" src="./assets/icons/tmap.png" width="48" height="48" alt=""><h2 id="tmap-title">TMAP으로 오시나요?</h2><p>휴대폰에 설치된 TMAP에서<br>‘부산 목화웨딩컨벤션’을 찾아 주세요.</p><a class="button primary" href="tmap://search?name=%EB%B6%80%EC%82%B0%20%EB%AA%A9%ED%99%94%EC%9B%A8%EB%94%A9%EC%BB%A8%EB%B2%A4%EC%85%98" id="tmap-launch">TMAP 앱 열기 ↗</a><button class="text-link" id="tmap-copy" type="button">예식장 주소 복사</button><p class="form-hint">앱이 열리지 않으면 주소를 복사해 검색해 주세요.</p></dialog>
+  <dialog class="small-dialog" id="guest-delete-dialog" aria-labelledby="guest-delete-title"><h2 id="guest-delete-title">남긴 메시지를 삭제할까요?</h2><p><span id="delete-guest-name"></span> 님이 작성한<br>축하 메시지가 삭제됩니다.</p><div class="dialog-actions"><button type="button" class="button secondary" id="cancel-guest-delete">그대로 두기</button><button type="button" class="button primary" id="confirm-guest-delete">삭제하기</button></div><p class="form-status" id="delete-guest-status" role="status"></p></dialog>
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lightbox-title"><div class="lightbox-top"><h2 id="lightbox-title">사진첩</h2><button class="icon-button" id="close-photo" type="button" aria-label="사진 닫기"><img class="icon light" src="./assets/icons/x-lg.svg" width="21" height="21" alt=""></button></div><div class="lightbox-image-wrap"><img id="lightbox-image" alt=""></div><div class="lightbox-bottom"><button class="icon-button" id="previous-photo" type="button" aria-label="이전 사진"><img class="icon light reverse" src="./assets/icons/arrow-right.svg" width="24" height="24" alt=""></button><p id="photo-count" aria-live="polite"></p><button class="icon-button" id="next-photo" type="button" aria-label="다음 사진"><img class="icon light" src="./assets/icons/arrow-right.svg" width="24" height="24" alt=""></button></div><div class="album-strip" id="album-strip" aria-label="전체 사진 선택">{{photoThumbnails}}</div><div class="lightbox-detail">{{albumAudioControl}}<p class="sr-only" id="photo-description"></p><a class="photo-download" id="photo-download" download>사진 저장 ↓</a></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

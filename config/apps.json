@@ -87,13 +87,42 @@
       "id": "invitation-v2",
       "source": "apps/invitation-v2",
       "output": "invitation-v2",
-      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets"]
+      "files": [
+        "index.html",
+        "map.html",
+        "wedding.ics",
+        "css",
+        "js",
+        "assets"
+      ]
     },
     {
       "id": "invitation-v3",
       "source": "apps/invitation-v3",
       "output": "invitation-v3",
-      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets", "manage.html"]
+      "files": [
+        "index.html",
+        "map.html",
+        "wedding.ics",
+        "css",
+        "js",
+        "assets",
+        "manage.html"
+      ]
+    },
+    {
+      "id": "invitation-v4",
+      "source": "apps/invitation-v4",
+      "output": "invitation-v4",
+      "files": [
+        "index.html",
+        "map.html",
+        "wedding.ics",
+        "css",
+        "js",
+        "assets",
+        "manage.html"
+      ]
     },
     {
       "id": "dates",
