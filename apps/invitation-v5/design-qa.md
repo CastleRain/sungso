@@ -95,3 +95,17 @@ Verified: all six sample recipients mapped to the correct side; bride digits1230
 Final local verification: selected bride survives a reload, and its123004 copy succeeds afterward. Full final check remains1,963/849/247; no observed browser console errors. Evidence in `docs/invitation-v5-review/accounts/`: `v5-4-320.png`, `v5-4-desktop.png`, final mobile capture. Result: passed. Deployment confirmation follows.
 
 VER5.4 public verification: f99664505f48c07787fa679a0faf0df8829df98f; Pages39453140637 completed success. All9 tested HTML/CSS/JS files match dist after newline normalization. Live body5.4.0, empty unconfigured account section hidden, no overflow/Replay/console errors; private accounts entry still shows authentication with its private root hidden and zero account form fields mounted. Final mobile screenshot: `docs/invitation-v5-review/accounts/v5-4-final-mobile.png` (local sample numbers). Result: passed.
+
+## VER5.5 — family lines, typography and lightweight actions
+
+Scope: account book, family names, all primary guest actions and supporting cards/dialogs. The existing photo/music/album/guestbook APIs remain unchanged.
+
+Fresh comparisons (2026-10-21): [Seychelles](https://toourguest.com/preview/seychelles) has two family accordions with nested recipient cards, copy and optional KakaoPay; [Porto](https://toourguest.com/preview/porto) shows parents/relation/couple and a two-side contact dialog; [FillTheSpace](https://fillthespace.co.kr/v/sample_invitation?preview=true) exposes two side tabs and per-recipient copy. Our design retains explicit recipient targeting and optional payment links, but uses a flat ledger, understated underline actions and full Korean serif typography instead of the nested boxes. Vendor sample typography/assets were not imported.
+
+Fonts: official NAVER MaruBuri archive converted to WOFF2, renamed Invitation Serif under OFL; Regular434784 bytes, SemiBold466408 bytes. Full character coverage retained for future family names and guest messages. Antic Didone and Pinyon remain. Both guest and private guest-preview rendering use the same account CSS/font declarations.
+
+Verified locally: 320/390/430/1440px document widths305/375/415/1425 with no horizontal page overflow. Family wording uses user-authorized 아빠/엄마 placeholders. Account copy66×46px, keyboard Home switches groom, correct recipient feedback; actual paste into a local unsent composer gave123006. Clipboard tool returned a stale value on that secondary tab, so native paste was used as the stronger proof. 20-digit input in the local manager preview reflows without overflow, copy links remain disabled there, and temporary input was restored without saving. Composer and story dialog close/focus behavior verified. The 320px story dialog overflow from its negative-margin float close button was fixed; final client/scroll widths both290px.
+
+Evidence: primary workspace `docs/invitation-v5-review/refine-accounts-390.png`, `refine-family-desktop.png`, `refine-seychelles-accounts.png`, `refine-fill-accounts.png`. Production account values remain empty/hidden; no production test writes or invented payment details. Native OS map/share/calendar behavior is unchanged and remains a real-device check. Public verification follows.
+
+Final local check: 1,963 tests, 856 references, 247 JavaScript syntax checks passed. No observed browser errors. Motion-off leaves zero hidden reveal elements and was restored after verification. Result: passed.

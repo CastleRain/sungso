@@ -1,0 +1,5 @@
+/* MaruBuri outlines, repackaged under the family name Invitation Serif. */
+@font-face{font-family:InvitationSerif;src:url('../assets/fonts/InvitationSerif-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:InvitationSerif;src:url('../assets/fonts/InvitationSerif-SemiBold.woff2') format('woff2');font-weight:500 700;font-style:normal;font-display:swap}
+@font-face{font-family:PinyonScript;src:url('../assets/fonts/PinyonScript-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:AnticDidone;src:url('../assets/fonts/AnticDidone-Regular.ttf') format('truetype');font-weight:400;font-display:swap}

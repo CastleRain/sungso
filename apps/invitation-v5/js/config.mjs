@@ -7,6 +7,11 @@ export const wedding = Object.freeze({
   address: '부산광역시 연제구 중앙대로 1125 시티타워', phone: '051-714-2243',
   map: { timestamp: '1792422272379', key: '3jhadz839rm' },
 });
+// Replace only these parent labels when the family names are confirmed.
+export const family = Object.freeze({
+  groom: { parents: ['아빠', '엄마'], relation: '아들', role: '신랑', name: wedding.groom },
+  bride: { parents: ['아빠', '엄마'], relation: '딸', role: '신부', name: wedding.bride },
+});
 export const content = Object.freeze({
   invitation: ['3월 6일, 저희 결혼식에 초대합니다.', '함께해 주시면 정말 기쁠 것 같아요.', '그날, 반가운 얼굴로 만나요.'],
   ourStory: {

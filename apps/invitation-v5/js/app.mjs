@@ -1,5 +1,5 @@
-import './public-accounts.mjs?v=5.4.0';
-import { showAccountCopyResult } from './account-interactions.mjs?v=5.4.0';
+import './public-accounts.mjs?v=5.5.0';
+import { showAccountCopyResult } from './account-interactions.mjs?v=5.5.0';
 import { wedding,photos as initialPhotos } from './config.mjs?v=5.0.0';
 import { countdown,shareUrl,photoIndex } from './core.mjs?v=5.0.0';
 import { renderNumber,settleDigits } from './countdown-view.mjs?v=5.0.0';

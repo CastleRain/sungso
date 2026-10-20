@@ -9,7 +9,7 @@ export function renderAccounts(groups) {
   })).filter(side => side.accounts.length);
   if (!sides.length) return '';
   return `<div class="account-book">
-    <div class="account-tabs" role="tablist" aria-label="계좌 안내" hidden>${sides.map(side => `<button type="button" role="tab" id="account-tab-${side.id}" aria-controls="account-panel-${side.id}" aria-selected="false" tabindex="-1" data-account-side="${side.id}">${side.label}<span aria-hidden="true">↗</span></button>`).join('')}</div>
+    <div class="account-tabs" role="tablist" aria-label="계좌 안내" hidden>${sides.map(side => `<button type="button" role="tab" id="account-tab-${side.id}" aria-controls="account-panel-${side.id}" aria-selected="false" tabindex="-1" data-account-side="${side.id}"><span>${side.label}</span><small aria-hidden="true">${side.id === 'groom' ? 'GROOM' : 'BRIDE'}</small></button>`).join('')}</div>
     ${sides.map(side => `<section class="account-panel" id="account-panel-${side.id}" data-account-panel="${side.id}">
       <h3 class="account-side-title">${side.label}</h3>
       ${side.accounts.map(account => {

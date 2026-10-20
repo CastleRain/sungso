@@ -1,6 +1,6 @@
 import { ACCOUNT_SLOTS, emptyAccounts, validateAccounts, accountGroups } from '../../../shared/invitation/account-core.mjs';
-import { renderAccounts } from './account-view.mjs?v=5.4.0';
-import { mountAccountTabs } from './account-interactions.mjs?v=5.4.0';
+import { renderAccounts } from './account-view.mjs?v=5.5.0';
+import { mountAccountTabs } from './account-interactions.mjs?v=5.5.0';
 
 export function mountAccountManager({ root, request, preview = false }) {
   let disposed = false, ready = false, pending = false, revision = 0, saved = '';
@@ -25,7 +25,7 @@ export function mountAccountManager({ root, request, preview = false }) {
       }).join('')}</fieldset>
       <div class="manager-toolbar"><button type="button" id="accounts-reload" disabled>최신 내용 불러오기</button>${preview ? '<button type="button" id="accounts-sample" disabled>예시 번호 채워 보기</button>' : ''}<a href="./#accounts" target="_blank" rel="noopener">청첩장 보기 ↗</a></div>
       <p class="manager-status" id="accounts-status" role="status" aria-live="polite">계좌 정보를 불러오고 있어요.</p>
-      <details class="accounts-preview-wrap" open><summary>하객에게 보이는 모습</summary><div class="account-preview"><h2>마음 전하실 곳</h2><p class="account-preview-intro">보내주시는 따뜻한 마음,<br>감사히 간직하겠습니다.</p><div id="account-preview-content"></div></div></details>
+      <details class="accounts-preview-wrap" open><summary>하객에게 보이는 모습</summary><div class="account-preview"><p class="accounts-eyebrow">With gratitude</p><h2>마음 전하실 곳</h2><p class="account-preview-intro">보내주시는 따뜻한 마음,<br>감사히 간직하겠습니다.</p><div id="account-preview-content"></div></div></details>
       <footer class="manager-footer"><p>공개를 선택한 계좌만 청첩장에 표시됩니다.</p><button class="manager-primary" id="accounts-save" disabled>청첩장에 반영</button></footer>
     </form>`;
   const $ = selector => root.querySelector(selector), form = $('#account-form'), fields = $('.account-fields'), status = $('#accounts-status');

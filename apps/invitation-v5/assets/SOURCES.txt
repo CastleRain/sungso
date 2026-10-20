@@ -6,3 +6,11 @@ Reference petals: https://hellomybrand.com/wed/images/particles/tuliip_1.png thr
 Photos: user's six original wedding photos, optimized copies from previous invitation version. No AI-generated people or photo retouching.
 Audio: user's supplied Wedding Day MP3 playlist, unchanged from VER4, 22:26 full loop. No YouTube iframe/API.
 Commercial AbramoSerif/SometimesTimes fonts are not distributed in this implementation.
+
+2026-10-21 VER5.5 Korean type:
+MaruBuri Regular and SemiBold, NAVER / NAVER Cultural Foundation.
+Official source: https://hangeul.naver.com/hangeul_static/webfont/zips/maruburi.zip
+https://hangeul.naver.com/font
+https://help.naver.com/service/30016/contents/18088
+WOFF2 packaging renamed Invitation Serif. Outlines and full glyph coverage retained.
+License included: fonts/InvitationSerif-OFL.txt

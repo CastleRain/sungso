@@ -1,6 +1,6 @@
 import { ACCOUNTS_PATH } from '../../../shared/invitation/account-core.mjs';
-import { renderAccounts } from './account-view.mjs?v=5.4.0';
-import { mountAccountTabs } from './account-interactions.mjs?v=5.4.0';
+import { renderAccounts } from './account-view.mjs?v=5.5.0';
+import { mountAccountTabs } from './account-interactions.mjs?v=5.5.0';
 const local = ['127.0.0.1','localhost'].includes(location.hostname);
 const base = local ? 'http://127.0.0.1:8025' : 'https://sungso-homehunt-api.onrender.com';
 const section = document.querySelector('#accounts'), list = document.querySelector('#accounts-list');
