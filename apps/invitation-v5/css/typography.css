@@ -1,5 +1,8 @@
-/* MaruBuri outlines, repackaged under the family name Invitation Serif. */
-@font-face{font-family:InvitationSerif;src:url('../assets/fonts/InvitationSerif-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:InvitationSerif;src:url('../assets/fonts/InvitationSerif-SemiBold.woff2') format('woff2');font-weight:500 700;font-style:normal;font-display:swap}
+/* Official OFL sources, served with the page; no installed font is required.
+   RIDIBatang includes all 11,172 modern Hangul syllables and also backs up
+   uncommon characters outside Hahmlet's display set. */
+@font-face{font-family:RIDIBatang;src:url('../assets/fonts/RIDIBatang-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Hahmlet;src:url('../assets/fonts/Hahmlet-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:PinyonScript;src:url('../assets/fonts/PinyonScript-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:AnticDidone;src:url('../assets/fonts/AnticDidone-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+:root{--font:RIDIBatang,"Noto Serif KR",Batang,serif;--font-title:Hahmlet,RIDIBatang,"Noto Serif KR",Batang,serif}
