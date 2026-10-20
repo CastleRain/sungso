@@ -32,3 +32,7 @@ Source desktop/mobile, contacts and bride tab, expanded accounts, carousel/fulls
 ## Deliberate differences and practical limits
 
 Commercial display fonts substituted as above. Personal names/story/date/venue/photos changed to actual couple data. Account/contact/meal/reception/spots UI is conditional on real supplied values, so currently absent. Vendor sample toolbar, advertisements and flower purchases omitted. Native system sharing replaces a Kakao SDK button because no application key was supplied. Original password field for messages replaced with existing own-device deletion proof. Device-specific map launching/calendar importing/native share and production authenticated RSVP list remain real-device/account checks; production submissions are not fabricated for QA.
+
+## Public release verification
+
+Commit e9ed9d6c86d3f7c5df43ea88c6c5f1ed8c7f9ba6 deployed successfully in Pages run39436500078. Public assets match the built files; VER3/4 stay unchanged. Public390px browser verified fonts, no overflow, album2→3/6 navigation, guestbook/RSVP dialogs, music after a gesture, official Kakao map and zero observed console errors. Render availability returns200 with available:true; anonymous management returns401. No production test submissions or private document contents inspected. Authenticated response management and native OS integrations remain the practical checks stated above.
