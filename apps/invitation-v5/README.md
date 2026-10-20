@@ -60,3 +60,7 @@ VER5.2에서 하객용 참석 응답 영역과 제출 모듈을 제거했다. �
 부모님 이름은 `js/config.mjs`의 `family.groom.parents` / `family.bride.parents` 두 배열에서 바꾼 뒤 `node apps/invitation-v5/scripts/build.mjs`로 생성한다. 현재 ‘아빠’, ‘엄마’는 사용자가 지정한 임시 표기다. 계좌의 예금주와는 별도이며, 계좌 정보는 기존 회원 관리 화면에서 등록한다.
 
 한글 본문·이름·액션은 MaruBuri Regular/SemiBold의 자체 호스팅 WOFF2(변환명 Invitation Serif), 영문 제목은 Antic Didone, 계좌의 장식 제목은 Pinyon을 사용한다. 글리프 전체를 보존하므로 나중에 입력하는 이름·메시지도 같은 서체가 적용된다. 관리자 전체는 공통 회원 UI를 유지하고 하객 미리보기만 청첩장 서체를 쓴다.
+
+## VER5.5.1 첫 화면 안정화
+
+손글씨 오프닝은 `intro-boot.js`가 문서 파싱 직후 독립 실행한다. 전체 앱 모듈의 다운로드·실행이나 DOMContentLoaded를 기다리지 않는다. 준비 안내는 한 번만 잠깐 표시하고 ‘음악과 함께 보기’ 버튼은 제거했다. 고정 음악 토글·자동재생 시도·브라우저 차단 시 첫 실제 조작으로 재생하는 동작은 유지한다.

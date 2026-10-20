@@ -46,7 +46,6 @@ if (typeof document !== 'undefined' && music.src) {
   const controls = [...document.querySelectorAll('[data-audio-toggle]')];
   const status = document.querySelector('#sound-status');
   const notice = document.querySelector('#music-notice');
-  const startHint = document.querySelector('#music-start');
   let noticeShown = false, noticeTimer;
   function musicReady() {
     if (noticeShown || !notice || audio.error || audio.readyState < 2) return;
@@ -68,7 +67,6 @@ if (typeof document !== 'undefined' && music.src) {
   musicReady();
   const player = createAudioController(audio, state => {
     dock.dataset.state = state;
-    startHint.hidden = state !== 'blocked';
     const playing = state === 'playing';
     const label = { paused: '음악 켜기', blocked: '음악 켜기', loading: '취소', playing: '음악 끄기', error: '다시 재생' }[state];
     controls.forEach(control => {
@@ -79,11 +77,10 @@ if (typeof document !== 'undefined' && music.src) {
     status.textContent = state === 'error' ? '음악을 불러오지 못했어요. 다시 재생해 주세요.' : state === 'blocked' ? '화면을 터치하면 음악이 시작됩니다.' : '';
   });
   controls.forEach(control => control.addEventListener('click', () => { void player.toggle(); }));
-  startHint.addEventListener('click', () => { void player.start(); });
   // Browsers that allow sound start immediately; others need a trusted gesture.
   // Explicit pause clears the pending retry, so scrolling or opening a photo cannot undo it.
   function firstInteraction(event) {
-    if (!event.isTrusted || event.target.closest?.('[data-audio-toggle], #music-start')) return;
+    if (!event.isTrusted || event.target.closest?.('[data-audio-toggle]')) return;
     if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
     void player.resumeOnGesture();
   }

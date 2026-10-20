@@ -1,11 +1,8 @@
 // Progressive enhancement: the unenhanced document remains fully readable.
 export function setupEditorialMotion({ enabled = true } = {}) {
   const root = document.documentElement;
-  const lettering = document.querySelector('.hero-handwriting');
-  let inkAnimations = [];
   let frame = 0;
   let active = enabled;
-  let openingTimer;
   const scenes = [...document.querySelectorAll('[data-scroll-photo], [data-scroll-ending]')];
   const visibleScenes = new Set();
 
@@ -36,34 +33,6 @@ export function setupEditorialMotion({ enabled = true } = {}) {
       return line;
     }));
   });
-
-  function settleInk() {
-    inkAnimations.forEach(animation => animation.cancel());
-    inkAnimations = [];
-  }
-
-  function writeInk({ opening = false } = {}) {
-    settleInk();
-    if (!active || document.hidden || !lettering?.animate) return;
-    let duration = 0;
-    lettering.querySelectorAll('.ink-trace').forEach(trace => {
-      const style = getComputedStyle(trace);
-      duration = Math.max(duration, parseFloat(style.getPropertyValue('--ink-end')));
-      inkAnimations.push(trace.animate(
-        [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
-        { duration: parseFloat(style.getPropertyValue('--ink-duration')),
-          delay: parseFloat(style.getPropertyValue('--ink-delay')),
-          easing: 'ease-in-out', fill: 'both' }
-      ));
-    });
-    lettering.querySelectorAll('.ink-seal').forEach(seal => {
-      inkAnimations.push(seal.animate(
-        [{ opacity: 0 }, { opacity: 1 }],
-        { duration: 90, delay: parseFloat(getComputedStyle(seal).getPropertyValue('--ink-end')), fill: 'both' }
-      ));
-    });
-    if (opening) openingTimer = setTimeout(() => window.sungsoIntro?.finish(), duration + 140);
-  }
 
   function renderScroll() {
     frame = 0;
@@ -106,7 +75,6 @@ export function setupEditorialMotion({ enabled = true } = {}) {
     root.classList.toggle('editorial-motion', active);
     if (!active) {
       window.sungsoIntro?.finish();
-      settleInk();
       cancelAnimationFrame(frame);
       frame = 0;
       scenes.forEach(scene => {
@@ -114,34 +82,14 @@ export function setupEditorialMotion({ enabled = true } = {}) {
       });
     } else queueScroll();
   }
-  document.querySelector('#intro-skip').addEventListener('click', () => window.sungsoIntro?.finish());
-  document.addEventListener('sungso:intro-finished', () => {
-    clearTimeout(openingTimer);
-    settleInk();
-    if (document.activeElement?.id === 'intro-skip') document.querySelector('.hero-scroll').focus({ preventScroll: true });
-  });
-  document.addEventListener('focusin', event => {
-    if (root.classList.contains('intro-locked') &&
-      !event.target.closest?.('.hero, #sound-dock')) window.sungsoIntro?.finish();
-  });
   addEventListener('scroll', queueScroll, { passive: true });
   addEventListener('resize', queueScroll, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      settleInk();
       cancelAnimationFrame(frame);
       frame = 0;
     } else queueScroll();
   });
   setEnabled(enabled);
-  requestAnimationFrame(() => {
-    const opening = root.classList.contains('intro-locked');
-    if (opening) {
-      root.classList.remove('intro-pending');
-      root.classList.add('intro-running');
-    }
-    // A direct section link or restored page should not replay the opening.
-    if (opening) writeInk({ opening: true });
-  });
   return { setEnabled };
 }

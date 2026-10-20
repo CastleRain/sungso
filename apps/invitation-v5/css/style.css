@@ -117,7 +117,6 @@ html.intro-locked,html.intro-locked body{overflow:hidden;height:100%;overscroll-
 
 .wedding-date{font-size:17px;line-height:2;color:var(--text)}
 
-.music-start{position:absolute;z-index:6;top:58px;left:50%;transform:translateX(-50%);min-height:44px;padding:8px 16px;border:1px solid #ffffff60;border-radius:24px;background:#18241f66;backdrop-filter:blur(8px);color:#fff;font-size:11px;letter-spacing:.03em;white-space:nowrap}.music-start span{margin-left:7px;font-size:14px}.music-start:hover{background:#18241f99}
 
 /* VER5.5: refined Korean type, open space and hairline actions. */
 :root{--paper:#f5f7f8;--warm:#faf9f7;--pale:#fcfcfb;--text:#344957;--ink:#45667e;--muted:#617584;--line:#d8e0e5;font-synthesis:none}

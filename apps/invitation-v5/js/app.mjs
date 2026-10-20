@@ -4,9 +4,9 @@ import { wedding,photos as initialPhotos } from './config.mjs?v=5.0.0';
 import { countdown,shareUrl,photoIndex } from './core.mjs?v=5.0.0';
 import { renderNumber,settleDigits } from './countdown-view.mjs?v=5.0.0';
 import { connectPublicAlbum } from './public-album.mjs?v=5.0.0';
-import './background-audio.mjs?v=5.3.0';
+import './background-audio.mjs?v=5.5.1';
 import './guestbook.mjs?v=5.0.0';
-import { setupEditorialMotion } from './editorial-motion.mjs?v=5.3.0';
+import { setupEditorialMotion } from './editorial-motion.mjs?v=5.5.1';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');let effects=true;try{effects=localStorage.getItem('sungso_invitation_v5_motion')!=='off';}catch{}
 const motion=()=>effects&&!reduced.matches;
