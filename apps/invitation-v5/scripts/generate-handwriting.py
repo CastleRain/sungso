@@ -55,19 +55,19 @@ def trace(char):
     return ' '.join(segments),max(22,2*radius/ratio+14),(left/ratio-100,top/ratio-100,(right-left)/ratio+200,(bottom-top)/ratio+200)
 
 def advance(text):return sum(font['hmtx'][cmap[ord(c)]][0] for c in text)
-width=9100; defs=[]; letters=[];delay=120;index=0
-for text,scale,baseline in [('With love',1,1900)]:
+width=12000; defs=[]; letters=[];delay=40;index=0
+for text,scale,baseline in [('We are',.86,1550),('getting married',1,3650)]:
     x=(width-advance(text)*scale)/2
     for char in text:
         aw=font['hmtx'][cmap[ord(char)]][0]
-        if char==' ':x+=aw*scale;delay+=95;continue
+        if char==' ':x+=aw*scale;delay+=30;continue
         pen=SVGPathPen(glyphs);glyphs[cmap[ord(char)]].draw(TransformPen(pen,(1,0,0,-1,0,0)))
         path,stroke,bounds=trace(char);bx,by,bw,bh=bounds
-        duration=620 if index==0 else round(230+min(190,aw/8));mid=f'v5-ink-letter-{index}'
+        duration=190 if index==0 else round(70+min(50,aw/20));mid=f'v5-ink-letter-{index}'
         style=f'--ink-delay:{delay}ms;--ink-duration:{duration}ms;--ink-end:{delay+duration}ms'
         defs.append(f'<mask id="{mid}" maskUnits="userSpaceOnUse" x="{bx:.1f}" y="{by:.1f}" width="{bw:.1f}" height="{bh:.1f}"><path class="ink-trace" pathLength="1" d="{path}" fill="none" stroke="white" stroke-width="{stroke:.1f}" stroke-linecap="round" stroke-linejoin="round" style="{style}"/><rect class="ink-seal" x="{bx:.1f}" y="{by:.1f}" width="{bw:.1f}" height="{bh:.1f}" fill="white" style="{style}"/></mask>')
         letters.append(f'<g transform="translate({x:.1f} {baseline}) scale({scale})"><path d="{pen.getCommands()}" fill="currentColor" mask="url(#{mid})"/></g>')
-        x+=aw*scale;delay+=duration-25;index+=1
-svg='<svg class="hero-handwriting" viewBox="0 0 9100 2600" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><defs>'+''.join(defs)+'</defs>'+''.join(letters)+'</svg>'
+        x+=aw*scale;delay+=duration-8;index+=1
+svg='<svg class="hero-handwriting" viewBox="0 0 12000 4550" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><defs>'+''.join(defs)+'</defs>'+''.join(letters)+'</svg>'
 (root/'src/hero-handwriting.svg').write_text(svg,encoding='utf-8')
 print(f'{index} vector letters; {len(svg):,} bytes; ink complete {delay/1000:.1f}s')

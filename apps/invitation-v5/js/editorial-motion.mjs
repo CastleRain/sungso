@@ -6,7 +6,8 @@ export function setupEditorialMotion({ enabled = true } = {}) {
   let inkAnimations = [];
   let frame = 0;
   let active = enabled;
-  const scenes = [...document.querySelectorAll('[data-scroll-photo], [data-scroll-date]')];
+  let openingTimer;
+  const scenes = [...document.querySelectorAll('[data-scroll-photo], [data-scroll-ending]')];
   const visibleScenes = new Set();
 
   document.querySelectorAll('.section-title h2, .story-section > h2').forEach(heading => {
@@ -42,11 +43,13 @@ export function setupEditorialMotion({ enabled = true } = {}) {
     inkAnimations = [];
   }
 
-  function writeInk() {
+  function writeInk({ opening = false } = {}) {
     settleInk();
     if (!active || document.hidden || !lettering?.animate) return;
+    let duration = 0;
     lettering.querySelectorAll('.ink-trace').forEach(trace => {
       const style = getComputedStyle(trace);
+      duration = Math.max(duration, parseFloat(style.getPropertyValue('--ink-end')));
       inkAnimations.push(trace.animate(
         [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
         { duration: parseFloat(style.getPropertyValue('--ink-duration')),
@@ -60,6 +63,7 @@ export function setupEditorialMotion({ enabled = true } = {}) {
         { duration: 90, delay: parseFloat(getComputedStyle(seal).getPropertyValue('--ink-end')), fill: 'both' }
       ));
     });
+    if (opening) openingTimer = setTimeout(() => window.sungsoIntro?.finish(), duration + 140);
   }
 
   function renderScroll() {
@@ -71,8 +75,6 @@ export function setupEditorialMotion({ enabled = true } = {}) {
       const progress = Math.max(0, Math.min(1, (height - rect.top) / (height + rect.height)));
       const centered = progress - .5;
       scene.style.setProperty('--scene-y', `${(centered * 44).toFixed(2)}px`);
-      scene.style.setProperty('--date-x', `${(centered * 72).toFixed(2)}px`);
-      scene.style.setProperty('--date-scale', (1 + centered * .22).toFixed(3));
     });
   }
 
@@ -105,15 +107,26 @@ export function setupEditorialMotion({ enabled = true } = {}) {
     replay.hidden = !active;
     root.classList.toggle('editorial-motion', active);
     if (!active) {
+      window.sungsoIntro?.finish();
       settleInk();
       cancelAnimationFrame(frame);
       frame = 0;
       scenes.forEach(scene => {
-        ['--scene-y', '--date-x', '--date-scale'].forEach(name => scene.style.removeProperty(name));
+        scene.style.removeProperty('--scene-y');
       });
     } else queueScroll();
   }
-  replay.addEventListener('click', writeInk);
+  replay.addEventListener('click', () => writeInk());
+  document.querySelector('#intro-skip').addEventListener('click', () => window.sungsoIntro?.finish());
+  document.addEventListener('sungso:intro-finished', () => {
+    clearTimeout(openingTimer);
+    settleInk();
+    if (document.activeElement?.id === 'intro-skip') replay.focus({ preventScroll: true });
+  });
+  document.addEventListener('focusin', event => {
+    if (root.classList.contains('intro-locked') &&
+      !event.target.closest?.('.hero, #sound-dock')) window.sungsoIntro?.finish();
+  });
   addEventListener('scroll', queueScroll, { passive: true });
   addEventListener('resize', queueScroll, { passive: true });
   document.addEventListener('visibilitychange', () => {
@@ -124,6 +137,14 @@ export function setupEditorialMotion({ enabled = true } = {}) {
     } else queueScroll();
   });
   setEnabled(enabled);
-  requestAnimationFrame(writeInk);
+  requestAnimationFrame(() => {
+    const opening = root.classList.contains('intro-locked');
+    if (opening) {
+      root.classList.remove('intro-pending');
+      root.classList.add('intro-running');
+    }
+    // A direct section link or restored page should not replay the opening.
+    if (opening) writeInk({ opening: true });
+  });
   return { setEnabled };
 }

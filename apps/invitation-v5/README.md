@@ -2,11 +2,11 @@
 
 Seychelles 참고: https://toourguest.com/preview/seychelles
 
-공개 `/sungso/invitation-v5/`, 사진 관리 `manage.html`, 참석 응답 관리 `responses.html`.
+공개 `/sungso/invitation-v5/`, 사진 관리 `manage.html`. 기존 참석 응답 관리 `responses.html`은 회원 전용으로 유지한다.
 
 `js/config.mjs`에서 확정된 연락처, 계좌와 선택 안내를 입력하고 `node apps/invitation-v5/scripts/build.mjs`를 실행한다. 미입력 항목은 숨긴다. 사진 추가/순서/제외는 기존 두 회원 웹 관리 화면에서 하며 VER3/4/5에 같은 앨범이 표시된다. 방명록도 동일한 기존 데이터를 사용한다.
 
-참석 응답은 `/api/invitation/v5/rsvp`로 제출하고 두 회원만 `/manage`에서 읽는다. 사용자는 같은 기기의 편집 증명으로 재응답할 수 있다. 서버 응답 전에는 완료 표시를 하지 않는다. 전체 전화번호·비밀번호를 수집하지 않는다. 선택 전화 뒤 4자리는 공개되지 않는다. 예식 30일 뒤 조회/접수 종료 및 실행 중 6시간 주기 서버 정리로 내용 삭제.
+VER5.2에서 하객용 참석 응답 영역과 제출 모듈을 제거했다. 기존 응답 API와 회원 전용 목록은 보존하며 두 회원만 `/manage`에서 읽는다. 사용자는 같은 기기의 편집 증명으로 재응답할 수 있다. 서버 응답 전에는 완료 표시를 하지 않는다. 전체 전화번호·비밀번호를 수집하지 않는다. 선택 전화 뒤 4자리는 공개되지 않는다. 예식 30일 뒤 조회/접수 종료 및 실행 중 6시간 주기 서버 정리로 내용 삭제.
 
 ## 로컬
 
@@ -32,3 +32,11 @@ Seychelles 참고: https://toourguest.com/preview/seychelles
 사용자 후속 선택으로 웜 화이트·하늘색·블루 잉크를 혼합했다. 표지는 OFL Pinyon Script의 벡터 손글씨 With love이며, 본문 영문은 Antic Didone를 유지한다. 손글씨를 변경할 때 Python fontTools/Pillow/NumPy/OpenCV가 있는 환경에서 `scripts/generate-handwriting.py` 후 `scripts/build.mjs`를 실행한다. 생성 SVG는 저장소에 보관하므로 일반 사이트 빌드에는 Python이 필요 없다.
 
 `js/editorial-motion.mjs`가 글자/줄 순차 등장과 사진/날짜의 스크롤 이동을 관리한다. 화면 효과 끄기·prefers-reduced-motion에서는 본문과 손글씨가 완성된 채 보이며, 탭이 숨겨지면 획 애니메이션과 예약 프레임을 해제한다. 원본 Seychelles와 최초 색감/서체의 버전은 5.0.0 기록을 참고한다.
+
+## VER5.2 표지와 흐름
+
+사진을 화면 가득 보여 주고, 어두운 오프닝에서 Pinyon 벡터 손글씨 `We are getting married`를 약 2초 동안 쓴다. 이후 사진이 밝아지며 성우·소희와 일시가 등장한다. 음악은 실제 재생 준비가 됐을 때만 짧은 안내를 띄우며, 오른쪽 위의 기존 켜기/끄기와 전체 MP3 재생을 유지한다.
+
+`intro-boot.js`가 첫 화면 스크롤을 잠깐 잠근다. 바로 보기/Escape/섹션 직접 링크/다른 요소로 포커스 이동/탭 숨김으로 잠금을 해제하며, 모듈 실패 시에도 4.5초 후 해제한다. 효과 끄기·기기 모션 감소·뒤로 가기로 복원할 때는 잠그지 않는다.
+
+화이트·웜 그레이·차분한 블루 그레이로 조정했다. 중복되던 큰 MARCH 06 2027 장면과 하객 RSVP를 제거했다. 예식 안내의 실제 날짜/시간에 줄별 리빌을 적용하고, OUR LOVE STORY를 타임라인 바로 아래에 배치했다. 제목·본문·하단 공유는 스크롤 등장, 사진·마무리 사진은 스크롤 이동을 사용한다. 작은 나비는 효과 끄기/모션 감소에서 정지한다.

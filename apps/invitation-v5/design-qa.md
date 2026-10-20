@@ -46,3 +46,19 @@ Verified 320/390/430/1440px with no horizontal overflow; actual ink middle frame
 Result: passed. Evidence: docs/invitation-v5-review/blue-cover.png and blue-date.png.
 
 VER5.1 release f6cd28a deployed successfully via Pages39439810691. Public browser confirms body5.1.0, final muted#5f7085, live ink stroke0.94/next1, no horizontal overflow or console errors. Supporting text contrast4.54:1; replay5.0:1.
+
+## VER5.2 — dark handwriting opening and a shorter flow
+
+User explicitly requested a dark, briefly scroll-locked opening, fast handwriting, a transient music-ready notice, a butterfly, a full-photo cover with readable names/date, restrained blue, no RSVP, and story immediately after the timeline. The follow-up removes the oversized MARCH 06 2027 scene because Wedding Day already contains the actual date.
+
+Implemented Pinyon vector “We are getting married” in two lines (~2 seconds), then a 1.1-second veil fade and names/date reveal. The existing date-balloon photograph fills the mobile viewport. Warm white and muted blue-grey #4a6378 replace saturated blue panels. The butterfly sits in the scroll anchor; the fixed music control switches to a translucent white outline over the photo. Notice text is triggered only by usable audio data, then disappears. Existing full MP3/autoplay-attempt/gesture fallback/explicit stop behavior is preserved.
+
+The large date scene and its scroll code are removed. Actual Korean date and time in Wedding Day reveal in sequence. Story follows timeline; public RSVP markup/import is gone while existing authenticated management/API/data remain intact. Lower headings, paragraphs, sharing and closing photograph use reveal or scroll movement. There is one dynamic album.
+
+Browser evidence: 320×568,390×844,430×932,1440×1000 show no horizontal overflow; names/date remain inside the photo. Early root overflow:hidden, veil opacity .85 and partial stroke (.87 with following strokes at1) were observed while a scroll attempt kept Y=0. Normal completion, Escape and skip unlock; skip restores focus to replay. The stable scrollbar gutter keeps paper width375 before and after unlocking at390px. Direct #location lands at top without a lock. Effects-off reload shows all text, no butterfly animation and no opening. Actual music-ready text appears and disappears. Story opens/closes, photo advances1→2/6, guestbook composer opens without submission. Console errors0. Final Wedding Day follows the full photo, with both date lines reaching opacity1. Device OS reduced-motion switching and native map/calendar integration remain real-phone checks.
+
+The early boot includes a 4.5-second fail-open deadline if modules fail, plus pagehide/visibility/focus exit handling. These failure guards were inspected; the error path was not forced through the live browser.
+
+Root check: 1,950 passed,829 local references,242 JavaScript files. One first-run pre-existing server test selected an ephemeral port rejected by Node fetch (“bad port”); unchanged retry and the final post-edit full run both passed. No production writes and no VER3/4 source changes.
+
+Result: passed locally. Evidence: docs/invitation-v5-review/v5-2-opening.png, v5-2-cover.png, v5-2-wedding-day.png. Public release verification follows deployment.

@@ -45,6 +45,26 @@ if (typeof document !== 'undefined' && music.src) {
   const dock = document.querySelector('#sound-dock');
   const controls = [...document.querySelectorAll('[data-audio-toggle]')];
   const status = document.querySelector('#sound-status');
+  const notice = document.querySelector('#music-notice');
+  let noticeShown = false, noticeTimer;
+  function musicReady() {
+    if (noticeShown || !notice || audio.error || audio.readyState < 2) return;
+    noticeShown = true;
+    notice.textContent = '배경음악이 준비되었습니다.';
+    notice.hidden = false;
+    notice.classList.add('is-visible');
+    noticeTimer = setTimeout(() => {
+      notice.classList.remove('is-visible');
+      setTimeout(() => { notice.hidden = true; }, 500);
+    }, 2400);
+  }
+  audio.addEventListener('loadeddata', musicReady);
+  audio.addEventListener('canplay', musicReady);
+  audio.addEventListener('error', () => {
+    clearTimeout(noticeTimer);
+    if (notice) { notice.hidden = true; notice.classList.remove('is-visible'); }
+  });
+  musicReady();
   const player = createAudioController(audio, state => {
     dock.dataset.state = state;
     const playing = state === 'playing';
