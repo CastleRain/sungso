@@ -1,0 +1,10 @@
+[hidden]{display:none!important}
+.wedding-auth{box-sizing:border-box;max-width:560px;margin:0 auto;padding:48px 24px 80px;text-align:center;color:#344e60;font-family:RIDIBatang,serif;line-height:1.9}
+.wedding-auth-home{font-size:14px;color:#486e87;text-underline-offset:6px}
+.wedding-auth-script{font:52px PinyonScript,cursive;color:#527c98;margin:72px 0 24px}
+.wedding-auth h1{font:500 23px Hahmlet,serif;margin-bottom:24px}
+.wedding-auth p{font-size:15px}
+.wedding-auth button,.wedding-member-bar button{font:inherit;color:inherit;background:white;border:1px solid #bdd0dc;border-radius:3px;min-height:44px;padding:10px 20px;cursor:pointer}
+.wedding-auth button{display:block;margin:20px auto}
+.wedding-auth button:focus-visible,.wedding-auth a:focus-visible{outline:2px solid #446c88;outline-offset:5px}
+.wedding-member-bar{display:flex;align-items:center;justify-content:flex-end;gap:18px;max-width:760px;margin:auto;padding:12px 24px;font:14px RIDIBatang,serif;color:#344e60}

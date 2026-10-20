@@ -56,7 +56,11 @@ export function createRenderServer({ api, guestbook, album, rsvp, accounts, maxA
     const origin = String(req.headers.origin || '');
     res.setHeader('Vary', 'Origin');
     const guestLocal = (publicGuestbook || albumRequest || rsvpRequest || accountRequest) && ['http://127.0.0.1:8024','http://localhost:8024'].includes(origin);
-    if (origin && !ALLOWED_ORIGINS.has(origin) && !guestLocal) {
+    // One production invitation origin, only on its required routes. Never add
+    // this origin to the shared app allowlist or allow arbitrary Vercel previews.
+    const standaloneInvitation = origin === 'https://sungso-wedding.vercel.app'
+      && (publicGuestbook || albumRequest || accountRequest);
+    if (origin && !ALLOWED_ORIGINS.has(origin) && !guestLocal && !standaloneInvitation) {
       req.resume(); return failure(res, 403, 'ORIGIN_DENIED', '허용되지 않은 페이지입니다.');
     }
     if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
