@@ -72,3 +72,13 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 - 전체 1,972개 검사 및 서비스 번들 통과. 새 Origin의 정확한 경로 허용, 유사 도메인/다른 앱/RSVP 거부, 승인된 두 역할/비활성/비회원 API 검증 통과.
 - 로컬 실제 루트·사진·음악 재생 확인. 전용 HTTP 검사에서 다른 앱 404·MP3 Range 206 확인.
 - Vercel 프로젝트 생성 및 요청 도메인 소유/배정 `verified: true` 확인. 실제 운영 배포 결과는 아래에 추가한다.
+
+### 운영 반영 결과
+
+- Vercel 배포 `dpl_77dSQzQkVUfCMGcqMcBVRWEhbrmw`가 READY이고 `https://sungso-wedding.vercel.app/`에 연결됐다. 익명 HTTP 요청으로 루트 200을 확인했다. 프로젝트에는 Git 저장소가 연결되어 있지 않다.
+- 업로드 계획과 76개 허용 목록이 정확하게 일치한다. 제공 파일 74개의 실제 바이트(음악은 앞 1,024바이트 Range)가 로컬 산출물과 일치한다. `.env.local`·`.vercel` 등 연결 정보는 업로드에서 제외된다.
+- 다른 앱·예전 청첩장·내부 소스·환경 파일 등 19개 경로 모두 실제 404. 공개 API 200, 회원 관리 API 무로그인 401, 정확한 Origin/OPTIONS 204, 다른 앱과 비허용 Origin 403을 확인했다. 세부 결과: `invitation-vercel-review/live-check.json`.
+- 공개 브라우저에서 VER5.6, 리디바탕/Hahmlet 로딩, 모바일 가로 넘침 없음, 사진첩 확대/이동, 음악 약 22분26초 재생과 진행, 카카오 약도, 방명록 작성창을 확인했다. 운영 검증용 글·사진·계좌는 에이전트가 작성하지 않았다. 사용자가 직접 작성한 메시지가 공개 화면에 표시되는 것도 확인했다.
+- 공유/OG/ICS는 새 origin이고 배포된 공유 함수 결과도 새 주소다. 인앱 자동화의 clipboard 읽기/붙여넣기는 이전 값이 반환되어 독립적인 실제 기기 클립보드 검증 완료로 기록하지 않는다. 실제 카카오톡 카드와 기기 공유 시트는 별도 확인 항목이다.
+- Firebase 승인 도메인에 새 정확한 호스트와 기존 도메인이 함께 있음을 확인했다. 실제 승인 회원의 새 origin Google 로그인은 사용자 확인을 요청한 상태이며, 관리 API의 토큰/회원 검사와 익명 차단은 검증했다.
+- GitHub Linux 검사에서 ICS 줄바꿈 차이를 발견해 전용 빌더에서 CRLF를 강제하도록 수정했다. 후속 커밋 `15a5656`의 [GitHub Actions 39465719671](https://github.com/CastleRain/sungso/actions/runs/39465719671) 검사·Pages 배포 성공을 확인했다. 기존 Pages 및 Vercel 제공 파일을 손상시키지 않았다.
