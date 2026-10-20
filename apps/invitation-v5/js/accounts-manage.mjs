@@ -2,7 +2,7 @@ import { getMember, registerPrivateCleanup } from '../../../shared/firebase/site
 import { getApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { ACCOUNTS_PATH } from '../../../shared/invitation/account-core.mjs';
-import { mountAccountManager } from './accounts-manage-ui.mjs?v=5.3.0';
+import { mountAccountManager } from './accounts-manage-ui.mjs?v=5.4.0';
 const uid = getMember()?.uid, requests = new Set();
 let disposed = false;
 function current() { return !disposed && uid && getMember()?.uid === uid && getAuth(getApp('homehunt-private-cloud')).currentUser?.uid === uid; }

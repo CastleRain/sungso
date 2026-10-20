@@ -1,4 +1,5 @@
-import './public-accounts.mjs?v=5.3.0';
+import './public-accounts.mjs?v=5.4.0';
+import { showAccountCopyResult } from './account-interactions.mjs?v=5.4.0';
 import { wedding,photos as initialPhotos } from './config.mjs?v=5.0.0';
 import { countdown,shareUrl,photoIndex } from './core.mjs?v=5.0.0';
 import { renderNumber,settleDigits } from './countdown-view.mjs?v=5.0.0';
@@ -15,9 +16,16 @@ updateEffects();reduced.addEventListener('change',updateEffects);$('#motion-togg
 editorialMotion=setupEditorialMotion({enabled:motion()});
 
 let toastTimer;export function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
-async function copy(text,message){try{await navigator.clipboard.writeText(text);toast(message);return true;}catch{const input=document.createElement('textarea');input.value=text;input.style.cssText='position:fixed;left:-9999px';document.body.append(input);input.select();const ok=document.execCommand('copy');input.remove();toast(ok?message:'복사하지 못했어요. 길게 눌러 직접 복사해 주세요.');return ok;}}
+async function copy(text,message){try{await navigator.clipboard.writeText(text);toast(message);return true;}catch{const input=document.createElement('textarea'),focus=document.activeElement;let ok=false;input.value=text;input.style.cssText='position:fixed;left:-9999px';document.body.append(input);try{input.select();ok=document.execCommand('copy');}catch{}finally{input.remove();focus?.focus({preventScroll:true});}toast(ok?message:'복사하지 못했어요. 길게 눌러 직접 복사해 주세요.');return ok;}}
 $$('[data-copy-address]').forEach(b=>b.addEventListener('click',()=>copy(wedding.address,'예식장 주소를 복사했어요.')));
-document.addEventListener('click',async event=>{const b=event.target.closest?.('[data-copy-account]');if(!b)return;if(await copy(b.dataset.copyAccount,'계좌번호를 복사했어요. 은행 앱에 붙여넣어 주세요.')&&b.isConnected){b.querySelector('span').textContent='복사됨';setTimeout(()=>{if(b.isConnected)b.querySelector('span').textContent='복사';},2500);}});
+let accountCopying=false;
+document.addEventListener('click',async event=>{
+  const button=event.target.closest?.('[data-copy-account]');
+  if(!button||button.disabled||accountCopying)return;
+  accountCopying=true;button.setAttribute('aria-busy','true');
+  try{showAccountCopyResult(button,await copy(button.dataset.copyAccount,`${button.dataset.accountHolder}님의 계좌를 복사했어요.`));}
+  finally{accountCopying=false;button.removeAttribute('aria-busy');}
+});
 $('#copy-link').addEventListener('click',()=>copy(shareUrl(wedding,location),'청첩장 링크를 복사했어요.'));
 $('#share-invitation').addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:wedding.title,text:'3월 6일, 성우와 소희의 결혼식에 초대합니다.',url:shareUrl(wedding,location)});return;}catch(e){if(e.name==='AbortError')return;}}await copy(shareUrl(wedding,location),'공유할 청첩장 링크를 복사했어요.');});
 const openers=new WeakMap();

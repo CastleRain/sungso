@@ -1,5 +1,6 @@
 import { ACCOUNT_SLOTS, emptyAccounts, validateAccounts, accountGroups } from '../../../shared/invitation/account-core.mjs';
-import { renderAccounts } from './account-view.mjs?v=5.3.0';
+import { renderAccounts } from './account-view.mjs?v=5.4.0';
+import { mountAccountTabs } from './account-interactions.mjs?v=5.4.0';
 
 export function mountAccountManager({ root, request, preview = false }) {
   let disposed = false, ready = false, pending = false, revision = 0, saved = '';
@@ -28,6 +29,7 @@ export function mountAccountManager({ root, request, preview = false }) {
       <footer class="manager-footer"><p>공개를 선택한 계좌만 청첩장에 표시됩니다.</p><button class="manager-primary" id="accounts-save" disabled>청첩장에 반영</button></footer>
     </form>`;
   const $ = selector => root.querySelector(selector), form = $('#account-form'), fields = $('.account-fields'), status = $('#accounts-status');
+  const previewTabs = mountAccountTabs($('#account-preview-content'));
   function read() {
     return [...root.querySelectorAll('[data-account-id]')].map(field => ({
       id: field.dataset.accountId, enabled: field.querySelector('[name=enabled]').checked,
@@ -46,6 +48,7 @@ export function mountAccountManager({ root, request, preview = false }) {
     try {
       const groups = accountGroups(read());
       area.innerHTML = groups.length ? renderAccounts(groups) : '<p class="manager-note">공개할 계좌를 입력하면 여기에 보여요.</p>';
+      previewTabs.refresh();
       area.querySelectorAll('[data-copy-account]').forEach(button => {
         button.disabled = true;
         button.title = '미리보기입니다. 실제 청첩장에서 복사할 수 있어요.';
@@ -98,5 +101,5 @@ export function mountAccountManager({ root, request, preview = false }) {
   const beforeLeave = event => { if (dirty()) { event.preventDefault(); event.returnValue = ''; } };
   window.addEventListener('beforeunload', beforeLeave);
   void load();
-  return { dispose() { disposed = true; saved = ''; window.removeEventListener('beforeunload', beforeLeave); root.replaceChildren(); } };
+  return { dispose() { disposed = true; saved = ''; window.removeEventListener('beforeunload', beforeLeave); previewTabs.dispose(); root.replaceChildren(); } };
 }

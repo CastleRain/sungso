@@ -1,6 +1,52 @@
-.account-pay{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;margin-top:12px;border:1px solid var(--line,#d8e0e6);border-radius:5px;font-size:12px;color:inherit;text-decoration:none}
-.account-pay:hover{background:var(--pale,#f3f6f8)}
-.account-pay span{font-weight:600}
+.accounts-section{background:#fbfcfd;padding-block:64px}
+.accounts-section>div>.accounts-eyebrow{font-family:AnticDidone,Georgia,serif;font-size:11px;letter-spacing:2.2px;color:#62788b;margin:0 0 20px}
+.accounts-section .korean-title{font-size:23px;letter-spacing:-.5px;margin-bottom:18px}
+.accounts-section>div>.accounts-intro{font-size:13px;line-height:1.9;color:#687784;margin-bottom:30px}
+.account-book{--account-ink:#415e75;--account-muted:#657581;--account-line:#d9e2e8;--account-wash:#edf3f7;text-align:left;color:#354854}
+.account-tabs{display:flex;border-bottom:1px solid var(--account-line);gap:20px}
+.account-tabs button{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;flex:1;min-height:52px;padding:12px 0;border:0;background:transparent;color:var(--account-muted);font:inherit;font-size:14px;cursor:pointer}
+.account-tabs button:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--account-ink);transform:scaleX(0);transition:transform .25s}
+.account-tabs button[aria-selected=true]{color:var(--account-ink);font-weight:600}
+.account-tabs button[aria-selected=true]:after{transform:scaleX(1)}
+.account-tabs button>span{font-size:14px;opacity:.65}
+.account-tabs button[aria-selected=true]>span{transform:rotate(45deg)}
+.account-side-title{font-size:15px;margin:24px 0 4px}
+.is-enhanced .account-side-title{display:none}
+.account-panel[hidden]{display:none!important}
+.account-panel:not([hidden]){animation:account-arrive .28s ease-out}
+.account-panel:focus-visible{outline:2px solid var(--account-ink);outline-offset:5px}
+.account-recipient{padding:22px 0;border-bottom:1px solid var(--account-line)}
+.account-person{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;overflow-wrap:anywhere}
+.account-person>span{flex:0 0 38px;color:var(--account-muted);font-size:12px}
+.account-person>strong{font-size:16px;font-weight:500;line-height:1.45;letter-spacing:.2px}
+.account-transfer{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.account-destination{min-width:0;display:grid;gap:5px}
+.account-destination>span:first-child{font-size:11px;color:var(--account-muted);overflow-wrap:anywhere}
+.account-destination .account-digits{font-family:SUIT,Arial,sans-serif;font-size:18px;letter-spacing:.4px;line-height:1.4;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.account-copy{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:76px;min-height:44px;padding:9px 12px;border:1px solid #bdccd8;border-radius:5px;color:var(--account-ink);background:transparent;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,border-color .2s}
+.account-copy svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.account-copy .copy-tick{display:none}
+.account-copy.is-copied{background:var(--account-wash);border-color:var(--account-ink)}
+.account-copy.is-copied .copy-sheet{display:none}
+.account-copy.is-copied .copy-tick{display:block;stroke-dasharray:25;animation:account-check .3s ease-out}
+.account-copy:active{background:var(--account-wash)}
+.account-copy:disabled{cursor:default;opacity:.65}
+.account-pay{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-height:44px;width:fit-content;margin:8px 0 -6px auto;color:var(--account-ink);font-size:12px;text-decoration:none}
+.account-pay>span:nth-child(2){text-decoration:underline;text-underline-offset:4px;text-decoration-color:#bac9d5}
+.account-pay .pay-wordmark{font-family:Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:-.7px;color:#3b332c;background:#faed9c;padding:2px 5px;border-radius:3px}
+.account-receipt{padding-top:22px;text-align:center}
+.account-feedback:empty{display:none}
+.account-receipt .account-feedback{font-size:12px;color:var(--account-ink);line-height:1.8;margin:0 0 6px;overflow-wrap:anywhere}
+.account-receipt .account-help{font-size:11px;line-height:1.8;color:var(--account-muted);margin:0}
+.account-receipt.has-copy .account-feedback{font-weight:500}
+.account-loading{padding:32px 0;font-size:12px;color:#657581;text-align:center}
+.account-book button:focus-visible,.account-pay:focus-visible{outline:2px solid var(--account-ink);outline-offset:4px}
+@media(hover:hover){.account-copy:hover{background:var(--account-wash)}.account-pay:hover>span:nth-child(2){text-decoration-color:currentColor}.account-tabs button:hover{color:var(--account-ink)}}
+@keyframes account-arrive{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes account-check{from{stroke-dashoffset:25}to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.account-panel:not([hidden]),.account-copy.is-copied .copy-tick{animation:none}.account-tabs button:after{transition:none}}
+.motion-off .account-panel,.motion-off .account-copy .copy-tick{animation:none!important}
+.motion-off .account-tabs button:after{transition:none}
 .account-manager .account-fields{border:0;padding:0;margin:32px 0}
 .account-editor-group{margin:28px 0}
 .account-editor-group h2{font-size:19px;margin-bottom:14px}
@@ -21,19 +67,4 @@
 .account-preview{max-width:400px;margin:20px auto;background:var(--ss-surface);padding:38px 22px;border:1px solid var(--ss-border);border-radius:12px;font-size:14px}
 .account-preview h2{text-align:center;font-size:20px;font-weight:500}
 .account-preview-intro{text-align:center;color:var(--ss-muted);font-size:13px;margin:16px 0 28px!important;line-height:2}
-.account-preview .account-group{border:1px solid var(--ss-border);border-radius:8px;margin:12px 0;overflow:hidden}
-.account-preview .account-group summary{display:flex;align-items:center;justify-content:space-between;padding:16px;min-height:54px;cursor:pointer}
-.account-preview summary img{width:14px}
-.account-preview summary::-webkit-details-marker{display:none}
-.account-preview .account-group[open] summary img{transform:rotate(180deg)}
-.account-preview .account-body{padding:14px;background:var(--ss-bg)}
-.account-preview .account-item{background:var(--ss-surface);padding:14px;border-radius:6px;margin-bottom:12px}
-.account-preview .account-item>p{font-size:13px;margin-bottom:12px}
-.account-preview .account-number{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.account-preview .account-number small{display:block;color:var(--ss-muted);font-size:11px}
-.account-preview .account-number strong{font-weight:500;overflow-wrap:anywhere}
-.account-preview .account-number button{border:0;font-size:11px;opacity:.7;padding:6px;min-width:44px}
-.account-preview .account-number img{width:16px;display:block;margin:0 auto 5px}
-.account-preview .account-hint{font-size:11px;color:var(--ss-muted);line-height:1.7}
-.account-preview .account-pay{border-color:var(--ss-border)}
 @media(min-width:800px){.account-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.account-editor-group{align-self:start}}
