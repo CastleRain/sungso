@@ -19,8 +19,6 @@ function renderStory() {
   opened = next;
   invitation.hidden = next;
   story.hidden = !next;
-  const controls = document.querySelector('#sound-dock');
-  if (controls) document.querySelector(next ? '#story-music-slot' : '#music-slot').append(controls);
   document.body.classList.toggle('story-open', next);
   document.querySelector('#skip-link').href = next ? '#our-story-title' : '#invitation';
   document.querySelector('#skip-link').textContent = next ? '이야기로 바로가기' : '초대글로 바로가기';
@@ -69,6 +67,6 @@ addEventListener('popstate', () => { cancelOpening(); renderStory(); });
 addEventListener('hashchange', () => { if (opening) cancelOpening(); renderStory(); });
 document.addEventListener('keydown', event => {
   if (opening && event.key === 'Escape') { event.preventDefault(); cancelOpening(); returnFocus?.focus({ preventScroll: true }); return; }
-  if (opened && event.key === 'Escape' && document.querySelector('#sound-settings')?.hidden !== false) closeStory(event);
+  if (opened && event.key === 'Escape') closeStory(event);
 });
 renderStory();

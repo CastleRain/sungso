@@ -1,8 +1,8 @@
 import { getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { getApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { mountAlbumManager } from './manage-ui.mjs?v=3.4.0';
-import { ALBUM_PATH } from '../../../shared/invitation/album-core.mjs?v=3.4.0';
+import { mountAlbumManager } from './manage-ui.mjs?v=3.5.0';
+import { ALBUM_PATH } from '../../../shared/invitation/album-core.mjs?v=3.5.0';
 const uid=getMember()?.uid,requests=new Set();let disposed=false;
 const base='https://sungso-homehunt-api.onrender.com'+ALBUM_PATH;
 async function request(path,{method='GET',body,blob=false}={}) {

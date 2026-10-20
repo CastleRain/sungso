@@ -1,4 +1,4 @@
-import { ALBUM_PATH, defaultPhotos, validateAlbumItems } from '../../../shared/invitation/album-core.mjs?v=3.4.0';
+import { ALBUM_PATH, defaultPhotos, validateAlbumItems } from '../../../shared/invitation/album-core.mjs?v=3.5.0';
 const api = ['localhost','127.0.0.1'].includes(location.hostname)&&location.port==='8024' ? 'http://127.0.0.1:8025' : 'https://sungso-homehunt-api.onrender.com';
 const key='sungso_invitation_v3_public_album';
 function resolvePhotos(data) {

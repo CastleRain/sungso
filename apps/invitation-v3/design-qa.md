@@ -1,3 +1,16 @@
+# Invitation VER3.5 — full-photo ink opening
+
+Local implementation passed; production verification follows in the calling workspace.
+
+- Mobile hero height equals viewport: 568/844/932px at widths320/390/430. Desktop1440×884 keeps the centered480px invitation and812px hero. All inspected widths have no document overflow; title/names/date stay within the hero and faces remain clear.
+- 19 original Pinyon font outline glyphs, traced centerline SVG masks, ~5.1s sequential ink. Actual first-glyph partial stroke-dashoffset0.586923 while next glyphs remain1 and final seals0; completed offsets0/seals1. Replay returns scrollY0. Motion off shows the complete letters and system reduced-motion styles disable animation. No bitmap lettering or generated couple image.
+- Title two lines; names23px (small phone21), date18px (small phone16–17), Korean time14px (short phone12), photo overlay and text shadow. First viewport contains only the photograph and its overlay controls/text.
+- One music note control is fixed top10px on mobile, aligned inside the invitation top46px on desktop. Transparent/no player panel, no range input. White on photo, blue after scroll and on story. At scrollY1102: top10, onCoverfalse, rgb40/87/207. Actual MP3 plays while scrolling and on story; audio element count1. Native lightbox retains its own toggle.
+- 18 app tests and full1917 tests passed; source references/syntax passed. No server, Firestore rules, production guestbook or album write changes were needed.
+- Evidence in calling workspace docs/invitation-v3-review/full-photo-ink: ink-start-390.jpg, cover-320.jpg, cover-desktop.jpg, music-scrolled-390.jpg. Physical phone OS/browser chrome behavior remains a device check.
+
+---
+
 # Invitation VER3.4 — portal and private album
 
 Local result: passed. Production verification follows after deployment.

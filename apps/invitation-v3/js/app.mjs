@@ -1,10 +1,10 @@
-import { wedding, photos as defaultPhotos, accountGroups } from './config.mjs?v=3.4.0';
-import { connectPublicAlbum } from './public-album.mjs?v=3.4.0';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.4.0';
-import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.4.0';
-import './guestbook.mjs?v=3.4.0';
-import './story-view.mjs?v=3.4.0';
-import './background-audio.mjs?v=3.4.0';
+import { wedding, photos as defaultPhotos, accountGroups } from './config.mjs?v=3.5.0';
+import { connectPublicAlbum } from './public-album.mjs?v=3.5.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.5.0';
+import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.5.0';
+import './guestbook.mjs?v=3.5.0';
+import './story-view.mjs?v=3.5.0';
+import './background-audio.mjs?v=3.5.0';
 
 const root = document.documentElement;
 let photos = defaultPhotos, pendingAlbum;
@@ -65,9 +65,9 @@ const replay = document.querySelector('#replay-intro');
 replay.hidden = false;
 replay.addEventListener('click', () => {
   if (!motionOn) { toast('효과를 켜면 손글씨가 쓰이는 모습을 볼 수 있어요.'); return; }
-  const title = document.querySelector('.hero h1');
-  title.getAnimations().forEach(animation => animation.cancel());
-  title.querySelectorAll('.ink-word').forEach((word,index)=>{word.getAnimations().forEach(a=>a.cancel());word.animate([{clipPath:'inset(0 100% -30% -10%)',opacity:0},{clipPath:'inset(0 -10% -30% -10%)',opacity:1}],{duration:1100,delay:index*650,fill:'both',easing:'cubic-bezier(.4,0,.2,1)'});});
+  document.querySelector('.hero').scrollIntoView({block:'start',behavior:'instant'});
+  const lettering = document.querySelector('.hero-handwriting');
+  lettering.replaceWith(lettering.cloneNode(true));
 });
 
 const message = document.querySelector('#day-message');

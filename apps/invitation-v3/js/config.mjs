@@ -1,4 +1,4 @@
-import { defaultPhotos } from '../../../shared/invitation/album-core.mjs?v=3.4.0';
+import { defaultPhotos } from '../../../shared/invitation/album-core.mjs?v=3.5.0';
 export const wedding = Object.freeze({
   title: '성우와 소희, 결혼합니다', groom: '성우', bride: '소희',
   startsAt: '2027-03-06T15:30:00+09:00', endsAt: null, timezone: 'Asia/Seoul',

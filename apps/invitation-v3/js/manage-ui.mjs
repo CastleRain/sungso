@@ -1,5 +1,5 @@
-import { defaultPhotos, MAX_ALBUM_PHOTOS, validateAlbumItems } from '../../../shared/invitation/album-core.mjs?v=3.4.0';
-import { prepareAlbumPhoto } from './album-image.mjs?v=3.4.0';
+import { defaultPhotos, MAX_ALBUM_PHOTOS, validateAlbumItems } from '../../../shared/invitation/album-core.mjs?v=3.5.0';
+import { prepareAlbumPhoto } from './album-image.mjs?v=3.5.0';
 const itemOf=p=>({id:p.id,kind:p.kind,alt:p.alt});
 export function mountAlbumManager({root,api,preview=false}) {
   let disposed=false,ready=false,busy=false,revision=0,draft=[],saved=[],library=[],dragged;
