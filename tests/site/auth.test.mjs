@@ -34,17 +34,17 @@ test('every private entry defers scripts until auth; only the explicit guest inv
       const guestModules = [...files].filter(([output]) => output.startsWith(`${app}/`) && /\.(?:js|mjs)$/.test(output));
       for (const [, entry] of guestModules) {
         const js = await readFile(new URL(`../../${entry.source}`, import.meta.url), 'utf8');
-        if (entry.source === `apps/${app}/js/manage.mjs` || app==='invitation-v5' && entry.source===`apps/${app}/js/responses.mjs`) {
-          const privateEntry=entry.source.endsWith('/responses.mjs')?'responses':'manage';
+        if (entry.source === `apps/${app}/js/manage.mjs` || app==='invitation-v5' && /\/(?:responses|accounts-manage)\.mjs$/.test(entry.source)) {
+          const privateEntry=entry.source.endsWith('/accounts-manage.mjs')?'accounts':entry.source.endsWith('/responses.mjs')?'responses':'manage';
           const manager = await readFile(new URL(`../../apps/${app}/${privateEntry}.html`,import.meta.url),'utf8');
           assert.match(manager,/data-private-root[^>]*hidden/);
           assert.match(manager,/shared\/firebase\/boot\.mjs/);
-          assert.match(manager,/type="application\/x-sungso-script"[^>]+data-src="\.\/js\/(?:manage|responses)\.mjs/);
+          assert.match(manager,/type="application\/x-sungso-script"[^>]+data-src="\.\/js\/(?:manage|responses|accounts-manage)\.mjs/);
           assert.match(js,/getMember/);assert.match(js,/registerPrivateCleanup/);assert.match(js,/Authorization/);
           continue;
         }
         assert.doesNotMatch(js, /firebasejs|firestore|private_data|site_members|shared\/firebase/);
-        assert.doesNotMatch(js,/from\s+['"][^'"]*\/(?:manage|responses)\.mjs/);
+        assert.doesNotMatch(js,/from\s+['"][^'"]*\/(?:manage|responses|accounts-manage)\.mjs/);
       }
       continue;
     }

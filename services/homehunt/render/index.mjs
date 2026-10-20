@@ -1,4 +1,5 @@
 import {createRsvpApi,createRsvpStore} from '../../invitation/server/rsvp.mjs';
+import { createAccountApi, createAccountStore } from '../../invitation/server/accounts.mjs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -24,7 +25,8 @@ async function start() {
   const album = createAlbumApi({store:createAlbumStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
   const rsvpStore=createRsvpStore({db});
   const rsvp=createRsvpApi({store:rsvpStore,authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
-  const server = createRenderServer({ api, guestbook, album, rsvp });
+  const accounts = createAccountApi({store:createAccountStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
+  const server = createRenderServer({ api, guestbook, album, rsvp, accounts });
   const maintenance = createFirestoreMaintenance({ db });
   const clean = () => { void maintenance.runIfDue().catch(() => {}); void rsvpStore.purgeExpired().catch(() => {}); };
   const interval = setInterval(clean, 6 * 60 * 60 * 1000);

@@ -1,7 +1,6 @@
 // Progressive enhancement: the unenhanced document remains fully readable.
 export function setupEditorialMotion({ enabled = true } = {}) {
   const root = document.documentElement;
-  const replay = document.querySelector('#ink-replay');
   const lettering = document.querySelector('.hero-handwriting');
   let inkAnimations = [];
   let frame = 0;
@@ -104,7 +103,6 @@ export function setupEditorialMotion({ enabled = true } = {}) {
 
   function setEnabled(value) {
     active = value;
-    replay.hidden = !active;
     root.classList.toggle('editorial-motion', active);
     if (!active) {
       window.sungsoIntro?.finish();
@@ -116,12 +114,11 @@ export function setupEditorialMotion({ enabled = true } = {}) {
       });
     } else queueScroll();
   }
-  replay.addEventListener('click', () => writeInk());
   document.querySelector('#intro-skip').addEventListener('click', () => window.sungsoIntro?.finish());
   document.addEventListener('sungso:intro-finished', () => {
     clearTimeout(openingTimer);
     settleInk();
-    if (document.activeElement?.id === 'intro-skip') replay.focus({ preventScroll: true });
+    if (document.activeElement?.id === 'intro-skip') document.querySelector('.hero-scroll').focus({ preventScroll: true });
   });
   document.addEventListener('focusin', event => {
     if (root.classList.contains('intro-locked') &&

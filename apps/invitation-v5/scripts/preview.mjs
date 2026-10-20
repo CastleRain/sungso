@@ -18,9 +18,9 @@ createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
     if (pathname === '/' || pathname === base.slice(0, -1)) { res.writeHead(302, { Location: base }); res.end(); return; }
-    const harness = pathname === base+'manage-preview.html' || pathname === base+'manage-preview.mjs';
+    const harness = ['manage-preview.html','manage-preview.mjs','accounts-preview.html','accounts-preview.mjs'].some(name=>pathname===base+name);
     if (harness) {
-      const name=pathname.endsWith('.mjs')?'manage-preview.mjs':'manage-preview.html';
+      const name=pathname.slice(base.length);
       res.writeHead(200,{'Content-Type':types[extname(name)],'Cache-Control':'no-store'});res.end(await readFile(new URL(name,import.meta.url)));return;
     }
     if (!/^\/sungso\/(?:invitation-v[345]\/|shared\/(?:firebase|theme|invitation)\/)/.test(pathname)) {res.writeHead(404);res.end();return;}

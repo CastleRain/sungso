@@ -191,3 +191,10 @@ test('wedding RSVP documents stay server-only even for both signed-in members',a
   await assertFails(getDoc(doc(db,path)));await assertFails(setDoc(doc(db,path),{schema:1,rows:[]}));await assertFails(getDocs(collection(db,'wedding_rsvps')));
  }
 });
+
+test('account drafts and writes stay server-only even for both approved members',async()=>{
+ const path='wedding_accounts/sungso_20270306';await seed(path,{schema:1,revision:1,accounts:[]});
+ for(const db of [env.unauthenticatedContext().firestore(),client('outsider'),client(),client(partner)]){
+  await assertFails(getDoc(doc(db,path)));await assertFails(setDoc(doc(db,path),{schema:1,revision:2,accounts:[]}));await assertFails(getDocs(collection(db,'wedding_accounts')));
+ }
+});
