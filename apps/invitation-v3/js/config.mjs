@@ -1,3 +1,4 @@
+import { defaultPhotos } from '../../../shared/invitation/album-core.mjs?v=3.4.0';
 export const wedding = Object.freeze({
   title: '성우와 소희, 결혼합니다', groom: '성우', bride: '소희',
   startsAt: '2027-03-06T15:30:00+09:00', endsAt: null, timezone: 'Asia/Seoul',
@@ -49,11 +50,4 @@ export const accountGroups = [
     { relation: '어머니', holder: '', bank: '', number: '' },
   ] },
 ];
-export const photos = Object.freeze([
-  { id: 'forest', src: './assets/photos/forest-1440.webp', thumb: './assets/photos/forest-640.webp', width: 1440, height: 2159, alt: '초록빛 산책길에서 손을 잡고 나란히 걷는 성우와 소희' },
-  { id: 'bouquet', src: './assets/photos/bouquet-1440.webp', thumb: './assets/photos/bouquet-640.webp', width: 1440, height: 2159, alt: '작은 꽃다발을 사이에 두고 서로를 바라보는 두 사람' },
-  { id: 'promise', src: './assets/photos/promise-1440.webp', thumb: './assets/photos/promise-640.webp', width: 1440, height: 2159, alt: '색색의 꽃다발 옆에서 손을 포개는 두 사람' },
-  { id: 'date', src: './assets/photos/date-1440.webp', thumb: './assets/photos/date-640.webp', width: 1440, height: 2159, alt: '나무 아래에서 0306 풍선을 들고 결혼 날짜를 전하는 두 사람' },
-  { id: 'walk', src: './assets/photos/walk-1440.webp', thumb: './assets/photos/walk-640.webp', width: 1440, height: 2159, alt: '햇살이 비치는 골목에서 손을 잡고 나란히 걷는 두 사람' },
-  { id: 'sea', src: './assets/photos/sea-1440.webp', thumb: './assets/photos/sea-640.webp', width: 1440, height: 2159, alt: '바닷가에서 빨간 하트 풍선을 들고 마주 보는 두 사람' },
-]);
+export const photos = defaultPhotos;

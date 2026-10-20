@@ -34,7 +34,16 @@ test('every private entry defers scripts until auth; only the explicit guest inv
       const guestModules = [...files].filter(([output]) => output.startsWith(`${app}/`) && /\.(?:js|mjs)$/.test(output));
       for (const [, entry] of guestModules) {
         const js = await readFile(new URL(`../../${entry.source}`, import.meta.url), 'utf8');
+        if (entry.source === 'apps/invitation-v3/js/manage.mjs') {
+          const manager = await readFile(new URL('../../apps/invitation-v3/manage.html',import.meta.url),'utf8');
+          assert.match(manager,/data-private-root[^>]*hidden/);
+          assert.match(manager,/shared\/firebase\/boot\.mjs/);
+          assert.match(manager,/type="application\/x-sungso-script"[^>]+data-src="\.\/js\/manage\.mjs/);
+          assert.match(js,/getMember/);assert.match(js,/registerPrivateCleanup/);assert.match(js,/Authorization/);
+          continue;
+        }
         assert.doesNotMatch(js, /firebasejs|firestore|private_data|site_members|shared\/firebase/);
+        assert.doesNotMatch(js,/from\s+['"][^'"]*\/manage\.mjs/);
       }
       continue;
     }

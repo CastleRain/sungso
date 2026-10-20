@@ -18,6 +18,7 @@ services:
         - services/invitation/server/**
         - apps/homehunt/data/apartment-catalog-seoul-gyeonggi.json
         - shared/homehunt/**
+        - shared/invitation/**
         - render.yaml
     envVars:
       - key: NODE_VERSION

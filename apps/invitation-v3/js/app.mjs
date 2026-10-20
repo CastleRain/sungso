@@ -1,11 +1,13 @@
-import { wedding, photos, accountGroups } from './config.mjs?v=3.3.0';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.3.0';
-import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.3.0';
-import './guestbook.mjs?v=3.3.0';
-import './story-view.mjs?v=3.3.0';
-import './background-audio.mjs?v=3.3.0';
+import { wedding, photos as defaultPhotos, accountGroups } from './config.mjs?v=3.4.0';
+import { connectPublicAlbum } from './public-album.mjs?v=3.4.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.4.0';
+import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.4.0';
+import './guestbook.mjs?v=3.4.0';
+import './story-view.mjs?v=3.4.0';
+import './background-audio.mjs?v=3.4.0';
 
 const root = document.documentElement;
+let photos = defaultPhotos, pendingAlbum;
 const motionButton = document.querySelector('#motion-toggle');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const motionKey = 'sungso_invitation_v3_motion';
@@ -156,7 +158,7 @@ function updateNavigation() {
   const distance=document.documentElement.scrollHeight-innerHeight;
   document.querySelector('#reading-progress').style.transform='scaleX('+(distance>0?Math.min(1,Math.max(0,scrollY/distance)):0)+')';
   nav.hidden = !document.querySelector('#our-story').hidden || cover.getBoundingClientRect().bottom > 64;
-  const current = sections.filter(section => section.getBoundingClientRect().top < innerHeight * .5).at(-1);
+  const current = sections.filter(section => !section.hidden && section.getBoundingClientRect().top < innerHeight * .5).at(-1);
   navLinks.forEach(link => {
     if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
     else link.removeAttribute('aria-current');
@@ -260,23 +262,22 @@ function showPhoto(index) {
   const photo = photos[currentPhoto];
   fullImage.src = photo.src;
   fullImage.alt = photo.alt;
-  document.querySelector('#photo-download').href=photo.src;
-  document.querySelector('#photo-download').download=`성우와소희-${photo.id}.webp`;
+  document.querySelector('#photo-download').href=photo.src+(photo.kind==='upload'?'?download=1':'');
+  document.querySelector('#photo-download').download=`성우와소희-${photo.id}.${photo.kind==='upload'?'jpg':'webp'}`;
   document.querySelectorAll('[data-thumbnail]').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===currentPhoto)));
   document.querySelector(`[data-thumbnail="${currentPhoto}"]`)?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
   document.querySelector('#photo-count').textContent = `${String(currentPhoto + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
   document.querySelector('#photo-description').textContent = photo.alt;
   if (motionOn) fullImage.animate([{ opacity: .45 }, { opacity: 1 }], { duration: 240 });
 }
-document.querySelectorAll('[data-photo]').forEach(button => {
-  button.addEventListener('click', () => {
+document.querySelector('.gallery').addEventListener('click', event => {
+    const button=event.target.closest('[data-photo]');if(!button)return;
     trigger = button;
     showPhoto(Number(button.dataset.photo));
     dialog.showModal();
     document.querySelector('#close-photo').focus();
-  });
 });
-document.querySelectorAll('[data-thumbnail]').forEach(button=>button.addEventListener('click',()=>showPhoto(Number(button.dataset.thumbnail))));
+document.querySelector('#album-strip').addEventListener('click',event=>{const button=event.target.closest('[data-thumbnail]');if(button)showPhoto(Number(button.dataset.thumbnail));});
 document.querySelector('#close-photo').addEventListener('click', () => dialog.close());
 document.querySelector('#previous-photo').addEventListener('click', () => showPhoto(currentPhoto - 1));
 document.querySelector('#next-photo').addEventListener('click', () => showPhoto(currentPhoto + 1));
@@ -289,6 +290,7 @@ dialog.addEventListener('keydown', event => {
 dialog.addEventListener('close', () => {
   fullImage.removeAttribute('src');
   trigger?.focus({ preventScroll: true });
+  if(pendingAlbum){const next=pendingAlbum;pendingAlbum=undefined;applyAlbum(next);}
 });
 let pointerStart;
 fullImage.addEventListener('pointerdown', event => { if (event.isPrimary) pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId }; });
@@ -301,3 +303,42 @@ fullImage.addEventListener('pointerup', event => {
 fullImage.addEventListener('pointercancel', () => { pointerStart = null; });
 fullImage.addEventListener('dragstart', event => event.preventDefault());
 fullImage.addEventListener('error', () => toast('사진을 불러오지 못했어요. 다음 사진을 보거나 다시 열어 주세요.'));
+
+// Uploaded thumbnails share the bounded API; load only visible images, two at a time.
+const albumThumbQueue=[];let activeAlbumThumbs=0;
+function pumpAlbumThumbs(){
+  while(activeAlbumThumbs<2&&albumThumbQueue.length){
+    const image=albumThumbQueue.shift();if(!image.isConnected)continue;
+    activeAlbumThumbs++;const done=()=>{activeAlbumThumbs--;pumpAlbumThumbs();};
+    image.addEventListener('load',done,{once:true});image.addEventListener('error',done,{once:true});
+    image.loading='eager';image.src=image.dataset.albumThumb;
+  }
+}
+const albumThumbObserver=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){albumThumbObserver.unobserve(entry.target);albumThumbQueue.push(entry.target);}});pumpAlbumThumbs();
+},{rootMargin:'240px'}):null;
+function loadAlbumThumb(image,p){
+  if(p.kind!=='upload'){image.src=p.thumb;image.loading='lazy';return;}
+  image.dataset.albumThumb=p.thumb;
+  if(albumThumbObserver)albumThumbObserver.observe(image);else{albumThumbQueue.push(image);pumpAlbumThumbs();}
+}
+function applyAlbum(next) {
+  if(dialog.open){pendingAlbum=next;return;}
+  photos=next;
+  const gallery=document.querySelector('.gallery'),strip=document.querySelector('#album-strip');
+  const restoreFocus=gallery.contains(document.activeElement);
+  albumThumbObserver?.disconnect();albumThumbQueue.length=0;
+  gallery.replaceChildren();strip.replaceChildren();
+  document.querySelector('#gallery').hidden=!photos.length;
+  document.querySelector('#quick-nav a[href="#gallery"]').hidden=!photos.length;
+  photos.forEach((p,index)=>{
+    const button=document.createElement('button');button.type='button';button.className='gallery-item';button.dataset.photo=String(index);button.setAttribute('aria-label',`${p.alt} · 크게 보기`);
+    const image=document.createElement('img');image.alt=p.alt;image.width=p.width;image.height=p.height;image.decoding='async';button.append(image);gallery.append(button);loadAlbumThumb(image,p);
+    const thumb=document.createElement('button');thumb.type='button';thumb.dataset.thumbnail=String(index);thumb.setAttribute('aria-label',`${index+1}번째 사진, ${p.alt}`);
+    const small=document.createElement('img');small.alt='';small.width=48;small.height=64;thumb.append(small);strip.append(thumb);loadAlbumThumb(small,p);
+  });
+  if(restoreFocus)gallery.querySelector('button')?.focus({preventScroll:true});
+  updateNavigation();
+}
+const albumLoader=connectPublicAlbum(applyAlbum,failed=>{document.querySelector('#album-retry').hidden=!failed;});
+document.querySelector('#album-retry').addEventListener('click',()=>{void albumLoader.refresh();});

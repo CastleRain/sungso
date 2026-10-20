@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { isAlbumRoute } from '../../../shared/invitation/album-core.mjs';
 const MAX_BODY_BYTES = 750 * 1024;
 const ALLOWED_ORIGINS = new Set(['https://castlerain.github.io', 'http://localhost:8000', 'http://127.0.0.1:8000']);
 const failure = (res, status, code, error) => {
@@ -22,7 +23,7 @@ async function readBody(req, limit = MAX_BODY_BYTES) {
   });
 }
 /** Node adapter; liveness proves the process is awake, never API access. */
-export function createRenderServer({ api, guestbook, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
+export function createRenderServer({ api, guestbook, album, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
   if (typeof api !== 'function') throw new TypeError('An API handler is required');
   if (!Number.isSafeInteger(maxActiveRequests) || maxActiveRequests < 1
     || !Number.isSafeInteger(maxQueuedRequests) || maxQueuedRequests < 0) throw new RangeError('Invalid request limits');
@@ -49,9 +50,10 @@ export function createRenderServer({ api, guestbook, maxActiveRequests = 2, maxQ
     try { pathname = new URL(req.url, 'http://homehunt.invalid').pathname; }
     catch { req.resume(); return failure(res, 400, 'INVALID_URL', '요청 주소를 확인해주세요.'); }
     const publicGuestbook = typeof guestbook === 'function' && /^\/api\/invitation\/v3\/guestbook(?:\/[0-9a-f-]{36})?$/i.test(pathname);
+    const albumRequest = typeof album === 'function' && isAlbumRoute(pathname);
     const origin = String(req.headers.origin || '');
     res.setHeader('Vary', 'Origin');
-    const guestLocal = publicGuestbook && ['http://127.0.0.1:8024','http://localhost:8024'].includes(origin);
+    const guestLocal = (publicGuestbook || albumRequest) && ['http://127.0.0.1:8024','http://localhost:8024'].includes(origin);
     if (origin && !ALLOWED_ORIGINS.has(origin) && !guestLocal) {
       req.resume(); return failure(res, 403, 'ORIGIN_DENIED', '허용되지 않은 페이지입니다.');
     }
@@ -89,7 +91,7 @@ export function createRenderServer({ api, guestbook, maxActiveRequests = 2, maxQ
       req.body = rawBody.length ? rawBody : {};
       res.status = status => { res.statusCode = status; return res; };
       res.json = value => { res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(value)); return res; };
-      await (publicGuestbook ? guestbook : api)(req, res);
+      await (publicGuestbook ? guestbook : albumRequest ? album : api)(req, res);
     } catch { failure(res, 503, 'SERVICE_UNAVAILABLE', '서비스에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.'); }
     finally { release(heavy); }
   });

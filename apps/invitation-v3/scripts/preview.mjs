@@ -2,10 +2,12 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildSite } from '../../../scripts/build-site.mjs';
 import { startGuestbookPreview } from './guestbook-dev.mjs';
 await startGuestbookPreview();
+await buildSite();
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+const root = fileURLToPath(new URL('../../../dist/', import.meta.url));
 const base = '/sungso/invitation-v3/';
 const args = process.argv.slice(2);
 const flag = (name, fallback) => { const index = args.indexOf(name); return index < 0 ? fallback : args[index + 1]; };
@@ -16,10 +18,14 @@ createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
     if (pathname === '/' || pathname === base.slice(0, -1)) { res.writeHead(302, { Location: base }); res.end(); return; }
-    if (!pathname.startsWith(base)) { res.writeHead(404); res.end(); return; }
-    const relative = pathname.slice(base.length) || 'index.html';
-    if (!/^(index\.html|map\.html|wedding\.ics|(css|js|assets)\/)/.test(relative)) { res.writeHead(404); res.end(); return; }
-    const file = resolve(root, relative);
+    const harness = pathname === base+'manage-preview.html' || pathname === base+'manage-preview.mjs';
+    if (harness) {
+      const name=pathname.endsWith('.mjs')?'manage-preview.mjs':'manage-preview.html';
+      res.writeHead(200,{'Content-Type':types[extname(name)],'Cache-Control':'no-store'});res.end(await readFile(new URL(name,import.meta.url)));return;
+    }
+    if (!/^\/sungso\/(?:invitation-v3\/|shared\/(?:firebase|theme|invitation)\/)/.test(pathname)) {res.writeHead(404);res.end();return;}
+    const relative=pathname.slice('/sungso/'.length).replace(/\/$/,'/index.html');
+    const file=resolve(root,relative);
     if (!file.startsWith(resolve(root) + sep) || !(await stat(file)).isFile()) { res.writeHead(404); res.end(); return; }
     res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
     res.end(await readFile(file));

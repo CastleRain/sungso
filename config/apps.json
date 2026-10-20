@@ -93,7 +93,7 @@
       "id": "invitation-v3",
       "source": "apps/invitation-v3",
       "output": "invitation-v3",
-      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets"]
+      "files": ["index.html", "map.html", "wedding.ics", "css", "js", "assets", "manage.html"]
     },
     {
       "id": "dates",
@@ -207,6 +207,13 @@
         "reading-font.css",
         "fonts/PretendardVariable.woff2",
         "fonts/Pretendard-LICENSE.txt"
+      ]
+    },
+    {
+      "source": "shared/invitation",
+      "output": "shared/invitation",
+      "files": [
+        "album-core.mjs"
       ]
     }
   ],

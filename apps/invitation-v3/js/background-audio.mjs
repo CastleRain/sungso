@@ -1,4 +1,4 @@
-import { music } from './config.mjs?v=3.3.0';
+import { music } from './config.mjs?v=3.4.0';
 
 // A real audio element owns playback; changing views never recreates it.
 export function createAudioController(audio, onState = () => {}) {

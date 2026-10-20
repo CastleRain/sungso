@@ -174,3 +174,14 @@ test('a rejected audit atomically preserves the existing ledger and budget; a va
   await assertFails(setDoc(doc(db, 'itineraries/main'), { legacy: false }));
   await assertFails(deleteDoc(doc(db, 'itineraries/main')));
 });
+
+
+test('album metadata and image payloads are server-only even for approved members', async () => {
+  const root='wedding_albums/sungso_20270306',photo=root+'/photos/fixture';
+  await seed(root,{schema:1,revision:1,items:[],uploads:[]});await seed(photo,{full:'fixture-private-bytes'});
+  for(const db of [env.unauthenticatedContext().firestore(),client(),client(partner),client('outsider')]){
+    await assertFails(getDoc(doc(db,root)));await assertFails(getDoc(doc(db,photo)));
+    await assertFails(setDoc(doc(db,root),{overwritten:true}));await assertFails(setDoc(doc(db,photo),{overwritten:true}));
+    await assertFails(getDocs(collection(db,root+'/photos')));
+  }
+});

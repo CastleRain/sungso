@@ -1,3 +1,21 @@
+# Invitation VER3.4 — portal and private album
+
+Local result: passed. Production verification follows after deployment.
+
+- Shared blue/script direction and real photographs retained. Music dock is relative in document flow; settings expand below it instead of overlaying other sections. Audio stays outside the two views; only controls move.
+- Story portal is a 240px two-leaf custom arched door. Actual intermediate matrix3d rotation observed. Escape cancels; effect-off opens directly. Native back/forward restores the main/story view while the same audio continues.
+- Date tabs: 남은 시간 / 예식 달력. Album: 사진첩. No fixed six-photo claim or visible captions. Caption text fields removed from manager; only internal accessible alt text remains.
+- Manager: existing member auth and deferred private script, token checked through response decoding, logout abort/cleanup. Public guest page imports no Firebase SDK or private manager entry. Firestore client tests reject reads/writes/queries to metadata and image documents even for approved clients.
+- Local browser workflow: add two existing optimized real photos; publish8; reload both views; reorder/remove first -> publish7; uploaded full image opens at1067px; visible count06/07; archive restores original; remove uploaded duplicates and restore initial six in original order. Test data stays in excluded local JSON. No production upload/publish/guestbook write used for verification.
+- Public metadata exposes only selected photos. Pending/private assets404, invalid/disabled/nonmember tokens rejected, stale revision conflicts preserve partner edits, retries idempotent, server strips APP metadata and enforces JPEG limits. Public JPEG save returns attachment. Seven server tests pass.
+- Root checks1917, local references701, JS syntax213; Firestore Emulator58 tests pass; all Render/Firebase bundles build. One local run initially hit a pre-existing random forbidden test port; rerun passed without changing tests.
+- Actual guest view320/390/430/1440px: no horizontal overflow, three self-hosted fonts loaded, relative music dock and240px door fit. Manager320/390/430/1440px: no horizontal overflow and all photo buttons >=44px. No description inputs; private library assets are loaded with two concurrent requests. Uploaded public thumbnails are visible-only/two at a time.
+- Real mobile OS downloads/map/calendar/share and physical speaker playback remain device checks. Initial Render cold start can take time; errors preserve drafts and offer retry. Local preview harness is excluded from Pages; actual manage.html always authenticates.
+
+Evidence: docs/invitation-v3-review/portal-album/ in the calling workspace, including portal-390.jpg and manage-no-captions-390.jpg. Older verification history follows.
+
+---
+
 # VER3.3 — audio-only music, one album and a separate story
 
 **final result: passed (local); production verification follows after publishing**
