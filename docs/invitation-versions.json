@@ -63,6 +63,8 @@
     "version": "5.5.0",
     "path": "apps/invitation-v5",
     "url": "https://castlerain.github.io/sungso/invitation-v5/",
-    "deployment": "pending"
+    "deployment": "success",
+    "commit": "b04eb0d220a16a207d1303d331ec1eb19efb4f42",
+    "pagesRun": "39457140552"
   }
 }
