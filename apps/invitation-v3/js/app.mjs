@@ -1,41 +1,11 @@
-import { wedding, photos, accountGroups } from './config.mjs?v=3.2.0';
-import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.2.0';
-import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.2.0';
-import './guestbook.mjs?v=3.2.0';
+import { wedding, photos, accountGroups } from './config.mjs?v=3.3.0';
+import { countdown, formatWedding, photoIndex, shareUrl, publishedAccounts } from './core.mjs?v=3.3.0';
+import { renderNumber, settleDigits } from './countdown-view.mjs?v=3.3.0';
+import './guestbook.mjs?v=3.3.0';
+import './story-view.mjs?v=3.3.0';
+import './background-audio.mjs?v=3.3.0';
 
 const root = document.documentElement;
-const storySlides = [...document.querySelectorAll('.story-slide')];
-const storyTabs = [...document.querySelectorAll('[data-story]')];
-let storyIndex = 0;
-function selectStory(index, focus = false) {
-  storyIndex = photoIndex(index, storySlides.length);
-  storySlides.forEach((slide, i) => { slide.hidden = i !== storyIndex; });
-  storyTabs.forEach((tab, i) => tab.setAttribute('aria-pressed', String(i === storyIndex)));
-  document.querySelector('#story-status').textContent = storySlides[storyIndex].getAttribute('aria-label');
-  if (focus) storyTabs[storyIndex].focus();
-}
-storyTabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => selectStory(index));
-  tab.addEventListener('keydown', event => {
-    if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-    event.preventDefault();
-    selectStory(event.key === 'Home' ? 0 : event.key === 'End' ? storySlides.length - 1 : storyIndex + (event.key === 'ArrowLeft' ? -1 : 1), true);
-  });
-});
-document.querySelector('#story-prev').addEventListener('click', () => selectStory(storyIndex - 1));
-document.querySelector('#story-next').addEventListener('click', () => selectStory(storyIndex + 1));
-const storyViewer = document.querySelector('.story-slides');
-let storyPointer;
-storyViewer.addEventListener('pointerdown', event => { if (event.isPrimary) storyPointer = {x:event.clientX,y:event.clientY,id:event.pointerId}; });
-storyViewer.addEventListener('pointerup', event => {
-  if (!storyPointer || event.pointerId !== storyPointer.id) return;
-  const dx = event.clientX - storyPointer.x, dy = event.clientY - storyPointer.y;
-  storyPointer = null;
-  if (Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.5) { selectStory(storyIndex + (dx<0?1:-1)); suppressStoryClick = true; setTimeout(()=>{suppressStoryClick=false;},0); }
-});
-storyViewer.addEventListener('pointercancel',()=>{storyPointer=null;});
-let suppressStoryClick = false;
-storyViewer.addEventListener('click',event=>{if(suppressStoryClick){event.preventDefault();event.stopImmediatePropagation();}},true);
 const motionButton = document.querySelector('#motion-toggle');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const motionKey = 'sungso_invitation_v3_motion';
@@ -55,7 +25,7 @@ function applyMotion() {
   motionButton.setAttribute('aria-pressed', String(motionOn));
   motionButton.setAttribute('aria-label', reducedMotion.matches ? '기기 설정에 따라 움직임을 줄이고 있습니다' : motionOn ? '사진과 스크롤 효과 끄기' : '사진과 스크롤 효과 켜기');
   revealObserver?.disconnect();
-  const elements = [...document.querySelectorAll('.reveal')];
+  const elements = [...document.querySelectorAll('.reveal')].filter(element => !element.closest('[hidden]'));
   if (!motionOn || !('IntersectionObserver' in window)) {
     elements.forEach(element => element.removeAttribute('data-waiting'));
     return;
@@ -185,7 +155,7 @@ function updateNavigation() {
   scrollFrame = 0;
   const distance=document.documentElement.scrollHeight-innerHeight;
   document.querySelector('#reading-progress').style.transform='scaleX('+(distance>0?Math.min(1,Math.max(0,scrollY/distance)):0)+')';
-  nav.hidden = cover.getBoundingClientRect().bottom > 64;
+  nav.hidden = !document.querySelector('#our-story').hidden || cover.getBoundingClientRect().bottom > 64;
   const current = sections.filter(section => section.getBoundingClientRect().top < innerHeight * .5).at(-1);
   navLinks.forEach(link => {
     if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
@@ -195,6 +165,7 @@ function updateNavigation() {
 addEventListener('scroll', () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(updateNavigation); }, { passive: true });
 addEventListener('resize', updateNavigation);
 updateNavigation();
+addEventListener('invitation:viewchange', () => { applyMotion(); updateNavigation(); });
 
 let toastTimer;
 function toast(text) {
@@ -281,13 +252,6 @@ document.querySelector('#open-tmap').addEventListener('click',()=>{tmapDialog.sh
 document.querySelector('#close-tmap').addEventListener('click',()=>tmapDialog.close());
 tmapDialog.addEventListener('close',()=>document.querySelector('#open-tmap').focus({preventScroll:true}));
 document.querySelector('#tmap-copy').addEventListener('click',()=>copyText(wedding.address,'예식장 주소를 복사했어요.'));
-const albumButtons=[...document.querySelectorAll('[data-album]')];
-albumButtons.forEach(button=>button.addEventListener('click',()=>{
-  albumButtons.forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
-  let count=0;document.querySelectorAll('.gallery-item').forEach(item=>{item.hidden=button.dataset.album!=='all'&&item.dataset.scene!==button.dataset.album;if(!item.hidden){count++;if(motionOn)item.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:450});}});
-  document.querySelector('#album-count').textContent=count+'장의 순간';
-}));
-
 const dialog = document.querySelector('#lightbox');
 const fullImage = document.querySelector('#lightbox-image');
 let currentPhoto = 0, trigger;

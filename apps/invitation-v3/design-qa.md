@@ -1,3 +1,18 @@
+# VER3.3 — audio-only music, one album and a separate story
+
+**final result: passed (local); production verification follows after publishing**
+
+- The user corrected the previous music removal and supplied an MP3, then explicitly requested the full playlist. The 1,346.089796-second file is preserved in length and encoded to 96kbps, 16,153,791 bytes, without embedded art/source metadata. A native looped audio element starts on the music button. There is no YouTube player, video request, extracted stream, or substitute song.
+- Real browser audio currentTime advanced while opening the story, returning, navigating forward, opening the album and switching photographs. Pause/resume inside the modal, keyboard volume 35→36%, native loop flag and full duration were observed. Controller tests exercise failure/retry, cancellation during loading and stale completion/new-request races.
+- The main page has exactly one six-photo album (3×2 thumbnail grid) and one enlargement dialog. Repeated photo story and ending image are removed. Parking/meal guidance is folded into location; map/calendar/guestbook/account contracts remain intact. At requested 390×844, old main height was 7,891px and new height 5,297px (~33% shorter); scrollbar makes actual content 375px wide.
+- The #our-story view contains only the supplied facts: introduction at a coffee shop and the groom's decision while watching Sohee run her cafe. No meeting date, personal history or missing family/account detail was invented. Main/story titles and focus switch, Back/Forward, Escape, direct reload, return focus and reading effects work. Same-document views preserve the audio element and form DOM.
+- 320/390/430/1440px main and story: no horizontal overflow. Fonts loaded, album 02/06 and keyboard End→06/06 worked; download control fits within 844px modal height. Existing countdown uses the unchanged core and rolling module. No production database writes.
+- Final root check: 1,910 passed; 688 references; 208 JS syntax checks. App tests: 18 passed. Original sandbox check was blocked by local port EACCES; rerun with allowed local networking passed.
+
+Evidence: calling workspace `docs/invitation-v3-review/story-audio/`. Physical iOS/Android audio policy, OS map/calendar/share and real account details remain device/user checks. Preview playback is intentionally opt-in; it does not falsely indicate autoplay.
+
+---
+
 # VER3.2 — typography, unboxed actions and countdown motion
 
 **final result: passed (local implementation)**
