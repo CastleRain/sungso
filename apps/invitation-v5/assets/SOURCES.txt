@@ -1,0 +1,8 @@
+VER5 assets, 2026-10-20
+Reference: https://toourguest.com/preview/seychelles
+Fonts: SUIT (existing OFL files), Antic Didone by Santiago Orozco (https://github.com/google/fonts/tree/main/ofl/anticdidone; OFL included).
+Reference interaction icons: rendered inline SVG inventory captured from the user-selected page, 2026-10-20. Only functional icons/rings/star used; no service logo.
+Reference petals: https://hellomybrand.com/wed/images/particles/tuliip_1.png through tuliip_4.png, observed in the page asset inventory. Decorative originals retained.
+Photos: user's six original wedding photos, optimized copies from previous invitation version. No AI-generated people or photo retouching.
+Audio: user's supplied Wedding Day MP3 playlist, unchanged from VER4, 22:26 full loop. No YouTube iframe/API.
+Commercial AbramoSerif/SometimesTimes fonts are not distributed in this implementation.

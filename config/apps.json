@@ -125,6 +125,21 @@
       ]
     },
     {
+      "id": "invitation-v5",
+      "source": "apps/invitation-v5",
+      "output": "invitation-v5",
+      "files": [
+        "index.html",
+        "map.html",
+        "wedding.ics",
+        "css",
+        "js",
+        "assets",
+        "manage.html",
+        "responses.html"
+      ]
+    },
+    {
       "id": "dates",
       "source": "apps/dates",
       "output": "dates",

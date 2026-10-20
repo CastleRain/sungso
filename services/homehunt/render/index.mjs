@@ -1,3 +1,4 @@
+import {createRsvpApi,createRsvpStore} from '../../invitation/server/rsvp.mjs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -21,9 +22,11 @@ async function start() {
     loadCatalog: async () => catalog, runtime: 'render', keySource: 'server-environment' });
   const guestbook = createGuestbookApi({ store: createGuestbookStore({ db }) });
   const album = createAlbumApi({store:createAlbumStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
-  const server = createRenderServer({ api, guestbook, album });
+  const rsvpStore=createRsvpStore({db});
+  const rsvp=createRsvpApi({store:rsvpStore,authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
+  const server = createRenderServer({ api, guestbook, album, rsvp });
   const maintenance = createFirestoreMaintenance({ db });
-  const clean = () => { void maintenance.runIfDue().catch(() => {}); };
+  const clean = () => { void maintenance.runIfDue().catch(() => {}); void rsvpStore.purgeExpired().catch(() => {}); };
   const interval = setInterval(clean, 6 * 60 * 60 * 1000);
   interval.unref();
   server.listen(config.port, '0.0.0.0', () => { console.info('HomeHunt API ready'); clean(); });

@@ -1,0 +1,28 @@
+# 성우 · 소희 Invitation VER5
+
+Seychelles 참고: https://toourguest.com/preview/seychelles
+
+공개 `/sungso/invitation-v5/`, 사진 관리 `manage.html`, 참석 응답 관리 `responses.html`.
+
+`js/config.mjs`에서 확정된 연락처, 계좌와 선택 안내를 입력하고 `node apps/invitation-v5/scripts/build.mjs`를 실행한다. 미입력 항목은 숨긴다. 사진 추가/순서/제외는 기존 두 회원 웹 관리 화면에서 하며 VER3/4/5에 같은 앨범이 표시된다. 방명록도 동일한 기존 데이터를 사용한다.
+
+참석 응답은 `/api/invitation/v5/rsvp`로 제출하고 두 회원만 `/manage`에서 읽는다. 사용자는 같은 기기의 편집 증명으로 재응답할 수 있다. 서버 응답 전에는 완료 표시를 하지 않는다. 전체 전화번호·비밀번호를 수집하지 않는다. 선택 전화 뒤 4자리는 공개되지 않는다. 예식 30일 뒤 조회/접수 종료 및 실행 중 6시간 주기 서버 정리로 내용 삭제.
+
+## 로컬
+
+`node apps/invitation-v5/scripts/preview.mjs --port 8024`
+
+로컬 API 8025의 `.local` JSON을 사용하며 운영 DB와 분리한다. 정적 배포 구조는 루트 `npm run build`로 만든다.
+
+## 원본과 의도적으로 다른 점
+
+- 사진, 이름, 사연, 날짜와 부산 목화웨딩홀 정보는 두 사람 자료.
+- 한글 SUIT 동일 계열. 사용권을 확인할 수 없는 AbramoSerif/SometimesTimes 대신 OFL Antic Didone 사용. 픽셀 단위 동일 복제라고 표현하지 않는다.
+- 실계좌/개인 연락처/식사/피로연/추천 장소는 미입력 상태라 숨김. 설정하면 해당 UI가 나온다.
+- 원본의 상품 구매·무료 시안 도구·공급자 광고는 하객 화면에서 제외.
+- 직접 카카오 공유 SDK 키가 없으므로 기기 공유와 URL 복사를 제공. 네이버·카카오·TMAP은 기존 실제 예식장 연결을 사용.
+- 원본 방명록 비밀번호 대신 기존 기기별 자기 글 삭제 증명 방식을 유지. 참석 응답은 실제 비공개 저장과 회원 조회를 제공.
+
+## 자산
+
+사용자 사진과 제공 MP3는 기존 VER4에서 그대로 사용한다. 한글 SUIT와 Antic Didone는 각 OFL을 fonts 폴더에 포함한다. 원본 페이지에서 관찰한 작은 기능 아이콘과 꽃잎의 출처는 `assets/SOURCES.txt`에 기록한다. 웹사이트 브랜드 로고나 커플 사진·샘플 사연은 사용하지 않는다.

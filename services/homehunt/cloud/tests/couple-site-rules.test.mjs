@@ -185,3 +185,9 @@ test('album metadata and image payloads are server-only even for approved member
     await assertFails(getDocs(collection(db,root+'/photos')));
   }
 });
+test('wedding RSVP documents stay server-only even for both signed-in members',async()=>{
+ const path='wedding_rsvps/sungso_20270306';await seed(path,{schema:1,rows:[{name:'Private fixture',phoneLast4:'0000'}]});
+ for(const db of [env.unauthenticatedContext().firestore(),client('outsider'),client(),client(partner)]){
+  await assertFails(getDoc(doc(db,path)));await assertFails(setDoc(doc(db,path),{schema:1,rows:[]}));await assertFails(getDocs(collection(db,'wedding_rsvps')));
+ }
+});
