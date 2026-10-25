@@ -3,7 +3,7 @@
   "source": {
     "name": "code.go.kr legal district full dataset",
     "url": "https://www.code.go.kr/etc/codeFullDown.do",
-    "retrievedAt": "2026-10-18T20:57:32.5346460+00:00",
+    "retrievedAt": "2026-10-25T21:05:12.7945096+00:00",
     "archiveSha256": "44a3fe4cacf88ce98e35fb883807d2725b589f427ff4d73ee40b914d1286bacd",
     "sourceRowCount": 53403,
     "currentRowCount": 20560,
