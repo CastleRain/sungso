@@ -73,6 +73,17 @@
       "deployment": "success",
       "commit": "426ce229451b28d17ca0ac5ca2a5f4dff932067d",
       "pagesRun": "39459004742"
+    },
+    {
+      "version": "6.0.0",
+      "path": "apps/invitation-v6",
+      "url": "https://sungso-wedding.vercel.app/v6/",
+      "branch": "codex/invitation-v6",
+      "preservedRoot": "https://sungso-wedding.vercel.app/",
+      "preservedTree": "9cadc286b6696f78d2dc0c61764d412502d78489",
+      "deployment": "success",
+      "commit": "0f0f3de3a39032c3c53f1f00ebf7159621020417",
+      "vercelDeployment": "dpl_77VcDQNVUBbsett9uokscaQqPZ5f"
     }
   ],
   "latest": {
@@ -84,14 +95,12 @@
     "pagesRun": "39460924915"
   },
   "separateEdition": {
-    "version": "6.0.0",
+    "version": "6.1.0",
     "path": "apps/invitation-v6",
     "url": "https://sungso-wedding.vercel.app/v6/",
     "branch": "codex/invitation-v6",
     "preservedRoot": "https://sungso-wedding.vercel.app/",
     "preservedTree": "9cadc286b6696f78d2dc0c61764d412502d78489",
-    "deployment": "success",
-    "commit": "0f0f3de3a39032c3c53f1f00ebf7159621020417",
-    "vercelDeployment": "dpl_77VcDQNVUBbsett9uokscaQqPZ5f"
+    "deployment": "pending"
   }
 }

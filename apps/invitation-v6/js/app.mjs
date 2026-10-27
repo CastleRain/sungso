@@ -6,16 +6,18 @@ import { renderNumber,settleDigits } from './countdown-view.mjs?v=5.0.0';
 import { connectPublicAlbum } from './public-album.mjs?v=5.0.0';
 import './background-audio.mjs?v=5.5.1';
 import './guestbook.mjs?v=5.0.0';
+import { setupScrollArrival } from './scroll-arrival.mjs?v=6.1.0';
 import { setupEditorialMotion } from './editorial-motion.mjs?v=5.5.1';
 import { setupChapters } from './chapters.mjs?v=6.0.0';
 import { setupQuickMenu } from './quick-menu.mjs?v=6.0.0';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');let effects=true;try{effects=localStorage.getItem('sungso_invitation_v5_motion')!=='off';}catch{}
 const motion=()=>effects&&!reduced.matches;
-let editorialMotion;
-function updateEffects(){document.documentElement.classList.toggle('motion-off',!motion());$('#motion-toggle').setAttribute('aria-pressed',String(!effects));$('#motion-toggle').textContent=effects?'화면 효과 끄기':'화면 효과 켜기';if(!motion())$$('.countdown strong').forEach(settleDigits);editorialMotion?.setEnabled(motion());}
+let editorialMotion, scrollArrival;
+function updateEffects(){document.documentElement.classList.toggle('motion-off',!motion());$('#motion-toggle').setAttribute('aria-pressed',String(!effects));$('#motion-toggle').textContent=effects?'화면 효과 끄기':'화면 효과 켜기';if(!motion())$$('.countdown strong').forEach(settleDigits);editorialMotion?.setEnabled(motion());scrollArrival?.setEnabled(motion());}
 updateEffects();reduced.addEventListener('change',updateEffects);$('#motion-toggle').addEventListener('click',()=>{effects=!effects;try{localStorage.setItem('sungso_invitation_v5_motion',effects?'on':'off');}catch{}updateEffects();});
 editorialMotion=setupEditorialMotion({enabled:motion()});
+scrollArrival=setupScrollArrival({enabled:motion()});
 
 let toastTimer;export function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
 async function copy(text,message){try{await navigator.clipboard.writeText(text);toast(message);return true;}catch{const input=document.createElement('textarea'),focus=document.activeElement;let ok=false;input.value=text;input.style.cssText='position:fixed;left:-9999px';document.body.append(input);try{input.select();ok=document.execCommand('copy');}catch{}finally{input.remove();focus?.focus({preventScroll:true});}toast(ok?message:'복사하지 못했어요. 길게 눌러 직접 복사해 주세요.');return ok;}}

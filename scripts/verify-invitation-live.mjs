@@ -43,9 +43,9 @@ assert.ok(rootHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/"`)
 const edition = await get(INVITATION_ORIGIN + '/v6/');
 assert.equal(edition.status, 200);
 const editionHtml = await edition.text();
-assert.match(editionHtml, /data-version="6\.0\.0"/);
+assert.match(editionHtml, /data-version="6\.1\.0"/);
 assert.ok(editionHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
-report.editions = { root: '5.6.0', v6: '6.0.0' };
+report.editions = { root: '5.6.0', v6: '6.1.0' };
 const privateRoutes = ['/api/invitation/v3/album/manage', '/api/invitation/v5/accounts/manage'];
 for (const route of ['/api/invitation/v3/guestbook', '/api/invitation/v3/album', '/api/invitation/v5/accounts', ...privateRoutes]) {
   const response = await get(api + route, { headers: { Origin: INVITATION_ORIGIN } });

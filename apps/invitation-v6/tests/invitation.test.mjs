@@ -9,3 +9,11 @@ test('configured accounts are escaped, copy digits only and omit incomplete rows
  const {renderAccounts}=await import('../js/account-view.mjs');const markup=renderAccounts([{label:'신랑 측',accounts:[{holder:'<홍길동>',relation:'신랑',bank:'은행 & 은행',number:'123-456-789'},{holder:'미정',bank:'',number:''}]}]);
  assert.match(markup,/data-copy-account="123456789"/);assert.match(markup,/&lt;홍길동&gt;/);assert.match(markup,/은행 &amp; 은행/);assert.doesNotMatch(markup,/미정|<홍길동>/);assert.match(markup,/은행 앱/);
 });
+
+
+test('embedded map is a scroll-through preview with an accessible full-map link',async()=>{
+ const css=await readFile(new URL('../css/ver6.css',import.meta.url),'utf8');
+ assert.match(html, /<a class="map-frame map-preview reveal"[^>]+href="https:\/\/place.map.kakao.com\/24484800"[^>]+aria-label=/);
+ assert.match(html, /id="venue-map"[^>]+tabindex="-1" aria-hidden="true"/);
+ assert.match(css, /\.map-preview iframe\{pointer-events:none\}/);
+});

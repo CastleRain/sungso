@@ -1,0 +1,92 @@
+{
+  "checkedAt": "2026-10-27T19:05:17.936Z",
+  "checks": [
+    {
+      "h": 568,
+      "overflow": false,
+      "visible": [
+        "wedding-day",
+        "location"
+      ],
+      "w": 320,
+      "y": 1250
+    },
+    {
+      "h": 568,
+      "overflow": false,
+      "visible": [
+        "location",
+        "our-story"
+      ],
+      "w": 320,
+      "y": 2499
+    },
+    {
+      "h": 568,
+      "overflow": false,
+      "visible": [
+        "gallery",
+        "accounts"
+      ],
+      "w": 320,
+      "y": 3749
+    },
+    {
+      "h": 568,
+      "overflow": false,
+      "visible": [
+        "accounts",
+        "guestbook"
+      ],
+      "w": 320,
+      "y": 4998
+    },
+    {
+      "h": 568,
+      "overflow": false,
+      "visible": [
+        "guestbook"
+      ],
+      "w": 320,
+      "y": 5588
+    },
+    {
+      "h": 932,
+      "overflow": false,
+      "w": 430,
+      "y": 1864
+    },
+    {
+      "h": 932,
+      "overflow": false,
+      "w": 430,
+      "y": 3728
+    },
+    {
+      "h": 932,
+      "overflow": false,
+      "w": 430,
+      "y": 5592
+    },
+    {
+      "h": 932,
+      "overflow": false,
+      "w": 430,
+      "y": 5803
+    },
+    {
+      "end": 5786,
+      "h": 900,
+      "overflow": false,
+      "w": 1440,
+      "y": 5577
+    }
+  ],
+  "notes": [
+    "Browser viewport emulation; not physical phone testing.",
+    "Map wheel: y2009 ->2600 after fix.",
+    "Story open/close y3055 unchanged; photo y3725 unchanged.",
+    "Reduced available viewport:390x480 dialog fits and scrolls.",
+    "Effects off: invisible0 pending0."
+  ]
+}

@@ -29,7 +29,7 @@ test('standalone invitation preserves Pages source and publishes only its depend
   assert.ok(html.includes(`property="og:image" content="${INVITATION_ORIGIN}/assets/photos/date-1440.webp"`));
   assert.ok((await read('wedding.ics')).includes(`URL:${INVITATION_ORIGIN}/\r\n`));
   assert.ok((await read('js/config.mjs')).includes(`canonicalUrl: '${INVITATION_ORIGIN}/'`));
-  assert.match(await read('v6/index.html'), /data-version="6\.0\.0"/);
+  assert.match(await read('v6/index.html'), /data-version="6\.1\.0"/);
   assert.ok((await read('v6/index.html')).includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
   assert.ok((await read('v6/wedding.ics')).includes(`URL:${INVITATION_ORIGIN}/v6/\r\n`));
   assert.ok((await read('v6/js/config.mjs')).includes(`canonicalUrl: '${INVITATION_ORIGIN}/v6/'`));

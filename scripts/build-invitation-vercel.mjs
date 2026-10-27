@@ -75,7 +75,7 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
     if (['accounts.html', 'manage.html', 'v6/accounts.html', 'v6/manage.html'].includes(file)) {
       const prefix = isV6 ? '../' : './';
       text = text.replace(prefix + 'shared/firebase/boot.mjs', prefix + 'standalone/auth-boot.mjs');
-      text = text.replace('</head>', `<link rel="stylesheet" href="./css/typography.css?v=${isV6 ? '6.0.0' : '5.6.0'}"><link rel="stylesheet" href="${prefix}standalone/auth.css"></head>`);
+      text = text.replace('</head>', `<link rel="stylesheet" href="./css/typography.css?v=${isV6 ? '6.1.0' : '5.6.0'}"><link rel="stylesheet" href="${prefix}standalone/auth.css"></head>`);
       // RSVP is absent from the completed guest release; existing Pages history remains available separately.
       text = text.replace(/<br><a href="\.\/responses\.html">.*?<\/a>/, '');
     }
@@ -89,7 +89,7 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
   // The manifest stays outside the uploaded folder.
   await mkdir(path.join(PROJECT_ROOT, '.local'), { recursive: true });
   await writeFile(path.join(PROJECT_ROOT, '.local/invitation-vercel-manifest.json'),
-    JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.0.0', origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
+    JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.1.0', origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
   return { distDir, ...result };
 }
 
@@ -125,7 +125,7 @@ export async function verifyInvitation(distDir) {
   const configuration = JSON.parse(await readFile(path.join(distDir, 'vercel.json'), 'utf8'));
   if (configuration.rewrites || configuration.redirects || configuration.routes) throw Error('The isolated static deployment must not rewrite missing app paths.');
   if (!(await readFile(path.join(distDir, 'index.html'), 'utf8')).includes('data-version="5.6.0"')) throw Error('Unexpected release.');
-  if (!(await readFile(path.join(distDir, 'v6/index.html'), 'utf8')).includes('data-version="6.0.0"')) throw Error('Unexpected separate edition.');
+  if (!(await readFile(path.join(distDir, 'v6/index.html'), 'utf8')).includes('data-version="6.1.0"')) throw Error('Unexpected separate edition.');
   return { fileCount: files.length, files };
 }
 
