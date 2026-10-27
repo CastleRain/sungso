@@ -1,0 +1,32 @@
+/* B — a full-bleed photograph becomes a print; the same album unfolds below. */
+body[data-variant="b"]{--paper:#fff;--ink:#253c4d;--accent:#3f627b;--muted:#5a7080;--line:#d8e2eb;background:#eaf0f5}
+[data-variant="b"] .paper{background:#fff}
+[data-variant="b"] .hero{background:#fff;overflow:hidden}
+[data-variant="b"] .hero-photo{transform:translateY(var(--b-cover-lift,0px)) scale(var(--b-cover-scale,1));transform-origin:center 40%;clip-path:inset(0 var(--b-cover-inset,0%));will-change:transform}
+[data-variant="b"]:not(.theme-b-motion) .hero-photo{will-change:auto}
+[data-variant="b"].b-cover-framed #sound-dock[data-on-cover=true]{color:var(--accent)}
+[data-variant="b"].b-cover-framed #sound-dock[data-on-cover=true] .sound-toggle{background:#fffffff2;border-color:var(--line)}
+[data-variant="b"] .b-print-corner{position:absolute;bottom:20px;z-index:4;width:22px;height:22px;border-bottom:1px solid #ffffffb3;pointer-events:none;opacity:.7}
+[data-variant="b"] .b-print-corner-left{left:20px;border-left:1px solid #ffffffb3}
+[data-variant="b"] .b-print-corner-right{right:20px;border-right:1px solid #ffffffb3}
+[data-variant="b"] #invitation{padding-top:76px;padding-bottom:64px}
+[data-variant="b"] #wedding-day,[data-variant="b"] #gallery{background:#f6f9fb}
+[data-variant="b"] .story-entry{position:relative;border:0!important;background:#f8fafc!important;box-shadow:5px 5px 0 #fff,5px 5px 0 1px var(--line)!important;overflow:hidden;transform:rotate(-1deg)}
+[data-variant="b"] .story-image{display:block;width:100%;padding:10px 10px 0;overflow:hidden}
+[data-variant="b"] .story-copy{position:relative;display:flex;flex-direction:column;width:100%;inset:auto;padding:24px 24px 27px;border:0;box-shadow:none;background:transparent;text-align:left}
+[data-variant="b"] .b-story-fold{position:absolute;bottom:0;right:0;width:27px;height:27px;background:linear-gradient(135deg,#e1e9ef 0 49%,#fff 50%);box-shadow:-2px -2px 5px #253c4d09;pointer-events:none}
+[data-variant="b"] .gallery-decoration{position:relative;inset:auto;height:30px;margin-bottom:12px;text-align:center}
+[data-variant="b"] .b-album-mark{height:24px;width:64px;margin-inline:auto;stroke:var(--accent);stroke-width:.7;opacity:.5}
+[data-variant="b"] .gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;position:relative;isolation:isolate;overflow:visible}
+[data-variant="b"] .gallery-photo{position:relative;display:block;aspect-ratio:3/4;padding:5px 5px 12px!important;background:#fff!important;border:1px solid #d8e2eb!important;box-shadow:0 3px 10px #253c4d0b;z-index:var(--b-photo-order,auto);transform:translate(var(--b-photo-x,0px),var(--b-photo-y,0px)) rotate(var(--b-photo-rotate,0deg)) scale(var(--b-photo-scale,1));transform-origin:center 30%;overflow:hidden}
+[data-variant="b"] .gallery-photo img{width:100%;height:100%;object-fit:cover;display:block}
+[data-variant="b"] .gallery-photo:only-child{grid-column:1/-1;max-width:320px;width:100%;justify-self:center}
+[data-variant="b"] .b-album-open .gallery-photo{transition:box-shadow .2s,border-color .2s}
+[data-variant="b"] .b-album-open .gallery-photo:hover,[data-variant="b"] .b-album-open .gallery-photo:focus-visible{border-color:var(--accent)!important;box-shadow:0 7px 17px #253c4d17}
+[data-variant="b"].theme-b-motion #story-dialog[open] .story-page:not([hidden]){transform-origin:left center;animation:b-turn-page .5s cubic-bezier(.2,.7,.2,1) both}
+[data-variant="b"].theme-b-motion #photo-dialog[open] .photo-stage{animation:b-photo-lift .38s cubic-bezier(.2,.7,.2,1) both}
+@keyframes b-turn-page{from{transform:perspective(900px) rotateY(6deg) translateX(10px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes b-photo-lift{from{transform:translateY(12px) rotate(-1deg) scale(.97);opacity:.7}to{transform:none;opacity:1}}
+@media(max-width:359px){[data-variant="b"] .gallery-grid{gap:7px}[data-variant="b"] .gallery-photo{padding:4px 4px 8px!important}}
+@media(min-width:768px){[data-variant="b"] .gallery-grid{gap:16px}[data-variant="b"] .gallery-photo{padding:8px 8px 20px!important}}
+@media(prefers-reduced-motion:reduce){[data-variant="b"] .hero-photo,[data-variant="b"] .gallery-photo{transform:none!important;clip-path:none!important;will-change:auto}[data-variant="b"] .story-page,[data-variant="b"] .photo-stage{animation:none!important}}

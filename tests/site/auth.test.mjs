@@ -27,6 +27,17 @@ test('every private entry defers scripts until auth; only the explicit guest inv
   for (const { id: app, source } of registry.apps) {
     const html = await readFile(new URL(`../../${source}/index.html`, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /sungso_pin_auth/);
+    if (app === 'invitation-lab') {
+      assert.doesNotMatch(html, /firebase\/boot\.mjs|firebasejs|data-private-root/);
+      assert.match(html, /noindex,\s*nofollow/);
+      const { files } = await createFilePlan({ registry });
+      for (const [output, entry] of files) {
+        if (!output.startsWith('lab/v6-1/') || !/\.(?:html|mjs|js)$/.test(output)) continue;
+        const content = await readFile(new URL(`../../${entry.source}`, import.meta.url), 'utf8');
+        assert.doesNotMatch(content, /firebasejs|firestore|private_data|site_members|shared\/firebase|Authorization/);
+      }
+      continue;
+    }
     if (['invitation-v2', 'invitation-v3', 'invitation-v4', 'invitation-v5', 'invitation-v6'].includes(app)) {
       assert.doesNotMatch(html, /firebase\/boot\.mjs|firebasejs|data-private-root/);
       assert.match(html, /js\/app\.mjs\?v=(?:2\.1\.0|[3456]\.\d+\.\d+)/);

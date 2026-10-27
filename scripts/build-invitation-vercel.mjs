@@ -1,12 +1,14 @@
 import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
 import { init, parse } from 'es-module-lexer';
 import { buildSite, PROJECT_ROOT } from './build-site.mjs';
 import { listFiles } from './check-site.mjs';
 
 export const INVITATION_ORIGIN = 'https://sungso-wedding.vercel.app';
 export const INVITATION_DIST = path.join(PROJECT_ROOT, 'deploy/invitation/dist');
+export const INVITATION_LAB_PATH = 'lab/v6-1';
 const SOURCE = 'apps/invitation-v5';
 const OLD_URL = 'https://castlerain.github.io/sungso/invitation-v5/';
 const V6_SOURCE = 'apps/invitation-v6';
@@ -85,11 +87,21 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
   }
   await cp(path.join(distDir, 'standalone/404.html'), path.join(distDir, '404.html'));
   await cp(path.join(PROJECT_ROOT, 'deploy/invitation/vercel.json'), path.join(distDir, 'vercel.json'));
+  await restorePreservedLineEndings(distDir);
+  const { buildInvitationLab } = await import('../apps/invitation-lab/scripts/build.mjs');
+  await buildInvitationLab({
+    outDir: path.join(distDir, INVITATION_LAB_PATH),
+    assetBase: '/v6/assets/',
+    canonicalRoot: `${INVITATION_ORIGIN}/${INVITATION_LAB_PATH}/`,
+  });
+  await verifyPreservedInvitation(distDir);
   const result = await verifyInvitation(distDir);
   // The manifest stays outside the uploaded folder.
   await mkdir(path.join(PROJECT_ROOT, '.local'), { recursive: true });
   await writeFile(path.join(PROJECT_ROOT, '.local/invitation-vercel-manifest.json'),
-    JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.1.0', origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
+    JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.1.0',
+      lab: {path: INVITATION_LAB_PATH, variants: ['a', 'b', 'c', 'd', 'e'], dataMode: 'demo'},
+      origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
   return { distDir, ...result };
 }
 
@@ -126,7 +138,59 @@ export async function verifyInvitation(distDir) {
   if (configuration.rewrites || configuration.redirects || configuration.routes) throw Error('The isolated static deployment must not rewrite missing app paths.');
   if (!(await readFile(path.join(distDir, 'index.html'), 'utf8')).includes('data-version="5.6.0"')) throw Error('Unexpected release.');
   if (!(await readFile(path.join(distDir, 'v6/index.html'), 'utf8')).includes('data-version="6.1.0"')) throw Error('Unexpected separate edition.');
+  await verifyLabOutput(distDir, files);
   return { fileCount: files.length, files };
+}
+
+/** An additive lab must never change the previously verified public editions. */
+export async function verifyPreservedInvitation(distDir) {
+  const baseline = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-lab/baseline.json'), 'utf8'));
+  for (const entry of baseline.files) {
+    const bytes = await readFile(path.join(distDir, entry.path));
+    const hash = createHash('sha256').update(bytes).digest('hex');
+    if (bytes.length !== entry.bytes || hash !== entry.sha256) throw Error(`Preserved invitation changed: ${entry.path}`);
+  }
+  return {preservedFiles: baseline.files.length, sourceCommit: baseline.sourceCommit};
+}
+
+// Git normalizes source text on Linux. Recreate the already published byte form
+// before enforcing hashes; content changes still fail the hash check below.
+async function restorePreservedLineEndings(distDir) {
+  const baseline = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-lab/baseline.json'), 'utf8'));
+  for (const entry of baseline.files.filter(item => item.lineEndings && item.lineEndings !== 'none')) {
+    const filename = path.join(distDir, entry.path);
+    const source = await readFile(filename, 'utf8');
+    let position = 0;
+    const restored = source.replace(/\r?\n/g, () => {
+      if (entry.lineEndings === 'mixed') return entry.newlinePattern[position++] === 'c' ? '\r\n' : '\n';
+      return entry.lineEndings === 'crlf' ? '\r\n' : '\n';
+    });
+    if (source !== restored) await writeFile(filename, restored);
+  }
+}
+
+async function verifyLabOutput(distDir, files) {
+  const labFiles = files.filter(file => file.startsWith(`${INVITATION_LAB_PATH}/`));
+  if (!labFiles.length) throw Error('The five invitation studies are missing.');
+  const base = `${INVITATION_ORIGIN}/${INVITATION_LAB_PATH}/`;
+  const runtime = await readFile(path.join(distDir, INVITATION_LAB_PATH, 'runtime.mjs'), 'utf8');
+  const data = /export default\s+({[\s\S]*})\s*;\s*$/.exec(runtime);
+  if (!data || JSON.parse(data[1]).mode !== 'demo') throw Error('Invitation studies must use build-selected demo data.');
+  for (const id of ['a', 'b', 'c', 'd', 'e']) {
+    const html = await readFile(path.join(distDir, INVITATION_LAB_PATH, id, 'index.html'), 'utf8');
+    if (!html.includes(`data-variant="${id}"`) || !html.includes('data-mode="demo"')
+      || !/name="robots"[^>]*content="noindex/.test(html)) throw Error(`Incomplete invitation study: ${id}`);
+    if (!html.includes("connect-src 'self'") || !html.includes("form-action 'none'")) throw Error(`Unrestricted invitation study: ${id}`);
+    if (!html.includes(`property="og:url" content="${base}${id}/"`)) throw Error(`Wrong invitation study canonical: ${id}`);
+    const event = await readFile(path.join(distDir, INVITATION_LAB_PATH, id, 'wedding.ics'), 'utf8');
+    if (!event.includes(`URL:${base}${id}/`)) throw Error(`Wrong invitation study calendar: ${id}`);
+  }
+  for (const file of labFiles) {
+    if (/\.(?:mp3|ttf|woff2)$/.test(file)) throw Error(`Invitation study duplicates shared media: ${file}`);
+    if (!/\.(?:html|mjs|js|css)$/.test(file)) continue;
+    const source = await readFile(path.join(distDir, file), 'utf8');
+    if (/firebasejs|auth-boot|site-auth|data-private-root/.test(source)) throw Error(`Authentication must not be loaded by a study: ${file}`);
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#f5f7f8">
+  <meta name="description" content="성우와 소희의 청첩장, 다섯 가지 움직임을 비교해 보세요.">
+  <meta property="og:title" content="성우와 소희 · 다섯 가지 초대">
+  <meta property="og:description" content="VER6.1 A—E 디자인 비교실 · 체험 데이터로 작동합니다.">
+  <meta property="og:image" content="https://sungso-wedding.vercel.app/v6/assets/photos/date-1440.webp">
+  <meta property="og:url" content="{{canonicalRoot}}">
+  <link rel="canonical" href="{{canonicalRoot}}">
+  <link rel="preload" href="{{assetBase}}fonts/RIDIBatang-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./catalog.css">
+  <title>다섯 가지 초대 · 성우와 소희</title>
+  <style>
+    @font-face{font-family:LabReading;src:url('{{assetBase}}fonts/RIDIBatang-Regular.woff2') format('woff2');font-display:swap;font-weight:400}
+    @font-face{font-family:LabHeading;src:url('{{assetBase}}fonts/Hahmlet-Medium.woff2') format('woff2');font-display:swap;font-weight:500}
+    @font-face{font-family:LabScript;src:url('{{assetBase}}fonts/PinyonScript-Regular.ttf') format('truetype');font-display:swap}
+  </style>
+  <script type="module" src="./catalog.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#comparison">시안 비교로 바로 가기</a>
+  <header class="catalog-header">
+    <a class="wordmark" href="#top" aria-label="비교실 처음으로">S <span>&amp;</span> S</a>
+    <span class="edition">INVITATION STUDIES <b>6.1</b></span>
+    <a class="current-link" href="https://sungso-wedding.vercel.app/v6/" target="_blank" rel="noopener">기존 청첩장 <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="top">
+    <section class="introduction" aria-labelledby="catalog-title">
+      <p class="eyebrow">SUNGWOO &amp; SOHEE / FIVE WAYS TO SAY</p>
+      <h1 id="catalog-title">We are getting married</h1>
+      <p class="intro-title">같은 두 사람, 다섯 가지 초대.</p>
+      <p class="intro-copy">한 줄의 잉크, 펼쳐지는 사진, 머무는 빛.<br>우리의 이야기에 가장 잘 어울리는 움직임을 골라 보세요.</p>
+      <p class="preview-note"><span aria-hidden="true">·</span> 디자인 체험실입니다. 방명록은 이 기기에만 저장되며 계좌는 예시예요.</p>
+    </section>
+    <section class="studies" aria-label="청첩장 다섯 가지 디자인">
+      <button class="study study-a is-selected" data-study="a" aria-pressed="true"><span class="study-number">A</span><span class="study-art" aria-hidden="true"><svg viewBox="0 0 200 140"><path d="M20 120C45 90 15 20 75 25S100 120 155 80S160 10 185 25"/></svg></span><span class="study-name">한 줄로 이어지는 초대</span><small>ONE CONTINUOUS LINE</small></button>
+      <button class="study study-b" data-study="b" aria-pressed="false"><span class="study-number">B</span><span class="study-art stack-art" aria-hidden="true"><i></i><i></i><i></i></span><span class="study-name">사진이 놓이는 순간</span><small>MOMENTS, UNFOLDED</small></button>
+      <button class="study study-c" data-study="c" aria-pressed="false"><span class="study-number">C</span><span class="study-art light-art" aria-hidden="true"><i></i></span><span class="study-name">빛이 머무는 장면</span><small>WHERE THE LIGHT STAYS</small></button>
+      <button class="study study-d" data-study="d" aria-pressed="false"><span class="study-number">D</span><span class="study-art" aria-hidden="true"><svg viewBox="0 0 200 140"><path d="m35 90 65-55 60 65"/><circle cx="35" cy="90" r="3"/><circle cx="100" cy="35" r="4"/><circle cx="160" cy="100" r="3"/></svg></span><span class="study-name">우리의 작은 별자리</span><small>OUR LITTLE CONSTELLATION</small></button>
+      <button class="study study-e" data-study="e" aria-pressed="false"><span class="study-number">E</span><span class="study-art" aria-hidden="true"><svg viewBox="0 0 200 140"><path d="M33 62h45l-5 38H38zM78 66c30-6 26 28-3 23M118 62h45l-5 38h-35zM163 66c27-6 24 28-3 23M48 48c-15-16 17-20 3-35M139 48c-15-16 17-20 3-35M27 109h57M112 109h57"/></svg></span><span class="study-name">처음 만난 테이블</span><small>WHERE OUR STORY BEGAN</small></button>
+    </section>
+    <section class="comparison" id="comparison" aria-labelledby="comparison-title">
+      <div class="comparison-heading"><div><p class="eyebrow">EXPLORE THE DETAILS</p><h2 id="comparison-title">움직임까지, 직접 비교해요.</h2></div><div class="view-switch" role="group" aria-label="비교 방식"><button id="single-view" aria-pressed="true">하나씩 보기</button><button id="split-view" aria-pressed="false">나란히 보기</button></div></div>
+      <div class="compare-toolbar">
+        <label class="section-select">같은 장면으로 <select id="section-select"><option value="top">첫 화면</option><option value="wedding-day">예식 안내</option><option value="location">오시는 길</option><option value="our-story">우리 이야기</option><option value="gallery">사진첩</option><option value="accounts">마음 전하실 곳</option><option value="guestbook">축하 메시지</option></select></label>
+        <button id="replay-all" class="text-action">오프닝 다시 보기 <span aria-hidden="true">↻</span></button>
+        <label class="audio-select">음악 <select id="audio-select"><option value="none">끄기</option><option value="left">왼쪽 시안</option><option value="right">오른쪽 시안</option></select></label>
+      </div>
+      <div class="preview-layout" id="preview-layout">
+        <article class="preview-pane" data-pane="left"><header class="pane-header"><label><span>01</span><select id="left-study" aria-label="첫 번째 시안"><option value="a">A · 한 줄로 이어지는 초대</option><option value="b">B · 사진이 놓이는 순간</option><option value="c">C · 빛이 머무는 장면</option><option value="d">D · 우리의 작은 별자리</option><option value="e">E · 처음 만난 테이블</option></select></label><a id="left-open" class="standalone-link" href="./a/" target="_blank" rel="noopener" aria-label="첫 번째 시안 전체 화면으로 열기">전체 화면 <span aria-hidden="true">↗</span></a></header><div class="phone-frame" id="left-frame"></div><p id="left-description" class="pane-description"></p></article>
+        <article class="preview-pane" data-pane="right" hidden><header class="pane-header"><label><span>02</span><select id="right-study" aria-label="두 번째 시안"><option value="a">A · 한 줄로 이어지는 초대</option><option value="b" selected>B · 사진이 놓이는 순간</option><option value="c">C · 빛이 머무는 장면</option><option value="d">D · 우리의 작은 별자리</option><option value="e">E · 처음 만난 테이블</option></select></label><a id="right-open" class="standalone-link" href="./b/" target="_blank" rel="noopener" aria-label="두 번째 시안 전체 화면으로 열기">전체 화면 <span aria-hidden="true">↗</span></a></header><div class="phone-frame" id="right-frame"></div><p id="right-description" class="pane-description"></p></article>
+      </div>
+      <p class="comparison-status" id="comparison-status" role="status">시안 안에서 스크롤하거나 ‘같은 장면으로’를 선택해 보세요.</p>
+    </section>
+    <section class="notes" aria-labelledby="notes-title">
+      <div><p class="eyebrow">A LITTLE NOTE TO OURSELVES</p><h2 id="notes-title">어떤 장면이 마음에 남았나요?</h2><p>메모와 점수는 이 브라우저에만 보관돼요.<br>실제 청첩장이나 다른 기기에는 표시되지 않습니다.</p></div>
+      <form id="notes-form"><label class="note-theme-label">기록할 시안 <select id="note-study"><option value="a">A · 한 줄로 이어지는 초대</option><option value="b">B · 사진이 놓이는 순간</option><option value="c">C · 빛이 머무는 장면</option><option value="d">D · 우리의 작은 별자리</option><option value="e">E · 처음 만난 테이블</option></select></label><fieldset><legend>각 항목 1—5점 · 점수를 비워 두어도 괜찮아요</legend><div class="rating-grid" id="rating-grid"></div></fieldset><label class="note-label">기억해 둘 느낌<textarea id="study-note" maxlength="1500" rows="4" placeholder="좋았던 움직임, 바꾸고 싶은 부분을 편하게 적어 주세요."></textarea></label><div class="notes-actions"><button class="save-note" type="submit">메모 보관 <span aria-hidden="true">↗</span></button><span id="note-status" role="status"></span></div></form>
+    </section>
+    <section class="guide" aria-label="비교 안내"><p><b>공통으로 유지한 것</b> 두 사람의 사진 · 손글씨 · 전체 음악 · 예식 정보 · 하나의 사진첩</p><p><b>새로 더한 것</b> 빠른 보기 · 큰 글씨 · 예식 정보 이미지 저장</p><p>기존 청첩장은 그대로입니다. 마음에 드는 안을 고른 뒤 최종 하객용으로 연결할 예정이에요.</p></section>
+  </main>
+  <footer class="catalog-footer"><span>SUNGWOO &amp; SOHEE</span><span>2027. 03. 06</span><a href="#top">처음으로 ↑</a></footer>
+  <noscript><p class="noscript">비교 화면은 자바스크립트가 필요해요. 각 시안을 바로 열 수 있습니다: <a href="./a/">A</a> · <a href="./b/">B</a> · <a href="./c/">C</a> · <a href="./d/">D</a> · <a href="./e/">E</a></p></noscript>
+</body>
+</html>

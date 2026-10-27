@@ -1,0 +1,46 @@
+[
+  {
+    "id": "forest",
+    "width": 1440,
+    "height": 2159,
+    "alt": "초록빛 산책길에서 손을 잡고 나란히 걷는 성우와 소희"
+  },
+  {
+    "id": "bouquet",
+    "width": 1440,
+    "height": 2159,
+    "alt": "작은 꽃다발을 사이에 두고 서로를 바라보는 두 사람"
+  },
+  {
+    "id": "promise",
+    "width": 1440,
+    "height": 2159,
+    "alt": "색색의 꽃다발 옆에서 손을 포개는 두 사람"
+  },
+  {
+    "id": "date",
+    "width": 1440,
+    "height": 2159,
+    "alt": "나무 아래에서 0306 풍선을 들고 결혼 날짜를 전하는 두 사람"
+  },
+  {
+    "id": "walk",
+    "width": 1440,
+    "height": 2159,
+    "alt": "햇살이 비치는 골목에서 손을 잡고 나란히 걷는 두 사람"
+  },
+  {
+    "id": "sea",
+    "width": 1440,
+    "height": 2159,
+    "alt": "바닷가에서 빨간 하트 풍선을 들고 마주 보는 두 사람"
+  },
+  {
+    "id": "bf3653d0-b17a-44e6-99f2-bc96e1acc8a2",
+    "width": 854,
+    "height": 1280,
+    "alt": "성우와 소희의 사진",
+    "localFile": "published-7.jpg",
+    "thumbFile": "published-7-thumb.jpg"
+  }
+]

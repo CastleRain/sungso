@@ -167,6 +167,27 @@
       ]
     },
     {
+      "id": "invitation-lab",
+      "source": "apps/invitation-lab/dist",
+      "output": "lab/v6-1",
+      "build": "apps/invitation-lab/scripts/build.mjs",
+      "files": [
+        "index.html",
+        "catalog.css",
+        "catalog.mjs",
+        "runtime.mjs",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "css",
+        "js",
+        "themes",
+        "assets"
+      ]
+    },
+    {
       "id": "table",
       "source": "apps/table",
       "output": "table",

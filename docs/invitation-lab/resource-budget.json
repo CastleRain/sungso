@@ -1,0 +1,792 @@
+{
+  "measuredAt": "2026-10-27T20:08:13.602Z",
+  "method": "Per-resource gzip level 9 for HTML including inline SVG, linked CSS, all reachable local JS including the selected dynamic theme; hero and four fonts counted at raw file size. No cache assumed.",
+  "limits": {
+    "jsGzip": 150000,
+    "critical": 1800000
+  },
+  "excluded": [
+    "deferred whole MP3",
+    "map iframe and third-party map",
+    "lazy gallery and story photos",
+    "catalog comparison host"
+  ],
+  "limitations": [
+    "These are build resource estimates, not actual HTTP transfer or performance timing.",
+    "Responsive hero srcset may select a different image; lab accounting uses requested forest-960.webp.",
+    "Baseline uses its actual date-1440.webp hero. LCP, CLS and real-device timing are unverified."
+  ],
+  "editions": [
+    {
+      "id": "baseline",
+      "htmlGzip": 28983,
+      "cssGzip": 14905,
+      "jsGzip": 27468,
+      "heroRaw": 490446,
+      "fontsRaw": 889064,
+      "total": 1450866,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "v6/index.html",
+          "raw": 128578,
+          "gzip": 28983
+        },
+        "css": [
+          {
+            "file": "v6/css/typography.css",
+            "raw": 919,
+            "gzip": 389
+          },
+          {
+            "file": "v6/css/style.css",
+            "raw": 32686,
+            "gzip": 8150
+          },
+          {
+            "file": "v6/css/accounts.css",
+            "raw": 7666,
+            "gzip": 2291
+          },
+          {
+            "file": "v6/css/ver6.css",
+            "raw": 15083,
+            "gzip": 4075
+          }
+        ],
+        "js": [
+          {
+            "file": "shared/invitation/account-core.mjs",
+            "raw": 3485,
+            "gzip": 1472
+          },
+          {
+            "file": "shared/invitation/album-core.mjs",
+            "raw": 3209,
+            "gzip": 1413
+          },
+          {
+            "file": "v6/js/account-interactions.mjs",
+            "raw": 3672,
+            "gzip": 1330
+          },
+          {
+            "file": "v6/js/account-view.mjs",
+            "raw": 3015,
+            "gzip": 1359
+          },
+          {
+            "file": "v6/js/app.mjs",
+            "raw": 9925,
+            "gzip": 3635
+          },
+          {
+            "file": "v6/js/background-audio.mjs",
+            "raw": 4949,
+            "gzip": 1881
+          },
+          {
+            "file": "v6/js/chapters.mjs",
+            "raw": 2680,
+            "gzip": 986
+          },
+          {
+            "file": "v6/js/config.mjs",
+            "raw": 5295,
+            "gzip": 2447
+          },
+          {
+            "file": "v6/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "v6/js/countdown-view.mjs",
+            "raw": 1747,
+            "gzip": 665
+          },
+          {
+            "file": "v6/js/editorial-motion.mjs",
+            "raw": 3689,
+            "gzip": 1317
+          },
+          {
+            "file": "v6/js/guestbook.mjs",
+            "raw": 7127,
+            "gzip": 2905
+          },
+          {
+            "file": "v6/js/intro-boot.js",
+            "raw": 4081,
+            "gzip": 1505
+          },
+          {
+            "file": "v6/js/public-accounts.mjs",
+            "raw": 2767,
+            "gzip": 1319
+          },
+          {
+            "file": "v6/js/public-album.mjs",
+            "raw": 1962,
+            "gzip": 964
+          },
+          {
+            "file": "v6/js/quick-menu.mjs",
+            "raw": 2256,
+            "gzip": 915
+          },
+          {
+            "file": "v6/js/scroll-arrival.mjs",
+            "raw": 3969,
+            "gzip": 1340
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/date-1440.webp",
+          "raw": 490446,
+          "gzip": 490614
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "a",
+      "htmlGzip": 29754,
+      "cssGzip": 8044,
+      "jsGzip": 28841,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1279153,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/v6-1/a/index.html",
+          "raw": 130237,
+          "gzip": 29754
+        },
+        "css": [
+          {
+            "file": "lab/v6-1/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/v6-1/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/v6-1/themes/a.css",
+            "raw": 3825,
+            "gzip": 1310
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/v6-1/js/app.mjs",
+            "raw": 13639,
+            "gzip": 4861
+          },
+          {
+            "file": "lab/v6-1/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/v6-1/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/v6-1/js/demo-data.mjs",
+            "raw": 2870,
+            "gzip": 1363
+          },
+          {
+            "file": "lab/v6-1/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/v6-1/js/guest-features.mjs",
+            "raw": 6858,
+            "gzip": 2368
+          },
+          {
+            "file": "lab/v6-1/js/intro-boot.js",
+            "raw": 4082,
+            "gzip": 1505
+          },
+          {
+            "file": "lab/v6-1/js/invitation-card.mjs",
+            "raw": 14952,
+            "gzip": 5359
+          },
+          {
+            "file": "lab/v6-1/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/v6-1/runtime.mjs",
+            "raw": 5257,
+            "gzip": 1860
+          },
+          {
+            "file": "lab/v6-1/themes/a.mjs",
+            "raw": 7368,
+            "gzip": 2715
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "b",
+      "htmlGzip": 29701,
+      "cssGzip": 8200,
+      "jsGzip": 30365,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1280780,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/v6-1/b/index.html",
+          "raw": 130130,
+          "gzip": 29701
+        },
+        "css": [
+          {
+            "file": "lab/v6-1/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/v6-1/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/v6-1/themes/b.css",
+            "raw": 4322,
+            "gzip": 1466
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/v6-1/js/app.mjs",
+            "raw": 13639,
+            "gzip": 4861
+          },
+          {
+            "file": "lab/v6-1/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/v6-1/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/v6-1/js/demo-data.mjs",
+            "raw": 2870,
+            "gzip": 1363
+          },
+          {
+            "file": "lab/v6-1/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/v6-1/js/guest-features.mjs",
+            "raw": 6858,
+            "gzip": 2368
+          },
+          {
+            "file": "lab/v6-1/js/intro-boot.js",
+            "raw": 4082,
+            "gzip": 1505
+          },
+          {
+            "file": "lab/v6-1/js/invitation-card.mjs",
+            "raw": 14952,
+            "gzip": 5359
+          },
+          {
+            "file": "lab/v6-1/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/v6-1/runtime.mjs",
+            "raw": 5257,
+            "gzip": 1860
+          },
+          {
+            "file": "lab/v6-1/themes/a.mjs",
+            "raw": 7368,
+            "gzip": 2715
+          },
+          {
+            "file": "lab/v6-1/themes/b.mjs",
+            "raw": 3748,
+            "gzip": 1524
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "c",
+      "htmlGzip": 29681,
+      "cssGzip": 8096,
+      "jsGzip": 30056,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1280347,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/v6-1/c/index.html",
+          "raw": 130035,
+          "gzip": 29681
+        },
+        "css": [
+          {
+            "file": "lab/v6-1/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/v6-1/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/v6-1/themes/c.css",
+            "raw": 4030,
+            "gzip": 1362
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/v6-1/js/app.mjs",
+            "raw": 13639,
+            "gzip": 4861
+          },
+          {
+            "file": "lab/v6-1/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/v6-1/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/v6-1/js/demo-data.mjs",
+            "raw": 2870,
+            "gzip": 1363
+          },
+          {
+            "file": "lab/v6-1/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/v6-1/js/guest-features.mjs",
+            "raw": 6858,
+            "gzip": 2368
+          },
+          {
+            "file": "lab/v6-1/js/intro-boot.js",
+            "raw": 4082,
+            "gzip": 1505
+          },
+          {
+            "file": "lab/v6-1/js/invitation-card.mjs",
+            "raw": 14952,
+            "gzip": 5359
+          },
+          {
+            "file": "lab/v6-1/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/v6-1/runtime.mjs",
+            "raw": 5257,
+            "gzip": 1860
+          },
+          {
+            "file": "lab/v6-1/themes/a.mjs",
+            "raw": 7368,
+            "gzip": 2715
+          },
+          {
+            "file": "lab/v6-1/themes/c.mjs",
+            "raw": 2780,
+            "gzip": 1215
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "d",
+      "htmlGzip": 30156,
+      "cssGzip": 9018,
+      "jsGzip": 28824,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1280512,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/v6-1/d/index.html",
+          "raw": 131604,
+          "gzip": 30156
+        },
+        "css": [
+          {
+            "file": "lab/v6-1/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/v6-1/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/v6-1/themes/d.css",
+            "raw": 8854,
+            "gzip": 2284
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/v6-1/js/app.mjs",
+            "raw": 13639,
+            "gzip": 4861
+          },
+          {
+            "file": "lab/v6-1/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/v6-1/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/v6-1/js/demo-data.mjs",
+            "raw": 2870,
+            "gzip": 1363
+          },
+          {
+            "file": "lab/v6-1/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/v6-1/js/guest-features.mjs",
+            "raw": 6858,
+            "gzip": 2368
+          },
+          {
+            "file": "lab/v6-1/js/intro-boot.js",
+            "raw": 4082,
+            "gzip": 1505
+          },
+          {
+            "file": "lab/v6-1/js/invitation-card.mjs",
+            "raw": 14952,
+            "gzip": 5359
+          },
+          {
+            "file": "lab/v6-1/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/v6-1/runtime.mjs",
+            "raw": 5257,
+            "gzip": 1860
+          },
+          {
+            "file": "lab/v6-1/themes/d.mjs",
+            "raw": 7607,
+            "gzip": 2698
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "e",
+      "htmlGzip": 30406,
+      "cssGzip": 8925,
+      "jsGzip": 29102,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1280947,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/v6-1/e/index.html",
+          "raw": 131742,
+          "gzip": 30406
+        },
+        "css": [
+          {
+            "file": "lab/v6-1/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/v6-1/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/v6-1/themes/e.css",
+            "raw": 8065,
+            "gzip": 2191
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/v6-1/js/app.mjs",
+            "raw": 13639,
+            "gzip": 4861
+          },
+          {
+            "file": "lab/v6-1/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/v6-1/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/v6-1/js/demo-data.mjs",
+            "raw": 2870,
+            "gzip": 1363
+          },
+          {
+            "file": "lab/v6-1/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/v6-1/js/guest-features.mjs",
+            "raw": 6858,
+            "gzip": 2368
+          },
+          {
+            "file": "lab/v6-1/js/intro-boot.js",
+            "raw": 4082,
+            "gzip": 1505
+          },
+          {
+            "file": "lab/v6-1/js/invitation-card.mjs",
+            "raw": 14952,
+            "gzip": 5359
+          },
+          {
+            "file": "lab/v6-1/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/v6-1/runtime.mjs",
+            "raw": 5257,
+            "gzip": 1860
+          },
+          {
+            "file": "lab/v6-1/themes/e.mjs",
+            "raw": 7791,
+            "gzip": 2976
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    }
+  ]
+}

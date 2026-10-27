@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-28",
+  "revision": 2,
+  "totalPhotos": 7,
+  "mode": "public-read-only",
+  "downloads": [
+    {
+      "file": "published-7.jpg",
+      "url": "https://sungso-homehunt-api.onrender.com/api/invitation/v3/album/photos/bf3653d0-b17a-44e6-99f2-bc96e1acc8a2/full",
+      "bytes": 235530,
+      "sha256": "0d3a3734d541e353e9870a6d16749c0169ded9bc94445330c62c169c439a6b2f"
+    },
+    {
+      "file": "published-7-thumb.jpg",
+      "url": "https://sungso-homehunt-api.onrender.com/api/invitation/v3/album/photos/bf3653d0-b17a-44e6-99f2-bc96e1acc8a2/thumb",
+      "bytes": 40422,
+      "sha256": "541f5ce25139c5da36ad80bd97e7b122ca1130ced09a03ba18cb5e64b012187c"
+    }
+  ]
+}
