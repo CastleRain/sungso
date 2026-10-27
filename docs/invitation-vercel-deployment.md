@@ -88,3 +88,11 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 루트 / 는 기존 VER5.6으로 유지하고 /v6/ 에 새 청첩장을 추가한다. 전용 빌드의 139개 파일은 두 버전과 필수 공통 의존성만 포함한다. 기존 버전 파일 74개는 배포 전 공개본과 바이트가 일치했다. /v6/manage.html 및 /v6/accounts.html은 기존 두 회원과 동일한 API·데이터를 사용한다. 새로운 Origin·Firebase 승인 도메인·과금 설정은 추가하지 않는다.
 
 공유·OG·ICS는 각각 루트와 /v6/ 주소를 사용한다. 최신 Pages 완료본 기록 latest는 5.6이고 separateEdition에 VER6을 기록한다. GitHub의 codex/invitation-v6 브랜치는 master와 분리되어 있어 기존 Pages를 자동 교체하지 않는다. 검증 결과는 docs/invitation-v6-review/live-check.json에 별도로 남긴다.
+
+## 공개 배포 완료
+
+- 2026-10-28 Vercel READY, deployment dpl_77VcDQNVUBbsett9uokscaQqPZ5f. 소스 0f0f3de3a39032c3c53f1f00ebf7159621020417.
+- /v6/ 200·data-version 6.0.0, / 200·5.6.0. 제공 파일 137개 바이트 일치(두 MP3는 Range 앞 1024바이트), 제외 경로 23개 404, API 검사 19개 통과, Pages 주요 4개 보존.
+- 실제 공개 앨범 7장 이미지 로드, 썸네일 7/7 선택, 이야기 02/03 전환, 음악 재생 유지, 메뉴 공개 5개 순번·이동, 브라우저 오류 0 확인.
+- 공개 계좌가 비어 있어 계좌 영역과 메뉴는 숨김. 기존 데이터나 공개 상태를 바꾸지 않았다. 공개 본문 높이 390×844에서 약 5425px(당시 방명록/앨범 기준).
+- 기존 승인 회원 인증 모듈은 원본 그대로이고 관리 API 익명 요청은 401이다. 이번에는 두 회원 재로그인이나 운영 관리값 변경을 수행하지 않았다.
