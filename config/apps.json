@@ -141,6 +141,22 @@
       ]
     },
     {
+      "id": "invitation-v6",
+      "source": "apps/invitation-v6",
+      "output": "invitation-v6",
+      "files": [
+        "index.html",
+        "map.html",
+        "wedding.ics",
+        "css",
+        "js",
+        "assets",
+        "manage.html",
+        "responses.html",
+        "accounts.html"
+      ]
+    },
+    {
       "id": "dates",
       "source": "apps/dates",
       "output": "dates",

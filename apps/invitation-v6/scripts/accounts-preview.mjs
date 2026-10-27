@@ -1,0 +1,3 @@
+import { mountAccountManager } from './js/accounts-manage-ui.mjs?v=5.4.0';
+async function request(path,{method='GET',body}={}){const response=await fetch('http://127.0.0.1:8025/api/invitation/v5/accounts'+path,{method,headers:{Authorization:'Bearer local-preview',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',credentials:'omit'});const data=await response.json();if(!response.ok||data.ok!==true)throw Error(data.error||'연결하지 못했어요.');return data;}
+mountAccountManager({root:document.querySelector('#accounts-manager'),request,preview:true});

@@ -82,5 +82,14 @@
     "deployment": "success",
     "commit": "328de3c285adf3cd7b6ff38b4e3444c907a27645",
     "pagesRun": "39460924915"
+  },
+  "separateEdition": {
+    "version": "6.0.0",
+    "path": "apps/invitation-v6",
+    "url": "https://sungso-wedding.vercel.app/v6/",
+    "branch": "codex/invitation-v6",
+    "preservedRoot": "https://sungso-wedding.vercel.app/",
+    "preservedTree": "9cadc286b6696f78d2dc0c61764d412502d78489",
+    "deployment": "prepared"
   }
 }

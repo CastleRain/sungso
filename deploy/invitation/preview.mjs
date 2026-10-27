@@ -12,7 +12,8 @@ export function createInvitationPreview(root = defaultRoot) {
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://localhost');
-      const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html';
+      const requested = decodeURIComponent(url.pathname).replace(/^\/+/, '');
+      const relative = !requested ? 'index.html' : requested.endsWith('/') ? requested + 'index.html' : requested;
       const filename = path.resolve(root, relative);
       if (!filename.startsWith(root + path.sep) || !['GET', 'HEAD'].includes(req.method)) throw Error();
       const info = await stat(filename);

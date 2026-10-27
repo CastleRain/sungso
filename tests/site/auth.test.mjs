@@ -27,14 +27,14 @@ test('every private entry defers scripts until auth; only the explicit guest inv
   for (const { id: app, source } of registry.apps) {
     const html = await readFile(new URL(`../../${source}/index.html`, import.meta.url), 'utf8');
     assert.doesNotMatch(html, /sungso_pin_auth/);
-    if (['invitation-v2', 'invitation-v3', 'invitation-v4', 'invitation-v5'].includes(app)) {
+    if (['invitation-v2', 'invitation-v3', 'invitation-v4', 'invitation-v5', 'invitation-v6'].includes(app)) {
       assert.doesNotMatch(html, /firebase\/boot\.mjs|firebasejs|data-private-root/);
-      assert.match(html, /js\/app\.mjs\?v=(?:2\.1\.0|[345]\.\d+\.\d+)/);
+      assert.match(html, /js\/app\.mjs\?v=(?:2\.1\.0|[3456]\.\d+\.\d+)/);
       const { files } = await createFilePlan({ registry });
       const guestModules = [...files].filter(([output]) => output.startsWith(`${app}/`) && /\.(?:js|mjs)$/.test(output));
       for (const [, entry] of guestModules) {
         const js = await readFile(new URL(`../../${entry.source}`, import.meta.url), 'utf8');
-        if (entry.source === `apps/${app}/js/manage.mjs` || app==='invitation-v5' && /\/(?:responses|accounts-manage)\.mjs$/.test(entry.source)) {
+        if (entry.source === `apps/${app}/js/manage.mjs` || ['invitation-v5','invitation-v6'].includes(app) && /\/(?:responses|accounts-manage)\.mjs$/.test(entry.source)) {
           const privateEntry=entry.source.endsWith('/accounts-manage.mjs')?'accounts':entry.source.endsWith('/responses.mjs')?'responses':'manage';
           const manager = await readFile(new URL(`../../apps/${app}/${privateEntry}.html`,import.meta.url),'utf8');
           assert.match(manager,/data-private-root[^>]*hidden/);

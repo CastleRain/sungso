@@ -1,0 +1,32 @@
+VER5 assets, 2026-10-20
+Reference: https://toourguest.com/preview/seychelles
+Fonts: SUIT (existing OFL files), Antic Didone by Santiago Orozco (https://github.com/google/fonts/tree/main/ofl/anticdidone; OFL included).
+Reference interaction icons: rendered inline SVG inventory captured from the user-selected page, 2026-10-20. Only functional icons/rings/star used; no service logo.
+Reference petals: https://hellomybrand.com/wed/images/particles/tuliip_1.png through tuliip_4.png, observed in the page asset inventory. Decorative originals retained.
+Photos: user's six original wedding photos, optimized copies from previous invitation version. No AI-generated people or photo retouching.
+Audio: user's supplied Wedding Day MP3 playlist, unchanged from VER4, 22:26 full loop. No YouTube iframe/API.
+Commercial AbramoSerif/SometimesTimes fonts are not distributed in this implementation.
+
+2026-10-21 VER5.5 Korean type:
+MaruBuri Regular and SemiBold, NAVER / NAVER Cultural Foundation.
+Official source: https://hangeul.naver.com/hangeul_static/webfont/zips/maruburi.zip
+https://hangeul.naver.com/font
+https://help.naver.com/service/30016/contents/18088
+WOFF2 packaging renamed Invitation Serif. Outlines and full glyph coverage retained.
+License included: fonts/InvitationSerif-OFL.txt
+
+2026-10-21 VER5.6 screen-reading Korean type:
+RIDIBatang Regular, Copyright 2019 RIDI & Sandoll. Font designed by Sandoll Inc.
+Official distribution/license: https://ridicorp.com/ridibatang/
+Original: https://ridicorp.com/wp-content/themes/ridicorp/css/font/RIDIBatang.otf
+Packaged as WOFF2 without subsetting; all 11,172 modern Hangul syllables retained.
+License declaration from official page, original embedded copyright and SIL OFL1.1 full text included in fonts/RIDIBatang-OFL.txt.
+Hahmlet by Minjoo Ham / Mark Fromberg / Hypertype.
+Official project: https://github.com/hyper-type/hahmlet
+Google Fonts distribution: https://github.com/google/fonts/tree/main/ofl/hahmlet
+Hahmlet[wght].ttf instantiated at weight500 with fontTools, WOFF2 compressed, no glyph subset.
+License included: fonts/Hahmlet-OFL.txt (no Reserved Font Name).
+Hahmlet is used for display text; RIDIBatang supplies full Hangul coverage as the next font in the display stack.
+Previous Invitation Serif assets stay available for cached older pages, but the new page does not request them.
+RIDIBatang-Regular.woff2 SHA256 f8b10923149ffa3c453b04e6fb55568cec3e56cc2c1596c014714a54cc29f3f2
+Hahmlet-Medium.woff2 SHA256 1161ef0e2c4d0d8baac3d797d57756457d425296aa6faf36ff3a5acc695bf4d0

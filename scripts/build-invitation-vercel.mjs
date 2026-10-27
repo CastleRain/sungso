@@ -9,6 +9,8 @@ export const INVITATION_ORIGIN = 'https://sungso-wedding.vercel.app';
 export const INVITATION_DIST = path.join(PROJECT_ROOT, 'deploy/invitation/dist');
 const SOURCE = 'apps/invitation-v5';
 const OLD_URL = 'https://castlerain.github.io/sungso/invitation-v5/';
+const V6_SOURCE = 'apps/invitation-v6';
+const V6_OLD_URL = 'https://castlerain.github.io/sungso/invitation-v6/';
 const SHARED_FILES = [
   'firebase/site-auth.mjs', 'firebase/auth-core.mjs', 'firebase/config.mjs',
   'invitation/album-core.mjs', 'invitation/account-core.mjs',
@@ -16,36 +18,45 @@ const SHARED_FILES = [
   'theme/fonts/Pretendard-LICENSE.txt',
 ];
 
-export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
-  // The existing Pages source/build is never edited by this deployment.
-  const version = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-versions.json'), 'utf8')).latest;
-  if (version.path !== SOURCE || version.deployment !== 'success') throw Error('A verified latest invitation release is required.');
+async function editionFiles(sourceRoot) {
   const files = new Set(['index.html', 'map.html', 'wedding.ics', 'manage.html', 'accounts.html',
     'css/typography.css', 'css/style.css', 'css/accounts.css', 'css/manage.css', 'js/intro-boot.js']);
+  if (sourceRoot === V6_SOURCE) files.add('css/ver6.css');
   await init;
   async function addModule(relative) {
     if (files.has(relative)) return;
     files.add(relative);
-    const source = await readFile(path.join(PROJECT_ROOT, SOURCE, relative), 'utf8');
+    const source = await readFile(path.join(PROJECT_ROOT, sourceRoot, relative), 'utf8');
     for (const item of parse(source)[0]) {
       if (!item.n || /^https?:/.test(item.n)) continue;
       const target = path.posix.normalize(path.posix.join(path.posix.dirname(relative), item.n.split(/[?#]/)[0]));
       if (target.startsWith('../')) {
-        const shared = path.posix.normalize(path.posix.join(SOURCE, target));
+        const shared = path.posix.normalize(path.posix.join(sourceRoot, target));
         if (!SHARED_FILES.some(file => shared === `shared/${file}`)) throw Error(`Unapproved shared dependency: ${shared}`);
       } else await addModule(target);
     }
   }
   for (const entry of ['js/app.mjs', 'js/manage.mjs', 'js/accounts-manage.mjs']) await addModule(entry);
   const runtimeText = (await Promise.all([...files].filter(file => /\.(html|css|js|mjs)$/.test(file))
-    .map(file => readFile(path.join(PROJECT_ROOT, SOURCE, file), 'utf8')))).join('\n')
+    .map(file => readFile(path.join(PROJECT_ROOT, sourceRoot, file), 'utf8')))).join('\n')
     + await readFile(path.join(PROJECT_ROOT, 'shared/invitation/album-core.mjs'), 'utf8');
   // Only literal assets referenced by this release, including its six default album photos.
   for (const match of runtimeText.matchAll(/assets\/[\w./-]+\.(?:webp|jpg|png|svg|mp3|ttf|woff2)/g)) files.add(match[0]);
   for (const file of ['AnticDidone-OFL.txt', 'Pinyon-OFL.txt', 'RIDIBatang-OFL.txt', 'Hahmlet-OFL.txt']) files.add('assets/fonts/' + file);
   for (const file of ['assets/SOURCES.txt', 'assets/icons/LICENSE.txt', 'assets/icons/MAP-SOURCES.txt']) files.add(file);
+  return [...files].sort();
+}
+
+export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
+  // Keep VER5.6 at the original root. VER6 is a separate /v6/ edition.
+  const version = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-versions.json'), 'utf8')).latest;
+  if (version.path !== SOURCE || version.deployment !== 'success') throw Error('The preserved VER5.6 release is required.');
+  const editions = [
+    { id: 'invitation-v5', source: SOURCE, output: '', files: await editionFiles(SOURCE) },
+    { id: 'invitation-v6', source: V6_SOURCE, output: 'v6', files: await editionFiles(V6_SOURCE) },
+  ];
   const registry = {
-    apps: [{ id: 'invitation-v5', source: SOURCE, output: '', files: [...files].sort() }],
+    apps: editions,
     shared: [
       { source: 'shared', output: 'shared', files: SHARED_FILES },
       { source: 'deploy/invitation', output: 'standalone', files: ['auth-boot.mjs', 'auth.css', '404.html'] },
@@ -56,12 +67,15 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
     if (!/\.(html|mjs|js|ics|css)$/.test(file)) continue;
     let text = await readFile(path.join(distDir, file), 'utf8');
     text = text.replaceAll(OLD_URL, INVITATION_ORIGIN + '/');
+    text = text.replaceAll(V6_OLD_URL, INVITATION_ORIGIN + '/v6/');
     // iCalendar requires CRLF even when a Linux checkout supplies LF text.
     if (file.endsWith('.ics')) text = text.replace(/\r?\n/g, '\r\n');
-    if (file.endsWith('.html')) text = text.replaceAll('../shared/', './shared/');
-    if (['accounts.html', 'manage.html'].includes(file)) {
-      text = text.replace('./shared/firebase/boot.mjs', './standalone/auth-boot.mjs');
-      text = text.replace('</head>', '<link rel="stylesheet" href="./css/typography.css?v=5.6.0"><link rel="stylesheet" href="./standalone/auth.css"></head>');
+    const isV6 = file.startsWith('v6/');
+    if (file.endsWith('.html') && !isV6) text = text.replaceAll('../shared/', './shared/');
+    if (['accounts.html', 'manage.html', 'v6/accounts.html', 'v6/manage.html'].includes(file)) {
+      const prefix = isV6 ? '../' : './';
+      text = text.replace(prefix + 'shared/firebase/boot.mjs', prefix + 'standalone/auth-boot.mjs');
+      text = text.replace('</head>', `<link rel="stylesheet" href="./css/typography.css?v=${isV6 ? '6.0.0' : '5.6.0'}"><link rel="stylesheet" href="${prefix}standalone/auth.css"></head>`);
       // RSVP is absent from the completed guest release; existing Pages history remains available separately.
       text = text.replace(/<br><a href="\.\/responses\.html">.*?<\/a>/, '');
     }
@@ -75,7 +89,7 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
   // The manifest stays outside the uploaded folder.
   await mkdir(path.join(PROJECT_ROOT, '.local'), { recursive: true });
   await writeFile(path.join(PROJECT_ROOT, '.local/invitation-vercel-manifest.json'),
-    JSON.stringify({ version: version.version, sourceCommit: version.commit, origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
+    JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.0.0', origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
   return { distDir, ...result };
 }
 
@@ -89,7 +103,8 @@ export async function verifyInvitation(distDir) {
   function verify(value, from) {
     if (!value || /^(?:#|[a-z][\w+.-]*:|\/\/)/i.test(value)) return;
     const url = new URL(value.replaceAll('&amp;', '&'), `${INVITATION_ORIGIN}/${from}`);
-    const target = decodeURIComponent(url.pathname.slice(1)) || 'index.html';
+    const pathname = decodeURIComponent(url.pathname.slice(1));
+    const target = !pathname ? 'index.html' : pathname.endsWith('/') ? pathname + 'index.html' : pathname;
     if (!allowed.has(target)) throw Error(`${from}: missing local resource ${value} -> ${target}`);
   }
   await init;
@@ -110,6 +125,7 @@ export async function verifyInvitation(distDir) {
   const configuration = JSON.parse(await readFile(path.join(distDir, 'vercel.json'), 'utf8'));
   if (configuration.rewrites || configuration.redirects || configuration.routes) throw Error('The isolated static deployment must not rewrite missing app paths.');
   if (!(await readFile(path.join(distDir, 'index.html'), 'utf8')).includes('data-version="5.6.0"')) throw Error('Unexpected release.');
+  if (!(await readFile(path.join(distDir, 'v6/index.html'), 'utf8')).includes('data-version="6.0.0"')) throw Error('Unexpected separate edition.');
   return { fileCount: files.length, files };
 }
 

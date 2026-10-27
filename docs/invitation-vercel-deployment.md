@@ -82,3 +82,9 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 - 공유/OG/ICS는 새 origin이고 배포된 공유 함수 결과도 새 주소다. 인앱 자동화의 clipboard 읽기/붙여넣기는 이전 값이 반환되어 독립적인 실제 기기 클립보드 검증 완료로 기록하지 않는다. 실제 카카오톡 카드와 기기 공유 시트는 별도 확인 항목이다.
 - Firebase 승인 도메인에 새 정확한 호스트와 기존 도메인이 함께 있음을 확인했다. 새 origin에서 성우 회원 로그인이 복원되어 사진 관리 목록 7장과 계좌 관리의 ‘저장된 내용을 불러왔어요’ 상태가 표시됨을 확인했다. 관리 값은 변경하지 않았다. 두 승인 역할의 허용 및 비활성/비회원 거부는 경계 테스트로 검증했으며, 소희 계정으로 실제 재로그인은 하지 않았다.
 - GitHub Linux 검사에서 ICS 줄바꿈 차이를 발견해 전용 빌더에서 CRLF를 강제하도록 수정했다. 후속 커밋 `15a5656`의 [GitHub Actions 39465719671](https://github.com/CastleRain/sungso/actions/runs/39465719671) 검사·Pages 배포 성공을 확인했다. 기존 Pages 및 Vercel 제공 파일을 손상시키지 않았다.
+
+## 2026-10-28 — VER6 별도 경로
+
+루트 / 는 기존 VER5.6으로 유지하고 /v6/ 에 새 청첩장을 추가한다. 전용 빌드의 139개 파일은 두 버전과 필수 공통 의존성만 포함한다. 기존 버전 파일 74개는 배포 전 공개본과 바이트가 일치했다. /v6/manage.html 및 /v6/accounts.html은 기존 두 회원과 동일한 API·데이터를 사용한다. 새로운 Origin·Firebase 승인 도메인·과금 설정은 추가하지 않는다.
+
+공유·OG·ICS는 각각 루트와 /v6/ 주소를 사용한다. 최신 Pages 완료본 기록 latest는 5.6이고 separateEdition에 VER6을 기록한다. GitHub의 codex/invitation-v6 브랜치는 master와 분리되어 있어 기존 Pages를 자동 교체하지 않는다. 검증 결과는 docs/invitation-v6-review/live-check.json에 별도로 남긴다.

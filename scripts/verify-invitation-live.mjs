@@ -29,7 +29,8 @@ for (let offset = 0; offset < candidates.length; offset += 5) {
 for (const pathname of ['/homehunt/', '/homehunt/index.html', '/wecost/', '/wecost/index.html', '/honeymoon/',
   '/homehunt-v2/', '/travel/', '/sohee/', '/sungso/', '/invitation-v3/', '/invitation-v4/',
   '/apps/hub/index.html', '/services/homehunt/render/node-server.mjs', '/config/apps.json', '/.env.local',
-  '/.git/config', '/.vercel/project.json', '/shared/firebase/boot.mjs', '/responses.html']) {
+  '/.git/config', '/.vercel/project.json', '/shared/firebase/boot.mjs', '/responses.html',
+  '/v6/homehunt/', '/v6/wecost/', '/v6/honeymoon/', '/v6/responses.html']) {
   const response = await get(INVITATION_ORIGIN + pathname);
   assert.equal(response.status, 404, pathname);
   report.missingPaths.push({ path: pathname, status: response.status });
@@ -39,6 +40,12 @@ assert.equal(root.status, 200);
 const rootHtml = await root.text();
 assert.match(rootHtml, /data-version="5\.6\.0"/);
 assert.ok(rootHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/"`));
+const edition = await get(INVITATION_ORIGIN + '/v6/');
+assert.equal(edition.status, 200);
+const editionHtml = await edition.text();
+assert.match(editionHtml, /data-version="6\.0\.0"/);
+assert.ok(editionHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
+report.editions = { root: '5.6.0', v6: '6.0.0' };
 const privateRoutes = ['/api/invitation/v3/album/manage', '/api/invitation/v5/accounts/manage'];
 for (const route of ['/api/invitation/v3/guestbook', '/api/invitation/v3/album', '/api/invitation/v5/accounts', ...privateRoutes]) {
   const response = await get(api + route, { headers: { Origin: INVITATION_ORIGIN } });
@@ -79,7 +86,7 @@ for (const file of ['index.html', 'css/typography.css', 'js/config.mjs', 'weddin
   report.pagesPreserved.push(file);
 }
 report.assets.sort((a, b) => a.file.localeCompare(b.file));
-await mkdir(path.join(PROJECT_ROOT, 'docs/invitation-vercel-review'), { recursive: true });
-await writeFile(path.join(PROJECT_ROOT, 'docs/invitation-vercel-review/live-check.json'), JSON.stringify(report, null, 2) + '\n');
+await mkdir(path.join(PROJECT_ROOT, 'docs/invitation-v6-review'), { recursive: true });
+await writeFile(path.join(PROJECT_ROOT, 'docs/invitation-v6-review/live-check.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: 'passed', assets: report.assets.length, missingPaths: report.missingPaths.length,
   apiChecks: report.api.length, preservedPagesFiles: report.pagesPreserved.length, productionWrites: 0 }));

@@ -12,7 +12,7 @@ test('standalone invitation preserves Pages source and publishes only its depend
   t.after(() => rm(root, { recursive: true, force: true }));
   const pagesSource = await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html'));
   const result = await buildInvitation({ distDir: path.join(root, 'dist') });
-  assert.ok(result.fileCount < 100);
+  assert.ok(result.fileCount < 180);
   assert.deepEqual(await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html')), pagesSource);
   for (const required of ['index.html', 'map.html', 'wedding.ics', 'manage.html', 'accounts.html',
     'assets/audio/wedding-day.mp3', 'assets/fonts/RIDIBatang-Regular.woff2',
@@ -29,8 +29,12 @@ test('standalone invitation preserves Pages source and publishes only its depend
   assert.ok(html.includes(`property="og:image" content="${INVITATION_ORIGIN}/assets/photos/date-1440.webp"`));
   assert.ok((await read('wedding.ics')).includes(`URL:${INVITATION_ORIGIN}/\r\n`));
   assert.ok((await read('js/config.mjs')).includes(`canonicalUrl: '${INVITATION_ORIGIN}/'`));
+  assert.match(await read('v6/index.html'), /data-version="6\.0\.0"/);
+  assert.ok((await read('v6/index.html')).includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
+  assert.ok((await read('v6/wedding.ics')).includes(`URL:${INVITATION_ORIGIN}/v6/\r\n`));
+  assert.ok((await read('v6/js/config.mjs')).includes(`canonicalUrl: '${INVITATION_ORIGIN}/v6/'`));
   assert.doesNotMatch(html, /site-auth|auth-boot|data-private-root/);
-  for (const file of ['manage.html', 'accounts.html']) {
+  for (const file of ['manage.html', 'accounts.html', 'v6/manage.html', 'v6/accounts.html']) {
     const admin = await read(file);
     assert.match(admin, /standalone\/auth-boot\.mjs/);
     assert.match(admin, /data-private-root hidden/);
@@ -48,6 +52,8 @@ test('standalone invitation preserves Pages source and publishes only its depend
     assert.equal((await fetch(local + pathname)).status, 404, pathname);
   }
   assert.equal((await fetch(local + '/')).status, 200);
+  assert.equal((await fetch(local + '/v6/')).status, 200);
+  assert.equal((await fetch(local + '/v6/homehunt/')).status, 404);
   const audio = await fetch(local + '/assets/audio/wedding-day.mp3', { headers: { Range: 'bytes=0-1023' } });
   assert.equal(audio.status, 206); assert.equal((await audio.arrayBuffer()).byteLength, 1024);
   await writeFile(path.join(result.distDir, 'index.html'), html.replace('#wedding-day', '/homehunt/'));
