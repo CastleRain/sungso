@@ -105,6 +105,13 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 - 스크롤 연동 등장·표지 사진 이동, 지도 스크롤 포획 방지, 빠른 메뉴 도착 위치와 좁은 화면 하단 겹침을 개선했다. 전체1,997개 검사 통과. 기존 손글씨·음악·사진·폰트·관리 인증·서버 데이터는 보존한다.
 - 구성 비교·모바일/PC 화면 근거: invitation-v6-review/scroll-audit/index.html. 실제 휴대폰 OS 동작과 두 회원 재로그인은 이번 검증 범위가 아니다.
 
+## 2026-10-28 — 다섯 비교 시안 공개 완료
+
+- `/lab/v6-1/`과 A–E 경로를 별도로 추가했다. 소스 `4b6bbf8`, 배포 `dpl_389SmaXZGfGxqiM4g9FeH4vSgsS7` READY. 별도 Git 브랜치 `codex/invitation-lab`를 사용해 master/기존 Pages를 교체하지 않았다.
+- 전용 177개 허용 목록과 dry-run 정확히 일치. 이전 파일 140개 바이트 보존. 공개 제공 175개 일치·32개 제외 경로 404·API 19개·시안 5개의 canonical/ICS/CSP 검증 통과. 결과: `invitation-lab/live-check.json`.
+- 모든 시안은 demo 모드이며 운영 쓰기 경로가 없다. 계좌는 예시이고 방명록은 각 시안/기기별 localStorage다. 현재 공개 사진 7장의 스냅샷을 재사용한다. 관리 화면·승인된 두 계정·서버와 Firebase 설정은 바꾸지 않았다.
+- 전체 검사 2,068개 통과. 모바일/PC·모션·음악·팝업·복사·PNG·비교 화면의 실제 결과와 실물 기기 미검증 항목은 `invitation-lab/PROGRESS.md`에서 확인한다.
+
 ## 2026-10-28 — VER6.1 A–E 비교실 빌드 준비
 
 - 새 비교실은 `/lab/v6-1/`, 다섯 시안은 `/lab/v6-1/a/`부터 `/lab/v6-1/e/`까지다. 루트 VER5.6과 `/v6/`의 6.1.0은 교체하지 않는다. 비교실에는 `noindex,nofollow`와 시안 안내를 표시한다.

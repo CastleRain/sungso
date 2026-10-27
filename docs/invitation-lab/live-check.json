@@ -1,0 +1,1349 @@
+{
+  "checkedAt": "2026-10-27T20:09:20.632Z",
+  "origin": "https://sungso-wedding.vercel.app",
+  "assets": [
+    {
+      "file": "404.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "accounts.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "assets/audio/wedding-day.mp3",
+      "status": 206,
+      "matches": true,
+      "contentType": "audio/mpeg"
+    },
+    {
+      "file": "assets/fonts/AnticDidone-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/fonts/AnticDidone-Regular.ttf",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/ttf"
+    },
+    {
+      "file": "assets/fonts/Hahmlet-Medium.woff2",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/woff2"
+    },
+    {
+      "file": "assets/fonts/Hahmlet-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/fonts/Pinyon-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/fonts/PinyonScript-Regular.ttf",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/ttf"
+    },
+    {
+      "file": "assets/fonts/RIDIBatang-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/fonts/RIDIBatang-Regular.woff2",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/woff2"
+    },
+    {
+      "file": "assets/icons/kakao-map.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "assets/icons/LICENSE.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/icons/MAP-SOURCES.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "assets/icons/naver-map.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "assets/icons/tmap.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "assets/photos/bouquet-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/bouquet-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/date-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/date-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/forest-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/forest-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/promise-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/promise-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/sea-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/sea-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/walk-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/photos/walk-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "assets/reference-icons/icon-10.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-15.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-16.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-2.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-25.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-7.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-8.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/reference-icons/icon-9.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "assets/SOURCES.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "css/accounts.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "css/manage.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "css/style.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "css/typography.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "js/account-interactions.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/account-view.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/accounts-manage-ui.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/accounts-manage.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/album-image.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/app.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/background-audio.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/config.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/countdown-view.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/editorial-motion.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/guestbook.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/intro-boot.js",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/manage-ui.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/manage.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/public-accounts.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "js/public-album.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/a/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/a/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/assets/photos/published-7-thumb.jpg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/jpeg"
+    },
+    {
+      "file": "lab/v6-1/assets/photos/published-7.jpg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/jpeg"
+    },
+    {
+      "file": "lab/v6-1/b/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/b/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/c/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/c/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/catalog.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/catalog.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/css/base.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/css/typography.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/d/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/d/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/e/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/e/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/app.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/audio.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/demo-data.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/gallery.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/guest-features.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/intro-boot.js",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/invitation-card.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/js/ui.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/runtime.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/a.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/a.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/b.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/b.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/c.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/c.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/d.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/d.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/e.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/v6-1/themes/e.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "manage.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "map.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "shared/firebase/auth-core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "shared/firebase/config.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "shared/firebase/site-auth.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "shared/invitation/account-core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "shared/invitation/album-core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "shared/theme/brand.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "shared/theme/fonts/Pretendard-LICENSE.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "shared/theme/fonts/PretendardVariable.woff2",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/woff2"
+    },
+    {
+      "file": "shared/theme/reading-font.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "standalone/404.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "standalone/auth-boot.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "standalone/auth.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/accounts.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/audio/wedding-day.mp3",
+      "status": 206,
+      "matches": true,
+      "contentType": "audio/mpeg"
+    },
+    {
+      "file": "v6/assets/fonts/AnticDidone-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/ttf"
+    },
+    {
+      "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/woff2"
+    },
+    {
+      "file": "v6/assets/fonts/Hahmlet-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/fonts/Pinyon-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/ttf"
+    },
+    {
+      "file": "v6/assets/fonts/RIDIBatang-OFL.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+      "status": 200,
+      "matches": true,
+      "contentType": "font/woff2"
+    },
+    {
+      "file": "v6/assets/icons/kakao-map.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "v6/assets/icons/LICENSE.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/icons/MAP-SOURCES.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/assets/icons/naver-map.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "v6/assets/icons/tmap.png",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/png"
+    },
+    {
+      "file": "v6/assets/photos/bouquet-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/bouquet-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/date-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/date-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/forest-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/forest-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/forest-960.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/promise-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/promise-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/sea-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/sea-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/walk-1440.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/photos/walk-640.webp",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/webp"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-10.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-15.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-16.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-7.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-8.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/reference-icons/icon-9.svg",
+      "status": 200,
+      "matches": true,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "file": "v6/assets/SOURCES.txt",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "file": "v6/css/accounts.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/css/manage.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/css/style.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/css/typography.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/css/ver6.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "v6/index.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "v6/js/account-interactions.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/account-view.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/accounts-manage-ui.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/accounts-manage.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/album-image.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/app.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/background-audio.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/chapters.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/config.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/core.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/countdown-view.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/editorial-motion.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/guestbook.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/intro-boot.js",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/manage-ui.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/manage.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/public-accounts.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/public-album.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/quick-menu.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/js/scroll-arrival.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "v6/manage.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "v6/map.html",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "file": "v6/wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    },
+    {
+      "file": "wedding.ics",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/calendar; charset=utf-8"
+    }
+  ],
+  "missingPaths": [
+    {
+      "path": "/homehunt/",
+      "status": 404
+    },
+    {
+      "path": "/homehunt/index.html",
+      "status": 404
+    },
+    {
+      "path": "/wecost/",
+      "status": 404
+    },
+    {
+      "path": "/wecost/index.html",
+      "status": 404
+    },
+    {
+      "path": "/honeymoon/",
+      "status": 404
+    },
+    {
+      "path": "/homehunt-v2/",
+      "status": 404
+    },
+    {
+      "path": "/travel/",
+      "status": 404
+    },
+    {
+      "path": "/sohee/",
+      "status": 404
+    },
+    {
+      "path": "/sungso/",
+      "status": 404
+    },
+    {
+      "path": "/invitation-v3/",
+      "status": 404
+    },
+    {
+      "path": "/invitation-v4/",
+      "status": 404
+    },
+    {
+      "path": "/apps/hub/index.html",
+      "status": 404
+    },
+    {
+      "path": "/services/homehunt/render/node-server.mjs",
+      "status": 404
+    },
+    {
+      "path": "/config/apps.json",
+      "status": 404
+    },
+    {
+      "path": "/.env.local",
+      "status": 404
+    },
+    {
+      "path": "/.git/config",
+      "status": 404
+    },
+    {
+      "path": "/.vercel/project.json",
+      "status": 404
+    },
+    {
+      "path": "/shared/firebase/boot.mjs",
+      "status": 404
+    },
+    {
+      "path": "/responses.html",
+      "status": 404
+    },
+    {
+      "path": "/v6/homehunt/",
+      "status": 404
+    },
+    {
+      "path": "/v6/wecost/",
+      "status": 404
+    },
+    {
+      "path": "/v6/honeymoon/",
+      "status": 404
+    },
+    {
+      "path": "/v6/responses.html",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/homehunt/",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/wecost/",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/honeymoon/",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/manage.html",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/accounts.html",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/scripts/build.mjs",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/src/index.template.html",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/tests/demo-data.test.mjs",
+      "status": 404
+    },
+    {
+      "path": "/lab/v6-1/z/",
+      "status": 404
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/invitation/v3/guestbook",
+      "status": 200,
+      "origin": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "path": "/api/invitation/v3/album",
+      "status": 200,
+      "origin": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "path": "/api/invitation/v5/accounts",
+      "status": 200,
+      "origin": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "path": "/api/invitation/v3/album/manage",
+      "status": 401,
+      "origin": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "path": "/api/invitation/v5/accounts/manage",
+      "status": 401,
+      "origin": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "path": "/api/health",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/health",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/quota",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/quota",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/apartment-history",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/apartment-history",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/invitation/v5/rsvp",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/invitation/v5/rsvp",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/invitation/v5/accounts/other",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/invitation/v5/accounts/other",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/invitation/v3/album",
+      "status": 403,
+      "origin": "https://random-preview.vercel.app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/invitation/v3/album",
+      "status": 403,
+      "origin": "https://random-preview.vercel.app",
+      "method": "OPTIONS"
+    },
+    {
+      "path": "/api/invitation/v5/accounts",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app.evil.example",
+      "method": "GET"
+    },
+    {
+      "path": "/api/invitation/v5/accounts",
+      "status": 403,
+      "origin": "https://sungso-wedding.vercel.app.evil.example",
+      "method": "OPTIONS"
+    }
+  ],
+  "pagesPreserved": [
+    "index.html",
+    "css/typography.css",
+    "js/config.mjs",
+    "wedding.ics"
+  ],
+  "editions": {
+    "root": "5.6.0",
+    "v6": "6.1.0"
+  },
+  "lab": [
+    {
+      "id": "a",
+      "url": "https://sungso-wedding.vercel.app/lab/v6-1/a/",
+      "status": 200,
+      "mode": "demo",
+      "calendarUrlMatches": true,
+      "networkRestricted": true
+    },
+    {
+      "id": "b",
+      "url": "https://sungso-wedding.vercel.app/lab/v6-1/b/",
+      "status": 200,
+      "mode": "demo",
+      "calendarUrlMatches": true,
+      "networkRestricted": true
+    },
+    {
+      "id": "c",
+      "url": "https://sungso-wedding.vercel.app/lab/v6-1/c/",
+      "status": 200,
+      "mode": "demo",
+      "calendarUrlMatches": true,
+      "networkRestricted": true
+    },
+    {
+      "id": "d",
+      "url": "https://sungso-wedding.vercel.app/lab/v6-1/d/",
+      "status": 200,
+      "mode": "demo",
+      "calendarUrlMatches": true,
+      "networkRestricted": true
+    },
+    {
+      "id": "e",
+      "url": "https://sungso-wedding.vercel.app/lab/v6-1/e/",
+      "status": 200,
+      "mode": "demo",
+      "calendarUrlMatches": true,
+      "networkRestricted": true
+    }
+  ]
+}

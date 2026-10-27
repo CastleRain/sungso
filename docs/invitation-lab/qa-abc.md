@@ -69,3 +69,16 @@
 실제 iPhone/Android 터치, Safari의 주소창 변화, 기기 모션 감소 설정, OS 다운로드·공유 시트, 음악 소리의 기기 출력과 네이티브 지도 앱 전환은 별도 실기기 확인 범위다. 이 기록은 A/B/C와 카드 모듈의 로컬 검증이며 공개 배포 완료를 의미하지 않는다.
 
 다음: 다섯 시안 통합 검증과 비교 페이지에서 실제 휴대폰으로 모션 강도·스크롤 길이를 비교한다.
+
+## 공개 배포 후 독립 교차 확인
+
+같은 날 공개 주소 `https://sungso-wedding.vercel.app/lab/v6-1/`를 별도 Chrome 탭에서 확인했다. 비교 화면에서 B 사진첩 이동, E 이야기 이동과 E 사진첩 이동이 실제로 이루어졌다. 프레임 내부 DOM에서 E의 `theme-e-motion`, 이야기 top43.67px, 사진첩 top43.75px 및 실제6개 사진 버튼을 확인했다.
+
+시안을 B → E → D → B → E로 연속 교체해도 해당 Chrome 탭의 error/warn 기록은0개였다. 다른 브라우저에서 한 번 관찰된 일반 `MutationObserver.observe` 대상 오류는 이 독립 확인에서 재현되지 않았다. 오류가 절대 발생하지 않는다는 보장은 아니며, 현재 소스 결함으로 판정할 근거는 발견하지 못했다.
+
+E 단독 공개 페이지의 390×844 화면도 확인했다. `theme-e-motion`이 활성화되고 실제338px 스크롤에서 표지 `scale1 → 1.0088`, Y이동 `0 → 6.81px`가 관찰됐다. 이야기 구역 진입 후 진행률1, 컵 획 dashoffset0%, 가로 넘침 없음, 관측 error/warn0개였다. 서버나 운영 데이터 쓰기는 없으며 검증 탭과 임시 뷰포트는 모두 정리했다.
+
+- [공개 B 비교 사진첩](qa/public-catalog-b-gallery.png)
+- [공개 E 비교 이야기](qa/public-catalog-e-story.png)
+- [공개 E 비교 사진첩](qa/public-catalog-e-gallery.png)
+- [공개 E 모바일 이야기](qa/public-e-mobile-story.png)
