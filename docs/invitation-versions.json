@@ -101,6 +101,8 @@
     "branch": "codex/invitation-v6",
     "preservedRoot": "https://sungso-wedding.vercel.app/",
     "preservedTree": "9cadc286b6696f78d2dc0c61764d412502d78489",
-    "deployment": "pending"
+    "deployment": "success",
+    "commit": "8068785dc5475f0ce24387e9faa96fe037208be9",
+    "vercelDeployment": "dpl_7CxCpxtWssDrfCA2xxHwagG2B5Av"
   }
 }
