@@ -6,3 +6,21 @@
 
 .preview-foot>div{display:flex;gap:14px;align-items:center}.preview-foot>div button{min-height:38px}.width-switch button{min-height:40px}.fixed-section button{min-height:44px;min-width:44px}.delete-saved{min-width:38px}.text-actions>*{min-height:44px}.edit-footer button{min-height:44px}@media(max-width:740px){.preview-foot{flex-wrap:wrap;gap:3px}.preview-foot>div{justify-content:space-between;width:100%}.preview-foot>div button{min-height:35px}.preview-foot .preview-ready{font-size:9px}.scene-tools button{min-height:44px}}
 .preview-actions #audio-toggle{min-width:64px}.preview-actions #audio-toggle.is-loading svg{opacity:.45}.preview-actions #audio-toggle.is-loading::before{content:"";width:9px;height:9px;flex:none;border:1px solid #b7cad9;border-top-color:#496e90;border-radius:50%;animation:studio-audio-loading .8s linear infinite}@keyframes studio-audio-loading{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.preview-actions #audio-toggle.is-loading::before{animation:none}}
+
+/* Samples use the same bundled families as the invitation, not device fonts. */
+@font-face{font-family:StudioModern;src:url('../../shared/theme/fonts/PretendardVariable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
+.palette-sample{display:flex;align-items:center;gap:0;margin-bottom:10px;padding:1px;isolation:isolate}
+.palette-sample i{display:block;width:32px;height:24px;border-radius:50%;border:1px solid #29496320;background:var(--sample-paper);box-shadow:0 1px 3px #2949630b}
+.palette-sample i+i{margin-left:-9px;background:var(--sample-soft)}
+.palette-sample i:last-child{background:var(--sample-accent);border-color:transparent}
+.palette-sample[data-palette=mist]{--sample-paper:#fcfdfd;--sample-soft:#edf2f6;--sample-accent:#436c92}
+.palette-sample[data-palette=azure]{--sample-paper:#fbfdff;--sample-soft:#edf4fb;--sample-accent:#285fa0}
+.palette-sample[data-palette=rose]{--sample-paper:#fffdfd;--sample-soft:#f8f0f3;--sample-accent:#8c5166}
+.palette-sample[data-palette=midnight]{--sample-paper:#fcfdff;--sample-soft:#edf0f6;--sample-accent:#324c78}
+.font-sample{display:block;margin:1px 0 12px;color:var(--ink);font-size:20px;line-height:1.6;letter-spacing:.015em;overflow-wrap:anywhere}
+.font-sample[data-font=letter]{font-family:RIDIBatang,serif;font-weight:400}
+.font-sample[data-font=editorial]{font-family:Hahmlet,RIDIBatang,serif;font-weight:500;letter-spacing:-.025em}
+.font-sample[data-font=modern]{font-family:StudioModern,sans-serif;font-weight:450;letter-spacing:-.02em}
+.scene-group[data-choice=palette] .choice-label,.scene-group[data-choice=font] .choice-label{padding-top:15px;padding-bottom:14px}
+.scene-group[data-choice=palette] .choice-check,.scene-group[data-choice=font] .choice-check{top:16px}
+@media(max-width:740px){.font-sample{font-size:20px}.preview-foot .preview-ready{line-height:1.5}}

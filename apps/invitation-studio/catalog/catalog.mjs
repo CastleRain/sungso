@@ -3,11 +3,12 @@ import { CHOICES, PRESETS, DEFAULT_COMPOSITION, SECTION_IDS, normalizeCompositio
 const $ = selector => document.querySelector(selector);
 const frame = $('#invitation-preview');
 const STORAGE_KEY = 'sungso_invitation_studio_combinations_v1';
-const labels = { cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
+const labels = { palette: '색감', font: '글씨체', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
 const keys = Object.keys(DEFAULT_COMPOSITION), history = [];
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, pendingJump, motionReady = true;
 let audioPhase = 'paused';
 let saved = readSaved();
+let editingScroll = 0, editingFocus = null, viewFrame = 0;
 
 function node(tag, className, text) { const el = document.createElement(tag); if (className) el.className = className; if (text) el.textContent = text; return el; }
 function post(message) { frame.contentWindow?.postMessage(message, location.origin); }
@@ -60,48 +61,80 @@ function renderChoices() {
   $('#undo-change').disabled = history.length === 0;
   updateURL();
 }
-function apply(next, { section, replayOpening = false, remember = true } = {}) {
+function apply(next, { section, replayOpening = false, reviewKey, remember = true } = {}) {
   const normalized = normalizeComposition(next);
-  if (!section && composition.opening !== normalized.opening) { section = 'top'; replayOpening = true; }
+  const changed = keys.filter(key => composition[key] !== normalized[key]);
+  if (!section && changed.length) {
+    reviewKey = changed.includes('opening') ? 'opening' : changed[0];
+    section = SECTION_IDS[reviewKey]; replayOpening = reviewKey === 'opening';
+  }
   if (!sameComposition(composition, normalized) && remember) { history.push({ ...composition }); if (history.length > 30) history.shift(); }
   composition = normalized; renderChoices();
-  if (section) pendingJump = { section, ...(section === 'top' && replayOpening ? { replayOpening: true } : {}) };
+  if (section) {
+    pendingJump = destination(section, replayOpening, reviewKey);
+    if (matchMedia('(max-width:740px)').matches) showView('preview');
+  }
   if (ready) {
     post({ type: 'invitation-studio:apply', composition });
     $('#preview-status').textContent = '선택한 장면을 이어 붙이고 있어요.';
   }
 }
 function showView(view) {
+  const mobile = matchMedia('(max-width:740px)').matches;
+  const previous = document.body.dataset.view;
+  if (mobile && previous === 'edit' && view === 'preview') { editingScroll = window.scrollY; editingFocus = document.activeElement; }
   document.body.dataset.view = view;
   document.querySelectorAll('.mobile-view [data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
-  if (matchMedia('(max-width:740px)').matches) $('.mobile-view').scrollIntoView({ block: 'start', behavior: 'auto' });
+  if (!mobile || previous === view) return;
+  const focusAtSwitch = document.activeElement;
+  cancelAnimationFrame(viewFrame);
+  viewFrame = requestAnimationFrame(() => {
+    // A new input chosen during the view transition takes precedence over restoration.
+    if (document.activeElement !== focusAtSwitch && document.activeElement !== document.body) return;
+    window.scrollTo({ top: view === 'edit' ? editingScroll : $('.mobile-view').offsetTop, behavior: 'instant' });
+    if (view === 'edit' && editingFocus?.isConnected && $('.edit-panel').contains(editingFocus)) editingFocus.focus({ preventScroll: true });
+  });
 }
-function jump(section, mobilePreview = false, replayOpening = false) {
+function destination(section, replayOpening = false, reviewKey) {
+  return { section, ...(section === 'top' && replayOpening ? { replayOpening: true } : {}), ...(keys.includes(reviewKey) && SECTION_IDS[reviewKey] === section ? { reviewKey } : {}) };
+}
+function jump(section, mobilePreview = false, replayOpening = false, reviewKey) {
   if (mobilePreview) showView('preview');
-  const destination = { section, ...(section === 'top' && replayOpening ? { replayOpening: true } : {}) };
-  if (ready) post({ type: 'invitation-studio:jump', ...destination }); else pendingJump = destination;
+  const target = destination(section, replayOpening, reviewKey);
+  if (ready) post({ type: 'invitation-studio:jump', ...target }); else pendingJump = target;
 }
 function mountChoices() {
   const container = $('#scene-controls');
   keys.forEach((key, index) => {
-    const group = node('details', 'scene-group'); group.open = index === 0;
+    const group = node('details', 'scene-group'); group.open = index === 0; group.dataset.choice = key;
     const summary = node('summary'); const text = node('span', '', `${String(index + 1).padStart(2, '0')}  ${labels[key]}`);
     const selected = node('small'); selected.dataset.current = key; text.append(selected); summary.append(text);
     const list = node('div', 'choice-list'); list.setAttribute('role', 'radiogroup'); list.setAttribute('aria-label', labels[key]);
     CHOICES[key].forEach(choice => {
       const label = node('label', 'choice-label'), input = node('input'); input.type = 'radio'; input.name = key; input.value = choice.id;
       const title = node('strong', '', choice.label), detail = node('small', '', choice.detail), source = node('span', 'choice-source', choice.source), check = node('span', 'choice-check', '✓'); check.setAttribute('aria-hidden', 'true');
-      input.addEventListener('change', () => { if (input.checked) apply({ ...composition, [key]: choice.id }, { section: SECTION_IDS[key], replayOpening: key === 'opening' }); });
-      label.append(input, title, detail, source, check); list.append(label);
+      const select = () => apply({ ...composition, [key]: choice.id }, { section: SECTION_IDS[key], replayOpening: key === 'opening', reviewKey: key });
+      input.addEventListener('change', () => { if (input.checked) select(); });
+      // Click precedes change for a new radio; only the already-selected option needs this replay path.
+      input.addEventListener('click', () => { if (input.checked && composition[key] === choice.id) select(); });
+      label.append(input);
+      if (key === 'palette') {
+        const swatches = node('span', 'palette-sample'); swatches.dataset.palette = choice.id; swatches.setAttribute('aria-hidden', 'true');
+        for (let index = 0; index < 3; index++) swatches.append(node('i'));
+        label.append(swatches);
+      } else if (key === 'font') {
+        const sample = node('span', 'font-sample', '성우와 소희, 우리의 날'); sample.dataset.font = choice.id; sample.setAttribute('aria-hidden', 'true'); label.append(sample);
+      }
+      label.append(title, detail, source, check); list.append(label);
     });
     const tools = node('div', 'scene-tools'), button = node('button', '', key === 'opening' ? '이 효과 다시 보기 ↻' : '이 장면 미리 보기 ↗');
-    button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true, key === 'opening')); tools.append(button);
+    button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true, key === 'opening', key)); tools.append(button);
     group.append(summary, list, tools); container.append(group);
   });
   PRESETS.forEach(preset => {
     const button = node('button', 'preset'); button.dataset.preset = preset.id; button.type = 'button';
     button.append(node('strong', '', preset.label), node('small', '', preset.detail));
-    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true }); notify('여섯 가지 선택을 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
+    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true }); notify('색감과 글씨체까지 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
     $('#presets').append(button);
   });
 }
@@ -133,7 +166,10 @@ window.addEventListener('message', event => {
     post({ type: 'invitation-lab:control', action: 'audio', enabled: audioEnabled });
   } else if (event.data.type === 'invitation-studio:applied') {
     if (!sameComposition(normalizeComposition(event.data.composition), composition)) return;
-    ready = true; $('#preview-status').textContent = '선택한 조합이 연결되어 있어요.'; $('#preview-status').classList.add('is-ready');
+    ready = true;
+    const reviewed = pendingJump?.reviewKey;
+    $('#preview-status').textContent = reviewed ? `${labels[reviewed]} · ${CHOICES[reviewed].find(choice => choice.id === composition[reviewed]).label} 적용했어요.` : '선택한 조합이 연결되어 있어요.';
+    $('#preview-status').classList.add('is-ready');
     if (pendingJump) { const destination = pendingJump; pendingJump = undefined; post({ type: 'invitation-studio:jump', ...destination }); }
   } else if (event.data.type === 'invitation-lab:audio-state') {
     // A newly reloaded child first reports paused; keep the requested music choice until its ready handshake.
@@ -178,4 +214,4 @@ $('#import-combination').addEventListener('change', async event => {
   } catch { notify('이 조립실에서 저장한 조합 JSON 파일을 선택해 주세요.'); }
   finally { event.target.value = ''; }
 });
-window.addEventListener('pagehide', () => { clearTimeout(noticeTimer); post({ type: 'invitation-lab:control', action: 'audio', enabled: false }); });
+window.addEventListener('pagehide', () => { clearTimeout(noticeTimer); cancelAnimationFrame(viewFrame); post({ type: 'invitation-lab:control', action: 'audio', enabled: false }); });

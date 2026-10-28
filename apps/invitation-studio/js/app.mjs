@@ -6,9 +6,10 @@ import { setupAccounts, setupGuestbook } from './guest-features.mjs';
 import { setupGallery } from './gallery.mjs';
 import { setupAudio } from './audio.mjs';
 import { createInvitationCard } from './invitation-card.mjs';
-import { readComposition, compositionParams } from './composition.mjs';
+import { readComposition, compositionParams, CHOICES } from './composition.mjs';
 import { mountStudio, studioMessage } from './studio-preview.mjs';
-import { scrollPreviewTo } from './preview-scroll.mjs';
+import { scrollPreviewTo, afterPreviewScroll } from './preview-scroll.mjs';
+import { createSceneReview } from './scene-review.mjs';
 
 const variant = document.body.dataset.variant;
 if (!/^[fg]$/.test(variant) || config.mode !== 'demo') throw new Error('Invitation lab requires a recognized demo edition.');
@@ -43,7 +44,7 @@ document.documentElement.classList.toggle('compare-mode', comparison);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 let effects = readPreference('sungso_invitation_studio_motion', 'on') !== 'off';
 const motion = () => effects && !reduced.matches;
-let themeController, revealObserver;
+let themeController, revealObserver, sceneReview;
 
 function revealAll() { $$('.reveal').forEach(element => element.classList.add('is-visible')); }
 function updateEffects() {
@@ -54,6 +55,7 @@ function updateEffects() {
   $('#motion-toggle').setAttribute('aria-pressed', String(!effects));
   if (!enabled) { window.sungsoIntro?.finish(); revealAll(); }
   themeController?.setEnabled(enabled);
+  sceneReview?.setEnabled(enabled);
   document.dispatchEvent(new Event('lab:motion-change'));
 }
 if ('IntersectionObserver' in window) {
@@ -110,20 +112,38 @@ storyDialog.addEventListener('keydown', event => { if (['ArrowLeft', 'ArrowRight
 addSwipe($('.story-pages'), delta => showChapter(chapter + delta));
 readRoute();
 
-let jumpFrame = 0;
-function jumpTo(id, { replayOpening = false } = {}) {
+sceneReview = createSceneReview({ doc: document, win: window, enabled: motion() });
+let jumpFrame = 0, jumpGeneration = 0, cancelScrollReview = () => {};
+function cancelPreviewJump() {
+  jumpGeneration++;
+  cancelAnimationFrame(jumpFrame); jumpFrame = 0;
+  cancelScrollReview(); sceneReview.cancel();
+}
+function jumpTo(id, { replayOpening = false, reviewKey } = {}) {
   const target = document.getElementById(id); if (!target) return;
   cancelInitialAnchor();
-  cancelAnimationFrame(jumpFrame);
+  cancelPreviewJump();
+  const generation = jumpGeneration;
   window.sungsoIntro?.finish(); closeDialogs();
   $$('.reveal', target).forEach(element => element.classList.add('is-visible'));
   history.replaceState(null, '', `#${id}`);
-  jumpFrame = requestAnimationFrame(() => {
-    jumpFrame = 0;
-    scrollPreviewTo(target, { behavior: replayOpening || !motion() ? 'instant' : 'smooth' });
-    if (replayOpening && id === 'top') window.sungsoIntro?.replay(composition.opening);
+  Promise.resolve(themeController?.whenReady).catch(() => {}).then(() => {
+    if (generation !== jumpGeneration || document.hidden || $('dialog[open]')) return;
+    jumpFrame = requestAnimationFrame(() => {
+      jumpFrame = 0;
+      scrollPreviewTo(target, { behavior: replayOpening || !motion() ? 'instant' : 'smooth' });
+      if (replayOpening && id === 'top') window.sungsoIntro?.replay(composition.opening);
+      if (reviewKey) cancelScrollReview = afterPreviewScroll({ win: window, doc: document, onSettled: () => {
+        if (generation !== jumpGeneration) return;
+        themeController?.refresh();
+        sceneReview.show({ section: id, key: reviewKey, label: CHOICES[reviewKey]?.find(choice => choice.id === composition[reviewKey])?.label || '' });
+      } });
+    });
   });
 }
+// A deliberate guest gesture takes precedence over any pending font/scroll wait.
+['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(type => window.addEventListener(type, cancelPreviewJump, { capture: true, passive: true }));
+document.addEventListener('visibilitychange', () => { if (document.hidden) cancelPreviewJump(); });
 $$('[data-jump]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); jumpTo(link.hash.slice(1)); }));
 function updateCountdown() {
   const count = countdown(config.wedding.startsAt);
@@ -164,7 +184,7 @@ $('#save-card').addEventListener('click', async event => {
   $('#save-card-status').textContent = '사진과 글씨를 한 장에 담고 있어요.';
   try {
     const style = getComputedStyle(document.body);
-    const result = await createInvitationCard({ wedding: config.wedding, photoUrl: new URL(`${config.assetBase}photos/date-1440.webp`, location.origin).href, variant, themeName: document.title, canonicalUrl, colors: Object.fromEntries(['paper', 'ink', 'accent', 'muted', 'line'].map(key => [key, style.getPropertyValue(`--${key}`).trim()])) });
+    const result = await createInvitationCard({ wedding: config.wedding, photoUrl: new URL(`${config.assetBase}photos/date-1440.webp`, location.origin).href, variant, font: composition.font, themeName: document.title, canonicalUrl, colors: Object.fromEntries(['paper', 'ink', 'accent', 'muted', 'line'].map(key => [key, style.getPropertyValue(`--${key}`).trim()])) });
     if (cardUrl) URL.revokeObjectURL(cardUrl); cardUrl = result.url;
     const file = new File([result.blob], result.filename, { type: 'image/png' });
     let shared = false;
@@ -204,6 +224,7 @@ window.addEventListener('message', event => {
   if (request.type === 'apply' && themeController) {
     // The initial parent handshake must not skip the existing handwriting opening.
     if (compositionParams(request.composition).toString() !== compositionParams(composition).toString()) {
+      cancelPreviewJump();
       window.sungsoIntro?.finish(); closeDialogs();
       if (/^#story\//.test(location.hash)) history.replaceState(null, '', '#our-story');
       else if (/^#photo\//.test(location.hash) || location.hash === '#album') history.replaceState(null, '', '#gallery');
@@ -211,7 +232,7 @@ window.addEventListener('message', event => {
       themeController.setComposition(request.composition);
     }
     parentMessage({ type: 'invitation-studio:applied', composition });
-  } else if (request.type === 'jump') jumpTo(request.section, { replayOpening: request.replayOpening });
+  } else if (request.type === 'jump') jumpTo(request.section, { replayOpening: request.replayOpening, reviewKey: request.reviewKey });
 });
 parentMessage({ type: 'invitation-studio:ready', composition, motionReady: Boolean(themeController) });
 parentMessage({ type: 'invitation-lab:ready' });
@@ -232,7 +253,7 @@ window.addEventListener('pageshow', () => themeController?.refresh());
 window.addEventListener('pagehide', event => {
   cancelInitialAnchor();
   if (event.persisted) return;
-  cancelAnimationFrame(jumpFrame);
+  cancelPreviewJump(); sceneReview.destroy();
   clearInterval(countdownTimer); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
   if (cardUrl) URL.revokeObjectURL(cardUrl);
   if (calendarUrl) URL.revokeObjectURL(calendarUrl);

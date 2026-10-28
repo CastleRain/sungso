@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { studioMessage, STUDIO_SECTIONS } from '../js/studio-preview.mjs';
-import { DEFAULT_COMPOSITION, compositionParams } from '../js/composition.mjs';
+import { DEFAULT_COMPOSITION, compositionParams, SECTION_IDS } from '../js/composition.mjs';
 import { validateCardUrls } from '../js/invitation-card.mjs';
 import { createDemoAdapter } from '../js/demo-data.mjs';
 
@@ -30,6 +30,16 @@ test('opening replay is allowed only at the top and only with an explicit boolea
     assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section, replayOpening: true }), context), { type: 'jump', section });
   }
   assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section: 'top', replayOpening: 'true' }), context), { type: 'jump', section: 'top' });
+});
+
+test('review feedback accepts only a known composition key at its associated section', () => {
+  for (const [key, section] of Object.entries(SECTION_IDS)) {
+    assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section, reviewKey: key }), context), { type: 'jump', section, reviewKey: key });
+  }
+  for (const reviewKey of ['__proto__', 'constructor', 'endpoint', '<script>', {}, ['font'], null]) {
+    assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section: 'invitation', reviewKey }), context), { type: 'jump', section: 'invitation' });
+  }
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section: 'gallery', reviewKey: 'font' }), context), { type: 'jump', section: 'gallery' });
 });
 test('exported invitation card accepts only its own allowlisted composition URL', () => {
   const options = { photoUrl: `${origin}/v6/assets/photos/date-1440.webp`, baseURI: `${origin}/lab/studio/preview/`, variant: 'f', canonicalUrl: `${origin}/lab/studio/preview/?${compositionParams(DEFAULT_COMPOSITION)}` };

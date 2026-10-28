@@ -1,5 +1,6 @@
 import { formatWedding } from './core.mjs';
 import { readComposition, compositionParams } from './composition.mjs';
+import { APPEARANCE_FONTS, appearanceChoices } from './appearance.mjs';
 
 export const CARD_SIZE = Object.freeze({ width: 1080, height: 1440 });
 const palettes = Object.freeze({
@@ -89,11 +90,11 @@ function bounded(promise, milliseconds, message) {
     .finally(() => clearTimeout(timer));
 }
 
-async function loadFonts(doc) {
+async function loadFonts(doc, typography) {
   if (!doc.fonts?.load || !doc.fonts?.ready) throw new Error('이 브라우저에서는 청첩장 글꼴을 확인할 수 없어요. 최신 브라우저에서 다시 시도해 주세요.');
   await bounded(Promise.all([
-    doc.fonts.load('400 32px RIDIBatang', '성우 소희 결혼식'),
-    doc.fonts.load('500 54px Hahmlet', '성우 소희'),
+    doc.fonts.load(`${typography.bodyWeight} 32px ${typography.body}`, '성우 소희 결혼식'),
+    doc.fonts.load(`${typography.titleWeight} 54px ${typography.title}`, '성우 소희'),
     doc.fonts.load('400 82px PinyonScript', 'We are getting married'),
     doc.fonts.load('400 20px AnticDidone', 'SUNGWOO SOHEE 2027'),
   ]).then(results => {
@@ -153,8 +154,9 @@ function drawMotif(ctx, variant, palette) {
 }
 
 /** Native canvas export. The caller owns Object URL lifetime and share/download UI. */
-export async function createInvitationCard({ wedding, photoUrl, variant, themeName, canonicalUrl, colors, doc = document } = {}) {
+export async function createInvitationCard({ wedding, photoUrl, variant, themeName, canonicalUrl, colors, font = 'letter', doc = document } = {}) {
   const palette = cardPalette(variant, colors);
+  const typography = APPEARANCE_FONTS[appearanceChoices({ font }).font];
   const urls = validateCardUrls({ photoUrl, canonicalUrl, variant, baseURI: doc.baseURI });
   const details = {
     groom: cleanText(wedding?.groom, '신랑 이름', 30), bride: cleanText(wedding?.bride, '신부 이름', 30),
@@ -162,31 +164,33 @@ export async function createInvitationCard({ wedding, photoUrl, variant, themeNa
     address: cleanText(wedding?.address, '주소', 180), themeName: cleanText(themeName, '시안 이름', 50),
   };
   const date = formatWedding(wedding.startsAt);
-  const [, photo] = await Promise.all([loadFonts(doc), loadPhoto(doc, urls.photoUrl)]);
+  const [, photo] = await Promise.all([loadFonts(doc, typography), loadPhoto(doc, urls.photoUrl)]);
   const canvas = doc.createElement('canvas'); canvas.width = CARD_SIZE.width; canvas.height = CARD_SIZE.height;
   const ctx = canvas.getContext('2d');
   if (!ctx || typeof canvas.toBlob !== 'function') throw new Error('이 브라우저에서는 이미지를 만들 수 없어요. 최신 브라우저에서 다시 시도해 주세요.');
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  const bodyText = (text, options) => textLine(ctx, text, { font: typography.body, weight: typography.bodyWeight, ...options });
+  const titleText = (text, options) => textLine(ctx, text, { font: typography.title, weight: typography.titleWeight, ...options });
   try {
     ctx.fillStyle = palette.paper; ctx.fillRect(0, 0, canvas.width, canvas.height);
     textLine(ctx, 'With love', { x:64, y:59, size:34, font:'PinyonScript', color:palette.accent, align:'left' });
     textLine(ctx, 'VER6.1 — STUDIO', { x:1016, y:55, size:18, font:'AnticDidone', color:palette.muted, align:'right' });
     drawPhoto(ctx, photo, variant, palette);
     textLine(ctx, 'We are getting married', { y:859, size:82, minimum:68, font:'PinyonScript', color:palette.accent });
-    textLine(ctx, `${details.groom}  &  ${details.bride}`, { y:939, size:54, minimum:36, font:'Hahmlet', weight:500, color:palette.ink });
-    textLine(ctx, date.dateKorean, { y:1004, size:33, minimum:28, color:palette.ink });
-    textLine(ctx, date.time, { y:1048, size:31, color:palette.ink });
-    textLine(ctx, details.venue, { y:1120, size:35, minimum:25, font:'Hahmlet', weight:500, color:palette.ink });
-    textLine(ctx, details.room, { y:1163, size:29, minimum:22, color:palette.ink });
+    titleText(`${details.groom}  &  ${details.bride}`, { y:939, size:54, minimum:36, color:palette.ink });
+    bodyText(date.dateKorean, { y:1004, size:33, minimum:28, color:palette.ink });
+    bodyText(date.time, { y:1048, size:31, color:palette.ink });
+    titleText(details.venue, { y:1120, size:35, minimum:25, color:palette.ink });
+    bodyText(details.room, { y:1163, size:29, minimum:22, color:palette.ink });
     let addressLines, addressSize = 27;
-    do { ctx.font = `400 ${addressSize}px RIDIBatang`; addressLines = wrapCardText(details.address, 920, text => ctx.measureText(text).width); if (addressLines.length <= 2) break; addressSize--; } while (addressSize >= 20);
+    do { ctx.font = `${typography.bodyWeight} ${addressSize}px ${typography.body}`; addressLines = wrapCardText(details.address, 920, text => ctx.measureText(text).width); if (addressLines.length <= 2) break; addressSize--; } while (addressSize >= 20);
     if (addressLines.length > 2) throw new Error('주소가 너무 길어 이미지에 모두 담기 어려워요. 예식장 주소를 확인해 주세요.');
-    addressLines.forEach((text, index) => textLine(ctx, text, { y:1215 + index*34, size:addressSize, color:palette.muted }));
+    addressLines.forEach((text, index) => bodyText(text, { y:1215 + index*34, size:addressSize, color:palette.muted }));
     drawMotif(ctx, variant, palette);
     const visibleUrl = new URL(urls.canonicalUrl).origin.replace(/^https:\/\//, '') + '/lab/studio/';
     textLine(ctx, visibleUrl, { y:1340, size:21, minimum:18, font:'AnticDidone', color:palette.muted });
-    textLine(ctx, '조합 미리보기', { y:1380, size:19, color:palette.muted });
-    textLine(ctx, details.themeName, { y:1411, size:17, minimum:14, color:palette.muted });
+    bodyText('조합 미리보기', { y:1380, size:19, color:palette.muted });
+    bodyText(details.themeName, { y:1411, size:17, minimum:14, color:palette.muted });
     const blob = await bounded(new Promise((resolve, reject) => {
       try { canvas.toBlob(value => value?.size > 0 && value.type === 'image/png' ? resolve(value) : reject(new Error('이미지를 저장하지 못했어요. 다시 시도해 주세요.')), 'image/png'); }
       catch { reject(new Error('사진을 이미지로 저장할 수 없어요. 청첩장을 새로 연 뒤 다시 시도해 주세요.')); }

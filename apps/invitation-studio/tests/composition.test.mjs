@@ -2,26 +2,46 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CHOICES, PRESETS, DEFAULT_COMPOSITION, normalizeComposition, readComposition, compositionParams, sameComposition } from '../js/composition.mjs';
 
-test('all 1944 assembled scenes survive URL round trips without carrying data or origin controls', () => {
+test('all 23328 mood and scene combinations survive URL round trips without data or origin controls', () => {
   let count = 0;
-  for (const cover of CHOICES.cover) for (const opening of CHOICES.opening) for (const intro of CHOICES.intro) for (const date of CHOICES.date) for (const story of CHOICES.story) for (const album of CHOICES.album) {
-    const state = { cover: cover.id, opening: opening.id, intro: intro.id, date: date.id, story: story.id, album: album.id };
+  for (const palette of CHOICES.palette) for (const font of CHOICES.font) for (const cover of CHOICES.cover) for (const opening of CHOICES.opening) for (const intro of CHOICES.intro) for (const date of CHOICES.date) for (const story of CHOICES.story) for (const album of CHOICES.album) {
+    const state = { palette: palette.id, font: font.id, cover: cover.id, opening: opening.id, intro: intro.id, date: date.id, story: story.id, album: album.id };
     const params = compositionParams({ ...state, mode: 'live', origin: 'https://evil.example', account: '1234' });
     assert.equal(params.get('version'), '1');
     assert.deepEqual(readComposition(params.toString()), state);
-    assert.equal(params.size, 7);
+    assert.equal(params.size, 9);
     count++;
   }
-  assert.equal(count, 1944);
+  assert.equal(count, 23328);
 });
 
 test('existing version 1 links, saved choices, and imported files retain their five scenes with original handwriting', () => {
   const oldState = { cover: 'curtain', intro: 'together', date: 'orbit', story: 'line', album: 'contact' };
-  const upgraded = { ...oldState, opening: 'ink' };
+  const upgraded = { ...DEFAULT_COMPOSITION, ...oldState };
   assert.deepEqual(readComposition('?version=1&cover=curtain&intro=together&date=orbit&story=line&album=contact'), upgraded);
   assert.deepEqual(normalizeComposition(oldState), upgraded);
   assert.deepEqual(normalizeComposition({ version: 1, name: '소희의 조합', composition: oldState }), upgraded);
   assert.deepEqual(readComposition(compositionParams(upgraded)), upgraded);
+});
+
+test('old six-choice links and records keep their exact original atmosphere', () => {
+  const previous = { cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact' };
+  const expected = { ...DEFAULT_COMPOSITION, ...previous };
+  assert.deepEqual(readComposition('?version=1&cover=curtain&opening=light&intro=together&date=orbit&story=line&album=contact'), expected);
+  assert.deepEqual(normalizeComposition({ version: 1, composition: previous }), expected);
+  assert.equal(expected.palette, 'mist'); assert.equal(expected.font, 'letter');
+});
+
+test('color and typography are allowlisted and survive saved and imported envelopes', () => {
+  for (const palette of CHOICES.palette) for (const font of CHOICES.font) {
+    const state = { ...DEFAULT_COMPOSITION, palette: palette.id, font: font.id };
+    const saved = JSON.parse(JSON.stringify({ version: 1, name: '소희의 분위기', composition: state }));
+    assert.deepEqual(normalizeComposition(saved), state);
+    assert.ok(sameComposition(normalizeComposition(saved), state));
+  }
+  for (const value of ['url(https://evil.test/font)', '<style>', '../../../', 'inherit', false, {}, []]) {
+    assert.deepEqual(normalizeComposition({ palette: value, font: value }), DEFAULT_COMPOSITION);
+  }
 });
 
 test('opening choice is allowlisted and survives the exported JSON envelope', () => {

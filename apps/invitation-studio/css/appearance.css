@@ -1,0 +1,94 @@
+/* Reuse the existing locally hosted OFL Pretendard variable font and its license.
+   Relative URL works both at Vercel root and under the /sungso/ Pages prefix. */
+@font-face{font-family:StudioModern;src:url('../../../shared/theme/fonts/PretendardVariable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+
+/* Letter is exactly the previous font pairing. Opening SVG and English scripts stay original. */
+body[data-font=letter]{--font:RIDIBatang,serif;--font-title:Hahmlet,RIDIBatang,serif}
+body[data-font=editorial]{--font:Hahmlet,RIDIBatang,serif;--font-title:Hahmlet,RIDIBatang,serif;font-weight:500;line-height:1.95;letter-spacing:-.018em}
+body[data-font=editorial] :is(h3,.invitation-copy,.guest-message,.account-bank,.date-copy,.hero-date,.hero-venue,.closing-copy){font-weight:500}
+body[data-font=editorial] .invitation-copy{font-size:17px;line-height:2.25;letter-spacing:-.025em}
+body[data-font=editorial] :is(.family-person>p:first-child,.account-help,.demo-note){line-height:1.95}
+body[data-font=modern]{--font:StudioModern,RIDIBatang,serif;--font-title:StudioModern,Hahmlet,RIDIBatang,serif;font-weight:400;line-height:1.85;letter-spacing:-.014em}
+body[data-font=modern] .invitation-copy{font-size:18px;line-height:2.15;letter-spacing:-.025em}
+body[data-font=modern] .hero-names{font-weight:500;letter-spacing:.12em}
+body[data-font=modern] :is(.date-copy,.family-person>p:first-child,.hero-venue){font-weight:500}
+body[data-font=modern] :is(.guest-message,.closing-copy){line-height:1.95}
+.large-text body[data-font] .invitation-copy{font-size:19px}
+body[data-font=editorial] :is(.section-title h2,.script-title,.story-handwriting),
+body[data-font=modern] :is(.section-title h2,.script-title,.story-handwriting){letter-spacing:normal}
+
+/* Mist keeps all former surfaces unchanged. Other moods recolour the same components,
+   including the older scenes' hard-coded blue papers; photographs retain their colour. */
+body[data-palette]:not([data-palette=mist]){background:var(--outer)}
+body[data-palette]:not([data-palette=mist]) .wedding-section{background:linear-gradient(180deg,var(--paper),var(--tint) 60%,var(--paper))}
+body[data-palette]:not([data-palette=mist]) :is(.date-ticket,.arrival-card,.account-row,.map-apps>a,.map-apps>button){background:var(--surface);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .date-ticket:before,
+body[data-palette]:not([data-palette=mist]) .date-ticket:after{background:var(--soft);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .calendar .wedding-day span:after{border-color:color-mix(in srgb,var(--accent) 32%,transparent)}
+body[data-palette]:not([data-palette=mist]) .save-date-action b{text-decoration-color:color-mix(in srgb,var(--accent) 38%,transparent)}
+body[data-palette]:not([data-palette=mist]) .countdown-band{background:var(--soft);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .arrival-card .map-frame{border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .gallery-section{background:linear-gradient(var(--surface),var(--soft))}
+body[data-palette]:not([data-palette=mist]) .accounts-section{background:linear-gradient(180deg,var(--soft),var(--surface))}
+body[data-palette]:not([data-palette=mist]) .account-tabs{background:var(--soft)}
+body[data-palette]:not([data-palette=mist]) .account-tabs:before{background:var(--surface)}
+body[data-palette]:not([data-palette=mist]) .account-panel-frame:before{background:var(--tint)}
+body[data-palette]:not([data-palette=mist]) .guestbook-section{background:var(--surface)}
+body[data-palette]:not([data-palette=mist]) .guestbook-list li{background:var(--paper)}
+body[data-palette]:not([data-palette=mist]) .guestbook-list li:before{color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .letter-entry{background:linear-gradient(160deg,var(--soft),var(--paper));border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .letter-entry:before{background:var(--tint)}
+body[data-palette]:not([data-palette=mist]) .letter-entry:hover{border-color:var(--accent)}
+body[data-palette]:not([data-palette=mist]) .guestbook-composer-style{background:linear-gradient(var(--soft),var(--paper) 160px);border-top-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .guestbook-composer-style textarea{background:repeating-linear-gradient(transparent,transparent 28px,var(--line) 29px,transparent 30px)}
+body[data-palette]:not([data-palette=mist]) .experience-dock{background:color-mix(in srgb,var(--surface) 94%,transparent);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .experience-dock [aria-current=true]{background:var(--soft);color:var(--accent)}
+body[data-palette]:not([data-palette=mist]) .experience-dock .quick-toggle:hover{background:var(--soft)}
+body[data-palette]:not([data-palette=mist]) .dock-progress{background:var(--accent)}
+body[data-palette]:not([data-palette=mist]) :is(.quick-actions>a,.quick-actions>button){background:var(--soft)}
+body[data-palette]:not([data-palette=mist]) #sound-dock:not([data-on-cover=true]) .sound-toggle{background:color-mix(in srgb,var(--paper) 94%,transparent)}
+body[data-palette]:not([data-palette=mist]) .modal::backdrop{background:color-mix(in srgb,var(--night) 58%,transparent)}
+body[data-palette]:not([data-palette=mist]) :is(.photo-dialog,.photo-dialog .modal-close,.photo-stage>p){background:var(--night)}
+body[data-palette]:not([data-palette=mist]) .toast{background:var(--night)}
+
+/* Selectable upper scenes. */
+body[data-palette]:not([data-palette=mist]) .upper-curtain-left{background:linear-gradient(90deg,transparent 15%,color-mix(in srgb,var(--tint) 22%,transparent));border-color:color-mix(in srgb,var(--paper) 40%,transparent)}
+body[data-palette]:not([data-palette=mist]) .upper-curtain-right{background:linear-gradient(-90deg,transparent 15%,color-mix(in srgb,var(--tint) 22%,transparent));border-color:color-mix(in srgb,var(--paper) 40%,transparent)}
+body[data-palette]:not([data-palette=mist])[data-cover=aperture] .hero{background:var(--tint)}
+body[data-palette]:not([data-palette=mist])[data-intro=letter] .invitation-section{background:linear-gradient(180deg,var(--paper),var(--soft) 52%,var(--paper))}
+body[data-palette]:not([data-palette=mist])[data-intro=letter] .invitation-section .section-inner:before{border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-intro=together] .invitation-section{background:linear-gradient(90deg,var(--soft),var(--surface) 48%,var(--soft))}
+body[data-palette]:not([data-palette=mist])[data-intro=together] .upper-family-join{color:var(--accent)}
+body[data-palette]:not([data-palette=mist])[data-intro=together] .family-lines:before{background:linear-gradient(90deg,transparent,var(--line))}
+body[data-palette]:not([data-palette=mist])[data-intro=together] .family-lines:after{background:linear-gradient(90deg,var(--line),transparent)}
+body[data-palette]:not([data-palette=mist])[data-intro=ribbon] .invitation-section{background:var(--soft)}
+body[data-palette]:not([data-palette=mist])[data-intro=ribbon] .upper-ribbon{color:var(--accent);opacity:.3}
+body[data-palette]:not([data-palette=mist])[data-intro=ribbon] .invitation-copy{background:color-mix(in srgb,var(--soft) 74%,transparent)}
+body[data-palette]:not([data-palette=mist])[data-date=orbit] .date-ticket{background:var(--surface);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-date=orbit] .date-face{background:radial-gradient(ellipse,var(--soft),var(--surface) 70%)}
+body[data-palette]:not([data-palette=mist])[data-date=orbit] .upper-date-orbit{color:var(--accent)}
+body[data-palette]:not([data-palette=mist])[data-date=flip] .date-ticket{background:var(--soft)}
+body[data-palette]:not([data-palette=mist])[data-date=flip] :is(.date-face,.date-detail){background:var(--surface);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) .upper-page-hinge{background:linear-gradient(color-mix(in srgb,var(--accent) 14%,transparent),transparent)}
+
+/* Story and album structure remains the selected variant; only paper and ink change. */
+body[data-palette]:not([data-palette=mist])[data-story=line] #our-story{background:var(--surface)}
+body[data-palette]:not([data-palette=mist])[data-story=fold] #our-story{background:var(--soft)}
+body[data-palette]:not([data-palette=mist])[data-story=fold] #our-story .story-copy{background:var(--surface)}
+body[data-palette]:not([data-palette=mist])[data-story=light] #our-story{background:linear-gradient(150deg,var(--soft),var(--surface) 68%)}
+body[data-palette]:not([data-palette=mist])[data-story=light] #our-story .story-entry{background:var(--surface);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=light] #our-story .story-copy{background:linear-gradient(135deg,var(--surface),var(--paper))}
+body[data-palette]:not([data-palette=mist])[data-story=light] #our-story .story-chapters{border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story{background:var(--night);color:var(--paper)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story .story-entry{background:color-mix(in srgb,var(--night) 90%,var(--paper));border-color:color-mix(in srgb,var(--paper) 20%,transparent)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story :is(.section-title h2,.section-title p,.story-copy,.story-chapters>button){color:var(--paper)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story :is(.story-sky-art,.story-chapters>button small){color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story .story-chapters:before{background:color-mix(in srgb,var(--line) 45%,transparent)}
+body[data-palette]:not([data-palette=mist])[data-story=constellation] #our-story .chapter-node{background:var(--night);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story{background:var(--soft)}
+body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story .story-copy{background:var(--paper);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story :is(.story-image,.story-chapters){border-color:var(--line)}
+body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story .story-cafe-art{color:var(--accent)}
+body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story .story-copy:after{background:var(--accent)}
+body[data-palette]:not([data-palette=mist])[data-album=grid] #gallery-grid .gallery-photo{background:var(--surface);border-color:var(--line)}
+body[data-palette]:not([data-palette=mist]) :is(.album-sheet,.album-feature){background:var(--surface)}
