@@ -1,5 +1,5 @@
 import { emptyDay, validateDay, dateInKorea, koreanDateTime, timeFromKorea, validDate } from '../../../shared/journey/core.mjs';
-import { createJourneyMap } from './map.mjs?v=2.0.1';
+import { createJourneyMap } from './map.mjs?v=2.0.2';
 import { createJourneyPlayback } from './playback.mjs';
 import { prepareJourneyPhoto } from './photo.mjs';
 
