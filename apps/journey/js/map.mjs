@@ -125,7 +125,9 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
   globalThis.navermap_authFailure = authFailure;
   status('네이버 지도를 불러오고 있어요.');
   function resize() { return guard(() => {
-    const width = host.clientWidth, height = host.clientHeight; if (!width || !height || width === lastWidth && height === lastHeight) return;
+    // NAVER writes fixed pixel dimensions on its host. Measure the responsive
+    // outer element so a sidebar/layout change can resize that fixed host again.
+    const width = element.clientWidth, height = element.clientHeight; if (!width || !height || width === lastWidth && height === lastHeight) return;
     const center = map.getCenter(), zoom = map.getZoom?.();
     map.setSize(new maps.Size(width, height)); map.setCenter(center);
     if (Number.isFinite(zoom) && map.getZoom?.() !== zoom) map.setZoom(zoom, false);

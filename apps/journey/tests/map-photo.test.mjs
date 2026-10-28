@@ -47,10 +47,10 @@ test('map playback pauses, seeks, resumes and changes speed without changing rou
   const tick = value => { now = value; const next = [...callbacks.values()]; callbacks.clear(); next.forEach(callback => callback(now)); };
   const api = {
     LatLng: class { constructor(lat, lng) { this.lat = lat; this.lng = lng; } },
-    Point: class {}, Size: class {}, SymbolPath: { CIRCLE: 3 }, LatLngBounds: class { extend() {} },
+    Point: class {}, Size: class { constructor(width, height) { this.width = width; this.height = height; } }, SymbolPath: { CIRCLE: 3 }, LatLngBounds: class { extend() {} },
     Map: class {
       constructor() { mapInstance = this; this.center = { lat: 37, lng: 127 }; this.zoom = 15; this.fits = 0; }
-      getCenter() { return this.center; } getZoom() { return this.zoom; } setSize() { this.zoom = 9; }
+      getCenter() { return this.center; } getZoom() { return this.zoom; } setSize(value) { this.size = value; this.zoom = 9; }
       setCenter(value) { this.center = value; } setZoom(value) { this.zoom = value; } fitBounds() { this.fits++; } setOptions() {} destroy() {}
     },
     Polyline: class { constructor(options) { this.options = options; this.path = options.path; lines.push(this); } setMap(value) { this.map = value; } setPath(value) { this.path = value; } setOptions(value) { Object.assign(this.options, value); } },
@@ -79,8 +79,12 @@ test('map playback pauses, seeks, resumes and changes speed without changing rou
   adapter.play({ speed: 4, from: .9 }); tick(49500); assert.equal(adapter.getPlayback().progress, 1); assert.equal(adapter.getPlayback().playing, false); assert.equal(completed, 1);
   assert.equal(adapter.getPlayback().positions[0].state, 'finished');
   const center = { lat: 37.5, lng: 127.5 }; mapInstance.center = center; mapInstance.zoom = 17;
-  host.children[0].clientWidth = 800; host.children[0].clientHeight = 500; adapter.resize();
+  adapter.play({ from: .4, speed: 2 }); const beforeResize = adapter.getPlayback();
+  // NAVER's inner host remains at its previous fixed size after the sidebar closes.
+  host.clientWidth = 800; host.clientHeight = 500; assert.equal(host.children[0].clientWidth, 400); adapter.resize();
+  assert.equal(mapInstance.size.width, 800); assert.equal(mapInstance.size.height, 500);
   assert.equal(mapInstance.center, center); assert.equal(mapInstance.zoom, 17);
+  assert.deepEqual(adapter.getPlayback(), beforeResize); assert.equal(adapter.getPlayback().playing, true);
   const fits = mapInstance.fits; adapter.render(day); assert.equal(mapInstance.fits, fits); assert.equal(mapInstance.center, center);
   assert.deepEqual(day, original);
   const lineCount = lines.length;

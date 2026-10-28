@@ -1,5 +1,5 @@
 import { emptyDay, validateDay, dateInKorea, koreanDateTime, timeFromKorea, validDate } from '../../../shared/journey/core.mjs';
-import { createJourneyMap } from './map.mjs?v=1.1.0';
+import { createJourneyMap } from './map.mjs?v=1.1.1';
 import { prepareJourneyPhoto } from './photo.mjs';
 
 const names={sungwoo:'성우',sohee:'소희',together:'함께'};
