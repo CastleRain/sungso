@@ -2,17 +2,37 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CHOICES, PRESETS, DEFAULT_COMPOSITION, normalizeComposition, readComposition, compositionParams, sameComposition } from '../js/composition.mjs';
 
-test('all 486 assembled scenes survive URL round trips without carrying data or origin controls', () => {
+test('all 1944 assembled scenes survive URL round trips without carrying data or origin controls', () => {
   let count = 0;
-  for (const cover of CHOICES.cover) for (const intro of CHOICES.intro) for (const date of CHOICES.date) for (const story of CHOICES.story) for (const album of CHOICES.album) {
-    const state = { cover: cover.id, intro: intro.id, date: date.id, story: story.id, album: album.id };
+  for (const cover of CHOICES.cover) for (const opening of CHOICES.opening) for (const intro of CHOICES.intro) for (const date of CHOICES.date) for (const story of CHOICES.story) for (const album of CHOICES.album) {
+    const state = { cover: cover.id, opening: opening.id, intro: intro.id, date: date.id, story: story.id, album: album.id };
     const params = compositionParams({ ...state, mode: 'live', origin: 'https://evil.example', account: '1234' });
     assert.equal(params.get('version'), '1');
     assert.deepEqual(readComposition(params.toString()), state);
-    assert.equal(params.size, 6);
+    assert.equal(params.size, 7);
     count++;
   }
-  assert.equal(count, 486);
+  assert.equal(count, 1944);
+});
+
+test('existing version 1 links, saved choices, and imported files retain their five scenes with original handwriting', () => {
+  const oldState = { cover: 'curtain', intro: 'together', date: 'orbit', story: 'line', album: 'contact' };
+  const upgraded = { ...oldState, opening: 'ink' };
+  assert.deepEqual(readComposition('?version=1&cover=curtain&intro=together&date=orbit&story=line&album=contact'), upgraded);
+  assert.deepEqual(normalizeComposition(oldState), upgraded);
+  assert.deepEqual(normalizeComposition({ version: 1, name: '소희의 조합', composition: oldState }), upgraded);
+  assert.deepEqual(readComposition(compositionParams(upgraded)), upgraded);
+});
+
+test('opening choice is allowlisted and survives the exported JSON envelope', () => {
+  for (const opening of CHOICES.opening) {
+    const state = { ...DEFAULT_COMPOSITION, opening: opening.id };
+    const imported = JSON.parse(JSON.stringify({ version: 1, name: '성우의 조합', composition: state }));
+    assert.deepEqual(normalizeComposition(imported), state);
+  }
+  for (const opening of ['../../script.js', '<script>', 'https://example.com/', false, null, [], { id: 'ink' }]) {
+    assert.deepEqual(normalizeComposition({ opening }), DEFAULT_COMPOSITION);
+  }
 });
 
 test('malformed configuration and unsupported schema versions always return a safe full composition', () => {

@@ -1,0 +1,13 @@
+/* Every opening uses the original Pinyon glyphs. Only these short-lived layers move. */
+.opening-line{transform-box:fill-box;transform-origin:center;opacity:1;filter:none}
+.hero-letter h1{position:relative;overflow:visible}
+.intro-running[data-opening=flow] .hero-handwriting{overflow:visible}
+.intro-running[data-opening=bloom] .hero-letter{filter:drop-shadow(0 2px 12px #0003)}
+.intro-running[data-opening=light] .hero:after{opacity:.88}
+.intro-complete .opening-line{opacity:1;filter:none;transform:none}
+.motion-off .opening-line{opacity:1!important;filter:none!important;transform:none!important}
+.motion-off .hero-letter h1{clip-path:none!important;filter:none!important}
+@media(prefers-reduced-motion:reduce){
+  .opening-line{opacity:1!important;filter:none!important;transform:none!important}
+  .hero-letter h1{clip-path:none!important;filter:none!important}
+}

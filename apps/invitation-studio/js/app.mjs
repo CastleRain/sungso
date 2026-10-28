@@ -8,6 +8,7 @@ import { setupAudio } from './audio.mjs';
 import { createInvitationCard } from './invitation-card.mjs';
 import { readComposition, compositionParams } from './composition.mjs';
 import { mountStudio, studioMessage } from './studio-preview.mjs';
+import { scrollPreviewTo } from './preview-scroll.mjs';
 
 const variant = document.body.dataset.variant;
 if (!/^[fg]$/.test(variant) || config.mode !== 'demo') throw new Error('Invitation lab requires a recognized demo edition.');
@@ -109,12 +110,19 @@ storyDialog.addEventListener('keydown', event => { if (['ArrowLeft', 'ArrowRight
 addSwipe($('.story-pages'), delta => showChapter(chapter + delta));
 readRoute();
 
-function jumpTo(id) {
+let jumpFrame = 0;
+function jumpTo(id, { replayOpening = false } = {}) {
   const target = document.getElementById(id); if (!target) return;
+  cancelInitialAnchor();
+  cancelAnimationFrame(jumpFrame);
   window.sungsoIntro?.finish(); closeDialogs();
   $$('.reveal', target).forEach(element => element.classList.add('is-visible'));
   history.replaceState(null, '', `#${id}`);
-  requestAnimationFrame(() => { target.scrollIntoView({ behavior: motion() ? 'smooth' : 'instant', block: 'start' }); });
+  jumpFrame = requestAnimationFrame(() => {
+    jumpFrame = 0;
+    scrollPreviewTo(target, { behavior: replayOpening || !motion() ? 'instant' : 'smooth' });
+    if (replayOpening && id === 'top') window.sungsoIntro?.replay(composition.opening);
+  });
 }
 $$('[data-jump]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); jumpTo(link.hash.slice(1)); }));
 function updateCountdown() {
@@ -203,7 +211,7 @@ window.addEventListener('message', event => {
       themeController.setComposition(request.composition);
     }
     parentMessage({ type: 'invitation-studio:applied', composition });
-  } else if (request.type === 'jump') jumpTo(request.section);
+  } else if (request.type === 'jump') jumpTo(request.section, { replayOpening: request.replayOpening });
 });
 parentMessage({ type: 'invitation-studio:ready', composition, motionReady: Boolean(themeController) });
 parentMessage({ type: 'invitation-lab:ready' });
@@ -214,7 +222,7 @@ document.fonts.ready.then(() => {
   if (!initialAnchorPending) return;
   requestAnimationFrame(() => {
     if (initialAnchorPending && location.hash === initialSectionHash && !document.hidden && !$('dialog[open]')) {
-      document.getElementById(initialSectionHash.slice(1))?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      scrollPreviewTo(document.getElementById(initialSectionHash.slice(1)));
     }
     cancelInitialAnchor();
   });
@@ -224,6 +232,7 @@ window.addEventListener('pageshow', () => themeController?.refresh());
 window.addEventListener('pagehide', event => {
   cancelInitialAnchor();
   if (event.persisted) return;
+  cancelAnimationFrame(jumpFrame);
   clearInterval(countdownTimer); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
   if (cardUrl) URL.revokeObjectURL(cardUrl);
   if (calendarUrl) URL.revokeObjectURL(calendarUrl);

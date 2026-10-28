@@ -11,7 +11,9 @@ export function studioMessage(event, { origin, parent, embedded }) {
   const data = event.data;
   if (!data || typeof data !== 'object') return null;
   if (data.type === 'invitation-studio:apply') return { type: 'apply', composition: normalizeComposition(data.composition) };
-  if (data.type === 'invitation-studio:jump' && STUDIO_SECTIONS.includes(data.section)) return { type: 'jump', section: data.section };
+  if (data.type === 'invitation-studio:jump' && STUDIO_SECTIONS.includes(data.section)) {
+    return { type: 'jump', section: data.section, ...(data.section === 'top' && data.replayOpening === true ? { replayOpening: true } : {}) };
+  }
   return null;
 }
 

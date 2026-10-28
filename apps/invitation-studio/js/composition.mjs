@@ -1,10 +1,16 @@
 /** Only visual choices may cross the editor/preview boundary. Never accepts data mode or URLs. */
-export const DEFAULT_COMPOSITION = Object.freeze({ cover: 'cinema', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack' });
+export const DEFAULT_COMPOSITION = Object.freeze({ cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack' });
 export const CHOICES = Object.freeze({
   cover: Object.freeze([
     { id: 'cinema', label: '시네마 프레임', detail: '가득 찬 사진이 작은 프레임으로 이어져요.', source: 'F · 다듬은 표지' },
     { id: 'curtain', label: '빛의 커튼', detail: '양쪽으로 빛이 걷히며 두 사람을 보여줘요.', source: 'NEW · 표지' },
     { id: 'aperture', label: '열리는 창', detail: '사진 위의 부드러운 창이 넓게 열려요.', source: 'NEW · 표지' },
+  ]),
+  opening: Object.freeze([
+    { id: 'ink', label: '한 획씩 쓰는 편지', detail: '원래의 손글씨를 한 획씩 또렷하게 써 내려가요.', source: 'ORIGINAL · 첫 문구' },
+    { id: 'flow', label: '두 줄의 흐름', detail: '두 줄의 손글씨가 부드럽게 흐르며 이어져요.', source: 'NEW · 첫 문구' },
+    { id: 'bloom', label: '번지는 잉크', detail: '은은하게 번진 글씨가 맑고 선명하게 맺혀요.', source: 'NEW · 첫 문구' },
+    { id: 'light', label: '빛이 지나간 자리', detail: '가는 빛이 지나간 자리에 손글씨가 드러나요.', source: 'NEW · 첫 문구' },
   ]),
   intro: Object.freeze([
     { id: 'letter', label: '펼쳐지는 초대', detail: '한 줄씩 이어지는 초대글과 가족 소개.', source: 'NEW · 초대글' },
@@ -32,10 +38,10 @@ export const CHOICES = Object.freeze({
 });
 export const PRESETS = Object.freeze([
   { id: 'flow', label: '01 · 잔잔하게 이어지는', detail: '기존 F의 분위기에서 새 초대글을 더했어요.', composition: DEFAULT_COMPOSITION },
-  { id: 'light', label: '02 · 빛이 열리는', detail: '빛의 커튼, 마주 오는 이름, 둥근 날짜의 조합.', composition: Object.freeze({ cover: 'curtain', intro: 'together', date: 'orbit', story: 'line', album: 'contact' }) },
-  { id: 'letter', label: '03 · 우리의 작은 영화', detail: '열리는 창과 날짜 넘김, 커피 한 잔의 이야기.', composition: Object.freeze({ cover: 'aperture', intro: 'ribbon', date: 'flip', story: 'cafe', album: 'stack' }) },
+  { id: 'light', label: '02 · 빛이 열리는', detail: '빛으로 드러나는 손글씨와 커튼, 둥근 날짜의 조합.', composition: Object.freeze({ cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact' }) },
+  { id: 'letter', label: '03 · 우리의 작은 영화', detail: '흐르는 손글씨와 열리는 창, 커피 한 잔의 이야기.', composition: Object.freeze({ cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'cafe', album: 'stack' }) },
 ]);
-export const SECTION_IDS = Object.freeze({ cover: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
+export const SECTION_IDS = Object.freeze({ cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
 export function normalizeComposition(input) {
   const result = { ...DEFAULT_COMPOSITION };
   if (!input || typeof input !== 'object' || Array.isArray(input)) return result;

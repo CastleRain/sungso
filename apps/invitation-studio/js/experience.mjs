@@ -1,4 +1,5 @@
 import { mountGalleryExperience } from './gallery-experience.mjs';
+import { scrollPreviewTo } from './preview-scroll.mjs';
 
 export const clamp = value => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
 export function entranceProgress(top, height, viewport) {
@@ -126,7 +127,7 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
     const first = query('#guestbook-list li');
     animate(first, [{ opacity: .4, transform: 'translateY(-22px) rotate(-2deg)' }, { opacity: 1, transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.7,.2,1)' });
     // The new message is visible at the place from which the guest entered the composer.
-    first?.scrollIntoView({ behavior: active ? 'smooth' : 'auto', block: 'center' });
+    scrollPreviewTo(first, { win, behavior: active ? 'smooth' : 'instant', block: 'center' });
   });
   function setEnabled(value) {
     active = Boolean(value); doc.body.classList.toggle('experience-active', active);

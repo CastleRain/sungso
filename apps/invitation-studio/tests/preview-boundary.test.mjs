@@ -23,6 +23,14 @@ test('only invitation sections can be targeted and messages cannot perform arbit
   for (const section of ['homehunt', 'body', '__proto__', '<script>', '#gallery']) assert.equal(studioMessage(event({ type: 'invitation-studio:jump', section }), context), null);
   for (const data of [null, 'apply', { type: 'delete-account' }]) assert.equal(studioMessage(event(data), context), null);
 });
+
+test('opening replay is allowed only at the top and only with an explicit boolean', () => {
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section: 'top', replayOpening: true }), context), { type: 'jump', section: 'top', replayOpening: true });
+  for (const section of STUDIO_SECTIONS.filter(value => value !== 'top')) {
+    assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section, replayOpening: true }), context), { type: 'jump', section });
+  }
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:jump', section: 'top', replayOpening: 'true' }), context), { type: 'jump', section: 'top' });
+});
 test('exported invitation card accepts only its own allowlisted composition URL', () => {
   const options = { photoUrl: `${origin}/v6/assets/photos/date-1440.webp`, baseURI: `${origin}/lab/studio/preview/`, variant: 'f', canonicalUrl: `${origin}/lab/studio/preview/?${compositionParams(DEFAULT_COMPOSITION)}` };
   assert.equal(validateCardUrls(options).canonicalUrl, options.canonicalUrl);

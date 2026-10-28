@@ -3,7 +3,7 @@ import { CHOICES, PRESETS, DEFAULT_COMPOSITION, SECTION_IDS, normalizeCompositio
 const $ = selector => document.querySelector(selector);
 const frame = $('#invitation-preview');
 const STORAGE_KEY = 'sungso_invitation_studio_combinations_v1';
-const labels = { cover: '첫 화면', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
+const labels = { cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
 const keys = Object.keys(DEFAULT_COMPOSITION), history = [];
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, pendingJump, motionReady = true;
 let audioPhase = 'paused';
@@ -60,11 +60,12 @@ function renderChoices() {
   $('#undo-change').disabled = history.length === 0;
   updateURL();
 }
-function apply(next, { section, remember = true } = {}) {
+function apply(next, { section, replayOpening = false, remember = true } = {}) {
   const normalized = normalizeComposition(next);
+  if (!section && composition.opening !== normalized.opening) { section = 'top'; replayOpening = true; }
   if (!sameComposition(composition, normalized) && remember) { history.push({ ...composition }); if (history.length > 30) history.shift(); }
   composition = normalized; renderChoices();
-  if (section) pendingJump = section;
+  if (section) pendingJump = { section, ...(section === 'top' && replayOpening ? { replayOpening: true } : {}) };
   if (ready) {
     post({ type: 'invitation-studio:apply', composition });
     $('#preview-status').textContent = '선택한 장면을 이어 붙이고 있어요.';
@@ -75,9 +76,10 @@ function showView(view) {
   document.querySelectorAll('.mobile-view [data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
   if (matchMedia('(max-width:740px)').matches) $('.mobile-view').scrollIntoView({ block: 'start', behavior: 'auto' });
 }
-function jump(section, mobilePreview = false) {
+function jump(section, mobilePreview = false, replayOpening = false) {
   if (mobilePreview) showView('preview');
-  if (ready) post({ type: 'invitation-studio:jump', section }); else pendingJump = section;
+  const destination = { section, ...(section === 'top' && replayOpening ? { replayOpening: true } : {}) };
+  if (ready) post({ type: 'invitation-studio:jump', ...destination }); else pendingJump = destination;
 }
 function mountChoices() {
   const container = $('#scene-controls');
@@ -89,17 +91,17 @@ function mountChoices() {
     CHOICES[key].forEach(choice => {
       const label = node('label', 'choice-label'), input = node('input'); input.type = 'radio'; input.name = key; input.value = choice.id;
       const title = node('strong', '', choice.label), detail = node('small', '', choice.detail), source = node('span', 'choice-source', choice.source), check = node('span', 'choice-check', '✓'); check.setAttribute('aria-hidden', 'true');
-      input.addEventListener('change', () => { if (input.checked) apply({ ...composition, [key]: choice.id }, { section: SECTION_IDS[key] }); });
+      input.addEventListener('change', () => { if (input.checked) apply({ ...composition, [key]: choice.id }, { section: SECTION_IDS[key], replayOpening: key === 'opening' }); });
       label.append(input, title, detail, source, check); list.append(label);
     });
-    const tools = node('div', 'scene-tools'), button = node('button', '', '이 장면 미리 보기 ↗');
-    button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true)); tools.append(button);
+    const tools = node('div', 'scene-tools'), button = node('button', '', key === 'opening' ? '이 효과 다시 보기 ↻' : '이 장면 미리 보기 ↗');
+    button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true, key === 'opening')); tools.append(button);
     group.append(summary, list, tools); container.append(group);
   });
   PRESETS.forEach(preset => {
     const button = node('button', 'preset'); button.dataset.preset = preset.id; button.type = 'button';
     button.append(node('strong', '', preset.label), node('small', '', preset.detail));
-    button.addEventListener('click', () => { apply(preset.composition, { section: 'top' }); notify('다섯 장면을 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
+    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true }); notify('여섯 가지 선택을 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
     $('#presets').append(button);
   });
 }
@@ -109,7 +111,7 @@ function renderSaved() {
   saved.forEach(item => {
     const li = node('li'), open = node('button'), remove = node('button', 'delete-saved', '×');
     open.type = remove.type = 'button'; open.append(node('span', '', item.name), node('small', '', keys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label).join(' / ')));
-    open.addEventListener('click', () => { $('#combination-name').value = item.name; apply(item.composition, { section: 'top' }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
+    open.addEventListener('click', () => { $('#combination-name').value = item.name; apply(item.composition, { section: 'top', replayOpening: true }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
     remove.setAttribute('aria-label', `${item.name} 저장된 조합 삭제`);
     remove.addEventListener('click', () => { if (persistSaved(saved.filter(record => record.id !== item.id))) { notify('저장된 조합을 삭제했어요. 지금 보는 조합은 그대로예요.'); $('#save-combination').focus(); } });
     li.append(open, remove); list.append(li);
@@ -132,7 +134,7 @@ window.addEventListener('message', event => {
   } else if (event.data.type === 'invitation-studio:applied') {
     if (!sameComposition(normalizeComposition(event.data.composition), composition)) return;
     ready = true; $('#preview-status').textContent = '선택한 조합이 연결되어 있어요.'; $('#preview-status').classList.add('is-ready');
-    if (pendingJump) { const section = pendingJump; pendingJump = undefined; post({ type: 'invitation-studio:jump', section }); }
+    if (pendingJump) { const destination = pendingJump; pendingJump = undefined; post({ type: 'invitation-studio:jump', ...destination }); }
   } else if (event.data.type === 'invitation-lab:audio-state') {
     // A newly reloaded child first reports paused; keep the requested music choice until its ready handshake.
     renderAudioState(event.data.phase || (event.data.playing === true ? 'playing' : 'paused'), { syncIntent: ready, announce: ready });
@@ -152,7 +154,7 @@ $('#save-combination').addEventListener('click', () => {
   if (persistSaved([{ id: crypto.randomUUID(), name, composition: { ...composition } }, ...saved])) { $('#combination-name').value = name; notify(`‘${name}’ 조합을 이 브라우저에 저장했어요.`); }
 });
 $('#undo-change').addEventListener('click', () => { if (history.length) { const prior = history.pop(); apply(prior, { remember: false }); notify('이전 선택으로 돌아갔어요.'); } });
-$('#reset-combination').addEventListener('click', () => { apply(DEFAULT_COMPOSITION, { section: 'top' }); notify('기본 조합으로 돌아갔어요. 저장해 둔 조합은 그대로예요.'); });
+$('#reset-combination').addEventListener('click', () => { apply(DEFAULT_COMPOSITION, { section: 'top', replayOpening: true }); notify('기본 조합으로 돌아갔어요. 저장해 둔 조합은 그대로예요.'); });
 $('#copy-preview').addEventListener('click', () => copyURL('preview'));
 $('#copy-editor').addEventListener('click', () => copyURL('editor'));
 $('#replay-preview').addEventListener('click', () => { pendingJump = undefined; ready = false; $('#preview-status').textContent = '선택한 조합을 처음부터 다시 보여드려요.'; post({ type: 'invitation-lab:control', action: 'replay' }); });
@@ -172,7 +174,7 @@ $('#import-combination').addEventListener('change', async event => {
     if (file.size > 16384) throw new Error('size');
     const data = JSON.parse(await file.text());
     if (!data || typeof data !== 'object' || Array.isArray(data) || String(data.version) !== '1' || !data.composition || !keys.some(key => CHOICES[key].some(choice => choice.id === data.composition[key]))) throw new Error('shape');
-    apply(normalizeComposition(data), { section: 'top' }); $('#combination-name').value = cleanName(data.name); notify('파일의 조합을 불러왔어요. 보관하려면 저장을 눌러 주세요.');
+    apply(normalizeComposition(data), { section: 'top', replayOpening: true }); $('#combination-name').value = cleanName(data.name); notify('파일의 조합을 불러왔어요. 보관하려면 저장을 눌러 주세요.');
   } catch { notify('이 조립실에서 저장한 조합 JSON 파일을 선택해 주세요.'); }
   finally { event.target.value = ''; }
 });
