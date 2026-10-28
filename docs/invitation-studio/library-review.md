@@ -26,3 +26,10 @@
 - 기존205개 배포 파일·운영 데이터·인증·API·Firebase 설정을 보존한다. 새 배포 파일은 Studio 안에만 추가한다. 공개 배포 결과는 검증 뒤 아래에 기록한다.
 
 **다음:** 두 사람이 조합에 별점을 남기며 최종 구성을 좁힌 뒤, 선택한 조합을 운영 데이터에 연결할 완료본으로 승격한다.
+
+## 공개 배포
+
+- 구현 `ca216e7`, 전용 브랜치 `codex/invitation-studio`에 보관. Vercel `dpl_86dnSq1zJH9XVqGQdbrL3a6ba6zf` READY, `https://sungso-wedding.vercel.app/lab/studio/` 반영.
+- 업로드250개 경로/SHA-1 일치. 공개248개 파일 일치·제외50개 경로404·API19개·Pages4개 보존·운영쓰기0 확인. 상세는 `live-check.json`.
+- 공개 페이지의13개 선택 범주·40개 보관함, 새 빠른 메뉴 선택/구역 이동을 확인했다. 확인 뒤 기존 사용자 선택(azure/editorial/focus/aperture/flow/ribbon/flip/line/contact + 원래 기능 표현)으로 복원했다. 공개 저장소에 검증용 조합이나 글을 만들지 않았다.
+- 옵션 창 근거: `library-public-options.png`.
