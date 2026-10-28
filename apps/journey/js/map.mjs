@@ -51,6 +51,55 @@ export function journeyMapFrame(segments, time) {
   return { paths, heads };
 }
 
+const clampProgress = value => Number.isFinite(Number(value)) ? Math.max(0, Math.min(1, Number(value))) : 0;
+const pointDate = time => {
+  if (!Number.isFinite(time)) return null;
+  const value = new Date(time + 9 * 3600000);
+  return Number.isFinite(value.getTime()) ? value.toISOString().slice(0, 10) : null;
+};
+
+/** A scene is a view of one saved day; never join invalid, reversed or cross-day points. */
+export function journeySceneData(scene) {
+  const segments = [], records = (scene?.records || []).filter(record => validPosition(record.position) && (record.time === null || Number.isFinite(record.time) && (!scene.date || pointDate(record.time) === scene.date)));
+  for (const segment of scene?.segments || []) {
+    let points = [], piece = 0;
+    const flush = () => { if (points.length) segments.push({ id: `${segment.id}:${piece++}`, person: segment.person, points }); points = []; };
+    for (const point of segment.points || []) {
+      if (!validPosition(point) || !Number.isFinite(point.time) || scene.date && pointDate(point.time) !== scene.date) { flush(); continue; }
+      if (points.length && point.time < points.at(-1).time) flush();
+      points.push(point);
+    }
+    flush();
+  }
+  let start = null, end = null;
+  for (const segment of segments) for (const point of segment.points) {
+    start = start === null ? point.time : Math.min(start, point.time);
+    end = end === null ? point.time : Math.max(end, point.time);
+  }
+  for (const time of [scene?.startTime, scene?.time, scene?.endTime, ...records.map(record => record.time)].filter(Number.isFinite)) {
+    if (scene?.date && pointDate(time) !== scene.date) continue;
+    start = start === null ? time : Math.min(start, time); end = end === null ? time : Math.max(end, time);
+  }
+  const position = validPosition(scene?.position) ? scene.position : segments[0]?.points[0] || null;
+  return { scene, records, segments, position, start, end };
+}
+
+function sceneFrame(data, value) {
+  const progress = clampProgress(value), time = data.start === null ? null : Math.round(data.start + (data.end - data.start) * progress);
+  const state = time === null ? { paths: [], heads: new Map() } : journeyMapFrame(data.segments, time);
+  // A finished/gap point remains only a faint historical dot, not a current location.
+  for (const head of state.heads.values()) head.current = head.state !== 'gap' && !(head.state === 'finished' && head.recordedAt < time);
+  const reached = data.records.filter(record => time === null ? record.time === null : Number.isFinite(record.time) && record.time <= time);
+  for (const record of reached) {
+    const prior = state.heads.get(record.person), current = time === null || record.time === time;
+    if (!prior || !prior.current && (record.time ?? -Infinity) > (prior.recordedAt ?? -Infinity) || current && !prior.current) state.heads.set(record.person, { ...record.position, time: record.time, recordedAt: record.time, recordId: record.id, title: record.title, state: 'recorded', current });
+  }
+  if (!data.segments.length && !data.records.length && data.position && PEOPLE[data.scene?.person]) state.heads.set(data.scene.person, { ...data.position, time, recordedAt: data.scene?.time ?? null, state: 'recorded', current: true });
+  return { ...state, reached, progress, time };
+}
+
+export function journeySceneFrame(scene, progress = 0) { return sceneFrame(journeySceneData(scene), progress); }
+
 export function loadJourneyMapSdk() {
   if (sdkPromise) return sdkPromise;
   sdkPromise = new Promise((resolve, reject) => {
@@ -88,6 +137,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
   let progress = 0, playing = false, speed = 1, duration = 60, start = null, end = null, anchorTime = 0, anchorProgress = 0, lastPainted = 0;
   let progressHandler = () => {}, completeHandler = () => {}, headStates = new Map(), playbackVisible = false, viewKey = null, hadPositions = false;
   let coordinates = new WeakMap(), lastWidth = 0, lastHeight = 0;
+  let renderMode = 'day', currentScene = null, sceneOptions = {}, sceneData = journeySceneData(null), scenePainted = false, sceneCamera = 'follow', sceneHasFit = false, sceneRecords = [];
   const authFailureBefore = globalThis.navermap_authFailure;
   const safely = action => { try { return action(); } catch { return undefined; } };
   const healthy = () => !disposed && !failed && !!map && !!maps;
@@ -99,6 +149,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
   function removeOverlays(api = maps, tolerateFailure = false) {
     const oldItems = [...polylines, ...progressLines, ...markers, ...heads.map(value => value.marker)].filter(Boolean), oldHeads = heads, oldListeners = listeners, oldInfo = info;
     info = null; polylines = []; progressLines = []; markers = []; heads = []; listeners = [];
+    scenePainted = false; sceneRecords = [];
     const cleanup = action => tolerateFailure ? safely(action) : action();
     for (const item of oldItems) cleanup(() => item.setMap(null));
     for (const listener of oldListeners) cleanup(() => api?.Event?.removeListener(listener));
@@ -203,6 +254,124 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
       }
     });
   }
+  function scenePositions(scene) {
+    const positions = [];
+    if (validPosition(scene?.position)) positions.push(scene.position);
+    for (const segment of scene?.segments || []) for (const point of segment.points || []) if (validPosition(point) && (!scene.date || pointDate(point.time) === scene.date)) positions.push(point);
+    for (const record of scene?.records || []) if (validPosition(record.position)) positions.push(record.position);
+    if (validPosition(scene?.endPosition)) positions.push(scene.endPosition);
+    return positions;
+  }
+  function fitScenePositions(positions, force = false) {
+    if (!positions.length) return;
+    const bounds = map.getBounds?.();
+    if (!force && sceneHasFit && bounds?.hasLatLng && positions.every(point => bounds.hasLatLng(coordinate(point)))) return;
+    if (positions.every(point => Math.abs(point.lat - positions[0].lat) < .00001 && Math.abs(point.lng - positions[0].lng) < .00001)) {
+      map.setCenter(coordinate(positions[0])); map.setZoom(14, false);
+    } else {
+      const target = new maps.LatLngBounds(); positions.forEach(point => target.extend(coordinate(point)));
+      map.fitBounds(target, { top: 70, bottom: 160, left: 55, right: 55 });
+    }
+    sceneHasFit = true;
+  }
+  function fitCurrentScene() {
+    sceneCamera = 'follow';
+    return guard(() => fitScenePositions(scenePositions(currentScene), true));
+  }
+  function showAllScenes(scenes = []) {
+    sceneCamera = 'all';
+    return guard(() => fitScenePositions(scenes.flatMap(scenePositions), true));
+  }
+  function sceneLabel(person, text = currentScene?.title) {
+    const box = document.createElement('div'), title = document.createElement('strong'), detail = document.createElement('span');
+    box.className = 'journey-scene-label';
+    box.style.cssText = 'background:var(--ss-surface);color:var(--ss-text);border:1px solid var(--ss-border-strong);border-radius:14px;padding:10px 13px;box-shadow:0 4px 14px var(--ss-shadow);font-family:var(--ss-font-sans);line-height:1.4;max-width:220px;pointer-events:none';
+    title.textContent = text || '이날의 이동'; title.style.cssText = 'display:block;font-size:15px;font-weight:700';
+    const name = person === 'together' ? '성우와 소희' : (PEOPLE[person] || PEOPLE.together).name;
+    detail.textContent = [currentScene?.date?.replaceAll('-', '.'), name].filter(Boolean).join(' · ');
+    detail.style.cssText = 'display:block;margin-top:3px;font-size:12px;color:var(--ss-muted)';
+    box.append(title, detail); return box;
+  }
+  function paintSceneBase() {
+    removeOverlays();
+    const historyIds = new Set();
+    for (const oldScene of sceneOptions.history || []) {
+      if (!oldScene || oldScene.id === currentScene?.id || historyIds.has(oldScene.id) || oldScene.date > currentScene?.date) continue;
+      if (oldScene.date === currentScene?.date && Number.isFinite(oldScene.time) && Number.isFinite(currentScene.time) && oldScene.time > currentScene.time) continue;
+      historyIds.add(oldScene.id);
+      for (const member of oldScene.members || [oldScene]) {
+        const point = validPosition(member.endPosition) ? member.endPosition : member.position;
+        if (!validPosition(point) || !PEOPLE[member.person]) continue;
+        const owner = PEOPLE[member.person];
+        markers.push(new maps.Marker({ map, position: coordinate(point), title: `${owner.name} · ${oldScene.date || ''}`, clickable: false, zIndex: 1, icon: { path: maps.SymbolPath.CIRCLE, radius: 5, fillColor: owner.color, fillOpacity: .22, strokeColor: '#ffffff', strokeOpacity: .45, strokeWeight: 2 } }));
+      }
+    }
+    for (const segment of sceneData.segments) {
+      polylines.push(segment.points.length > 1 ? new maps.Polyline({ map, path: segment.points.map(coordinate), strokeColor: (PEOPLE[segment.person] || PEOPLE.together).color, strokeWeight: 3, strokeOpacity: .13, clickable: false, zIndex: 2 }) : null);
+    }
+    for (const record of sceneData.records) {
+      const owner = PEOPLE[record.person]; if (!owner) continue;
+      const marker = new maps.Marker({ map: null, position: coordinate(record.position), title: `${owner.name} · ${record.title || ''} · ${currentScene.date}`, clickable: false, zIndex: 3, icon: { path: maps.SymbolPath.CIRCLE, radius: 5, fillColor: owner.color, fillOpacity: .22, strokeColor: '#ffffff', strokeWeight: 2 } });
+      markers.push(marker); sceneRecords.push({ id: record.id, marker, visible: false });
+    }
+    scenePainted = true;
+  }
+  function paintSceneFrame() {
+    const state = sceneFrame(sceneData, sceneOptions.progress);
+    const reached = new Set(state.reached.map(record => record.id));
+    for (const record of sceneRecords) {
+      const visible = reached.has(record.id);
+      if (visible !== record.visible) { record.marker.setMap(visible ? map : null); record.visible = visible; }
+    }
+    for (const [index, path] of state.paths.entries()) {
+      if (path.length < 2) { progressLines[index]?.setMap(null); progressLines[index] = null; continue; }
+      if (progressLines[index]) progressLines[index].setPath(path.map(coordinate));
+      else progressLines[index] = new maps.Polyline({ map, path: path.map(coordinate), strokeColor: (PEOPLE[sceneData.segments[index].person] || PEOPLE.together).color, strokeWeight: 5, strokeOpacity: .95, clickable: false, zIndex: 5 });
+    }
+    for (const head of heads.filter(value => !state.heads.has(value.person))) { head.marker.setMap(null); head.label.close(); }
+    heads = heads.filter(value => state.heads.has(value.person));
+    for (const [person, point] of state.heads) {
+      const owner = PEOPLE[person] || PEOPLE.together, active = point.current;
+      const titleText = point.title || currentScene?.title || '이날의 이동', title = `${owner.name} · ${titleText} · ${currentScene?.date || ''}`;
+      const icon = { path: maps.SymbolPath.CIRCLE, radius: active ? 9 : 5, fillColor: owner.color, fillOpacity: active ? 1 : .22, strokeColor: '#ffffff', strokeWeight: active ? 3 : 2 };
+      let head = heads.find(value => value.person === person);
+      if (!head) {
+        const marker = new maps.Marker({ map, position: coordinate(point), title, icon, clickable: true, zIndex: active ? 100 : 3 });
+        const label = new maps.InfoWindow({ content: sceneLabel(person, titleText), borderWidth: 0, disableAnchor: true, disableAutoPan: true, backgroundColor: 'transparent', pixelOffset: new maps.Point(person === 'sohee' ? 65 : -65, -12) });
+        head = { person, marker, label, active, labelShown: false, title }; heads.push(head);
+        listeners.push(maps.Event.addListener(marker, 'click', () => { if (!picking && healthy() && head.active) onSelect(currentScene?.recordIds?.[0] || currentScene?.id, { sceneId: currentScene?.id }); }));
+      }
+      head.marker.setPosition(coordinate(point));
+      if (head.title !== title) { head.marker.setTitle(title); head.label.setContent(sceneLabel(person, titleText)); head.title = title; }
+      if (head.active !== active) { head.marker.setIcon(icon); head.marker.setZIndex?.(active ? 100 : 3); head.active = active; }
+      if (active) {
+        if (!head.labelShown) { head.label.open(map, coordinate(point)); head.labelShown = true; }
+        head.label.setPosition(coordinate(point));
+      } else if (head.labelShown) { head.label.close(); head.labelShown = false; }
+    }
+  }
+  /** The period controller owns time. This method paints a frame and never starts a clock. */
+  function renderScene(scene, options = {}) {
+    if (disposed) return false;
+    const changed = renderMode !== 'scene' || currentScene !== scene;
+    if (renderMode !== 'scene') { generation++; clearFrame(); start = null; end = null; headStates.clear(); sceneHasFit = false; }
+    renderMode = 'scene'; currentScene = scene || null;
+    sceneOptions = { progress: clampProgress(options.progress), history: options.history || [], next: options.next || options.nextScene || null };
+    if (changed) { sceneData = journeySceneData(currentScene); scenePainted = false; coordinates = new WeakMap(); }
+    return guard(() => {
+      if (!scenePainted) {
+        paintSceneBase();
+        if (sceneCamera === 'follow') {
+          const positions = scenePositions(currentScene), next = sceneOptions.next;
+          if (validPosition(next?.position)) positions.push(next.position);
+          fitScenePositions(positions);
+        }
+        if (!sceneData.position && !sceneData.segments.length) status(currentScene ? '이 기억의 위치를 정하면 지도에서도 볼 수 있어요.' : '기록을 선택하면 지도에서 볼 수 있어요.');
+        else status('');
+      }
+      paintSceneFrame();
+    });
+  }
   function syncProgress(now = performance.now()) { if (playing) progress = Math.min(1, anchorProgress + (now - anchorTime) * speed / (duration * 1000)); }
   function stop() { clearFrame(); progress = 0; anchorProgress = 0; if (healthy() && start !== null) paintPlayback(); return notifyPlayback(); }
   function pause() { syncProgress(); clearFrame(); if (healthy() && start !== null) paintPlayback(); return notifyPlayback(); }
@@ -218,6 +387,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
   }
   function render(day, options = {}) {
     if (disposed) return false; generation++; clearFrame(); progress = 0; anchorProgress = 0; playbackVisible = false; headStates = new Map(); coordinates = new WeakMap();
+    renderMode = 'day'; currentScene = null; sceneData = journeySceneData(null); sceneOptions = {}; scenePainted = false;
     currentDay = day; currentOptions = options; data = journeyMapData(day, options.person || 'all');
     const times = data.segments.flatMap(segment => segment.points.map(point => point.time).filter(Number.isFinite));
     start = times.length ? times.reduce((a, b) => Math.min(a, b), Infinity) : null; end = times.length ? times.reduce((a, b) => Math.max(a, b), -Infinity) : null;
@@ -255,14 +425,15 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
     if (disposed || failed) { safely(() => candidate.destroy()); return false; }
     map = candidate;
     maps.Event.addListener(map, 'click', event => { if (healthy() && picking) { const position = { lat: event.coord.lat(), lng: event.coord.lng() }; if (validPosition(position)) onPick(position); } });
-    render(currentDay, currentOptions); setPicking(picking); return healthy();
+    if (renderMode === 'scene') renderScene(currentScene, sceneOptions); else render(currentDay, currentOptions);
+    setPicking(picking); return healthy();
   }).catch(() => { failMap(); return false; });
   function destroy() {
     if (disposed) return; clearFrame(); disposed = true; observer?.disconnect(); document.removeEventListener('visibilitychange', visibility);
     const oldMap = map, oldApi = maps; map = null; maps = null;
     removeOverlays(oldApi, true); safely(() => oldMap?.destroy()); element.replaceChildren();
-    currentDay = null; data = { records: [], segments: [] }; headStates.clear(); start = null; end = null; progress = 0; coordinates = new WeakMap(); progressHandler = () => {}; completeHandler = () => {};
+    currentDay = null; currentScene = null; sceneData = journeySceneData(null); sceneOptions = {}; data = { records: [], segments: [] }; headStates.clear(); start = null; end = null; progress = 0; coordinates = new WeakMap(); progressHandler = () => {}; completeHandler = () => {};
     if (globalThis.navermap_authFailure === authFailure) globalThis.navermap_authFailure = authFailureBefore;
   }
-  return { ready, render, setPicking, resize, play, pause, seek, setSpeed, getPlayback, stop, destroy };
+  return { ready, render, renderScene, showAllScenes, fitCurrentScene, setPicking, resize, play, pause, seek, setSpeed, getPlayback, stop, destroy };
 }

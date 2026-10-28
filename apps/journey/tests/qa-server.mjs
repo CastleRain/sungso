@@ -50,6 +50,17 @@ export async function seedJourneyQa(store) {
     sampleRecord('qa-no-position', '검수용 · 위치를 모르는 기억'),
   ] } }, MEMBER.uid);
   for (const date of ['2026-09-27', '2026-10-03', '2026-10-10']) await store.save(date, { expectedRevision: 0, day: { ...emptyDay(date), records: [sampleRecord('qa-memory-' + date, '검수용 · 날짜만 남은 기억')] } }, MEMBER.uid);
+  // Sparse, fictional memories across three years. Only the recent sample day
+  // has dense tracks; these fixtures never enter a production response/build.
+  for (const [date, person, title, lat, lng] of [
+    ['2023-11-02', 'sungwoo', '서울에서', 37.5663, 126.9779],
+    ['2024-03-16', 'sohee', '한강 산책', 37.5283, 126.9344],
+    ['2024-11-02', 'sungwoo', '서울의 가을', 37.574, 126.986],
+    ['2025-02-16', 'sohee', '서울에서', 37.555, 127.021],
+    ['2025-04-27', 'together', '서울숲', 37.545, 127.0422],
+    ['2025-08-14', 'together', '부산의 여름', 35.1531, 129.1187],
+    ['2026-01-10', 'together', '겨울의 한강', 37.5283, 126.9344],
+  ]) await store.save(date, { expectedRevision: 0, day: { ...emptyDay(date), records: [sampleRecord('qa-memory-' + date, title, { person, position: { lat, lng }, ...(person === 'together' ? { kind: 'photo', photoId: SAMPLE_PHOTO_ID } : {}) })] } }, MEMBER.uid);
 }
 
 const QA_ENTRY = `import { mountJourney } from '/sungso/journey/js/ui.mjs';
@@ -57,13 +68,15 @@ const root=document.querySelector('[data-private-root]'),controllers=new Set();l
 root.hidden=false;
 const initial=await fetch('/__qa/session',{cache:'no-store'}).then(r=>r.json());
 const current=()=>!disposed;
-async function request(path,{method='GET',body,blob=false}={}){
+async function request(path,{method='GET',body,blob=false,signal}={}){
  if(!current())throw Error('로그인 상태가 바뀌었어요.');
+ if(signal?.aborted)throw new DOMException('Aborted','AbortError');
  const controller=new AbortController();controllers.add(controller);const timer=setTimeout(()=>controller.abort(),90000);
+ const cancel=()=>controller.abort();signal?.addEventListener('abort',cancel,{once:true});
  try{const response=await fetch('/api/journey/v1'+path,{method,headers:{Authorization:'Bearer qa-member',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,cache:'no-store',credentials:'omit',signal:controller.signal});
  const data=await(blob&&response.ok?response.blob():response.json());if(!current())throw Error('로그인 상태가 바뀌었어요.');
- if(!response.ok||!blob&&data.ok!==true){const error=Error(data.error||'저장소에 연결하지 못했어요.');error.status=response.status;throw error;}return data;
- }catch(error){if(error.name==='AbortError')throw Error('연결이 지연되고 있어요. 입력 내용은 유지되니 다시 시도해주세요.');throw error;}finally{clearTimeout(timer);controllers.delete(controller);}
+ if(!response.ok||!blob&&data.ok!==true){const error=Error(data.error||'저장소에 연결하지 못했어요.');error.status=response.status;error.code=data.code;throw error;}return data;
+ }catch(error){if(error.name==='AbortError'&&!signal?.aborted)throw Error('연결이 지연되고 있어요. 입력 내용은 유지되니 다시 시도해주세요.');throw error;}finally{clearTimeout(timer);controllers.delete(controller);signal?.removeEventListener('abort',cancel);}
 }
 const ui=mountJourney({root,request,member:${JSON.stringify(MEMBER)}});
 function dispose(){if(disposed)return;disposed=true;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(poll);ui.dispose();document.querySelector('#qaStatus').textContent='로컬 QA 로그아웃 · 화면과 요청 정리됨';}

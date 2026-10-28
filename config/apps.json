@@ -154,7 +154,7 @@
       "id": "journey",
       "source": "apps/journey",
       "output": "journey",
-      "files": ["index.html", "style.css", "js"]
+        "files": ["index.html", "style.css", "js", "assets"]
     },
     {
       "id": "table",
@@ -202,7 +202,7 @@
     {
       "source": "shared/journey",
       "output": "shared/journey",
-      "files": ["core.mjs", "import.mjs"]
+        "files": ["core.mjs", "import.mjs", "playback-core.mjs"]
     },
     {
       "source": "shared/finance",
