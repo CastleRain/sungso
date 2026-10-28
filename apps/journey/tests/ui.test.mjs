@@ -75,7 +75,7 @@ async function harness(t, { db = database(), preparePhoto, waitForReady = true, 
     showAllScenes(scenes) { this.overview = clone(scenes); }, fitCurrentScene() { this.fitCount++; },
     resize() { this.resizeCount++; }, setPicking() {}, destroy() {}
   };
-  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: ({ onStatus }) => { onStatus({ ready: true }); return map; }, storyProcessor: async (type, payload) => { storyCalls.push({ type, payload: clone(payload) }); return storyProcessor ? storyProcessor(type, payload) : type === 'select' ? selectJourneyScenes(payload.days, payload.options) : prepareJourneyScene(payload.scene, payload.day); }, playbackFactory: options => createJourneyPlayback({ ...options, now: () => clock, requestFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; }, cancelFrame: id => frames.delete(id) }), ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
+  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: ({ onStatus }) => { map.reportStatus=onStatus;onStatus({ ready: true }); return map; }, storyProcessor: async (type, payload) => { storyCalls.push({ type, payload: clone(payload) }); return storyProcessor ? storyProcessor(type, payload) : type === 'select' ? selectJourneyScenes(payload.days, payload.options) : prepareJourneyScene(payload.scene, payload.day); }, playbackFactory: options => createJourneyPlayback({ ...options, now: () => clock, requestFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; }, cancelFrame: id => frames.delete(id) }), ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
     assert.match(String(url), /import-worker\.mjs$/);
     const worker = { payload: null, terminated: false, postMessage(payload) { this.payload = payload; }, terminate() { this.terminated = true; }, respond(result) { this.onmessage?.({ data: { ok: true, result } }); } };
     workers.push(worker); return worker;
@@ -413,4 +413,21 @@ test('calendar selection restores the selected scene after inspecting a full-day
   const h = await harness(t, { db: periodDatabase() }); h.$('nextScene').click(); h.$('toggleRecords').click(); await until(() => h.$('records').textContent.includes('다시 만난 동네'));
   h.$('showDayRoute').click(); assert.equal(h.map.renders.at(-1).day.date, '2025-07-08'); const renders = h.map.sceneRenders.length;
   await h.openDay('2025-07-08'); assert.ok(h.map.sceneRenders.length > renders); assert.equal(h.map.sceneRenders.at(-1).scene.date, '2025-07-08'); assert.equal(h.app.getPlayback().playing, false); assert.equal(h.app.getPlayback().index, 1);
+});
+
+test('empty and failed period notices remain below a visible map connection notice and recover its space', async t => {
+  const h=await harness(t),win=h.root.ownerDocument.defaultView,wrap=h.root.querySelector('.map-wrap'),notice=h.root.ownerDocument.createElement('p');
+  notice.className='journey-map-message';notice.textContent='지도에 연결하지 못했어요.';let noticeHeight=48;
+  notice.getBoundingClientRect=()=>({height:noticeHeight});h.$('journeyMap').append(notice);
+  h.map.reportStatus({ready:false,error:notice.textContent});
+  await new Promise(resolve=>setTimeout(resolve,25));
+  assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'56px');
+  assert.match(h.$('saveState').textContent,/지도에 표시할 장소가 없어요/);
+  h.db.beforePlayback=()=>{throw Error('기간을 불러오지 못했어요.');};h.$('refreshDay').click();
+  await until(()=>!h.$('globalError').hidden);assert.match(h.$('globalError').textContent,/기간을 불러오지 못했어요/);
+  assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'56px');
+  noticeHeight=106;Object.defineProperty(win,'innerWidth',{configurable:true,value:320});win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve=>setTimeout(resolve,25));assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'114px','wrapped connection text reserves its whole visible height');
+  notice.hidden=true;h.map.reportStatus({ready:true});
+  await new Promise(resolve=>setTimeout(resolve,25));assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'0px','a recovered map returns the period notice to its normal position');
 });

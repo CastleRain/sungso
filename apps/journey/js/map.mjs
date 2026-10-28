@@ -421,7 +421,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
   const ready = Promise.resolve().then(() => sdkLoader()).then(api => {
     if (disposed || failed) return false;
     maps = api;
-    const candidate = new api.Map(host, { center: new api.LatLng(37.5665, 126.978), zoom: 12, zoomControl: true, scrollWheel: false });
+    const candidate = new api.Map(host, { center: new api.LatLng(37.5665, 126.978), zoom: 12, zoomControl: true, ...(api.ZoomControlStyle && api.Position ? { zoomControlOptions: { style: api.ZoomControlStyle.SMALL, position: api.Position.RIGHT_CENTER } } : {}), scrollWheel: false });
     if (disposed || failed) { safely(() => candidate.destroy()); return false; }
     map = candidate;
     maps.Event.addListener(map, 'click', event => { if (healthy() && picking) { const position = { lat: event.coord.lat(), lng: event.coord.lng() }; if (validPosition(position)) onPick(position); } });
