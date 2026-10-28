@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-28T11:52:29.554Z",
+  "checkedAt": "2026-10-28T12:16:19.119Z",
   "origin": "https://sungso-wedding.vercel.app",
   "assets": [
     {
@@ -591,6 +591,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/css/scroll-effects.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
       "file": "lab/studio/css/typography.css",
       "status": 200,
       "matches": true,
@@ -694,6 +700,18 @@
     },
     {
       "file": "lab/studio/js/scene-review.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/scroll-effects.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/section-order.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"
