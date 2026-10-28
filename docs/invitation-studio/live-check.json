@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-28T10:36:14.590Z",
+  "checkedAt": "2026-10-28T11:19:37.653Z",
   "origin": "https://sungso-wedding.vercel.app",
   "assets": [
     {
@@ -573,6 +573,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/css/opening-effects.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
       "file": "lab/studio/css/typography.css",
       "status": 200,
       "matches": true,
@@ -658,6 +664,12 @@
     },
     {
       "file": "lab/studio/js/invitation-card.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/preview-scroll.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"
