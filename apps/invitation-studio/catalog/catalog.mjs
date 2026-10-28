@@ -1,10 +1,10 @@
-import { CHOICES, PRESETS, DEFAULT_COMPOSITION, SECTION_IDS, normalizeComposition, readComposition, compositionParams, sameComposition } from './js/composition.mjs';
+import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDER_SECTIONS, SECTION_IDS, moveSection, normalizeComposition, readComposition, compositionParams, sameComposition } from './js/composition.mjs';
 
 const $ = selector => document.querySelector(selector);
 const frame = $('#invitation-preview');
 const STORAGE_KEY = 'sungso_invitation_studio_combinations_v1';
-const labels = { palette: '색감', font: '글씨체', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
-const keys = Object.keys(DEFAULT_COMPOSITION), history = [];
+const labels = { palette: '색감', font: '글씨체', motion: '공통 스크롤 효과', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
+const keys = CHOICE_KEYS, globalKeys = ['palette', 'font', 'motion'], history = [], orderRows = new Map();
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, pendingJump, motionReady = true;
 let audioPhase = 'paused';
 let saved = readSaved();
@@ -50,6 +50,26 @@ function updateURL() {
   const url = new URL(location.href); url.search = compositionParams(composition).toString();
   window.history.replaceState(null, '', url); $('#open-preview').href = urlFor('preview');
 }
+function orderLabel(order) { return order.map(id => ORDER_SECTIONS.find(section => section.id === id).label).join(' → '); }
+function renderOrder() {
+  const list = $('#section-order'), focus = document.activeElement;
+  const wasOrderControl = list.contains(focus);
+  composition.order.forEach((id, index) => {
+    const row = orderRows.get(id); if (!row) return;
+    row.querySelector('.order-number').textContent = String(index + 1).padStart(2, '0');
+    row.querySelector('select').value = String(index);
+    row.querySelector('[data-direction="up"]').disabled = index === 0;
+    row.querySelector('[data-direction="down"]').disabled = index === composition.order.length - 1;
+    if (list.children[index] !== row) list.insertBefore(row, list.children[index] || null);
+  });
+  // A reordered row keeps the keyboard on the same control without scrolling its editor.
+  if (wasOrderControl && focus?.isConnected) {
+    const target = focus.disabled ? focus.closest('li').querySelector('select') : focus;
+    target.focus({ preventScroll: true });
+  }
+  $('#preview-order').textContent = orderLabel(composition.order);
+  $('#reset-order').disabled = composition.order.every((id, index) => id === DEFAULT_ORDER[index]);
+}
 function renderChoices() {
   for (const key of keys) {
     document.querySelectorAll(`input[name="${key}"]`).forEach(input => { input.checked = input.value === composition[key]; });
@@ -59,6 +79,7 @@ function renderChoices() {
   document.querySelectorAll('[data-preset]').forEach(button => button.setAttribute('aria-pressed', String(sameComposition(composition, PRESETS.find(item => item.id === button.dataset.preset).composition))));
   $('#preview-summary').textContent = keys.map(key => CHOICES[key].find(item => item.id === composition[key]).label).join(' · ');
   $('#undo-change').disabled = history.length === 0;
+  renderOrder();
   updateURL();
 }
 function apply(next, { section, replayOpening = false, reviewKey, remember = true } = {}) {
@@ -68,7 +89,8 @@ function apply(next, { section, replayOpening = false, reviewKey, remember = tru
     reviewKey = changed.includes('opening') ? 'opening' : changed[0];
     section = SECTION_IDS[reviewKey]; replayOpening = reviewKey === 'opening';
   }
-  if (!sameComposition(composition, normalized) && remember) { history.push({ ...composition }); if (history.length > 30) history.shift(); }
+  if (!section && composition.order.some((id, index) => id !== normalized.order[index])) section = normalized.order.find((id, index) => id !== composition.order[index]);
+  if (!sameComposition(composition, normalized) && remember) { history.push(normalizeComposition(composition)); if (history.length > 30) history.shift(); }
   composition = normalized; renderChoices();
   if (section) {
     pendingJump = destination(section, replayOpening, reviewKey);
@@ -92,7 +114,18 @@ function showView(view) {
     // A new input chosen during the view transition takes precedence over restoration.
     if (document.activeElement !== focusAtSwitch && document.activeElement !== document.body) return;
     window.scrollTo({ top: view === 'edit' ? editingScroll : $('.mobile-view').offsetTop, behavior: 'instant' });
-    if (view === 'edit' && editingFocus?.isConnected && $('.edit-panel').contains(editingFocus)) editingFocus.focus({ preventScroll: true });
+    if (view === 'edit' && editingFocus?.isConnected && $('.edit-panel').contains(editingFocus)) {
+      // A section can move far from its old editor position. Return to that row on mobile.
+      const row = editingFocus.closest('.order-row');
+      if (row) {
+        const bounds = row.getBoundingClientRect(), safeTop = $('.mobile-view').getBoundingClientRect().height + 16;
+        if (bounds.top < safeTop || bounds.bottom > window.innerHeight - 16) {
+          editingScroll = Math.max(0, Math.min(window.scrollY + bounds.top - safeTop, document.documentElement.scrollHeight - window.innerHeight));
+          window.scrollTo({ top: editingScroll, behavior: 'instant' });
+        }
+      }
+      editingFocus.focus({ preventScroll: true });
+    }
   });
 }
 function destination(section, replayOpening = false, reviewKey) {
@@ -104,10 +137,11 @@ function jump(section, mobilePreview = false, replayOpening = false, reviewKey) 
   if (ready) post({ type: 'invitation-studio:jump', ...target }); else pendingJump = target;
 }
 function mountChoices() {
-  const container = $('#scene-controls');
   keys.forEach((key, index) => {
+    const isGlobal = globalKeys.includes(key), container = $(isGlobal ? '#global-controls' : '#scene-controls');
     const group = node('details', 'scene-group'); group.open = index === 0; group.dataset.choice = key;
-    const summary = node('summary'); const text = node('span', '', `${String(index + 1).padStart(2, '0')}  ${labels[key]}`);
+    const number = isGlobal ? globalKeys.indexOf(key) + 1 : index - globalKeys.length + 1;
+    const summary = node('summary'); const text = node('span', '', `${String(number).padStart(2, '0')}  ${labels[key]}`);
     const selected = node('small'); selected.dataset.current = key; text.append(selected); summary.append(text);
     const list = node('div', 'choice-list'); list.setAttribute('role', 'radiogroup'); list.setAttribute('aria-label', labels[key]);
     CHOICES[key].forEach(choice => {
@@ -127,23 +161,52 @@ function mountChoices() {
       }
       label.append(title, detail, source, check); list.append(label);
     });
-    const tools = node('div', 'scene-tools'), button = node('button', '', key === 'opening' ? '이 효과 다시 보기 ↻' : '이 장면 미리 보기 ↗');
+    const tools = node('div', 'scene-tools'), button = node('button', '', key === 'opening' ? '이 효과 다시 보기 ↻' : key === 'motion' ? '이 흐름 미리 보기 ↗' : '이 장면 미리 보기 ↗');
     button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true, key === 'opening', key)); tools.append(button);
     group.append(summary, list, tools); container.append(group);
   });
   PRESETS.forEach(preset => {
     const button = node('button', 'preset'); button.dataset.preset = preset.id; button.type = 'button';
     button.append(node('strong', '', preset.label), node('small', '', preset.detail));
-    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true }); notify('색감과 글씨체까지 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
+    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true }); notify('전체 스타일과 순서까지 추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); });
     $('#presets').append(button);
   });
+}
+function mountOrder() {
+  const changePosition = (id, position, control) => {
+    const previous = composition.order.indexOf(id);
+    if (previous === position) return;
+    const label = ORDER_SECTIONS.find(section => section.id === id).label;
+    // Native selects do not consistently acquire focus on every mobile browser.
+    (control || orderRows.get(id)?.querySelector('select'))?.focus({ preventScroll: true });
+    apply({ ...composition, order: moveSection(composition.order, id, position) }, { section: id });
+    $('#order-status').textContent = `${label}, ${position + 1}번째로 옮겼어요.`;
+    notify(`${label}을 ${position + 1}번째로 옮겼어요. 미리보기에서 확인해 보세요.`);
+  };
+  ORDER_SECTIONS.forEach(section => {
+    const row = node('li', 'order-row'); row.dataset.section = section.id;
+    const number = node('span', 'order-number'); number.setAttribute('aria-hidden', 'true');
+    const name = node('strong', 'order-name', section.label);
+    const controls = node('div', 'order-controls');
+    const select = node('select'); select.setAttribute('aria-label', `${section.label} 순서`);
+    DEFAULT_ORDER.forEach((_, index) => { const option = node('option', '', `${index + 1}번째`); option.value = String(index); select.append(option); });
+    select.addEventListener('change', () => changePosition(section.id, Number(select.value), select));
+    controls.append(select);
+    for (const [direction, symbol, amount] of [['up', '↑', -1], ['down', '↓', 1]]) {
+      const button = node('button', 'order-arrow', symbol); button.type = 'button'; button.dataset.direction = direction;
+      button.setAttribute('aria-label', `${section.label} ${direction === 'up' ? '위로' : '아래로'} 이동`);
+      button.addEventListener('click', () => changePosition(section.id, composition.order.indexOf(section.id) + amount, button)); controls.append(button);
+    }
+    row.append(number, name, controls); orderRows.set(section.id, row);
+  });
+  $('#reset-order').addEventListener('click', () => { apply({ ...composition, order: [...DEFAULT_ORDER] }, { section: 'invitation' }); $('#order-status').textContent = '처음 순서로 돌아왔어요.'; notify('장면 선택은 유지하고 순서만 처음으로 돌렸어요.'); });
 }
 function renderSaved() {
   const list = $('#saved-combinations'); list.replaceChildren();
   if (!saved.length) { const item = node('p', 'saved-empty', '아직 보관한 조합이 없어요.'); list.append(item); return; }
   saved.forEach(item => {
     const li = node('li'), open = node('button'), remove = node('button', 'delete-saved', '×');
-    open.type = remove.type = 'button'; open.append(node('span', '', item.name), node('small', '', keys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label).join(' / ')));
+    open.type = remove.type = 'button'; open.append(node('span', '', item.name), node('small', '', keys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label).join(' / ')), node('small', 'saved-order', orderLabel(item.composition.order)));
     open.addEventListener('click', () => { $('#combination-name').value = item.name; apply(item.composition, { section: 'top', replayOpening: true }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
     remove.setAttribute('aria-label', `${item.name} 저장된 조합 삭제`);
     remove.addEventListener('click', () => { if (persistSaved(saved.filter(record => record.id !== item.id))) { notify('저장된 조합을 삭제했어요. 지금 보는 조합은 그대로예요.'); $('#save-combination').focus(); } });
@@ -155,7 +218,7 @@ async function copyURL(kind) {
   try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(url); notify(kind === 'editor' ? '조립 화면 주소를 복사했어요.' : '선택한 조합의 미리보기 주소를 복사했어요.'); }
   catch { $('#link-value').value = url; $('#fallback-link').href = url; $('#link-dialog').showModal(); $('#link-value').focus(); $('#link-value').select(); }
 }
-mountChoices(); renderChoices(); renderSaved();
+mountChoices(); mountOrder(); renderChoices(); renderSaved();
 const initial = new URL('./preview/', location.href); initial.search = compositionParams(composition).toString(); initial.searchParams.set('compare', '1'); frame.src = initial.href;
 window.addEventListener('message', event => {
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data || typeof event.data !== 'object') return;
@@ -187,7 +250,7 @@ document.querySelectorAll('[data-width]').forEach(button => {
 $('#save-combination').addEventListener('click', () => {
   const name = cleanName($('#combination-name').value) || `우리의 조합 ${saved.length + 1}`;
   if (saved.length >= 8) { notify('최대 8개까지 보관할 수 있어요. 필요 없는 조합을 지운 뒤 저장해 주세요.'); return; }
-  if (persistSaved([{ id: crypto.randomUUID(), name, composition: { ...composition } }, ...saved])) { $('#combination-name').value = name; notify(`‘${name}’ 조합을 이 브라우저에 저장했어요.`); }
+  if (persistSaved([{ id: crypto.randomUUID(), name, composition: normalizeComposition(composition) }, ...saved])) { $('#combination-name').value = name; notify(`‘${name}’ 조합을 이 브라우저에 저장했어요.`); }
 });
 $('#undo-change').addEventListener('click', () => { if (history.length) { const prior = history.pop(); apply(prior, { remember: false }); notify('이전 선택으로 돌아갔어요.'); } });
 $('#reset-combination').addEventListener('click', () => { apply(DEFAULT_COMPOSITION, { section: 'top', replayOpening: true }); notify('기본 조합으로 돌아갔어요. 저장해 둔 조합은 그대로예요.'); });
@@ -209,7 +272,7 @@ $('#import-combination').addEventListener('change', async event => {
   try {
     if (file.size > 16384) throw new Error('size');
     const data = JSON.parse(await file.text());
-    if (!data || typeof data !== 'object' || Array.isArray(data) || String(data.version) !== '1' || !data.composition || !keys.some(key => CHOICES[key].some(choice => choice.id === data.composition[key]))) throw new Error('shape');
+    if (!data || typeof data !== 'object' || Array.isArray(data) || String(data.version) !== '1' || !data.composition || typeof data.composition !== 'object' || Array.isArray(data.composition) || !keys.some(key => CHOICES[key].some(choice => choice.id === data.composition[key]))) throw new Error('shape');
     apply(normalizeComposition(data), { section: 'top', replayOpening: true }); $('#combination-name').value = cleanName(data.name); notify('파일의 조합을 불러왔어요. 보관하려면 저장을 눌러 주세요.');
   } catch { notify('이 조립실에서 저장한 조합 JSON 파일을 선택해 주세요.'); }
   finally { event.target.value = ''; }

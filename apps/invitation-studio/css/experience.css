@@ -21,6 +21,7 @@ body[data-variant=g]{--accent:#557b97;--soft:#f2f7fa;--paper:#fff}.theme-g .date
 /* Flow gives the complete date one short held moment; Air keeps a continuous reading flow. */
 @media(min-height:760px){.experience-active.theme-f .date-scene{padding-bottom:110px}.experience-active.theme-f .date-ticket{position:sticky;top:70px}.large-text .experience-active.theme-f .date-scene{padding-bottom:0}.large-text .experience-active.theme-f .date-ticket{position:relative;top:auto}}
 .experience-active.theme-f .hero{clip-path:inset(0 calc(var(--cover,0) * 14px) round calc(var(--cover,0) * 24px))}
+.experience-dock .quick-toggle[aria-current=true]{background:var(--soft);color:var(--accent)}
 .motion-off .date-scene{padding-bottom:0!important}.motion-off .date-ticket{position:relative!important;top:auto!important}
 @media(prefers-reduced-motion:reduce){.date-scene{padding-bottom:0!important}.date-ticket{position:relative!important;top:auto!important}}
 .date-copy{white-space:normal;word-break:keep-all;font-size:13px;line-height:1.9}.date-copy strong{display:inline-block}.date-detail .calendar th{font-size:11px}.save-date-action>span{font-size:11px}.save-date-action b{font-size:13px}.dday{font-size:12px}

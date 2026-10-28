@@ -72,6 +72,19 @@ test('effects-off and system reduced motion leave complete decorative paths and 
   f.controller.setEnabled(true); assert.equal(f.album.enabled, true); f.media.matches = true; f.fire(f.media, 'change'); assert.equal(f.album.enabled, false); assert.equal(f.frames.size, 0);
   assert.equal(f.story.style.values.get('--content-progress'), '1');
 });
+test('reading without scroll motion keeps album selection interactions enabled', () => {
+  const f = fixture({ story: 'line', album: 'contact' });
+  f.controller.setScrollEnabled(false);
+  assert.equal(f.frames.size, 0); assert.equal(f.story.style.values.get('--content-progress'), '1');
+  assert.equal(f.album.enabled, true); assert.equal(f.album.index, 6);
+  f.fire(f.win, 'scroll'); assert.equal(f.frames.size, 0);
+  f.controller.setComposition({ story: 'cafe', album: 'stack' });
+  assert.equal(f.album.enabled, true); assert.equal(f.frames.size, 0);
+  f.controller.setScrollEnabled(true); assert.equal(f.frames.size, 1);
+  f.controller.setEnabled(false); assert.equal(f.album.enabled, false);
+  f.controller.destroy();
+});
+
 test('destroy restores presentation state and removes every added illustration, listener and scheduled frame', () => {
   const f = fixture(); f.controller.destroy(); assert.equal(f.frames.size, 0); assert.equal(f.album.destroyed, true);
   assert.equal(f.entry.querySelectorAll('svg').length, 0); assert.equal(f.doc.body.dataset.story, undefined); assert.equal(f.doc.body.dataset.album, undefined);

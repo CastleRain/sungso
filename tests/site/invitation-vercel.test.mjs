@@ -13,7 +13,7 @@ test('standalone invitation preserves Pages source and publishes only its depend
   const pagesSource = await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html'));
   const result = await buildInvitation({ distDir: path.join(root, 'dist') });
   // Includes the studio's isolated appearance and scene review modules/styles.
-  assert.ok(result.fileCount <= 244);
+  assert.ok(result.fileCount <= 247);
   assert.deepEqual(await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html')), pagesSource);
   for (const required of ['index.html', 'map.html', 'wedding.ics', 'manage.html', 'accounts.html',
     'assets/audio/wedding-day.mp3', 'assets/fonts/RIDIBatang-Regular.woff2',

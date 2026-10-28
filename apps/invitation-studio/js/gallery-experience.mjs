@@ -25,7 +25,7 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   if (!stage || !grid || !gallery) return { setEnabled() {}, refresh() {}, destroy() {} };
   const previousHidden = grid.hidden, cleanups = [], reduced = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   let photos = [], index = -1, selectedId, fingerprint = '', requested = enabled, active = false, disposed = false, frame = 0;
-  let startPointer, suppressClick = false, engaged = false, animation;
+  let startPointer, suppressClick = false, engaged = false, animation, scrollEnabled = true;
   const create = (tag, className, text) => { const node = doc.createElement(tag); node.className = className; if (text) node.textContent = text; return node; };
   const listen = (target, type, fn, options) => { target?.addEventListener?.(type, fn, options); cleanups.push(() => target?.removeEventListener?.(type, fn, options)); };
   const root = create('div', 'experience-album'); root.setAttribute('aria-label', '두 사람의 사진첩');
@@ -53,12 +53,12 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   function cancelAnimation() { animation?.cancel(); animation = undefined; }
   function paintProgress() {
     frame = 0;
-    if (!canAnimate()) return;
+    if (!canAnimate() || !scrollEnabled) return;
     const bounds = scene.getBoundingClientRect(), viewport = win.innerHeight;
     if (bounds.bottom < -40 || bounds.top > viewport + 40) return;
     root.style.setProperty('--album-reveal', String(engaged ? 1 : albumEntry(bounds.top, viewport)));
   }
-  function queue() { if (!disposed && canAnimate() && !frame) frame = win.requestAnimationFrame(paintProgress); }
+  function queue() { if (!disposed && canAnimate() && scrollEnabled && !frame) frame = win.requestAnimationFrame(paintProgress); }
   function settle() { engaged = true; root.style.setProperty('--album-reveal', '1'); }
   function renderSelection({ animate = false, scrollThumbnail = false } = {}) {
     const photo = photos[index]; if (!photo) return;
@@ -113,9 +113,9 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   }
   function setEnabled(value) {
     requested = Boolean(value); active = requested && !reduced?.matches;
-    root.classList.toggle('album-motion', active);
+    root.classList.toggle('album-motion', active && scrollEnabled);
     if (frame) win.cancelAnimationFrame(frame); frame = 0;
-    if (!active) { root.style.setProperty('--album-reveal', '1'); cancelAnimation(); }
+    if (!active || !scrollEnabled) { root.style.setProperty('--album-reveal', '1'); if (!active) cancelAnimation(); }
     else queue();
   }
   listen(focus, 'click', event => {
@@ -163,6 +163,7 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   refresh(); setEnabled(enabled);
   return {
     setEnabled, refresh,
+    setScrollEnabled(value) { scrollEnabled = Boolean(value); setEnabled(requested); },
     get index() { return index; },
     destroy() {
       disposed = true; if (frame) win.cancelAnimationFrame(frame); cancelAnimation();

@@ -11,7 +11,7 @@ export function recipientIndex(index, length) {
 
 /** Native document scroll drives short, independent scenes. No wheel interception or frame loop. */
 export function mountExperience({ doc = document, win = window, enabled = true, variant, gallery, includeGallery = true, includeUpper = true } = {}) {
-  let active = Boolean(enabled), frame = 0, destroyed = false;
+  let active = Boolean(enabled), scrollEnabled = true, frame = 0, destroyed = false;
   const cleanups = [], animations = new Set();
   const query = selector => doc.querySelector(selector);
   const all = selector => [...doc.querySelectorAll(selector)];
@@ -26,20 +26,20 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
   const album = includeGallery ? mountGalleryExperience({ doc, win, enabled, gallery }) : { setEnabled() {}, refresh() {}, destroy() {} };
   const cover = query('.hero'), date = query('.date-scene'), arrival = query('.arrival-card'), journey = query('.journey');
   const dock = query('.experience-dock');
-  const sections = all('main > section[id]');
 
   function render() {
     frame = 0;
     if (destroyed || doc.hidden || query('dialog[open]')) return;
     const height = win.innerHeight, hero = cover?.getBoundingClientRect();
     const dateRect = date?.getBoundingClientRect(), arrivalRect = arrival?.getBoundingClientRect(), journeyRect = journey?.getBoundingClientRect();
-    const current = sections.filter(section => section.getBoundingClientRect().top <= height * .42).at(-1)?.id;
+    const current = all('main > section[id]').filter(section => !section.hidden && section.getBoundingClientRect().top <= height * .42).at(-1)?.id;
     dock?.classList.toggle('is-cover', Boolean(hero && hero.bottom > height * .35));
     const selected = current === 'gallery' ? 'gallery' : current === 'location' ? 'location' : current === 'wedding-day' ? 'wedding-day' : '';
     all('[data-dock]').forEach(link => link.setAttribute('aria-current', String(link.dataset.dock === selected)));
+    query('#quick-menu-toggle')?.setAttribute('aria-current', String(Boolean(current && !selected)));
     const total = Math.max(1, doc.documentElement.scrollHeight - height);
     dock?.style.setProperty('--reading', String(clamp(win.scrollY / total)));
-    if (!active) return;
+    if (!active || !scrollEnabled) return;
     if (includeUpper) {
       cover?.style.setProperty('--cover', String(clamp(-hero.top / Math.max(1, hero.height))));
       date?.style.setProperty('--scene', String(clamp((height * .86 - dateRect.top) / Math.max(1, height * .95))));
@@ -130,8 +130,8 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
     scrollPreviewTo(first, { win, behavior: active ? 'smooth' : 'instant', block: 'center' });
   });
   function setEnabled(value) {
-    active = Boolean(value); doc.body.classList.toggle('experience-active', active);
-    if (!active) {
+    active = Boolean(value); doc.body.classList.toggle('experience-active', active && scrollEnabled);
+    if (!active || !scrollEnabled) {
       animations.forEach(animation => animation.cancel()); animations.clear();
       for (const [element, property, final] of [[cover,'--cover',0],[date,'--scene',1],[arrival,'--arrival',1],[journey,'--journey',1]]) element?.style.setProperty(property, String(final));
     }
@@ -140,6 +140,7 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
   setEnabled(enabled);
   return {
     setEnabled,
+    setScrollEnabled(value) { scrollEnabled = Boolean(value); setEnabled(active); },
     refresh() { album.refresh(); schedule(); },
     destroy() {
       destroyed = true; if (frame) win.cancelAnimationFrame(frame); frame = 0;

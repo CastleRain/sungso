@@ -1,0 +1,35 @@
+/* A restrained global entrance layer. Chosen section illustrations retain their own styles. */
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="still"]) .reveal {
+  transition: none;
+}
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="still"]) .reveal:not(.is-visible) {
+  opacity: 1;
+  transform: none;
+}
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"]) .global-scroll-target.reveal:not(.is-visible) {
+  opacity: var(--global-scroll-opacity, 1);
+}
+body.global-scroll-active[data-scroll-effect="rise"] main.paper > .section > .global-scroll-target {
+  opacity: var(--global-scroll-opacity, 1);
+  translate: 0 var(--global-scroll-y, 0px);
+}
+body.global-scroll-active[data-scroll-effect="focus"] main.paper > .section > .global-scroll-target {
+  opacity: var(--global-scroll-opacity, 1);
+  scale: var(--global-scroll-scale, 1);
+  filter: blur(var(--global-scroll-blur, 0px));
+  transform-origin: center 28%;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.global-scroll-active main.paper > .section > .global-scroll-target {
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+    filter: none !important;
+  }
+}
+html.motion-off body.global-scroll-active main.paper > .section > .global-scroll-target {
+  opacity: 1 !important;
+  translate: none !important;
+  scale: none !important;
+  filter: none !important;
+}

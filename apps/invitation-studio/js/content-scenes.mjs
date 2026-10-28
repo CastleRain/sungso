@@ -18,7 +18,7 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
   const previous = { story: doc.body.dataset.story, album: doc.body.dataset.album };
   const reduced = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   const cleanups = [], decorations = [];
-  let choices = contentChoices(composition), requested = Boolean(enabled), frame = 0, disposed = false, progress = 0;
+  let choices = contentChoices(composition), requested = Boolean(enabled), scrollEnabled = true, frame = 0, disposed = false, progress = 0;
   const album = albumFactory({ doc, win, gallery, enabled: false });
   const active = () => requested && !reduced?.matches && !disposed;
   const blocked = () => doc.hidden || Boolean(doc.querySelector('dialog[open]'));
@@ -56,18 +56,19 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
   function cancel() { if (frame) win.cancelAnimationFrame(frame); frame = 0; }
   function render() {
     frame = 0;
-    if (!active() || blocked() || !entry) return;
+    if (!active() || !scrollEnabled || blocked() || !entry) return;
     const bounds = entry.getBoundingClientRect();
     // Completed reading remains visible when returning upwards or closing a chapter.
     progress = Math.max(progress, contentProgress(bounds.top, win.innerHeight));
     story.style.setProperty('--content-progress', String(progress));
   }
-  function queue() { if (active() && !blocked() && !frame) frame = win.requestAnimationFrame(render); }
+  function queue() { if (active() && scrollEnabled && !blocked() && !frame) frame = win.requestAnimationFrame(render); }
   function sync() {
     cancel();
-    doc.body.classList.toggle('content-motion', active());
+    doc.body.classList.toggle('content-motion', active() && scrollEnabled);
     album.setEnabled(active() && choices.album !== 'grid');
-    if (!active()) story?.style.setProperty('--content-progress', '1');
+    album.setScrollEnabled?.(scrollEnabled);
+    if (!active() || !scrollEnabled) story?.style.setProperty('--content-progress', '1');
     else queue();
   }
   function setComposition(value) {
@@ -94,6 +95,7 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
   return {
     setComposition,
     setEnabled(value) { if (disposed) return; requested = Boolean(value); sync(); },
+    setScrollEnabled(value) { if (disposed) return; scrollEnabled = Boolean(value); sync(); },
     refresh() { if (!disposed) { album.refresh(); queue(); } },
     destroy() {
       if (disposed) return;

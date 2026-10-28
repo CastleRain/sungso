@@ -136,6 +136,7 @@ function jumpTo(id, { replayOpening = false, reviewKey } = {}) {
       if (reviewKey) cancelScrollReview = afterPreviewScroll({ win: window, doc: document, onSettled: () => {
         if (generation !== jumpGeneration) return;
         themeController?.refresh();
+        if (reviewKey === 'motion') themeController?.previewMotion(id);
         sceneReview.show({ section: id, key: reviewKey, label: CHOICES[reviewKey]?.find(choice => choice.id === composition[reviewKey])?.label || '' });
       } });
     });

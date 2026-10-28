@@ -1,5 +1,15 @@
 /** Only visual choices may cross the editor/preview boundary. Never accepts data mode or URLs. */
-export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack' });
+export const ORDER_SECTIONS = Object.freeze([
+  { id: 'invitation', label: '초대글 · 가족 소개' },
+  { id: 'wedding-day', label: '예식 날짜' },
+  { id: 'location', label: '오시는 길' },
+  { id: 'our-story', label: '우리의 이야기' },
+  { id: 'gallery', label: '사진첩' },
+  { id: 'accounts', label: '마음 전하실 곳' },
+  { id: 'guestbook', label: '축하의 편지' },
+].map(section => Object.freeze(section)));
+export const DEFAULT_ORDER = Object.freeze(ORDER_SECTIONS.map(section => section.id));
+export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', motion: 'signature', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', order: DEFAULT_ORDER });
 export const CHOICES = Object.freeze({
   palette: Object.freeze([
     { id: 'mist', label: '안개 블루', detail: '지금의 차분한 블루와 맑은 종이색을 유지해요.', source: 'ORIGINAL · 색감' },
@@ -11,6 +21,12 @@ export const CHOICES = Object.freeze({
     { id: 'letter', label: '단정한 편지', detail: '부드러운 리디바탕 본문과 또렷한 함렛 제목.', source: 'ORIGINAL · 글씨체' },
     { id: 'editorial', label: '또렷한 세리프', detail: '함렛의 단단한 획으로 이름과 문장을 선명하게.', source: 'SERIF · 글씨체' },
     { id: 'modern', label: '가벼운 모던', detail: '정돈된 프리텐다드 본문에 기존 손글씨를 함께.', source: 'MODERN · 글씨체' },
+  ]),
+  motion: Object.freeze([
+    { id: 'signature', label: '장면 그대로', detail: '고른 장면의 펼침과 스크롤 연출을 그대로 살려요.', source: 'ORIGINAL · 스크롤' },
+    { id: 'rise', label: '살며시 떠오르기', detail: '각 장면에 아래에서 살짝 떠오르는 흐름을 더해요.', source: 'RISE · 스크롤' },
+    { id: 'focus', label: '선명해지는 장면', detail: '각 장면에 조금씩 가까워지고 선명해지는 흐름을 더해요.', source: 'FOCUS · 스크롤' },
+    { id: 'still', label: '차분하게 읽기', detail: '스크롤 움직임만 쉬어요. 첫 손글씨와 클릭 동작은 유지돼요.', source: 'STILL · 스크롤' },
   ]),
   cover: Object.freeze([
     { id: 'cinema', label: '시네마 프레임', detail: '가득 찬 사진이 작은 프레임으로 이어져요.', source: 'F · 다듬은 표지' },
@@ -47,20 +63,33 @@ export const CHOICES = Object.freeze({
     { id: 'grid', label: '한눈에 보는 사진첩', detail: '모든 순간을 차분한 격자로 살펴봐요.', source: 'VER6 · 사진첩' },
   ]),
 });
+export const CHOICE_KEYS = Object.freeze(Object.keys(CHOICES));
 export const PRESETS = Object.freeze([
   { id: 'flow', label: '01 · 잔잔하게 이어지는', detail: '기존 F의 분위기에서 새 초대글을 더했어요.', composition: DEFAULT_COMPOSITION },
   { id: 'light', label: '02 · 빛이 열리는', detail: '빛으로 드러나는 손글씨와 커튼, 둥근 날짜의 조합.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact' }) },
   { id: 'letter', label: '03 · 우리의 작은 영화', detail: '흐르는 손글씨와 열리는 창, 커피 한 잔의 이야기.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'cafe', album: 'stack' }) },
 ]);
-export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
+export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
+/** Every required section occurs once. Cover and closing never enter the movable list. */
+export function normalizeOrder(input) {
+  const values = typeof input === 'string' ? input.slice(0, 512).split(',') : Array.isArray(input) ? input.slice(0, 64) : [];
+  const selected = values.filter(value => typeof value === 'string' && DEFAULT_ORDER.includes(value));
+  return [...new Set([...selected, ...DEFAULT_ORDER])];
+}
+export function moveSection(input, section, position) {
+  const order = normalizeOrder(input);
+  if (!DEFAULT_ORDER.includes(section) || !Number.isInteger(position) || position < 0 || position >= order.length) return order;
+  order.splice(order.indexOf(section), 1); order.splice(position, 0, section); return order;
+}
 export function normalizeComposition(input) {
-  const result = { ...DEFAULT_COMPOSITION };
+  const result = { ...DEFAULT_COMPOSITION, order: [...DEFAULT_ORDER] };
   if (!input || typeof input !== 'object' || Array.isArray(input)) return result;
   if (Object.hasOwn(input, 'version') && String(input.version) !== '1') return result;
-  const candidate = input.composition && typeof input.composition === 'object' && !Array.isArray(input.composition) ? input.composition : input;
-  for (const key of Object.keys(result)) {
+  const candidate = Object.hasOwn(input, 'composition') && input.composition && typeof input.composition === 'object' && !Array.isArray(input.composition) ? input.composition : input;
+  for (const key of CHOICE_KEYS) {
     if (Object.hasOwn(candidate, key) && typeof candidate[key] === 'string' && CHOICES[key].some(choice => choice.id === candidate[key])) result[key] = candidate[key];
   }
+  if (Object.hasOwn(candidate, 'order')) result.order = normalizeOrder(candidate.order);
   return result;
 }
 export function readComposition(search = '') {
@@ -68,8 +97,9 @@ export function readComposition(search = '') {
   return normalizeComposition(Object.fromEntries(params));
 }
 export function compositionParams(input) {
-  return new URLSearchParams({ version: '1', ...normalizeComposition(input) });
+  const result = normalizeComposition(input);
+  return new URLSearchParams({ version: '1', ...result, order: result.order.join(',') });
 }
 export function sameComposition(left, right) {
-  return Object.keys(DEFAULT_COMPOSITION).every(key => left?.[key] === right?.[key]);
+  return CHOICE_KEYS.every(key => left?.[key] === right?.[key]) && Array.isArray(left?.order) && Array.isArray(right?.order) && left.order.length === right.order.length && left.order.every((id, index) => id === right.order[index]);
 }
