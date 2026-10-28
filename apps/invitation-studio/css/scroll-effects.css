@@ -39,7 +39,7 @@ body.global-scroll-active[data-scroll-effect="unveil"] main.paper > .section > .
   inset: -8px;
   background: linear-gradient(100deg, transparent, var(--paper) 55%, var(--paper));
   opacity: var(--global-scroll-veil, 0);
-  clip-path: inset(0 var(--global-scroll-wipe, 100%) 0 0);
+  clip-path: inset(0 0 0 var(--global-scroll-wipe, 100%));
   pointer-events: none;
   z-index: 8;
 }

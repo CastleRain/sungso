@@ -29,12 +29,12 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
 
   function paint(node, progress) {
     node.style.setProperty('--global-scroll-opacity', String(.68 + .32 * progress));
-    node.style.setProperty('--global-scroll-y', `${16 * (1 - progress)}px`);
-    node.style.setProperty('--global-scroll-scale', String(.98 + .02 * progress));
-    node.style.setProperty('--global-scroll-blur', `${1.2 * (1 - progress)}px`);
-    node.style.setProperty('--global-scroll-x', `${18 * (1 - progress) * (targets.get(node)?.direction || 1)}px`);
-    node.style.setProperty('--global-scroll-breathe', String(1 + .035 * (1 - progress)));
-    node.style.setProperty('--global-scroll-veil', String(.24 * (1 - progress)));
+    node.style.setProperty('--global-scroll-y', `${44 * (1 - progress)}px`);
+    node.style.setProperty('--global-scroll-scale', String(.9 + .1 * progress));
+    node.style.setProperty('--global-scroll-blur', `${3.5 * (1 - progress)}px`);
+    node.style.setProperty('--global-scroll-x', `${44 * (1 - progress) * (targets.get(node)?.direction || 1)}px`);
+    node.style.setProperty('--global-scroll-breathe', String(1 + .09 * (1 - progress)));
+    node.style.setProperty('--global-scroll-veil', String(.72 * (1 - progress)));
     node.style.setProperty('--global-scroll-wipe', `${100 * progress}%`);
   }
   function restore(node, record) {
@@ -100,11 +100,11 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     record.progress = 1; paint(node, 1);
     if (!node.animate) return false;
     const frames = {
-      rise: [{ opacity: .68, translate: '0 16px' }, { opacity: 1, translate: '0 0' }],
-      focus: [{ opacity: .68, scale: .98, filter: 'blur(1.2px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)' }],
-      drift: [{ opacity: .68, translate: `${18 * record.direction}px 0` }, { opacity: 1, translate: '0 0' }],
+      rise: [{ opacity: .68, translate: '0 44px' }, { opacity: 1, translate: '0 0' }],
+      focus: [{ opacity: .68, scale: .9, filter: 'blur(3.5px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)' }],
+      drift: [{ opacity: .68, translate: `${44 * record.direction}px 0` }, { opacity: 1, translate: '0 0' }],
       unveil: [{ opacity: .78 }, { opacity: 1 }],
-      breathe: [{ opacity: .78, scale: 1.035 }, { opacity: 1, scale: 1 }],
+      breathe: [{ opacity: .78, scale: 1.09 }, { opacity: 1, scale: 1 }],
     }[current];
     const track = animation => {
       animations.add(animation);
@@ -118,8 +118,8 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
         // content remains intact, including in browsers without pseudo-element WAAPI.
         try {
           const veil = node.animate([
-            { opacity: .24, clipPath: 'inset(0 0% 0 0)' },
-            { opacity: 0, clipPath: 'inset(0 100% 0 0)' },
+            { opacity: .72, clipPath: 'inset(0 0 0 0%)' },
+            { opacity: 0, clipPath: 'inset(0 0 0 100%)' },
           ], { duration: 800, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none', pseudoElement: '::after' });
           track(veil);
           // Older engines may silently ignore this option. Cancel synchronously
@@ -157,12 +157,21 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     replay,
     prepareDemo() {
       cancel(); cancelAnimations();
+      const before = new Map([...targets].map(([node, record]) => [node, record.progress]));
+      let restored = false;
       for (const record of targets.values()) record.progress = 0;
       render();
       return () => {
+        if (restored || disposed) return;
+        restored = true;
         cancel(); cancelAnimations();
-        // A cancelled editor demonstration must never leave read content dimmed.
-        for (const [node, record] of targets) { record.progress = 1; paint(node, 1); }
+        // Settle what is on screen or was already read. Do not consume the entrance
+        // of unread sections below the viewport merely because a demo finished.
+        for (const [node, record] of targets) {
+          const top = record.section?.getBoundingClientRect().top;
+          record.progress = !Number.isFinite(top) || top < win.innerHeight ? 1 : before.get(node) || 0;
+          paint(node, active() && !blocked() ? record.progress : 1);
+        }
       };
     },
     destroy() {

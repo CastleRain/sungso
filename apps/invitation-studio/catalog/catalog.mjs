@@ -178,6 +178,10 @@ function makeSample(key, value, mini = false) {
   } else {
     sample.append(node('span', 'sample-caption', '예식　 길찾기　 사진'), node('span', 'sample-script', 'Always with you'));
   }
+  if (key === 'motion' && !mini) sample.append(node('span', 'sample-motion-kind', {
+    signature: '장면 고유 연출', rise: '아래 → 위', focus: '작게 · 흐림 → 크게 · 선명',
+    drift: '양옆 → 가운데', unveil: '커튼 · 왼쪽 → 오른쪽', breathe: '크게 → 작게', still: '움직임 없음',
+  }[value]));
   return sample;
 }
 function syncExpanded() {
@@ -217,7 +221,9 @@ function mountChoices() {
     const count = node('span', 'choice-count', `${CHOICES[key].length}가지`); count.append(node('span', 'expand-symbol', '＋'));
     button.append(sample, text, count); button.addEventListener('click', () => { const scroll = $('#editor-content'), oldTop = group.getBoundingClientRect().top; restoreCurrent(); openKey = openKey === key ? null : key; syncExpanded(); scroll.scrollTop += group.getBoundingClientRect().top - oldTop; if (openKey) { activeReviewKey = key; requestPreview(composition, { key }); } });
     const content = node('div', 'inline-options'); content.id = `options-${key}`;
-    content.append(node('p', 'inline-hint', '표현을 누르면 실제 장면이 바로 재생돼요.'));
+    content.append(node('p', 'inline-hint', key === 'motion'
+      ? '같은 초대글과 날짜 구간에서 비교해요. 방향·크기·초점의 차이를 봐주세요.'
+      : '표현을 누르면 실제 장면이 바로 재생돼요.'));
     optionStates.set(key, { search: '', limit: 6 });
     if (CHOICES[key].length > 6) {
       const search = node('input', 'options-search'); search.type = 'search'; search.placeholder = '이름이나 느낌 찾기'; search.setAttribute('aria-label', `${labels[key]} 표현 검색`);

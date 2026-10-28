@@ -43,9 +43,9 @@ test('scroll modes are allowlisted and entrance progress is finite, bounded and 
 test('drift alternates with current section order and settles to the exact original position', () => {
   const f = fixture({ mode: 'drift' }); f.flush();
   assert.ok(parseFloat(f.first.values.get('--global-scroll-x')) < 0);
-  assert.equal(f.second.values.get('--global-scroll-x'), '18px');
+  assert.equal(f.second.values.get('--global-scroll-x'), '44px');
   f.nodes.reverse(); f.controller.refresh(); f.flush();
-  assert.equal(f.second.values.get('--global-scroll-x'), '-18px');
+  assert.equal(f.second.values.get('--global-scroll-x'), '-44px');
   f.second.parentElement.top = 0; f.fire(f.win, 'scroll'); f.flush();
   assert.equal(f.second.values.get('--global-scroll-x'), '0px');
   assert.equal(f.frames.size, 0); f.controller.destroy();
@@ -53,10 +53,10 @@ test('drift alternates with current section order and settles to the exact origi
 
 test('breathe uses a bounded zoom-out and unveil only paints a transparent decorative curtain', () => {
   const f = fixture({ mode: 'breathe' }); f.flush();
-  assert.equal(f.second.values.get('--global-scroll-breathe'), '1.035');
-  assert.ok(Number(f.first.values.get('--global-scroll-breathe')) < 1.035);
+  assert.equal(f.second.values.get('--global-scroll-breathe'), '1.09');
+  assert.ok(Number(f.first.values.get('--global-scroll-breathe')) < 1.09);
   f.controller.setMode('unveil'); f.flush();
-  assert.equal(f.second.values.get('--global-scroll-veil'), '0.24');
+  assert.equal(f.second.values.get('--global-scroll-veil'), '0.72');
   assert.equal(f.second.values.get('--global-scroll-wipe'), '0%');
   assert.equal(f.second.values.has('clip-path'), false);
   f.fire(f.doc, 'focusin', f.second);
@@ -87,14 +87,14 @@ test('every added mode suspends safely and stops running while disabled, hidden 
 test('added effect previews animate the selected section without clipping any content', () => {
   const f = fixture({ mode: 'drift' }); f.flush();
   assert.equal(f.controller.replay('gallery'), true);
-  assert.equal(f.second.animations.at(-1).frames[0].translate, '18px 0');
+  assert.equal(f.second.animations.at(-1).frames[0].translate, '44px 0');
   f.controller.setMode('breathe'); f.flush(); f.controller.replay('gallery');
-  assert.equal(f.second.animations.at(-1).frames[0].scale, 1.035);
+  assert.equal(f.second.animations.at(-1).frames[0].scale, 1.09);
   f.controller.setMode('unveil'); f.flush(); f.controller.replay('gallery');
   const content = f.second.animations.at(-2), curtain = f.second.animations.at(-1);
   assert.equal(content.frames.some(frame => 'clipPath' in frame), false);
   assert.equal(curtain.effect.pseudoElement, '::after'); assert.equal(curtain.cancelled, false);
-  assert.equal(curtain.frames[1].clipPath, 'inset(0 100% 0 0)');
+  assert.equal(curtain.frames[1].clipPath, 'inset(0 0 0 100%)');
   f.fire(f.doc, 'pointerdown', f.second);
   assert.equal(content.cancelled, true); assert.equal(curtain.cancelled, true);
   f.controller.destroy();
@@ -118,11 +118,11 @@ test('scroll schedules one frame and retains fully read sections when moving bac
   f.controller.destroy();
 });
 
-test('signature and still do not activate global transformations; focus stays subtle', () => {
+test('signature and still do not activate global transformations; focus has a distinct bounded approach', () => {
   const f = fixture({ mode: 'signature' }); assert.equal(f.frames.size, 0); assert.equal(f.doc.body.classList.contains('global-scroll-active'), false);
   f.controller.setMode('focus'); f.flush(); assert.equal(f.doc.body.dataset.scrollEffect, 'focus');
-  assert.ok(Number(f.second.values.get('--global-scroll-scale')) >= .98);
-  assert.ok(parseFloat(f.second.values.get('--global-scroll-blur')) <= 1.2);
+  assert.ok(Number(f.second.values.get('--global-scroll-scale')) >= .9);
+  assert.ok(parseFloat(f.second.values.get('--global-scroll-blur')) <= 3.5);
   f.controller.setMode('still'); assert.equal(f.frames.size, 0); assert.equal(f.doc.body.classList.contains('global-scroll-active'), false); assert.equal(f.second.values.get('--global-scroll-opacity'), '1');
   f.controller.destroy();
 });
@@ -158,11 +158,11 @@ test('removal and destruction restore only this layer and cancel pending work', 
 test('explicit preview replays only the selected section with the selected global effect', async () => {
   const f = fixture(); f.flush();
   assert.equal(f.controller.replay('invitation'), true);
-  const rise = f.first.animations[0]; assert.equal(rise.frames[0].translate, '0 16px'); assert.equal(rise.options.duration, 650); assert.equal(rise.options.fill, 'none');
+  const rise = f.first.animations[0]; assert.equal(rise.frames[0].translate, '0 44px'); assert.equal(rise.options.duration, 650); assert.equal(rise.options.fill, 'none');
   assert.equal(f.second.animations.length, 0); assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
   assert.equal(f.controller.replay('invitation'), true); assert.equal(rise.cancelled, true);
   f.controller.setMode('focus'); f.flush(); assert.equal(f.first.animations[1].cancelled, true);
-  assert.equal(f.controller.replay('gallery'), true); const focus = f.second.animations[0]; assert.equal(focus.frames[0].scale, .98); assert.equal(focus.frames[1].filter, 'blur(0px)');
+  assert.equal(f.controller.replay('gallery'), true); const focus = f.second.animations[0]; assert.equal(focus.frames[0].scale, .9); assert.equal(focus.frames[1].filter, 'blur(0px)');
   focus.complete(); await Promise.resolve(); assert.equal(focus.cancelled, false);
   f.controller.destroy();
 });
@@ -181,7 +181,7 @@ test('preview refuses unsafe or disabled targets and stops for user input, dialo
   f.controller.destroy();
 });
 
-test('scroll demo can replay an already read unchanged mode then leave all content readable on cancel', () => {
+test('scroll demo can replay an already read unchanged mode then leave previously read content readable on cancel', () => {
   for (const mode of SCROLL_EFFECTS) {
     const f = fixture({ mode });
     f.first.parentElement.top = 0; f.second.parentElement.top = 0; f.fire(f.win, 'scroll'); f.flush();
@@ -211,4 +211,35 @@ test('preparing a demo never reenables disabled or reduced scroll effects', () =
     assert.equal(f.first.values.get('--global-scroll-opacity'), '1'); assert.equal(f.frames.size, 0);
     restore(); f.controller.destroy();
   }
+});
+
+test('finishing or cancelling a demo preserves the entrance of unread sections below the viewport', () => {
+  for (const mode of ['rise', 'focus', 'drift', 'unveil', 'breathe']) {
+    const f = fixture({ mode }); f.flush();
+    const restore = f.controller.prepareDemo('motion');
+    f.first.parentElement.top = 20; f.fire(f.win, 'scroll'); f.flush();
+    restore();
+    assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+    assert.equal(f.second.values.get('--global-scroll-opacity'), '0.68');
+    assert.equal(f.second.values.get('--global-scroll-wipe'), '0%');
+    // A real subsequent scroll must still reveal the section that the demo never read.
+    f.second.parentElement.top = 640; f.fire(f.win, 'scroll'); f.flush();
+    assert.ok(Number(f.second.values.get('--global-scroll-opacity')) > .68);
+    assert.ok(Number(f.second.values.get('--global-scroll-opacity')) < 1);
+    f.second.parentElement.top = 20; f.fire(f.win, 'scroll'); f.flush();
+    assert.equal(f.second.values.get('--global-scroll-opacity'), '1');
+    f.controller.destroy();
+  }
+});
+
+test('demo cleanup leaves visible content readable without consuming unread progress while motion is disabled', () => {
+  const f = fixture({ mode: 'focus' }); f.flush();
+  const restore = f.controller.prepareDemo('motion');
+  f.controller.setEnabled(false); restore();
+  assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+  assert.equal(f.second.values.get('--global-scroll-opacity'), '1');
+  f.controller.setEnabled(true); f.flush();
+  assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+  assert.equal(f.second.values.get('--global-scroll-opacity'), '0.68');
+  f.controller.destroy();
 });
