@@ -7,7 +7,7 @@ test('local life starters can be found without changing the shared six-app confi
   const config = normalizeHomeConfig();
   const before = structuredClone(config);
   const all = getBrowsableApps(config);
-  assert.equal(all.length, 11);
+  assert.equal(all.length, 12);
   assert.equal(all.filter(app => app.local).length, 3);
   assert.equal(getBrowsableApps(config, { query: '장보기' })[0].id, 'table');
   assert.equal(getBrowsableApps(config, { query: '사진첩' })[0].id, 'footprints');
@@ -21,15 +21,20 @@ test('local life starters can be found without changing the shared six-app confi
   assert.equal(sohee.href, './sohee/workspace/');
   assert.equal(sohee.pinnable, false);
   assert.throws(() => withHomeShortcuts(config, ['sohee']));
+  const journey = getBrowsableApps(config, {query: '타임라인'})[0];
+  assert.equal(journey.href, './journey/');
+  assert.equal(journey.local, undefined);
+  assert.equal(journey.pinnable, false);
+  assert.throws(() => withHomeShortcuts(config, ['journey']));
 });
 
-test('the eleven-app mobile library keeps both HomeHunt versions and all apps reachable', () => {
+test('the twelve-app mobile library keeps both HomeHunt versions and all apps reachable', () => {
   const apps = getBrowsableApps(normalizeHomeConfig());
   const first = paginateApps(apps, { page: 1, pageSize: 6 });
   const second = paginateApps(apps, { page: 2, pageSize: 6 });
   assert.equal(first.pageCount, 2);
-  assert.equal(second.items.length, 5);
-  assert.equal(new Set([...first.items, ...second.items].map(app => app.id)).size, 11);
+  assert.equal(second.items.length, 6);
+  assert.equal(new Set([...first.items, ...second.items].map(app => app.id)).size, 12);
   assert.ok(apps.some(app => app.id === 'homehunt' && app.href === './homehunt/'));
   assert.ok(apps.some(app => app.id === 'homehunt-v2' && app.href === './homehunt-v2/'));
 });

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+  <title>우리의 발자취 · sungso</title>
+  <link rel="stylesheet" href="../shared/theme/brand.css?v=sky-1">
+  <link rel="stylesheet" href="./style.css?v=1.0.0">
+  <script type="module" src="../shared/firebase/boot.mjs"></script>
+</head>
+<body data-app="journey">
+<main data-private-root hidden>
+  <header class="journey-header">
+    <a href="../" aria-label="sungso 우리 홈"><img class="sungso-wordmark" src="../shared/theme/sungso-wordmark-sky.png" alt="sungso" width="2091" height="752"></a>
+    <nav aria-label="주 메뉴"><a href="../">우리 홈</a><a href="../#apps">모든 앱</a><a href="./" aria-current="page">우리의 발자취</a></nav>
+    <span class="couple">성우와 소희</span>
+  </header>
+  <div class="journey-shell">
+    <aside class="sidebar">
+      <div class="intro"><p class="eyebrow">OUR JOURNEY</p><h1>우리의 발자취</h1><p>기록이 있는 날도,<br>사진으로 기억하는 날도.</p></div>
+      <section aria-label="기록 달력"><div class="month-nav"><button id="previousMonth" class="text-action" aria-label="이전 달">이전</button><h2 id="monthTitle"></h2><button id="nextMonth" class="text-action" aria-label="다음 달">다음</button></div><div class="weekdays" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div id="calendar" class="calendar"></div></section>
+      <label class="archive-label" for="archiveMonth">저장한 달</label><select id="archiveMonth"><option value="">불러오는 중</option></select>
+      <section class="month-records"><h2>이달의 기록</h2><div id="dayList"></div></section>
+      <button id="addOldPhoto" class="text-action older-action">사진으로 이전 기록 채우기</button>
+      <a href="../footprints/" class="legacy-link">기존 장소·방문 기록 보기</a>
+    </aside>
+    <section class="content" aria-label="선택한 날의 기록">
+      <div class="top-actions"><button id="openImport" class="primary">타임라인 추가</button><button id="addRecord">기록 추가</button><button id="refreshDay" class="text-action">새로 불러오기</button></div>
+      <div class="day-heading"><div><p id="selectedDate" class="selected-date"></p><h2 id="dayTitle">우리의 하루를 기록해요</h2></div><p class="save-state" id="saveState" role="status" aria-live="polite">저장한 기록을 불러오는 중…</p></div>
+      <div id="globalError" class="error-box" role="alert" hidden></div>
+      <div class="day-tools"><div class="people" role="group" aria-label="이동한 사람"><button data-person="all" aria-pressed="true">전체</button><button data-person="sungwoo" aria-pressed="false">성우</button><button data-person="sohee" aria-pressed="false">소희</button><button data-person="together" aria-pressed="false">함께</button></div><span class="source-legend">실제 이동 기록과 직접 남긴 장소를 함께 봐요</span></div>
+      <div class="map-wrap"><div id="journeyMap" class="map" aria-label="이날의 이동 지도"></div><div class="map-controls"><button id="playDay">이날 다시 보기</button><button id="stopDay" hidden>재생 멈추기</button><span id="playState" role="status"></span></div></div>
+      <div class="record-heading"><h3>이날 남긴 기억 <span id="recordCount"></span></h3><button id="addPhoto" class="text-action">사진 추가</button></div>
+      <div id="records" class="records"></div>
+      <section class="source-summary" id="sourceSummary" aria-label="기록 출처"></section>
+      <p class="quiet-note">타임라인을 다시 넣어도 직접 보완한 기록은 유지해요. 새 기록은 확인한 뒤 저장합니다.</p>
+    </section>
+  </div>
+  <dialog id="recordDialog" aria-labelledby="recordDialogTitle"><form id="recordForm">
+    <header class="dialog-heading"><div><p class="eyebrow">OUR MEMORY</p><h2 id="recordDialogTitle">기억 한 장 남기기</h2></div><button type="button" data-close="recordDialog" class="text-action">닫기</button></header>
+    <div class="form-body">
+      <label class="photo-input">사진 <span>선택 · JPG, PNG, WebP · 20MB 이하</span><input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp"></label><img id="photoPreview" class="photo-preview" alt="저장할 사진 미리보기" hidden>
+      <button id="viewPhoto" type="button" class="text-action" hidden>사진 크게 보기</button>
+      <p id="photoNote" class="field-note"></p>
+      <div class="form-row"><label>날짜<input id="recordDate" type="date" required></label><label>시간 <span>모르면 비워두세요</span><input id="recordTime" type="time"></label></div>
+      <label>누구의 기록<select id="recordPerson"><option value="together">함께</option><option value="sungwoo">성우</option><option value="sohee">소희</option></select></label>
+      <label>장소 또는 기억의 제목<input id="recordTitle" maxlength="100" required placeholder="어디에서 무엇을 했나요?"></label>
+      <label>짧은 메모<textarea id="recordNote" rows="3" maxlength="2000" placeholder="이날 기억하고 싶은 이야기"></textarea></label>
+      <div class="location-heading"><span>위치 <small>선택</small></span><button type="button" id="pickLocation" class="text-action">지도에서 위치 고르기</button></div>
+      <div class="form-row"><label>위도<input id="recordLat" type="number" step="any" min="-90" max="90" placeholder="37.5"></label><label>경도<input id="recordLng" type="number" step="any" min="-180" max="180" placeholder="127.0"></label></div>
+      <p class="field-note">사진의 날짜·위치를 확인해 채워요. 위치를 모르면 사진과 메모만 저장할 수 있어요.</p>
+      <p id="recordError" class="form-error" role="alert"></p>
+    </div><footer class="dialog-footer"><button type="button" data-close="recordDialog">취소</button><button id="saveRecord" type="submit" class="primary">기록 저장</button></footer>
+  </form></dialog>
+  <dialog id="photoDialog" class="photo-viewer" aria-labelledby="photoViewTitle">
+    <header class="dialog-heading"><h2 id="photoViewTitle">이날의 사진</h2><button id="closePhotoView" type="button" class="text-action" autofocus>기록으로 돌아가기</button></header>
+    <p id="photoViewStatus" class="field-note" role="status" aria-live="polite"></p>
+    <img id="fullPhoto" alt="이날의 사진" hidden>
+  </dialog>
+  <dialog id="importDialog" aria-labelledby="importTitle"><form id="importForm">
+    <header class="dialog-heading"><div><p class="eyebrow">ADD YOUR TIMELINE</p><h2 id="importTitle">우리의 길을 가져와요</h2></div><button type="button" data-close="importDialog" class="text-action">닫기</button></header>
+    <div class="form-body"><p class="dialog-copy">Google 타임라인 JSON 파일을 선택해 주세요. 날짜별로 확인하고 기존 기록에 추가합니다.</p>
+    <label>누구의 타임라인인가요?<select id="importPerson"><option value="sungwoo">성우</option><option value="sohee">소희</option></select></label>
+    <label class="file-area">타임라인 파일 선택<input id="timelineFile" type="file" accept=".json,application/json"></label>
+    <p id="importProgress" role="status" aria-live="polite"></p><div id="importPreview" class="import-preview"></div><p id="importError" class="form-error" role="alert"></p>
+    <p class="field-note">같은 시각·좌표의 중복 경로는 건너뛰며, 직접 수정한 기록을 덮어쓰지 않아요. 원본 파일은 컴퓨터에 보관해 주세요.</p>
+    </div><footer class="dialog-footer"><button type="button" data-close="importDialog">닫기</button><button id="saveImport" class="primary" type="submit" disabled>확인한 기록 추가</button></footer>
+  </form></dialog>
+  <div id="pickNotice" class="pick-notice" hidden><span>지도에서 기억하는 장소를 눌러주세요.</span><button id="cancelPick">취소</button></div>
+</main>
+<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=1.0.0"></script>
+</body></html>

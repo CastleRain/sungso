@@ -151,6 +151,12 @@
       ]
     },
     {
+      "id": "journey",
+      "source": "apps/journey",
+      "output": "journey",
+      "files": ["index.html", "style.css", "js"]
+    },
+    {
       "id": "table",
       "source": "apps/table",
       "output": "table",
@@ -193,6 +199,11 @@
     }
   ],
   "shared": [
+    {
+      "source": "shared/journey",
+      "output": "shared/journey",
+      "files": ["core.mjs", "import.mjs"]
+    },
     {
       "source": "shared/finance",
       "output": "shared",
