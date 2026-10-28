@@ -9,7 +9,7 @@ export const ORDER_SECTIONS = Object.freeze([
   { id: 'guestbook', label: '축하의 편지' },
 ].map(section => Object.freeze(section)));
 export const DEFAULT_ORDER = Object.freeze(ORDER_SECTIONS.map(section => section.id));
-export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', motion: 'signature', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', order: DEFAULT_ORDER });
+export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', motion: 'signature', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', order: DEFAULT_ORDER });
 export const CHOICES = Object.freeze({
   palette: Object.freeze([
     { id: 'mist', label: '안개 블루', detail: '지금의 차분한 블루와 맑은 종이색을 유지해요.', source: 'ORIGINAL · 색감' },
@@ -26,6 +26,9 @@ export const CHOICES = Object.freeze({
     { id: 'signature', label: '장면 그대로', detail: '고른 장면의 펼침과 스크롤 연출을 그대로 살려요.', source: 'ORIGINAL · 스크롤' },
     { id: 'rise', label: '살며시 떠오르기', detail: '각 장면에 아래에서 살짝 떠오르는 흐름을 더해요.', source: 'RISE · 스크롤' },
     { id: 'focus', label: '선명해지는 장면', detail: '각 장면에 조금씩 가까워지고 선명해지는 흐름을 더해요.', source: 'FOCUS · 스크롤' },
+    { id: 'drift', label: '교차하는 흐름', detail: '양쪽에서 작은 움직임으로 장면이 가운데에 자리 잡아요.', source: 'DRIFT · 스크롤' },
+    { id: 'unveil', label: '걷히는 베일', detail: '얇은 베일이 걷히듯 장면이 드러나요.', source: 'UNVEIL · 스크롤' },
+    { id: 'breathe', label: '여백으로 스며들기', detail: '조금 가까웠던 장면이 여백 안으로 잔잔하게 자리 잡아요.', source: 'BREATHE · 스크롤' },
     { id: 'still', label: '차분하게 읽기', detail: '스크롤 움직임만 쉬어요. 첫 손글씨와 클릭 동작은 유지돼요.', source: 'STILL · 스크롤' },
   ]),
   cover: Object.freeze([
@@ -62,6 +65,26 @@ export const CHOICES = Object.freeze({
     { id: 'contact', label: '펼쳐지는 필름', detail: '사진들이 가볍게 펼쳐지고 한 장을 골라요.', source: 'G · 사진첩' },
     { id: 'grid', label: '한눈에 보는 사진첩', detail: '모든 순간을 차분한 격자로 살펴봐요.', source: 'VER6 · 사진첩' },
   ]),
+  arrival: Object.freeze([
+    { id: 'unfold', label: '펼쳐지는 약도', detail: '접어 둔 약도를 펼치고 교통편을 골라요.', source: 'ORIGINAL · 오시는 길' },
+    { id: 'itinerary', label: '한 줄의 도착 여정', detail: '가는 경로선과 정돈된 안내를 따라 도착해요.', source: 'JOURNEY · 오시는 길' },
+    { id: 'postcard', label: '부산에서 온 엽서', detail: '엽서 한 장에 장소와 지도를 함께 담아요.', source: 'POSTCARD · 오시는 길' },
+  ]),
+  gifting: Object.freeze([
+    { id: 'card', label: '받는 분의 카드', detail: '양가와 받는 분을 고르면 한 장의 카드가 바뀌어요.', source: 'ORIGINAL · 마음 전하실 곳' },
+    { id: 'ledger', label: '단정한 한 줄', detail: '가벼운 선과 또렷한 계좌 정보로 간결하게 전해요.', source: 'LINE · 마음 전하실 곳' },
+    { id: 'letter', label: '마음을 담은 편지', detail: '편지지 위에 받는 분과 계좌를 차분히 펼쳐요.', source: 'LETTER · 마음 전하실 곳' },
+  ]),
+  wishes: Object.freeze([
+    { id: 'envelope', label: '열어 보는 봉투', detail: '봉투를 열고 축하의 편지를 남겨요.', source: 'ORIGINAL · 방명록' },
+    { id: 'postcard', label: '축하의 엽서', detail: '한 장의 엽서에서 짧은 인사를 시작해요.', source: 'POSTCARD · 방명록' },
+    { id: 'notebook', label: '우리의 축하 노트', detail: '노트에 한 줄을 남기듯 두 사람에게 마음을 전해요.', source: 'NOTEBOOK · 방명록' },
+  ]),
+  navigation: Object.freeze([
+    { id: 'dock', label: '현재 장면의 메뉴', detail: '지금 읽는 위치를 표시하는 익숙한 하단 메뉴.', source: 'ORIGINAL · 빠른 메뉴' },
+    { id: 'ribbon', label: '가느다란 길잡이', detail: '종이 끝의 리본처럼 얇고 넓게 이어지는 메뉴.', source: 'RIBBON · 빠른 메뉴' },
+    { id: 'compact', label: '작은 책갈피', detail: '간격을 모은 작은 메뉴로 읽는 흐름을 가볍게.', source: 'BOOKMARK · 빠른 메뉴' },
+  ]),
 });
 export const CHOICE_KEYS = Object.freeze(Object.keys(CHOICES));
 export const PRESETS = Object.freeze([
@@ -69,7 +92,7 @@ export const PRESETS = Object.freeze([
   { id: 'light', label: '02 · 빛이 열리는', detail: '빛으로 드러나는 손글씨와 커튼, 둥근 날짜의 조합.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact' }) },
   { id: 'letter', label: '03 · 우리의 작은 영화', detail: '흐르는 손글씨와 열리는 창, 커피 한 잔의 이야기.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'cafe', album: 'stack' }) },
 ]);
-export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
+export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery', arrival: 'location', gifting: 'accounts', wishes: 'guestbook', navigation: 'location' });
 /** Every required section occurs once. Cover and closing never enter the movable list. */
 export function normalizeOrder(input) {
   const values = typeof input === 'string' ? input.slice(0, 512).split(',') : Array.isArray(input) ? input.slice(0, 64) : [];

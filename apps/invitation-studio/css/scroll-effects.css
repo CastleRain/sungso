@@ -1,12 +1,12 @@
 /* A restrained global entrance layer. Chosen section illustrations retain their own styles. */
-html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="still"]) .reveal {
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="drift"], [data-scroll-effect="unveil"], [data-scroll-effect="breathe"], [data-scroll-effect="still"]) .reveal {
   transition: none;
 }
-html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="still"]) .reveal:not(.is-visible) {
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="drift"], [data-scroll-effect="unveil"], [data-scroll-effect="breathe"], [data-scroll-effect="still"]) .reveal:not(.is-visible) {
   opacity: 1;
   transform: none;
 }
-html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"]) .global-scroll-target.reveal:not(.is-visible) {
+html.js-motion body:is([data-scroll-effect="rise"], [data-scroll-effect="focus"], [data-scroll-effect="drift"], [data-scroll-effect="unveil"], [data-scroll-effect="breathe"]) .global-scroll-target.reveal:not(.is-visible) {
   opacity: var(--global-scroll-opacity, 1);
 }
 body.global-scroll-active[data-scroll-effect="rise"] main.paper > .section > .global-scroll-target {
@@ -19,6 +19,39 @@ body.global-scroll-active[data-scroll-effect="focus"] main.paper > .section > .g
   filter: blur(var(--global-scroll-blur, 0px));
   transform-origin: center 28%;
 }
+body.global-scroll-active[data-scroll-effect="drift"] main.paper > .section > .global-scroll-target {
+  opacity: var(--global-scroll-opacity, 1);
+  translate: var(--global-scroll-x, 0px) 0;
+}
+body.global-scroll-active[data-scroll-effect="breathe"] main.paper > .section > .global-scroll-target {
+  opacity: var(--global-scroll-opacity, 1);
+  scale: var(--global-scroll-breathe, 1);
+  transform-origin: center 28%;
+}
+body.global-scroll-active[data-scroll-effect="unveil"] main.paper > .section > .global-scroll-target {
+  position: relative;
+  opacity: var(--global-scroll-opacity, 1);
+}
+/* The curtain only clips its own decoration, never a photo, link or focus ring. */
+body.global-scroll-active[data-scroll-effect="unveil"] main.paper > .section > .global-scroll-target::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  background: linear-gradient(100deg, transparent, var(--paper) 55%, var(--paper));
+  opacity: var(--global-scroll-veil, 0);
+  clip-path: inset(0 var(--global-scroll-wipe, 100%) 0 0);
+  pointer-events: none;
+  z-index: 8;
+}
+body.global-scroll-active main.paper > .section > .global-scroll-target:focus-within {
+  opacity: 1 !important;
+  translate: none !important;
+  scale: none !important;
+  filter: none !important;
+}
+body.global-scroll-active main.paper > .section > .global-scroll-target:focus-within::after {
+  opacity: 0 !important;
+}
 @media (prefers-reduced-motion: reduce) {
   body.global-scroll-active main.paper > .section > .global-scroll-target {
     opacity: 1 !important;
@@ -26,6 +59,7 @@ body.global-scroll-active[data-scroll-effect="focus"] main.paper > .section > .g
     scale: none !important;
     filter: none !important;
   }
+  body.global-scroll-active[data-scroll-effect="unveil"] main.paper > .section > .global-scroll-target::after { display: none; }
 }
 html.motion-off body.global-scroll-active main.paper > .section > .global-scroll-target {
   opacity: 1 !important;
@@ -33,3 +67,4 @@ html.motion-off body.global-scroll-active main.paper > .section > .global-scroll
   scale: none !important;
   filter: none !important;
 }
+html.motion-off body.global-scroll-active[data-scroll-effect="unveil"] main.paper > .section > .global-scroll-target::after { display: none; }

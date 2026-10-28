@@ -1,6 +1,6 @@
 // Editor-only feedback. This controller never reloads a document or mounts guest features.
-export const REVIEW_TARGETS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery' });
-const names = Object.freeze({ palette: '색감', font: '글씨체', motion: '전체 스크롤 효과', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' });
+export const REVIEW_TARGETS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery', arrival: 'location', gifting: 'accounts', wishes: 'guestbook', navigation: 'location' });
+const names = Object.freeze({ palette: '색감', font: '글씨체', motion: '전체 스크롤 효과', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴' });
 
 export function createSceneReview({ doc = document, win = window, enabled = true } = {}) {
   const reduced = win.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -53,6 +53,14 @@ export function createSceneReview({ doc = document, win = window, enabled = true
     } else if (key === 'album') {
       if (doc.body.dataset.album === 'grid') [...target.querySelectorAll('.gallery-photo')].slice(0, 6).forEach((node, index) => enter(node, index * 45));
       else { enter(target.querySelector('.album-feature'), 55); enter(target.querySelector('.album-filmstrip'), 120); }
+    } else if (key === 'arrival') {
+      enter(target.querySelector('.arrival-title'), 50); enter(target.querySelector('.journey'), 100);
+    } else if (key === 'gifting') {
+      enter(target.querySelector('.account-panel-frame'), 70);
+    } else if (key === 'wishes') {
+      enter(target.querySelector('#guestbook-write'), 55);
+    } else if (key === 'navigation') {
+      enter(doc.querySelector('.experience-dock'), 35);
     }
   }
   function show({ section, key, label } = {}) {

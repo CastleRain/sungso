@@ -1,14 +1,16 @@
 import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDER_SECTIONS, SECTION_IDS, moveSection, normalizeComposition, readComposition, compositionParams, sameComposition } from './js/composition.mjs';
+import { LIBRARY_LIMIT, LIBRARY_BYTES, cleanName, cleanNote, cleanRating, parseLibrary, selectSaved, updateSaved, exportSelection, parseImport } from './js/saved-library.mjs';
 
 const $ = selector => document.querySelector(selector);
 const frame = $('#invitation-preview');
 const STORAGE_KEY = 'sungso_invitation_studio_combinations_v1';
-const labels = { palette: '색감', font: '글씨체', motion: '공통 스크롤 효과', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩' };
-const keys = CHOICE_KEYS, globalKeys = ['palette', 'font', 'motion'], history = [], orderRows = new Map();
+const labels = { palette: '색감', font: '글씨체', motion: '공통 스크롤 효과', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴' };
+const keys = CHOICE_KEYS, globalKeys = ['palette', 'font', 'motion'], utilityKeys = ['arrival', 'gifting', 'wishes', 'navigation'], history = [], orderRows = new Map();
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, pendingJump, motionReady = true;
 let audioPhase = 'paused';
-let saved = readSaved();
+let savedReadFailed = false, savedSnapshot = null, saved = readSaved(), visibleSavedCount = 6, draftRating = 0, editingRecordId;
 let editingScroll = 0, editingFocus = null, viewFrame = 0;
+let chooserKey, chooserValue, chooserTrigger, chooserScroll = 0;
 
 function node(tag, className, text) { const el = document.createElement(tag); if (className) el.className = className; if (text) el.textContent = text; return el; }
 function post(message) { frame.contentWindow?.postMessage(message, location.origin); }
@@ -30,20 +32,21 @@ function urlFor(kind) {
   const url = new URL(kind === 'editor' ? './' : './preview/', location.href);
   url.search = compositionParams(composition).toString(); return url.href;
 }
-function cleanName(value) { return String(value || '').trim().slice(0, 32); }
 function readSaved() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw || raw.length > 32000) return [];
-    const data = JSON.parse(raw);
-    if (!Array.isArray(data)) return [];
-    return data.slice(0, 8).filter(item => item && typeof item === 'object' && typeof item.id === 'string').map(item => ({
-      id: item.id.slice(0, 80), name: cleanName(item.name) || '이름 없는 조합', composition: normalizeComposition(item.composition),
-    }));
-  } catch { return []; }
+  try { savedSnapshot = localStorage.getItem(STORAGE_KEY); return parseLibrary(savedSnapshot); }
+  catch { savedReadFailed = true; return []; }
 }
 function persistSaved(next) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); saved = next; renderSaved(); return true; }
+  if (savedReadFailed) { notify('기존 보관함을 읽지 못해 덮어쓰지 않았어요. 현재 조합은 파일로 보관해 주세요.'); return false; }
+  try {
+    const latest = localStorage.getItem(STORAGE_KEY);
+    if (latest !== savedSnapshot) {
+      try { saved = parseLibrary(latest); savedSnapshot = latest; renderSaved(); notify('다른 창에서 보관함이 바뀌어 최신 내용으로 맞췄어요. 지금 작업을 한 번 더 눌러 주세요.'); }
+      catch { savedReadFailed = true; renderSaved(); notify('다른 창의 보관함을 읽지 못해 덮어쓰지 않았어요.'); }
+      return false;
+    }
+    const serialized = JSON.stringify(next); localStorage.setItem(STORAGE_KEY, serialized); savedSnapshot = serialized; saved = next; renderSaved(); return true;
+  }
   catch { notify('이 브라우저에는 저장할 수 없어요. 조합 링크나 파일로 보관해 주세요.'); return false; }
 }
 function updateURL() {
@@ -74,10 +77,12 @@ function renderChoices() {
   for (const key of keys) {
     document.querySelectorAll(`input[name="${key}"]`).forEach(input => { input.checked = input.value === composition[key]; });
     const choice = CHOICES[key].find(item => item.id === composition[key]);
-    $(`[data-current="${key}"]`).textContent = choice.label;
+    const selected = $(`[data-current="${key}"]`); if (selected) selected.textContent = choice.label;
+    const sample = $(`[data-choice="${key}"] .choice-mini`); if (sample) { sample.replaceChildren(makeSample(key, choice.id, true)); }
   }
   document.querySelectorAll('[data-preset]').forEach(button => button.setAttribute('aria-pressed', String(sameComposition(composition, PRESETS.find(item => item.id === button.dataset.preset).composition))));
-  $('#preview-summary').textContent = keys.map(key => CHOICES[key].find(item => item.id === composition[key]).label).join(' · ');
+  $('#preview-summary').textContent = globalKeys.map(key => CHOICES[key].find(item => item.id === composition[key]).label).join(' · ');
+  $('#preview-summary').title = keys.map(key => `${labels[key]}: ${CHOICES[key].find(item => item.id === composition[key]).label}`).join('\n');
   $('#undo-change').disabled = history.length === 0;
   renderOrder();
   updateURL();
@@ -136,34 +141,69 @@ function jump(section, mobilePreview = false, replayOpening = false, reviewKey) 
   const target = destination(section, replayOpening, reviewKey);
   if (ready) post({ type: 'invitation-studio:jump', ...target }); else pendingJump = target;
 }
+function makeSample(key, value, mini = false) {
+  if (key === 'palette') {
+    const sample = node('span', 'palette-sample'); sample.dataset.palette = value; sample.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < 3; i++) sample.append(node('i'));
+    return sample;
+  }
+  if (key === 'font') {
+    const sample = node('span', 'font-sample', mini ? '가' : '성우와 소희, 우리의 날'); sample.dataset.font = value; sample.setAttribute('aria-hidden', 'true'); return sample;
+  }
+  const sample = node('span', 'scene-sample'); sample.dataset.sample = key; sample.dataset.variant = value; sample.setAttribute('aria-hidden', 'true');
+  const symbol = { cover: 'S & S', opening: 'With love', intro: '성우 & 소희', date: '03.06', story: 'Our story', album: '▤', arrival: '↗', gifting: 'For you', wishes: 'Dear us', navigation: '· · ·' }[key];
+  sample.append(node('i'), node('span', '', symbol || 'Aa'), node('i'));
+  return sample;
+}
+function closeChooser() {
+  const trigger = chooserTrigger; chooserTrigger = null;
+  $('#choice-dialog').close();
+  trigger?.focus({ preventScroll: true });
+  window.scrollTo({ top: chooserScroll, behavior: 'instant' });
+}
+function renderChooser() {
+  const list = $('#choice-results'); list.replaceChildren();
+  $('#choice-heading').textContent = labels[chooserKey];
+  $('#choice-category').value = chooserKey;
+  const term = $('#choice-search').value.trim().toLocaleLowerCase('ko');
+  const choices = CHOICES[chooserKey].filter(choice => `${choice.label} ${choice.detail}`.toLocaleLowerCase('ko').includes(term));
+  list.setAttribute('role', 'radiogroup'); list.setAttribute('aria-label', labels[chooserKey]);
+  choices.forEach(choice => {
+    const label = node('label', 'choice-label'), input = node('input'); input.type = 'radio'; input.name = 'browser-choice'; input.value = choice.id; input.checked = choice.id === chooserValue;
+    const title = node('strong', '', choice.label), detail = node('small', '', choice.detail), check = node('span', 'choice-check', '✓'); check.setAttribute('aria-hidden', 'true');
+    input.addEventListener('change', () => { if (input.checked) { chooserValue = choice.id; $('#choice-selection').textContent = `선택: ${choice.label}`; } });
+    label.append(input, makeSample(chooserKey, choice.id), title, detail, check);
+    if (composition[chooserKey] === choice.id) label.append(node('span', 'current-marker', '지금 적용 중'));
+    list.append(label);
+  });
+  $('#choice-empty').hidden = choices.length > 0;
+  $('#choice-selection').textContent = `선택: ${CHOICES[chooserKey].find(choice => choice.id === chooserValue).label}`;
+}
+function openChooser(key, trigger) {
+  chooserKey = key; chooserValue = composition[key]; chooserTrigger = trigger; chooserScroll = window.scrollY;
+  $('#choice-search').value = ''; renderChooser(); $('#choice-dialog').showModal();
+  $('#choice-results input:checked')?.focus({ preventScroll: true });
+}
 function mountChoices() {
-  keys.forEach((key, index) => {
-    const isGlobal = globalKeys.includes(key), container = $(isGlobal ? '#global-controls' : '#scene-controls');
-    const group = node('details', 'scene-group'); group.open = index === 0; group.dataset.choice = key;
-    const number = isGlobal ? globalKeys.indexOf(key) + 1 : index - globalKeys.length + 1;
-    const summary = node('summary'); const text = node('span', '', `${String(number).padStart(2, '0')}  ${labels[key]}`);
-    const selected = node('small'); selected.dataset.current = key; text.append(selected); summary.append(text);
-    const list = node('div', 'choice-list'); list.setAttribute('role', 'radiogroup'); list.setAttribute('aria-label', labels[key]);
-    CHOICES[key].forEach(choice => {
-      const label = node('label', 'choice-label'), input = node('input'); input.type = 'radio'; input.name = key; input.value = choice.id;
-      const title = node('strong', '', choice.label), detail = node('small', '', choice.detail), source = node('span', 'choice-source', choice.source), check = node('span', 'choice-check', '✓'); check.setAttribute('aria-hidden', 'true');
-      const select = () => apply({ ...composition, [key]: choice.id }, { section: SECTION_IDS[key], replayOpening: key === 'opening', reviewKey: key });
-      input.addEventListener('change', () => { if (input.checked) select(); });
-      // Click precedes change for a new radio; only the already-selected option needs this replay path.
-      input.addEventListener('click', () => { if (input.checked && composition[key] === choice.id) select(); });
-      label.append(input);
-      if (key === 'palette') {
-        const swatches = node('span', 'palette-sample'); swatches.dataset.palette = choice.id; swatches.setAttribute('aria-hidden', 'true');
-        for (let index = 0; index < 3; index++) swatches.append(node('i'));
-        label.append(swatches);
-      } else if (key === 'font') {
-        const sample = node('span', 'font-sample', '성우와 소희, 우리의 날'); sample.dataset.font = choice.id; sample.setAttribute('aria-hidden', 'true'); label.append(sample);
-      }
-      label.append(title, detail, source, check); list.append(label);
-    });
-    const tools = node('div', 'scene-tools'), button = node('button', '', key === 'opening' ? '이 효과 다시 보기 ↻' : key === 'motion' ? '이 흐름 미리 보기 ↗' : '이 장면 미리 보기 ↗');
-    button.type = 'button'; button.addEventListener('click', () => jump(SECTION_IDS[key], true, key === 'opening', key)); tools.append(button);
-    group.append(summary, list, tools); container.append(group);
+  keys.forEach(key => {
+    const container = $(globalKeys.includes(key) ? '#global-controls' : utilityKeys.includes(key) ? '#utility-controls' : '#scene-controls');
+    const group = node('div', 'choice-row'); group.dataset.choice = key;
+    const button = node('button', 'choice-open'); button.type = 'button'; button.setAttribute('aria-haspopup', 'dialog'); button.setAttribute('aria-controls', 'choice-dialog'); button.setAttribute('aria-label', `${labels[key]} 고르기`);
+    const sample = node('span', 'choice-mini'), text = node('span', 'choice-row-text'), selected = node('small'); selected.dataset.current = key;
+    text.append(node('strong', '', labels[key]), selected);
+    const count = node('span', 'choice-count', `${CHOICES[key].length}가지`); count.append(node('span', '', '↗'));
+    button.append(sample, text, count); button.addEventListener('click', () => openChooser(key, button));
+    group.append(button); container.append(group);
+    const category = node('option', '', labels[key]); category.value = key; $('#choice-category').append(category);
+  });
+  $('#close-choices').addEventListener('click', closeChooser);
+  $('#choice-dialog').addEventListener('cancel', event => { event.preventDefault(); closeChooser(); });
+  $('#choice-category').addEventListener('change', event => { chooserKey = event.target.value; chooserValue = composition[chooserKey]; $('#choice-search').value = ''; renderChooser(); });
+  $('#choice-search').addEventListener('input', renderChooser);
+  $('#apply-choice').addEventListener('click', () => {
+    const key = chooserKey, value = chooserValue;
+    closeChooser();
+    apply({ ...composition, [key]: value }, { section: SECTION_IDS[key], replayOpening: key === 'opening', reviewKey: key });
   });
   PRESETS.forEach(preset => {
     const button = node('button', 'preset'); button.dataset.preset = preset.id; button.type = 'button';
@@ -201,24 +241,69 @@ function mountOrder() {
   });
   $('#reset-order').addEventListener('click', () => { apply({ ...composition, order: [...DEFAULT_ORDER] }, { section: 'invitation' }); $('#order-status').textContent = '처음 순서로 돌아왔어요.'; notify('장면 선택은 유지하고 순서만 처음으로 돌렸어요.'); });
 }
+function mountStars(container, rating, onChange, name) {
+  container.replaceChildren();
+  for (let value = 1; value <= 5; value++) {
+    const button = node('button', 'rating-star', value <= rating ? '★' : '☆'); button.type = 'button'; button.dataset.rating = String(value);
+    button.setAttribute('aria-label', `${name} 별점 ${value}개`); button.setAttribute('aria-pressed', String(value === rating)); button.title = value === rating ? '한 번 더 누르면 별점을 지워요.' : `별점 ${value}개`;
+    button.addEventListener('click', () => onChange(value === rating ? 0 : value, value)); container.append(button);
+  }
+}
+function renderDraftStars() {
+  mountStars($('#draft-stars'), draftRating, (value, focusValue) => {
+    draftRating = value; renderDraftStars(); $(`#draft-stars [data-rating="${focusValue}"]`)?.focus({ preventScroll: true });
+  }, '지금 조합');
+}
+function loadMetadata(item) { $('#combination-name').value = item.name; $('#combination-note').value = item.note || ''; draftRating = cleanRating(item.rating); renderDraftStars(); }
 function renderSaved() {
   const list = $('#saved-combinations'); list.replaceChildren();
-  if (!saved.length) { const item = node('p', 'saved-empty', '아직 보관한 조합이 없어요.'); list.append(item); return; }
-  saved.forEach(item => {
-    const li = node('li'), open = node('button'), remove = node('button', 'delete-saved', '×');
-    open.type = remove.type = 'button'; open.append(node('span', '', item.name), node('small', '', keys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label).join(' / ')), node('small', 'saved-order', orderLabel(item.composition.order)));
-    open.addEventListener('click', () => { $('#combination-name').value = item.name; apply(item.composition, { section: 'top', replayOpening: true }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
+  $('#library-count').textContent = `${saved.length} / ${LIBRARY_LIMIT}`;
+  const matches = selectSaved(saved, { search: $('#library-search').value, favorites: $('#library-favorites').checked, sort: $('#library-sort').value });
+  $('#library-status').textContent = savedReadFailed ? '기존 보관함을 읽지 못했어요. 원본을 덮어쓰지 않도록 저장을 멈췄어요.' : saved.length ? `${saved.length}개 중 ${matches.length}개 · 별점은 같은 별을 다시 누르면 지워져요.` : '';
+  $('#library-more').hidden = matches.length <= visibleSavedCount;
+  $('#library-more').textContent = `조합 더 보기 (${Math.max(0, matches.length - visibleSavedCount)}개)`;
+  if (!matches.length) { list.append(node('li', 'saved-empty', saved.length ? '조건에 맞는 조합이 없어요.' : '마음에 드는 첫 조합을 보관해 보세요.')); return; }
+  matches.slice(0, visibleSavedCount).forEach(item => {
+    const li = node('li', 'saved-card'); li.dataset.savedId = item.id;
+    const heading = node('div', 'saved-card-heading'), open = node('button', 'saved-open'); open.type = 'button';
+    open.append(node('strong', '', item.name), node('span', '', '불러오기 ↗'));
+    open.addEventListener('click', () => { loadMetadata(item); apply(item.composition, { section: 'top', replayOpening: true }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
+    heading.append(open); li.append(heading);
+    const summary = node('p', 'saved-style', globalKeys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label).join(' · ')); li.append(summary);
+    const stars = node('div', 'rating-stars'); stars.setAttribute('role', 'group'); stars.setAttribute('aria-label', `${item.name} 별점`);
+    mountStars(stars, item.rating, (rating, focusValue) => {
+      if (persistSaved(updateSaved(saved, item.id, { rating }))) {
+        const updated = [...list.children].find(el => el.dataset.savedId === item.id);
+        (updated?.querySelector(`[data-rating="${focusValue}"]`) || $('#library-favorites')).focus({ preventScroll: true });
+        notify(rating ? `‘${item.name}’에 별 ${rating}개를 남겼어요.` : '별점을 지웠어요. 조합은 그대로 보관돼요.');
+      }
+    }, item.name); li.append(stars);
+    if (item.note) li.append(node('p', 'saved-note', item.note));
+    const details = node('details', 'saved-details'); details.append(node('summary', '', '조합 내용 보기'));
+    details.append(node('p', '', keys.filter(key => !globalKeys.includes(key)).map(key => `${labels[key]}: ${CHOICES[key].find(choice => choice.id === item.composition[key]).label}`).join(' · ')), node('p', 'saved-order', orderLabel(item.composition.order))); li.append(details);
+    const actions = node('div', 'saved-actions'), edit = node('button', '', '이름·메모 수정'), exportButton = node('button', '', '파일 ↓'), remove = node('button', 'delete-saved', '삭제');
+    edit.type = exportButton.type = remove.type = 'button';
+    edit.setAttribute('aria-label', `${item.name} 이름과 메모 수정`);
+    edit.addEventListener('click', () => { editingRecordId = item.id; $('#saved-edit-name').value = item.name; $('#saved-edit-note').value = item.note; $('#saved-edit-dialog').showModal(); });
+    exportButton.setAttribute('aria-label', `${item.name} 파일로 내보내기`); exportButton.addEventListener('click', () => downloadJSON(exportSelection(item.composition, item), 'sungso-wedding-combination.json'));
     remove.setAttribute('aria-label', `${item.name} 저장된 조합 삭제`);
-    remove.addEventListener('click', () => { if (persistSaved(saved.filter(record => record.id !== item.id))) { notify('저장된 조합을 삭제했어요. 지금 보는 조합은 그대로예요.'); $('#save-combination').focus(); } });
-    li.append(open, remove); list.append(li);
+    remove.addEventListener('click', () => {
+      if (remove.dataset.confirm !== 'true') { remove.dataset.confirm = 'true'; remove.textContent = '삭제 확인'; remove.setAttribute('aria-label', `${item.name} 정말 삭제`); return; }
+      if (persistSaved(saved.filter(record => record.id !== item.id))) { notify('저장된 조합을 삭제했어요. 지금 보는 조합은 그대로예요.'); $('#save-combination').focus({ preventScroll: true }); }
+    });
+    actions.append(edit, exportButton, remove); li.append(actions); list.append(li);
   });
+}
+function downloadJSON(value, filename) {
+  const blob = new Blob([JSON.stringify(value, null, 2) + '\n'], { type: 'application/json' });
+  const url = URL.createObjectURL(blob), a = node('a'); a.href = url; a.download = filename; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 async function copyURL(kind) {
   const url = urlFor(kind);
   try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(url); notify(kind === 'editor' ? '조립 화면 주소를 복사했어요.' : '선택한 조합의 미리보기 주소를 복사했어요.'); }
   catch { $('#link-value').value = url; $('#fallback-link').href = url; $('#link-dialog').showModal(); $('#link-value').focus(); $('#link-value').select(); }
 }
-mountChoices(); mountOrder(); renderChoices(); renderSaved();
+mountChoices(); mountOrder(); renderChoices(); renderSaved(); renderDraftStars();
 const initial = new URL('./preview/', location.href); initial.search = compositionParams(composition).toString(); initial.searchParams.set('compare', '1'); frame.src = initial.href;
 window.addEventListener('message', event => {
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data || typeof event.data !== 'object') return;
@@ -249,8 +334,30 @@ document.querySelectorAll('[data-width]').forEach(button => {
 });
 $('#save-combination').addEventListener('click', () => {
   const name = cleanName($('#combination-name').value) || `우리의 조합 ${saved.length + 1}`;
-  if (saved.length >= 8) { notify('최대 8개까지 보관할 수 있어요. 필요 없는 조합을 지운 뒤 저장해 주세요.'); return; }
-  if (persistSaved([{ id: crypto.randomUUID(), name, composition: normalizeComposition(composition) }, ...saved])) { $('#combination-name').value = name; notify(`‘${name}’ 조합을 이 브라우저에 저장했어요.`); }
+  if (saved.length >= LIBRARY_LIMIT) { notify(`최대 ${LIBRARY_LIMIT}개까지 보관할 수 있어요. 기존 조합은 지우지 않았어요. 파일로도 보관할 수 있어요.`); return; }
+  const now = Date.now();
+  if (persistSaved([{ id: crypto.randomUUID(), name, rating: draftRating, note: cleanNote($('#combination-note').value), createdAt: now, updatedAt: now, composition: normalizeComposition(composition) }, ...saved])) { $('#combination-name').value = name; notify(`‘${name}’ 조합과 별점·메모를 이 브라우저에 저장했어요.`); }
+});
+for (const id of ['#library-search', '#library-sort', '#library-favorites']) $(id).addEventListener(id === '#library-search' ? 'input' : 'change', () => { visibleSavedCount = 6; renderSaved(); });
+$('#library-more').addEventListener('click', () => { visibleSavedCount += 6; renderSaved(); });
+$('#close-saved-edit').addEventListener('click', () => $('#saved-edit-dialog').close());
+$('#saved-edit-dialog').addEventListener('close', () => {
+  if (document.activeElement && document.activeElement !== document.body && !$('#saved-edit-dialog').contains(document.activeElement)) return;
+  const card = [...$('#saved-combinations').children].find(el => el.dataset.savedId === editingRecordId);
+  (card?.querySelector('.saved-open') || $('#save-combination')).focus({ preventScroll: true });
+});
+$('#save-record-meta').addEventListener('click', () => {
+  const item = saved.find(entry => entry.id === editingRecordId); if (!item) return;
+  if (persistSaved(updateSaved(saved, item.id, { name: cleanName($('#saved-edit-name').value) || item.name, note: cleanNote($('#saved-edit-note').value) }))) {
+    $('#saved-edit-dialog').close();
+    const card = [...$('#saved-combinations').children].find(el => el.dataset.savedId === item.id); (card?.querySelector('.saved-open') || $('#save-combination')).focus({ preventScroll: true });
+    notify('이름과 메모를 저장했어요. 조합은 그대로예요.');
+  }
+});
+window.addEventListener('storage', event => {
+  if (event.key !== STORAGE_KEY) return;
+  try { saved = parseLibrary(event.newValue); savedSnapshot = event.newValue; savedReadFailed = false; renderSaved(); }
+  catch { savedReadFailed = true; renderSaved(); }
 });
 $('#undo-change').addEventListener('click', () => { if (history.length) { const prior = history.pop(); apply(prior, { remember: false }); notify('이전 선택으로 돌아갔어요.'); } });
 $('#reset-combination').addEventListener('click', () => { apply(DEFAULT_COMPOSITION, { section: 'top', replayOpening: true }); notify('기본 조합으로 돌아갔어요. 저장해 둔 조합은 그대로예요.'); });
@@ -264,17 +371,27 @@ $('#audio-toggle').addEventListener('click', () => {
   post({ type: 'invitation-lab:control', action: 'audio', enabled: audioEnabled });
 });
 $('#export-combination').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify({ version: 1, name: cleanName($('#combination-name').value) || '우리의 청첩장', composition }, null, 2) + '\n'], { type: 'application/json' });
-  const url = URL.createObjectURL(blob), a = node('a'); a.href = url; a.download = 'sungso-wedding-combination.json'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000); notify('조합 파일을 저장해요. 사진과 개인 정보는 포함되지 않아요.');
+  downloadJSON(exportSelection(composition, { name: $('#combination-name').value, rating: draftRating, note: $('#combination-note').value }), 'sungso-wedding-combination.json');
+  notify('조합과 별점·메모를 파일로 보관해요.');
+});
+$('#export-library').addEventListener('click', () => {
+  if (savedReadFailed) { notify('보관함을 읽지 못해 내보내지 못했어요. 현재 조합 파일은 따로 저장할 수 있어요.'); return; }
+  if (!saved.length) { notify('먼저 마음에 드는 조합을 저장해 주세요.'); return; }
+  downloadJSON({ version: 1, kind: 'sungso-studio-library', items: saved }, 'sungso-wedding-library.json'); notify(`${saved.length}개 조합과 별점·메모를 파일로 보관해요.`);
 });
 $('#import-combination').addEventListener('change', async event => {
   const file = event.target.files?.[0]; if (!file) return;
   try {
-    if (file.size > 16384) throw new Error('size');
-    const data = JSON.parse(await file.text());
-    if (!data || typeof data !== 'object' || Array.isArray(data) || String(data.version) !== '1' || !data.composition || typeof data.composition !== 'object' || Array.isArray(data.composition) || !keys.some(key => CHOICES[key].some(choice => choice.id === data.composition[key]))) throw new Error('shape');
-    apply(normalizeComposition(data), { section: 'top', replayOpening: true }); $('#combination-name').value = cleanName(data.name); notify('파일의 조합을 불러왔어요. 보관하려면 저장을 눌러 주세요.');
-  } catch { notify('이 조립실에서 저장한 조합 JSON 파일을 선택해 주세요.'); }
+    if (file.size > LIBRARY_BYTES) throw new Error('size');
+    const data = parseImport(await file.text());
+    if (data.kind === 'library') {
+      if (saved.length + data.items.length > LIBRARY_LIMIT) { notify(`모두 더하면 ${saved.length + data.items.length}개가 되어 40개를 넘어요. 기존 보관함은 그대로 두었어요.`); return; }
+      const now = Date.now();
+      if (persistSaved([...data.items.map(item => ({ ...item, id: crypto.randomUUID(), updatedAt: now })), ...saved])) notify(`${data.items.length}개 조합과 별점·메모를 보관함에 더했어요. 기존 조합은 유지했어요.`);
+    } else {
+      apply(data.composition, { section: 'top', replayOpening: true }); loadMetadata(data); notify('파일의 조합·별점·메모를 불러왔어요. 보관하려면 새로 저장을 눌러 주세요.');
+    }
+  } catch { notify('이 조립실에서 저장한 조합 또는 보관함 JSON 파일을 선택해 주세요.'); }
   finally { event.target.value = ''; }
 });
 window.addEventListener('pagehide', () => { clearTimeout(noticeTimer); cancelAnimationFrame(viewFrame); post({ type: 'invitation-lab:control', action: 'audio', enabled: false }); });

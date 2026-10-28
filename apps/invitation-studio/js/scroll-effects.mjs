@@ -1,5 +1,5 @@
 /** Global reading rhythm, independent from a section's chosen illustration or interaction. */
-export const SCROLL_EFFECTS = Object.freeze(['signature', 'rise', 'focus', 'still']);
+export const SCROLL_EFFECTS = Object.freeze(['signature', 'rise', 'focus', 'drift', 'unveil', 'breathe', 'still']);
 export const normalizeScrollEffect = value => SCROLL_EFFECTS.includes(value) ? value : 'signature';
 
 export function scrollEntrance(top, viewport) {
@@ -8,7 +8,8 @@ export function scrollEntrance(top, viewport) {
   return p * p * (3 - 2 * p);
 }
 
-const properties = ['--global-scroll-opacity', '--global-scroll-y', '--global-scroll-scale', '--global-scroll-blur'];
+const properties = ['--global-scroll-opacity', '--global-scroll-y', '--global-scroll-scale', '--global-scroll-blur', '--global-scroll-x', '--global-scroll-breathe', '--global-scroll-veil', '--global-scroll-wipe'];
+const animatedModes = new Set(['rise', 'focus', 'drift', 'unveil', 'breathe']);
 
 /** Scroll/resize requests one frame only; read sections never fade away again. */
 export function mountScrollEffects({ doc = document, win = window, enabled = true, mode = 'signature' } = {}) {
@@ -22,7 +23,7 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     cleanups.push(() => node?.removeEventListener?.(type, callback, options));
   };
   const blocked = () => doc.hidden || Boolean(doc.querySelector('dialog[open]'));
-  const active = () => !disposed && requested && !reduced?.matches && !doc.documentElement.classList.contains('motion-off') && (current === 'rise' || current === 'focus');
+  const active = () => !disposed && requested && !reduced?.matches && !doc.documentElement.classList.contains('motion-off') && animatedModes.has(current);
   const cancel = () => { if (frame) win.cancelAnimationFrame(frame); frame = 0; };
   function cancelAnimations() { animations.forEach(animation => animation.cancel()); animations.clear(); }
 
@@ -31,6 +32,10 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     node.style.setProperty('--global-scroll-y', `${16 * (1 - progress)}px`);
     node.style.setProperty('--global-scroll-scale', String(.98 + .02 * progress));
     node.style.setProperty('--global-scroll-blur', `${1.2 * (1 - progress)}px`);
+    node.style.setProperty('--global-scroll-x', `${18 * (1 - progress) * (targets.get(node)?.direction || 1)}px`);
+    node.style.setProperty('--global-scroll-breathe', String(1 + .035 * (1 - progress)));
+    node.style.setProperty('--global-scroll-veil', String(.24 * (1 - progress)));
+    node.style.setProperty('--global-scroll-wipe', `${100 * progress}%`);
   }
   function restore(node, record) {
     properties.forEach(property => {
@@ -52,6 +57,8 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
       });
       node.classList.add('global-scroll-target');
     }
+    // Reordering changes the reading rhythm, without replacing an existing target.
+    [...next].forEach((node, index) => { targets.get(node).direction = index % 2 ? 1 : -1; });
   }
   function readable() { for (const node of targets.keys()) paint(node, 1); }
   function render() {
@@ -92,13 +99,34 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     const [node, record] = target;
     record.progress = 1; paint(node, 1);
     if (!node.animate) return false;
-    const frames = current === 'rise'
-      ? [{ opacity: .68, translate: '0 16px' }, { opacity: 1, translate: '0 0' }]
-      : [{ opacity: .68, scale: .98, filter: 'blur(1.2px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)' }];
-    try {
-      const animation = node.animate(frames, { duration: 650, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none' });
+    const frames = {
+      rise: [{ opacity: .68, translate: '0 16px' }, { opacity: 1, translate: '0 0' }],
+      focus: [{ opacity: .68, scale: .98, filter: 'blur(1.2px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)' }],
+      drift: [{ opacity: .68, translate: `${18 * record.direction}px 0` }, { opacity: 1, translate: '0 0' }],
+      unveil: [{ opacity: .78 }, { opacity: 1 }],
+      breathe: [{ opacity: .78, scale: 1.035 }, { opacity: 1, scale: 1 }],
+    }[current];
+    const track = animation => {
       animations.add(animation);
       animation.finished?.then(() => animations.delete(animation), () => animations.delete(animation));
+    };
+    try {
+      const animation = node.animate(frames, { duration: 650, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none' });
+      track(animation);
+      if (current === 'unveil') {
+        // Only the decorative pseudo-element is clipped. The readable, interactive
+        // content remains intact, including in browsers without pseudo-element WAAPI.
+        try {
+          const veil = node.animate([
+            { opacity: .24, clipPath: 'inset(0 0% 0 0)' },
+            { opacity: 0, clipPath: 'inset(0 100% 0 0)' },
+          ], { duration: 800, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none', pseudoElement: '::after' });
+          track(veil);
+          // Older engines may silently ignore this option. Cancel synchronously
+          // before the next paint rather than accidentally clipping the content.
+          if (veil.effect?.pseudoElement !== '::after') { veil.cancel(); animations.delete(veil); }
+        } catch { /* The content opacity replay is still available. */ }
+      }
       return true;
     } catch { return false; }
   }

@@ -9,7 +9,7 @@ test('all 23328 mood and scene combinations with distributed motion choices surv
     const params = compositionParams({ ...state, mode: 'live', origin: 'https://evil.example', account: '1234' });
     assert.equal(params.get('version'), '1');
     assert.deepEqual(readComposition(params.toString()), state);
-    assert.equal(params.size, 11);
+    assert.equal(params.size, CHOICE_KEYS.length + 2);
     count++;
   }
   assert.equal(count, 23328);
@@ -138,4 +138,20 @@ test('motion accepts fixed presets only and cannot configure data, scripts, or s
     assert.deepEqual(normalizeComposition(JSON.parse(JSON.stringify({ version: 1, composition: state }))), state);
   }
   for (const motion of ['url(https://evil.test)', '<script>', 'none', {}, [], false]) assert.deepEqual(normalizeComposition({ motion }), DEFAULT_COMPOSITION);
+});
+
+test('all four utility presentations survive saving, sharing and reordering without changing data mode', () => {
+  let count = 0;
+  for (const arrival of CHOICES.arrival) for (const gifting of CHOICES.gifting) for (const wishes of CHOICES.wishes) for (const navigation of CHOICES.navigation) for (const motion of CHOICES.motion) {
+    const state = { ...DEFAULT_COMPOSITION, arrival: arrival.id, gifting: gifting.id, wishes: wishes.id, navigation: navigation.id, motion: motion.id, order: [...DEFAULT_ORDER].reverse() };
+    assert.deepEqual(readComposition(compositionParams(state)), state);
+    assert.deepEqual(normalizeComposition(JSON.parse(JSON.stringify({ version: 1, rating: 5, note: '좋아하는 조합', composition: state }))), state);
+    assert.equal(Object.hasOwn(normalizeComposition({ ...state, mode: 'live', account: '123456', api: 'https://example.test' }), 'mode'), false);
+    count++;
+  }
+  assert.equal(count, 567);
+  const previous = { palette: 'azure', font: 'editorial', motion: 'focus', cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'line', album: 'contact', order: [...DEFAULT_ORDER] };
+  const upgraded = normalizeComposition(previous);
+  for (const key of ['arrival', 'gifting', 'wishes', 'navigation']) assert.equal(upgraded[key], DEFAULT_COMPOSITION[key]);
+  for (const key of Object.keys(previous)) assert.deepEqual(upgraded[key], previous[key]);
 });

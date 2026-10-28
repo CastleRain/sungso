@@ -1,5 +1,6 @@
 import { mountGalleryExperience } from './gallery-experience.mjs';
 import { scrollPreviewTo } from './preview-scroll.mjs';
+import { recipientTransition } from './utility-scenes.mjs';
 
 export const clamp = value => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
 export function entranceProgress(top, height, viewport) {
@@ -86,7 +87,7 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
       const selected = buttonIndex === selectedRecipient; button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
       if (selected && focus) button.focus({ preventScroll: true });
     });
-    if (runAnimation) animate(rows[selectedRecipient], variant === 'f' ? [{ opacity: .45, transform: 'perspective(700px) rotateY(-9deg) translateX(12px)' }, { opacity: 1, transform: 'none' }] : [{ opacity: .5, transform: 'translateY(12px) rotate(-1deg)' }, { opacity: 1, transform: 'none' }], { duration: 370, easing: 'cubic-bezier(.2,.75,.2,1)' });
+    if (runAnimation) animate(rows[selectedRecipient], recipientTransition(doc.body.dataset.gifting, variant), { duration: 370, easing: 'cubic-bezier(.2,.75,.2,1)' });
     schedule();
   }
   function setupRecipients(initial = false) {
