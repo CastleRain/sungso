@@ -1,0 +1,120 @@
+/* The existing ink, names, date and audio remain the real cover; these are optional surroundings. */
+.upper-scenes-ready .hero{--upper-cover:0;--cover:0;clip-path:none}
+.upper-scenes-ready .hero-photo{transform:none}
+.upper-scenes-ready .hero-details{translate:none}
+.upper-scenes-ready .invitation-section{--upper-intro:1;isolation:isolate}
+.upper-scenes-ready .invitation-section .section-inner{isolation:isolate}
+.upper-scenes-ready .date-scene{--upper-date:1;--scene:1;padding-bottom:0!important}
+.upper-scenes-ready .date-ticket{position:relative!important;top:auto!important;transform:none}
+.upper-scenes-ready .date-six,.upper-scenes-ready .date-detail{transform:none;opacity:1}
+.upper-scenes-ready .date-stroke{transform:scaleX(var(--upper-date,1))}
+.upper-curtains,.upper-aperture-edge,.upper-ribbon,.upper-date-orbit,.upper-family-join,.upper-page-hinge{display:none;pointer-events:none}
+
+/* Cinema: the full-bleed opening slowly becomes a framed photograph. */
+.upper-scenes-active[data-cover=cinema] .hero{clip-path:inset(calc(var(--upper-cover) * 10px) calc(var(--upper-cover) * 14px) round calc(var(--upper-cover) * 26px))}
+.upper-scenes-active[data-cover=cinema] .hero-photo{transform:scale(calc(1 + var(--upper-cover) * .07)) translateY(calc(var(--upper-cover) * 25px))}
+.upper-scenes-active[data-cover=cinema] .hero-details{translate:0 calc(var(--upper-cover) * -18px)}
+
+/* Curtain: sheer blue panels peel towards the two edges while the picture comes forward. */
+.upper-scenes-ready[data-cover=curtain] .upper-curtains{display:block;position:absolute;inset:0;z-index:1;perspective:900px;overflow:hidden}
+.upper-curtain{position:absolute;top:0;bottom:0;width:50%;opacity:0}
+.upper-curtain-left{left:0;transform-origin:left;background:linear-gradient(90deg,#b6d4e600 15%,#d2e4ed12 80%,#ebf5fb38);border-right:1px solid #e4f2ff66}
+.upper-curtain-right{right:0;transform-origin:right;background:linear-gradient(-90deg,#b6d4e600 15%,#d2e4ed12 80%,#ebf5fb38);border-left:1px solid #e4f2ff66}
+.upper-scenes-active[data-cover=curtain] .upper-curtain{opacity:calc(var(--upper-cover) * 1.8);box-shadow:0 0 30px #1026380c}
+.upper-scenes-active[data-cover=curtain] .upper-curtain-left{transform:translateX(calc(var(--upper-cover) * -75%)) rotateY(calc(var(--upper-cover) * -24deg))}
+.upper-scenes-active[data-cover=curtain] .upper-curtain-right{transform:translateX(calc(var(--upper-cover) * 75%)) rotateY(calc(var(--upper-cover) * 24deg))}
+.upper-scenes-active[data-cover=curtain] .hero-photo{transform:scale(calc(1 + var(--upper-cover) * .08))}
+.upper-scenes-active[data-cover=curtain] .hero-letter{translate:0 calc(var(--upper-cover) * -12px)}
+
+/* Aperture: a rounded window forms around the photograph, without a second opening or replay. */
+.upper-scenes-ready[data-cover=aperture] .hero{background:#e8f0f5}
+.upper-scenes-ready[data-cover=aperture] .upper-aperture-edge{display:block;position:absolute;inset:0;border:1px solid #ffffff5c;z-index:1;opacity:0}
+.upper-scenes-active[data-cover=aperture] .hero{clip-path:inset(calc(var(--upper-cover) * 16px) calc(var(--upper-cover) * 12px) round calc(var(--upper-cover) * 27%) calc(var(--upper-cover) * 27%) calc(var(--upper-cover) * 24px) calc(var(--upper-cover) * 24px))}
+.upper-scenes-active[data-cover=aperture] .hero-photo{transform:scale(calc(1 + var(--upper-cover) * .035)) translateY(calc(var(--upper-cover) * 12px))}
+.upper-scenes-active[data-cover=aperture] .upper-aperture-edge{inset:calc(var(--upper-cover) * 26px);border-radius:calc(var(--upper-cover) * 25%) calc(var(--upper-cover) * 25%) 20px 20px;opacity:var(--upper-cover)}
+
+/* Letter: a quiet sheet settles flat and the invitation is read down the page. */
+.upper-scenes-ready[data-intro=letter] .invitation-section{background:linear-gradient(180deg,#fcfdfd,#f4f8fb 52%,#fcfdfd)}
+.upper-scenes-ready[data-intro=letter] .invitation-section .section-inner:before{content:"";position:absolute;inset:-24px -8px;border-top:1px solid #ccdce77d;border-bottom:1px solid #ccdce77d;pointer-events:none;z-index:-1}
+.upper-scenes-active[data-intro=letter] .invitation-section .section-inner:before{transform:perspective(900px) rotateX(calc((1 - var(--upper-intro)) * 13deg));opacity:calc(.45 + var(--upper-intro) * .55)}
+.upper-scenes-active[data-intro=letter] .invitation-copy{clip-path:inset(0 0 calc((1 - var(--upper-intro)) * 100%) 0);translate:0 calc((1 - var(--upper-intro)) * 18px)}
+.upper-scenes-active[data-intro=letter] .family-lines{translate:0 calc((1 - var(--upper-intro)) * 24px);opacity:calc(.45 + var(--upper-intro) * .55)}
+
+/* Together: two families approach a single quiet ampersand. */
+.upper-scenes-ready[data-intro=together] .invitation-section{background:linear-gradient(90deg,#eff5f9,#fff 48%,#eff5f9)}
+.upper-scenes-ready[data-intro=together] .family-lines{position:relative;gap:clamp(40px,14vw,90px);padding:26px 0 14px;margin-top:10px}
+.upper-scenes-ready[data-intro=together] .family-person{position:relative;z-index:1}
+.upper-scenes-ready[data-intro=together] .upper-family-join{display:block;position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font:40px/1 var(--script);color:#688fa9}
+.upper-scenes-ready[data-intro=together] .family-lines:before,.upper-scenes-ready[data-intro=together] .family-lines:after{content:"";position:absolute;top:0;width:42%;height:1px;background:linear-gradient(90deg,transparent,#89a9bf);transform-origin:right}
+.upper-scenes-ready[data-intro=together] .family-lines:before{left:0}.upper-scenes-ready[data-intro=together] .family-lines:after{right:0;background:linear-gradient(90deg,#89a9bf,transparent);transform-origin:left}
+.upper-scenes-active[data-intro=together] .family-person:first-child{translate:calc((1 - var(--upper-intro)) * -22px) 0}
+.upper-scenes-active[data-intro=together] .family-person:nth-child(2){translate:calc((1 - var(--upper-intro)) * 22px) 0}
+.upper-scenes-active[data-intro=together] .family-lines:before,.upper-scenes-active[data-intro=together] .family-lines:after{transform:scaleX(var(--upper-intro))}
+.upper-scenes-active[data-intro=together] .upper-family-join{opacity:var(--upper-intro);scale:calc(.8 + var(--upper-intro) * .2)}
+
+/* Ribbon: one thin drawn line loops around the invitation, behind readable text. */
+.upper-scenes-ready[data-intro=ribbon] .invitation-section{background:#f7fafc;overflow:hidden}
+.upper-scenes-ready[data-intro=ribbon] .upper-ribbon{display:block;position:absolute;left:50%;top:50%;width:calc(100% + 40px);height:calc(100% + 85px);transform:translate(-50%,-50%);color:#91afc7;opacity:.55;z-index:-1;overflow:visible}
+.upper-scenes-ready[data-intro=ribbon] .upper-ribbon path{stroke-dasharray:1;stroke-dashoffset:0}
+.upper-scenes-ready[data-intro=ribbon] .invitation-copy{background:#f7fafcbd;display:inline-block;padding:6px 10px;margin-left:auto;margin-right:auto}
+.upper-scenes-active[data-intro=ribbon] .upper-ribbon path{stroke-dashoffset:calc(1 - var(--upper-intro))}
+.upper-scenes-active[data-intro=ribbon] .invitation-section .script-title{translate:calc((1 - var(--upper-intro)) * -16px) 0}
+.upper-scenes-active[data-intro=ribbon] .family-lines{translate:calc((1 - var(--upper-intro)) * 16px) 0}
+
+/* Ticket keeps the F date composition, with a short readable fold rather than a long pinned area. */
+.upper-scenes-active[data-date=ticket] .date-ticket{transform:perspective(1100px) translateY(calc((1 - var(--upper-date)) * 30px)) rotateX(calc((1 - var(--upper-date)) * 10deg)) scale(calc(.94 + var(--upper-date) * .06))}
+.upper-scenes-active[data-date=ticket] .date-six{transform:translateY(calc((1 - var(--upper-date)) * 12px)) scale(calc(1.13 - var(--upper-date) * .13))}
+.upper-scenes-active[data-date=ticket] .date-detail{transform:translateX(calc((1 - var(--upper-date)) * 15px));opacity:calc(.65 + var(--upper-date) * .35)}
+
+/* Orbit: a single marker follows a fine circular calendar dial. No perpetual spinning. */
+.upper-scenes-ready[data-date=orbit] .date-ticket{border-radius:94px 6px 6px 6px;box-shadow:none;background:linear-gradient(120deg,#f0f6fb,#fff 55%)}
+.upper-scenes-ready[data-date=orbit] .date-ticket:before,.upper-scenes-ready[data-date=orbit] .date-ticket:after{display:none}
+.upper-scenes-ready[data-date=orbit] .date-face{padding-top:38px;padding-bottom:26px}
+.upper-scenes-ready[data-date=orbit] .date-six{position:relative;z-index:1;margin:18px 0 22px;font-size:clamp(88px,18vw,124px)}
+.upper-scenes-ready[data-date=orbit] .upper-date-orbit{display:block;position:absolute;left:50%;top:48%;width:min(190px,112%);height:auto;transform:translate(-50%,-50%);color:#789bb5;opacity:.65}
+.upper-scenes-ready[data-date=orbit] .upper-orbit-dot{transform-origin:100px 100px;transform:rotate(290deg)}
+.upper-scenes-ready[data-date=orbit] .date-month,.upper-scenes-ready[data-date=orbit] .date-copy{position:relative;z-index:1}
+.upper-scenes-ready[data-date=orbit] .date-stroke{display:none}
+.upper-scenes-ready[data-date=orbit] .countdown-band{border-top-style:solid;background:#f5f9fc;border-radius:0 0 6px 6px}
+.upper-scenes-active[data-date=orbit] .upper-orbit-dot{transform:rotate(calc(20deg + var(--upper-date) * 270deg))}
+.upper-scenes-active[data-date=orbit] .date-six{transform:scale(calc(.88 + var(--upper-date) * .12));opacity:calc(.55 + var(--upper-date) * .45)}
+.upper-scenes-active[data-date=orbit] .date-ticket{transform:translateY(calc((1 - var(--upper-date)) * 18px))}
+
+/* Flip: the calendar page hinges into place; every date remains real text and an ordinary button. */
+.upper-scenes-ready[data-date=flip] .date-ticket{grid-template-columns:1fr;max-width:410px;margin:auto;border-radius:5px;perspective:1100px;background:#edf4f9}
+.upper-scenes-ready[data-date=flip] .date-face{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:24px;padding:24px 25px 22px;text-align:left;align-items:center;background:white;justify-content:stretch}
+.upper-scenes-ready[data-date=flip] .date-month{grid-column:2;grid-row:1;align-self:end;font-size:11px}.upper-scenes-ready[data-date=flip] .date-month span{display:inline;margin-left:8px}
+.upper-scenes-ready[data-date=flip] .date-six{grid-column:1;grid-row:1/3;font-size:94px;margin:0;line-height:1.1}
+.upper-scenes-ready[data-date=flip] .date-copy{grid-column:2;grid-row:2;align-self:start;margin-top:9px;font-size:13px;line-height:1.9}
+.upper-scenes-ready[data-date=flip] .date-copy strong{font-size:15px}
+.upper-scenes-ready[data-date=flip] .date-stroke{display:none}
+.upper-scenes-ready[data-date=flip] .date-detail{position:relative;padding:24px 30px 20px;background:#fff;border-top:1px solid #c7d9e6;transform-origin:50% 0;max-width:none;width:100%;backface-visibility:hidden}
+.upper-scenes-ready[data-date=flip] .date-detail .calendar{max-width:310px}.upper-scenes-ready[data-date=flip] .calendar td{height:34px}
+.upper-scenes-ready[data-date=flip] .upper-page-hinge{display:block;position:absolute;left:0;right:0;top:0;height:18px;background:linear-gradient(#9eb9cd26,transparent)}
+.upper-scenes-ready[data-date=flip] .countdown-band{border-top-style:solid;background:#f2f7fb}
+.upper-scenes-active[data-date=flip] .date-detail{transform:rotateX(calc((1 - var(--upper-date)) * -24deg));box-shadow:0 calc((1 - var(--upper-date)) * 12px) calc((1 - var(--upper-date)) * 18px) #355d7a12}
+.upper-scenes-active[data-date=flip] .date-ticket:before{transform:rotate(calc(-1 - (1 - var(--upper-date)) * 3deg))}
+.upper-scenes-active[data-date=flip] .date-ticket:after{transform:rotate(calc(1 + (1 - var(--upper-date)) * 2deg))}
+
+/* Keyboard, large type, and disabled motion always expose a settled scene. */
+.upper-scenes-ready .date-ticket:focus-within,.upper-scenes-ready .date-ticket:focus-within .date-detail{transform:none!important;opacity:1!important}
+.large-text .upper-scenes-ready[data-date=orbit] .date-face{min-height:290px}
+.large-text .upper-scenes-ready[data-date=orbit] .upper-date-orbit{width:184px;top:48%}
+.large-text .upper-scenes-ready[data-date=flip] .date-face{grid-template-columns:1fr;text-align:center;gap:10px}
+.large-text .upper-scenes-ready[data-date=flip] .date-month,.large-text .upper-scenes-ready[data-date=flip] .date-six,.large-text .upper-scenes-ready[data-date=flip] .date-copy{grid-column:1;grid-row:auto}
+@media(max-width:360px){
+  .upper-scenes-ready[data-intro=together] .family-lines{gap:40px}.upper-scenes-ready[data-intro=together] .upper-family-join{font-size:31px}
+  .upper-scenes-ready[data-date=orbit] .date-ticket{grid-template-columns:1fr;border-radius:80px 80px 5px 5px}
+  .upper-scenes-ready[data-date=orbit] .date-face{padding:27px 15px 20px}.upper-scenes-ready[data-date=orbit] .date-six{font-size:96px;margin:18px 0}
+  .upper-scenes-ready[data-date=orbit] .upper-date-orbit{width:173px;top:46%}.upper-scenes-ready[data-date=orbit] .date-detail{padding:15px 20px 20px}
+  .upper-scenes-ready[data-date=flip] .date-face{padding:22px 17px;gap:16px}.upper-scenes-ready[data-date=flip] .date-six{font-size:82px}
+  .upper-scenes-ready[data-date=flip] .date-copy{font-size:12px}.upper-scenes-ready[data-date=flip] .date-copy strong{font-size:14px}.upper-scenes-ready[data-date=flip] .date-detail{padding:22px 20px 20px}
+}
+@media(min-width:768px){.upper-scenes-ready[data-date=orbit] .upper-date-orbit{width:212px}.upper-scenes-ready[data-date=orbit] .date-six{font-size:140px}.upper-scenes-ready[data-date=flip] .date-ticket{max-width:440px}}
+.motion-off .upper-scenes-ready .hero,.motion-off .upper-scenes-ready .hero-photo,.motion-off .upper-scenes-ready .hero-letter,.motion-off .upper-scenes-ready .hero-details,.motion-off .upper-scenes-ready .invitation-copy,.motion-off .upper-scenes-ready .family-lines,.motion-off .upper-scenes-ready .family-person,.motion-off .upper-scenes-ready .date-ticket,.motion-off .upper-scenes-ready .date-six,.motion-off .upper-scenes-ready .date-detail{transform:none!important;translate:none!important;clip-path:none!important;opacity:1!important}
+.motion-off .upper-curtains,.motion-off .upper-aperture-edge{display:none!important}
+@media(prefers-reduced-motion:reduce){
+  .upper-scenes-ready .hero,.upper-scenes-ready .hero-photo,.upper-scenes-ready .hero-letter,.upper-scenes-ready .hero-details,.upper-scenes-ready .invitation-copy,.upper-scenes-ready .family-lines,.upper-scenes-ready .family-person,.upper-scenes-ready .date-ticket,.upper-scenes-ready .date-six,.upper-scenes-ready .date-detail{transform:none!important;translate:none!important;clip-path:none!important;opacity:1!important}
+  .upper-curtains,.upper-aperture-edge{display:none!important}
+  .upper-scenes-ready .upper-ribbon path{stroke-dashoffset:0!important}
+}

@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import { buildInvitation, verifyInvitation, verifyPreservedStudioBaseline } from '../../scripts/build-invitation-vercel.mjs';
+import { PROJECT_ROOT, loadRegistry } from '../../scripts/build-site.mjs';
+
+test('studio is additive to all 205 verified files and cannot publish real-data or management entries', async t => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'sungso-studio-'));
+  t.after(() => rm(temp, { recursive: true, force: true }));
+  const built = await buildInvitation({ distDir: path.join(temp, 'dist') });
+  assert.equal((await verifyPreservedStudioBaseline(built.distDir)).preservedFiles, 205);
+  const baseline = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-studio/baseline.json'), 'utf8'));
+  const old = new Set(baseline.files.map(item => item.path));
+  const added = built.files.filter(item => !old.has(item));
+  assert.ok(added.length > 20);
+  assert.ok(added.every(item => item.startsWith('lab/studio/')));
+  assert.ok(!added.some(item => /\.(mp3|woff2|ttf)$/.test(item)));
+  const app = (await loadRegistry()).apps.find(item => item.id === 'invitation-studio');
+  assert.equal(app.output, 'lab/studio'); assert.ok(app.files.includes('preview'));
+  assert.ok(!app.files.some(item => ['src', 'scripts', 'tests', 'accounts.html', 'manage.html'].includes(item)));
+  const preview = await readFile(path.join(built.distDir, 'lab/studio/preview/index.html'), 'utf8');
+  assert.match(preview, /data-variant="f"/); assert.match(preview, /data-mode="demo"/);
+  for (const section of ['wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook']) assert.ok(preview.includes(`id="${section}"`));
+  assert.match(preview, /connect-src 'self'/); assert.match(preview, /form-action 'none'/);
+  const event = await readFile(path.join(built.distDir, 'lab/studio/preview/wedding.ics'), 'utf8');
+  assert.match(event, /URL:https:\/\/sungso-wedding\.vercel\.app\/lab\/studio\/preview\//);
+  const oldFile = path.join(built.distDir, 'lab/experience/f/index.html'), original = await readFile(oldFile, 'utf8');
+  await writeFile(oldFile, original + '<!-- changed -->');
+  await assert.rejects(verifyPreservedStudioBaseline(built.distDir), /Preserved pre-studio invitation changed/);
+  await writeFile(oldFile, original);
+  const runtimePath = path.join(built.distDir, 'lab/studio/runtime.mjs'), runtime = await readFile(runtimePath, 'utf8');
+  await writeFile(runtimePath, runtime.replace('"mode": "demo"', '"mode": "live"'));
+  await assert.rejects(verifyInvitation(built.distDir), /build-selected demo/);
+});

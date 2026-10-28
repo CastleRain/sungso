@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#eef3f8"><meta http-equiv="Content-Security-Policy" content="connect-src 'self'; form-action 'none'; object-src 'none'; base-uri 'self'">
+<title>우리의 청첩장 조립실 · 성우와 소희</title><meta name="description" content="좋아하는 장면을 골라 두 사람만의 청첩장으로 연결하는 VER6.1 조립실.">
+<link rel="canonical" href="{{canonicalRoot}}"><link rel="stylesheet" href="./css/typography.css"><link rel="stylesheet" href="./catalog.css"><script type="module" src="./catalog.mjs"></script>
+</head><body data-view="edit">
+<header class="studio-header"><a class="studio-brand" href="./"><span>Our wedding studio</span><small>SUNGWOO &amp; SOHEE</small></a><nav aria-label="기존 버전"><a href="../v6-1/">A–E</a><a href="../experience/">F–G</a><a id="open-preview" href="./preview/" target="_blank" rel="noopener">전체 화면 <span aria-hidden="true">↗</span></a></nav></header>
+<nav class="mobile-view" aria-label="조립 화면 보기"><button data-view="edit" aria-pressed="true">장면 고르기</button><button data-view="preview" aria-pressed="false">미리 보기</button></nav>
+<main class="workspace">
+<aside class="edit-panel" aria-label="청첩장 조립">
+  <header class="edit-intro"><p class="eyebrow">VER6.1 · A LITTLE MORE US</p><h1>좋아하는 장면을,<br><em>우리의 청첩장으로.</em></h1><p>표지부터 사진첩까지 골라 보세요.<br>선택한 장면이 바로 이어집니다.</p></header>
+  <section class="preset-section" aria-labelledby="preset-heading"><div class="section-top"><h2 id="preset-heading">이 조합부터 시작해 보세요</h2><span>3 COMBINATIONS</span></div><div id="presets" class="presets"></div></section>
+  <section class="choices-section" aria-label="장면 조립"><div class="section-top"><h2>장면별로 골라 보기</h2><span>5 CHAPTERS</span></div><div id="scene-controls"></div></section>
+  <section class="fixed-section" aria-labelledby="fixed-heading"><div class="section-top"><h2 id="fixed-heading">함께 유지되는 네 가지</h2><span>FIXED</span></div><p>마음에 드셨던 F의 구성을 모든 조합에 담았어요.</p><ul><li><span>01</span><div><strong>오시는 길</strong><small>펼쳐지는 약도 · 교통편 선택</small></div><button data-jump="location">보기 ↗</button></li><li><span>02</span><div><strong>마음 전하실 곳</strong><small>받는 분 선택 · 카드 전환 · 복사 완료</small></div><button data-jump="accounts">보기 ↗</button></li><li><span>03</span><div><strong>축하의 편지</strong><small>봉투 열기 · 편지 쓰기 · 메시지 카드</small></div><button data-jump="guestbook">보기 ↗</button></li><li><span>04</span><div><strong>빠른 메뉴</strong><small>읽는 위치와 진행에 반응하는 메뉴</small></div><button data-jump="wedding-day">보기 ↗</button></li></ul></section>
+  <section class="save-section" aria-labelledby="save-heading"><div class="section-top"><h2 id="save-heading">마음에 드는 조합 보관하기</h2><span>MY SELECTIONS</span></div><label for="combination-name">조합 이름</label><div class="save-row"><input id="combination-name" maxlength="32" placeholder="예: 소희가 고른 조합" autocomplete="off"><button id="save-combination">저장 <span aria-hidden="true">＋</span></button></div><p class="helper">이 브라우저에 최대 8개 저장돼요. 다른 기기에서는 조합 링크로 이어 보세요.</p><ul id="saved-combinations" class="saved-list"></ul><div class="text-actions"><button id="export-combination">파일로 보관 ↓</button><label class="import-action">파일 불러오기 ↑<input id="import-combination" type="file" accept="application/json,.json"></label></div></section>
+  <footer class="edit-footer"><p>조립용 미리보기예요. 계좌는 예시이고, 방명록은 이 기기에만 저장됩니다. 기존 청첩장에는 영향을 주지 않아요.</p><div><button id="undo-change" disabled>이전 선택으로</button><button id="reset-combination">기본 조합으로</button></div></footer>
+</aside>
+<section class="preview-panel" aria-labelledby="preview-heading">
+  <div class="preview-toolbar"><div><p class="eyebrow">YOUR INVITATION</p><h2 id="preview-heading">지금 고른 조합</h2></div><div class="preview-actions"><button id="audio-toggle" aria-pressed="false" aria-label="미리보기 음악 켜기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></svg><span>음악</span></button><button id="copy-preview" class="share-action">조합 링크 <span aria-hidden="true">↗</span></button></div></div>
+  <div class="preview-position"><p id="preview-summary">표지 · 초대글 · 날짜 · 이야기 · 사진첩</p><div class="width-switch" aria-label="미리보기 화면 너비"><button data-width="mobile" aria-pressed="true">모바일</button><button data-width="wide" aria-pressed="false">넓게</button></div></div>
+  <div class="preview-stage" data-width="mobile"><div class="phone-shell"><iframe id="invitation-preview" title="선택한 조합의 청첩장 미리보기" allow="autoplay; clipboard-write; web-share" src="./preview/?compare=1"></iframe></div></div>
+  <div class="preview-foot"><span class="preview-ready" id="preview-status" role="status">청첩장을 준비하고 있어요.</span><div><button id="replay-preview">처음부터 보기 ↻</button><button id="copy-editor">조립 화면 링크 복사 ↗</button></div></div>
+</section>
+</main><p id="studio-notice" class="studio-notice" role="status" hidden></p>
+<dialog id="link-dialog" aria-labelledby="link-heading"><button class="dialog-close" id="close-link" aria-label="주소 창 닫기">×</button><p class="eyebrow">KEEP THIS COMBINATION</p><h2 id="link-heading">이 조합의 주소</h2><p>주소를 선택해 복사해 주세요.</p><textarea id="link-value" readonly aria-label="조합 주소"></textarea><a id="fallback-link" href="./preview/" target="_blank" rel="noopener">새 창에서 보기 ↗</a></dialog>
+<noscript><p>조립 기능을 사용하려면 자바스크립트를 켜 주세요. <a href="./preview/">기본 청첩장 보기</a></p></noscript>
+</body></html>

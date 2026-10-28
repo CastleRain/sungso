@@ -36,7 +36,10 @@ for (const pathname of ['/homehunt/', '/homehunt/index.html', '/wecost/', '/weco
     '/lab/v6-1/src/index.template.html', '/lab/v6-1/tests/demo-data.test.mjs', '/lab/v6-1/z/'] : []),
   ...(manifest.experience ? ['/lab/experience/homehunt/', '/lab/experience/wecost/', '/lab/experience/honeymoon/',
     '/lab/experience/manage.html', '/lab/experience/accounts.html', '/lab/experience/scripts/build.mjs',
-    '/lab/experience/src/index.template.html', '/lab/experience/tests/', '/lab/experience/z/'] : [])]) {
+    '/lab/experience/src/index.template.html', '/lab/experience/tests/', '/lab/experience/z/'] : []),
+  ...(manifest.studio ? ['/lab/studio/homehunt/', '/lab/studio/wecost/', '/lab/studio/honeymoon/',
+    '/lab/studio/manage.html', '/lab/studio/accounts.html', '/lab/studio/scripts/build.mjs',
+    '/lab/studio/src/index.template.html', '/lab/studio/tests/', '/lab/studio/z/'] : [])]) {
   const response = await get(INVITATION_ORIGIN + pathname);
   assert.equal(response.status, 404, pathname);
   report.missingPaths.push({ path: pathname, status: response.status });
@@ -52,7 +55,7 @@ const editionHtml = await edition.text();
 assert.match(editionHtml, /data-version="6\.1\.0"/);
 assert.ok(editionHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
 report.editions = { root: '5.6.0', v6: '6.1.0' };
-for (const key of ['lab', 'experience'].filter(key => manifest[key])) {
+for (const key of ['lab', 'experience', 'studio'].filter(key => manifest[key])) {
   const collection = manifest[key];
   report[key] = [];
   const catalog = await get(`${INVITATION_ORIGIN}/${collection.path}/`);
@@ -63,7 +66,7 @@ for (const key of ['lab', 'experience'].filter(key => manifest[key])) {
     const response = await get(url);
     assert.equal(response.status, 200, `study ${id}`);
     const html = await response.text();
-    assert.ok(html.includes(`data-variant="${id}"`));
+    assert.ok(html.includes(`data-variant="${key === 'studio' ? 'f' : id}"`));
     assert.ok(html.includes('data-mode="demo"'));
     assert.ok(html.includes(`property="og:url" content="${url}"`));
     assert.match(html, /connect-src 'self'/);
@@ -113,9 +116,9 @@ for (const file of ['index.html', 'css/typography.css', 'js/config.mjs', 'weddin
   report.pagesPreserved.push(file);
 }
 report.assets.sort((a, b) => a.file.localeCompare(b.file));
-const reportDirectory = manifest.experience ? 'docs/invitation-experience' : manifest.lab ? 'docs/invitation-lab' : 'docs/invitation-v6-review';
+const reportDirectory = manifest.studio ? 'docs/invitation-studio' : manifest.experience ? 'docs/invitation-experience' : manifest.lab ? 'docs/invitation-lab' : 'docs/invitation-v6-review';
 await mkdir(path.join(PROJECT_ROOT, reportDirectory), { recursive: true });
 await writeFile(path.join(PROJECT_ROOT, reportDirectory, 'live-check.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: 'passed', assets: report.assets.length, missingPaths: report.missingPaths.length,
   apiChecks: report.api.length, preservedPagesFiles: report.pagesPreserved.length, labVariants: report.lab?.length || 0,
-  experienceVariants: report.experience?.length || 0, productionWrites: 0 }));
+  experienceVariants: report.experience?.length || 0, studioVariants: report.studio?.length || 0, productionWrites: 0 }));

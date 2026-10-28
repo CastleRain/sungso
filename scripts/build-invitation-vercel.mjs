@@ -10,6 +10,7 @@ export const INVITATION_ORIGIN = 'https://sungso-wedding.vercel.app';
 export const INVITATION_DIST = path.join(PROJECT_ROOT, 'deploy/invitation/dist');
 export const INVITATION_LAB_PATH = 'lab/v6-1';
 export const INVITATION_EXPERIENCE_PATH = 'lab/experience';
+export const INVITATION_STUDIO_PATH = 'lab/studio';
 const SOURCE = 'apps/invitation-v5';
 const OLD_URL = 'https://castlerain.github.io/sungso/invitation-v5/';
 const V6_SOURCE = 'apps/invitation-v6';
@@ -101,9 +102,17 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
     assetBase: '/v6/assets/',
     canonicalRoot: `${INVITATION_ORIGIN}/${INVITATION_EXPERIENCE_PATH}/`,
   });
+  const { buildInvitationStudio } = await import('../apps/invitation-studio/scripts/build.mjs');
+  await buildInvitationStudio({
+    outDir: path.join(distDir, INVITATION_STUDIO_PATH),
+    assetBase: '/v6/assets/',
+    canonicalRoot: `${INVITATION_ORIGIN}/${INVITATION_STUDIO_PATH}/`,
+  });
   await restorePreservedLineEndings(distDir, 'docs/invitation-experience/baseline.json');
+  await restorePreservedLineEndings(distDir, 'docs/invitation-studio/baseline.json');
   await verifyPreservedInvitation(distDir);
   await verifyPreservedExperienceBaseline(distDir);
+  await verifyPreservedStudioBaseline(distDir);
   const result = await verifyInvitation(distDir);
   // The manifest stays outside the uploaded folder.
   await mkdir(path.join(PROJECT_ROOT, '.local'), { recursive: true });
@@ -111,6 +120,7 @@ export async function buildInvitation({ distDir = INVITATION_DIST } = {}) {
     JSON.stringify({ version: version.version, sourceCommit: version.commit, separateEdition: '6.1.0',
       lab: {path: INVITATION_LAB_PATH, variants: ['a', 'b', 'c', 'd', 'e'], dataMode: 'demo'},
       experience: {path: INVITATION_EXPERIENCE_PATH, variants: ['f', 'g'], dataMode: 'demo'},
+      studio: {path: INVITATION_STUDIO_PATH, variants: ['preview'], mode: 'demo', schemaVersion: 1},
       origin: INVITATION_ORIGIN, ...result }, null, 2) + '\n');
   return { distDir, ...result };
 }
@@ -150,6 +160,7 @@ export async function verifyInvitation(distDir) {
   if (!(await readFile(path.join(distDir, 'v6/index.html'), 'utf8')).includes('data-version="6.1.0"')) throw Error('Unexpected separate edition.');
   await verifyLabOutput(distDir, files);
   await verifyLabOutput(distDir, files, INVITATION_EXPERIENCE_PATH, ['f', 'g']);
+  await verifyLabOutput(distDir, files, INVITATION_STUDIO_PATH, ['preview'], { preview: 'f' });
   return { fileCount: files.length, files };
 }
 
@@ -175,6 +186,17 @@ export async function verifyPreservedExperienceBaseline(distDir) {
   return {preservedFiles: baseline.files.length, sourceCommit: baseline.sourceCommit};
 }
 
+/** Studio assembly is additive; the existing F/G and all earlier editions stay unchanged. */
+export async function verifyPreservedStudioBaseline(distDir) {
+  const baseline = JSON.parse(await readFile(path.join(PROJECT_ROOT, 'docs/invitation-studio/baseline.json'), 'utf8'));
+  for (const entry of baseline.files) {
+    const bytes = await readFile(path.join(distDir, entry.path));
+    if (bytes.length !== entry.bytes || createHash('sha256').update(bytes).digest('hex') !== entry.sha256)
+      throw Error(`Preserved pre-studio invitation changed: ${entry.path}`);
+  }
+  return {preservedFiles: baseline.files.length, sourceCommit: baseline.sourceCommit};
+}
+
 // Git normalizes source text on Linux. Recreate the already published byte form
 // before enforcing hashes; content changes still fail the hash check below.
 async function restorePreservedLineEndings(distDir, baselineFile = 'docs/invitation-lab/baseline.json') {
@@ -191,7 +213,7 @@ async function restorePreservedLineEndings(distDir, baselineFile = 'docs/invitat
   }
 }
 
-async function verifyLabOutput(distDir, files, collectionPath = INVITATION_LAB_PATH, variants = ['a', 'b', 'c', 'd', 'e']) {
+async function verifyLabOutput(distDir, files, collectionPath = INVITATION_LAB_PATH, variants = ['a', 'b', 'c', 'd', 'e'], variantIdentifiers = {}) {
   const labFiles = files.filter(file => file.startsWith(`${collectionPath}/`));
   if (!labFiles.length) throw Error(`Invitation studies are missing: ${collectionPath}`);
   const base = `${INVITATION_ORIGIN}/${collectionPath}/`;
@@ -200,7 +222,7 @@ async function verifyLabOutput(distDir, files, collectionPath = INVITATION_LAB_P
   if (!data || JSON.parse(data[1]).mode !== 'demo') throw Error('Invitation studies must use build-selected demo data.');
   for (const id of variants) {
     const html = await readFile(path.join(distDir, collectionPath, id, 'index.html'), 'utf8');
-    if (!html.includes(`data-variant="${id}"`) || !html.includes('data-mode="demo"')
+    if (!html.includes(`data-variant="${variantIdentifiers[id] || id}"`) || !html.includes('data-mode="demo"')
       || !/name="robots"[^>]*content="noindex/.test(html)) throw Error(`Incomplete invitation study: ${id}`);
     if (!html.includes("connect-src 'self'") || !html.includes("form-action 'none'")) throw Error(`Unrestricted invitation study: ${id}`);
     if (!html.includes(`property="og:url" content="${base}${id}/"`)) throw Error(`Wrong invitation study canonical: ${id}`);

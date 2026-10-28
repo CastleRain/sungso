@@ -99,7 +99,7 @@ test('additive invitation build preserves every original byte and serves five is
   }
   const added=result.files.filter(file=>!baseline.files.some(entry=>entry.path===file));
   assert.ok(added.length>15);
-  assert.ok(added.every(file=>file.startsWith('lab/v6-1/') || file.startsWith('lab/experience/')));
+  assert.ok(added.every(file=>file.startsWith('lab/v6-1/') || file.startsWith('lab/experience/') || file.startsWith('lab/studio/')));
   assert.ok(!added.some(file=>/\.(mp3|ttf|woff2)$/.test(file)));
   const server=createInvitationPreview(result.distDir);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));

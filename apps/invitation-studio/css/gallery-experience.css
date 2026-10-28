@@ -1,0 +1,41 @@
+/* The small prints become the album itself. Decorative sheets never take input. */
+.experience-album{--album-reveal:1;position:relative;max-width:590px;margin-inline:auto}
+.experience-album [hidden]{display:none!important}
+.has-experience-album>.gallery-grid{display:none!important}
+.album-scene{position:relative;isolation:isolate;min-height:340px;height:clamp(350px,62svh,590px);display:grid;place-items:center;perspective:1100px;touch-action:pan-y pinch-zoom;margin:4px -4px 0}
+.album-feature{position:relative;z-index:3;width:min(84%,370px);height:auto;aspect-ratio:2/3;max-height:100%;padding:0;background:#eff2f3;border:0;overflow:hidden;cursor:zoom-in;touch-action:pan-y pinch-zoom;box-shadow:0 18px 40px #19384518;transform:translateY(calc((1 - var(--album-reveal))*26px)) scale(calc(.85 + var(--album-reveal)*.15));transform-origin:center 65%;will-change:transform;border-radius:2px}
+.album-feature-image{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+.album-feature::after{content:"";position:absolute;inset:75% 0 0;background:linear-gradient(transparent,#102d4440);pointer-events:none}
+.album-expand{position:absolute;right:13px;bottom:13px;color:white;font:13px/1.5 var(--font-body,var(--font));z-index:2;text-shadow:0 1px 7px #1236;padding-bottom:2px;border-bottom:1px solid #ffffff80}
+.album-image-error{position:absolute;inset:0;display:grid;place-content:center;padding:24px;font-size:14px;line-height:1.8;word-break:keep-all;color:var(--ink);background:var(--paper)}
+.album-sheet{position:absolute;z-index:1;left:50%;top:50%;width:58%;height:82%;padding:5px;background:white;box-shadow:0 8px 24px #1a354a12;pointer-events:none;transform-origin:50% 70%;opacity:calc(.88 - var(--album-reveal)*.88);will-change:transform,opacity;overflow:hidden}
+.album-sheet img{display:block;width:100%;height:100%;object-fit:cover}
+.album-sheet-1{transform:translate(calc(-50% - (1 - var(--album-reveal))*24%),calc(-50% + (1 - var(--album-reveal))*3%)) rotate(calc((1 - var(--album-reveal))*-12deg))}
+.album-sheet-2{transform:translate(calc(-50% + (1 - var(--album-reveal))*24%),calc(-50% + (1 - var(--album-reveal))*3%)) rotate(calc((1 - var(--album-reveal))*12deg))}
+.album-sheet-3,.album-sheet-4{display:none}
+.album-controls{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:18px}
+.album-controls button{min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;font:24px/1 var(--roman);background:transparent;color:var(--accent);transition:background .2s,transform .2s}
+.album-controls button:hover{background:color-mix(in srgb,var(--accent) 6%,transparent);transform:translateY(-1px)}
+.album-controls button:disabled{opacity:.3;cursor:default;transform:none}
+.album-position{font:15px/1.4 var(--roman);letter-spacing:.16em;font-variant-numeric:tabular-nums;min-width:70px;text-align:center;color:var(--accent)}
+.album-filmstrip{display:flex;gap:9px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:16px 2px 13px;scroll-snap-type:x proximity;align-items:center;touch-action:pan-x pan-y pinch-zoom}
+.album-thumbnail{flex:0 0 52px;height:76px;padding:0 0 5px;border:0;border-bottom:2px solid transparent;opacity:.52;background:transparent;scroll-snap-align:center;cursor:pointer;transition:opacity .25s,border-color .25s,transform .25s;position:relative}
+.album-thumbnail img{width:100%;height:100%;object-fit:cover;display:block;border-radius:1px;pointer-events:none}
+.album-thumbnail[aria-pressed=true]{opacity:1;border-color:var(--accent);transform:translateY(-3px)}
+.album-thumbnail:hover{opacity:.9}
+.album-thumbnail:focus-visible,.album-controls button:focus-visible,.album-feature:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.album-empty{padding:44px 16px;text-align:center;color:var(--muted);font-size:15px}
+body[data-album=contact] .album-scene{height:clamp(340px,60svh,590px);margin-inline:0}
+body[data-album=contact] .album-feature{width:min(84%,370px);transform:translateY(calc((1 - var(--album-reveal))*32px)) scale(calc(.64 + var(--album-reveal)*.36));box-shadow:0 14px 30px #1a354a12}
+body[data-album=contact] .album-sheet{display:block;width:37%;height:45%;padding:4px;opacity:calc(1 - var(--album-reveal));box-shadow:0 6px 16px #1a354a0c}
+body[data-album=contact] .album-sheet-1{transform:translate(calc(-50% - (1 - var(--album-reveal))*84%),calc(-50% - (1 - var(--album-reveal))*64%)) rotate(calc((1 - var(--album-reveal))*-5deg))}
+body[data-album=contact] .album-sheet-2{transform:translate(calc(-50% + (1 - var(--album-reveal))*84%),calc(-50% - (1 - var(--album-reveal))*64%)) rotate(calc((1 - var(--album-reveal))*5deg))}
+body[data-album=contact] .album-sheet-3{transform:translate(calc(-50% - (1 - var(--album-reveal))*84%),calc(-50% + (1 - var(--album-reveal))*64%)) rotate(calc((1 - var(--album-reveal))*4deg))}
+body[data-album=contact] .album-sheet-4{transform:translate(calc(-50% + (1 - var(--album-reveal))*84%),calc(-50% + (1 - var(--album-reveal))*64%)) rotate(calc((1 - var(--album-reveal))*-4deg))}
+body[data-album=contact] .album-controls{justify-content:space-between;padding-inline:9%}
+body[data-album=contact] .album-controls button{border-color:transparent;border-radius:0;border-bottom:1px solid var(--line)}
+.experience-album:not(.album-motion) .album-feature,.motion-off .album-feature{transform:none;will-change:auto}
+.experience-album:not(.album-motion) .album-sheet,.motion-off .album-sheet{display:none;will-change:auto}
+@media(min-width:768px){.album-thumbnail{flex-basis:58px;height:86px}.album-thumbnail:first-child{margin-left:auto}.album-thumbnail:last-child{margin-right:auto}.album-scene{margin-top:14px}.album-controls{margin-top:22px}}
+@media(max-width:360px){.album-scene{min-height:300px;height:375px}.album-feature{width:80%}.album-filmstrip{gap:7px}.album-thumbnail{flex-basis:48px;height:71px}.album-controls{gap:17px}.album-expand{font-size:12px;right:10px;bottom:10px}body[data-album=contact] .album-scene{height:355px}}
+@media(prefers-reduced-motion:reduce){.album-feature{transform:none!important;will-change:auto}.album-sheet{display:none!important;will-change:auto}.album-thumbnail,.album-controls button{transition:none}}

@@ -55,7 +55,7 @@ test('round two preserves all 177 existing files and serves two isolated experie
   const old=new Set(baseline.files.map(entry=>entry.path));
   const added=result.files.filter(file=>!old.has(file));
   assert.ok(added.length>10);
-  assert.ok(added.every(file=>file.startsWith('lab/experience/')));
+  assert.ok(added.every(file=>file.startsWith('lab/experience/')||file.startsWith('lab/studio/')));
   assert.ok(!added.some(file=>/\.(mp3|ttf|woff2)$/.test(file)));
   const server=createInvitationPreview(result.distDir);
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
