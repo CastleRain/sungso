@@ -25,7 +25,72 @@ test('playback follows timestamps and leaves the unrecorded interval unconnected
   assert.equal(moving.paths[0].length, 2); assert.equal(moving.paths[1].length, 0);
   assert.equal(moving.heads.get('sungwoo').lat, 37.05);
   const gap = journeyMapFrame(segments, 3000);
-  assert.equal(gap.heads.size, 0); assert.deepEqual(gap.paths.map(p => p.length), [2, 0]);
+  assert.equal(gap.heads.get('sungwoo').state, 'gap'); assert.equal(gap.heads.get('sungwoo').recordedAt, 2000);
+  assert.equal(gap.heads.get('sungwoo').lat, 37.1); assert.deepEqual(gap.paths.map(p => p.length), [2, 0]);
+  const finished = journeyMapFrame(segments, 6000);
+  assert.equal(finished.heads.get('sungwoo').state, 'finished'); assert.equal(finished.heads.get('sungwoo').lat, 38.1);
+  const waiting = journeyMapFrame([{ person: 'sohee', points: [{ lat: 37, lng: 127, time: 1000 }, { lat: 37, lng: 127, time: 2000 }] }], 1500);
+  assert.equal(waiting.heads.get('sohee').state, 'recorded'); assert.equal(waiting.heads.get('sohee').lat, 37);
+});
+
+test('map playback pauses, seeks, resumes and changes speed without changing route data or camera', async t => {
+  const keys = ['document', 'requestAnimationFrame', 'cancelAnimationFrame', 'ResizeObserver', 'navermap_authFailure', 'performance'];
+  const originals = keys.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]);
+  t.after(() => { for (const [key, descriptor] of originals) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } });
+  const element = () => ({ style: {}, dataset: {}, children: [], clientWidth: 400, clientHeight: 300, setAttribute() {}, replaceChildren(...children) { this.children = children; } });
+  globalThis.document = { createElement: element, addEventListener() {}, removeEventListener() {} };
+  globalThis.ResizeObserver = undefined; globalThis.navermap_authFailure = undefined;
+  let now = 0, nextFrame = 0, mapInstance; const callbacks = new Map(), markers = [], lines = [], labels = [];
+  Object.defineProperty(globalThis, 'performance', { configurable: true, value: { now: () => now } });
+  globalThis.requestAnimationFrame = callback => { callbacks.set(++nextFrame, callback); return nextFrame; };
+  globalThis.cancelAnimationFrame = id => callbacks.delete(id);
+  const tick = value => { now = value; const next = [...callbacks.values()]; callbacks.clear(); next.forEach(callback => callback(now)); };
+  const api = {
+    LatLng: class { constructor(lat, lng) { this.lat = lat; this.lng = lng; } },
+    Point: class {}, Size: class {}, SymbolPath: { CIRCLE: 3 }, LatLngBounds: class { extend() {} },
+    Map: class {
+      constructor() { mapInstance = this; this.center = { lat: 37, lng: 127 }; this.zoom = 15; this.fits = 0; }
+      getCenter() { return this.center; } getZoom() { return this.zoom; } setSize() { this.zoom = 9; }
+      setCenter(value) { this.center = value; } setZoom(value) { this.zoom = value; } fitBounds() { this.fits++; } setOptions() {} destroy() {}
+    },
+    Polyline: class { constructor(options) { this.options = options; this.path = options.path; lines.push(this); } setMap(value) { this.map = value; } setPath(value) { this.path = value; } setOptions(value) { Object.assign(this.options, value); } },
+    Marker: class { constructor(options) { Object.assign(this, options); markers.push(this); } setMap(value) { this.map = value; } setPosition(value) { this.position = value; } setIcon(value) { this.icon = value; } setTitle(value) { this.title = value; } },
+    InfoWindow: class { constructor(options) { this.options = options; this.opens = 0; labels.push(this); } open(map, anchor) { this.opens++; assert.ok(anchor instanceof api.LatLng); } close() {} setPosition(value) { this.position = value; } setContent(value) { this.content = value; } },
+    Event: { addListener() { return {}; }, removeListener() {} },
+  };
+  const start = Date.parse('2026-10-18T10:00:00+09:00'), point = (minute, lat) => ({ lat, lng: 127, time: start + minute * 60000 });
+  const day = { date: '2026-10-18', records: [], tracks: [{ id: 'a', person: 'sungwoo', points: [point(0, 37), point(1, 37.01)] }, { id: 'b', person: 'sungwoo', points: [point(3, 38), point(4, 38.01)] }] };
+  const original = structuredClone(day), host = element(), adapter = createJourneyMap({ element: host, sdkLoader: () => api });
+  adapter.render(day); assert.equal(await adapter.ready, true); const updates = []; let completed = 0;
+  assert.equal(adapter.getPlayback().duration, 60); assert.equal(adapter.getPlayback().time, start);
+  assert.equal(adapter.getPlayback().startTime, start); assert.equal(adapter.getPlayback().endTime, start + 240000);
+  assert.equal(adapter.play({ onProgress: value => updates.push(value), onComplete: () => completed++ }), true);
+  assert.equal(updates[0].time, start); assert.equal(updates[0].playing, true);
+  tick(15000); assert.equal(adapter.getPlayback().progress, .25);
+  const paused = adapter.pause(); tick(30000); assert.equal(adapter.getPlayback().progress, paused.progress); assert.equal(callbacks.size, 0);
+  const sought = adapter.seek(.5); assert.equal(sought.time, start + 120000); assert.equal(sought.positions[0].state, 'gap');
+  assert.equal(markers.at(-1).position.lat, 37.01); assert.equal(markers.at(-1).icon.path, api.SymbolPath.CIRCLE);
+  assert.match(markers.at(-1).title, /기록 공백/);
+  adapter.play(); tick(37500); assert.equal(adapter.getPlayback().progress, .625);
+  assert.equal(labels.length, 1); assert.equal(labels[0].opens, 1); assert.ok(labels[0].position instanceof api.LatLng);
+  adapter.setSpeed(2); tick(45000); assert.equal(adapter.getPlayback().progress, .875);
+  adapter.seek(.1); tick(48000); assert.ok(Math.abs(adapter.getPlayback().progress - .2) < 1e-8);
+  adapter.stop(); assert.equal(adapter.getPlayback().progress, 0); assert.equal(adapter.getPlayback().playing, false);
+  adapter.play({ speed: 4, from: .9 }); tick(49500); assert.equal(adapter.getPlayback().progress, 1); assert.equal(adapter.getPlayback().playing, false); assert.equal(completed, 1);
+  assert.equal(adapter.getPlayback().positions[0].state, 'finished');
+  const center = { lat: 37.5, lng: 127.5 }; mapInstance.center = center; mapInstance.zoom = 17;
+  host.children[0].clientWidth = 800; host.children[0].clientHeight = 500; adapter.resize();
+  assert.equal(mapInstance.center, center); assert.equal(mapInstance.zoom, 17);
+  const fits = mapInstance.fits; adapter.render(day); assert.equal(mapInstance.fits, fits); assert.equal(mapInstance.center, center);
+  assert.deepEqual(day, original);
+  const lineCount = lines.length;
+  adapter.render({ ...day, tracks: [{ id: 'only-a', person: 'sungwoo', points: [point(0, 37)] }, { id: 'only-b', person: 'sungwoo', points: [point(2, 38)] }] });
+  assert.equal(adapter.getPlayback().available, true); assert.equal(adapter.getPlayback().startTime, start); assert.equal(adapter.getPlayback().endTime, start + 120000);
+  assert.equal(adapter.play({ from: .5 }), true); assert.equal(adapter.getPlayback().time, start + 60000);
+  assert.equal(adapter.getPlayback().positions[0].state, 'gap'); assert.equal(lines.length, lineCount);
+  adapter.render({ ...day, tracks: [{ id: 'one-point', person: 'sungwoo', points: [point(2, 38)] }] });
+  assert.equal(adapter.getPlayback().startTime, adapter.getPlayback().endTime); assert.equal(adapter.getPlayback().available, false); assert.equal(adapter.play(), false);
+  adapter.destroy(); assert.equal(callbacks.size, 0); assert.equal(adapter.getPlayback().startTime, null);
 });
 
 test('NAVER loader waits past synchronous callback until namespace assignment and cleans up failures', async t => {

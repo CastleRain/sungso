@@ -63,8 +63,18 @@ async function harness(t, { db = database(), preparePhoto, waitForReady = true }
   dom.window.HTMLDialogElement.prototype.close = function () { this.open = false; };
   dom.window.HTMLElement.prototype.scrollIntoView = function () {};
   const root = dom.window.document.querySelector('[data-private-root]'); root.hidden = false;
-  const $ = id => root.querySelector('#' + id), workers = [], map = { ready: Promise.resolve(true), renders: [], render(day, options) { this.renders.push({ day: clone(day), options }); }, stop() {}, setPicking() {}, destroy() {}, play(options) { this.playOptions = options; return true; } };
-  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: () => map, ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
+  const $ = id => root.querySelector('#' + id), workers = [], map = {
+    ready: Promise.resolve(true), renders: [], range: null, resizeCount: 0, state: { progress: 0, time: null, playing: false, speed: 1, available: false },
+    render(day, options) { this.renders.push({ day: clone(day), options }); const points = day.tracks.filter(track => options.person === 'all' || track.person === options.person).flatMap(track => track.points); this.range = points.length ? [Math.min(...points.map(point => point.time)), Math.max(...points.map(point => point.time))] : null; this.state = { ...this.state, progress: 0, time: this.range?.[0] ?? null, startTime: this.range?.[0] ?? null, endTime: this.range?.[1] ?? null, playing: false, available: !!this.range && this.range[1] > this.range[0] }; },
+    getPlayback() { return clone(this.state); },
+    stop() { this.state = { ...this.state, playing: false, progress: 0, time: this.range?.[0] ?? null }; return this.getPlayback(); },
+    pause() { this.state.playing = false; return this.getPlayback(); },
+    seek(progress) { this.state.progress = progress; this.state.time = this.range ? this.range[0] + (this.range[1] - this.range[0]) * progress : null; return this.getPlayback(); },
+    setSpeed(speed) { this.state.speed = speed; return this.getPlayback(); },
+    resize() { this.resizeCount++; }, setPicking() {}, destroy() {},
+    play(options) { this.playOptions = options; if (!this.state.available) return false; if (this.state.progress === 1) this.seek(0); this.state.playing = true; this.state.speed = options.speed; return true; }
+  };
+  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: ({ onStatus }) => { onStatus({ ready: true }); return map; }, ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
     assert.match(String(url), /import-worker\.mjs$/);
     const worker = { payload: null, terminated: false, postMessage(payload) { this.payload = payload; }, terminate() { this.terminated = true; }, respond(result) { this.onmessage?.({ data: { ok: true, result } }); } };
     workers.push(worker); return worker;
@@ -236,7 +246,68 @@ test('closing a pending full-photo request ignores its late response and disposa
 
 test('startup archive response cannot undo a month navigation made while it was loading', async t => {
   const db = database(emptyDay('2002-02-03')), gate = deferred(); db.beforeArchive = () => gate.promise;
-  const h = await harness(t, { db, waitForReady: false }); h.$('nextMonth').click(); const chosenMonth = h.$('monthTitle').textContent;
+  const h = await harness(t, { db, waitForReady: false }); h.$('toggleCalendar').click(); h.$('nextMonth').click(); const chosenMonth = h.$('monthTitle').textContent;
   await until(() => db.calls.some(call => call.path.startsWith('/months?'))); gate.resolve(); await tick(); await tick();
   assert.equal(h.$('monthTitle').textContent, chosenMonth); assert.equal(db.calls.filter(call => call.path.startsWith('/days/')).length, 0); assert.ok(!db.calls.some(call => call.path === '/months?month=2002-02'));
+});
+
+test('map is primary by default and calendar and memory panels toggle independently without resetting playback', async t => {
+  const h = await harness(t); const renders = h.map.renders.length;
+  assert.equal(h.$('calendarPanel').hidden, true); assert.equal(h.$('recordsPanel').hidden, true); assert.equal(h.$('toggleCalendar').getAttribute('aria-expanded'), 'false'); assert.equal(h.$('toggleRecords').getAttribute('aria-expanded'), 'false');
+  h.$('toggleCalendar').click(); assert.equal(h.$('calendarPanel').hidden, false); assert.equal(h.$('recordsPanel').hidden, true); assert.equal(h.$('journeyLayout').classList.contains('calendar-open'), true); assert.equal(h.$('toggleCalendar').getAttribute('aria-expanded'), 'true');
+  h.$('toggleRecords').click(); assert.equal(h.$('recordsPanel').hidden, false); assert.equal(h.$('calendarPanel').hidden, false); assert.equal(h.$('toggleRecords').getAttribute('aria-expanded'), 'true');
+  h.$('closeCalendar').click(); assert.equal(h.$('calendarPanel').hidden, true); assert.equal(h.$('recordsPanel').hidden, false);
+  h.$('toggleCalendar').click(); h.$('focusMap').click(); assert.equal(h.$('calendarPanel').hidden, true); assert.equal(h.$('recordsPanel').hidden, true); assert.equal(h.$('focusMap').getAttribute('aria-pressed'), 'true'); assert.equal(h.map.renders.length, renders, 'layout controls do not redraw or restart the journey');
+  h.$('toggleRecords').click(); h.$('closeRecords').click(); assert.equal(h.root.ownerDocument.activeElement, h.$('toggleRecords')); assert.equal(h.$('recordsPanel').hidden, true);
+});
+
+test('previous and next date controls skip empty dates and cross saved months with the calendar collapsed', async t => {
+  const db = database(fixtureDay([memory('latest', '마지막 기록')], { revision: 1 }));
+  db.days.set('2026-10-02', validateDay({ ...emptyDay('2026-10-02'), revision: 1, records: [memory('earlier', '이달의 이전 기록')] }));
+  db.days.set('2026-09-30', validateDay({ ...emptyDay('2026-09-30'), revision: 1, records: [memory('last-month', '지난달 기록')] }));
+  const h = await harness(t, { db }); assert.equal(h.$('nextDay').disabled, true); assert.equal(h.$('previousDay').disabled, false);
+  h.$('previousDay').click(); await until(() => h.$('dayTitle').textContent === '이달의 이전 기록'); assert.equal(h.$('calendarPanel').hidden, true);
+  h.$('previousDay').click(); await until(() => h.$('dayTitle').textContent === '지난달 기록'); await until(() => h.$('previousDay').disabled); assert.equal(h.$('nextDay').disabled, false);
+  h.$('nextDay').click(); await until(() => h.$('dayTitle').textContent === '이달의 이전 기록');
+  assert.ok(!db.calls.some(call => call.path === '/days/2026-10-01'), 'empty dates are never fetched as a navigation destination');
+});
+
+test('playback supports seeking, pause and resume, speed changes, restart and person filtering', async t => {
+  const db = database(fixtureDay([], { imports: [source], tracks: [{ id: 'track-a', person: 'sungwoo', sourceId: source.id, points: [{ lat: 37.5, lng: 127, time: TIME }, { lat: 37.501, lng: 127.001, time: TIME + 60000 }] }] }));
+  const h = await harness(t, { db }); assert.equal(h.$('playTime').textContent, '14:00:00'); assert.match(h.$('playRange').textContent, /14:01:00/); h.$('playDay').click(); assert.equal(h.map.state.playing, true);
+  h.$('playSeek').value = '500'; h.$('playSeek').dispatchEvent(h.event('input', { bubbles: true })); assert.equal(h.map.state.progress, .5); assert.equal(h.$('playTime').textContent, '14:00:30'); assert.match(h.$('playSeek').getAttribute('aria-valuetext'), /50퍼센트/);
+  h.$('stopDay').click(); assert.equal(h.map.state.playing, false); assert.equal(h.$('playSeek').value, '500'); assert.equal(h.$('playDay').hidden, false); h.change('playSpeed', '4'); assert.equal(h.map.state.speed, 4);
+  h.$('playDay').click(); assert.equal(h.map.state.progress, .5); assert.equal(h.map.playOptions.speed, 4); h.$('restartDay').click(); assert.equal(h.map.state.progress, 0); assert.equal(h.map.state.playing, false); assert.equal(h.$('playTime').textContent, '14:00:00');
+  h.root.querySelector('[data-person="sohee"]').click(); assert.equal(h.$('playDay').disabled, true); assert.equal(h.$('playSeek').disabled, true); assert.equal(h.$('playTime').textContent, '--:--');
+  h.root.querySelector('[data-person="sungwoo"]').click(); assert.equal(h.$('playDay').disabled, false); assert.equal(h.map.state.speed, 4);
+});
+
+test('playback clock uses the map range including singleton boundary samples', async t => {
+  const point = time => ({ lat: 37.5, lng: 127, time });
+  const db = database(fixtureDay([], { imports: [source], tracks: [{ id: 'single-early', person: 'sungwoo', sourceId: source.id, points: [point(TIME - 60000)] }, { id: 'regular', person: 'sungwoo', sourceId: source.id, points: [point(TIME), point(TIME + 60000)] }] }));
+  const h = await harness(t, { db }); assert.equal(h.$('playTime').textContent, '13:59:00'); assert.equal(h.$('playRange').textContent, '13:59:00 — 14:01:00');
+  h.$('playSeek').value = '500'; h.$('playSeek').dispatchEvent(h.event('input', { bubbles: true })); assert.equal(h.$('playTime').textContent, '14:00:00');
+  h.close();
+  const singles = database(fixtureDay([], { imports: [source], tracks: [{ id: 'single-early', person: 'sungwoo', sourceId: source.id, points: [point(TIME)] }, { id: 'single-late', person: 'sungwoo', sourceId: source.id, points: [point(TIME + 60000)] }] }));
+  const second = await harness(t, { db: singles }); assert.equal(second.$('playDay').disabled, false); assert.equal(second.$('playRange').textContent, '14:00:00 — 14:01:00');
+});
+
+test('an earlier save refresh cannot unlock a newer in-flight save', async t => {
+  const db = database(), archiveGate = deferred(), secondSaveGate = deferred(); const h = await harness(t, { db });
+  db.beforeArchive = () => archiveGate.promise;
+  h.$('addRecord').click(); h.$('recordTitle').value = '첫 번째 기록'; h.submit(); await until(() => !h.$('recordDialog').open);
+  db.beforePut = () => secondSaveGate.promise; h.$('addRecord').click(); h.$('recordTitle').value = '두 번째 기록'; h.submit(); await until(() => db.calls.filter(call => call.method === 'PUT').length === 2);
+  archiveGate.resolve(); await tick(); await tick(); assert.equal(h.$('recordTitle').disabled, true); assert.equal(h.$('saveRecord').disabled, true); assert.equal(h.$('recordDialog').open, true);
+  h.submit(); await tick(); assert.equal(db.calls.filter(call => call.method === 'PUT').length, 2, 'older finally must not release the newer save lock');
+  secondSaveGate.resolve(); await until(() => !h.$('recordDialog').open); assert.equal(db.days.get(DATE).records.length, 2);
+});
+
+test('map height fits the viewport after measuring headers and responds to resized mobile layout', async t => {
+  const h = await harness(t), win = h.root.ownerDocument.defaultView, wrap = h.root.querySelector('.map-wrap'); let top = 252;
+  wrap.getBoundingClientRect = () => ({ top }); Object.defineProperty(win, 'innerHeight', { configurable: true, value: 900 }); win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve => setTimeout(resolve, 25)); assert.equal(wrap.style.getPropertyValue('--journey-map-height'), '632px');
+  top = 350.5; Object.defineProperty(win, 'innerHeight', { configurable: true, value: 844 }); win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve => setTimeout(resolve, 25)); assert.equal(wrap.style.getPropertyValue('--journey-map-height'), '477px');
+  Object.defineProperty(win, 'scrollY', { configurable: true, value: 100 }); top = 250.5; win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve => setTimeout(resolve, 25)); assert.equal(wrap.style.getPropertyValue('--journey-map-height'), '477px', 'scroll position must not inflate the map');
 });
