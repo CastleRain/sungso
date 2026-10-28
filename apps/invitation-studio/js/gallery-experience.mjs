@@ -165,6 +165,20 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
     setEnabled, refresh,
     setScrollEnabled(value) { scrollEnabled = Boolean(value); setEnabled(requested); },
     get index() { return index; },
+    prepareDemo() { engaged = false; queue(); return () => settle(); },
+    demoNext() {
+      const originalId = selectedId, originalEngaged = engaged, originalStripLeft = strip.scrollLeft;
+      if (photos.length < 2) return () => {};
+      select(albumStep(index, photos.length, 1), true);
+      const demonstratedId = selectedId;
+      return () => {
+        if (disposed || selectedId !== demonstratedId) return;
+        const original = photos.findIndex(photo => photo.id === originalId);
+        if (original >= 0) select(original);
+        strip.scrollTo?.({ left: originalStripLeft, behavior: 'instant' });
+        engaged = originalEngaged; cancelAnimation(); queue();
+      };
+    },
     destroy() {
       disposed = true; if (frame) win.cancelAnimationFrame(frame); cancelAnimation();
       cleanups.forEach(clean => clean()); resize?.disconnect(); root.remove(); grid.hidden = previousHidden; stage.classList.remove('has-experience-album');

@@ -143,6 +143,29 @@ export function mountExperience({ doc = document, win = window, enabled = true, 
     setEnabled,
     setScrollEnabled(value) { scrollEnabled = Boolean(value); setEnabled(active); },
     refresh() { album.refresh(); schedule(); },
+    demoInteraction(key) {
+      if (key === 'arrival') {
+        const before = travelButtons.find(button => button.getAttribute('aria-selected') === 'true')?.dataset.arrivalTab;
+        const after = travelButtons.find(button => button.dataset.arrivalTab !== before)?.dataset.arrivalTab;
+        if (!before || !after) return () => {};
+        chooseTravel(after);
+        return () => { if (travelButtons.find(button => button.getAttribute('aria-selected') === 'true')?.dataset.arrivalTab === after) chooseTravel(before); };
+      }
+      if (key === 'gifting' && picker?.children.length > 1) {
+        const before = selectedRecipient, side = query('[data-account-side][aria-selected="true"]')?.dataset.accountSide;
+        const after = (before + 1) % picker.children.length;
+        chooseRecipient(after);
+        return () => {
+          if (selectedRecipient === after && query('[data-account-side][aria-selected="true"]')?.dataset.accountSide === side) chooseRecipient(before, false, false);
+        };
+      }
+      if (key === 'wishes' && writeButton) {
+        const alreadyOpen = writeButton.classList.contains('is-opening');
+        writeButton.classList.add('is-opening');
+        return () => { if (!alreadyOpen && !composer?.open) writeButton.classList.remove('is-opening'); };
+      }
+      return () => {};
+    },
     destroy() {
       destroyed = true; if (frame) win.cancelAnimationFrame(frame); frame = 0;
       accountObserver?.disconnect(); cleanups.forEach(cleanup => cleanup()); animations.forEach(animation => animation.cancel()); animations.clear(); album.destroy();

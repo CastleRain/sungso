@@ -10,6 +10,7 @@ import { readComposition, compositionParams, CHOICES } from './composition.mjs';
 import { mountStudio, studioMessage } from './studio-preview.mjs';
 import { scrollPreviewTo, afterPreviewScroll } from './preview-scroll.mjs';
 import { createSceneReview } from './scene-review.mjs';
+import { createSceneDemo } from './scene-demo.mjs';
 
 const variant = document.body.dataset.variant;
 if (!/^[fg]$/.test(variant) || config.mode !== 'demo') throw new Error('Invitation lab requires a recognized demo edition.');
@@ -44,7 +45,9 @@ document.documentElement.classList.toggle('compare-mode', comparison);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 let effects = readPreference('sungso_invitation_studio_motion', 'on') !== 'off';
 const motion = () => effects && !reduced.matches;
-let themeController, revealObserver, sceneReview;
+let themeController, revealObserver, sceneReview, sceneDemo, visualOnly = false;
+let latestApplyId = -1, stoppedDemoId = -1;
+let awaitingApplyId = null;
 
 function revealAll() { $$('.reveal').forEach(element => element.classList.add('is-visible')); }
 function updateEffects() {
@@ -216,24 +219,54 @@ featureResults.forEach((result, index) => {
   if (result.status === 'rejected') { console.error(`Invitation feature ${index} failed`, result.reason); toast('일부 체험 기능을 준비하지 못했어요. 새로고침해 주세요.'); }
 });
 try {
-  themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, composition, onChange: syncCompositionLinks });
+  themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, composition, onChange: next => { if (!visualOnly) syncCompositionLinks(next); } });
   requestAnimationFrame(() => themeController.refresh());
 } catch (error) { console.error('Invitation motion fallback', error); revealAll(); document.documentElement.classList.remove('js-motion'); }
-window.addEventListener('message', event => {
+if (comparison && themeController) sceneDemo = createSceneDemo({
+  doc: document, win: window, controller: () => themeController,
+  finishOpening: () => window.sungsoIntro?.finish(),
+  replayOpening: () => window.sungsoIntro?.replay(themeController.composition.opening, { preview: true }),
+  onState: state => parentMessage({ type: 'invitation-studio:demo-state', ...state }),
+});
+function stopPendingDemo() {
+  if (awaitingApplyId === null) return;
+  stoppedDemoId = Math.max(stoppedDemoId, awaitingApplyId);
+  parentMessage({ type: 'invitation-studio:demo-state', requestId: awaitingApplyId, phase: 'cancelled', reason: 'user-input' });
+}
+if (comparison) {
+  ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(type => window.addEventListener(type, stopPendingDemo, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopPendingDemo(); });
+}
+window.addEventListener('message', async event => {
   const request = studioMessage(event, { origin: location.origin, parent: window.parent, embedded: comparison });
   if (!request) return;
   if (request.type === 'apply' && themeController) {
-    // The initial parent handshake must not skip the existing handwriting opening.
-    if (compositionParams(request.composition).toString() !== compositionParams(composition).toString()) {
-      cancelPreviewJump();
-      window.sungsoIntro?.finish(); closeDialogs();
-      if (/^#story\//.test(location.hash)) history.replaceState(null, '', '#our-story');
-      else if (/^#photo\//.test(location.hash) || location.hash === '#album') history.replaceState(null, '', '#gallery');
-      else if (history.state?.labDialog) history.replaceState(null, '', location.href);
+    if (request.requestId !== undefined && request.requestId < latestApplyId) return;
+    if (request.requestId !== undefined) latestApplyId = request.requestId;
+    awaitingApplyId = request.requestId ?? null;
+    sceneDemo?.cancel('new-selection'); cancelPreviewJump(); cancelInitialAnchor();
+    // Keep live dialogs, their routes, focus and form drafts mounted during edits.
+    if (compositionParams(request.composition).toString() !== compositionParams(themeController.composition).toString()) {
+      if (!$('dialog[open]')) window.sungsoIntro?.finish();
+      visualOnly = request.previewOnly === true;
       themeController.setComposition(request.composition);
+      visualOnly = false;
     }
-    parentMessage({ type: 'invitation-studio:applied', composition });
-  } else if (request.type === 'jump') jumpTo(request.section, { replayOpening: request.replayOpening, reviewKey: request.reviewKey });
+    if (!request.previewOnly) syncCompositionLinks(request.composition);
+    await Promise.resolve(themeController.whenReady).catch(() => {});
+    if (request.requestId !== undefined && request.requestId !== latestApplyId) return;
+    awaitingApplyId = null;
+    parentMessage({ type: 'invitation-studio:applied', composition: themeController.composition, ...(request.requestId !== undefined ? { requestId: request.requestId } : {}) });
+  } else if (request.type === 'demo' && request.requestId === latestApplyId && request.requestId > stoppedDemoId) {
+    cancelInitialAnchor(); cancelPreviewJump();
+    sceneDemo?.start(request);
+  } else if (request.type === 'demo-stop' && request.requestId >= latestApplyId) {
+    stoppedDemoId = Math.max(stoppedDemoId, request.requestId);
+    sceneDemo?.cancel('stop'); cancelPreviewJump();
+  } else if (request.type === 'jump') {
+    if ($('dialog[open]')) parentMessage({ type: 'invitation-studio:demo-state', requestId: latestApplyId, phase: 'blocked', reason: 'dialog' });
+    else jumpTo(request.section, { replayOpening: request.replayOpening, reviewKey: request.reviewKey });
+  }
 });
 parentMessage({ type: 'invitation-studio:ready', composition, motionReady: Boolean(themeController) });
 parentMessage({ type: 'invitation-lab:ready' });
@@ -254,7 +287,7 @@ window.addEventListener('pageshow', () => themeController?.refresh());
 window.addEventListener('pagehide', event => {
   cancelInitialAnchor();
   if (event.persisted) return;
-  cancelPreviewJump(); sceneReview.destroy();
+  cancelPreviewJump(); sceneReview.destroy(); sceneDemo?.destroy();
   clearInterval(countdownTimer); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
   if (cardUrl) URL.revokeObjectURL(cardUrl);
   if (calendarUrl) URL.revokeObjectURL(calendarUrl);

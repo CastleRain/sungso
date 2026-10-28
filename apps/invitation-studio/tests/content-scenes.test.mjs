@@ -91,3 +91,26 @@ test('destroy restores presentation state and removes every added illustration, 
   assert.equal(f.doc.body.classList.contains('theme-f'), true); assert.equal(f.story.style.values.has('--content-progress'), false);
   f.fire(f.win, 'scroll'); f.controller.setComposition({ story: 'cafe', album: 'grid' }); f.controller.refresh(); assert.equal(f.frames.size, 0); assert.equal(f.doc.body.dataset.story, undefined);
 });
+
+test('story demo resets its read progress without opening a chapter and restores readable content', () => {
+  const f = fixture({ story: 'line', album: 'contact' }); f.entry.top = 100; f.flush();
+  assert.equal(f.story.style.values.get('--content-progress'), '1');
+  f.entry.top = 700; const restore = f.controller.prepareDemo('story'); f.flush();
+  assert.ok(Number(f.story.style.values.get('--content-progress')) < 1);
+  assert.equal(f.dialog.open, undefined); assert.equal(f.album.index, 6);
+  restore(); f.fire(f.win, 'scroll'); f.flush();
+  assert.equal(f.story.style.values.get('--content-progress'), '1');
+  assert.equal(f.dialog.open, undefined); f.controller.destroy();
+});
+
+test('grid demo highlights an actual second photograph without opening or selecting a viewer', () => {
+  const f = fixture({ story: 'line', album: 'grid' });
+  const first = new Element('button'), second = new Element('button');
+  first.className = second.className = 'gallery-photo'; f.grid.append(first, second);
+  let clicked = 0; first.addEventListener('click', () => clicked++); second.addEventListener('click', () => clicked++);
+  const restore = f.controller.demoInteraction();
+  assert.equal(first.classList.contains('studio-demo-photo'), false);
+  assert.equal(second.classList.contains('studio-demo-photo'), true);
+  assert.equal(clicked, 0); assert.equal(f.dialog.open, undefined); assert.equal(f.album.index, 6);
+  restore(); assert.equal(second.classList.contains('studio-demo-photo'), false); f.controller.destroy();
+});

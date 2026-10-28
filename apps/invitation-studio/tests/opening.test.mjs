@@ -152,3 +152,38 @@ test('slow parsing and animation errors cannot leave a cover locked or revive an
   stale.window.sungsoIntro.replay('flow'); oldFrame(); stale.flush();
   assert.equal(stale.window.sungsoIntro.effect, 'flow'); assert.equal(stale.window.sungsoIntro.running, true);
 });
+
+test('explicit editor previews reuse every real ink effect without locking touch or keyboard scrolling', () => {
+  for (const opening of ['ink', 'flow', 'bloom', 'light']) {
+    const f = fixture({ hash: '#invitation' }); f.parsed();
+    assert.equal(f.window.sungsoIntro.replay(opening, { preview: true }), true); f.flush();
+    assert.equal(f.classes.has('intro-preview'), true); assert.equal(f.classes.has('intro-locked'), false);
+    assert.equal(f.animations.filter(animation => 'strokeDashoffset' in animation.keys[0]).length, 19);
+    assert.equal(f.fire(f.document, 'touchmove').defaultPrevented, false);
+    assert.equal(f.fire(f.document, 'keydown', { key: 'PageDown', target: { closest: () => null } }).defaultPrevented, false);
+    f.expire(); assert.equal(f.finished, 1); assert.equal(f.classes.has('intro-preview'), false);
+    assert.equal(f.classes.has('intro-complete'), true); assert.equal(f.timers.size, 0);
+    f.window.sungsoIntro.finish(); assert.equal(f.finished, 1);
+  }
+});
+
+test('editor mode is opt-in and ordinary guest replays still protect the opening', () => {
+  for (const settings of [undefined, {}, { preview: 'true' }, null]) {
+    const f = fixture({ hash: '#invitation' }); f.parsed(); f.window.sungsoIntro.replay('flow', settings); f.flush();
+    assert.equal(f.classes.has('intro-locked'), true); assert.equal(f.classes.has('intro-preview'), false);
+    assert.equal(f.fire(f.document, 'touchmove').defaultPrevented, true);
+    assert.equal(f.fire(f.document, 'keydown', { key: 'ArrowDown', target: { closest: () => null } }).defaultPrevented, true);
+    f.window.sungsoIntro.finish(); assert.equal(f.finished, 1);
+  }
+});
+
+test('cancelled or reduced editor openings settle once and do not revive on a stale frame', () => {
+  const f = fixture({ hash: '#invitation' }); f.parsed(); f.window.sungsoIntro.replay('light', { preview: true });
+  const staleFrame = [...f.frames.values()][0]; f.window.sungsoIntro.finish(); staleFrame();
+  assert.equal(f.animations.length, 0); assert.equal(f.finished, 1); assert.equal(f.frames.size, 0);
+  f.window.sungsoIntro.replay('bloom', { preview: true }); f.flush();
+  f.media.matches = true; f.fire(f.media, 'change');
+  assert.equal(f.window.sungsoIntro.running, false); assert.equal(f.finished, 2);
+  assert.equal(f.classes.has('intro-locked'), false); assert.equal(f.classes.has('intro-preview'), false);
+  assert.equal(f.window.sungsoIntro.replay('ink', { preview: true }), false);
+});

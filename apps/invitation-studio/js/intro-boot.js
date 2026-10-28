@@ -15,6 +15,7 @@
   }
 
   function finish() {
+    const wasOpening = Boolean(cycle) || root.classList.contains('intro-locked') || root.classList.contains('intro-preview');
     if (cycle) {
       clearTimeout(cycle.timer);
       cancelAnimationFrame(cycle.frame);
@@ -22,13 +23,12 @@
       cycle.events.abort();
       cycle = null;
     }
-    const wasLocked = root.classList.contains('intro-locked');
-    root.classList.remove('intro-pending', 'intro-running', 'intro-locked');
+    root.classList.remove('intro-pending', 'intro-running', 'intro-locked', 'intro-preview');
     root.classList.add('intro-complete');
     if (document.activeElement?.id === 'intro-skip') {
       document.querySelector('.hero-scroll')?.focus({ preventScroll: true });
     }
-    if (wasLocked) document.dispatchEvent(new Event('sungso:intro-finished'));
+    if (wasOpening) document.dispatchEvent(new Event('sungso:intro-finished'));
   }
 
   // Two harmless wrappers keep the original glyph transforms, masks and paths intact.
@@ -108,16 +108,19 @@
     } catch { finish(); }
   }
 
-  function replay(value = effect) {
+  function replay(value = effect, settings = {}) {
     finish();
     effect = normalize(value);
     root.dataset.opening = effect;
     if (!enabled()) return false;
+    // Only the explicit editor caller opts in. URL options never unlock an
+    // ordinary guest opening, and preview uses exactly the same ink animations.
+    const preview = settings?.preview === true;
     const current = { events: new AbortController(), animations: [], started: false, timer: null, frame: null };
     cycle = current;
     const options = { signal: current.events.signal };
     root.classList.remove('intro-complete');
-    root.classList.add('intro-pending', 'intro-locked');
+    root.classList.add('intro-pending', preview ? 'intro-preview' : 'intro-locked');
     current.timer = setTimeout(finish, 4500);
     addEventListener('hashchange', finish, options);
     addEventListener('pagehide', finish, options);
@@ -128,10 +131,10 @@
     }, options);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') finish();
-      else if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key) &&
+      else if (!preview && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key) &&
         !event.target.closest?.('button, a, input, textarea')) event.preventDefault();
     }, options);
-    document.addEventListener('touchmove', event => {
+    if (!preview) document.addEventListener('touchmove', event => {
       if (event.cancelable) event.preventDefault();
     }, { ...options, passive: false });
     function start() {

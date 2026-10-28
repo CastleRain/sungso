@@ -1,4 +1,4 @@
-import { normalizeComposition, SECTION_IDS } from './composition.mjs';
+import { normalizeComposition, SECTION_IDS, CHOICE_KEYS } from './composition.mjs';
 import { mountExperience } from './experience.mjs';
 import { mountUpperScenes } from './upper-scenes.mjs';
 import { mountContentScenes } from './content-scenes.mjs';
@@ -14,7 +14,10 @@ export function studioMessage(event, { origin, parent, embedded }) {
   if (!embedded || !event || event.origin !== origin || event.source !== parent) return null;
   const data = event.data;
   if (!data || typeof data !== 'object') return null;
-  if (data.type === 'invitation-studio:apply') return { type: 'apply', composition: normalizeComposition(data.composition) };
+  const requestId = Number.isSafeInteger(data.requestId) && data.requestId >= 0 ? data.requestId : null;
+  if (data.type === 'invitation-studio:apply') return { type: 'apply', composition: normalizeComposition(data.composition), ...(requestId !== null ? { requestId } : {}), ...(data.previewOnly === true ? { previewOnly: true } : {}) };
+  if (data.type === 'invitation-studio:demo' && requestId !== null && CHOICE_KEYS.includes(data.key)) return { type: 'demo', requestId, key: data.key };
+  if (data.type === 'invitation-studio:demo-stop' && requestId !== null) return { type: 'demo-stop', requestId };
   if (data.type === 'invitation-studio:jump' && STUDIO_SECTIONS.includes(data.section)) {
     const reviewKey = typeof data.reviewKey === 'string' && Object.hasOwn(SECTION_IDS, data.reviewKey) && SECTION_IDS[data.reviewKey] === data.section ? data.reviewKey : null;
     return { type: 'jump', section: data.section, ...(data.section === 'top' && data.replayOpening === true ? { replayOpening: true } : {}), ...(reviewKey ? { reviewKey } : {}) };
@@ -49,6 +52,15 @@ export function mountStudio({ doc = document, win = window, gallery, enabled = t
   return {
     get composition() { return { ...current }; },
     get whenReady() { return controllers[0]?.whenReady || Promise.resolve(); },
+    prepareDemo(key) {
+      if (disposed) return () => {};
+      const cleanups = [scroll.prepareDemo?.(key), upper.prepareDemo?.(key), content.prepareDemo?.(key)].filter(Boolean);
+      return () => cleanups.forEach(clean => clean());
+    },
+    demoInteraction(key) {
+      if (disposed) return () => {};
+      return key === 'album' ? content.demoInteraction?.() || (() => {}) : experience.demoInteraction?.(key) || (() => {});
+    },
     previewMotion(id) { if (!disposed) scroll.replay?.(id); },
     setComposition(next) {
       if (disposed) return;

@@ -106,3 +106,17 @@ test('destroy removes generated nodes, data, inline geometry and all scheduled l
   assert.equal(f.detail.children.includes(f.calendarButton), true); assert.equal(f.family.children.length, 0);
   f.fire(f.win, 'scroll'); f.fire(f.win, 'resize'); f.fire(f.doc, 'visibilitychange'); assert.equal(f.frames.size, 0);
 });
+
+test('editor demonstration resets settled date only for the demonstration and settles safely on cancel', () => {
+  const f = fixture({ composition: { cover: 'aperture', intro: 'ribbon', date: 'flip' } }); f.flush();
+  f.fire(f.doc, 'focusin', { target: f.calendarButton });
+  assert.equal(f.date.style.values.get('--upper-date'), '1');
+  const restore = f.controller.prepareDemo('date'); f.flush();
+  assert.ok(Number(f.date.style.values.get('--upper-date')) < 1);
+  restore(); f.date.rect.top = 800; f.fire(f.win, 'scroll'); f.flush();
+  assert.equal(f.date.style.values.get('--upper-date'), '1');
+  assert.equal(f.invitation.style.values.get('--upper-intro'), '1');
+  assert.equal(f.detail.children.includes(f.calendarButton), true);
+  assert.equal(f.calendarButton.focused, undefined);
+  f.controller.destroy();
+});

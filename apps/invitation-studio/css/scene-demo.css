@@ -1,0 +1,9 @@
+/* Only the embedded editor mounts this status; it never covers a control. */
+.studio-demo-notice{position:fixed;z-index:57;top:calc(64px + var(--safe-top,0px));right:max(12px,calc((100vw - 720px)/2 + 12px));max-width:min(285px,calc(100vw - 32px));padding:9px 13px;background:var(--paper,#fff);border:1px solid var(--line,#dbe4eb);box-shadow:0 3px 18px #20394a0c;border-radius:3px;color:var(--ink,#294963);pointer-events:none;font:12px/1.65 var(--font,serif)}
+.studio-demo-notice small,.studio-demo-notice span{display:block;word-break:keep-all}.studio-demo-notice small{font-size:10px;color:var(--muted,#61778a);margin-bottom:2px}.studio-demo-notice[hidden]{display:none!important}
+@media(min-width:768px){.studio-demo-notice{top:calc(90px + var(--safe-top,0px))}}
+.studio-demo-photo{outline:2px solid var(--accent,#496b86);outline-offset:4px;box-shadow:0 0 0 7px var(--paper,#fff)}
+.studio-demo-photo>img{transform:scale(1.025);transition:transform .35s ease}
+@media(prefers-reduced-motion:reduce){.studio-demo-photo>img{transform:none;transition:none}}
+/* The editor reuses the original dark ink stage without locking scrolling. */
+.intro-preview .hero:after{opacity:.82;transition:none}.intro-preview .hero-details{opacity:0;transform:translateY(16px);transition:none}.intro-preview .hero-scroll{opacity:0;pointer-events:none}

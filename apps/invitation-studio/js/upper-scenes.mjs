@@ -113,6 +113,13 @@ export function mountUpperScenes({ doc = document, win = window, enabled = true,
   return {
     setEnabled(value) { if (destroyed) return; requested = Boolean(value); updateEnabled(); },
     setComposition,
+    prepareDemo() {
+      settled.clear(); schedule();
+      return () => {
+        settled.add(invite); settled.add(date);
+        set(invite, '--upper-intro', 1); set(date, '--upper-date', 1);
+      };
+    },
     refresh() { if (destroyed) return; if (active) schedule(); else finalState(); },
     destroy() {
       if (destroyed) return;

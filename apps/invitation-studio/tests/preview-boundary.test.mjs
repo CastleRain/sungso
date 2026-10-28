@@ -59,3 +59,30 @@ test('studio messages remain local and cannot reuse another experiment guestbook
   await reloaded.remove(message.id);
   assert.deepEqual(await reloaded.messages(), []);
 });
+
+test('request-tagged demos accept every visual key but never data actions or untrusted senders', () => {
+  for (const key of Object.keys(SECTION_IDS)) {
+    const data = { type: 'invitation-studio:demo', requestId: 19, key, action: 'submit', account: 'secret' };
+    assert.deepEqual(studioMessage(event(data), context), { type: 'demo', requestId: 19, key });
+    assert.equal(studioMessage({ ...event(data), source: sibling }, context), null);
+    assert.equal(studioMessage({ ...event(data), origin: 'https://evil.test' }, context), null);
+    assert.equal(studioMessage(event(data), { ...context, embedded: false }), null);
+  }
+  for (const key of ['__proto__', 'constructor', 'submit', 'copy', 'mode', [], {}, null]) {
+    assert.equal(studioMessage(event({ type: 'invitation-studio:demo', requestId: 19, key }), context), null);
+  }
+  for (const requestId of [-1, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '19', null, {}, []]) {
+    assert.equal(studioMessage(event({ type: 'invitation-studio:demo', requestId, key: 'motion' }), context), null);
+    assert.equal(studioMessage(event({ type: 'invitation-studio:demo-stop', requestId }), context), null);
+  }
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:demo-stop', requestId: 20, key: 'submit' }), context), { type: 'demo-stop', requestId: 20 });
+});
+
+test('transient rendering is explicit and preserves the legacy apply boundary and composition whitelist', () => {
+  const composition = { ...DEFAULT_COMPOSITION, palette: 'rose' };
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:apply', composition }), context), { type: 'apply', composition });
+  assert.deepEqual(studioMessage(event({ type: 'invitation-studio:apply', requestId: 22, previewOnly: true, composition: { ...composition, mode: 'live', submit: true } }), context), { type: 'apply', requestId: 22, previewOnly: true, composition });
+  for (const previewOnly of ['true', 1, {}, null]) {
+    assert.equal(Object.hasOwn(studioMessage(event({ type: 'invitation-studio:apply', requestId: 23, previewOnly, composition }), context), 'previewOnly'), false);
+  }
+});

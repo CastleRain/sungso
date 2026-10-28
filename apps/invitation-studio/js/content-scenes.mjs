@@ -94,6 +94,18 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
   setComposition(choices);
   return {
     setComposition,
+    prepareDemo(key) {
+      progress = 0; queue();
+      const finishAlbum = key === 'album' ? album.prepareDemo?.() : null;
+      return () => { progress = 1; story?.style.setProperty('--content-progress', '1'); finishAlbum?.(); };
+    },
+    demoInteraction() {
+      if (choices.album !== 'grid') return album.demoNext?.() || (() => {});
+      // The grid has no selected-photo state. Show its next real thumbnail without opening a dialog.
+      const next = grid?.querySelectorAll('.gallery-photo')?.[1];
+      next?.classList.add('studio-demo-photo');
+      return () => next?.classList.remove('studio-demo-photo');
+    },
     setEnabled(value) { if (disposed) return; requested = Boolean(value); sync(); },
     setScrollEnabled(value) { if (disposed) return; scrollEnabled = Boolean(value); sync(); },
     refresh() { if (!disposed) { album.refresh(); queue(); } },

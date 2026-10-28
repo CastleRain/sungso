@@ -155,6 +155,16 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     setEnabled(value) { if (disposed) return; requested = Boolean(value); sync(); },
     refresh,
     replay,
+    prepareDemo() {
+      cancel(); cancelAnimations();
+      for (const record of targets.values()) record.progress = 0;
+      render();
+      return () => {
+        cancel(); cancelAnimations();
+        // A cancelled editor demonstration must never leave read content dimmed.
+        for (const [node, record] of targets) { record.progress = 1; paint(node, 1); }
+      };
+    },
     destroy() {
       if (disposed) return;
       disposed = true; cancel(); cancelAnimations(); cleanups.forEach(cleanup => cleanup());

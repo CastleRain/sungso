@@ -180,3 +180,35 @@ test('preview refuses unsafe or disabled targets and stops for user input, dialo
   f.controller.setMode('signature'); assert.equal(f.controller.replay('invitation'), false);
   f.controller.destroy();
 });
+
+test('scroll demo can replay an already read unchanged mode then leave all content readable on cancel', () => {
+  for (const mode of SCROLL_EFFECTS) {
+    const f = fixture({ mode });
+    f.first.parentElement.top = 0; f.second.parentElement.top = 0; f.fire(f.win, 'scroll'); f.flush();
+    assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+    f.first.parentElement.top = 640; f.second.parentElement.top = 1400;
+    const restore = f.controller.prepareDemo('motion');
+    if (!['signature', 'still'].includes(mode)) assert.ok(Number(f.first.values.get('--global-scroll-opacity')) < 1);
+    restore(); restore();
+    assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+    assert.equal(f.second.values.get('--global-scroll-opacity'), '1');
+    assert.equal(f.frames.size, 0);
+    f.fire(f.win, 'scroll'); f.flush();
+    assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+    assert.equal(f.second.values.get('--global-scroll-wipe'), '100%');
+    f.controller.destroy();
+  }
+});
+
+test('preparing a demo never reenables disabled or reduced scroll effects', () => {
+  for (const condition of ['disabled', 'reduced', 'hidden', 'dialog']) {
+    const f = fixture({ mode: 'unveil' }); f.flush();
+    if (condition === 'disabled') f.controller.setEnabled(false);
+    if (condition === 'reduced') f.reduced.matches = true;
+    if (condition === 'hidden') f.doc.hidden = true;
+    if (condition === 'dialog') f.dialog.open = true;
+    const restore = f.controller.prepareDemo('motion');
+    assert.equal(f.first.values.get('--global-scroll-opacity'), '1'); assert.equal(f.frames.size, 0);
+    restore(); f.controller.destroy();
+  }
+});
