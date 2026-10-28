@@ -41,3 +41,11 @@
 ## 다음
 
 두 사람이 저장한 조합 링크로 최종 장면을 고른 뒤, 선택한 구성을 운영 데이터에 연결한 별도 완료본으로 승격한다.
+
+## 배포 확인
+
+- 구현 커밋 `ca12a2a`, 별도 브랜치 `codex/invitation-studio`. 전체 `npm run check` 2,113개 통과.
+- Vercel `dpl_7LfKkrLBRxpW9J7sEuizkRioNncT` READY. 기존 Hobby 프로젝트에 `https://sungso-wedding.vercel.app/lab/studio/` 추가. 요금제·도메인·인증 설정 변경 없음.
+- 업로드 238개 경로·SHA-1과 허용 목록 일치. 기존 205개 바이트 보존 및 새 파일 33개만 추가.
+- 공개 제공 파일 236개 내용 일치, 제외 경로 50개 404, API 허용/거부·익명 관리 401 검사 19개, 기존 Pages 4개 파일 보존 확인. 운영 검증 쓰기 0. 자세한 응답은 `live-check.json`.
+- 실제 공개 조립실의 추천2 적용, 다섯 선택값, 사진첩/받는 분 선택 UI 각1개, 가로 넘침0, 준비 완료 상태를 확인했다. `public-studio.jpg`에 최종 화면을 보관한다.
