@@ -71,3 +71,24 @@ test('real Firestore retries preserve partner revisions and an upload concurrent
   assert.equal((await first.day(date)).title, '수정한 제목');
   assert.equal((await first.month('2024-03')).days[0].revision, 3);
 });
+
+test('real Firestore period query pages document IDs, preserves originals and requires no summary migration', async () => {
+  const store = createJourneyStore({ db }), dates = [];
+  const batch = db.batch();
+  for (let i = 0; i < 34; i++) {
+    const dayDate = new Date(Date.UTC(2023, 11, 20 + i * 5)).toISOString().slice(0, 10);
+    dates.push(dayDate);
+    const day = { ...emptyDay(dayDate), revision: 1, records: [{ ...manual, id: `memory-${i}`, position: { lat: 37.5, lng: 127 } }] };
+    batch.set(db.doc(`${JOURNEY_ROOT}/days/${dayDate}`), { schema: 1, data: JSON.stringify(day), updatedBy: 'private-fixture', updatedAt: time });
+  }
+  await batch.commit();
+  const first = await store.playback({ from: dates[0], to: dates.at(-1) });
+  assert.equal(first.days.length, 31); assert.equal(first.nextCursor, dates[30]);
+  const second = await store.playback({ from: dates[0], to: dates.at(-1), after: first.nextCursor });
+  assert.equal(second.nextCursor, null);
+  assert.deepEqual([...first.days, ...second.days].map(day => day.date), dates);
+  assert.equal((await db.doc(JOURNEY_ROOT).get()).exists, false, 'reads never create a root ledger or migration');
+  assert.equal((await store.day(dates[0])).revision, 1);
+  assert.equal((await store.day(dates[0])).records[0].note, manual.note);
+  assert.doesNotMatch(JSON.stringify(first), /updatedBy|private-fixture|sourceId|"note"/);
+});

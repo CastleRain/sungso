@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { emptyDay, validateDay, summarizeDay, mergeDayImport } from '../../shared/journey/core.mjs';
+import { buildDayCandidates } from '../../shared/journey/playback-core.mjs';
 import { jpegBytes } from '../invitation/server/album.mjs';
 
 export const JOURNEY_ROOT = 'journey_private/shared';
@@ -7,6 +8,8 @@ export const PHOTO_LIMIT = 400;
 export const PHOTO_BYTES_LIMIT = 160 * 1024 * 1024;
 export const DAY_BYTES_LIMIT = 160 * 1024 * 1024;
 export const DAY_LIMIT = 10000;
+export const PLAYBACK_PAGE_DAYS = 31;
+export const PLAYBACK_PAGE_BYTES = 2 * 1024 * 1024;
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const hash = value => createHash('sha256').update(value).digest('hex');
 export class JourneyError extends Error {
@@ -91,6 +94,32 @@ export function createJourneyStore({ db, now = Date.now }) {
     async day(date) {
       const snapshot = await dayRef(date).get();
       return dayState(snapshot.exists ? snapshot.data() : null, date);
+    },
+    async playback({ from, to, after = null } = {}) {
+      validDate(from); validDate(to);
+      if (from > to) fail('INVALID_RANGE', '시작 날짜가 마지막 날짜보다 늦어요. 기간을 확인해주세요.');
+      if (after !== null) {
+        validDate(after);
+        if (after < from || after > to) fail('INVALID_CURSOR', '불러오던 기간이 달라졌어요. 기간을 다시 선택해주세요.');
+        if (after === to) return { days: [], nextCursor: null };
+      }
+      // Document IDs are KST dates. The built-in document-name index needs no
+      // new composite index and skips absent days without reading calendar gaps.
+      let query = db.collection(`${JOURNEY_ROOT}/days`).orderBy('__name__').endAt(to).limit(PLAYBACK_PAGE_DAYS + 1);
+      query = after === null ? query.startAt(from) : query.startAfter(after);
+      const snapshots = await query.get(), days = [];
+      let bytes = Buffer.byteLength('{"ok":true,"days":[],"nextCursor":"0000-00-00"}'), more = false;
+      for (const snapshot of snapshots.docs) {
+        if (days.length === PLAYBACK_PAGE_DAYS) { more = true; break; }
+        const summary = buildDayCandidates(dayState(snapshot.data(), snapshot.id));
+        const size = Buffer.byteLength(JSON.stringify(summary)) + (days.length ? 1 : 0);
+        if (bytes + size > PLAYBACK_PAGE_BYTES) {
+          if (!days.length) fail('PLAYBACK_DAY_TOO_LARGE', '이날의 기록은 날짜 찾기에서 자세히 볼 수 있어요.', 413);
+          more = true; break;
+        }
+        days.push(summary); bytes += size;
+      }
+      return { days, nextCursor: more ? days.at(-1).date : null };
     },
     async save(date, input, uid) {
       if (!only(input, ['expectedRevision', 'day']) || !Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 0 || input.day?.date !== date) fail('INVALID_DAY', '최신 날짜 기록을 불러온 뒤 저장해 주세요.');

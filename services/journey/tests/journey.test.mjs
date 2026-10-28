@@ -231,3 +231,19 @@ test('HTTP: storage failures are sanitized and rate limits do not write storage'
   assert.equal(result.statusCode, 429); assert.equal(result.value.code, 'RATE_LIMIT');
   assert.equal(f.db.calls.writes, 0);
 });
+
+test('HTTP: period playback is member-only, read-only and uses the existing origin boundary', async t => {
+  const f = await httpFixture(t), path = '/playback?from=2023-01-01&to=2026-12-31';
+  for (const token of ['', 'unknown', 'inactive', 'outsider']) assert.notEqual((await f.request(path, token)).status, 200);
+  for (const Origin of ['https://evil.example', 'https://sungso-wedding.vercel.app']) assert.equal((await f.request(path, 'first', { headers: { Origin } })).status, 403);
+  for (const member of ['first', 'second']) {
+    const response = await f.request(path, member);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(await response.json(), { ok: true, days: [], nextCursor: null });
+  }
+  assert.equal((await f.request('/playback?from=2026-01-01&to=2025-01-01')).status, 400);
+  assert.equal((await f.request('/playback')).status, 400);
+  assert.equal((await f.request(path, 'first', { method: 'POST', body: '{}' })).status, 405);
+  assert.equal(f.db.calls.writes, 0);
+});

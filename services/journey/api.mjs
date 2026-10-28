@@ -27,6 +27,10 @@ export function createJourneyApi({ store, authenticate, now = Date.now }) {
       const member = await authenticate(req); rate(member.uid);
       const url = new URL(req.url, 'http://journey.invalid'), suffix = url.pathname.slice(JOURNEY_PATH.length);
       if (req.method === 'GET' && suffix === '/months') return res.status(200).json({ ok: true, ...await store.month(url.searchParams.get('month')) });
+      if (suffix === '/playback') {
+        if (req.method !== 'GET') return res.status(405).json({ ok: false, error: '지원하지 않는 요청입니다.' });
+        return res.status(200).json({ ok: true, ...await store.playback({ from: url.searchParams.get('from'), to: url.searchParams.get('to'), after: url.searchParams.get('after') }) });
+      }
       const day = /^\/days\/(\d{4}-\d{2}-\d{2})(\/import)?$/.exec(suffix);
       if (day) {
         if (!day[2] && req.method === 'GET') return res.status(200).json({ ok: true, day: await store.day(day[1]) });
