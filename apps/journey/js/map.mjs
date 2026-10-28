@@ -56,13 +56,14 @@ export function loadJourneyMapSdk() {
       if (error) { script.remove(); reject(error); }
       else resolve(globalThis.naver.maps);
     };
-    const ready = () => finish(globalThis.naver?.maps?.Map ? null : Error('네이버 지도 연결을 확인해 주세요.'));
+    // With no submodules the SDK calls back before assigning naver.maps in the
+    // same script. Resolve after that stack finishes, without a timed delay.
+    const ready = () => queueMicrotask(() => finish(globalThis.naver?.maps?.Map ? null : Error('네이버 지도 연결을 확인해 주세요.')));
     globalThis[callbackName] = ready;
     timer = setTimeout(() => finish(Error('지도 연결이 지연되고 있어요.')), 15000);
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(NAVER_CLIENT_ID)}&callback=${callbackName}`;
     script.async = true;
-    // script.onload fires before the SDK's internal resources are ready.
-    // Only its documented callback may release map/marker construction.
+    // Use the SDK's readiness callback, not script download completion.
     script.onerror = () => finish(Error('네이버 지도를 불러오지 못했어요.'));
     document.head.append(script);
   }).catch(error => { sdkPromise = undefined; throw error; });

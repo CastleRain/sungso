@@ -28,7 +28,7 @@ test('playback follows timestamps and leaves the unrecorded interval unconnected
   assert.equal(gap.heads.size, 0); assert.deepEqual(gap.paths.map(p => p.length), [2, 0]);
 });
 
-test('NAVER loader waits for SDK callback, shares pending load and cleans up failure/timeout', async t => {
+test('NAVER loader waits past synchronous callback until namespace assignment and cleans up failures', async t => {
   const keys = ['document', 'naver', '__journeyNaverSdkReady', 'setTimeout', 'clearTimeout'];
   const originals = keys.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]);
   t.after(() => { for (const [key, descriptor] of originals) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } });
@@ -44,10 +44,13 @@ test('NAVER loader waits for SDK callback, shares pending load and cleans up fai
   await assert.rejects(timedOut, /지연/);
   assert.equal(globalThis.__journeyNaverSdkReady, undefined); assert.equal(timers.size, 0); assert.equal(scripts[1].removed, true);
   const pending = loadJourneyMapSdk(); let resolved = false; void pending.then(() => { resolved = true; });
-  globalThis.naver = { maps: { Map: class {} } }; // Namespace can appear before internal SDK initialization finishes.
   scripts[2].onload?.(); await Promise.resolve();
   assert.equal(resolved, false); assert.equal(loadJourneyMapSdk(), pending); assert.match(scripts[2].src, /callback=__journeyNaverSdkReady/);
+  // The no-submodule SDK invokes callback inside En.boot, then assigns naver.maps
+  // later in the same script stack. Checking the namespace in callback is premature.
   globalThis.__journeyNaverSdkReady();
+  assert.equal(globalThis.naver, undefined); assert.equal(resolved, false);
+  globalThis.naver = { maps: { Map: class {} } };
   assert.equal(await pending, globalThis.naver.maps); assert.equal(resolved, true);
   assert.equal(globalThis.__journeyNaverSdkReady, undefined); assert.equal(timers.size, 0);
 });
