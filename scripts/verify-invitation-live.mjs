@@ -33,7 +33,10 @@ for (const pathname of ['/homehunt/', '/homehunt/index.html', '/wecost/', '/weco
   '/v6/homehunt/', '/v6/wecost/', '/v6/honeymoon/', '/v6/responses.html',
   ...(manifest.lab ? ['/lab/v6-1/homehunt/', '/lab/v6-1/wecost/', '/lab/v6-1/honeymoon/',
     '/lab/v6-1/manage.html', '/lab/v6-1/accounts.html', '/lab/v6-1/scripts/build.mjs',
-    '/lab/v6-1/src/index.template.html', '/lab/v6-1/tests/demo-data.test.mjs', '/lab/v6-1/z/'] : [])]) {
+    '/lab/v6-1/src/index.template.html', '/lab/v6-1/tests/demo-data.test.mjs', '/lab/v6-1/z/'] : []),
+  ...(manifest.experience ? ['/lab/experience/homehunt/', '/lab/experience/wecost/', '/lab/experience/honeymoon/',
+    '/lab/experience/manage.html', '/lab/experience/accounts.html', '/lab/experience/scripts/build.mjs',
+    '/lab/experience/src/index.template.html', '/lab/experience/tests/', '/lab/experience/z/'] : [])]) {
   const response = await get(INVITATION_ORIGIN + pathname);
   assert.equal(response.status, 404, pathname);
   report.missingPaths.push({ path: pathname, status: response.status });
@@ -49,13 +52,14 @@ const editionHtml = await edition.text();
 assert.match(editionHtml, /data-version="6\.1\.0"/);
 assert.ok(editionHtml.includes(`property="og:url" content="${INVITATION_ORIGIN}/v6/"`));
 report.editions = { root: '5.6.0', v6: '6.1.0' };
-if (manifest.lab) {
-  report.lab = [];
-  const catalog = await get(`${INVITATION_ORIGIN}/${manifest.lab.path}/`);
+for (const key of ['lab', 'experience'].filter(key => manifest[key])) {
+  const collection = manifest[key];
+  report[key] = [];
+  const catalog = await get(`${INVITATION_ORIGIN}/${collection.path}/`);
   assert.equal(catalog.status, 200, 'comparison catalog');
   assert.match(await catalog.text(), /noindex,nofollow/);
-  for (const id of manifest.lab.variants) {
-    const url = `${INVITATION_ORIGIN}/${manifest.lab.path}/${id}/`;
+  for (const id of collection.variants) {
+    const url = `${INVITATION_ORIGIN}/${collection.path}/${id}/`;
     const response = await get(url);
     assert.equal(response.status, 200, `study ${id}`);
     const html = await response.text();
@@ -66,7 +70,7 @@ if (manifest.lab) {
     const event = await get(url + 'wedding.ics');
     assert.equal(event.status, 200);
     assert.ok((await event.text()).includes(`URL:${url}`));
-    report.lab.push({id, url, status: 200, mode: 'demo', calendarUrlMatches: true, networkRestricted: true});
+    report[key].push({id, url, status: 200, mode: 'demo', calendarUrlMatches: true, networkRestricted: true});
   }
 }
 const privateRoutes = ['/api/invitation/v3/album/manage', '/api/invitation/v5/accounts/manage'];
@@ -109,8 +113,9 @@ for (const file of ['index.html', 'css/typography.css', 'js/config.mjs', 'weddin
   report.pagesPreserved.push(file);
 }
 report.assets.sort((a, b) => a.file.localeCompare(b.file));
-const reportDirectory = manifest.lab ? 'docs/invitation-lab' : 'docs/invitation-v6-review';
+const reportDirectory = manifest.experience ? 'docs/invitation-experience' : manifest.lab ? 'docs/invitation-lab' : 'docs/invitation-v6-review';
 await mkdir(path.join(PROJECT_ROOT, reportDirectory), { recursive: true });
 await writeFile(path.join(PROJECT_ROOT, reportDirectory, 'live-check.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ status: 'passed', assets: report.assets.length, missingPaths: report.missingPaths.length,
-  apiChecks: report.api.length, preservedPagesFiles: report.pagesPreserved.length, labVariants: report.lab?.length || 0, productionWrites: 0 }));
+  apiChecks: report.api.length, preservedPagesFiles: report.pagesPreserved.length, labVariants: report.lab?.length || 0,
+  experienceVariants: report.experience?.length || 0, productionWrites: 0 }));

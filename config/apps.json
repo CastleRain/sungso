@@ -188,6 +188,23 @@
       ]
     },
     {
+      "id": "invitation-experience",
+      "source": "apps/invitation-experience/dist",
+      "output": "lab/experience",
+      "build": "apps/invitation-experience/scripts/build.mjs",
+      "files": [
+        "index.html",
+        "catalog.css",
+        "runtime.mjs",
+        "f",
+        "g",
+        "css",
+        "js",
+        "themes",
+        "assets"
+      ]
+    },
+    {
       "id": "table",
       "source": "apps/table",
       "output": "table",

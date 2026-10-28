@@ -1,0 +1,459 @@
+{
+  "measuredAt": "2026-10-28T00:10:49.344Z",
+  "method": "Per-resource gzip level 9 for HTML including inline SVG, linked CSS, all reachable local JS including the selected dynamic theme; hero and four fonts counted at raw file size. No cache assumed.",
+  "limits": {
+    "jsGzip": 150000,
+    "critical": 1800000
+  },
+  "excluded": [
+    "deferred whole MP3",
+    "map iframe and third-party map",
+    "lazy gallery and story photos",
+    "catalog comparison host"
+  ],
+  "limitations": [
+    "These are build resource estimates, not actual HTTP transfer or performance timing.",
+    "Responsive hero srcset may select a different image; lab accounting uses requested forest-960.webp.",
+    "Baseline uses its actual date-1440.webp hero. LCP, CLS and real-device timing are unverified."
+  ],
+  "editions": [
+    {
+      "id": "baseline",
+      "htmlGzip": 28983,
+      "cssGzip": 14905,
+      "jsGzip": 27468,
+      "heroRaw": 490446,
+      "fontsRaw": 889064,
+      "total": 1450866,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "v6/index.html",
+          "raw": 128578,
+          "gzip": 28983
+        },
+        "css": [
+          {
+            "file": "v6/css/typography.css",
+            "raw": 919,
+            "gzip": 389
+          },
+          {
+            "file": "v6/css/style.css",
+            "raw": 32686,
+            "gzip": 8150
+          },
+          {
+            "file": "v6/css/accounts.css",
+            "raw": 7666,
+            "gzip": 2291
+          },
+          {
+            "file": "v6/css/ver6.css",
+            "raw": 15083,
+            "gzip": 4075
+          }
+        ],
+        "js": [
+          {
+            "file": "shared/invitation/account-core.mjs",
+            "raw": 3485,
+            "gzip": 1472
+          },
+          {
+            "file": "shared/invitation/album-core.mjs",
+            "raw": 3209,
+            "gzip": 1413
+          },
+          {
+            "file": "v6/js/account-interactions.mjs",
+            "raw": 3672,
+            "gzip": 1330
+          },
+          {
+            "file": "v6/js/account-view.mjs",
+            "raw": 3015,
+            "gzip": 1359
+          },
+          {
+            "file": "v6/js/app.mjs",
+            "raw": 9925,
+            "gzip": 3635
+          },
+          {
+            "file": "v6/js/background-audio.mjs",
+            "raw": 4949,
+            "gzip": 1881
+          },
+          {
+            "file": "v6/js/chapters.mjs",
+            "raw": 2680,
+            "gzip": 986
+          },
+          {
+            "file": "v6/js/config.mjs",
+            "raw": 5295,
+            "gzip": 2447
+          },
+          {
+            "file": "v6/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "v6/js/countdown-view.mjs",
+            "raw": 1747,
+            "gzip": 665
+          },
+          {
+            "file": "v6/js/editorial-motion.mjs",
+            "raw": 3689,
+            "gzip": 1317
+          },
+          {
+            "file": "v6/js/guestbook.mjs",
+            "raw": 7127,
+            "gzip": 2905
+          },
+          {
+            "file": "v6/js/intro-boot.js",
+            "raw": 4081,
+            "gzip": 1505
+          },
+          {
+            "file": "v6/js/public-accounts.mjs",
+            "raw": 2767,
+            "gzip": 1319
+          },
+          {
+            "file": "v6/js/public-album.mjs",
+            "raw": 1962,
+            "gzip": 964
+          },
+          {
+            "file": "v6/js/quick-menu.mjs",
+            "raw": 2256,
+            "gzip": 915
+          },
+          {
+            "file": "v6/js/scroll-arrival.mjs",
+            "raw": 3969,
+            "gzip": 1340
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/date-1440.webp",
+          "raw": 490446,
+          "gzip": 490614
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "f",
+      "htmlGzip": 30263,
+      "cssGzip": 14385,
+      "jsGzip": 33253,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1290415,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/experience/f/index.html",
+          "raw": 132201,
+          "gzip": 30263
+        },
+        "css": [
+          {
+            "file": "lab/experience/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/experience/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/experience/css/experience.css",
+            "raw": 22412,
+            "gzip": 5696
+          },
+          {
+            "file": "lab/experience/css/gallery-experience.css",
+            "raw": 6253,
+            "gzip": 1872
+          },
+          {
+            "file": "lab/experience/themes/f.css",
+            "raw": 68,
+            "gzip": 83
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/experience/js/app.mjs",
+            "raw": 14733,
+            "gzip": 5156
+          },
+          {
+            "file": "lab/experience/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/experience/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/experience/js/demo-data.mjs",
+            "raw": 2876,
+            "gzip": 1367
+          },
+          {
+            "file": "lab/experience/js/experience.mjs",
+            "raw": 10102,
+            "gzip": 3331
+          },
+          {
+            "file": "lab/experience/js/gallery-experience.mjs",
+            "raw": 11468,
+            "gzip": 3853
+          },
+          {
+            "file": "lab/experience/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/experience/js/guest-features.mjs",
+            "raw": 6955,
+            "gzip": 2378
+          },
+          {
+            "file": "lab/experience/js/intro-boot.js",
+            "raw": 4089,
+            "gzip": 1510
+          },
+          {
+            "file": "lab/experience/js/invitation-card.mjs",
+            "raw": 12663,
+            "gzip": 4686
+          },
+          {
+            "file": "lab/experience/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/experience/runtime.mjs",
+            "raw": 5269,
+            "gzip": 1866
+          },
+          {
+            "file": "lab/experience/themes/f.mjs",
+            "raw": 362,
+            "gzip": 296
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    },
+    {
+      "id": "g",
+      "htmlGzip": 30264,
+      "cssGzip": 14385,
+      "jsGzip": 33234,
+      "heroRaw": 323450,
+      "fontsRaw": 889064,
+      "total": 1290397,
+      "passes": {
+        "javascript": true,
+        "critical": true
+      },
+      "files": {
+        "html": {
+          "file": "lab/experience/g/index.html",
+          "raw": 132201,
+          "gzip": 30264
+        },
+        "css": [
+          {
+            "file": "lab/experience/css/typography.css",
+            "raw": 923,
+            "gzip": 391
+          },
+          {
+            "file": "lab/experience/css/base.css",
+            "raw": 24977,
+            "gzip": 6343
+          },
+          {
+            "file": "lab/experience/css/experience.css",
+            "raw": 22412,
+            "gzip": 5696
+          },
+          {
+            "file": "lab/experience/css/gallery-experience.css",
+            "raw": 6253,
+            "gzip": 1872
+          },
+          {
+            "file": "lab/experience/themes/g.css",
+            "raw": 67,
+            "gzip": 83
+          }
+        ],
+        "js": [
+          {
+            "file": "lab/experience/js/app.mjs",
+            "raw": 14733,
+            "gzip": 5156
+          },
+          {
+            "file": "lab/experience/js/audio.mjs",
+            "raw": 8499,
+            "gzip": 2737
+          },
+          {
+            "file": "lab/experience/js/core.mjs",
+            "raw": 4522,
+            "gzip": 2015
+          },
+          {
+            "file": "lab/experience/js/demo-data.mjs",
+            "raw": 2876,
+            "gzip": 1367
+          },
+          {
+            "file": "lab/experience/js/experience.mjs",
+            "raw": 10102,
+            "gzip": 3331
+          },
+          {
+            "file": "lab/experience/js/gallery-experience.mjs",
+            "raw": 11468,
+            "gzip": 3853
+          },
+          {
+            "file": "lab/experience/js/gallery.mjs",
+            "raw": 6448,
+            "gzip": 2346
+          },
+          {
+            "file": "lab/experience/js/guest-features.mjs",
+            "raw": 6955,
+            "gzip": 2378
+          },
+          {
+            "file": "lab/experience/js/intro-boot.js",
+            "raw": 4089,
+            "gzip": 1510
+          },
+          {
+            "file": "lab/experience/js/invitation-card.mjs",
+            "raw": 12663,
+            "gzip": 4686
+          },
+          {
+            "file": "lab/experience/js/ui.mjs",
+            "raw": 5048,
+            "gzip": 1712
+          },
+          {
+            "file": "lab/experience/runtime.mjs",
+            "raw": 5269,
+            "gzip": 1866
+          },
+          {
+            "file": "lab/experience/themes/g.mjs",
+            "raw": 350,
+            "gzip": 277
+          }
+        ],
+        "hero": {
+          "file": "v6/assets/photos/forest-960.webp",
+          "raw": 323450,
+          "gzip": 323568
+        },
+        "fonts": [
+          {
+            "file": "v6/assets/fonts/RIDIBatang-Regular.woff2",
+            "raw": 457368,
+            "gzip": 457499
+          },
+          {
+            "file": "v6/assets/fonts/Hahmlet-Medium.woff2",
+            "raw": 240616,
+            "gzip": 239924
+          },
+          {
+            "file": "v6/assets/fonts/PinyonScript-Regular.ttf",
+            "raw": 151412,
+            "gzip": 72026
+          },
+          {
+            "file": "v6/assets/fonts/AnticDidone-Regular.ttf",
+            "raw": 39668,
+            "gzip": 19710
+          }
+        ]
+      }
+    }
+  ]
+}
