@@ -347,9 +347,15 @@ function mountChoices() {
   });
   PRESETS.forEach(preset => {
     const button = node('button', 'preset'); button.dataset.preset = preset.id; button.type = 'button';
+    if (preset.featured) {
+      button.classList.add('preset-featured');
+      button.append(node('span', 'preset-badge', preset.badge));
+    }
     button.append(node('strong', '', preset.label), node('small', '', preset.detail));
-    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true, reviewKey: 'opening' }); notify('추천 조합으로 바꿨어요. 하나씩 다시 골라도 좋아요.'); }); $('#presets').append(button);
+    button.addEventListener('click', () => { apply(preset.composition, { section: 'top', replayOpening: true, reviewKey: 'opening' }); notify(`${preset.label.replace(/^\d+ · /, '')} 조합을 적용했어요. 마음에 들면 조합 저장을 눌러 주세요.`); }); $(preset.featured ? '#presets' : '#preset-archive').append(button);
   });
+  $('#preset-count').textContent = `추천 ${PRESETS.filter(preset => preset.featured).length}가지 ↗`;
+  $('#preset-archive-count').textContent = `${PRESETS.filter(preset => !preset.featured).length}가지`;
   syncExpanded();
 }
 function mountOrder() {
