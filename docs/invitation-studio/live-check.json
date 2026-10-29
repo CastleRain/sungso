@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-29T00:43:30.140Z",
+  "checkedAt": "2026-10-29T01:54:06.478Z",
   "origin": "https://sungso-wedding.vercel.app",
   "assets": [
     {
@@ -579,6 +579,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/css/guest-pass.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
       "file": "lab/studio/css/opening-effects.css",
       "status": 200,
       "matches": true,
@@ -586,6 +592,12 @@
     },
     {
       "file": "lab/studio/css/optional-scenes.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/css/photo-finish-scenes.css",
       "status": 200,
       "matches": true,
       "contentType": "text/css; charset=utf-8"
@@ -705,6 +717,12 @@
       "contentType": "application/javascript; charset=utf-8"
     },
     {
+      "file": "lab/studio/js/guest-pass.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
       "file": "lab/studio/js/intro-boot.js",
       "status": 200,
       "matches": true,
@@ -718,6 +736,12 @@
     },
     {
       "file": "lab/studio/js/optional-scenes.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/photo-finish-scenes.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"
@@ -784,6 +808,18 @@
     },
     {
       "file": "lab/studio/js/utility-scenes.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/vendor/qrcode-generator.LICENSE",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/octet-stream"
+    },
+    {
+      "file": "lab/studio/js/vendor/qrcode-generator.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"

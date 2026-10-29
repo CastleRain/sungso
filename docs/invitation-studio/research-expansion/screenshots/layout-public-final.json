@@ -1,0 +1,62 @@
+[
+  {
+    "width": 320,
+    "editor": {
+      "overflow": 0,
+      "viewport": 320
+    },
+    "preview": {
+      "overflow": 0,
+      "textSize": "19px",
+      "viewport": 298
+    }
+  },
+  {
+    "width": 390,
+    "editor": {
+      "overflow": 0,
+      "viewport": 390
+    },
+    "preview": {
+      "overflow": 0,
+      "textSize": "19px",
+      "viewport": 360
+    }
+  },
+  {
+    "width": 430,
+    "editor": {
+      "overflow": 0,
+      "viewport": 430
+    },
+    "preview": {
+      "overflow": 0,
+      "textSize": "19px",
+      "viewport": 384
+    }
+  },
+  {
+    "width": 1100,
+    "editor": {
+      "overflow": 0,
+      "viewport": 1100
+    },
+    "preview": {
+      "overflow": 0,
+      "textSize": "19px",
+      "viewport": 376
+    }
+  },
+  {
+    "width": 1440,
+    "editor": {
+      "overflow": 0,
+      "viewport": 1440
+    },
+    "preview": {
+      "overflow": 0,
+      "textSize": "19px",
+      "viewport": 376
+    }
+  }
+]
