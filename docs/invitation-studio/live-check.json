@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-29T04:21:43.696Z",
+  "checkedAt": "2026-10-29T09:46:33.144Z",
   "origin": "https://sungso-wedding.vercel.app",
   "assets": [
     {
@@ -561,6 +561,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/css/content-editor.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
       "file": "lab/studio/css/content-scenes.css",
       "status": 200,
       "matches": true,
@@ -573,6 +579,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/css/fine-appearance.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
       "file": "lab/studio/css/gallery-experience.css",
       "status": 200,
       "matches": true,
@@ -580,6 +592,12 @@
     },
     {
       "file": "lab/studio/css/guest-pass.css",
+      "status": 200,
+      "matches": true,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/css/live-photo-manager.css",
       "status": 200,
       "matches": true,
       "contentType": "text/css; charset=utf-8"
@@ -645,6 +663,12 @@
       "contentType": "text/css; charset=utf-8"
     },
     {
+      "file": "lab/studio/guided-steps.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
       "file": "lab/studio/index.html",
       "status": 200,
       "matches": true,
@@ -675,6 +699,24 @@
       "contentType": "application/javascript; charset=utf-8"
     },
     {
+      "file": "lab/studio/js/content-draft.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/content-editor.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/content-preview.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
       "file": "lab/studio/js/content-scenes.mjs",
       "status": 200,
       "matches": true,
@@ -694,6 +736,18 @@
     },
     {
       "file": "lab/studio/js/experience.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/fine-appearance.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/fine-tuning.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"
@@ -730,6 +784,12 @@
     },
     {
       "file": "lab/studio/js/invitation-card.mjs",
+      "status": 200,
+      "matches": true,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "file": "lab/studio/js/live-photo-manager.mjs",
       "status": 200,
       "matches": true,
       "contentType": "application/javascript; charset=utf-8"
