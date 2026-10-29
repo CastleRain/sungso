@@ -71,6 +71,33 @@ test('completion shows every independent path but no future photo is exposed ear
   assert.ok(frame.heads.features.every(value => !value.properties.current));
 });
 
+test('single-point tracks appear only when reached and remain after the same person moves onward', () => {
+  const input = day([s('point', 'sungwoo', [p(5, 37)]), s('route', 'sungwoo', [p(10, 38), p(20, 39)])]), before = structuredClone(input), plan = prepareJourneyWorld([input]);
+  const early = journeyMotionFrame(plan, state(start + 4 * 60000));
+  assert.equal(early.records.features.length, 0); assert.equal(early.heads.features.length, 0);
+  const arrived = journeyMotionFrame(plan, state(start + 5 * 60000));
+  assert.equal(arrived.records.features.length, 1); assert.equal(arrived.records.features[0].properties.trackPoint, true);
+  assert.notEqual(arrived.signature, early.signature, 'a newly reached single-point track invalidates the static point source');
+  const later = journeyMotionFrame(plan, state(start + 15 * 60000));
+  assert.deepEqual(later.records.features[0].geometry.coordinates, [127, 37]);
+  assert.deepEqual(later.heads.features[0].geometry.coordinates, [127, 38.5]); assert.equal(later.heads.features[0].properties.current, true);
+  const complete = journeyMotionFrame(plan, state(start + 20 * 60000, { progress: 1 }));
+  assert.equal(complete.records.features.length, 1); assert.equal(complete.completed.features.length, 1); assert.equal(complete.heads.features[0].properties.current, false);
+  const rewind = journeyMotionFrame(plan, state(start + 4 * 60000)); assert.equal(rewind.records.features.length, 0);
+  assert.deepEqual(input, before);
+});
+
+test('past single-point tracks persist across dates without making the other person current', () => {
+  const first = day([s('point', 'sungwoo', [p(5, 37)])]);
+  const second = day([s('route', 'sohee', [p(0, 35), p(10, 36)].map(point => ({ ...point, time: point.time + 86400000 })))], { date: '2026-01-11' });
+  const plan = prepareJourneyWorld([first, second]), frame = journeyMotionFrame(plan, state(start + 86400000 + 5 * 60000, { index: 1 }));
+  assert.equal(frame.records.features.length, 1); assert.deepEqual(frame.records.features[0].geometry.coordinates, [127, 37]);
+  assert.equal(frame.current.features.length, 1); assert.equal(frame.completed.features.length, 0);
+  assert.deepEqual(Object.fromEntries(frame.heads.features.map(f => [f.properties.person, f.properties.current])), { sungwoo: false, sohee: true });
+  const end = journeyMotionFrame(plan, state(start + 86400000 + 10 * 60000, { index: 1, progress: 1 }));
+  assert.equal(end.records.features.length, 1); assert.equal(end.completed.features.length, 1);
+});
+
 function fixture(t, { reject = false } = {}) {
   const previousObserver = Object.getOwnPropertyDescriptor(globalThis, 'ResizeObserver');
   globalThis.ResizeObserver = undefined;
@@ -145,6 +172,18 @@ test('aspect-ratio changes refit overview and follow without changing playback o
   map.fire('movestart', { originalEvent: {} }); const manualFits = map.fits.length;
   f.host.clientWidth = 320; f.adapter.resize(); assert.equal(map.fits.length, manualFits);
   f.adapter.resize(); assert.equal(map.fits.length, manualFits, 'unchanged sizes do not cause a resize loop');
+});
+
+test('single-point arrival refreshes the SDK source, is counted separately, and stays in day detail', async t => {
+  const f = fixture(t); await f.ready(); const map = f.instances[0], scenes = [day([s('point', 'sungwoo', [p(5, 37)]), s('route', 'sungwoo', [p(10, 38), p(20, 39)])])];
+  f.adapter.renderMotion(scenes, state(start)); const source = map.getSource('journey-memories'), writes = source.writes;
+  assert.equal(f.host.children[0].dataset.trackPointCount, '0');
+  f.adapter.renderMotion(scenes, state(start + 5 * 60000));
+  assert.equal(source.writes, writes + 1); assert.equal(source.data.features.length, 1); assert.equal(f.host.children[0].dataset.trackPointCount, '1'); assert.equal(f.host.children[0].dataset.routeCount, '0');
+  f.adapter.renderMotion(scenes, state(start + 20 * 60000, { progress: 1 }));
+  assert.equal(source.data.features.length, 1); assert.equal(f.host.children[0].dataset.trackPointCount, '1'); assert.equal(f.host.children[0].dataset.routeCount, '1');
+  f.adapter.render({ date: scenes[0].date, records: [], tracks: scenes[0].segments }, { person: 'all' });
+  assert.equal(source.data.features.length, 1); assert.equal(source.data.features[0].properties.trackPoint, true); assert.equal(f.host.children[0].dataset.trackPointCount, '1'); assert.equal(f.host.children[0].dataset.routeCount, '1'); assert.equal(f.host.children[0].dataset.currentHeads, '0');
 });
 
 test('SDK failure reports a usable fallback and late initialization cannot revive disposed map', async t => {

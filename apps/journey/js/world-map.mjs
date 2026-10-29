@@ -39,6 +39,9 @@ export function unwrapJourneyCoordinates(points) {
 function line(segment, points = segment.points) {
   return feature({ type: 'LineString', coordinates: unwrapJourneyCoordinates(points) }, { person: segment.person, id: segment.key });
 }
+function singlePoint(segment) {
+  return feature({ type: 'Point', coordinates: position(segment.points[0]) }, { person: segment.person, id: segment.key, trackPoint: true });
+}
 function interpolate(a, b, time) {
   const ratio = b.time > a.time ? clamp((time - a.time) / (b.time - a.time), 0, 1) : 1;
   return { lat: a.lat + (b.lat - a.lat) * ratio, lng: wrap(a.lng + delta(a.lng, b.lng) * ratio), time };
@@ -83,7 +86,7 @@ export function prepareJourneyWorld(scenes = []) {
     for (const segment of scene?.segments || []) {
       if (!PEOPLE[segment.person]) continue;
       let points = [], piece = 0;
-      const flush = () => { if (points.length) { const value = { key: `${index}:${segment.id}:${piece++}`, person: segment.person, points }; value.line = points.length > 1 ? line(value) : null; segments.push(value); positions.push(...points); } points = []; };
+      const flush = () => { if (points.length) { const value = { key: `${index}:${segment.id}:${piece++}`, person: segment.person, points }; value.line = points.length > 1 ? line(value) : null; value.dot = points.length === 1 ? singlePoint(value) : null; segments.push(value); positions.push(...points); } points = []; };
       for (const p of segment.points || []) {
         if (!valid(p) || !Number.isFinite(p.time) || scene.date && koreaDate(p.time) !== scene.date) { flush(); continue; }
         if (points.length && p.time < points.at(-1).time) flush();
@@ -111,6 +114,7 @@ function priorDays(plan, index) {
   for (const day of plan.days.slice(0, index)) {
     for (const s of day.segments) {
       if (s.line) lines.push(s.line);
+      if (s.dot) records.push(s.dot);
       const p = s.points.at(-1), previous = heads.get(s.person);
       if (!previous || previous.day < day.index || p.time >= (previous.time ?? -Infinity)) heads.set(s.person, { ...p, person: s.person, current: false, day: day.index });
     }
@@ -128,10 +132,11 @@ export function journeyMotionFrame(plan, state = {}, history = null) {
   const index = clamp(Number.isInteger(state.index) ? state.index : -1, -1, plan.days.length - 1), day = plan.days[index];
   if (!day) return { completed: collection(), current: collection(), tails: collection(), records: collection(), heads: collection(), signature: 'empty', camera: [], activeKey: '' };
   const prior = history || priorDays(plan, index), complete = [...prior.lines], current = [], tails = [], dots = [...prior.records], heads = new Map([...prior.heads].map(([k, v]) => [k, { ...v }]));
-  const time = Number.isFinite(state.time) ? state.time : null, finished = state.progress === 1, activeKeys = [], camera = [];
+  const time = Number.isFinite(state.time) ? state.time : null, finished = state.progress === 1, activeKeys = [], camera = [], visibleTrackPoints = [];
   for (const segment of day.segments) {
     const first = segment.points[0], last = segment.points.at(-1);
     if (time === null || time < first.time) continue;
+    if (segment.dot) { dots.push(segment.dot); visibleTrackPoints.push(segment.key); }
     const reached = clipped(segment.points, time), head = reached.at(-1), active = time >= first.time && time <= last.time && !finished;
     if (time >= last.time) { if (segment.line) complete.push(segment.line); }
     else if (reached.length > 1) current.push(line(segment, reached));
@@ -153,7 +158,7 @@ export function journeyMotionFrame(plan, state = {}, history = null) {
   const headFeatures = [...heads.values()].map(p => feature({ type: 'Point', coordinates: position(p) }, { person: p.person, current: !!p.current, name: PEOPLE[p.person].name }));
   if (!camera.length) camera.push(...[...heads.values()].filter(p => p.day === index));
   if (!camera.length) camera.push(...day.positions);
-  return { completed: collection(complete), current: collection(current), tails: collection(tails), records: collection(dots), heads: collection(headFeatures), signature: `${index}|${complete.map(f => f.properties.id).join(',')}|${visibleRecords.join(',')}`, camera, activeKey: `${index}:${activeKeys.join(',')}` };
+  return { completed: collection(complete), current: collection(current), tails: collection(tails), records: collection(dots), heads: collection(headFeatures), signature: `${index}|${complete.map(f => f.properties.id).join(',')}|${visibleRecords.join(',')}|${visibleTrackPoints.join(',')}`, camera, activeKey: `${index}:${activeKeys.join(',')}` };
 }
 
 let sdkPromise;
@@ -209,7 +214,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
       if (state.progress === 1 && !completed) { completed = true; if (cameraMode !== 'manual') { cameraChanged('all'); fit(plan.positions, { force: true, overview: true }); } }
       if (state.progress < 1 && completed) { completed = false; if (cameraMode === 'all') cameraChanged('follow'); cameraKey = ''; }
       if (cameraMode === 'follow' && frame.activeKey !== cameraKey) { cameraKey = frame.activeKey; fit(frame.camera, { force: !hasFit }); }
-      host.dataset.scene = state.scene?.date || ''; host.dataset.routeCount = String(frame.completed.features.length + frame.current.features.length); host.dataset.currentHeads = String(frame.heads.features.filter(f => f.properties.current).length);
+      host.dataset.scene = state.scene?.date || ''; host.dataset.routeCount = String(frame.completed.features.length + frame.current.features.length); host.dataset.trackPointCount = String(frame.records.features.filter(f => f.properties.trackPoint).length); host.dataset.currentHeads = String(frame.heads.features.filter(f => f.properties.current).length);
     });
   }
   function renderMotion(values, nextState = {}) {
@@ -226,7 +231,9 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
     scenes = [scene]; plan = prepareJourneyWorld(scenes); mode = 'day'; state = {}; historyIndex = -2; staticSignature = ''; cameraKey = ''; popup?.remove(); popup = null;
     return guard(() => {
       const value = plan.days[0]; setData('history', collection(value.segments.filter(s => s.line).map(s => s.line))); setData('current', collection()); setData('tail', collection()); setData('heads', collection());
-      setData('memories', collection(value.records.map(r => feature({ type: 'Point', coordinates: position(r.position) }, { id: r.id, person: r.person, title: r.title }))));
+      const trackPoints = value.segments.filter(s => s.dot).map(s => s.dot);
+      setData('memories', collection([...trackPoints, ...value.records.map(r => feature({ type: 'Point', coordinates: position(r.position) }, { id: r.id, person: r.person, title: r.title }))]));
+      host.dataset.scene = day?.date || ''; host.dataset.routeCount = String(value.segments.filter(s => s.line).length); host.dataset.trackPointCount = String(trackPoints.length); host.dataset.currentHeads = '0';
       fit(value.positions, { force: true });
       const selected = value.records.find(r => r.id === options.selectedId); if (selected) showRecord(selected);
       if (!value.positions.length) status('이날의 장소를 추가하면 지도에 표시돼요.'); else status('');

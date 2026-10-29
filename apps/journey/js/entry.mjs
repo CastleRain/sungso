@@ -1,7 +1,7 @@
 import { getMember, registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { getApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { mountJourney } from './ui.mjs?v=3.0.0';
+import { mountJourney } from './ui.mjs?v=3.0.1';
 const member=getMember(),controllers=new Set();let disposed=false;
 if(!member?.uid)throw Error('회원 로그인이 필요해요.');
 const current=()=>!disposed&&getMember()?.uid===member.uid;
