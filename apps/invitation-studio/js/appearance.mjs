@@ -20,11 +20,15 @@ export function appearanceChoices(value) {
     font: typeof value?.font === 'string' && Object.hasOwn(APPEARANCE_FONTS, value.font) ? value.font : 'letter',
     spacing: ['compact', 'balanced', 'airy'].includes(value?.spacing) ? value.spacing : 'balanced',
     divider: ['none', 'line', 'chapter'].includes(value?.divider) ? value.divider : 'none',
+    textSize: ['original', 'comfortable', 'large'].includes(value?.textSize) ? value.textSize : 'original',
+    lineSpace: ['original', 'relaxed'].includes(value?.lineSpace) ? value.lineSpace : 'original',
+    photoTone: ['original', 'soft', 'mono'].includes(value?.photoTone) ? value.photoTone : 'original',
+    coverFocus: ['original', 'upper', 'lower'].includes(value?.coverFocus) ? value.coverFocus : 'original',
   };
 }
 
 export function mountAppearance({ doc = document, win = window, composition, onLayout = () => {} } = {}) {
-  const body = doc.body, dataKeys = ['palette', 'font', 'spacing', 'divider'];
+  const body = doc.body, dataKeys = ['palette', 'font', 'spacing', 'divider', 'textSize', 'lineSpace', 'photoTone', 'coverFocus'];
   const originalData = Object.fromEntries(dataKeys.map(key => [key, body.dataset[key]]));
   const tokens = Object.keys(APPEARANCE_PALETTES.mist).filter(key => key !== 'label');
   const originalTokens = tokens.map(key => [key, body.style.getPropertyValue(`--${key}`), body.style.getPropertyPriority(`--${key}`)]);
@@ -54,7 +58,9 @@ export function mountAppearance({ doc = document, win = window, composition, onL
   function setComposition(value) {
     if (disposed) return Promise.resolve(false);
     const next = appearanceChoices(value), previousFont = current?.font;
-    const layoutChanged = current && (current.spacing !== next.spacing || current.divider !== next.divider);
+    // Colour, image tone and focal point do not change boxes. Reading settings do,
+    // so the existing scene controllers remeasure without remounting their nodes.
+    const layoutChanged = current && ['spacing', 'divider', 'textSize', 'lineSpace'].some(key => current[key] !== next[key]);
     current = next;
     for (const key of dataKeys) body.dataset[key] = next[key];
     for (const key of tokens) body.style.setProperty(`--${key}`, APPEARANCE_PALETTES[next.palette][key]);

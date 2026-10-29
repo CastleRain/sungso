@@ -74,7 +74,8 @@ if (!document.documentElement.classList.contains('intro-locked')) document.docum
 
 function setTextSize(large) {
   document.documentElement.classList.toggle('large-text', large);
-  document.body.dataset.textSize = large ? 'large' : 'normal';
+  // The guest's readability override is separate from the saved composition.
+  // Appearance owns body.dataset.textSize, so turning this off restores that choice.
   $('#text-size-toggle').setAttribute('aria-pressed', String(large));
   $('#text-size-toggle>span').textContent = large ? '기본 글씨로 보기' : '글씨 크게 보기';
   savePreference('sungso_invitation_studio_text_size', large ? 'large' : 'normal');

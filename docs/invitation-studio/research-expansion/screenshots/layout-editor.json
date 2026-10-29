@@ -1,0 +1,127 @@
+[
+  {
+    "frame": {
+      "bottom": 428.75,
+      "height": 264.75,
+      "left": 11,
+      "right": 309,
+      "top": 164,
+      "width": 298,
+      "x": 11,
+      "y": 164
+    },
+    "overflow": 0,
+    "panel": {
+      "bottom": 842.984375,
+      "height": 253.234375,
+      "left": 1,
+      "right": 319,
+      "top": 589.75,
+      "width": 318,
+      "x": 1,
+      "y": 589.75
+    },
+    "smallActions": 0,
+    "width": 320
+  },
+  {
+    "frame": {
+      "bottom": 428.75,
+      "height": 264.75,
+      "left": 15,
+      "right": 375,
+      "top": 164,
+      "width": 360,
+      "x": 15,
+      "y": 164
+    },
+    "overflow": 0,
+    "panel": {
+      "bottom": 842.984375,
+      "height": 253.234375,
+      "left": 1,
+      "right": 389,
+      "top": 589.75,
+      "width": 388,
+      "x": 1,
+      "y": 589.75
+    },
+    "smallActions": 0,
+    "width": 390
+  },
+  {
+    "frame": {
+      "bottom": 428.75,
+      "height": 264.75,
+      "left": 23,
+      "right": 407,
+      "top": 164,
+      "width": 384,
+      "x": 23,
+      "y": 164
+    },
+    "overflow": 0,
+    "panel": {
+      "bottom": 842.984375,
+      "height": 253.234375,
+      "left": 1,
+      "right": 429,
+      "top": 589.75,
+      "width": 428,
+      "x": 1,
+      "y": 589.75
+    },
+    "smallActions": 0,
+    "width": 430
+  },
+  {
+    "frame": {
+      "bottom": 929,
+      "height": 659,
+      "left": 547,
+      "right": 923,
+      "top": 270,
+      "width": 376,
+      "x": 547,
+      "y": 270
+    },
+    "overflow": 0,
+    "panel": {
+      "bottom": 1000,
+      "height": 805.5,
+      "left": 0,
+      "right": 369,
+      "top": 194.5,
+      "width": 369,
+      "x": 0,
+      "y": 194.5
+    },
+    "smallActions": 0,
+    "width": 1100
+  },
+  {
+    "frame": {
+      "bottom": 929,
+      "height": 659,
+      "left": 742,
+      "right": 1118,
+      "top": 270,
+      "width": 376,
+      "x": 742,
+      "y": 270
+    },
+    "overflow": 0,
+    "panel": {
+      "bottom": 1000,
+      "height": 805.5,
+      "left": 0,
+      "right": 419,
+      "top": 194.5,
+      "width": 419,
+      "x": 0,
+      "y": 194.5
+    },
+    "smallActions": 0,
+    "width": 1440
+  }
+]

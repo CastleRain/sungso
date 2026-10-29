@@ -1,0 +1,299 @@
+{
+  "date": "2026-10-29",
+  "scope": "providers-c: 독립 업체 공개 샘플과 추가 공식 기능 사례",
+  "baseline": "docs/invitation-studio/PROGRESS.md (2026-10-29 세부 조절·추가 장면)",
+  "countPolicy": "공식 소개·상품 이미지·편집기 설정만으로 실제 청첩장 샘플 5개를 채우지 않는다. 구조 관측과 실제 클릭 검증을 구분한다.",
+  "totals": {
+    "providersWithAtLeastFivePublicSamples": 1,
+    "publicSamples": 5,
+    "additionalOfficialReferenceProviders": 3,
+    "gensProductDetailsExcludedFromSampleCount": 5
+  },
+  "providers": [
+    {
+      "id": "itscard",
+      "name": "잇츠카드",
+      "homepage": "https://www.itscard.co.kr/",
+      "countedSamples": 5,
+      "commonObserved": [
+        "표지 → 초대글·가족관계 → 당사자·혼주 연락 → 달력 → 사진첩 → 영상 → 위치·교통 → 양가 계좌 → RSVP → 방명록 순서의 마크업",
+        "양가 계좌 팝업, 복사 버튼, 복사 완료창",
+        "방명록 이름·비밀번호·등록 및 삭제 비밀번호 창",
+        "위치 안내에 대중교통·주차·전세버스와 지도/내비 버튼 문구"
+      ],
+      "samples": [
+        {
+          "id": "MCard47",
+          "title": "모던포토3",
+          "url": "https://www.itscard.co.kr/mobile/new_m/mcard/minifyHTML/MCard47.asp",
+          "method": "web.run 렌더 텍스트 + 공개 HTML GET",
+          "observed": [
+            "표지에 결혼 안내·이름·일시·홀 표기",
+            "이미지형 구역 제목과 gallery roll_type01 구조"
+          ],
+          "limits": "공개 iframe HTML/텍스트 관측이다. 실제 애니메이션·터치·복사·음악·작성·외부 앱 전환은 실행하지 않았다. 연락·문자 링크는 샘플용 pcAlert()이며 실제 tel/sms 기능 검증이 아니다.",
+          "detailUrl": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard47",
+          "status": 200,
+          "evidenceLevel": "public-sample-structure",
+          "countedAsActualPublicSample": true
+        },
+        {
+          "id": "MCard41",
+          "title": "핑크빛 웨딩",
+          "url": "https://www.itscard.co.kr/mobile/new_m/mcard/minifyHTML/MCard41.asp",
+          "method": "공식 상품 iframe 확인 + 공개 HTML GET(웹 도구 인코딩 오류 우회)",
+          "observed": [
+            "visual-section h-100 표지",
+            "이름 사이 접속어와 숫자형 영문 요일·시간",
+            "gallery roll_type01 구조"
+          ],
+          "limits": "공개 iframe HTML/텍스트 관측이다. 실제 애니메이션·터치·복사·음악·작성·외부 앱 전환은 실행하지 않았다. 연락·문자 링크는 샘플용 pcAlert()이며 실제 tel/sms 기능 검증이 아니다.",
+          "detailUrl": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard41",
+          "status": 200,
+          "evidenceLevel": "public-sample-structure",
+          "countedAsActualPublicSample": true
+        },
+        {
+          "id": "MCard35",
+          "title": "스몰웨딩",
+          "url": "https://www.itscard.co.kr/mobile/new_m/mcard/minifyHTML/MCard35.asp",
+          "method": "web.run 렌더 텍스트 + 공개 HTML GET",
+          "observed": [
+            "한국어 구역 제목에 글자 사이 공간을 둔 표기",
+            "gallery roll_type01 구조"
+          ],
+          "limits": "공개 iframe HTML/텍스트 관측이다. 실제 애니메이션·터치·복사·음악·작성·외부 앱 전환은 실행하지 않았다. 연락·문자 링크는 샘플용 pcAlert()이며 실제 tel/sms 기능 검증이 아니다.",
+          "detailUrl": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard35",
+          "status": 200,
+          "evidenceLevel": "public-sample-structure",
+          "countedAsActualPublicSample": true
+        },
+        {
+          "id": "MCard53",
+          "title": "결혼합니다",
+          "url": "https://www.itscard.co.kr/mobile/new_m/mcard/minifyHTML/MCard53.asp",
+          "method": "공식 상품 iframe 확인 + 공개 HTML GET(웹 도구 인코딩 오류 우회)",
+          "observed": [
+            "표지 일시를 한국어 문장형으로 표기",
+            "gallery roll_type01 구조"
+          ],
+          "limits": "공개 iframe HTML/텍스트 관측이다. 실제 애니메이션·터치·복사·음악·작성·외부 앱 전환은 실행하지 않았다. 연락·문자 링크는 샘플용 pcAlert()이며 실제 tel/sms 기능 검증이 아니다.",
+          "detailUrl": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard53",
+          "status": 200,
+          "evidenceLevel": "public-sample-structure",
+          "countedAsActualPublicSample": true
+        },
+        {
+          "id": "MCard49",
+          "title": "싱그러운날2",
+          "url": "https://www.itscard.co.kr/mobile/new_m/mcard/minifyHTML/MCard49.asp",
+          "method": "공식 상품 iframe 확인 + 공개 HTML GET",
+          "observed": [
+            "표지 D-day 문구",
+            "gallery-section type2 배열과 별도 확대 갤러리",
+            "다른 샘플의 영상 뒤 추가 배너 섹션 없음"
+          ],
+          "limits": "공개 iframe HTML/텍스트 관측이다. 실제 애니메이션·터치·복사·음악·작성·외부 앱 전환은 실행하지 않았다. 연락·문자 링크는 샘플용 pcAlert()이며 실제 tel/sms 기능 검증이 아니다.",
+          "detailUrl": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard49",
+          "status": 200,
+          "evidenceLevel": "public-sample-structure",
+          "countedAsActualPublicSample": true
+        }
+      ],
+      "providerClaims": [
+        {
+          "url": "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard47",
+          "items": [
+            "초대글·교통·혼주 글자 크기 조절",
+            "공유 사진·제목·내용·버튼 문구 설정"
+          ],
+          "limits": "상품 설명이며 해당 설정의 생성·저장·운영 동작은 미검증"
+        }
+      ]
+    },
+    {
+      "id": "fillthespace",
+      "name": "FillTheSpace",
+      "homepage": "https://fillthespace.co.kr/",
+      "countedSamples": 0,
+      "references": [
+        {
+          "url": "https://fillthespace.co.kr/",
+          "title": "홈 내 청첩장 미리보기",
+          "method": "web.run 텍스트 관측; 실제 화면은 root가 별도 확인",
+          "observed": [
+            "당사자별 프로필 사진·짧은 소개",
+            "사진첩, 달력·D-day·Google 일정, 교통·전세버스, 계좌·방명록"
+          ],
+          "limits": "홈에서 세 프리셋이 소개되지만 개별 완료 샘플 5개로 집계하지 않음"
+        },
+        {
+          "url": "https://fillthespace.co.kr/building",
+          "title": "공개 편집기",
+          "method": "web.run 텍스트·공개 HTML; root 브라우저 관측 전달",
+          "observed": [
+            "이름 순서·사진 편집·디자인·블록 설정 DOM",
+            "표지·달력 마커·글씨체·크기·배경 효과 설정"
+          ],
+          "limits": "초기 신규/불러오기 모달이 뒤늦게 설정 본문을 가린다. 신규 생성·저장하지 않았으며 설정 적용 후 결과 검증이 아님"
+        },
+        {
+          "url": "https://fillthespace.co.kr/faq",
+          "title": "공식 FAQ",
+          "method": "공식 FAQ 검색/텍스트",
+          "claims": [
+            "갤러리 masonry/carousel/grid",
+            "달력 circle/heart/star/flower 마커",
+            "KR/EN 및 카드 표면·글자 크기 선택"
+          ],
+          "limits": "공식 기능 설명이다. 개별 설정의 실제 작동은 이번 조사에서 검증하지 않음"
+        }
+      ],
+      "sampleRouteAttempt": {
+        "url": "https://fillthespace.co.kr/v/sample_invitation?preview=true",
+        "result": "building에서 링크를 확인했으나 web.run cache miss; 완료 샘플 집계 제외"
+      }
+    },
+    {
+      "id": "gensdesign",
+      "name": "젠스디자인",
+      "homepage": "https://www.gensdesign.co.kr/",
+      "listing": "https://www.gensdesign.co.kr/product/list.html?cate_no=25",
+      "countedSamples": 0,
+      "products": [
+        {
+          "id": "203",
+          "title": "메리골드",
+          "url": "https://www.gensdesign.co.kr/product/메리골드/203/category/25/display/1/",
+          "evidenceLevel": "public-product-detail",
+          "countedAsActualPublicSample": false,
+          "observed": "공식 상품 제목·상세 이미지 참조·주문 게시판 연결",
+          "limits": "실행 가능한 개별 청첩장 샘플 링크를 얻지 못했다. 이미지의 실제 모션이나 기능을 검증하지 않았다."
+        },
+        {
+          "id": "188",
+          "title": "릴리",
+          "url": "https://www.gensdesign.co.kr/product/릴리/188/category/25/display/1/",
+          "evidenceLevel": "public-product-detail",
+          "countedAsActualPublicSample": false,
+          "observed": "공식 상품 제목·상세 이미지 참조·주문 게시판 연결",
+          "limits": "실행 가능한 개별 청첩장 샘플 링크를 얻지 못했다. 이미지의 실제 모션이나 기능을 검증하지 않았다."
+        },
+        {
+          "id": "157",
+          "title": "러브 에세이",
+          "url": "https://www.gensdesign.co.kr/product/러브-에세이/157/category/25/display/1/",
+          "evidenceLevel": "public-product-detail",
+          "countedAsActualPublicSample": false,
+          "observed": "공식 상품 제목·상세 이미지 참조·주문 게시판 연결",
+          "limits": "실행 가능한 개별 청첩장 샘플 링크를 얻지 못했다. 이미지의 실제 모션이나 기능을 검증하지 않았다."
+        },
+        {
+          "id": "181",
+          "title": "그린브리즈",
+          "url": "https://www.gensdesign.co.kr/product/그린브리즈/181/category/25/display/1/",
+          "evidenceLevel": "public-product-detail",
+          "countedAsActualPublicSample": false,
+          "observed": "공식 상품 제목·상세 이미지 참조·주문 게시판 연결",
+          "limits": "실행 가능한 개별 청첩장 샘플 링크를 얻지 못했다. 이미지의 실제 모션이나 기능을 검증하지 않았다."
+        },
+        {
+          "id": "180",
+          "title": "너는 나의 봄",
+          "url": "https://www.gensdesign.co.kr/product/너는-나의-봄/180/category/25/display/1/",
+          "evidenceLevel": "public-product-detail",
+          "countedAsActualPublicSample": false,
+          "observed": "공식 상품 제목·상세 이미지 참조·주문 게시판 연결",
+          "limits": "실행 가능한 개별 청첩장 샘플 링크를 얻지 못했다. 이미지의 실제 모션이나 기능을 검증하지 않았다."
+        }
+      ],
+      "limits": "5개 공식 상품 페이지 확인과 5개 실제 청첩장 기능 검증은 다르므로 집계에서 제외."
+    },
+    {
+      "id": "maisondemarie",
+      "name": "메종드마리에",
+      "homepage": "https://maisondemarie.co.kr/",
+      "countedSamples": 0,
+      "references": [
+        {
+          "url": "https://maisondemarie.co.kr/",
+          "title": "공식 기능 소개",
+          "method": "web.run + 공개 HTML",
+          "claims": [
+            "사진 밝기·대비·채도 조절",
+            "글자 크기·간격·위치 조절",
+            "갤러리 배열·계좌·지도·오프닝 효과"
+          ],
+          "limits": "소개 페이지의 시연 UI와 설명만 관측. 5개 실제 완료 청첩장 경로 미확보; 기능 작동 확인으로 집계하지 않음"
+        }
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "photo-fit",
+      "priority": "high",
+      "name": "표지 사진 초점·밝기",
+      "source": [
+        "https://maisondemarie.co.kr/",
+        "https://fillthespace.co.kr/building"
+      ],
+      "newComparedWithStudio": true,
+      "proposal": "사진의 위·중앙·아래 초점과 절제된 밝기 조절을 표지 옵션으로 저장한다.",
+      "verification": "얼굴/이름 가독성, 320·390·1440px, 원본 변경 없음, 사진/음악 노드 보존."
+    },
+    {
+      "id": "type-density",
+      "priority": "high",
+      "name": "본문 글자 크기·행간·자간",
+      "source": [
+        "https://maisondemarie.co.kr/",
+        "https://www.itscard.co.kr/script/mcard/new/mcard_view.asp?CardCode=MCard47"
+      ],
+      "newComparedWithStudio": true,
+      "proposal": "서체 선택과 별도로 편안하게·기본·여유롭게 같은 제한된 조절을 제공한다.",
+      "verification": "긴 한국어·계좌·이름 줄바꿈, 44px 조작, 모달 넘침, 저장 URL 왕복."
+    },
+    {
+      "id": "couple-profile",
+      "priority": "medium",
+      "name": "두 사람 프로필",
+      "source": [
+        "https://fillthespace.co.kr/"
+      ],
+      "newComparedWithStudio": true,
+      "proposal": "짧은 자기소개와 인물 사진을 선택 장면으로 제공한다. 이야기 중복을 피하고 내용 입력 전에는 숨긴다.",
+      "verification": "임의 나이·MBTI·사연 생성 없음. 선택 해제 시 순서/빠른 메뉴에서 제거."
+    },
+    {
+      "id": "calendar-marker",
+      "priority": "medium",
+      "name": "달력 날짜 표시",
+      "source": [
+        "https://fillthespace.co.kr/faq"
+      ],
+      "newComparedWithStudio": true,
+      "proposal": "원·작은 하트·밑줄 등 날짜 강조 형태를 선택한다.",
+      "verification": "선택 날짜·대비·숫자 가독성·모션 감소·저장 호환."
+    },
+    {
+      "id": "album-masonry",
+      "priority": "medium",
+      "name": "사진 비율을 살리는 배열",
+      "source": [
+        "https://fillthespace.co.kr/faq"
+      ],
+      "newComparedWithStudio": true,
+      "proposal": "원본 종횡비를 살리는 masonry 배열을 기존 3종에 추가한다.",
+      "verification": "전체 사진 순서와 키보드 이동 일치, 선택 사진/확대 상태 유지, 늦은 이미지 이동 방지."
+    }
+  ],
+  "excluded": [
+    "RSVP는 사용자가 제외했으므로 재추가하지 않는다.",
+    "기존 하객 안내·체크리스트·초대 카드·감사 인사를 신규 기능으로 중복 집계하지 않는다.",
+    "실제 전화번호 없는 연락·문자, 미등록 교통정보, 송금·꽃배달 상업 기능은 임의로 추가하지 않는다.",
+    "소개 이미지에서 추론한 애니메이션을 실제 모션 검증으로 주장하지 않는다."
+  ],
+  "progress": "잇츠카드 5개 실제 공개 iframe의 구조를 비교했고, 3개 업체의 추가 공식 자료를 분리했다. 앱 소스·배포·운영 데이터 변경 없음.",
+  "next": "확인된 신규 후보 중 사진 가독성과 본문 크기를 먼저 조립실 옵션으로 구현하고 root가 실제 시연·저장·반응형 회귀를 검증한다."
+}

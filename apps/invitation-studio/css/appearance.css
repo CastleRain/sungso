@@ -110,3 +110,63 @@ body[data-divider=chapter] main.paper>.section:not(.hero):not(.closing-section):
 body[data-divider=chapter][data-story=constellation] main.paper>#our-story::before{color:var(--paper)}
 body[data-divider=line][data-story=constellation] main.paper>#our-story::before{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--paper) 30%,transparent),transparent)}
 @media(min-width:768px){body[data-spacing=compact] main.paper>.section:not(.hero):not(.closing-section){padding-block:52px}}
+
+/* Reading controls are opt-in. The original values deliberately add no overrides,
+   preserving the existing handwriting, title sizes, fixed dock and media geometry. */
+body[data-text-size=comfortable]{--body-size:17px;--reading-body-size:17px;--reading-note-size:15px;--reading-action-size:15px;--reading-map-size:13px}
+body[data-text-size=large]{--body-size:18px;--reading-body-size:18px;--reading-note-size:16px;--reading-action-size:16px;--reading-map-size:14px}
+body[data-text-size]:not([data-text-size=original]) :is(.invitation-copy,.guest-message,.account-intro,.story-page-copy>p:not(.story-note),.closing-copy){
+  font-size:var(--reading-body-size);overflow-wrap:anywhere;
+}
+body[data-text-size]:not([data-text-size=original]) .invitation-copy{font-size:max(18px,calc(var(--reading-body-size) + 1px))}
+body[data-text-size]:not([data-text-size=original]) .section-title>p:not(.eyebrow):not(.korean-heading){font-size:var(--reading-body-size)}
+body[data-text-size]:not([data-text-size=original]) :is(.family-person>p:first-child,.family-person>p:first-child>span,.family-person small,.arrival-title .address,.arrival-steps p,.journey-note,.car-destination span,.account-bank,.account-help,.demo-note,.guest-status,.date-copy,.story-copy>span:nth-child(2),.story-copy>small,.story-page-copy .story-note,.gallery-tools p,.countdown-label,.dday){
+  font-size:var(--reading-note-size);overflow-wrap:anywhere;
+}
+body[data-text-size]:not([data-text-size=original]) :is(.arrival-steps strong,.date-copy strong){font-size:var(--reading-body-size)}
+body[data-text-size]:not([data-text-size=original]) :is(.text-action,.save-date-action b,.account-tabs button,.recipient-picker button,.account-copy,.journey-tabs button,.letter-entry>span>span,.quick-actions>a,.quick-actions>button,.quick-nav>a,.viewer-tools button){
+  font-size:var(--reading-action-size);min-height:44px;overflow-wrap:anywhere;
+}
+body[data-text-size]:not([data-text-size=original]) .save-date-action>span{font-size:var(--reading-note-size)}
+body[data-text-size]:not([data-text-size=original]) .map-apps>:is(a,button){font-size:var(--reading-map-size);min-width:0;overflow-wrap:anywhere}
+body[data-text-size]:not([data-text-size=original]) .section :is(.guide-answer,.day-check-copy,.keepsake-place,.promise-words>p,.couple-note-context>p,.couple-note-thought>p,.thank-you-body){
+  font-size:var(--reading-body-size);overflow-wrap:anywhere;
+}
+body[data-text-size]:not([data-text-size=original]) .section .couple-note-thought>p{font-size:max(19px,var(--reading-body-size))}
+body[data-text-size]:not([data-text-size=original]) .section :is(.guide-question summary,.optional-section-link,.keepsake-actions>a,.keepsake-actions>button,.keepsake-save){font-size:var(--reading-action-size)}
+body[data-text-size]:not([data-text-size=original]) .section :is(.day-check-note,.keepsake-time,.keepsake-room,.keepsake-address){font-size:var(--reading-note-size)}
+body[data-text-size]:not([data-text-size=original]) .section :is(.guest-pass-address,.guest-pass-subway,.guest-pass-room,.invitation-qr-caption){font-size:var(--reading-note-size)}
+body[data-text-size]:not([data-text-size=original]) .section :is(.guest-pass-actions,.invitation-qr-actions) :is(a,button){font-size:var(--reading-action-size)}
+body[data-text-size]:not([data-text-size=original]) .modal :is(label,input:not([type=checkbox]),textarea){font-size:var(--reading-body-size)}
+body[data-text-size]:not([data-text-size=original]) .modal :is(.consent,.character-count){font-size:var(--reading-note-size)}
+body[data-text-size]:not([data-text-size=original]) :is(.family-lines,.recipient-picker,.location-actions,.closing-actions,.gallery-tools,.quick-nav){flex-wrap:wrap}
+body[data-text-size]:not([data-text-size=original]) :is(.family-person,.account-row,.arrival-steps li>div,.editorial-action>span){min-width:0;max-width:100%}
+body[data-text-size]:not([data-text-size=original]) .account-number{min-width:0;overflow-wrap:anywhere}
+body[data-text-size]:not([data-text-size=original]) .quick-nav>a{flex:1 1 calc(50% - 8px);min-width:0;justify-content:center}
+body[data-text-size]:not([data-text-size=original]) .date-copy{white-space:normal}
+@media(max-width:480px){
+  body[data-text-size]:not([data-text-size=original]) .date-ticket{grid-template-columns:minmax(0,1fr)}
+  body[data-text-size]:not([data-text-size=original]) .date-detail{width:100%;max-width:330px;justify-self:center;padding:20px clamp(12px,4vw,24px)}
+  body[data-text-size]:not([data-text-size=original]) .date-face{min-width:0}
+  body[data-text-size]:not([data-text-size=original]) .recipient-picker{gap:6px}
+}
+/* A guest's explicit larger-text preference still takes precedence over a saved mood. */
+html.large-text body[data-text-size]:not([data-text-size=original]){--body-size:19px;--reading-body-size:19px;--reading-note-size:16px;--reading-action-size:16px;--reading-map-size:14px}
+
+/* Keep authored <br> and pre-wrap/pre-line whitespace untouched. Form ruled lines
+   retain their original metrics; this setting changes reading prose, not inputs. */
+body[data-line-space=relaxed] .invitation-copy{line-height:2.45}
+body[data-line-space=relaxed] :is(.guest-message,.account-intro,.story-page-copy>p,.closing-copy,.account-help,.demo-note,.arrival-title .address,.journey-note,.date-copy){line-height:2.25}
+body[data-line-space=relaxed][data-font] .section :is(.guide-answer,.promise-words>p,.couple-note-context>p,.couple-note-thought>p,.thank-you-body,.day-check-note,.keepsake-address){line-height:2.25}
+
+/* Filters sit on known photographic img leaves, never a section/reveal parent:
+   global focus blur, transforms, maps, logos, QR and handwriting remain independent.
+   The two direct aria-hidden images are the existing gallery flight clones. */
+body[data-photo-tone=soft]{--invitation-photo-filter:saturate(.94) contrast(.97) brightness(1.02)}
+body[data-photo-tone=mono]{--invitation-photo-filter:grayscale(1) contrast(1.02)}
+body:is([data-photo-tone=soft],[data-photo-tone=mono]) :is(.hero-photo>img,.story-image>img,.story-page-photo>img,.gallery-photo>img,.album-feature-image,.album-sheet>img,.album-thumbnail>img,#photo-full,.photo-dialog>img[aria-hidden=true],.closing-photo>img,img[data-invitation-photo]),
+body:is([data-photo-tone=soft],[data-photo-tone=mono])>img[aria-hidden=true]{filter:var(--invitation-photo-filter)}
+body:is([data-photo-tone=soft],[data-photo-tone=mono]) .gallery-photo:hover>img{filter:var(--invitation-photo-filter) brightness(1.04)}
+/* The original 50% 43% focal point remains owned by the base scene stylesheet. */
+body[data-cover-focus=upper] .hero-photo>img{object-position:50% 25%}
+body[data-cover-focus=lower] .hero-photo>img{object-position:50% 70%}

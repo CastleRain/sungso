@@ -50,7 +50,7 @@ function fixture({ reduced = false, readiness = Promise.resolve(), staticOff = f
 }
 const flush = () => Promise.resolve();
 
-test('all 13 choices have bounded scene routes, with a common motion route and readable appearance positions', () => {
+test('all choices have bounded scene routes, with a common motion route and readable appearance positions', () => {
   const geometry = { top: 1000, height: 700, nextTop: 1700, interactionTop: 1400, viewport: 800, maxScroll: 4000 };
   for (const key of CHOICE_KEYS) {
     const route = demoRoute({ ...geometry, key });
@@ -64,7 +64,7 @@ test('all 13 choices have bounded scene routes, with a common motion route and r
   assert.equal(demoRoute({ key: 'motion', top: 0, height: 600, viewport: 800, maxScroll: 0 }).end, 0);
 });
 
-test('demo request accepts only the 13 known keys and safe request identities', () => {
+test('demo request accepts only the known keys and safe request identities', () => {
   for (const key of CHOICE_KEYS) assert.equal(validDemoRequest({ key, requestId: 1 }), true);
   for (const request of [null, {}, { key: 'delete', requestId: 1 }, { key: '__proto__', requestId: 1 }, { key: 'motion', requestId: -1 }, { key: 'motion', requestId: '2' }, { key: 'motion', requestId: Infinity }]) assert.equal(validDemoRequest(request), false);
 });
@@ -77,15 +77,24 @@ test('actual viewport moves once through a scene, then leaves no ongoing animati
   const count = h.moves.length; h.step(10000); assert.equal(h.moves.length, count); assert.equal(h.pendingTimers, 0);
 });
 
-test('all section choices reach their intended scene and only four safe interactions run', async () => {
+test('all section choices reach their intended scene and only safe visual interactions run', async () => {
   for (const key of CHOICE_KEYS) {
     const h = fixture(); assert.equal(h.demo.start({ key, requestId: 2 }), true); await flush(); h.complete();
     assert.equal(h.states.at(-1).key, key);
-    assert.equal(h.states.at(-1).phase, ['palette', 'font', 'spacing', 'divider'].includes(key) ? 'static' : 'complete');
-    assert.equal(h.interacted, ['album', 'arrival', 'gifting', 'wishes'].includes(key) ? 1 : 0, key);
+    assert.equal(h.states.at(-1).phase, ['palette', 'font', 'spacing', 'divider', 'textSize', 'lineSpace', 'photoTone', 'coverFocus', 'albumColumns', 'albumRatio', 'calendarMark'].includes(key) ? 'static' : 'complete', key);
+    assert.equal(h.interacted, ['album', 'arrival', 'gifting', 'wishes', 'guestGuide'].includes(key) ? 1 : 0, key);
     assert.equal(h.interactionRestored, h.interacted, key);
     assert.equal(h.replayCount, key === 'opening' ? 1 : 0, key);
     assert.ok(SECTION_IDS[key]); h.demo.destroy();
+  }
+});
+
+test('photo and calendar details bring the changed content into view rather than just the section heading', async () => {
+  for (const key of ['photoTone', 'albumColumns', 'albumRatio', 'calendarMark']) {
+    const h = fixture(); h.demo.start({ key, requestId: 3 }); await flush();
+    const target = h.doc.getElementById(SECTION_IDS[key]);
+    assert.equal(h.moves.at(-1).top, target.interaction.top - 132, key);
+    assert.equal(h.interacted, 0); assert.equal(h.pendingFrames, 0); h.demo.destroy();
   }
 });
 

@@ -120,6 +120,47 @@ test('motion preference, dialog and hidden tab disable optional motion without h
   f.controller.destroy();
 });
 
+test('guide slider supports one visible answer, keyboard movement and preserved selection across style changes', () => {
+  const f = fixture(), rows = [...f.guide.children]; rows[1].open = true;
+  const previous = f.doc.getElementById('guest-guide-previous'), next = f.doc.getElementById('guest-guide-next'), count = f.doc.getElementById('guest-guide-count');
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'slider' });
+  assert.deepEqual(rows.map(row => row.hidden), [false, true, true]); assert.ok(rows.every(row => row.open));
+  assert.equal(previous.disabled, true); assert.equal(count.textContent, '1 / 3');
+  next.fire('click'); assert.equal(count.textContent, '2 / 3');
+  f.controller.setComposition({ extras: [], guestGuide: 'slider' });
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'cards' });
+  assert.ok(rows.every(row => !row.hidden && row.open)); assert.equal(next.parentNode.hidden, true);
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'slider' });
+  assert.deepEqual(rows.map(row => row.hidden), [true, false, true]);
+  assert.equal(next.parentNode.fire('keydown', { key: 'End' }).defaultPrevented, true);
+  assert.equal(count.textContent, '3 / 3'); assert.equal(next.disabled, true);
+  next.parentNode.fire('keydown', { key: 'ArrowLeft' }); assert.equal(count.textContent, '2 / 3');
+  next.parentNode.fire('keydown', { key: 'Home' }); assert.equal(previous.disabled, true);
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'folded' });
+  assert.deepEqual(rows.map(row => row.open), [false, true, false]); assert.ok(rows.every(row => !row.hidden));
+  f.controller.destroy(); assert.ok([...next.listeners.values(), ...previous.listeners.values()].every(set => !set.size));
+});
+
+test('one-shot guide demonstration restores selection and always yields to manual navigation', () => {
+  const f = fixture(), count = f.doc.getElementById('guest-guide-count'), next = f.doc.getElementById('guest-guide-next');
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'slider' });
+  const finish = f.controller.demoInteraction('guestGuide'); assert.equal(count.textContent, '2 / 3');
+  finish(); finish(); assert.equal(count.textContent, '1 / 3');
+  const manual = f.controller.demoInteraction('guestGuide'); next.fire('click'); manual(); assert.equal(count.textContent, '3 / 3');
+  const wrap = f.controller.demoInteraction('guestGuide'); assert.equal(count.textContent, '1 / 3');
+  next.parentNode.fire('keydown', { key: 'ArrowRight' }); wrap(); assert.equal(count.textContent, '2 / 3');
+  const replaced = f.controller.demoInteraction('guestGuide');
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'cards' }); replaced();
+  f.controller.setComposition({ extras: ['guest-guide'], guestGuide: 'slider' }); assert.equal(count.textContent, '2 / 3');
+  const first = f.controller.demoInteraction('guestGuide'), second = f.controller.demoInteraction('guestGuide'); first(); assert.equal(count.textContent, '3 / 3'); second(); assert.equal(count.textContent, '2 / 3');
+  f.controller.demoInteraction('guestGuide'); f.controller.setEnabled(false); assert.equal(count.textContent, '2 / 3');
+  f.controller.demoInteraction('guestGuide'); assert.equal(count.textContent, '2 / 3');
+  f.controller.setEnabled(true); f.controller.demoInteraction('guestGuide'); f.media.matches = true; f.media.fire('change'); assert.equal(count.textContent, '2 / 3');
+  f.controller.demoInteraction('guestGuide'); assert.equal(count.textContent, '2 / 3');
+  assert.equal(f.audio.currentTime, 123); assert.equal(f.checks.filter(input => input.checked).length, 0);
+  f.controller.destroy();
+});
+
 test('teardown removes owned rows and handlers, restores visibility, and ignores late calls', () => {
   const f = fixture(); f.controller.setComposition({ extras: OPTIONAL_SECTION_IDS }); assert.equal(f.fact.textContent, '성우 & 소희');
   f.controller.destroy(); f.controller.destroy(); f.controller.setComposition({ extras: OPTIONAL_SECTION_IDS }); f.controller.refresh(); f.controller.setEnabled(true);

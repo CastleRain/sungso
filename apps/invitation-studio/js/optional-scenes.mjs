@@ -2,9 +2,9 @@ import { formatWedding } from './core.mjs';
 
 export const OPTIONAL_SECTION_IDS = Object.freeze(['guest-guide', 'day-checklist', 'keepsake']);
 export const OPTIONAL_SCENE_CHOICES = Object.freeze({
-  guestGuide: Object.freeze(['folded', 'cards']),
+  guestGuide: Object.freeze(['folded', 'cards', 'slider']),
   checklist: Object.freeze(['list', 'steps']),
-  keepsake: Object.freeze(['ticket', 'postcard']),
+  keepsake: Object.freeze(['ticket', 'postcard', 'qr']),
 });
 const SECTION_KEYS = Object.freeze({ 'guest-guide': 'guestGuide', 'day-checklist': 'checklist', keepsake: 'keepsake' });
 const GUEST_INFO_FIELDS = Object.freeze([
@@ -42,7 +42,8 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
   const media = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   const guide = doc.getElementById('guest-guide-items');
   const created = [], guideRows = [];
-  let destroyed = false, requested = Boolean(enabled), guideCards = false;
+  let destroyed = false, requested = Boolean(enabled), guideLayout = 'folded', guideIndex = 0;
+  let guideUserRevision = 0, finishGuideDemo = null;
 
   for (const item of guestGuideItems(wedding)) {
     if (!guide) break;
@@ -54,24 +55,46 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
     answer.className = 'guide-answer'; answer.textContent = item.answer;
     summary.append(label, marker); row.append(summary, answer); guide.append(row); created.push(row);
     const preventCollapse = event => {
-      if (!destroyed && guideCards && (event.type === 'click' || ['Enter', ' '].includes(event.key))) event.preventDefault();
+      if (!destroyed && guideLayout !== 'folded' && (event.type === 'click' || ['Enter', ' '].includes(event.key))) event.preventDefault();
     };
-    const keepVisible = () => { if (!destroyed && guideCards && !row.open) row.open = true; };
+    const keepVisible = () => { if (!destroyed && guideLayout !== 'folded' && !row.open) row.open = true; };
     summary.addEventListener('click', preventCollapse);
     summary.addEventListener('keydown', preventCollapse);
     row.addEventListener('toggle', keepVisible);
     guideRows.push({ row, summary, preventCollapse, keepVisible, foldedOpen: false });
   }
 
+  const guideControls = doc.createElement('div'); guideControls.className = 'guide-slider-controls'; guideControls.hidden = true;
+  const guidePrevious = doc.createElement('button'), guideNext = doc.createElement('button'), guideCount = doc.createElement('span');
+  guidePrevious.type = guideNext.type = 'button'; guidePrevious.id = 'guest-guide-previous'; guideNext.id = 'guest-guide-next';
+  guidePrevious.textContent = '←'; guideNext.textContent = '→';
+  guidePrevious.setAttribute('aria-label', '이전 하객 안내'); guideNext.setAttribute('aria-label', '다음 하객 안내');
+  guideCount.id = 'guest-guide-count'; guideCount.setAttribute('aria-live', 'polite'); guideCount.setAttribute('aria-atomic', 'true');
+  guideControls.append(guidePrevious, guideCount, guideNext); guide?.parentNode?.append(guideControls); created.push(guideControls);
+  function showGuide(index) {
+    if (destroyed) return;
+    guideIndex = Math.max(0, Math.min(guideRows.length - 1, index));
+    guideRows.forEach(({ row }, i) => { row.hidden = guideLayout === 'slider' && i !== guideIndex; });
+    guideCount.textContent = `${guideIndex + 1} / ${guideRows.length}`;
+    guidePrevious.disabled = guideIndex === 0; guideNext.disabled = guideIndex === guideRows.length - 1;
+  }
+  const previousGuide = () => { guideUserRevision++; showGuide(guideIndex - 1); };
+  const nextGuide = () => { guideUserRevision++; showGuide(guideIndex + 1); };
+  const guideKey = event => {
+    if (guideLayout !== 'slider' || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault(); guideUserRevision++;
+    showGuide(event.key === 'Home' ? 0 : event.key === 'End' ? guideRows.length - 1 : guideIndex + (event.key === 'ArrowLeft' ? -1 : 1));
+  };
+  guidePrevious.addEventListener('click', previousGuide); guideNext.addEventListener('click', nextGuide); guideControls.addEventListener('keydown', guideKey);
+
   function setGuideLayout(layout) {
-    const nextCards = layout === 'cards';
-    if (guideCards === nextCards) return;
-    // Snapshot only when entering cards; other style changes must not replace the user's folded state.
-    if (nextCards) guideRows.forEach(item => { item.foldedOpen = Boolean(item.row.open); });
-    guideCards = nextCards;
+    if (guideLayout === layout) return;
+    // Preserve the folded selection across cards ↔ slider changes and unrelated composition updates.
+    if (guideLayout === 'folded') guideRows.forEach(item => { item.foldedOpen = Boolean(item.row.open); });
+    guideLayout = layout;
     for (const { row, summary, foldedOpen } of guideRows) {
-      row.open = guideCards || foldedOpen;
-      if (guideCards) {
+      row.open = guideLayout !== 'folded' || foldedOpen;
+      if (guideLayout !== 'folded') {
         summary.setAttribute('aria-disabled', 'true');
         summary.setAttribute('tabindex', '-1');
       } else {
@@ -79,6 +102,8 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
         summary.removeAttribute('tabindex');
       }
     }
+    guideControls.hidden = guideLayout !== 'slider';
+    showGuide(guideIndex);
   }
 
   let formatted = {};
@@ -108,10 +133,13 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
 
   function syncMotion() {
     if (destroyed) return;
-    doc.body.classList.toggle('optional-effects', requested && !media?.matches && !doc.hidden && !doc.querySelector('dialog[open]'));
+    const motion = requested && !media?.matches && !doc.hidden && !doc.querySelector('dialog[open]');
+    if (!motion) finishGuideDemo?.();
+    doc.body.classList.toggle('optional-effects', motion);
   }
   function setComposition(input) {
     if (destroyed) return;
+    finishGuideDemo?.();
     const values = optionalSceneChoices(input);
     setGuideLayout(values.guestGuide);
     const active = new Set(Array.isArray(input?.extras) ? input.extras.filter(id => OPTIONAL_SECTION_IDS.includes(id)) : []);
@@ -128,11 +156,27 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
   setComposition(composition); updateChecklist();
   return {
     setComposition,
+    demoInteraction(key) {
+      finishGuideDemo?.();
+      if (key !== 'guestGuide' || destroyed || guideLayout !== 'slider' || guideRows.length < 2 || !requested || media?.matches || doc.hidden || doc.getElementById('guest-guide')?.hidden || doc.querySelector('dialog[open]')) return () => {};
+      const before = guideIndex, revision = guideUserRevision;
+      showGuide((before + 1) % guideRows.length);
+      let finished = false;
+      const finish = () => {
+        if (finished) return; finished = true;
+        if (finishGuideDemo === finish) finishGuideDemo = null;
+        if (!destroyed && guideLayout === 'slider' && guideUserRevision === revision) showGuide(before);
+      };
+      finishGuideDemo = finish;
+      return finish;
+    },
     setEnabled(value) { requested = Boolean(value); syncMotion(); },
     refresh() { syncMotion(); updateChecklist(); },
     destroy() {
       if (destroyed) return;
+      finishGuideDemo?.();
       destroyed = true;
+      guidePrevious.removeEventListener('click', previousGuide); guideNext.removeEventListener('click', nextGuide); guideControls.removeEventListener('keydown', guideKey);
       checks.forEach(input => input.removeEventListener('change', updateChecklist));
       for (const { row, summary, preventCollapse, keepVisible } of guideRows) {
         summary.removeEventListener('click', preventCollapse);
@@ -142,7 +186,7 @@ export function mountOptionalScenes({ doc = document, win = window, enabled = tr
       doc.removeEventListener('visibilitychange', syncMotion);
       doc.removeEventListener('lab:dialog-change', syncMotion);
       media?.removeEventListener?.('change', syncMotion);
-      created.forEach(node => node.remove());
+      created.forEach(node => { if (node.parentNode) node.remove(); });
       for (const { node, hidden, layout } of originals) {
         node.hidden = hidden;
         if (layout === undefined) delete node.dataset.optionalLayout; else node.dataset.optionalLayout = layout;

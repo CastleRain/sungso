@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULT_COMPOSITION } from '../js/composition.mjs';
-import { parseLibrary, selectSaved, updateSaved, exportSelection, parseImport, LIBRARY_BYTES } from '../js/saved-library.mjs';
+import { CHOICES, DEFAULT_COMPOSITION, DEFAULT_ORDER, OPTIONAL_SECTIONS, ORDER_SECTIONS, normalizeComposition, compositionParams, readComposition } from '../js/composition.mjs';
+import { parseLibrary, selectSaved, updateSaved, exportSelection, parseImport, LIBRARY_BYTES, LIBRARY_LIMIT } from '../js/saved-library.mjs';
 const record = (id, extra = {}) => ({ id, name: `조합 ${id}`, composition: { ...DEFAULT_COMPOSITION }, ...extra });
 test('old eight records migrate without write or loss, with independent compositions', () => {
   const source = Array.from({ length: 8 }, (_, i) => record(String(i)));
@@ -35,4 +35,43 @@ test('single selection and collection exports preserve ratings, notes, choices a
   assert.equal(collection.items[0].rating, 5); assert.equal(collection.items[0].note, '이 색감으로');
   assert.throws(() => parseImport(JSON.stringify({ version: 2, composition: DEFAULT_COMPOSITION })));
   assert.throws(() => parseImport(JSON.stringify({ version: 1, composition: { endpoint: 'evil' } })));
+});
+
+test('40 complete research combinations round trip through storage, collection export and individual V1 files', () => {
+  const extras = OPTIONAL_SECTIONS.map(section => section.id), order = ORDER_SECTIONS.map(section => section.id).reverse();
+  const items = Array.from({ length: LIBRARY_LIMIT }, (_, index) => ({
+    id: 'research-' + index, name: ('조합 ' + index + ' ').padEnd(32, '가'), note: ('비교한 느낌 ' + index + ' ').padEnd(240, '나'),
+    rating: index % 6, createdAt: 100 + index, updatedAt: 200 + index,
+    composition: normalizeComposition({
+      ...Object.fromEntries(Object.entries(CHOICES).map(([key, choices]) => [key, choices[index % choices.length].id])),
+      extras: index % 2 ? extras : ['day-pass', 'keepsake'], order,
+      motionSpeed: [.5, .75, 1, 1.25, 1.5][index % 5], motionStrength: [1.5, 1.25, 1, .75, .5][index % 5],
+    }),
+  }));
+  const storage = JSON.stringify(items);
+  assert.ok(storage.length < LIBRARY_BYTES); assert.deepEqual(parseLibrary(storage), items);
+  const exportFile = JSON.stringify({ version: 1, kind: 'sungso-studio-library', items });
+  assert.ok(exportFile.length < LIBRARY_BYTES);
+  const imported = parseImport(exportFile); assert.equal(imported.kind, 'library'); assert.deepEqual(imported.items, items);
+  for (const item of items) {
+    const single = parseImport(JSON.stringify(exportSelection(item.composition, item)));
+    assert.equal(single.kind, 'selection'); assert.equal(single.version, 1); assert.deepEqual(single.composition, item.composition);
+    assert.equal(single.name, item.name); assert.equal(single.rating, item.rating); assert.equal(single.note, item.note);
+    assert.deepEqual(readComposition(compositionParams(single.composition).toString()), item.composition);
+  }
+  const edited = updateSaved(imported.items, items[0].id, { name: '나중에 고른 조합', note: '흑백 사진도 다시 보기', rating: 5 }, 500);
+  assert.deepEqual(edited[0].composition, items[0].composition); assert.equal(items[0].rating, 0);
+});
+
+test('legacy V1 library files gain inert research defaults without enabling the day pass or changing old section order', () => {
+  const old = { cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact', palette: 'azure', font: 'letter' };
+  const saved = [{ id: 'old', name: '처음 고른 조합', rating: 4, note: '기존의 느낌 유지', createdAt: 1, updatedAt: 2, composition: old }];
+  const expected = normalizeComposition(old), loaded = parseLibrary(JSON.stringify(saved));
+  assert.deepEqual(loaded[0].composition, expected); assert.equal(loaded[0].name, saved[0].name); assert.equal(loaded[0].note, saved[0].note); assert.equal(loaded[0].rating, 4);
+  assert.deepEqual(expected.order, DEFAULT_ORDER); assert.deepEqual(expected.extras, []);
+  for (const key of ['textSize', 'lineSpace', 'photoTone', 'coverFocus', 'ending', 'calendarMark']) assert.equal(expected[key], 'original');
+  assert.equal(expected.albumColumns, 'auto'); assert.equal(expected.albumRatio, 'auto'); assert.equal(expected.dayPass, 'boarding');
+  assert.deepEqual(parseImport(JSON.stringify({ version: 1, composition: old })).composition, expected);
+  assert.deepEqual(parseImport(JSON.stringify({ version: 1, kind: 'sungso-studio-library', items: saved })).items, loaded);
+  assert.equal(saved[0].composition.dayPass, undefined, 'reading an old file never mutates its source');
 });

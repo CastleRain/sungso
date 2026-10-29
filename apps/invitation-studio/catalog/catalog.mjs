@@ -6,8 +6,12 @@ import { LIBRARY_LIMIT, LIBRARY_BYTES, cleanName, cleanNote, cleanRating, parseL
 const $ = selector => document.querySelector(selector);
 const frame = $('#invitation-preview');
 const STORAGE_KEY = 'sungso_invitation_studio_combinations_v1';
-const labels = { palette: '색감', font: '글씨체', motion: '공통 스크롤 효과', spacing: '읽는 여백', divider: '장면 사이의 연결', motionSpeed: '스크롤 속도', motionStrength: '스크롤 강도', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴', ...Object.fromEntries(OPTIONAL_SECTIONS.map(section => [section.key, section.label])) };
-const keys = CHOICE_KEYS, tuningKeys = ['motionSpeed', 'motionStrength'], globalKeys = ['palette', 'font', 'motion', 'spacing', 'divider'], history = [], orderRows = new Map();
+const labels = { palette: '색감', font: '글씨체', textSize: '글자 크기', lineSpace: '문장 사이 여유', photoTone: '사진의 색감', coverFocus: '표지 사진 구도', albumColumns: '사진첩 열 수', albumRatio: '사진의 비율', ending: '마지막 장면', calendarMark: '달력의 날짜 표시', motion: '공통 스크롤 효과', spacing: '읽는 여백', divider: '장면 사이의 연결', motionSpeed: '스크롤 속도', motionStrength: '스크롤 강도', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴', ...Object.fromEntries(OPTIONAL_SECTIONS.map(section => [section.key, section.label])) };
+const keys = CHOICE_KEYS, tuningKeys = ['motionSpeed', 'motionStrength'], globalKeys = ['palette', 'font', 'textSize', 'lineSpace', 'photoTone', 'motion', 'spacing', 'divider'], history = [], orderRows = new Map();
+const detailChildren = { cover: ['coverFocus'], date: ['calendarMark'], album: ['albumColumns', 'albumRatio'] };
+const detailParents = Object.fromEntries(Object.entries(detailChildren).flatMap(([parent, children]) => children.map(key => [key, parent])));
+const styleGroups = { all: globalKeys, type: ['palette', 'font', 'textSize', 'lineSpace'], photo: ['photoTone'], motion: ['motion', 'spacing', 'divider'] };
+let styleGroup = 'all';
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, motionReady = true;
 let audioPhase = 'paused';
 let savedReadFailed = false, savedSnapshot = null, saved = readSaved(), visibleSavedCount = 6, draftRating = 0, editingRecordId;
@@ -91,10 +95,11 @@ function renderOrder() {
   }
   const scenes = $('#scene-controls');
   choiceRows.forEach((row, key) => { row.hidden = !visibleChoice(key, composition); });
-  ['cover', 'opening', ...composition.order.map(id => sectionKeys[id])].forEach((key, index) => {
+  ['cover', 'opening', ...composition.order.map(id => sectionKeys[id])].flatMap(key => [key, ...(detailChildren[key] || [])]).forEach((key, index) => {
     const item = choiceRows.get(key); if (item && scenes.children[index] !== item) scenes.insertBefore(item, scenes.children[index] || null);
-    const number = item?.querySelector('.choice-number'); if (number) number.textContent = index < 2 ? (index === 0 ? 'COVER' : 'OPENING') : String(index - 1).padStart(2, '0');
+    const number = item?.querySelector('.choice-number'); if (number) number.textContent = detailParents[key] ? 'DETAIL' : key === 'cover' ? 'COVER' : key === 'opening' ? 'OPENING' : String(composition.order.indexOf(SECTION_IDS[key]) + 1).padStart(2, '0');
   });
+  syncChoiceVisibility();
   $('#preview-order').textContent = orderLabel(composition.order);
   $('#reset-order').disabled = composition.order.every((id, index) => id === orderForPreset(composition, 'default')[index]);
   document.querySelectorAll('[data-order-preset]').forEach(button => button.setAttribute('aria-pressed', String(composition.order.every((id, index) => id === orderForPreset(composition, button.dataset.orderPreset)[index]))));
@@ -229,13 +234,15 @@ function makeSample(key, value, mini = false) {
     const colors = APPEARANCE_PALETTES[value]; sample.style.background = colors.soft; sample.style.color = colors.accent;
     sample.append(node('span', 'sample-script', 'With love'), node('span', 'sample-caption', '성우 & 소희'));
     const swatches = node('span', 'sample-swatches'); for (const color of [colors.paper, colors.soft, colors.accent]) { const dot = node('i'); dot.style.background = color; swatches.append(dot); } sample.append(swatches);
+  } else if (['textSize', 'lineSpace'].includes(key)) {
+    sample.append(node('span', 'sample-names', '성우와 소희'), node('span', 'sample-caption', '함께할 소중한 날,'), node('span', 'sample-caption', '편안한 마음으로 와 주세요.'), node('span', 'sample-date', '2027. 03. 06'));
   } else if (key === 'font') {
     const font = APPEARANCE_FONTS[value]; sample.style.fontFamily = `${font.body}, serif`; sample.style.fontWeight = font.bodyWeight;
     sample.append(node('span', 'sample-names', mini ? '성우' : '성우와 소희'), node('span', 'sample-caption', '함께해 주실 소중한 분들을 초대해요.'), node('span', 'sample-date', '2027. 03. 06'));
-  } else if (['cover', 'opening', 'story', 'album', 'motion'].includes(key)) {
-    const sources = key === 'album' ? runtime.photos.slice(0, 3) : [runtime.photos[key === 'story' ? 1 : 0]];
+  } else if (['cover', 'opening', 'story', 'album', 'motion', 'photoTone', 'coverFocus', 'albumColumns', 'albumRatio', 'ending'].includes(key)) {
+    const sources = ['album', 'albumColumns', 'albumRatio'].includes(key) ? runtime.photos.slice(0, value === 'two' ? 2 : 3) : [runtime.photos[key === 'story' ? 1 : key === 'ending' ? runtime.photos.length - 1 : 0]];
     sources.filter(Boolean).forEach(photo => { const image = node('img'); image.src = new URL(photo.thumb || photo.src, new URL('./preview/', location.href)).href; image.alt = ''; image.loading = 'lazy'; image.width = photo.width || 640; image.height = photo.height || 960; sample.append(image); });
-    sample.append(node('span', 'sample-script', key === 'motion' ? 'With love' : key === 'story' ? 'Our story' : key === 'album' ? 'Our moments' : 'We are getting married'));
+    sample.append(node('span', 'sample-script', key === 'motion' ? 'With love' : key === 'story' ? 'Our story' : ['album', 'albumColumns', 'albumRatio'].includes(key) ? 'Our moments' : key === 'ending' ? 'See you soon' : 'We are getting married'));
   } else if (key === 'spacing') {
     sample.append(node('span', 'sample-script', 'With love'), node('span', 'sample-names', '성우 & 소희'), node('span', 'sample-caption', '함께할 날을 기다려요.'));
   } else if (key === 'divider') {
@@ -255,6 +262,10 @@ function makeSample(key, value, mini = false) {
     sample.append(node('span', 'sample-script', 'Thank you'), node('span', 'sample-caption', '우리의 시작에 함께해 주셔서'), node('span', 'sample-names', '성우 · 소희 드림'));
   } else if (key === 'intro') {
     sample.append(node('span', 'sample-script', 'With love'), node('span', 'sample-names', '성우 & 소희'), node('span', 'sample-caption', '저희 두 사람, 결혼합니다.'));
+  } else if (key === 'calendarMark') {
+    sample.append(node('span', 'sample-caption', 'MARCH 2027'), node('span', 'sample-calendar-date', '6'), node('span', 'sample-caption', 'SATURDAY'));
+  } else if (key === 'dayPass') {
+    sample.append(node('span', 'sample-script', 'Your day pass'), node('span', 'sample-names', '15:30 · 벨리스홀'), node('span', 'sample-caption', '목화웨딩홀 15층 · 길찾기 ↗'));
   } else if (key === 'date') {
     sample.append(node('span', 'sample-date', '03. 06'), node('span', 'sample-caption', '2027 · 토요일 오후 3시 30분'));
   } else if (key === 'arrival') {
@@ -276,6 +287,16 @@ function syncExpanded() {
   choiceRows.forEach((row, key) => {
     const expanded = key === openKey;
     row.classList.toggle('is-expanded', expanded); row.querySelector('.choice-open').setAttribute('aria-expanded', String(expanded)); row.querySelector('.inline-options').hidden = !expanded;
+  });
+  syncChoiceVisibility();
+}
+function syncChoiceVisibility() {
+  choiceRows.forEach((row, key) => {
+    const parent = detailParents[key];
+    row.hidden = !visibleChoice(key, composition)
+      || (globalKeys.includes(key) && !styleGroups[styleGroup].includes(key))
+      || (['albumColumns', 'albumRatio'].includes(key) && !['grid', 'masonry'].includes(composition.album))
+      || Boolean(parent && openKey !== parent && detailParents[openKey] !== parent);
   });
 }
 function renderOptions(key) {
@@ -300,8 +321,9 @@ function renderOptions(key) {
 }
 function mountChoices() {
   keys.forEach(key => {
-    const container = $(globalKeys.includes(key) ? '#global-controls' : key === 'navigation' ? '#navigation-controls' : '#scene-controls');
+    const container = $(globalKeys.includes(key) ? '#global-controls' : key === 'navigation' ? '#navigation-controls' : key === 'ending' ? '#ending-controls' : '#scene-controls');
     const group = node('section', 'choice-row'); group.dataset.choice = key;
+    if (detailParents[key]) group.classList.add('choice-detail');
     const button = node('button', 'choice-open'); button.type = 'button'; button.setAttribute('aria-controls', `options-${key}`); button.setAttribute('aria-label', `${labels[key]} 고르기`);
     const sample = node('span', 'choice-mini'), text = node('span', 'choice-row-text'), selected = node('small'); selected.dataset.current = key;
     const number = node('span', 'choice-number', globalKeys.includes(key) ? 'STYLE' : 'SCENE');
@@ -311,6 +333,7 @@ function mountChoices() {
     const content = node('div', 'inline-options'); content.id = `options-${key}`;
     content.append(node('p', 'inline-hint', key === 'motion'
       ? '같은 초대글과 날짜 구간에서 비교해요. 방향·크기·초점의 차이를 봐주세요.'
+      : ['albumColumns', 'albumRatio'].includes(key) ? '고른 사진첩의 배열에 바로 적용돼요. 다른 배열로 바꿔도 이 설정은 기억해요.'
       : '표현을 누르면 실제 장면이 바로 재생돼요.'));
     if (key === 'motion') mountTuning(content);
     optionStates.set(key, { search: '', limit: 6 });
@@ -428,6 +451,13 @@ async function copyURL(kind) {
   catch { $('#link-value').value = url; $('#fallback-link').href = url; $('#link-dialog').showModal(); $('#link-value').focus(); $('#link-value').select(); }
 }
 mountChoices(); mountOrder(); mountExtras(); renderChoices(); renderSaved(); renderDraftStars(); renderDemoTools();
+document.querySelectorAll('[data-style-group]').forEach(button => button.addEventListener('click', () => {
+  styleGroup = button.dataset.styleGroup;
+  if (!Object.hasOwn(styleGroups, styleGroup)) styleGroup = 'all';
+  document.querySelectorAll('[data-style-group]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.styleGroup === styleGroup)));
+  if (openKey && globalKeys.includes(openKey) && !styleGroups[styleGroup].includes(openKey)) { restoreCurrent(); openKey = null; }
+  syncExpanded();
+}));
 const initial = new URL('./preview/', location.href); initial.search = compositionParams(composition).toString(); initial.searchParams.set('compare', '1'); frame.src = initial.href;
 window.addEventListener('message', event => {
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data || typeof event.data !== 'object') return;
@@ -453,7 +483,7 @@ window.addEventListener('message', event => {
     demoPhase = data.phase; renderDemoTools();
     const status = { preparing: '장면을 준비하고 있어요.', playing: '실제 장면을 보여드리고 있어요. 직접 조작하면 멈춰요.', complete: '이 장면을 확인했어요. 다른 표현도 골라 보세요.', cancelled: '시연을 멈췄어요. 직접 살펴보셔도 좋아요.', static: '움직임을 줄인 상태로 보여드려요.', blocked: '열려 있는 창을 닫은 뒤 다시 보기를 눌러 주세요.' };
     $('#preview-status').textContent = data.phase === 'static' && data.reason === 'appearance'
-      ? '같은 장면에서 색감과 글씨체를 비교해 보세요.' : status[data.phase];
+      ? '바뀐 부분을 보여드려요. 변경 전 보기로 차이를 비교해 보세요.' : status[data.phase];
   } else if (data.type === 'invitation-lab:audio-state') renderAudioState(data.phase || (data.playing === true ? 'playing' : 'paused'), { syncIntent: ready, announce: ready });
 });
 window.addEventListener('popstate', () => apply(readComposition(location.search), { remember: false }));

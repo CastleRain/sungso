@@ -76,7 +76,7 @@ test('signature and still disable strength without erasing the saved tuning or c
 
 test('optional scene toggles add only the selected scene, keep its format on removal and hide disabled format controls', () => {
   const f = fixture({ promiseStyle: 'paired' }); f.run('mountExtras()');
-  assert.equal(f.nodes.filter(node => node.type === 'checkbox').length, 6); assert.deepEqual([...f.composition.extras], []);
+  assert.equal(f.nodes.filter(node => node.type === 'checkbox').length, OPTIONAL_SECTIONS.length); assert.deepEqual([...f.composition.extras], []);
   const toggle = f.nodes.find(node => node.dataset.extra === 'promises'); toggle.checked = true; toggle.emit('change');
   assert.deepEqual([...f.composition.extras], ['promises']); assert.ok(f.composition.order.includes('promises'));
   assert.equal(f.composition.promiseStyle, 'paired'); assert.equal(f.previews.at(-1).options.key, 'promiseStyle');
@@ -96,4 +96,41 @@ test('order shortcuts keep optional scene positions and every required scene exa
   }
   assert.equal(f.run("orderForPreset(composition, 'photos')")[2], 'gallery');
   assert.match(f.run('tuningSummary({ motionSpeed: .5, motionStrength: 1.25 })'), /0\.50×.*1\.25×/);
+});
+
+test('the new day-pass toggle preserves its style and remains distinct from legacy optional scenes', () => {
+  const f = fixture({ dayPass: 'concise', extras: ['guest-guide'], guestGuide: 'slider' });
+  f.run('mountExtras()');
+  const toggle = f.nodes.find(node => node.dataset.extra === 'day-pass');
+  assert.ok(toggle); toggle.checked = true; toggle.emit('change');
+  assert.deepEqual([...f.composition.extras], ['day-pass', 'guest-guide']);
+  assert.equal(f.composition.dayPass, 'concise'); assert.equal(f.composition.guestGuide, 'slider');
+  assert.equal(f.previews.at(-1).options.key, 'dayPass'); assert.equal(f.run("visibleChoice('dayPass', composition)"), true);
+  assert.equal(new Set(f.composition.order).size, DEFAULT_ORDER.length + 2);
+  toggle.checked = false; toggle.emit('change');
+  assert.deepEqual([...f.composition.extras], ['guest-guide']); assert.equal(f.composition.dayPass, 'concise');
+  assert.equal(f.run("visibleChoice('dayPass', composition)"), false);
+  assert.equal(f.run("visibleChoice('guestGuide', composition)"), true);
+});
+
+test('album details appear only for a compatible arrangement and mood filters do not erase choices', () => {
+  const f = fixture({ album: 'stack', albumColumns: 'three', albumRatio: 'square' });
+  f.run(`const choiceRows = new Map(keys.map(key => [key, {hidden:false}]));
+    const globalKeys = ['palette','font','textSize','lineSpace','photoTone','motion','spacing','divider'];
+    const styleGroups = {all:globalKeys, photo:['photoTone']}; let styleGroup = 'all';
+    const detailParents = {coverFocus:'cover', calendarMark:'date', albumColumns:'album', albumRatio:'album'};`);
+  vm.runInContext(between('function syncChoiceVisibility(', '\nfunction renderOptions('), f.state);
+  f.run("openKey = 'album'; syncChoiceVisibility()");
+  assert.equal(f.run("choiceRows.get('albumColumns').hidden"), true);
+  f.run("composition = {...composition, album:'masonry'}; syncChoiceVisibility()");
+  assert.equal(f.run("choiceRows.get('albumColumns').hidden"), false);
+  assert.equal(f.run("choiceRows.get('albumRatio').hidden"), false);
+  f.run("openKey = 'albumRatio'; syncChoiceVisibility()");
+  assert.equal(f.run("choiceRows.get('albumColumns').hidden"), false);
+  f.run("openKey = 'date'; styleGroup = 'photo'; syncChoiceVisibility()");
+  assert.equal(f.run("choiceRows.get('albumRatio').hidden"), true);
+  assert.equal(f.run("choiceRows.get('calendarMark').hidden"), false);
+  assert.equal(f.run("choiceRows.get('photoTone').hidden"), false);
+  assert.equal(f.run("choiceRows.get('font').hidden"), true);
+  assert.equal(f.composition.albumColumns, 'three'); assert.equal(f.composition.albumRatio, 'square');
 });

@@ -60,12 +60,12 @@ body[data-story=cafe] #our-story .story-copy{background:#fffefa;border:1px solid
 body[data-story=cafe].content-motion #our-story .story-copy{transform:perspective(850px) rotateX(calc((1 - var(--content-progress))*-12deg)) translateY(calc((1 - var(--content-progress))*10px))}
 body[data-story=cafe] #our-story .story-copy:after{content:"";position:absolute;bottom:15px;right:21px;width:25px;height:1px;background:#91a6b4;transform:rotate(-8deg);opacity:.6}
 body[data-story=cafe] #our-story .story-chapters{border-top:1px solid #637d8b25;padding-top:7px;margin-top:18px}
-body[data-album=grid] #gallery-stage>.experience-album{display:none!important}
-body[data-album=grid] #gallery-stage>#gallery-grid{display:grid!important}
-body[data-album=grid] #gallery-grid{gap:10px;padding:8px 0;max-width:590px;margin-inline:auto}
-body[data-album=grid] #gallery-grid .gallery-photo{padding:4px;background:white;box-shadow:0 4px 15px #16384f10;border:1px solid #637d8b22}
-body[data-album=grid] #gallery-grid .gallery-photo>img{border-radius:0;display:block}
-body[data-album=grid] #gallery-grid .gallery-photo>span{bottom:10px;right:10px}
+body:is([data-album=grid],[data-album=masonry]) #gallery-stage>.experience-album{display:none!important}
+body:is([data-album=grid],[data-album=masonry]) #gallery-stage>#gallery-grid{display:grid!important}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid{gap:10px;padding:8px 0;max-width:590px;margin-inline:auto}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo{padding:4px;background:white;box-shadow:0 4px 15px #16384f10;border:1px solid #637d8b22}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo>img{border-radius:0;display:block}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo>span{bottom:10px;right:10px}
 body[data-story] #our-story .story-entry:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
 .motion-off #our-story .story-copy,.motion-off body[data-story=fold] #our-story .story-image,.motion-off body[data-story=light] #our-story .story-image>img{transform:none!important}
 .motion-off #our-story .story-ink,.motion-off #our-story .story-steam{stroke-dashoffset:0!important}

@@ -12,7 +12,7 @@ test('all mood and scene combinations with distributed motion choices survive UR
     assert.equal(params.size, CHOICE_KEYS.length + 5);
     count++;
   }
-  assert.equal(count, 34992);
+  assert.equal(count, ['palette', 'font', 'cover', 'opening', 'intro', 'date', 'story', 'album'].reduce((total, key) => total * CHOICES[key].length, 1));
 });
 
 test('existing version 1 links, saved choices, and imported files retain their five scenes with original handwriting', () => {
@@ -187,4 +187,80 @@ test('all optional scene combinations are explicit, reversible and preserved wit
   assert.deepEqual(normalizeComposition({ extras: ['__proto__', 'location', '../../admin', {}, ...ids, ...ids] }).extras, ids);
   const legacy = readComposition('?version=1&motion=focus&palette=rose');
   assert.deepEqual(legacy.extras, []); assert.deepEqual(legacy.order, DEFAULT_ORDER);
+});
+
+const RESEARCH_DEFAULTS = Object.freeze({
+  textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original',
+  albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding',
+});
+
+test('research additions keep every legacy V1 default visually unchanged and optional content off', () => {
+  const legacy = { palette: 'azure', font: 'editorial', motion: 'breathe', cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'line', album: 'contact', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', order: [...DEFAULT_ORDER] };
+  const loaded = readComposition(new URLSearchParams({ version: '1', ...legacy, order: legacy.order.join(',') }).toString());
+  for (const [key, value] of Object.entries(RESEARCH_DEFAULTS)) assert.equal(loaded[key], value, key);
+  for (const [key, value] of Object.entries(legacy)) assert.deepEqual(loaded[key], value, key);
+  assert.deepEqual(loaded.extras, []); assert.equal(loaded.order.length, 7);
+  assert.deepEqual(normalizeComposition({ version: 1, composition: legacy }), loaded);
+  const previousExtras = ['guest-guide', 'day-checklist', 'keepsake', 'promises', 'couple-notes', 'thank-you'];
+  const extendedLegacy = normalizeComposition({ ...legacy, extras: previousExtras });
+  assert.deepEqual(extendedLegacy.extras, previousExtras);
+  assert.ok(!extendedLegacy.order.includes('day-pass')); assert.equal(extendedLegacy.order.length, 13);
+});
+
+test('every new research choice survives V1 links and envelopes alongside all other chosen settings', () => {
+  const allExtras = OPTIONAL_SECTIONS.map(section => section.id);
+  const background = normalizeComposition({
+    palette: 'lilac', font: 'editorial', textSize: 'large', lineSpace: 'relaxed', photoTone: 'mono', coverFocus: 'lower',
+    album: 'masonry', albumColumns: 'two', albumRatio: 'original', ending: 'glass', calendarMark: 'underline',
+    guestGuide: 'slider', keepsake: 'qr', dayPass: 'concise', extras: allExtras, order: [...ORDER_SECTIONS].reverse().map(section => section.id),
+    motion: 'unveil', motionSpeed: .5, motionStrength: 1.5,
+  });
+  for (const key of [...Object.keys(RESEARCH_DEFAULTS), 'album', 'guestGuide', 'keepsake']) for (const choice of CHOICES[key]) {
+    const state = normalizeComposition({ ...background, [key]: choice.id });
+    assert.deepEqual(readComposition(compositionParams(state).toString()), state, key + ':' + choice.id);
+    assert.deepEqual(normalizeComposition(JSON.parse(JSON.stringify({ version: 1, composition: state }))), state);
+  }
+  for (const key of Object.keys(RESEARCH_DEFAULTS)) for (const bad of ['<script>', 'https://outside.example/', '__proto__', {}, ['original'], false]) {
+    assert.equal(normalizeComposition({ ...background, [key]: bad })[key], RESEARCH_DEFAULTS[key], key);
+  }
+});
+
+test('day pass is explicitly optional, retains its format while disabled, and joins seven required plus seven optional sections', () => {
+  assert.equal(DEFAULT_ORDER.length, 7); assert.equal(OPTIONAL_SECTIONS.length, 7); assert.equal(ORDER_SECTIONS.length, 14);
+  const allExtras = OPTIONAL_SECTIONS.map(section => section.id);
+  const full = normalizeComposition({ extras: allExtras, order: ['day-pass', ...ORDER_SECTIONS.map(section => section.id)], dayPass: 'concise' });
+  assert.equal(full.order[0], 'day-pass'); assert.equal(full.order.length, 14); assert.equal(new Set(full.order).size, 14);
+  for (let position = 0; position < full.order.length; position++) {
+    const order = moveSection(full.order, 'day-pass', position, full.extras);
+    assert.equal(order[position], 'day-pass'); assert.equal(new Set(order).size, 14);
+    assert.deepEqual(readComposition(compositionParams({ ...full, order })), { ...full, order });
+  }
+  const removed = normalizeComposition({ ...full, extras: allExtras.filter(id => id !== 'day-pass') });
+  assert.ok(!removed.order.includes('day-pass')); assert.equal(removed.dayPass, 'concise');
+  assert.equal(normalizeComposition({ ...removed, extras: allExtras }).dayPass, 'concise');
+  const inactive = readComposition('?version=1&dayPass=concise&order=day-pass,top,closing');
+  assert.deepEqual(inactive.extras, []); assert.deepEqual(inactive.order, DEFAULT_ORDER);
+});
+
+test('the longest valid combination URL fits the parser without truncating its final order or adding operational values', () => {
+  const longestChoices = Object.fromEntries(Object.entries(CHOICES).map(([key, choices]) => [key, [...choices].sort((a, b) => b.id.length - a.id.length)[0].id]));
+  const state = normalizeComposition({ ...longestChoices, motionSpeed: 1.25, motionStrength: 1.25, extras: OPTIONAL_SECTIONS.map(section => section.id), order: ORDER_SECTIONS.map(section => section.id).reverse() });
+  const query = compositionParams(state).toString(), url = new URL('https://sungso-wedding.vercel.app/lab/studio/?' + query);
+  assert.ok(query.length + 1 <= 2048, 'readComposition string cap must hold every valid composition: ' + query.length);
+  assert.ok(url.href.length < 2048, 'shared URL stays within a conservative link size');
+  assert.deepEqual(readComposition(url.search), state);
+  assert.deepEqual(readComposition(url.searchParams), state);
+  assert.equal(url.searchParams.get('order'), state.order.join(','));
+  assert.equal(url.searchParams.get('version'), '1');
+  assert.deepEqual([...url.searchParams.keys()].sort(), [...CHOICE_KEYS, 'version', 'motionSpeed', 'motionStrength', 'extras', 'order'].sort());
+});
+
+test('each recommended combination is already normalized so applying it retains its selected indicator', () => {
+  for (const preset of PRESETS) {
+    const selected = normalizeComposition(preset.composition);
+    assert.equal(sameComposition(selected, preset.composition), true, preset.id);
+    assert.deepEqual(readComposition(compositionParams(selected)), preset.composition, preset.id);
+  }
+  const readable = PRESETS.find(preset => preset.id === 'readable').composition;
+  assert.deepEqual(readable.extras, ['guest-guide']); assert.equal(readable.order.at(-1), 'guest-guide');
 });

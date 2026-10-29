@@ -1,0 +1,544 @@
+{
+  "schemaVersion": 1,
+  "researchDate": "2026-10-29",
+  "scope": "공식 업체 5곳 공개 샘플 27개 + 디얼디어 접근 한계. 브라우저 화면 검수는 루트의 별도 증거.",
+  "sampleCounts": {
+    "바른손M카드": 5,
+    "보자기카드": 5,
+    "봄카드(제휴 필카드)": 6,
+    "아름": 5,
+    "살롱드레터": 6
+  },
+  "samples": [
+    {
+      "provider": "바른손M카드",
+      "id": "1188",
+      "name": "영화 같은 순간 MC4114",
+      "url": "https://mcard.barunsoncard.com/preview/1188",
+      "evidenceLevel": "public-template-json",
+      "observed": [
+        "전체 높이 사진 위 흰색 이름·일시·장소",
+        "이름은 표지 상부, 날짜/장소는 하부",
+        "GIF 레이어 참조(재생 내용 미확인)"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제품명·MC코드는 상세 페이지 기준이고 내부 템플릿 자원 ID는 다름.",
+      "catalogUrl": "https://mcard.barunsoncard.com/Product/Detail/1188"
+    },
+    {
+      "provider": "바른손M카드",
+      "id": "1189",
+      "name": "마가렛 MC4115",
+      "url": "https://mcard.barunsoncard.com/preview/1189",
+      "evidenceLevel": "public-template-json",
+      "observed": [
+        "표지 상부 사진과 하부 이름·일시 영역 분리",
+        "나눔명조 이름과 중립색 날짜"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제품명·MC코드는 상세 페이지 기준이고 내부 템플릿 자원 ID는 다름.",
+      "catalogUrl": "https://mcard.barunsoncard.com/Product/Detail/1189"
+    },
+    {
+      "provider": "바른손M카드",
+      "id": "1182",
+      "name": "행복한 시작 MC4108",
+      "url": "https://mcard.barunsoncard.com/preview/1182",
+      "evidenceLevel": "public-template-json",
+      "observed": [
+        "전체 높이 사진 위 이름·날짜·장소를 하부에 배치",
+        "나눔명조 초대글과 옅은 회색 배경"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제품명·MC코드는 상세 페이지 기준이고 내부 템플릿 자원 ID는 다름.",
+      "catalogUrl": "https://mcard.barunsoncard.com/Product/Detail/1182"
+    },
+    {
+      "provider": "바른손M카드",
+      "id": "1126",
+      "name": "Elegant Pearl MC3220",
+      "url": "https://mcard.barunsoncard.com/preview/1126",
+      "evidenceLevel": "public-template-json",
+      "observed": [
+        "사진 아래 정보 영역",
+        "갈색 이름·일시와 따뜻한 초대글 배경"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제품명·MC코드는 상세 페이지 기준이고 내부 템플릿 자원 ID는 다름.",
+      "catalogUrl": "https://mcard.barunsoncard.com/Product/Detail/1126"
+    },
+    {
+      "provider": "바른손M카드",
+      "id": "1180",
+      "name": "On The Grass MC4106",
+      "url": "https://mcard.barunsoncard.com/preview/1180",
+      "evidenceLevel": "public-template-json",
+      "observed": [
+        "전체 높이 사진과 흰색 하부 정보",
+        "GIF 레이어 참조(재생 내용 미확인)"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제품명·MC코드는 상세 페이지 기준이고 내부 템플릿 자원 ID는 다름.",
+      "catalogUrl": "https://mcard.barunsoncard.com/Product/Detail/1180"
+    },
+    {
+      "provider": "보자기카드",
+      "id": "1025",
+      "name": "사랑을 그린 날",
+      "url": "https://bojagicard.com/v5/home.php?uid=sample1025&landing_sample=1",
+      "evidenceLevel": "public-html-config",
+      "observed": [
+        "공식 카탈로그의 별도 표지 스킨",
+        "초대글·사진·위치·연락·방명록·프로필/인터뷰/히스토리 활성화 설정",
+        "계좌·RSVP·음악·공지·달력은 이 샘플 설정에서 비활성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 갤러리 사진 배열은 비어 있음. 활성화 설정만으로 내용 노출·동작을 보장하지 않음.",
+      "catalogUrl": "https://bojagicard.com/card/mobile-card.php",
+      "parentUiReview": "루트 에이전트가 별도로 5개 화면 및 메뉴/방명록 DOM 검수. 이 파일의 직접 조사에는 합산하지 않음."
+    },
+    {
+      "provider": "보자기카드",
+      "id": "1023",
+      "name": "A new track",
+      "url": "https://bojagicard.com/v5/home.php?uid=sample1023&landing_sample=1",
+      "evidenceLevel": "public-html-config",
+      "observed": [
+        "제목 Georgia·본문 고운돋움 설정",
+        "배경 교대·섹션 순서·연락/계좌 접기 옵션",
+        "방명록 답장 작성자 설정",
+        "갤러리 grid-basic·모서리 square 설정",
+        "진입/배경 효과는 none"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 갤러리 사진 배열은 비어 있음. 활성화 설정만으로 내용 노출·동작을 보장하지 않음.",
+      "catalogUrl": "https://bojagicard.com/card/mobile-card.php",
+      "parentUiReview": "루트 에이전트가 별도로 5개 화면 및 메뉴/방명록 DOM 검수. 이 파일의 직접 조사에는 합산하지 않음."
+    },
+    {
+      "provider": "보자기카드",
+      "id": "1021",
+      "name": "Forever Begins",
+      "url": "https://bojagicard.com/v5/home.php?uid=sample1021&landing_sample=1",
+      "evidenceLevel": "public-html-config",
+      "observed": [
+        "공식 카탈로그의 별도 표지 스킨",
+        "초대글·사진·위치·연락·방명록·프로필/인터뷰/히스토리 활성화 설정",
+        "계좌·RSVP·음악·공지·달력은 이 샘플 설정에서 비활성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 갤러리 사진 배열은 비어 있음. 활성화 설정만으로 내용 노출·동작을 보장하지 않음.",
+      "catalogUrl": "https://bojagicard.com/card/mobile-card.php",
+      "parentUiReview": "루트 에이전트가 별도로 5개 화면 및 메뉴/방명록 DOM 검수. 이 파일의 직접 조사에는 합산하지 않음."
+    },
+    {
+      "provider": "보자기카드",
+      "id": "1018",
+      "name": "Minimal Pearl",
+      "url": "https://bojagicard.com/v5/home.php?uid=sample1018&landing_sample=1",
+      "evidenceLevel": "public-html-config",
+      "observed": [
+        "공식 카탈로그의 별도 표지 스킨",
+        "초대글·사진·위치·연락·방명록·프로필/인터뷰/히스토리 활성화 설정",
+        "계좌·RSVP·음악·공지·달력은 이 샘플 설정에서 비활성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 갤러리 사진 배열은 비어 있음. 활성화 설정만으로 내용 노출·동작을 보장하지 않음.",
+      "catalogUrl": "https://bojagicard.com/card/mobile-card.php",
+      "parentUiReview": "루트 에이전트가 별도로 5개 화면 및 메뉴/방명록 DOM 검수. 이 파일의 직접 조사에는 합산하지 않음."
+    },
+    {
+      "provider": "보자기카드",
+      "id": "1017",
+      "name": "버건디 러브",
+      "url": "https://bojagicard.com/v5/home.php?uid=sample1017&landing_sample=1",
+      "evidenceLevel": "public-html-config",
+      "observed": [
+        "공식 카탈로그의 별도 표지 스킨",
+        "초대글·사진·위치·연락·방명록·프로필/인터뷰/히스토리 활성화 설정",
+        "계좌·RSVP·음악·공지·달력은 이 샘플 설정에서 비활성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 갤러리 사진 배열은 비어 있음. 활성화 설정만으로 내용 노출·동작을 보장하지 않음.",
+      "catalogUrl": "https://bojagicard.com/card/mobile-card.php",
+      "parentUiReview": "루트 에이전트가 별도로 5개 화면 및 메뉴/방명록 DOM 검수. 이 파일의 직접 조사에는 합산하지 않음."
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "fall_in_love",
+      "name": "Fall in love",
+      "url": "https://partner.feelcard.co.kr/fall_in_love",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "바둑판 앨범 안내",
+        "혼주 연락 창·계좌 복사/PAY·방명록 전체보기",
+        "로즈 강조색"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "wedding_day",
+      "name": "Wedding day",
+      "url": "https://partner.feelcard.co.kr/wedding_day",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "가로 슬라이드 앨범 안내",
+        "사진 아래 그라디언트 레이어",
+        "네이비 강조·직선형 액션 CSS"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "promise",
+      "name": "Promise",
+      "url": "https://partner.feelcard.co.kr/promise",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "바둑판 앨범 안내",
+        "가족 연락을 초대글 앞에 배치",
+        "100ms 간격으로 글자를 추가하는 typing 코드와 커서 CSS",
+        "Damion 영문·따뜻한 크림 배경"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "everything",
+      "name": "Everything",
+      "url": "https://partner.feelcard.co.kr/everything",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "가로 슬라이드 앨범 안내",
+        "상하 그라디언트 레이어",
+        "골드 강조·둥근 계좌/연락 액션 CSS"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "love_motion",
+      "name": "Love motion",
+      "url": "https://partner.feelcard.co.kr/love_motion",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "바둑판 앨범 안내",
+        "arch 클래스와 중립색 액션 CSS",
+        "명칭만으로 모션을 판단하지 않음"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "봄카드(제휴 필카드)",
+      "id": "lovely_day",
+      "name": "Lovely day",
+      "url": "https://partner.feelcard.co.kr/lovely_day",
+      "evidenceLevel": "public-html-css",
+      "observed": [
+        "가로 슬라이드 앨범 안내",
+        "살구색 외곽과 흰 내부 프레임 CSS",
+        "Pacifico 제목·오렌지 강조색"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음.",
+      "catalogUrl": "https://m.bomtvcard.com/mobile/shop/Fmobile.php",
+      "discovery": "공식 /fmobile/page5.js의 data-type→partner.feelcard.co.kr 연결 확인"
+    },
+    {
+      "provider": "아름",
+      "id": "basic-1",
+      "name": "베이직 1",
+      "url": "https://www.areum.co.kr/invitation/basic-1",
+      "evidenceLevel": "public-page-text",
+      "observed": [
+        "월·일 중심 표지",
+        "공식 목록: 프리텐다드 S",
+        "여섯 교통 분류·공지·양가 계좌",
+        "하객 사진 업로드 기간 종료 문구"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제공된 글꼴명은 공식 목록 표기이며 실제 로드 완료는 미검증.",
+      "catalogUrl": "https://www.areum.co.kr/wedding-samples"
+    },
+    {
+      "provider": "아름",
+      "id": "classic-1",
+      "name": "클래식 1",
+      "url": "https://www.areum.co.kr/invitation/classic-1",
+      "evidenceLevel": "public-page-text",
+      "observed": [
+        "영문 월·일·연도 분리 표지",
+        "공식 목록: 리디바탕 L",
+        "사진·영상 올리기 버튼과 공지사항"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제공된 글꼴명은 공식 목록 표기이며 실제 로드 완료는 미검증.",
+      "catalogUrl": "https://www.areum.co.kr/wedding-samples"
+    },
+    {
+      "provider": "아름",
+      "id": "arch-1",
+      "name": "아치 1",
+      "url": "https://www.areum.co.kr/invitation/arch-1",
+      "evidenceLevel": "public-page-text",
+      "observed": [
+        "큰 월·일과 이름·시간·홀 표지",
+        "공식 목록: 경복궁 수문장 L",
+        "교통/주차/식사/버스 안내 구분"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제공된 글꼴명은 공식 목록 표기이며 실제 로드 완료는 미검증.",
+      "catalogUrl": "https://www.areum.co.kr/wedding-samples"
+    },
+    {
+      "provider": "아름",
+      "id": "poster-1",
+      "name": "포스터 1",
+      "url": "https://www.areum.co.kr/invitation/poster-1",
+      "evidenceLevel": "public-page-text",
+      "observed": [
+        "시간(12:30)과 날짜·이름 표지",
+        "공식 목록: 에스코어드림 S",
+        "연락·달력·갤러리·위치·계좌·방명록 구성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제공된 글꼴명은 공식 목록 표기이며 실제 로드 완료는 미검증.",
+      "catalogUrl": "https://www.areum.co.kr/wedding-samples"
+    },
+    {
+      "provider": "아름",
+      "id": "sealing-1",
+      "name": "실링왁스 1",
+      "url": "https://www.areum.co.kr/invitation/sealing-1",
+      "evidenceLevel": "public-page-text",
+      "observed": [
+        "wax-seal 이미지와 이름·일시·홀 표지",
+        "공식 목록: 프리텐다드 M",
+        "가족 연락과 달력으로 이어지는 구성"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 제공된 글꼴명은 공식 목록 표기이며 실제 로드 완료는 미검증.",
+      "catalogUrl": "https://www.areum.co.kr/wedding-samples"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "sample1_2",
+      "name": "공식 샘플 001",
+      "url": "https://salondeletter.com/w/sample1_2",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_j 표지·음악 준비 문구·로딩 SVG 구조",
+        "인터뷰·사진·게스트스냅·교통·계좌·방명록",
+        "원고/사진첩 여러 레이아웃 DOM이 함께 존재"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "fb7i16olnt",
+      "name": "공식 샘플 003",
+      "url": "https://salondeletter.com/w/fb7i16olnt",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_i 표지·로딩 구조",
+        "이름 영문 병기·부모 편지·게스트스냅",
+        "10개 사진 번호와 복사/PAY UI"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "fpglo0twky",
+      "name": "공식 샘플 004",
+      "url": "https://salondeletter.com/w/fpglo0twky",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_h 표지·로딩·상단 구역 메뉴 구조",
+        "갤러리·인터뷰·교통·게스트스냅·방명록"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "s5lajly1m3",
+      "name": "공식 샘플 002",
+      "url": "https://salondeletter.com/w/s5lajly1m3",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_j 표지·로딩 DOM 없음",
+        "게스트스냅·갤러리·교통·계좌·방명록",
+        "gallery_portrait DOM 참조"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "id05keatry",
+      "name": "공식 샘플 011",
+      "url": "https://salondeletter.com/w/id05keatry",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_j 표지·로딩·상단 구역 메뉴",
+        "피로연 안내·박스형/카드형 안내문 구분",
+        "계좌·방명록·화환 UI"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    },
+    {
+      "provider": "살롱드레터",
+      "id": "iojsro5wcc",
+      "name": "공식 샘플 014",
+      "url": "https://salondeletter.com/w/iojsro5wcc",
+      "evidenceLevel": "public-html",
+      "observed": [
+        "type_j 표지·상단 구역 메뉴, 로딩 DOM 없음",
+        "사진 8개 번호와 더보기",
+        "피로연·공지·계좌·방명록"
+      ],
+      "limits": "텍스트·공개 HTML/설정 조사이며 실제 스크롤·모션 재생, 작성/복사/결제/외부 앱 실행은 검증하지 않음. 번호는 공식 블로그 이미지 파일명에서 구분했으며 작품명이 아님. DOM 존재와 화면 노출은 구분.",
+      "catalogUrl": "https://blog.naver.com/salondeletter/223882221463"
+    }
+  ],
+  "officialFeatureCases": [
+    {
+      "provider": "보자기카드",
+      "url": "https://bojagicard.com/card/mobile-card.php",
+      "features": [
+        "혼주 연락 별도 열기",
+        "포토부스·주차 공지",
+        "방명록의 신랑신부 답장 예시",
+        "갤러리 현재/전체 숫자",
+        "카카오톡/링크 공유"
+      ],
+      "evidenceLevel": "official-feature-example",
+      "limits": "랜딩 기능 예시 텍스트이며 동작 미검증"
+    },
+    {
+      "provider": "살롱드레터",
+      "url": "https://www.salondeletter.com/manage/w",
+      "features": [
+        "예식 당일 위치·연락·길찾기 우선 안내",
+        "받는 사람별 공유 문구",
+        "글자 레터링 색·위치",
+        "개인 구글드라이브 게스트스냅",
+        "교통 안내 최대10개와 색상"
+      ],
+      "evidenceLevel": "official-feature-description",
+      "limits": "공식 제공 설명이며 실제 작동 검증 아님"
+    },
+    {
+      "provider": "살롱드레터",
+      "url": "https://salondeletter.com/manage/w/qrcode",
+      "features": [
+        "QR 먼저 발급하고 청첩장 연결",
+        "인쇄 뒤에도 QR 유지",
+        "다운로드/링크확인 UI"
+      ],
+      "evidenceLevel": "official-feature-description",
+      "limits": "발급/저장 실행하지 않음"
+    },
+    {
+      "provider": "필카드",
+      "url": "https://feelmaker.co.kr/list/invitation?partner=feelmaker",
+      "features": [
+        "계좌 복사 후 은행 앱 붙여넣기",
+        "카카오페이 QR 등록",
+        "BGM 직접 업로드"
+      ],
+      "evidenceLevel": "official-feature-description",
+      "limits": "등록·결제 실행하지 않음"
+    }
+  ],
+  "excludedVendor": {
+    "provider": "디얼디어",
+    "url": "https://deardeer.kr/letterb/list",
+    "reason": "공식 카탈로그가 LetterB 제휴 목록으로 바뀜. 5개 상품 링크 모두 로그인 편집기로 연결되어 독립 공개 샘플로 집계하지 않음.",
+    "attempts": [
+      {
+        "name": "사랑 네 컷",
+        "template": "Wedding-30913225"
+      },
+      {
+        "name": "블랙 네 컷",
+        "template": "Wedding-31981425"
+      },
+      {
+        "name": "Polaroid",
+        "template": "Wedding-32002004"
+      },
+      {
+        "name": "코발트 노트",
+        "template": "purple-modern"
+      },
+      {
+        "name": "소프트 레터링",
+        "template": "modern"
+      }
+    ]
+  },
+  "accessNotes": [
+    "보자기 샘플/봄카드 제휴 샘플/살롱드레터 샘플은 web 도구에서 접근 오류: 공식 HTML 읽기로 HTTP 200과 공개 구성 확인",
+    "살롱드레터 공식 블로그는 web 도구 차단: 공개 블로그 HTML 이미지 링크에서 단축 URL을 추출하고 공식 샘플로 이동",
+    "봄카드 PC 안내 web redirect loop: 모바일 공식 안내와 연결 JS로 샘플 주소 확보",
+    "보자기 카탈로그의 디자인 개수는 조사 중 504→512로 달라져 결론 근거에서 제외"
+  ],
+  "recommendations": [
+    {
+      "id": "day-pass",
+      "recommendation": "표지나 긴 본문을 다시 읽지 않아도 예식일·홀·길찾기를 한 면에 모아 보는 선택 장면",
+      "basis": [
+        "살롱드레터 당일 안내 공식 설명"
+      ],
+      "implementationGuard": "자동 당일 강제 전환은 별도. 실제 확인된 주소/시간만 사용."
+    },
+    {
+      "id": "keepsake-qr",
+      "recommendation": "현재 조합 링크를 로컬 생성 QR과 한 장 안내로 보관",
+      "basis": [
+        "살롱드레터 QR 안내"
+      ],
+      "implementationGuard": "외부 QR 서비스에 URL 전송하지 않음. 금융계좌/전화번호를 QR 데이터로 넣지 않음."
+    },
+    {
+      "id": "guest-guide-slider",
+      "recommendation": "확인된 하객 안내를 한 장씩 넘겨 읽는 선택형 레이아웃",
+      "basis": [
+        "보자기 공지 예시",
+        "아름 공지 분류",
+        "살롱드레터 박스형/카드형 안내"
+      ],
+      "implementationGuard": "미정 주차·식사·전세버스·이벤트를 만들지 않음."
+    },
+    {
+      "id": "cover-legibility",
+      "recommendation": "표지의 이름/날짜 위치와 사진 아래 정보 영역을 비교",
+      "basis": [
+        "바른손1188/1189/1182"
+      ],
+      "implementationGuard": "기존 손글씨 보존"
+    },
+    {
+      "id": "guestbook-reply",
+      "recommendation": "두 사람의 방명록 답장",
+      "basis": [
+        "보자기 공식 예시와1023 설정"
+      ],
+      "implementationGuard": "운영 DB/관리 권한 확장 필요하므로 후속 검토"
+    },
+    {
+      "id": "private-guest-snap",
+      "recommendation": "하객 원본 사진 수집",
+      "basis": [
+        "아름·살롱드레터 공식 기능"
+      ],
+      "implementationGuard": "공개 단일 앨범과 구별; 서버·권한·저장비용 설계가 필요하여 현재 자동추가 제외"
+    }
+  ],
+  "nonGoals": [
+    "RSVP 재추가",
+    "유튜브/식전영상 추가",
+    "두 번째 사진첩",
+    "타 업체 사진·서체·문구·소스 복제",
+    "확인하지 않은 스크롤/모션 속도 주장"
+  ]
+}

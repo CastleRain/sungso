@@ -1,7 +1,8 @@
 import { mountGalleryExperience } from './gallery-experience.mjs';
 
 const STORIES = new Set(['chapters', 'line', 'fold', 'light', 'constellation', 'cafe']);
-const ALBUMS = new Set(['stack', 'contact', 'grid']);
+const ALBUMS = new Set(['stack', 'contact', 'grid', 'masonry']);
+const isThumbnailAlbum = album => album === 'grid' || album === 'masonry';
 export function contentChoices(value = {}) {
   return { story: STORIES.has(value?.story) ? value.story : 'chapters', album: ALBUMS.has(value?.album) ? value.album : 'stack' };
 }
@@ -66,7 +67,7 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
   function sync() {
     cancel();
     doc.body.classList.toggle('content-motion', active() && scrollEnabled);
-    album.setEnabled(active() && choices.album !== 'grid');
+    album.setEnabled(active() && !isThumbnailAlbum(choices.album));
     album.setScrollEnabled?.(scrollEnabled);
     if (!active() || !scrollEnabled) story?.style.setProperty('--content-progress', '1');
     else queue();
@@ -77,8 +78,8 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
     if (next.story !== choices.story) progress = 0;
     choices = next;
     doc.body.dataset.story = choices.story; doc.body.dataset.album = choices.album;
-    // Keep one album controller mounted so selection survives stack/contact/grid changes.
-    if (grid) grid.hidden = choices.album !== 'grid';
+    // Keep the same album controller and thumbnail nodes through every presentation.
+    if (grid) grid.hidden = !isThumbnailAlbum(choices.album);
     sync(); album.refresh();
   }
   listen(win, 'scroll', queue, { passive: true });
@@ -100,7 +101,7 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
       return () => { progress = 1; story?.style.setProperty('--content-progress', '1'); finishAlbum?.(); };
     },
     demoInteraction() {
-      if (choices.album !== 'grid') return album.demoNext?.() || (() => {});
+      if (!isThumbnailAlbum(choices.album)) return album.demoNext?.() || (() => {});
       // The grid has no selected-photo state. Show its next real thumbnail without opening a dialog.
       const next = grid?.querySelectorAll('.gallery-photo')?.[1];
       next?.classList.add('studio-demo-photo');

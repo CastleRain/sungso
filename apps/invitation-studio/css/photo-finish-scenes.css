@@ -1,0 +1,63 @@
+/* The same thumbnail buttons stay in DOM order: CSS columns read top-to-bottom. */
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid{
+  --album-gap:10px;
+  grid-template-columns:repeat(var(--studio-album-columns,3),minmax(0,1fr));
+  gap:var(--album-gap);align-items:start
+}
+body:is([data-album=grid],[data-album=masonry])[data-album-shape=square] #gallery-grid .gallery-photo{aspect-ratio:1}
+body:is([data-album=grid],[data-album=masonry])[data-album-shape=portrait] #gallery-grid .gallery-photo{aspect-ratio:2/3}
+body:is([data-album=grid],[data-album=masonry])[data-album-shape=original] #gallery-stage>#gallery-grid{
+  display:block!important;column-count:var(--studio-album-columns,3);column-gap:var(--album-gap)
+}
+body:is([data-album=grid],[data-album=masonry])[data-album-shape=original] #gallery-grid .gallery-photo{
+  aspect-ratio:auto;height:auto;break-inside:avoid;page-break-inside:avoid;margin:0 0 var(--album-gap);display:inline-block;vertical-align:top
+}
+body:is([data-album=grid],[data-album=masonry])[data-album-shape=original] #gallery-grid .gallery-photo>img{height:auto;aspect-ratio:auto;object-fit:contain}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo{min-height:44px;min-width:0;touch-action:pan-y pinch-zoom}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-empty{column-span:all}
+
+/* Original leaves the existing ending unchanged, including its live sharing buttons. */
+.studio-ending-photo{margin:0;pointer-events:none;overflow:hidden}
+.studio-ending-photo[hidden]{display:none!important}
+.studio-ending-photo>img{display:block;width:100%;height:100%;object-fit:cover}
+body[data-ending]:not([data-ending=original]) .closing-section{position:relative;isolation:isolate;overflow:hidden;--ending-progress:1}
+body[data-ending=glass] .closing-section{padding:clamp(250px,63vw,460px) 24px 125px;background:var(--soft)}
+body[data-ending=glass] .closing-section>.studio-ending-photo{position:absolute;inset:0;z-index:-2}
+body[data-ending=glass] .studio-ending-photo>img{object-position:50% 56%}
+body[data-ending=glass] .closing-section:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#20374800 20%,#20374825 100%)}
+body[data-ending=glass] .closing-section>.section-inner{
+  width:100%;max-width:560px;padding:34px 22px 25px;border:1px solid #ffffffb3;border-radius:3px;
+  background:#ffffffeb;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 15px 45px #1634490c
+}
+body[data-ending=glass] .closing-section .signature{margin-top:29px}
+body[data-ending=glass] .closing-section .preview-signature{margin-top:22px}
+body[data-ending=letter] .closing-section{background:#fff;padding-top:52px}
+body[data-ending=letter] .closing-section>.studio-ending-photo{width:100%;max-width:480px;margin:0 auto 35px;aspect-ratio:5/4}
+body[data-ending=letter] .studio-ending-photo>img{object-position:50% 57%}
+body[data-ending=letter] .closing-section>.section-inner{max-width:480px;border-top:1px solid var(--line);padding-top:30px}
+body[data-ending=letter] .closing-section .signature{margin-top:35px}
+body[data-ending=letter] .closing-section .script-title{font-size:clamp(40px,10vw,60px)}
+body[data-ending=glass] .closing-section[data-photo-available=false]{padding-top:65px}
+body[data-ending=glass].photo-finish-motion .closing-section>.section-inner{transform:translateY(calc((1 - var(--ending-progress,1))*14px))}
+body[data-ending=letter].photo-finish-motion .studio-ending-photo>img{transform:scale(calc(1.025 - var(--ending-progress,1)*.025))}
+body[data-ending=letter].photo-finish-motion .closing-section>.section-inner{transform:translateY(calc((1 - var(--ending-progress,1))*10px))}
+
+/* Mark the actual wedding cell; dates and calendar semantics are untouched. */
+body[data-calendar-mark=ring] .calendar .wedding-day span{border:0;border-radius:50%;background:transparent;color:var(--accent);transform:none;position:relative;font-weight:600}
+body[data-calendar-mark=ring] .calendar .wedding-day span:after{content:"";inset:-2px;border:1.5px solid currentColor;border-radius:50%;transform:none}
+body[data-calendar-mark=underline] .calendar .wedding-day span{border:0;background:transparent;color:var(--accent);border-radius:0;transform:none;position:relative;font-weight:600}
+body[data-calendar-mark=underline] .calendar .wedding-day span:after{content:"";inset:auto 3px 0;height:2px;border:0;border-radius:0;background:currentColor;transform:rotate(-4deg)}
+@media(max-width:359px){
+  body:is([data-album=grid],[data-album=masonry]) #gallery-grid{--album-gap:6px}
+  body:is([data-album=grid],[data-album=masonry]) #gallery-grid .gallery-photo{padding:2px}
+  body[data-ending=glass] .closing-section{padding-left:16px;padding-right:16px}
+  body[data-ending=glass] .closing-section>.section-inner{padding-inline:14px}
+  body[data-ending=glass] .closing-section .closing-actions{gap:18px}
+}
+.motion-off body[data-ending] .closing-section>.section-inner,.motion-off body[data-ending] .studio-ending-photo>img,
+body.motion-off[data-ending] .closing-section>.section-inner,body.motion-off[data-ending] .studio-ending-photo>img{transform:none!important}
+@media(prefers-reduced-motion:reduce){
+  body[data-ending] .closing-section>.section-inner,body[data-ending] .studio-ending-photo>img{transform:none!important}
+}
+

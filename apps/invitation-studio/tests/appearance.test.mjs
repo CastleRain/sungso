@@ -32,10 +32,10 @@ test('palette body, accent and muted text remains readable on all invitation pap
 });
 
 test('legacy and hostile appearance choices fall back to the original mood', () => {
-  for (const value of [null, undefined, {}, { palette: '__proto__', font: 'constructor', spacing: 'constructor', divider: '__proto__' }, { palette: 'https://outside.test', font: 'url(remote)', spacing: 0, divider: ['line'] }]) assert.deepEqual(appearanceChoices(value), { palette: 'mist', font: 'letter', spacing: 'balanced', divider: 'none' });
-  assert.deepEqual(appearanceChoices({ palette: 'rose', font: 'modern', endpoint: 'outside' }), { palette: 'rose', font: 'modern', spacing: 'balanced', divider: 'none' });
-  assert.deepEqual(appearanceChoices({ palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter' }), { palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter' });
-  assert.deepEqual(appearanceChoices({ palette: 'mono', spacing: 'compact', divider: 'line' }), { palette: 'mono', font: 'letter', spacing: 'compact', divider: 'line' });
+  for (const value of [null, undefined, {}, { palette: '__proto__', font: 'constructor', spacing: 'constructor', divider: '__proto__' }, { palette: 'https://outside.test', font: 'url(remote)', spacing: 0, divider: ['line'] }]) assert.deepEqual(appearanceChoices(value), { palette: 'mist', font: 'letter', spacing: 'balanced', divider: 'none', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original' });
+  assert.deepEqual(appearanceChoices({ palette: 'rose', font: 'modern', endpoint: 'outside' }), { palette: 'rose', font: 'modern', spacing: 'balanced', divider: 'none', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original' });
+  assert.deepEqual(appearanceChoices({ palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter' }), { palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original' });
+  assert.deepEqual(appearanceChoices({ palette: 'mono', spacing: 'compact', divider: 'line' }), { palette: 'mono', font: 'letter', spacing: 'compact', divider: 'line', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original' });
 });
 
 test('appearance changes do not replace content; old style data is restored on disposal', async () => {

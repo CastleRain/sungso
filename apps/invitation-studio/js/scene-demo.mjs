@@ -1,9 +1,10 @@
 import { CHOICES, CHOICE_KEYS, SECTION_IDS } from './composition.mjs';
 import { normalizeMotionValue } from './scroll-effects.mjs';
 
-const names = Object.freeze({ palette: '색감', font: '글씨체', motion: '공통 스크롤', spacing: '장면 사이 여백', divider: '장면 구분', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴', guestGuide: '하객 안내', checklist: '당일 체크리스트', keepsake: '간직하는 초대', promiseStyle: '우리의 약속', noteStyle: '우리의 한 문장', thanksStyle: '감사 인사' });
-const interactions = new Set(['album', 'arrival', 'gifting', 'wishes']);
-const interactionTargets = Object.freeze({ album: '.album-feature', arrival: '.journey', gifting: '.account-panel-frame', wishes: '#guestbook-write' });
+const names = Object.freeze({ palette: '색감', font: '글씨체', textSize: '글자 크기', lineSpace: '문장 사이 여유', photoTone: '사진의 색감', coverFocus: '표지 사진 구도', albumColumns: '사진첩 열 수', albumRatio: '사진의 비율', ending: '마지막 장면', calendarMark: '달력의 날짜 표시', dayPass: '당일 안내 패스', motion: '공통 스크롤', spacing: '장면 사이 여백', divider: '장면 구분', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴', guestGuide: '하객 안내', checklist: '당일 체크리스트', keepsake: '간직하는 초대', promiseStyle: '우리의 약속', noteStyle: '우리의 한 문장', thanksStyle: '감사 인사' });
+const interactions = new Set(['album', 'arrival', 'gifting', 'wishes', 'guestGuide']);
+const interactionTargets = Object.freeze({ album: '.album-feature', arrival: '.journey', gifting: '.account-panel-frame', wishes: '#guestbook-write', guestGuide: '#guest-guide-items' });
+const staticTargets = Object.freeze({ photoTone: '#gallery-stage', albumColumns: '#gallery-grid', albumRatio: '#gallery-grid', calendarMark: '.calendar' });
 const finite = value => Number.isFinite(value) ? value : 0;
 const clamp = (value, end) => Math.max(0, Math.min(Math.max(0, finite(end)), finite(value)));
 
@@ -12,7 +13,7 @@ export function demoRoute({ key, top = 0, height = 0, nextTop, interactionTop, v
   const limit = Number.isFinite(maxScroll) ? maxScroll : Number.MAX_SAFE_INTEGER;
   const at = value => clamp(value, limit), view = Math.max(1, finite(viewport));
   const resting = at(top - 20);
-  if (['palette', 'font', 'spacing', 'divider'].includes(key)) return { start: resting, end: resting, duration: 0, interactionAt: null };
+  if (['palette', 'font', 'spacing', 'divider', 'textSize', 'lineSpace', 'photoTone', 'coverFocus', 'albumColumns', 'albumRatio', 'calendarMark'].includes(key)) return { start: resting, end: resting, duration: 0, interactionAt: null };
   if (key === 'opening') return { start: at(top), end: at(top), duration: 3000, interactionAt: null };
   if (key === 'cover') return { start: at(top), end: at(top + Math.min(Math.max(height, view) * .65, view * .65)), duration: 2600, interactionAt: null };
   if (key === 'motion') return { start: at(top - view * .82), end: at((Number.isFinite(nextTop) ? nextTop : top + height) - 20), duration: 2600 / normalizeMotionValue(speed), interactionAt: null };
@@ -127,12 +128,15 @@ export function createSceneDemo({ doc = document, win = window, controller, onSt
     if (reason) { finish(request, 'blocked', reason); return; }
     const sibling = [...doc.querySelectorAll('main.paper > section[id]')].filter(node => !node.hidden);
     const next = sibling[sibling.indexOf(target) + 1];
-    const interactionSelector = request.key === 'album' && getController()?.composition?.album === 'grid' ? '#gallery-grid' : interactionTargets[request.key];
+    const interactionSelector = request.key === 'album' && ['grid', 'masonry'].includes(getController()?.composition?.album) ? '#gallery-grid' : interactionTargets[request.key];
     const interaction = interactionSelector ? target.querySelector(interactionSelector) : null;
     const interactionBounds = interaction?.getBoundingClientRect();
     const route = demoRoute({ key: request.key, top: topOf(target), height: target.getBoundingClientRect().height, nextTop: next ? topOf(next) : undefined, interactionTop: interactionBounds?.height > 0 ? topOf(interaction) : undefined, viewport: win.innerHeight, maxScroll: Math.max(0, doc.documentElement.scrollHeight - win.innerHeight), speed: getController()?.composition?.motionSpeed });
     const statically = cannotMove() || route.duration === 0;
-    move(statically ? Math.max(0, topOf(target) - 20) : route.start);
+    const detail = staticTargets[request.key] ? target.querySelector(staticTargets[request.key]) : null;
+    const visibleDetail = detail?.getBoundingClientRect().height > 0 ? detail : target;
+    const detailInset = visibleDetail !== target ? Math.min(132, win.innerHeight * .2) : 20;
+    move(statically ? Math.max(0, topOf(visibleDetail) - detailInset) : route.start);
     getController()?.refresh?.();
     if (statically) { finish(request, 'static', cannotMove() ? 'motion-reduced' : 'appearance'); return; }
     // Let native scroll listeners paint the destination before their monotonic

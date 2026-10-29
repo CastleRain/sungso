@@ -1,0 +1,32 @@
+.guest-pass-section{background:linear-gradient(var(--paper),var(--soft),var(--paper))}
+.guest-pass-card{position:relative;border:1px solid var(--line);padding:30px 24px;background:var(--paper);text-align:center;overflow:hidden}
+.guest-pass-kicker{font:10px var(--roman);letter-spacing:.24em;color:var(--muted)}
+.guest-pass-names{font:500 23px/1.8 var(--font-title);letter-spacing:.08em;margin:14px 0 24px;color:var(--ink)}
+.guest-pass-timing{border-block:1px dashed var(--line);padding:23px 0;margin:0 -24px 24px}
+.guest-pass-date{font:31px/1.4 var(--roman);color:var(--accent);letter-spacing:.04em}
+.guest-pass-time{font-size:14px;line-height:1.8;margin-top:7px;color:var(--muted)}
+.guest-pass-venue{font:500 17px/1.8 var(--font-title);color:var(--ink)}
+.guest-pass-room{font-size:15px;line-height:1.8;color:var(--accent)}
+.guest-pass-address,.guest-pass-subway{font-size:13px;line-height:1.9;word-break:keep-all;overflow-wrap:anywhere;color:var(--muted);margin-top:12px}
+.guest-pass-subway{padding-top:12px;border-top:1px solid var(--line);margin-top:20px}
+.guest-pass-maps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:20px}
+.guest-pass-maps :is(a,button){display:flex;justify-content:center;align-items:center;min-height:48px;border:1px solid var(--line);border-radius:3px;font-size:12px;color:var(--accent);font-family:var(--font);white-space:nowrap}
+.guest-pass-actions,.invitation-qr-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 24px;margin-top:22px}
+.guest-pass-actions :is(a,button),.invitation-qr-actions :is(a,button){display:flex;align-items:center;justify-content:center;min-height:48px;font:14px var(--font);color:var(--accent);border-bottom:1px solid var(--line)}
+.guest-pass-section :is(a,button):focus-visible,.invitation-qr-panel :is(a,button):focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.guest-pass-status,.invitation-qr-status{min-height:22px;font-size:12px;line-height:1.8;text-align:center;color:var(--muted);margin-top:12px}
+.guest-pass-section[data-optional-layout=boarding] .guest-pass-card:before,.guest-pass-section[data-optional-layout=boarding] .guest-pass-card:after{content:'';position:absolute;top:114px;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;background:var(--soft)}
+.guest-pass-section[data-optional-layout=boarding] .guest-pass-card:before{left:-10px}.guest-pass-section[data-optional-layout=boarding] .guest-pass-card:after{right:-10px}
+.guest-pass-section[data-optional-layout=concise] .guest-pass-card{border-inline:0;background:none;text-align:left;padding:22px 0}
+.guest-pass-section[data-optional-layout=concise] .guest-pass-kicker,.guest-pass-section[data-optional-layout=concise] .guest-pass-names{display:none}
+.guest-pass-section[data-optional-layout=concise] .guest-pass-timing{margin:0 0 23px;border:0;padding:0}
+.guest-pass-section[data-optional-layout=concise] .guest-pass-date{font-size:28px}
+.guest-pass-section[data-optional-layout=concise] .guest-pass-time{font:500 22px/1.8 var(--font-title);color:var(--ink);margin-top:10px}
+.keepsake-section[data-optional-layout=qr] :is(.keepsake-card,.keepsake-actions,.keepsake-save){display:none}
+.invitation-qr-panel{text-align:center}.invitation-qr-panel[hidden]{display:none!important}
+.invitation-qr-script{font:clamp(30px,8vw,41px)/1.4 var(--script);color:var(--accent);margin-bottom:20px}
+.invitation-qr-paper{width:min(100%,280px);margin:0 auto;padding:14px;background:#fff;border:1px solid var(--line);border-radius:3px}
+.invitation-qr-code{display:block;width:100%;height:auto;image-rendering:pixelated;background:#fff}
+.invitation-qr-caption{font-size:13px;line-height:1.9;color:var(--muted);margin-top:21px;word-break:keep-all}
+.invitation-qr-actions button:disabled{opacity:.55;cursor:wait}
+@media(max-width:360px){.guest-pass-card{padding-inline:17px}.guest-pass-timing{margin-inline:-17px}.guest-pass-maps{gap:4px}.guest-pass-maps :is(a,button){font-size:11px}.guest-pass-actions{gap:8px 17px}}

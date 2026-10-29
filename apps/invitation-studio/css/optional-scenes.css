@@ -21,6 +21,17 @@
 .guest-guide-section[data-optional-layout=cards] .guide-question summary{min-height:62px;padding-bottom:10px;cursor:default}
 .guest-guide-section[data-optional-layout=cards] .guide-question-mark{display:none}
 .guest-guide-section[data-optional-layout=cards] .guide-answer{padding-right:20px}
+.guest-guide-section[data-optional-layout=slider] .guide-questions{border:0;min-height:210px}
+.guest-guide-section[data-optional-layout=slider] .guide-question{padding:28px 24px;background:var(--paper);border:1px solid var(--line);border-radius:3px;min-height:210px}
+.guest-guide-section[data-optional-layout=slider] .guide-question summary{cursor:default;min-height:52px;padding:0 0 18px;font-size:17px}
+.guest-guide-section[data-optional-layout=slider] .guide-question-mark{display:none}
+.guest-guide-section[data-optional-layout=slider] .guide-answer{padding:0;font-size:15px}
+.guide-slider-controls{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:16px}
+.guide-slider-controls[hidden],.guide-question[hidden]{display:none!important}
+.guide-slider-controls button{display:grid;place-items:center;min-width:48px;min-height:48px;border:1px solid var(--line);border-radius:50%;font:22px var(--roman);color:var(--accent);cursor:pointer}
+.guide-slider-controls button:disabled{opacity:.32;cursor:default}
+.guide-slider-controls button:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.guide-slider-controls span{font:15px var(--roman);font-variant-numeric:tabular-nums;letter-spacing:.12em;color:var(--muted)}
 .day-checklist-section{background:var(--paper)}
 .day-checklist-status{display:flex;align-items:center;justify-content:space-between;gap:18px;font-size:13px;color:var(--muted);margin:0 0 15px}
 .day-checklist-status span{word-break:keep-all}

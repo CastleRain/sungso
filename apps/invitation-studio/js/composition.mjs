@@ -1,5 +1,6 @@
 /** Only visual choices may cross the editor/preview boundary. Never accepts data mode or URLs. */
 export const OPTIONAL_SECTIONS = Object.freeze([
+  { id: 'day-pass', label: '당일 안내 패스', key: 'dayPass', detail: '시간·층·주소와 길찾기를 한 장에서 바로 확인해요.', group: 'utility' },
   { id: 'guest-guide', label: '하객 안내', key: 'guestGuide', detail: '교통과 등록된 주차·식사 정보를 한곳에 모아요.', group: 'utility' },
   { id: 'day-checklist', label: '당일 체크리스트', key: 'checklist', detail: '일정과 교통편을 확인하며 가볍게 체크해요.', group: 'utility' },
   { id: 'keepsake', label: '간직하는 초대', key: 'keepsake', detail: '예식 정보를 이미지나 일정으로 간직해요.', group: 'utility' },
@@ -18,8 +19,52 @@ export const ORDER_SECTIONS = Object.freeze([
   ...OPTIONAL_SECTIONS,
 ].map(section => Object.freeze(section)));
 export const DEFAULT_ORDER = Object.freeze(ORDER_SECTIONS.filter(section => !section.group).map(section => section.id));
-export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
+export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original', albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
 export const CHOICES = Object.freeze({
+  textSize: Object.freeze([
+    { id: 'original', label: '지금의 글자 크기', detail: '기존의 섬세한 균형을 그대로 유지해요.' },
+    { id: 'comfortable', label: '조금 더 편안하게', detail: '본문과 안내를 한 단계 키워 읽기 편하게 해요.' },
+    { id: 'large', label: '또렷한 큰 글씨', detail: '이름과 안내를 넉넉하게 읽어요. 손글씨의 모습은 유지해요.' },
+  ]),
+  lineSpace: Object.freeze([
+    { id: 'original', label: '지금의 문장 간격', detail: '현재의 줄 간격을 유지해요.' },
+    { id: 'relaxed', label: '숨 쉬는 문장', detail: '본문 줄 사이를 조금 더 띄워 천천히 읽어요.' },
+  ]),
+  photoTone: Object.freeze([
+    { id: 'original', label: '사진 그대로', detail: '촬영한 사진의 색을 그대로 보여줘요.' },
+    { id: 'soft', label: '부드러운 빛', detail: '사진의 대비를 살짝 낮춰 부드럽게 연결해요.' },
+    { id: 'mono', label: '흑백의 순간', detail: '사진만 흑백으로 바꾸고 글과 강조색은 유지해요.' },
+  ]),
+  coverFocus: Object.freeze([
+    { id: 'original', label: '지금의 사진 구도', detail: '기존 첫 사진의 구도를 유지해요.' },
+    { id: 'upper', label: '위쪽을 조금 더', detail: '표지에서 사진의 위쪽 풍경을 더 보여줘요.' },
+    { id: 'lower', label: '두 사람에게 가까이', detail: '사진의 아래쪽 인물과 손을 중심에 가까이 둬요.' },
+  ]),
+  albumColumns: Object.freeze([
+    { id: 'auto', label: '배열에 어울리게', detail: '격자는 3열, 원본 비율 사진첩은 2열로 보여줘요.' },
+    { id: 'two', label: '넉넉한 두 줄', detail: '격자와 원본 사진첩에서 한 줄에 두 장씩 보여줘요.' },
+    { id: 'three', label: '한눈에 세 줄', detail: '격자와 원본 사진첩에서 한 줄에 세 장씩 보여줘요.' },
+  ]),
+  albumRatio: Object.freeze([
+    { id: 'auto', label: '배열의 기본 비율', detail: '격자는 세로, 원본 사진첩은 촬영한 비율을 사용해요.' },
+    { id: 'portrait', label: '세로로 길게', detail: '사진을 세로 프레임 안에 정돈해요.' },
+    { id: 'square', label: '반듯한 정사각', detail: '같은 크기로 정리해 사진을 빠르게 골라요.' },
+    { id: 'original', label: '원본 비율 그대로', detail: '사진 가장자리를 자르지 않고 촬영한 구도를 살려요.' },
+  ]),
+  ending: Object.freeze([
+    { id: 'original', label: '지금의 마지막 인사', detail: '짧은 문구와 서명으로 차분히 마무리해요.' },
+    { id: 'glass', label: '사진 위의 편지', detail: '마지막 사진 위에 반투명 편지가 떠오르며 끝나요.' },
+    { id: 'letter', label: '사진을 간직한 인사', detail: '작은 사진과 넉넉한 흰 여백으로 인사를 남겨요.' },
+  ]),
+  calendarMark: Object.freeze([
+    { id: 'original', label: '지금의 날짜 표시', detail: '기존 달력의 예식일 표시를 유지해요.' },
+    { id: 'ring', label: '가느다란 동그라미', detail: '가는 테두리로 3월 6일을 둘러요.' },
+    { id: 'underline', label: '작은 밑줄', detail: '날짜 아래 선을 그어 담백하게 표시해요.' },
+  ]),
+  dayPass: Object.freeze([
+    { id: 'boarding', label: '한 장의 당일 패스', detail: '날짜·시간·홀·길찾기를 티켓처럼 한곳에 모아요.' },
+    { id: 'concise', label: '빠르게 보는 예식 안내', detail: '큰 시간과 꼭 필요한 정보로 간결하게 읽어요.' },
+  ]),
   palette: Object.freeze([
     { id: 'mist', label: '안개 블루', detail: '지금의 차분한 블루와 맑은 종이색을 유지해요.', source: 'ORIGINAL · 색감' },
     { id: 'azure', label: '맑은 블루', detail: '깨끗한 화이트에 조금 더 선명한 파랑을 더해요.', source: 'BLUE · 색감' },
@@ -41,6 +86,7 @@ export const CHOICES = Object.freeze({
   guestGuide: Object.freeze([
     { id: 'folded', label: '접어 둔 안내', detail: '필요한 안내를 펼쳐 읽어요.' },
     { id: 'cards', label: '한눈에 보는 안내', detail: '교통과 등록된 안내를 나란히 정리해요.' },
+    { id: 'slider', label: '한 장씩 넘기는 안내', detail: '필요한 안내를 한 장씩 골라 읽어요.' },
   ]),
   checklist: Object.freeze([
     { id: 'list', label: '작은 확인 목록', detail: '하나씩 체크하며 준비한 내용을 확인해요.' },
@@ -49,6 +95,7 @@ export const CHOICES = Object.freeze({
   keepsake: Object.freeze([
     { id: 'ticket', label: '간직할 티켓', detail: '날짜와 장소를 티켓처럼 담아 저장해요.' },
     { id: 'postcard', label: '한 장의 초대', detail: '여유로운 엽서 구성에서 정보를 간직해요.' },
+    { id: 'qr', label: 'QR로 이어 보는 초대', detail: '고른 조합을 휴대폰으로 열거나 QR 이미지로 보관해요.' },
   ]),
   promiseStyle: Object.freeze([
     { id: 'lines', label: '한 줄씩 약속', detail: '일상에 대한 짧은 약속을 차분히 읽어요. 문구는 제안 초안이에요.' },
@@ -109,6 +156,7 @@ export const CHOICES = Object.freeze({
     { id: 'stack', label: '겹쳐지는 사진', detail: '여러 순간이 한 장의 사진첩으로 모여요.', source: 'F · 사진첩' },
     { id: 'contact', label: '펼쳐지는 필름', detail: '사진들이 가볍게 펼쳐지고 한 장을 골라요.', source: 'G · 사진첩' },
     { id: 'grid', label: '한눈에 보는 사진첩', detail: '모든 순간을 차분한 격자로 살펴봐요.', source: 'VER6 · 사진첩' },
+    { id: 'masonry', label: '구도를 살리는 사진첩', detail: '사진 원본의 비율을 살려 자연스럽게 이어 놓아요.', source: 'NEW · 사진첩' },
   ]),
   arrival: Object.freeze([
     { id: 'unfold', label: '펼쳐지는 약도', detail: '접어 둔 약도를 펼치고 교통편을 골라요.', source: 'ORIGINAL · 오시는 길' },
@@ -136,8 +184,11 @@ export const PRESETS = Object.freeze([
   { id: 'flow', label: '01 · 잔잔하게 이어지는', detail: '기존 F의 분위기에서 새 초대글을 더했어요.', composition: DEFAULT_COMPOSITION },
   { id: 'light', label: '02 · 빛이 열리는', detail: '빛으로 드러나는 손글씨와 커튼, 둥근 날짜의 조합.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'curtain', opening: 'light', intro: 'together', date: 'orbit', story: 'line', album: 'contact' }) },
   { id: 'letter', label: '03 · 우리의 작은 영화', detail: '흐르는 손글씨와 열리는 창, 커피 한 잔의 이야기.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'cafe', album: 'stack' }) },
+  { id: 'readable', label: '04 · 편안하게 읽는 초대', detail: '큰 글씨, 넉넉한 문장 간격, 한 장씩 읽는 안내.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, textSize: 'large', lineSpace: 'relaxed', guestGuide: 'slider', extras: Object.freeze(['guest-guide']), order: Object.freeze([...DEFAULT_ORDER, 'guest-guide']) }) },
+  { id: 'photo-edit', label: '05 · 흑백으로 남긴 순간', detail: '흑백 사진, 원본 비율 사진첩, 마지막 사진 편지.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, palette: 'mono', photoTone: 'mono', album: 'masonry', ending: 'glass', cover: 'curtain' }) },
+  { id: 'guest-first', label: '06 · 하객을 위한 작은 배려', detail: '당일 패스와 QR 초대를 넣어 필요한 정보를 간직해요.', composition: Object.freeze({ ...DEFAULT_COMPOSITION, dayPass: 'concise', keepsake: 'qr', extras: Object.freeze(['day-pass', 'keepsake']), order: Object.freeze(['invitation', 'day-pass', ...DEFAULT_ORDER.slice(1), 'keepsake']) }) },
 ]);
-export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', motion: 'invitation', spacing: 'invitation', divider: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery', arrival: 'location', gifting: 'accounts', wishes: 'guestbook', navigation: 'location', ...Object.fromEntries(OPTIONAL_SECTIONS.map(section => [section.key, section.id])) });
+export const SECTION_IDS = Object.freeze({ palette: 'invitation', font: 'invitation', textSize: 'invitation', lineSpace: 'invitation', photoTone: 'gallery', coverFocus: 'top', albumColumns: 'gallery', albumRatio: 'gallery', ending: 'closing', calendarMark: 'wedding-day', motion: 'invitation', spacing: 'invitation', divider: 'invitation', cover: 'top', opening: 'top', intro: 'invitation', date: 'wedding-day', story: 'our-story', album: 'gallery', arrival: 'location', gifting: 'accounts', wishes: 'guestbook', navigation: 'location', ...Object.fromEntries(OPTIONAL_SECTIONS.map(section => [section.key, section.id])) });
 export function normalizeExtras(input) {
   const values = typeof input === 'string' ? input.slice(0, 256).split(',') : Array.isArray(input) ? input.slice(0, 32) : [];
   // Canonical order keeps equality and saved records stable regardless of checkbox order.
