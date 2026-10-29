@@ -1,5 +1,5 @@
 import { emptyDay, validateDay, dateInKorea, koreanDateTime, timeFromKorea, validDate } from '../../../shared/journey/core.mjs';
-import { createJourneyMap } from './world-map.mjs?v=3.0.1';
+import { createJourneyMap } from './world-map.mjs?v=3.1.0';
 import { createJourneyPlayback } from './playback.mjs?v=3.0.0';
 import { prepareJourneyPhoto } from './photo.mjs';
 
@@ -84,14 +84,16 @@ export function mountJourney({root,request,member,mapFactory=createJourneyMap,pr
   }
   function showPlayback(state){
     if(disposed)return;playbackState=state||playbackState;const available=mapReady&&!loading&&!storyFailed&&!!playbackState.available,playing=available&&!!playbackState.playing,scenes=playbackState.scenes||[];
+    const overview=playbackState.mode==='fast';root.dataset.playbackMode=playbackState.mode;
     $('motionDate').hidden=!mapReady||loading||storyFailed||!playbackState.date||detailRoute||picking;
     $('motionYear').textContent=playbackState.date?.slice(0,4)||'';
     setText($('motionDay'),playbackState.date?playbackState.date.slice(5).replace('-','.'): '');
     $('motionDate').setAttribute('aria-label',playbackState.date?dayLabel(playbackState.date):'재생 날짜');
     setText($('motionClock'),Number.isFinite(playbackState.time)?koreanDateTime(playbackState.time).slice(11,16)+' · 한국 시간':'');
-    $('motionClock').hidden=!Number.isFinite(playbackState.time);
+    $('motionClock').hidden=overview||!Number.isFinite(playbackState.time);
     $('motionLegend').hidden=$('motionDate').hidden;
     $('followMotion').disabled=!scenes.length||loading||!mapReady;
+    setText($('followMotion'),overview?'이동 보기':'따라가기');$('followMotion').setAttribute('aria-label',overview?'전체 이동 보기':'이동 따라가기');
     $('playDay').disabled=!available;$('playDay').hidden=playing;$('stopDay').hidden=!playing;$('restartDay').disabled=!available;$('playSeek').disabled=!available;$('previousScene').disabled=!available||playbackState.index<=0;$('nextScene').disabled=!available||playbackState.index>=scenes.length-1;$('toggleRecords').disabled=!playbackState.scene;$('showAllScenes').disabled=!scenes.length;
     $('playSeek').value=String(Math.round((playbackState.progress||0)*1000));$('playSeek').setAttribute('aria-valuetext',playbackState.scene?`${dayLabel(playbackState.date)}, ${Math.round((playbackState.progress||0)*100)}퍼센트`:'재생할 기록 없음');$('playDate').textContent=playbackState.date?dayLabel(playbackState.date):'기록을 기다리는 중';$('playTime').textContent=elapsedLabel(playbackState.elapsed||0);$('playRange').textContent=elapsedLabel(playbackState.duration||60);$('playState').textContent=playing?'재생 중':'일시정지';
     for(const button of root.querySelectorAll('[data-mode]'))button.setAttribute('aria-pressed',String(button.dataset.mode===playbackState.mode));renderDurations();renderStoryList(scenes);renderPlaybackTicks(scenes);

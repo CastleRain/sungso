@@ -444,6 +444,11 @@ test('motion playback keeps every daily track and advances the prominent date wi
   assert.equal(h.app.getPlayback().scenes.flatMap(scene => scene.segments).length, 18, 'daily representative caps do not discard recorded travel');
   assert.equal(h.$('motionYear').textContent, '2026'); assert.equal(h.$('motionDay').textContent, '10.17'); assert.equal(h.$('motionDate').getAttribute('aria-live'), 'off');
   assert.match(h.$('motionClock').textContent, /10:00 · 한국 시간/); assert.match(h.$('motionLegend').textContent, /성우소희/); assert.doesNotMatch(h.$('motionLegend').textContent, /함께|GPS|사진|수동/);
+  assert.equal(h.$('motionClock').hidden, true, 'overview emphasizes the date rather than minute-by-minute detail');
+  assert.equal(h.$('followMotion').textContent, '이동 보기');
+  const initialTime=h.app.getPlayback().time;
+  h.root.querySelector('[data-mode="slow"]').click();assert.equal(h.$('motionClock').hidden,false);assert.equal(h.$('followMotion').textContent,'따라가기');assert.equal(h.app.getPlayback().time,initialTime);
+  h.root.querySelector('[data-mode="fast"]').click();assert.equal(h.$('motionClock').hidden,true);assert.equal(h.app.getPlayback().time,initialTime);
   h.$('playDay').click(); h.advance(45000);
   assert.equal(h.$('motionDay').textContent, '10.18'); assert.equal(h.map.motionRenders.at(-1).scenes.flatMap(scene => scene.segments).length, 18);
   const frame = h.app.getPlayback(); h.$('toggleStory').click(); h.$('closeStory').click();

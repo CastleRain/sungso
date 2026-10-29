@@ -5,7 +5,7 @@
   <title>우리의 발자취 · sungso</title>
   <link rel="stylesheet" href="../shared/theme/brand.css?v=sky-1">
   <link rel="stylesheet" href="./assets/maplibre/maplibre-gl.css">
-  <link rel="stylesheet" href="./style.css?v=3.0.0">
+  <link rel="stylesheet" href="./style.css?v=3.1.0">
   <script type="module" src="../shared/firebase/boot.mjs"></script>
 </head>
 <body data-app="journey">
@@ -13,7 +13,7 @@
   <header class="journey-header">
     <a href="../" aria-label="sungso 우리 홈"><img class="sungso-wordmark" src="../shared/theme/sungso-wordmark-sky.png" alt="sungso" width="2091" height="752"></a>
     <h1>우리의 발자취</h1>
-    <div class="view-modes" role="group" aria-label="재생 방식"><button data-mode="fast" aria-pressed="true">빠르게 보기</button><button data-mode="slow" aria-pressed="false">천천히 보기</button></div>
+    <div class="view-modes" role="group" aria-label="재생 방식"><button data-mode="fast" aria-pressed="true">한눈에 보기</button><button data-mode="slow" aria-pressed="false">천천히 보기</button></div>
     <div class="header-actions"><button id="addRecord" class="add-action">기록 추가</button><details id="moreMenu" class="more-menu"><summary aria-label="더 보기">더 보기</summary><div><button id="openImport">타임라인 가져오기</button><button id="refreshDay">새로 불러오기</button><a href="../footprints/">기존 장소·방문 기록</a></div></details></div>
   </header>
   <div class="journey-shell" id="journeyLayout">
@@ -89,5 +89,5 @@
   </form></dialog>
   <div id="pickNotice" class="pick-notice" hidden><span>지도에서 기억하는 장소를 눌러주세요.</span><button id="cancelPick">취소</button></div>
 </main>
-<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=3.0.1"></script>
+<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=3.1.0"></script>
 </body></html>

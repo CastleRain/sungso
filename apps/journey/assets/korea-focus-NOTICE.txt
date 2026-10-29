@@ -1,0 +1,32 @@
+Natural Earth Korea overview focus
+
+Dataset: Natural Earth 1:50m Admin 0 Countries
+Feature: ADMIN=South Korea, ADM0_A3=KOR
+License: Public domain (not a separate CC0 grant).
+Terms: https://www.naturalearthdata.com/about/terms-of-use/
+Dataset page: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/
+Source repository: https://github.com/nvkelso/natural-earth-vector
+Immutable source: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/9380cca83db5f9aef52d5e762765100745f84b27/geojson/ne_50m_admin_0_countries.geojson
+Source commit: 9380cca83db5f9aef52d5e762765100745f84b27
+Source revision date: 2022-05-13T05:33:10Z
+Retrieved: 2026-10-29
+
+Only the South Korea feature was extracted. Geometry coordinates and ring
+ordering are unmodified: no simplification, rounding, buffering, or invented
+coordinates. Nonessential source attributes and the legacy CRS object were
+removed; output coordinates remain longitude/latitude (CRS84/WGS84). The extracted
+FeatureCollection is exported as KOREA_FOCUS in ../js/korea-focus.mjs so the
+viewer can import it without another network fetch.
+
+This generalized geometry is for visual focus in the Journey overview only.
+It does not classify national borders, territorial status or location ownership,
+create departure/return records, or provide geofencing. Its approximate outline
+and a coastal margin only control the visual focus overlay. Natural Earth uses generalized
+de facto boundaries at this scale; small islands and coastlines can differ
+from the live basemap. Journey tracks and stored records remain independent.
+
+Made with Natural Earth.
+
+SHA-256:
+Source GeoJSON: 3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb
+korea-focus.mjs: 26892cde874f83207065199bce1988a20497710a35561ce5f3a2f2eaa00e8d41
