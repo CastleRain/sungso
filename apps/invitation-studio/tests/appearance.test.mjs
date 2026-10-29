@@ -32,21 +32,47 @@ test('palette body, accent and muted text remains readable on all invitation pap
 });
 
 test('legacy and hostile appearance choices fall back to the original mood', () => {
-  for (const value of [null, undefined, {}, { palette: '__proto__', font: 'constructor' }, { palette: 'https://outside.test', font: 'url(remote)' }]) assert.deepEqual(appearanceChoices(value), { palette: 'mist', font: 'letter' });
-  assert.deepEqual(appearanceChoices({ palette: 'rose', font: 'modern', endpoint: 'outside' }), { palette: 'rose', font: 'modern' });
+  for (const value of [null, undefined, {}, { palette: '__proto__', font: 'constructor', spacing: 'constructor', divider: '__proto__' }, { palette: 'https://outside.test', font: 'url(remote)', spacing: 0, divider: ['line'] }]) assert.deepEqual(appearanceChoices(value), { palette: 'mist', font: 'letter', spacing: 'balanced', divider: 'none' });
+  assert.deepEqual(appearanceChoices({ palette: 'rose', font: 'modern', endpoint: 'outside' }), { palette: 'rose', font: 'modern', spacing: 'balanced', divider: 'none' });
+  assert.deepEqual(appearanceChoices({ palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter' }), { palette: 'lilac', font: 'letter', spacing: 'airy', divider: 'chapter' });
+  assert.deepEqual(appearanceChoices({ palette: 'mono', spacing: 'compact', divider: 'line' }), { palette: 'mono', font: 'letter', spacing: 'compact', divider: 'line' });
 });
 
 test('appearance changes do not replace content; old style data is restored on disposal', async () => {
-  const env = fixture(); env.doc.body.dataset.palette = 'previous'; env.values.set('--ink', 'old-ink');
+  const env = fixture(); env.doc.body.dataset.palette = 'previous'; env.doc.body.dataset.spacing = 'previous-spacing'; env.values.set('--ink', 'old-ink');
   const controller = mountAppearance({ ...env, composition: { palette: 'mist', font: 'letter' } });
   await controller.whenReady;
   assert.equal(env.values.get('--paper'), '#fcfdfd');
+  assert.equal(env.doc.body.dataset.spacing, 'balanced'); assert.equal(env.doc.body.dataset.divider, 'none');
   const body = env.doc.body;
-  await controller.setComposition({ palette: 'rose', font: 'editorial' });
+  await controller.setComposition({ palette: 'rose', font: 'editorial', spacing: 'compact', divider: 'chapter' });
   assert.equal(env.doc.body, body); assert.equal(body.dataset.font, 'editorial');
   assert.equal(env.values.get('--accent'), APPEARANCE_PALETTES.rose.accent);
+  assert.equal(body.dataset.spacing, 'compact'); assert.equal(body.dataset.divider, 'chapter');
   controller.destroy(); assert.equal(body.dataset.palette, 'previous'); assert.equal(body.dataset.font, undefined);
+  assert.equal(body.dataset.spacing, 'previous-spacing'); assert.equal(body.dataset.divider, undefined);
   assert.equal(env.values.get('--ink'), 'old-ink'); assert.equal(env.values.has('--accent'), false);
+});
+
+test('layout choices notify existing scene controllers without reloading fonts or resetting content', async () => {
+  let fontRequests = 0;
+  const env = fixture(() => { fontRequests++; return Promise.resolve([]); });
+  const controller = mountAppearance({ ...env, composition: { palette: 'mist', font: 'letter' } });
+  await controller.whenReady;
+  const initialLayouts = env.layouts, body = env.doc.body;
+  await controller.setComposition({ palette: 'lilac', spacing: 'airy', divider: 'line' });
+  assert.equal(env.doc.body, body); assert.equal(fontRequests, 2);
+  assert.equal(env.layouts, initialLayouts + 1);
+  assert.equal(env.values.get('--soft'), APPEARANCE_PALETTES.lilac.soft);
+  await controller.setComposition({ palette: 'mono', spacing: 'airy', divider: 'line' });
+  assert.equal(env.layouts, initialLayouts + 1, 'colour alone does not invalidate scene geometry');
+  assert.equal(env.values.get('--soft'), APPEARANCE_PALETTES.mono.soft);
+  await controller.setComposition({ palette: 'mono' });
+  assert.equal(body.dataset.spacing, 'balanced'); assert.equal(body.dataset.divider, 'none');
+  assert.equal(env.layouts, initialLayouts + 2); assert.equal(fontRequests, 2);
+  controller.destroy();
+  assert.equal(await controller.setComposition({ spacing: 'airy', divider: 'chapter' }), false);
+  assert.equal(body.dataset.spacing, undefined); assert.equal(body.dataset.divider, undefined);
 });
 
 test('stale font completion cannot refresh a newer choice and current font failures settle safely', async () => {

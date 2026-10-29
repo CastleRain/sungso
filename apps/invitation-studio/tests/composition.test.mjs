@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDER_SECTIONS, normalizeOrder, moveSection, normalizeComposition, readComposition, compositionParams, sameComposition } from '../js/composition.mjs';
+import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDER_SECTIONS, OPTIONAL_SECTIONS, normalizeOrder, moveSection, normalizeComposition, readComposition, compositionParams, sameComposition } from '../js/composition.mjs';
 
-test('all 23328 mood and scene combinations with distributed motion choices survive URL round trips without data or origin controls', () => {
+test('all mood and scene combinations with distributed motion choices survive URL round trips without data or origin controls', () => {
   let count = 0;
   for (const palette of CHOICES.palette) for (const font of CHOICES.font) for (const cover of CHOICES.cover) for (const opening of CHOICES.opening) for (const intro of CHOICES.intro) for (const date of CHOICES.date) for (const story of CHOICES.story) for (const album of CHOICES.album) {
     const state = { ...DEFAULT_COMPOSITION, motion: CHOICES.motion[count % CHOICES.motion.length].id, palette: palette.id, font: font.id, cover: cover.id, opening: opening.id, intro: intro.id, date: date.id, story: story.id, album: album.id };
     const params = compositionParams({ ...state, mode: 'live', origin: 'https://evil.example', account: '1234' });
     assert.equal(params.get('version'), '1');
     assert.deepEqual(readComposition(params.toString()), state);
-    assert.equal(params.size, CHOICE_KEYS.length + 2);
+    assert.equal(params.size, CHOICE_KEYS.length + 5);
     count++;
   }
-  assert.equal(count, 23328);
+  assert.equal(count, 34992);
 });
 
 test('existing version 1 links, saved choices, and imported files retain their five scenes with original handwriting', () => {
@@ -74,7 +74,7 @@ test('prototype and nested data never become visual configuration or modify defa
 test('named presets are fully selectable and comparison detects an individual change', () => {
   for (const preset of PRESETS) assert.ok(sameComposition(normalizeComposition(preset.composition), preset.composition));
   assert.equal(sameComposition(DEFAULT_COMPOSITION, { ...DEFAULT_COMPOSITION }), true);
-  for (const key of CHOICE_KEYS) assert.equal(sameComposition(DEFAULT_COMPOSITION, { ...DEFAULT_COMPOSITION, [key]: CHOICES[key][1].id }), false);
+  for (const key of CHOICE_KEYS) assert.equal(sameComposition(DEFAULT_COMPOSITION, { ...DEFAULT_COMPOSITION, [key]: CHOICES[key].find(choice => choice.id !== DEFAULT_COMPOSITION[key]).id }), false);
   assert.equal(sameComposition(DEFAULT_COMPOSITION, { ...DEFAULT_COMPOSITION, order: [...DEFAULT_ORDER].reverse() }), false);
   assert.equal(sameComposition(DEFAULT_COMPOSITION, { ...DEFAULT_COMPOSITION, order: [...DEFAULT_ORDER] }), true);
 });
@@ -117,7 +117,7 @@ test('every section order survives links and saved files with independent style 
     count++;
   }
   assert.equal(count, 5040);
-  assert.deepEqual(ORDER_SECTIONS.map(item => item.id), DEFAULT_ORDER);
+  assert.deepEqual(ORDER_SECTIONS.filter(item => !item.group).map(item => item.id), DEFAULT_ORDER);
 });
 
 test('moving a section changes only its position, is reversible, and rejects invalid destinations', () => {
@@ -154,4 +154,37 @@ test('all four utility presentations survive saving, sharing and reordering with
   const upgraded = normalizeComposition(previous);
   for (const key of ['arrival', 'gifting', 'wishes', 'navigation']) assert.equal(upgraded[key], DEFAULT_COMPOSITION[key]);
   for (const key of Object.keys(previous)) assert.deepEqual(upgraded[key], previous[key]);
+});
+
+test('slow and strong settings round trip through shared URLs and the version 1 saved format', () => {
+  for (const motionSpeed of [.5, .75, 1, 1.25, 1.5]) for (const motionStrength of [.5, .75, 1, 1.25, 1.5]) {
+    const state = normalizeComposition({ motion: 'drift', motionSpeed, motionStrength, spacing: 'airy', divider: 'chapter' });
+    assert.deepEqual(readComposition(compositionParams(state)), state);
+    assert.deepEqual(normalizeComposition(JSON.parse(JSON.stringify({ version: 1, composition: state }))), state);
+    assert.equal(sameComposition(state, { ...state, motionSpeed: motionSpeed === 1 ? .5 : 1 }), false);
+  }
+  for (const value of [null, true, [], {}, 'NaN', 'Infinity', 'url(x)', '', '1px']) {
+    const result = normalizeComposition({ motionSpeed: value, motionStrength: value });
+    assert.equal(result.motionSpeed, 1); assert.equal(result.motionStrength, 1);
+  }
+  assert.equal(normalizeComposition({ motionSpeed: -500 }).motionSpeed, .5);
+  assert.equal(normalizeComposition({ motionStrength: 500 }).motionStrength, 1.5);
+  assert.equal(normalizeComposition({ motionSpeed: .66 }).motionSpeed, .75);
+});
+
+test('all optional scene combinations are explicit, reversible and preserved with order and settings', () => {
+  const ids = OPTIONAL_SECTIONS.map(section => section.id);
+  for (let mask = 0; mask < 2 ** ids.length; mask++) {
+    const extras = ids.filter((_, index) => mask & (1 << index));
+    const state = normalizeComposition({ extras, order: [...extras].reverse(), motionSpeed: .5, motionStrength: 1.5 });
+    assert.deepEqual(state.order, [...extras].reverse().concat(DEFAULT_ORDER));
+    assert.deepEqual(readComposition(compositionParams(state)), state);
+    assert.deepEqual(normalizeComposition({ version: 1, composition: state }), state);
+    assert.deepEqual(normalizeComposition({ ...state, extras: [] }).order, DEFAULT_ORDER);
+    if (extras.length) assert.equal(moveSection(state.order, extras[0], 0, extras)[0], extras[0]);
+  }
+  assert.deepEqual(normalizeComposition({ order: ids }).order, DEFAULT_ORDER, 'order cannot enable optional content');
+  assert.deepEqual(normalizeComposition({ extras: ['__proto__', 'location', '../../admin', {}, ...ids, ...ids] }).extras, ids);
+  const legacy = readComposition('?version=1&motion=focus&palette=rose');
+  assert.deepEqual(legacy.extras, []); assert.deepEqual(legacy.order, DEFAULT_ORDER);
 });

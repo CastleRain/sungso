@@ -25,7 +25,8 @@ function fixture({ reduced = false, readiness = Promise.resolve(), staticOff = f
   doc.hidden = false; doc.dialog = null;
   doc.createElement = () => new Element();
   doc.querySelector = () => doc.dialog;
-  const sections = ['top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook'].map((key, index) => new Element(key, index * 850, 850));
+  const sections = [...new Set(['top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook', ...Object.values(SECTION_IDS)])].map((key, index) => new Element(key, index * 850, 850));
+  doc.documentElement.scrollHeight = sections.length * 850;
   sections.forEach(section => {
     section.interaction = new Element('interaction', section.top + 420, 150);
     for (const el of [section, section.interaction]) el.getBoundingClientRect = () => ({ top: el.top - win.scrollY, height: el.height });
@@ -80,7 +81,7 @@ test('all section choices reach their intended scene and only four safe interact
   for (const key of CHOICE_KEYS) {
     const h = fixture(); assert.equal(h.demo.start({ key, requestId: 2 }), true); await flush(); h.complete();
     assert.equal(h.states.at(-1).key, key);
-    assert.equal(h.states.at(-1).phase, ['palette', 'font'].includes(key) ? 'static' : 'complete');
+    assert.equal(h.states.at(-1).phase, ['palette', 'font', 'spacing', 'divider'].includes(key) ? 'static' : 'complete');
     assert.equal(h.interacted, ['album', 'arrival', 'gifting', 'wishes'].includes(key) ? 1 : 0, key);
     assert.equal(h.interactionRestored, h.interacted, key);
     assert.equal(h.replayCount, key === 'opening' ? 1 : 0, key);
@@ -186,4 +187,52 @@ test('an unavailable visual hook stops safely without retaining an animation or 
   const h = fixture(); h.controller.demoInteraction = () => { throw new Error('visual controller unavailable'); };
   h.demo.start({ key: 'gifting', requestId: 13 }); await flush(); h.complete();
   assert.equal(h.states.at(-1).phase, 'blocked'); assert.equal(h.states.at(-1).reason, 'unavailable'); assert.equal(h.pendingFrames, 0); assert.equal(h.restored, 1);
+});
+
+test('scroll demo speed changes only travel time, keeping a consistent comparison route and bounded values', () => {
+  const geometry = { key: 'motion', top: 1000, height: 700, nextTop: 1700, viewport: 800, maxScroll: 4000 };
+  const slow = demoRoute({ ...geometry, speed: .5 }), normal = demoRoute(geometry), fast = demoRoute({ ...geometry, speed: 1.5 });
+  assert.equal(slow.duration, 5200); assert.equal(normal.duration, 2600); assert.equal(fast.duration, 2600 / 1.5);
+  assert.equal(slow.start, normal.start); assert.equal(slow.end, fast.end); assert.equal(slow.interactionAt, null);
+  assert.equal(demoRoute({ ...geometry, speed: -100 }).duration, 5200);
+  for (const speed of [undefined, null, '0.5', {}, NaN, Infinity]) assert.equal(demoRoute({ ...geometry, speed }).duration, 2600);
+  for (const key of CHOICE_KEYS.filter(key => key !== 'motion')) {
+    assert.deepEqual(demoRoute({ ...geometry, key, speed: .5 }), demoRoute({ ...geometry, key, speed: 1.5 }), key);
+  }
+});
+
+test('the actual common scroll comparison reads the saved speed and completes one 5.2 second slow pass', async () => {
+  const h = fixture(); h.controller.composition = { ...DEFAULT_COMPOSITION, motionSpeed: .5, motionStrength: 1.5 };
+  h.demo.start({ key: 'motion', requestId: 14 }); await flush(); h.step(20); h.step(2600);
+  assert.equal(h.states.at(-1).phase, 'playing'); assert.equal(h.pendingFrames, 1);
+  const halfway = h.moves.at(-1).top; assert.ok(halfway > h.moves[0].top && halfway < 1680);
+  h.step(2600);
+  assert.equal(h.states.at(-1).phase, 'complete'); assert.equal(h.moves.at(-1).top, 1680);
+  assert.equal(h.pendingFrames, 0); assert.equal(h.restored, 1); assert.equal(h.interacted, 0);
+  const count = h.moves.length; h.step(10000); assert.equal(h.moves.length, count); h.demo.destroy();
+});
+
+test('slow comparisons cancel immediately for user input or a hidden tab and cannot resume later', async () => {
+  for (const reason of ['user-input', 'hidden', 'motion-reduced']) {
+    const h = fixture(); h.controller.composition = { ...DEFAULT_COMPOSITION, motionSpeed: .5 };
+    h.demo.start({ key: 'motion', requestId: 15 }); await flush(); h.step(20); h.step(3000);
+    assert.equal(h.states.at(-1).phase, 'playing');
+    if (reason === 'user-input') h.win.emit('wheel');
+    if (reason === 'hidden') { h.doc.hidden = true; h.doc.emit('visibilitychange'); }
+    if (reason === 'motion-reduced') { h.media.matches = true; h.media.emit('change'); }
+    const count = h.moves.length; h.step(10000);
+    assert.equal(h.states.at(-1).phase, 'cancelled'); assert.equal(h.states.at(-1).reason, reason);
+    assert.equal(h.pendingFrames, 0); assert.equal(h.moves.length, count); assert.equal(h.restored, 1);
+    h.demo.destroy();
+  }
+});
+
+test('a newer fast comparison replaces a slow pass without an obsolete completion', async () => {
+  const h = fixture(); h.controller.composition = { ...DEFAULT_COMPOSITION, motionSpeed: .5 };
+  h.demo.start({ key: 'motion', requestId: 16 }); await flush(); h.step(20); h.step(1000);
+  h.controller.composition = { ...DEFAULT_COMPOSITION, motionSpeed: 1.5 };
+  h.demo.start({ key: 'motion', requestId: 17 }); await flush(); h.step(20); h.step(1800);
+  assert.equal(h.states.at(-1).phase, 'complete'); assert.equal(h.states.at(-1).requestId, 17);
+  assert.equal(h.states.some(state => state.requestId === 16 && state.phase === 'complete'), false);
+  assert.equal(h.restored, 2); assert.equal(h.pendingFrames, 0); h.demo.destroy();
 });

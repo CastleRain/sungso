@@ -1,4 +1,4 @@
-import { normalizeComposition, SECTION_IDS, CHOICE_KEYS } from './composition.mjs';
+import { normalizeComposition, SECTION_IDS, CHOICE_KEYS, ORDER_SECTIONS } from './composition.mjs';
 import { mountExperience } from './experience.mjs';
 import { mountUpperScenes } from './upper-scenes.mjs';
 import { mountContentScenes } from './content-scenes.mjs';
@@ -6,8 +6,10 @@ import { mountAppearance } from './appearance.mjs';
 import { mountSectionOrder } from './section-order.mjs';
 import { mountScrollEffects } from './scroll-effects.mjs';
 import { mountUtilityScenes } from './utility-scenes.mjs';
+import { mountOptionalScenes } from './optional-scenes.mjs';
+import { mountSentimentScenes } from './sentiment-scenes.mjs';
 
-export const STUDIO_SECTIONS = Object.freeze(['top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook']);
+export const STUDIO_SECTIONS = Object.freeze(['top', ...ORDER_SECTIONS.map(section => section.id)]);
 
 // Parent-window identity is checked separately from origin: a sibling frame cannot alter this preview.
 export function studioMessage(event, { origin, parent, embedded }) {
@@ -26,10 +28,10 @@ export function studioMessage(event, { origin, parent, embedded }) {
 }
 
 /** One persistent invitation. Composition never remounts sound, data, or the four approved modules. */
-export function mountStudio({ doc = document, win = window, gallery, enabled = true, composition, onChange = () => {} } = {}) {
+export function mountStudio({ doc = document, win = window, gallery, wedding, enabled = true, composition, onChange = () => {} } = {}) {
   let current = normalizeComposition(composition), disposed = false, requested = Boolean(enabled);
   const controllers = [];
-  let experience, upper, content, scroll, utilities;
+  let experience, upper, content, scroll, utilities, extras, sentiment;
   function updateMotion() {
     const sectionMotion = requested && current.motion !== 'still';
     experience?.setEnabled(requested);
@@ -38,15 +40,18 @@ export function mountStudio({ doc = document, win = window, gallery, enabled = t
     content?.setEnabled(requested); content?.setScrollEnabled(sectionMotion);
     scroll?.setEnabled(requested);
     utilities?.setEnabled(requested); utilities?.setScrollEnabled(sectionMotion);
+    extras?.setEnabled(sectionMotion); sentiment?.setEnabled(sectionMotion);
   }
   try {
     controllers.push(mountAppearance({ doc, win, composition: current, onLayout: () => { if (!disposed) doc.dispatchEvent(new win.Event('lab:layout-changed')); } }));
+    controllers.push(sentiment = mountSentimentScenes({ doc, win, composition: current, wedding, enabled }));
+    controllers.push(extras = mountOptionalScenes({ doc, win, composition: current, wedding, enabled }));
     controllers.push(mountSectionOrder({ doc, composition: current }));
     controllers.push(experience = mountExperience({ doc, win, gallery, enabled, variant: 'f', includeGallery: false, includeUpper: false }));
     controllers.push(utilities = mountUtilityScenes({ doc, win, enabled, composition: current }));
     controllers.push(upper = mountUpperScenes({ doc, win, enabled, composition: current }));
     controllers.push(content = mountContentScenes({ doc, win, gallery, enabled, composition: current }));
-    controllers.push(scroll = mountScrollEffects({ doc, win, enabled, mode: current.motion }));
+    controllers.push(scroll = mountScrollEffects({ doc, win, enabled, mode: current.motion, speed: current.motionSpeed, strength: current.motionStrength }));
     updateMotion();
   } catch (error) { controllers.reverse().forEach(controller => controller.destroy()); throw error; }
   return {

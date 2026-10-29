@@ -1,0 +1,79 @@
+/* Optional chapters reuse the invitation's selected paper, ink and locally hosted fonts. */
+.optional-section{background:var(--paper);scroll-margin-top:24px}
+.optional-section .section-title{margin-bottom:32px}
+.optional-section .section-title h2{font-size:clamp(42px,10vw,62px)}
+.optional-section .section-title>p:last-child{font-size:15px;line-height:1.9;word-break:keep-all}
+.optional-section :is(a,button,summary,label){-webkit-tap-highlight-color:transparent}
+.optional-section a:focus-visible,.optional-section summary:focus-visible,.day-check-row:focus-within{outline:2px solid var(--accent);outline-offset:5px}
+.guest-guide-section{background:linear-gradient(var(--paper),var(--soft),var(--paper))}
+.guide-questions{border-top:1px solid var(--line)}
+.guide-question{border-bottom:1px solid var(--line);min-width:0}
+.guide-question summary{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:64px;padding:15px 2px;cursor:pointer;list-style:none;font-family:var(--font-title);font-size:15px;line-height:1.75}
+.guide-question summary::-webkit-details-marker{display:none}
+.guide-question-mark{display:grid;place-items:center;flex:none;width:30px;height:30px;color:var(--accent);font:25px var(--roman)}
+.guide-question[open] .guide-question-mark{transform:rotate(45deg)}
+.guide-answer{font-size:14px;line-height:2.1;white-space:pre-line;word-break:keep-all;overflow-wrap:anywhere;color:var(--muted);padding:0 34px 23px 2px}
+.guide-question[open] summary{color:var(--accent)}
+.optional-section-link{display:flex;align-items:center;justify-content:center;gap:18px;min-height:48px;width:max-content;max-width:100%;margin:25px auto 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--accent)}
+.optional-section-link span{font-size:21px}
+.guest-guide-section[data-optional-layout=cards] .guide-questions{display:grid;gap:13px;border:0}
+.guest-guide-section[data-optional-layout=cards] .guide-question{background:color-mix(in srgb,var(--paper) 82%,transparent);border:1px solid var(--line);padding:0 18px;border-radius:2px}
+.guest-guide-section[data-optional-layout=cards] .guide-question summary{min-height:62px;padding-bottom:10px;cursor:default}
+.guest-guide-section[data-optional-layout=cards] .guide-question-mark{display:none}
+.guest-guide-section[data-optional-layout=cards] .guide-answer{padding-right:20px}
+.day-checklist-section{background:var(--paper)}
+.day-checklist-status{display:flex;align-items:center;justify-content:space-between;gap:18px;font-size:13px;color:var(--muted);margin:0 0 15px}
+.day-checklist-status span{word-break:keep-all}
+.day-checklist-status progress{flex:none;width:64px;height:3px;border:0;background:var(--line);color:var(--accent);accent-color:var(--accent);appearance:none}
+.day-checklist-status progress::-webkit-progress-bar{background:var(--line)}
+.day-checklist-status progress::-webkit-progress-value{background:var(--accent)}
+.day-checklist-status progress::-moz-progress-bar{background:var(--accent)}
+.day-check-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.day-check-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);min-width:0}
+.day-check-row label{display:flex;align-items:center;gap:14px;min-height:60px;cursor:pointer;font-size:15px;flex:1;min-width:0;word-break:keep-all}
+.day-check-row input{position:absolute;opacity:0;width:1px;height:1px}
+.day-check-mark{display:grid;place-items:center;width:22px;height:22px;flex:none;border:1px solid var(--line);border-radius:50%;color:var(--accent);font:15px var(--font)}
+.day-check-mark:after{content:'✓';opacity:0}
+.day-check-row input:checked+.day-check-mark{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.day-check-row input:checked+.day-check-mark:after{opacity:1}
+.day-check-row input:checked~.day-check-copy{color:var(--accent)}
+.day-check-row a{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;color:var(--accent);font:23px var(--roman)}
+.day-check-number{display:none;font:27px var(--roman);color:var(--accent);line-height:1}
+.day-check-note{font-size:12px;line-height:1.85;color:var(--muted);margin-top:22px;text-align:center;word-break:keep-all}
+.day-checklist-section[data-optional-layout=steps] .day-check-list{border:0;position:relative}
+.day-checklist-section[data-optional-layout=steps] .day-check-list:before{content:'';position:absolute;top:38px;bottom:38px;left:15px;width:1px;background:var(--line);pointer-events:none}
+.day-checklist-section[data-optional-layout=steps] .day-check-row{position:relative;border-bottom:0;padding:8px 0 8px 48px;min-height:92px}
+.day-checklist-section[data-optional-layout=steps] .day-check-number{display:grid;place-items:center;position:absolute;left:0;top:50%;transform:translateY(-50%);width:32px;min-height:40px;background:var(--paper)}
+.keepsake-section{background:linear-gradient(var(--paper),var(--soft))}
+.keepsake-card{position:relative;background:var(--paper);border:1px solid var(--line);text-align:center;padding:36px 24px 28px;overflow:hidden}
+.keepsake-overline{font:9px var(--roman);letter-spacing:.21em;color:var(--muted)}
+.keepsake-names{font:500 23px/1.8 var(--font-title);letter-spacing:.12em;margin:16px 0;color:var(--ink)}
+.keepsake-date{font:28px/1.7 var(--roman);color:var(--accent);letter-spacing:.04em}
+.keepsake-time{font-size:14px;margin:2px 0 22px;color:var(--muted)}
+.keepsake-rule{height:1px;border-top:1px dashed var(--line);margin:24px -24px 20px}
+.keepsake-place{font-family:var(--font-title);font-size:16px;line-height:1.9;word-break:keep-all}
+.keepsake-room{font-size:14px;color:var(--accent);margin-top:4px}
+.keepsake-address{font-size:12px;line-height:1.9;color:var(--muted);margin-top:12px;word-break:keep-all;overflow-wrap:anywhere}
+.keepsake-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px;margin-top:16px}
+.keepsake-actions :is(button,a){display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;font-size:13px;border-bottom:1px solid var(--line);color:var(--accent)}
+.keepsake-save{margin:24px auto 0;min-height:50px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--accent);font-size:15px;color:var(--accent)}
+.keepsake-save>span:last-child{font:23px var(--roman)}
+.keepsake-section[data-optional-layout=ticket] .keepsake-card:before,.keepsake-section[data-optional-layout=ticket] .keepsake-card:after{content:'';position:absolute;top:214px;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;background:var(--soft)}
+.keepsake-section[data-optional-layout=ticket] .keepsake-card:before{left:-12px}
+.keepsake-section[data-optional-layout=ticket] .keepsake-card:after{right:-12px}
+.keepsake-section[data-optional-layout=postcard] .keepsake-card{text-align:left;padding:36px 28px;border-width:1px 0;background:linear-gradient(135deg,var(--paper),var(--soft))}
+.keepsake-section[data-optional-layout=postcard] .keepsake-card:after{content:'With love';position:absolute;right:23px;top:26px;writing-mode:vertical-rl;color:var(--accent);font:29px var(--script);opacity:.65}
+.keepsake-section[data-optional-layout=postcard] .keepsake-rule{margin:22px 0;border-style:solid;width:48px}
+.keepsake-section[data-optional-layout=postcard] .keepsake-overline{padding-right:50px}
+.keepsake-section[data-optional-layout=postcard] .keepsake-names{padding-right:36px}
+.optional-effects .guide-question-mark,.optional-effects .day-check-mark{transition:transform .25s ease,background .25s ease,border-color .25s ease}
+.optional-effects .guide-question[open] .guide-answer{animation:optional-answer .3s ease-out}
+.optional-effects .day-check-row input:checked+.day-check-mark{animation:optional-check .3s ease-out}
+.optional-effects .keepsake-save:hover{transform:translateY(-2px)}
+@keyframes optional-answer{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes optional-check{50%{transform:scale(1.13)}}
+.quick-nav:has([data-optional-nav]:not([hidden])){flex-wrap:wrap;justify-content:center;gap:2px 18px}
+.large-text .optional-section :is(.guide-answer,.day-check-row label,.keepsake-place,.keepsake-save){font-size:17px}
+.large-text .optional-section :is(.guide-question summary,.keepsake-actions button,.keepsake-actions a){font-size:16px}
+@media(max-width:360px){.day-check-row label{font-size:14px;gap:11px}.day-check-row{gap:6px}.keepsake-card{padding-left:20px;padding-right:20px}.keepsake-date{font-size:26px}.keepsake-names{font-size:21px}.keepsake-section[data-optional-layout=postcard] .keepsake-card{padding-left:23px;padding-right:23px}}
+@media(prefers-reduced-motion:reduce){.optional-section *{animation:none!important;transition:none!important}}

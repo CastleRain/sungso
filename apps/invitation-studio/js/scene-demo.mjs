@@ -1,20 +1,21 @@
 import { CHOICES, CHOICE_KEYS, SECTION_IDS } from './composition.mjs';
+import { normalizeMotionValue } from './scroll-effects.mjs';
 
-const names = Object.freeze({ palette: '색감', font: '글씨체', motion: '공통 스크롤', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴' });
+const names = Object.freeze({ palette: '색감', font: '글씨체', motion: '공통 스크롤', spacing: '장면 사이 여백', divider: '장면 구분', cover: '첫 화면', opening: '첫 손글씨', intro: '초대글 · 가족 소개', date: '예식 날짜', story: '우리의 이야기', album: '사진첩', arrival: '오시는 길', gifting: '마음 전하실 곳', wishes: '축하의 편지', navigation: '빠른 메뉴', guestGuide: '하객 안내', checklist: '당일 체크리스트', keepsake: '간직하는 초대', promiseStyle: '우리의 약속', noteStyle: '우리의 한 문장', thanksStyle: '감사 인사' });
 const interactions = new Set(['album', 'arrival', 'gifting', 'wishes']);
 const interactionTargets = Object.freeze({ album: '.album-feature', arrival: '.journey', gifting: '.account-panel-frame', wishes: '#guestbook-write' });
 const finite = value => Number.isFinite(value) ? value : 0;
 const clamp = (value, end) => Math.max(0, Math.min(Math.max(0, finite(end)), finite(value)));
 
 /** Stable scene coordinates, independent of the selected effect and its transforms. */
-export function demoRoute({ key, top = 0, height = 0, nextTop, interactionTop, viewport = 800, maxScroll = Infinity } = {}) {
+export function demoRoute({ key, top = 0, height = 0, nextTop, interactionTop, viewport = 800, maxScroll = Infinity, speed = 1 } = {}) {
   const limit = Number.isFinite(maxScroll) ? maxScroll : Number.MAX_SAFE_INTEGER;
   const at = value => clamp(value, limit), view = Math.max(1, finite(viewport));
   const resting = at(top - 20);
-  if (key === 'palette' || key === 'font') return { start: resting, end: resting, duration: 0, interactionAt: null };
+  if (['palette', 'font', 'spacing', 'divider'].includes(key)) return { start: resting, end: resting, duration: 0, interactionAt: null };
   if (key === 'opening') return { start: at(top), end: at(top), duration: 3000, interactionAt: null };
   if (key === 'cover') return { start: at(top), end: at(top + Math.min(Math.max(height, view) * .65, view * .65)), duration: 2600, interactionAt: null };
-  if (key === 'motion') return { start: at(top - view * .82), end: at((Number.isFinite(nextTop) ? nextTop : top + height) - 20), duration: 2600, interactionAt: null };
+  if (key === 'motion') return { start: at(top - view * .82), end: at((Number.isFinite(nextTop) ? nextTop : top + height) - 20), duration: 2600 / normalizeMotionValue(speed), interactionAt: null };
   if (key === 'navigation') return { start: resting, end: at((Number.isFinite(nextTop) ? nextTop : top + height) - 20), duration: 2600, interactionAt: null };
   return {
     start: at(top - view * .78),
@@ -49,7 +50,7 @@ export function createSceneDemo({ doc = document, win = window, controller, onSt
   function label(request) {
     const composition = getController()?.composition;
     const choice = CHOICES[request.key]?.find(item => item.id === composition?.[request.key]);
-    return `${names[request.key]}${choice ? ` · ${choice.label}` : ''}`;
+    return `${names[request.key]}${choice ? ` · ${choice.label}` : ''}${request.key === 'motion' ? ` · 속도 ${composition.motionSpeed}× · 강도 ${composition.motionStrength}×` : ''}`;
   }
   function emit(request, phase, reason) {
     if (!request) return;
@@ -129,7 +130,7 @@ export function createSceneDemo({ doc = document, win = window, controller, onSt
     const interactionSelector = request.key === 'album' && getController()?.composition?.album === 'grid' ? '#gallery-grid' : interactionTargets[request.key];
     const interaction = interactionSelector ? target.querySelector(interactionSelector) : null;
     const interactionBounds = interaction?.getBoundingClientRect();
-    const route = demoRoute({ key: request.key, top: topOf(target), height: target.getBoundingClientRect().height, nextTop: next ? topOf(next) : undefined, interactionTop: interactionBounds?.height > 0 ? topOf(interaction) : undefined, viewport: win.innerHeight, maxScroll: Math.max(0, doc.documentElement.scrollHeight - win.innerHeight) });
+    const route = demoRoute({ key: request.key, top: topOf(target), height: target.getBoundingClientRect().height, nextTop: next ? topOf(next) : undefined, interactionTop: interactionBounds?.height > 0 ? topOf(interaction) : undefined, viewport: win.innerHeight, maxScroll: Math.max(0, doc.documentElement.scrollHeight - win.innerHeight), speed: getController()?.composition?.motionSpeed });
     const statically = cannotMove() || route.duration === 0;
     move(statically ? Math.max(0, topOf(target) - 20) : route.start);
     getController()?.refresh?.();

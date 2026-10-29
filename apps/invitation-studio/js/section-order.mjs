@@ -22,7 +22,7 @@ export function arrangeAroundAnchor(parent, nodes, anchor, tail) {
 export function mountSectionOrder({ doc = document, composition } = {}) {
   const main = doc.querySelector('main.paper');
   const tail = main?.querySelector('.closing-section');
-  const nodes = new Map(DEFAULT_ORDER.map(id => [id, doc.getElementById(id)]));
+  const nodes = new Map(ORDER_SECTIONS.map(({ id }) => [id, doc.getElementById(id)]));
   const firstLink = doc.querySelector('.hero-scroll');
   const originalLink = firstLink && [firstLink.getAttribute('href'), firstLink.getAttribute('aria-label')];
   const original = [...(main?.children || [])].filter(node => nodes.get(node.id) === node).map(node => node.id);
@@ -38,10 +38,10 @@ export function mountSectionOrder({ doc = document, composition } = {}) {
       before = link;
     }
   }
-  function apply(value) {
+  function apply(value, extras = []) {
     if (disposed || !main) return;
-    const order = normalizeOrder(value);
-    if (order.every((id, index) => id === current[index])) return;
+    const order = normalizeOrder(value, extras);
+    if (order.length === current.length && order.every((id, index) => id === current[index])) return;
     const active = doc.activeElement;
     const orderedNodes = order.map(id => nodes.get(id)).filter(node => node?.parentNode === main);
     arrangeAroundAnchor(main, orderedNodes, nodes.get('location'), tail);
@@ -52,10 +52,10 @@ export function mountSectionOrder({ doc = document, composition } = {}) {
     if (active?.isConnected && doc.activeElement !== active) active.focus?.({ preventScroll: true });
     current = order;
   }
-  apply(composition?.order);
+  apply(composition?.order, composition?.extras);
   return {
-    setComposition(next) { apply(next?.order); },
+    setComposition(next) { apply(next?.order, next?.extras); },
     setEnabled() {}, refresh() {},
-    destroy() { if (disposed) return; apply(original); disposed = true; if (originalLink) { firstLink.setAttribute('href', originalLink[0]); firstLink.setAttribute('aria-label', originalLink[1]); } },
+    destroy() { if (disposed) return; apply(original, original.filter(id => !DEFAULT_ORDER.includes(id))); disposed = true; if (originalLink) { firstLink.setAttribute('href', originalLink[0]); firstLink.setAttribute('aria-label', originalLink[1]); } },
   };
 }

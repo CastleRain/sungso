@@ -4,6 +4,8 @@ export const APPEARANCE_PALETTES = Object.freeze(Object.fromEntries(Object.entri
   azure: { label: '맑은 블루', paper: '#fbfdff', ink: '#243b50', accent: '#285fa0', muted: '#566f86', line: '#d6e3f1', soft: '#edf4fb', outer: '#e6edf5', surface: '#ffffff', tint: '#e3eefb', night: '#16374f' },
   rose: { label: '로즈 화이트', paper: '#fffdfd', ink: '#493a41', accent: '#8c5166', muted: '#79616c', line: '#eadce2', soft: '#faf0f3', outer: '#f2eaee', surface: '#ffffff', tint: '#f4e4eb', night: '#44313b' },
   midnight: { label: '밤빛 네이비', paper: '#fcfdff', ink: '#24334c', accent: '#324c78', muted: '#596b84', line: '#d8e0eb', soft: '#edf1f7', outer: '#e5eaf2', surface: '#ffffff', tint: '#e1e8f3', night: '#1c2d46' },
+  lilac: { label: '라일락 안개', paper: '#fefcff', ink: '#3c344b', accent: '#6e508f', muted: '#70617d', line: '#e1d9eb', soft: '#f3eff9', outer: '#ede8f2', surface: '#ffffff', tint: '#e9e1f2', night: '#30263e' },
+  mono: { label: '모노 화이트', paper: '#fdfdfd', ink: '#2f353b', accent: '#414b57', muted: '#626c76', line: '#dde1e5', soft: '#f0f2f4', outer: '#e8ebee', surface: '#ffffff', tint: '#e5e9ed', night: '#252c33' },
 }).map(([key, value]) => [key, Object.freeze(value)])));
 
 export const APPEARANCE_FONTS = Object.freeze({
@@ -16,11 +18,14 @@ export function appearanceChoices(value) {
   return {
     palette: typeof value?.palette === 'string' && Object.hasOwn(APPEARANCE_PALETTES, value.palette) ? value.palette : 'mist',
     font: typeof value?.font === 'string' && Object.hasOwn(APPEARANCE_FONTS, value.font) ? value.font : 'letter',
+    spacing: ['compact', 'balanced', 'airy'].includes(value?.spacing) ? value.spacing : 'balanced',
+    divider: ['none', 'line', 'chapter'].includes(value?.divider) ? value.divider : 'none',
   };
 }
 
 export function mountAppearance({ doc = document, win = window, composition, onLayout = () => {} } = {}) {
-  const body = doc.body, originalData = { palette: body.dataset.palette, font: body.dataset.font };
+  const body = doc.body, dataKeys = ['palette', 'font', 'spacing', 'divider'];
+  const originalData = Object.fromEntries(dataKeys.map(key => [key, body.dataset[key]]));
   const tokens = Object.keys(APPEARANCE_PALETTES.mist).filter(key => key !== 'label');
   const originalTokens = tokens.map(key => [key, body.style.getPropertyValue(`--${key}`), body.style.getPropertyPriority(`--${key}`)]);
   const waits = new Set();
@@ -49,9 +54,11 @@ export function mountAppearance({ doc = document, win = window, composition, onL
   function setComposition(value) {
     if (disposed) return Promise.resolve(false);
     const next = appearanceChoices(value), previousFont = current?.font;
+    const layoutChanged = current && (current.spacing !== next.spacing || current.divider !== next.divider);
     current = next;
-    body.dataset.palette = next.palette; body.dataset.font = next.font;
+    for (const key of dataKeys) body.dataset[key] = next[key];
     for (const key of tokens) body.style.setProperty(`--${key}`, APPEARANCE_PALETTES[next.palette][key]);
+    if (layoutChanged) onLayout();
     if (previousFont !== next.font) ready = loadFont(next.font);
     return ready;
   }
@@ -65,7 +72,7 @@ export function mountAppearance({ doc = document, win = window, composition, onL
       if (disposed) return;
       disposed = true; generation++;
       for (const wait of [...waits]) wait.finish(false);
-      for (const key of ['palette', 'font']) {
+      for (const key of dataKeys) {
         if (originalData[key] === undefined) delete body.dataset[key]; else body.dataset[key] = originalData[key];
       }
       for (const [key, value, priority] of originalTokens) {

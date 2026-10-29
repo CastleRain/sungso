@@ -17,6 +17,9 @@ test('studio is additive to all 205 verified files and cannot publish real-data 
   assert.ok(added.length > 20);
   assert.ok(added.every(item => item.startsWith('lab/studio/')));
   assert.ok(!added.some(item => /\.(mp3|woff2|ttf)$/.test(item)));
+  for (const file of ['js/optional-scenes.mjs', 'css/optional-scenes.css', 'js/sentiment-scenes.mjs', 'css/sentiment-scenes.css']) {
+    assert.ok(added.includes(`lab/studio/${file}`), `new scenes must stay in the isolated Studio: ${file}`);
+  }
   const app = (await loadRegistry()).apps.find(item => item.id === 'invitation-studio');
   assert.equal(app.output, 'lab/studio'); assert.ok(app.files.includes('preview'));
   assert.ok(!app.files.some(item => ['src', 'scripts', 'tests', 'accounts.html', 'manage.html'].includes(item)));
@@ -24,6 +27,12 @@ test('studio is additive to all 205 verified files and cannot publish real-data 
   assert.match(preview, /data-variant="f"/); assert.match(preview, /data-mode="demo"/);
   for (const section of ['wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook']) assert.ok(preview.includes(`id="${section}"`));
   assert.match(preview, /connect-src 'self'/); assert.match(preview, /form-action 'none'/);
+  for (const id of ['guest-guide', 'day-checklist', 'keepsake']) {
+    const tag = preview.match(new RegExp(`<section\\b[^>]*\\bid="${id}"[^>]*>`))?.[0];
+    assert.ok(tag && /\bhidden(?:\s|>)/.test(tag), `${id} must not flash before the composition is applied`);
+    const link = preview.match(new RegExp(`<a\\b[^>]*data-optional-nav="${id}"[^>]*>`))?.[0];
+    assert.ok(link && /\bhidden(?:\s|>)/.test(link), `${id} quick link starts hidden`);
+  }
   const event = await readFile(path.join(built.distDir, 'lab/studio/preview/wedding.ics'), 'utf8');
   assert.match(event, /URL:https:\/\/sungso-wedding\.vercel\.app\/lab\/studio\/preview\//);
   const oldFile = path.join(built.distDir, 'lab/experience/f/index.html'), original = await readFile(oldFile, 'utf8');

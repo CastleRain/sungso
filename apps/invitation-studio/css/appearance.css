@@ -92,3 +92,21 @@ body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story .story-c
 body[data-palette]:not([data-palette=mist])[data-story=cafe] #our-story .story-copy:after{background:var(--accent)}
 body[data-palette]:not([data-palette=mist])[data-album=grid] #gallery-grid .gallery-photo{background:var(--surface);border-color:var(--line)}
 body[data-palette]:not([data-palette=mist]) :is(.album-sheet,.album-feature){background:var(--surface)}
+
+/* Spacing changes only the reading chapters. Balanced is deliberately absent:
+   old combinations keep the exact scene geometry, including the cover and ending.
+   Preserve horizontal padding and type sizes at every viewport. */
+body[data-spacing=compact] main.paper>.section:not(.hero):not(.closing-section){padding-block:48px}
+body[data-spacing=airy] main.paper>.section:not(.hero):not(.closing-section){padding-block:clamp(88px,14vw,112px)}
+
+/* Chapter dividers belong to sections, not their animated inner content. Existing
+   letter/ribbon pseudo-elements and the fixed navigation remain independent.
+   The counter follows the actual DOM order and skips hidden optional chapters. */
+body[data-divider=chapter] main.paper{counter-reset:invitation-chapter}
+body[data-divider=chapter] main.paper>.section:not(.hero):not(.closing-section):not([hidden]){counter-increment:invitation-chapter}
+body:is([data-divider=line],[data-divider=chapter]) main.paper>.section:not(.hero):not(.closing-section):not([hidden])::before{position:absolute;pointer-events:none;color:var(--muted);z-index:1}
+body[data-divider=line] main.paper>.section:not(.hero):not(.closing-section):not([hidden])::before{content:"";inset:0 24px auto;height:1px;background:linear-gradient(90deg,transparent,var(--line) 20%,var(--line) 80%,transparent)}
+body[data-divider=chapter] main.paper>.section:not(.hero):not(.closing-section):not([hidden])::before{content:counter(invitation-chapter,decimal-leading-zero);inset:16px 24px auto;text-align:center;font:13px/1.4 var(--roman);letter-spacing:.16em;font-variant-numeric:tabular-nums}
+body[data-divider=chapter][data-story=constellation] main.paper>#our-story::before{color:var(--paper)}
+body[data-divider=line][data-story=constellation] main.paper>#our-story::before{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--paper) 30%,transparent),transparent)}
+@media(min-width:768px){body[data-spacing=compact] main.paper>.section:not(.hero):not(.closing-section){padding-block:52px}}

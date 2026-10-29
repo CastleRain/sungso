@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mountScrollEffects, normalizeScrollEffect, scrollEntrance, SCROLL_EFFECTS } from '../js/scroll-effects.mjs';
+import { mountScrollEffects, normalizeMotionValue, normalizeScrollEffect, scrollEntrance, SCROLL_EFFECTS } from '../js/scroll-effects.mjs';
 
 class Node extends EventTarget {
   constructor() {
@@ -38,6 +38,17 @@ test('scroll modes are allowlisted and entrance progress is finite, bounded and 
   assert.equal(scrollEntrance(NaN, 800), 1); assert.equal(scrollEntrance(50, 0), 1);
   const values = [900, 700, 500, 300, 0, -400].map(top => scrollEntrance(top, 800));
   assert.ok(values.every((value, index) => value >= 0 && value <= 1 && (!index || value >= values[index - 1])));
+});
+
+test('hidden optional scenes do not become read before they are enabled', () => {
+  const f = fixture({ mode: 'drift' });
+  f.second.parentElement.hidden = true; f.second.parentElement.top = 0;
+  f.flush();
+  const cleanup = f.controller.prepareDemo('cover'); cleanup();
+  f.second.parentElement.hidden = false; f.second.parentElement.top = 1400;
+  f.controller.refresh(); f.flush();
+  assert.equal(Math.abs(parseFloat(f.second.values.get('--global-scroll-x'))), 44);
+  f.controller.destroy();
 });
 
 test('drift alternates with current section order and settles to the exact original position', () => {
@@ -241,5 +252,70 @@ test('demo cleanup leaves visible content readable without consuming unread prog
   f.controller.setEnabled(true); f.flush();
   assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
   assert.equal(f.second.values.get('--global-scroll-opacity'), '0.68');
+  f.controller.destroy();
+});
+
+test('speed and strength accept bounded quarter steps and entrance speed never changes its endpoints', () => {
+  for (const value of [undefined, null, '0.5', {}, NaN, Infinity]) assert.equal(normalizeMotionValue(value), 1);
+  assert.equal(normalizeMotionValue(-100), .5); assert.equal(normalizeMotionValue(100), 1.5);
+  assert.equal(normalizeMotionValue(.64), .75); assert.equal(normalizeMotionValue(1.13), 1.25);
+  const middle = [0.5, 1, 1.5].map(speed => scrollEntrance(504, 800, speed));
+  assert.ok(middle[0] < middle[1] && middle[1] < middle[2]);
+  for (const speed of [.5, .75, 1, 1.25, 1.5]) {
+    const values = [900, 752, 640, 504, 350, 256, 0].map(top => scrollEntrance(top, 800, speed));
+    assert.equal(values[0], 0); assert.equal(values.at(-1), 1);
+    assert.ok(values.every((value, index) => value >= 0 && value <= 1 && (!index || value >= values[index - 1])));
+  }
+});
+
+test('strength scales actual travel, zoom and blur while preserving readable opacity and a bounded veil', () => {
+  for (const strength of [.5, 1.5]) {
+    const f = fixture({ mode: 'focus', strength }); f.flush();
+    assert.equal(parseFloat(f.second.values.get('--global-scroll-y')), 44 * strength);
+    assert.equal(Number(f.second.values.get('--global-scroll-scale')), 1 - .1 * strength);
+    assert.equal(parseFloat(f.second.values.get('--global-scroll-blur')), 3.5 * strength);
+    assert.equal(Number(f.second.values.get('--global-scroll-breathe')), 1 + .09 * strength);
+    assert.equal(Number(f.second.values.get('--global-scroll-veil')), Math.min(.85, .72 * strength));
+    assert.ok(Number(f.second.values.get('--global-scroll-opacity')) >= .5);
+    f.second.parentElement.top = 0; f.fire(f.win, 'scroll'); f.flush();
+    for (const property of ['--global-scroll-opacity', '--global-scroll-scale', '--global-scroll-breathe']) assert.equal(f.second.values.get(property), '1');
+    assert.equal(f.second.values.get('--global-scroll-y'), '0px'); assert.equal(f.second.values.get('--global-scroll-blur'), '0px');
+    f.controller.destroy();
+  }
+});
+
+test('composition tuning reuses content and cancels old replay while applying slow strong replay timings', () => {
+  const f = fixture({ mode: 'unveil' }); f.flush();
+  f.controller.replay('invitation'); const old = f.first.animations.slice();
+  f.controller.setComposition({ motionSpeed: .5, motionStrength: 1.5 }); f.flush();
+  assert.ok(old.every(animation => animation.cancelled));
+  assert.equal(f.nodes[0], f.first); assert.equal(f.nodes[1], f.second);
+  assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+  assert.equal(f.second.values.get('--global-scroll-y'), '66px');
+  f.controller.replay('gallery');
+  const content = f.second.animations.at(-2), veil = f.second.animations.at(-1);
+  assert.equal(content.options.duration, 1300); assert.equal(veil.options.duration, 1600);
+  assert.equal(content.frames[0].opacity, .52); assert.equal(veil.frames[0].opacity, .85);
+  f.controller.setMode('focus'); f.controller.replay('invitation');
+  const focus = f.first.animations.at(-1);
+  assert.equal(focus.frames[0].scale, .85); assert.equal(focus.frames[0].filter, 'blur(5.25px)');
+  f.fire(f.doc, 'pointerdown', f.first); assert.equal(focus.cancelled, true);
+  f.controller.setComposition({ motionSpeed: 1.5, motionStrength: .5 }); f.controller.replay('invitation');
+  assert.equal(f.first.animations.at(-1).options.duration, 650 / 1.5);
+  assert.equal(f.first.animations.at(-1).frames[0].scale, .95);
+  f.controller.destroy();
+});
+
+test('slow strong tuning retains reduced-motion safety and the entrance of sections never visited by the demo', () => {
+  const f = fixture({ mode: 'focus', speed: .5, strength: 1.5 }); f.flush();
+  const restore = f.controller.prepareDemo('motion');
+  f.first.parentElement.top = 20; f.fire(f.win, 'scroll'); f.flush(); restore();
+  assert.equal(f.first.values.get('--global-scroll-opacity'), '1');
+  assert.equal(f.second.values.get('--global-scroll-opacity'), '0.52');
+  f.reduced.matches = true; f.fire(f.reduced, 'change');
+  f.controller.setComposition({ motionSpeed: .5, motionStrength: 1.5 });
+  assert.equal(f.frames.size, 0); assert.equal(f.controller.replay('gallery'), false);
+  assert.equal(f.second.values.get('--global-scroll-opacity'), '1');
+  assert.equal(f.second.values.get('--global-scroll-blur'), '0px');
   f.controller.destroy();
 });

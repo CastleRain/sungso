@@ -1,10 +1,14 @@
 /** Global reading rhythm, independent from a section's chosen illustration or interaction. */
 export const SCROLL_EFFECTS = Object.freeze(['signature', 'rise', 'focus', 'drift', 'unveil', 'breathe', 'still']);
 export const normalizeScrollEffect = value => SCROLL_EFFECTS.includes(value) ? value : 'signature';
+export const normalizeMotionValue = value => typeof value === 'number' && Number.isFinite(value)
+  ? Math.round(Math.min(1.5, Math.max(.5, value)) * 4) / 4 : 1;
 
-export function scrollEntrance(top, viewport) {
+export function scrollEntrance(top, viewport, speed = 1) {
   if (!Number.isFinite(top) || !Number.isFinite(viewport) || viewport <= 0) return 1;
-  const p = Math.max(0, Math.min(1, (viewport * .94 - top) / Math.max(180, viewport * .62)));
+  // The native viewport always follows the user's input. Speed changes how far
+  // the entrance has unfolded at the same scroll position, never wheel/touch rate.
+  const p = Math.max(0, Math.min(1, (viewport * .94 - top) / Math.max(180, viewport * .62))) ** (1 / normalizeMotionValue(speed));
   return p * p * (3 - 2 * p);
 }
 
@@ -12,12 +16,13 @@ const properties = ['--global-scroll-opacity', '--global-scroll-y', '--global-sc
 const animatedModes = new Set(['rise', 'focus', 'drift', 'unveil', 'breathe']);
 
 /** Scroll/resize requests one frame only; read sections never fade away again. */
-export function mountScrollEffects({ doc = document, win = window, enabled = true, mode = 'signature' } = {}) {
+export function mountScrollEffects({ doc = document, win = window, enabled = true, mode = 'signature', speed = 1, strength = 1 } = {}) {
   const body = doc.body, reduced = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   const previousMode = body.dataset.scrollEffect;
   const previousActive = body.classList.contains('global-scroll-active');
   const targets = new Map(), cleanups = [], animations = new Set();
   let requested = Boolean(enabled), current = normalizeScrollEffect(mode), frame = 0, disposed = false;
+  let currentSpeed = normalizeMotionValue(speed), currentStrength = normalizeMotionValue(strength);
   const listen = (node, type, callback, options) => {
     node?.addEventListener?.(type, callback, options);
     cleanups.push(() => node?.removeEventListener?.(type, callback, options));
@@ -28,13 +33,14 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
   function cancelAnimations() { animations.forEach(animation => animation.cancel()); animations.clear(); }
 
   function paint(node, progress) {
-    node.style.setProperty('--global-scroll-opacity', String(.68 + .32 * progress));
-    node.style.setProperty('--global-scroll-y', `${44 * (1 - progress)}px`);
-    node.style.setProperty('--global-scroll-scale', String(.9 + .1 * progress));
-    node.style.setProperty('--global-scroll-blur', `${3.5 * (1 - progress)}px`);
-    node.style.setProperty('--global-scroll-x', `${44 * (1 - progress) * (targets.get(node)?.direction || 1)}px`);
-    node.style.setProperty('--global-scroll-breathe', String(1 + .09 * (1 - progress)));
-    node.style.setProperty('--global-scroll-veil', String(.72 * (1 - progress)));
+    const remaining = 1 - progress, alpha = Math.round(Math.max(.5, 1 - .32 * currentStrength) * 10000) / 10000;
+    node.style.setProperty('--global-scroll-opacity', String(alpha + (1 - alpha) * progress));
+    node.style.setProperty('--global-scroll-y', `${44 * currentStrength * remaining}px`);
+    node.style.setProperty('--global-scroll-scale', String(1 - .1 * currentStrength * remaining));
+    node.style.setProperty('--global-scroll-blur', `${3.5 * currentStrength * remaining}px`);
+    node.style.setProperty('--global-scroll-x', `${44 * currentStrength * remaining * (targets.get(node)?.direction || 1)}px`);
+    node.style.setProperty('--global-scroll-breathe', String(1 + .09 * currentStrength * remaining));
+    node.style.setProperty('--global-scroll-veil', String(Math.min(.85, .72 * currentStrength) * remaining));
     node.style.setProperty('--global-scroll-wipe', `${100 * progress}%`);
   }
   function restore(node, record) {
@@ -58,7 +64,7 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
       node.classList.add('global-scroll-target');
     }
     // Reordering changes the reading rhythm, without replacing an existing target.
-    [...next].forEach((node, index) => { targets.get(node).direction = index % 2 ? 1 : -1; });
+    [...next].filter(node => !targets.get(node).section?.hidden).forEach((node, index) => { targets.get(node).direction = index % 2 ? 1 : -1; });
   }
   function readable() { for (const node of targets.keys()) paint(node, 1); }
   function render() {
@@ -66,9 +72,10 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     if (disposed) return;
     if (!active() || blocked()) { readable(); return; }
     for (const [node, record] of targets) {
+      if (record.section?.hidden) continue;
       // Measure the stable parent, never the transformed/blurred content itself.
       const top = record.section?.getBoundingClientRect().top;
-      record.progress = Math.max(record.progress, scrollEntrance(top, win.innerHeight));
+      record.progress = Math.max(record.progress, scrollEntrance(top, win.innerHeight, currentSpeed));
       if (record.progress > .995) record.progress = 1;
       paint(node, record.progress);
     }
@@ -99,28 +106,29 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
     const [node, record] = target;
     record.progress = 1; paint(node, 1);
     if (!node.animate) return false;
+    const alpha = Math.round(Math.max(.5, 1 - .32 * currentStrength) * 10000) / 10000;
     const frames = {
-      rise: [{ opacity: .68, translate: '0 44px' }, { opacity: 1, translate: '0 0' }],
-      focus: [{ opacity: .68, scale: .9, filter: 'blur(3.5px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)' }],
-      drift: [{ opacity: .68, translate: `${44 * record.direction}px 0` }, { opacity: 1, translate: '0 0' }],
-      unveil: [{ opacity: .78 }, { opacity: 1 }],
-      breathe: [{ opacity: .78, scale: 1.09 }, { opacity: 1, scale: 1 }],
+      rise: [{ opacity: alpha, translate: `0 ${44 * currentStrength}px` }, { opacity: 1, translate: '0 0' }],
+      focus: [{ opacity: alpha, scale: 1 - .1 * currentStrength, filter: `blur(${3.5 * currentStrength}px)` }, { opacity: 1, scale: 1, filter: 'blur(0px)' }],
+      drift: [{ opacity: alpha, translate: `${44 * currentStrength * record.direction}px 0` }, { opacity: 1, translate: '0 0' }],
+      unveil: [{ opacity: alpha }, { opacity: 1 }],
+      breathe: [{ opacity: alpha, scale: 1 + .09 * currentStrength }, { opacity: 1, scale: 1 }],
     }[current];
     const track = animation => {
       animations.add(animation);
       animation.finished?.then(() => animations.delete(animation), () => animations.delete(animation));
     };
     try {
-      const animation = node.animate(frames, { duration: 650, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none' });
+      const animation = node.animate(frames, { duration: 650 / currentSpeed, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none' });
       track(animation);
       if (current === 'unveil') {
         // Only the decorative pseudo-element is clipped. The readable, interactive
         // content remains intact, including in browsers without pseudo-element WAAPI.
         try {
           const veil = node.animate([
-            { opacity: .72, clipPath: 'inset(0 0 0 0%)' },
+            { opacity: Math.min(.85, .72 * currentStrength), clipPath: 'inset(0 0 0 0%)' },
             { opacity: 0, clipPath: 'inset(0 0 0 100%)' },
-          ], { duration: 800, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none', pseudoElement: '::after' });
+          ], { duration: 800 / currentSpeed, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'none', pseudoElement: '::after' });
           track(veil);
           // Older engines may silently ignore this option. Cancel synchronously
           // before the next paint rather than accidentally clipping the content.
@@ -143,6 +151,12 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
   refresh();
 
   return {
+    setComposition(value) {
+      if (disposed) return;
+      currentSpeed = normalizeMotionValue(value?.motionSpeed);
+      currentStrength = normalizeMotionValue(value?.motionStrength);
+      refresh();
+    },
     setMode(value) {
       if (disposed) return;
       const next = normalizeScrollEffect(value);
@@ -168,6 +182,7 @@ export function mountScrollEffects({ doc = document, win = window, enabled = tru
         // Settle what is on screen or was already read. Do not consume the entrance
         // of unread sections below the viewport merely because a demo finished.
         for (const [node, record] of targets) {
+          if (record.section?.hidden) { record.progress = before.get(node) || 0; paint(node, record.progress); continue; }
           const top = record.section?.getBoundingClientRect().top;
           record.progress = !Number.isFinite(top) || top < win.innerHeight ? 1 : before.get(node) || 0;
           paint(node, active() && !blocked() ? record.progress : 1);

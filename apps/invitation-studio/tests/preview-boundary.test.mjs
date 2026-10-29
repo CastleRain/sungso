@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { studioMessage, STUDIO_SECTIONS } from '../js/studio-preview.mjs';
-import { DEFAULT_COMPOSITION, compositionParams, SECTION_IDS } from '../js/composition.mjs';
+import { DEFAULT_COMPOSITION, compositionParams, SECTION_IDS, OPTIONAL_SECTIONS } from '../js/composition.mjs';
 import { validateCardUrls } from '../js/invitation-card.mjs';
 import { createDemoAdapter } from '../js/demo-data.mjs';
 
@@ -46,6 +46,20 @@ test('exported invitation card accepts only its own allowlisted composition URL'
   assert.equal(validateCardUrls(options).canonicalUrl, options.canonicalUrl);
   for (const canonicalUrl of [`${origin}/homehunt/`, `${options.canonicalUrl}&mode=production`, 'https://evil.test/lab/studio/preview/', `${origin}/lab/studio/preview/#other`]) assert.throws(() => validateCardUrls({ ...options, canonicalUrl }));
   assert.throws(() => validateCardUrls({ ...options, photoUrl: 'https://evil.test/photo.jpg' }));
+});
+
+test('card URL preserves bounded motion tuning and optional scenes without admitting data or extra queries', () => {
+  const composition = { ...DEFAULT_COMPOSITION, motionSpeed: .5, motionStrength: 1.5, spacing: 'airy', divider: 'chapter', extras: OPTIONAL_SECTIONS.map(section => section.id), guestGuide: 'cards', keepsake: 'postcard', thanksStyle: 'signature' };
+  const params = compositionParams(composition);
+  const options = { photoUrl: `${origin}/v6/assets/photos/date-1440.webp`, baseURI: `${origin}/lab/studio/preview/`, variant: 'f', canonicalUrl: `${origin}/lab/studio/preview/?${params}` };
+  assert.equal(validateCardUrls(options).canonicalUrl, options.canonicalUrl);
+  assert.equal(params.get('motionSpeed'), '0.5'); assert.equal(params.get('motionStrength'), '1.5');
+  assert.ok(params.get('extras').includes('guest-guide')); assert.ok(params.get('order').includes('keepsake'));
+  for (const [key, value] of [['motionSpeed', '0'], ['motionStrength', 'NaN'], ['motionStrength', '1.4'], ['extras', 'guest-guide,homehunt'], ['guestGuide', 'live'], ['mode', 'production'], ['endpoint', 'https://evil.test'], ['guestInfo', '{"parking":"invented"}']]) {
+    const changed = new URLSearchParams(params); changed.set(key, value);
+    assert.throws(() => validateCardUrls({ ...options, canonicalUrl: `${origin}/lab/studio/preview/?${changed}` }), key);
+  }
+  assert.throws(() => validateCardUrls({ ...options, canonicalUrl: `${options.canonicalUrl}&motionSpeed=0.5` }));
 });
 test('studio messages remain local and cannot reuse another experiment guestbook', async () => {
   const entries = new Map(), storage = { getItem: key => entries.get(key) ?? null, setItem: (key, value) => entries.set(key, value), removeItem: key => entries.delete(key) };

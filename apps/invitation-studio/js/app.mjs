@@ -7,7 +7,7 @@ import { setupGallery } from './gallery.mjs';
 import { setupAudio } from './audio.mjs';
 import { createInvitationCard } from './invitation-card.mjs';
 import { readComposition, compositionParams, CHOICES } from './composition.mjs';
-import { mountStudio, studioMessage } from './studio-preview.mjs';
+import { mountStudio, studioMessage, STUDIO_SECTIONS } from './studio-preview.mjs';
 import { scrollPreviewTo, afterPreviewScroll } from './preview-scroll.mjs';
 import { createSceneReview } from './scene-review.mjs';
 import { createSceneDemo } from './scene-demo.mjs';
@@ -35,7 +35,7 @@ syncCompositionLinks(composition);
 // Correct that one initial position only while the visitor has not taken control.
 const initialSectionHash = location.hash;
 const anchorInputEvents = ['pointerdown', 'touchstart', 'keydown', 'wheel'];
-let initialAnchorPending = ['invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook'].includes(initialSectionHash.slice(1));
+let initialAnchorPending = STUDIO_SECTIONS.includes(initialSectionHash.slice(1));
 function cancelInitialAnchor() {
   initialAnchorPending = false;
   anchorInputEvents.forEach(type => window.removeEventListener(type, cancelInitialAnchor, true));
@@ -148,7 +148,11 @@ function jumpTo(id, { replayOpening = false, reviewKey } = {}) {
 // A deliberate guest gesture takes precedence over any pending font/scroll wait.
 ['pointerdown', 'touchstart', 'wheel', 'keydown'].forEach(type => window.addEventListener(type, cancelPreviewJump, { capture: true, passive: true }));
 document.addEventListener('visibilitychange', () => { if (document.hidden) cancelPreviewJump(); });
-$$('[data-jump]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); jumpTo(link.hash.slice(1)); }));
+document.addEventListener('click', event => {
+  const link = event.target.closest?.('[data-jump]');
+  if (!link || link.hidden) return;
+  event.preventDefault(); jumpTo(link.hash.slice(1));
+});
 function updateCountdown() {
   const count = countdown(config.wedding.startsAt);
   $$('[data-count]').forEach(element => {
@@ -183,9 +187,10 @@ google.search = new URLSearchParams({ action: 'TEMPLATE', text: config.wedding.t
 $('#google-calendar').href = google.href;
 
 let cardUrl;
-$('#save-card').addEventListener('click', async event => {
+function setCardStatus(message) { $$('#save-card-status, [data-card-status]').forEach(node => { node.textContent = message; }); }
+async function saveInvitationCard(event) {
   const button = event.currentTarget; if (button.disabled) return; button.disabled = true;
-  $('#save-card-status').textContent = '사진과 글씨를 한 장에 담고 있어요.';
+  setCardStatus('사진과 글씨를 한 장에 담고 있어요.');
   try {
     const style = getComputedStyle(document.body);
     const result = await createInvitationCard({ wedding: config.wedding, photoUrl: new URL(`${config.assetBase}photos/date-1440.webp`, location.origin).href, variant, font: composition.font, themeName: document.title, canonicalUrl, colors: Object.fromEntries(['paper', 'ink', 'accent', 'muted', 'line'].map(key => [key, style.getPropertyValue(`--${key}`).trim()])) });
@@ -194,14 +199,15 @@ $('#save-card').addEventListener('click', async event => {
     let shared = false;
     if (navigator.canShare?.({ files: [file] })) {
       try { await navigator.share({ files: [file], title: '성우와 소희의 예식 안내' }); shared = true; }
-      catch (error) { if (error.name === 'AbortError') { $('#save-card-status').textContent = '공유를 취소했어요. 이미지는 아래에서 확인할 수 있어요.'; } }
+      catch (error) { if (error.name === 'AbortError') { setCardStatus('공유를 취소했어요. 이미지는 아래에서 확인할 수 있어요.'); } }
     }
     $('#card-preview').src = result.url; $('#card-download').href = result.url; $('#card-download').download = result.filename;
     if (!shared) openDialog('card-dialog', button);
-    $('#save-card-status').textContent = shared ? '예식 정보 이미지를 공유했어요.' : '이미지를 열었어요. 다운로드하거나 길게 눌러 저장해 주세요.';
-  } catch (error) { $('#save-card-status').textContent = error.message || '이미지를 만들지 못했어요. 연결을 확인하고 다시 시도해 주세요.'; }
+    setCardStatus(shared ? '예식 정보 이미지를 공유했어요.' : '이미지를 열었어요. 다운로드하거나 길게 눌러 저장해 주세요.');
+  } catch (error) { setCardStatus(error.message || '이미지를 만들지 못했어요. 연결을 확인하고 다시 시도해 주세요.'); }
   finally { button.disabled = false; }
-});
+}
+$$('#save-card, [data-save-card]').forEach(button => button.addEventListener('click', saveInvitationCard));
 $('#card-dialog').addEventListener('close', () => { if (cardUrl) { URL.revokeObjectURL(cardUrl); cardUrl = undefined; $('#card-preview').removeAttribute('src'); $('#card-download').removeAttribute('href'); } });
 
 function parentMessage(data) { if (comparison) window.parent.postMessage(data, location.origin); }
@@ -210,7 +216,7 @@ window.addEventListener('message', event => {
   if (!comparison || event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'invitation-lab:control') return;
   const { action, section, enabled } = event.data;
   if (action === 'audio' && typeof enabled === 'boolean') { audio.setAllowed(enabled); if (enabled) void audio.play(); else parentMessage({ type: 'invitation-lab:audio-state', playing: false, phase: 'paused' }); }
-  else if (action === 'section' && ['top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook'].includes(section)) jumpTo(section);
+  else if (action === 'section' && STUDIO_SECTIONS.includes(section)) jumpTo(section);
   else if (action === 'replay') { history.replaceState(null, '', `${location.pathname}${location.search}#top`); location.reload(); }
 });
 
@@ -219,7 +225,7 @@ featureResults.forEach((result, index) => {
   if (result.status === 'rejected') { console.error(`Invitation feature ${index} failed`, result.reason); toast('일부 체험 기능을 준비하지 못했어요. 새로고침해 주세요.'); }
 });
 try {
-  themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, composition, onChange: next => { if (!visualOnly) syncCompositionLinks(next); } });
+  themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, wedding: config.wedding, composition, onChange: next => { if (!visualOnly) syncCompositionLinks(next); } });
   requestAnimationFrame(() => themeController.refresh());
 } catch (error) { console.error('Invitation motion fallback', error); revealAll(); document.documentElement.classList.remove('js-motion'); }
 if (comparison && themeController) sceneDemo = createSceneDemo({
