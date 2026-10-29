@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { emptyDay, validateDay, summarizeDay, mergeDayImport } from '../../shared/journey/core.mjs';
 import { buildDayCandidates } from '../../shared/journey/playback-core.mjs';
+import { selectJourneyMotionScenes, prepareJourneyMotionScene } from '../../shared/journey/motion-core.mjs';
 import { jpegBytes } from '../invitation/server/album.mjs';
 
 export const JOURNEY_ROOT = 'journey_private/shared';
@@ -95,31 +96,43 @@ export function createJourneyStore({ db, now = Date.now }) {
       const snapshot = await dayRef(date).get();
       return dayState(snapshot.exists ? snapshot.data() : null, date);
     },
-    async playback({ from, to, after = null } = {}) {
+    async playback({ from, to, after = null, geometry = null, person = 'all' } = {}) {
       validDate(from); validDate(to);
+      if (geometry !== null && geometry !== 'motion') fail('INVALID_GEOMETRY', '재생할 기록 형식을 확인해주세요.');
+      if (!['all', 'sungwoo', 'sohee', 'together'].includes(person)) fail('INVALID_PERSON', '이동한 사람을 확인해주세요.');
+      const motion = geometry === 'motion';
+      const response = (days, nextCursor, motionScenes = []) => ({ days, nextCursor, ...(motion ? { format: 'journey-motion-v1', motionScenes } : {}) });
       if (from > to) fail('INVALID_RANGE', '시작 날짜가 마지막 날짜보다 늦어요. 기간을 확인해주세요.');
       if (after !== null) {
         validDate(after);
         if (after < from || after > to) fail('INVALID_CURSOR', '불러오던 기간이 달라졌어요. 기간을 다시 선택해주세요.');
-        if (after === to) return { days: [], nextCursor: null };
+        if (after === to) return response([], null);
       }
       // Document IDs are KST dates. The built-in document-name index needs no
       // new composite index and skips absent days without reading calendar gaps.
       let query = db.collection(`${JOURNEY_ROOT}/days`).orderBy('__name__').endAt(to).limit(PLAYBACK_PAGE_DAYS + 1);
       query = after === null ? query.startAt(from) : query.startAfter(after);
-      const snapshots = await query.get(), days = [];
-      let bytes = Buffer.byteLength('{"ok":true,"days":[],"nextCursor":"0000-00-00"}'), more = false;
+      const snapshots = await query.get(), days = [], motionScenes = [];
+      let bytes = Buffer.byteLength(JSON.stringify({ ok: true, ...response([], '0000-00-00') })), more = false;
       for (const snapshot of snapshots.docs) {
         if (days.length === PLAYBACK_PAGE_DAYS) { more = true; break; }
-        const summary = buildDayCandidates(dayState(snapshot.data(), snapshot.id));
-        const size = Buffer.byteLength(JSON.stringify(summary)) + (days.length ? 1 : 0);
+        const day = dayState(snapshot.data(), snapshot.id), summary = buildDayCandidates(day);
+        const candidate = motion ? selectJourneyMotionScenes([summary], { person })[0] : null;
+        let scene = candidate ? prepareJourneyMotionScene(candidate, day) : null;
+        const summarySize = Buffer.byteLength(JSON.stringify(summary)) + (days.length ? 1 : 0);
+        let size = summarySize
+          + (scene ? Buffer.byteLength(JSON.stringify(scene)) + (motionScenes.length ? 1 : 0) : 0);
         if (bytes + size > PLAYBACK_PAGE_BYTES) {
-          if (!days.length) fail('PLAYBACK_DAY_TOO_LARGE', '이날의 기록은 날짜 찾기에서 자세히 볼 수 있어요.', 413);
-          more = true; break;
+          if (days.length) { more = true; break; }
+          if (bytes + summarySize > PLAYBACK_PAGE_BYTES) fail('PLAYBACK_DAY_TOO_LARGE', '이날의 기록은 날짜 찾기에서 자세히 볼 수 있어요.', 413);
+          // Geometry is an optional acceleration. A valid saved day can expand
+          // beyond one page when summaries, members and records repeat labels.
+          // Keep its summary/cursor so clients prepare this day from /days/:date.
+          scene = null; size = summarySize;
         }
-        days.push(summary); bytes += size;
+        days.push(summary); if (scene) motionScenes.push(scene); bytes += size;
       }
-      return { days, nextCursor: more ? days.at(-1).date : null };
+      return response(days, more ? days.at(-1).date : null, motionScenes);
     },
     async save(date, input, uid) {
       if (!only(input, ['expectedRevision', 'day']) || !Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 0 || input.day?.date !== date) fail('INVALID_DAY', '최신 날짜 기록을 불러온 뒤 저장해 주세요.');

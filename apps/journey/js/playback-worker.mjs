@@ -1,10 +1,13 @@
 import { selectJourneyScenes, prepareJourneyScene } from '../../../shared/journey/playback-core.mjs';
+import { selectJourneyMotionScenes, prepareJourneyMotionScene } from '../../../shared/journey/motion-core.mjs?v=3.0.0';
 
 export function handleJourneyPlaybackMessage(data) {
   try {
     let result;
     if (data?.type === 'select') result = selectJourneyScenes(data.days, data.options);
     else if (data?.type === 'prepare') result = prepareJourneyScene(data.scene, data.day);
+    else if (data?.type === 'motion-select') result = selectJourneyMotionScenes(data.days, data.options);
+    else if (data?.type === 'motion-prepare') result = prepareJourneyMotionScene(data.scene, data.day);
     else throw Error('지원하지 않는 재생 준비 요청입니다.');
     return { requestId: data?.requestId, ok: true, result };
   } catch (error) {

@@ -91,3 +91,70 @@ test('large summaries stop at the response byte boundary and resume without loss
   assert.deepEqual(actual, expected);
   assert.equal(db.calls.writes, 0);
 });
+
+test('motion geometry includes every trip, person filtering and no private source content or writes', async () => {
+  const { db, store } = fixture(), date = '2026-10-09', time = Date.parse(date + 'T09:00:00+09:00');
+  const imports = ['sungwoo','sohee'].map(person => ({ id:'source-'+person, hash:'b'.repeat(64), name:'PRIVATE_FILENAME', person, importedAt:time }));
+  const tracks = Array.from({ length:20 },(_,index)=>({id:'trip-'+index,person:index%2?'sohee':'sungwoo',sourceId:imports[index%2].id,points:[
+    {lat:27,lng:179,time:time+index*60000},{lat:27,lng:-179,time:time+index*60000+30000},
+  ]}));
+  put(db,date,[memory('photo-day',{person:'sungwoo',position:{lat:27,lng:179}})],{imports,tracks,note:'PRIVATE_DAY_NOTE'});
+  const before=structuredClone([...db.documents]);
+  const result=await store.playback({from:date,to:date,geometry:'motion'});
+  assert.equal(result.format,'journey-motion-v1');assert.equal(result.motionScenes.length,1);
+  assert.equal(result.motionScenes[0].segments.length,20);
+  assert.equal(result.motionScenes[0].records[0].time,null);
+  assert.ok(result.motionScenes[0].bounds.east-result.motionScenes[0].bounds.west<3);
+  assert.doesNotMatch(JSON.stringify(result),/PRIVATE_|updatedBy|importedAt|sourceId|"hash"|"note"/);
+  const selected=await store.playback({from:date,to:date,geometry:'motion',person:'sohee'});
+  assert.equal(selected.motionScenes[0].segments.length,10);
+  assert.ok(selected.motionScenes[0].segments.every(segment=>segment.person==='sohee'));
+  assert.deepEqual([...db.documents],before);assert.equal(db.calls.writes,0);
+  await assert.rejects(store.playback({from:date,to:date,geometry:'all'}),{status:400});
+  await assert.rejects(store.playback({from:date,to:date,geometry:'motion',person:'unknown'}),{status:400});
+});
+
+test('motion pages count geometry in byte limits and resume without losing days or tracks', async () => {
+  const {db,store}=fixture(),expected=[];
+  for(let i=1;i<=35;i++){
+    const date=new Date(Date.UTC(2026,7,i)).toISOString().slice(0,10),time=Date.parse(date+'T09:00:00+09:00');expected.push(date);
+    const source={id:'source',hash:'c'.repeat(64),name:'PRIVATE_FILENAME',person:'sungwoo',importedAt:time};
+    put(db,date,[],{imports:[source],tracks:Array.from({length:20},(_,index)=>({id:'trip-'+index,person:'sungwoo',sourceId:'source',points:Array.from({length:150},(_,p)=>({lat:35+p*.001,lng:127+Math.sin(p)*.01,time:time+index*60000+p*100}))}))});
+  }
+  const dates=[],trackIds=[];let after=null,pages=0;
+  do{const page=await store.playback({from:expected[0],to:expected.at(-1),after,geometry:'motion'});
+    assert.ok(Buffer.byteLength(JSON.stringify({ok:true,...page}))<=PLAYBACK_PAGE_BYTES);
+    dates.push(...page.days.map(day=>day.date));trackIds.push(...page.motionScenes.flatMap(scene=>scene.segments.map(segment=>scene.date+':'+segment.id)));
+    after=page.nextCursor;assert.ok(++pages<36);
+  }while(after);
+  assert.deepEqual(dates,expected);assert.equal(new Set(trackIds).size,700);assert.ok(pages>2,'geometry must participate in page size');
+  assert.equal(db.calls.writes,0);
+});
+
+test('a legal large day falls back to its summary when optional motion geometry exceeds one page', async () => {
+  const { db, store } = fixture(), date = '2025-04-27';
+  // Valid within the 600 KiB saved-day contract. Repeated member/record labels
+  // make the optional prepared representation larger than the 2 MiB response.
+  const records = Array.from({ length: 770 }, (_, index) => memory(String(index).padEnd(160, 'x'), {
+    title: '장'.repeat(160), note: '', position: { lat: -70 + index * .1, lng: 127 },
+  }));
+  put(db, '2025-04-26', [memory('before')]); put(db, date, records); put(db, '2025-04-28', [memory('after')]);
+  const original = structuredClone([...db.documents]), raw = await store.day(date);
+  assert.ok(Buffer.byteLength(JSON.stringify(raw)) <= 600 * 1024);
+
+  const solo = await store.playback({ from: date, to: date, geometry: 'motion' });
+  assert.equal(solo.format, 'journey-motion-v1'); assert.equal(solo.days.length, 1);
+  assert.deepEqual(solo.motionScenes, []); assert.equal(solo.nextCursor, null);
+  assert.equal(solo.days[0].candidates.flatMap(candidate => candidate.recordIds).length, records.length);
+  assert.ok(Buffer.byteLength(JSON.stringify({ ok: true, ...solo })) <= PLAYBACK_PAGE_BYTES);
+  assert.deepEqual(await store.day(date), raw, 'the original remains available to the client fallback');
+
+  const first = await store.playback({ from: '2025-04-26', to: '2025-04-28', geometry: 'motion' });
+  assert.deepEqual(first.days.map(day => day.date), ['2025-04-26']); assert.equal(first.nextCursor, '2025-04-26');
+  const second = await store.playback({ from: '2025-04-26', to: '2025-04-28', geometry: 'motion', after: first.nextCursor });
+  assert.deepEqual(second.days.map(day => day.date), [date, '2025-04-28']); assert.equal(second.nextCursor, null);
+  assert.deepEqual(second.motionScenes.map(scene => scene.date), ['2025-04-28']);
+  assert.ok(Buffer.byteLength(JSON.stringify({ ok: true, ...second })) <= PLAYBACK_PAGE_BYTES);
+  assert.doesNotMatch(JSON.stringify(second), /PRIVATE_|updatedBy|sourceId|"note"/);
+  assert.deepEqual([...db.documents], original); assert.equal(db.calls.writes, 0);
+});

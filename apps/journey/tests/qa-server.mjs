@@ -63,6 +63,26 @@ export async function seedJourneyQa(store) {
   ]) await store.save(date, { expectedRevision: 0, day: { ...emptyDay(date), records: [sampleRecord('qa-memory-' + date, title, { person, position: { lat, lng }, ...(person === 'together' ? { kind: 'photo', photoId: SAMPLE_PHOTO_ID } : {}) })] } }, MEMBER.uid);
 }
 
+// Fictional international paths used only by the local memory server. These
+// coordinates describe test movement, not a real road or flight itinerary.
+export async function seedJourneyMotionQa(store) {
+  const routes = [
+    ['2026-10-05', [[37.5665,126.978],[36.35,127.38],[35.87,128.60],[35.18,129.08]]],
+    ['2026-10-06', [[35.18,129.08],[35.87,128.60],[36.35,127.38],[37.5665,126.978]]],
+    ['2026-10-07', [[37.5665,126.978],[36.5,131.0],[35.9,136.0],[35.68,139.76]]],
+    ['2026-10-08', [[35.68,139.76],[35.69,139.70],[35.71,139.81],[35.68,139.76]]],
+    ['2026-10-09', [[35.68,139.76],[32,165],[28,179],[27,-179],[21.31,-157.86]]],
+    ['2026-10-11', [[21.31,-157.86],[27,-145],[33,-132],[37.77,-122.42]]],
+    ['2026-10-12', [[37.77,-122.42],[37.80,-122.45],[37.81,-122.40],[37.77,-122.42]]],
+  ];
+  for (const [date, coordinates] of routes) for (const person of ['sungwoo','sohee']) {
+    const start = Date.parse(date+'T09:00:00+09:00') + (person==='sohee'?900000:0);
+    const source = { id:'qa-motion-'+person+'-'+date, hash:(person==='sungwoo'?'c':'d').repeat(64), name:'synthetic-motion.json', person, kind:'timeline', importedAt:TIME };
+    const points = coordinates.map(([lat,lng],index)=>({lat:lat+(person==='sohee'?.025:0),lng,time:start+index*3600000}));
+    await store.import(date,{source,records:[],tracks:[{id:'qa-motion-track-'+person+'-'+date,person,sourceId:source.id,points}]},MEMBER.uid);
+  }
+}
+
 const QA_ENTRY = `import { mountJourney } from '/sungso/journey/js/ui.mjs';
 const root=document.querySelector('[data-private-root]'),controllers=new Set();let disposed=false;
 root.hidden=false;
@@ -85,7 +105,7 @@ document.querySelector('#qaLogout').addEventListener('click',async()=>{await fet
 window.addEventListener('pagehide',dispose,{once:true});
 `;
 
-const QA_BAR = '<aside aria-label="로컬 검수 도구" style="padding:8px 18px;background:#edf7fe;color:#343b44;font:13px sans-serif;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span id="qaStatus">로컬 QA · 가상 자료 · 메모리 DB (서버 종료 시 삭제)</span><a href="/__qa/timeline.json" download="qa-timeline.json">검수용 타임라인 파일</a><a href="/__qa/photo.jpg" download="qa-photo.jpg">검수용 사진</a><button id="qaLogout" type="button">QA 로그아웃</button></aside>';
+const QA_BAR = '<style>@media(max-width:720px){.qa-file{display:none}}</style><aside aria-label="로컬 검수 도구" style="height:56px;box-sizing:border-box;padding:6px 12px;background:#edf7fe;color:#343b44;font:13px sans-serif;display:flex;gap:14px;align-items:center"><span id="qaStatus" style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">로컬 검수 · 가상 기록 · 메모리 DB</span><a class="qa-file" href="/__qa/timeline.json" download="qa-timeline.json">검수용 타임라인 파일</a><a class="qa-file" href="/__qa/photo.jpg" download="qa-photo.jpg">검수용 사진</a><button id="qaLogout" type="button" style="flex-shrink:0">QA 로그아웃</button></aside>';
 
 function json(res, status, data) { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); }
 async function readBody(req, maximum = 700 * 1024) {
@@ -96,7 +116,7 @@ async function readBody(req, maximum = 700 * 1024) {
 
 export function createJourneyQaServer({ distDir = path.join(ROOT, 'dist') } = {}) {
   const staticServer = createStaticServer({ distDir });
-  let db, store, api, seeded = false, seeding = null, failure = null, authorized = true, generation = 1;
+  let db, store, api, seeded = false, seeding = null, motionSeeded = false, failure = null, authorized = true, generation = 1;
   let history = [];
   function reset() {
     db = createMemoryFirestore();
@@ -106,7 +126,7 @@ export function createJourneyQaServer({ distDir = path.join(ROOT, 'dist') } = {}
       if (!authorized || req.headers.authorization !== 'Bearer qa-member') throw new JourneyError('AUTH_REQUIRED', '로컬 QA 로그인이 필요합니다.', 401);
       return MEMBER;
     } });
-    seeded = false; seeding = null; failure = null; authorized = true; generation++; history = [];
+    seeded = false; seeding = null; motionSeeded = false; failure = null; authorized = true; generation++; history = [];
   }
   reset();
   async function seed() { if (!seeded && db.documents.size === 0) { seeding ||= seedJourneyQa(store).then(() => { seeded = true; }); await seeding; } }
@@ -114,7 +134,7 @@ export function createJourneyQaServer({ distDir = path.join(ROOT, 'dist') } = {}
     // No CORS and no remote listener: controls cannot be called cross-origin.
     const host = req.headers.host || '';
     if (!/^(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(host) || req.headers.origin && req.headers.origin !== 'http://' + host) return json(res, 403, { ok: false, error: 'Local QA only' });
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://oapi.map.naver.com https://openapi.map.naver.com; connect-src 'self' https://*.naver.com; img-src 'self' data: blob: https://*.pstatic.net https://*.naver.com; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://oapi.map.naver.com https://openapi.map.naver.com; connect-src 'self' https://*.naver.com https://tiles.openfreemap.org; img-src 'self' data: blob: https://*.pstatic.net https://*.naver.com https://tiles.openfreemap.org; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'");
     try {
       const url = new URL(req.url, 'http://' + host), pathname = url.pathname;
       if (pathname === '/__qa/state' && req.method === 'GET') return json(res, 200, { ok: true, syntheticOnly: true, seeded, authorized, generation, calls: db.calls, documents: db.documents.size, days: [...db.documents].filter(([key]) => key.startsWith(JOURNEY_ROOT + '/days/')).map(([, value]) => JSON.parse(value.data)), requests: history, failNext: failure });
@@ -138,7 +158,8 @@ export function createJourneyQaServer({ distDir = path.join(ROOT, 'dist') } = {}
         return await api(req, res);
       }
       if ((pathname === '/sungso/journey/' || pathname === '/sungso/journey/index.html') && ['GET', 'HEAD'].includes(req.method)) {
-        if (url.searchParams.get('qa') === 'sample') await seed();
+        if (['sample','motion'].includes(url.searchParams.get('qa'))) await seed();
+        if (url.searchParams.get('qa') === 'motion' && !motionSeeded) { await seedJourneyMotionQa(store); motionSeeded = true; }
         const html = (await readFile(path.join(distDir, 'journey/index.html'), 'utf8'))
           .replace(/<script\b[^>]*src=["'][^"']*firebase\/boot\.mjs[^"']*["'][^>]*><\/script>/, '<script type="module" src="/__qa/auth.mjs"></script>')
           .replace(/<script\b[^>]*type=["']application\/x-sungso-script["'][^>]*><\/script>/, '<script type="module" src="/__qa/entry.mjs"></script>')

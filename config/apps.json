@@ -202,7 +202,7 @@
     {
       "source": "shared/journey",
       "output": "shared/journey",
-        "files": ["core.mjs", "import.mjs", "playback-core.mjs"]
+        "files": ["core.mjs", "import.mjs", "playback-core.mjs", "motion-core.mjs"]
     },
     {
       "source": "shared/finance",

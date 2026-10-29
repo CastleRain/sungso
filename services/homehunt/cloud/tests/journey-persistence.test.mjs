@@ -91,4 +91,11 @@ test('real Firestore period query pages document IDs, preserves originals and re
   assert.equal((await store.day(dates[0])).revision, 1);
   assert.equal((await store.day(dates[0])).records[0].note, manual.note);
   assert.doesNotMatch(JSON.stringify(first), /updatedBy|private-fixture|sourceId|"note"/);
+  const motionFirst=await store.playback({from:dates[0],to:dates.at(-1),geometry:'motion'});
+  const motionSecond=await store.playback({from:dates[0],to:dates.at(-1),after:motionFirst.nextCursor,geometry:'motion'});
+  assert.equal(motionFirst.format,'journey-motion-v1');
+  assert.deepEqual([...motionFirst.motionScenes,...motionSecond.motionScenes].map(scene=>scene.date),dates);
+  assert.ok(motionFirst.motionScenes.every(scene=>scene.records[0].time===null));
+  assert.doesNotMatch(JSON.stringify(motionFirst),/updatedBy|private-fixture|sourceId|"note"/);
+  assert.equal((await db.doc(JOURNEY_ROOT).get()).exists,false);
 });

@@ -11,6 +11,7 @@ GitHub Pages의 발자취 화면은 기존 Render Free API를 호출한다. Fire
 | `GET /months` | 없음 | `months` 내림차순, `latestDate` 또는 null |
 | `GET /months?month=YYYY-MM` | 월 | `month`, `days` 날짜별 요약 |
 | `GET /playback?from=YYYY-MM-DD&to=YYYY-MM-DD&after=YYYY-MM-DD` | 시작·끝 날짜, 선택적 이전 페이지 마지막 날짜 | `days` 날짜 오름차순 재생 후보, `nextCursor` 또는 null |
+| `GET /playback?from=YYYY-MM-DD&to=YYYY-MM-DD&geometry=motion&person=all` | 위 기간·커서와 선택 사람(all/sungwoo/sohee/together) | 기존 응답 + `format:journey-motion-v1`, `motionScenes` 전체 이동의 화면용 좌표·시간 구간 |
 | `GET /days/YYYY-MM-DD` | 날짜 | `day`; 없으면 빈 revision 0, 저장하지 않음 |
 | `PUT /days/YYYY-MM-DD` | `{expectedRevision,day}` | `{day,changed,unchanged}` |
 | `POST /days/YYYY-MM-DD/import` | `{source,records,tracks}` | `{day,changed,unchanged,addedRecords,addedTracks,duplicateRecords,duplicateEdges}` |
@@ -20,6 +21,8 @@ GitHub Pages의 발자취 화면은 기존 Render Free API를 호출한다. Fire
 날짜·시각·출처 계약은 `shared/journey/core.mjs`가 서버와 브라우저에 공통이다. 날짜는 한국 시간 기준, 정확한 시각을 모르면 `time:null,timePrecision:'day'`로 저장한다. `PUT`은 가져온 출처·경로·기록의 원본 구분을 보존하고 기존 기록을 누락시키는 요청도 거부한다. 수동·사진 기록을 추가하고 기존 기록의 장소·메모·사람·시각·위치를 보완할 수 있다. 다른 기기의 변경과 충돌하면 `409 JOURNEY_CONFLICT`이고 입력을 덮어쓰지 않는다. 이미 저장된 것과 같은 요청은 오래된 revision의 재시도여도 쓰지 않는다. 삭제 API는 없다.
 
 재생 조회는 실제 저장된 `days` 문서만 기본 문서 ID 색인으로 읽는다. 한 페이지는 최대 31일·2MiB이며 다음 페이지는 `nextCursor`를 `after`로 보내 요청한다. 응답의 후보에는 날짜·revision·사람·장소·확인된 시각/좌표·원본 기록/경로 ID만 포함하고 메모·사진 바이트·파일명·해시·UID는 제외한다. 후보 선정과 구간 준비는 `shared/journey/playback-core.mjs`를 공통으로 사용한다. 날짜/기간/커서를 검증하고 조회로 장부·날짜 문서를 생성하거나 마이그레이션하지 않는다. 한 날짜의 후보가 응답 한도를 넘으면 `413 PLAYBACK_DAY_TOO_LARGE`로 알린다.
+
+`geometry=motion`은 `shared/journey/motion-core.mjs`로 선택한 사람의 모든 실제 트랙을 준비한다. 트랙 자체를 생략하지 않고 표시 좌표만 간소화하며 움직임·정지·공백 시각을 보존한다. 페이지 2MiB 한도에는 좌표 응답도 포함된다. 단일 날짜의 추가 좌표 투영이 한도를 넘으면 해당 날짜는 기존 후보만 반환하여 클라이언트가 날짜별 원본으로 준비한다. 기본 후보 자체의 초과는 기존 413을 유지한다. 기본 조회 형식은 유지하고 클라이언트는 이전 서버 응답에서도 날짜별 원본 조회로 대체할 수 있다. 새 컬렉션·저장 데이터 이전·공개 캐시는 만들지 않는다.
 
 ## 저장과 무료 요금제 한도
 

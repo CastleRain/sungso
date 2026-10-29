@@ -28,7 +28,7 @@ async function start() {
   const rsvpStore=createRsvpStore({db});
   const rsvp=createRsvpApi({store:rsvpStore,authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
   const accounts = createAccountApi({store:createAccountStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
-  // Daily records and read-only period playback share the same member gate.
+  // Daily records and paged motion geometry share the same private member gate.
   const journey = createJourneyApi({ store: createJourneyStore({ db }), authenticate: createSiteMemberGate({ db, auth: getAuth(app) }) });
   const server = createRenderServer({ api, guestbook, album, rsvp, accounts, journey });
   const maintenance = createFirestoreMaintenance({ db });

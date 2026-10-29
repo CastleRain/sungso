@@ -189,7 +189,7 @@ export function simplifyJourneyPoints(points, maxPoints = JOURNEY_PLAYBACK_LIMIT
   return result;
 }
 
-export function prepareJourneyScene(candidate, input) {
+export function prepareJourneyScene(candidate, input, { simplifyPoints = simplifyJourneyPoints } = {}) {
   const day = validateDay(input);
   const changed = () => { const error = Error('이 날짜의 기록이 바뀌었어요. 기간을 다시 불러와주세요.'); error.code = 'JOURNEY_SCENE_CHANGED'; throw error; };
   if (!candidate || candidate.date !== day.date || Number.isSafeInteger(candidate.revision) && candidate.revision !== day.revision) changed();
@@ -206,7 +206,7 @@ export function prepareJourneyScene(candidate, input) {
   const records = day.records.filter(record => recordIds.has(record.id) && record.person === recordOwners.get(record.id)).map(record => ({ id: record.id, title: record.title, person: record.person, position: position(record.position), time: record.time, timePrecision: record.timePrecision, ...(record.photoId ? { photoId: record.photoId } : {}) }));
   const tracks = day.tracks.filter(track => trackIds.has(track.id) && track.person === trackOwners.get(track.id));
   if (records.length !== recordIds.size || tracks.length !== trackIds.size) changed();
-  const segments = tracks.map(track => ({ id: track.id, person: track.person, points: simplifyJourneyPoints(track.points) }));
+  const segments = tracks.map(track => ({ id: track.id, person: track.person, points: simplifyPoints(track.points) }));
   const times = [candidate.time, candidate.endTime, ...segments.flatMap(segment => [segment.points[0]?.time, segment.points.at(-1)?.time])].filter(Number.isFinite);
   const startTime = times.length ? Math.min(...times) : candidate.time ?? null, endTime = times.length ? Math.max(...times) : candidate.endTime ?? startTime;
   const moving = segments.some(segment => segment.points.length > 1 && segment.points.at(-1).time > segment.points[0].time && segment.points.some(point => journeyDistance(segment.points[0], point) > .1));

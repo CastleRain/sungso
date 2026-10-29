@@ -245,5 +245,12 @@ test('HTTP: period playback is member-only, read-only and uses the existing orig
   assert.equal((await f.request('/playback?from=2026-01-01&to=2025-01-01')).status, 400);
   assert.equal((await f.request('/playback')).status, 400);
   assert.equal((await f.request(path, 'first', { method: 'POST', body: '{}' })).status, 405);
+  const motionPath=path+'&geometry=motion&person=sungwoo';
+  for(const token of ['', 'unknown', 'inactive', 'outsider']) assert.notEqual((await f.request(motionPath,token)).status,200);
+  const motion=await f.request(motionPath,'second');assert.equal(motion.status,200);
+  assert.equal(motion.headers.get('cache-control'),'private, no-store');
+  assert.deepEqual(await motion.json(),{ok:true,days:[],nextCursor:null,format:'journey-motion-v1',motionScenes:[]});
+  assert.equal((await f.request(path+'&geometry=unsupported')).status,400);
+  assert.equal((await f.request(motionPath,'first',{headers:{Origin:'https://evil.example'}})).status,403);
   assert.equal(f.db.calls.writes, 0);
 });

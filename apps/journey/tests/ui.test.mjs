@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { emptyDay, mergeDayImport, summarizeDay, validateDay } from '../../../shared/journey/core.mjs';
-import { buildDayCandidates, selectJourneyScenes, prepareJourneyScene } from '../../../shared/journey/playback-core.mjs';
+import { buildDayCandidates } from '../../../shared/journey/playback-core.mjs';
+import { selectJourneyMotionScenes, prepareJourneyMotionScene } from '../../../shared/journey/motion-core.mjs';
 import { createJourneyPlayback } from '../js/playback.mjs';
 import { mountJourney } from '../js/ui.mjs';
 
@@ -26,13 +27,13 @@ async function until(check, label = 'UI update') { for (let i = 0; i < 50; i++) 
 // Only transport and browser-only dependencies are replaced. The rendered HTML,
 // event handlers, schemas, import merge and optimistic concurrency are real.
 function database(initial = fixtureDay()) {
-  const db = { days: new Map([[initial.date, clone(initial)]]), photos: new Map(), calls: [], pageSize: 31, beforePut: null, afterPut: null, beforeImport: null, beforeArchive: null, beforePhotoRead: null, beforePlayback: null, beforeDayRead: null };
+  const db = { days: new Map([[initial.date, clone(initial)]]), photos: new Map(), calls: [], pageSize: 31, motionGeometry: false, beforePut: null, afterPut: null, beforeImport: null, beforeArchive: null, beforePhotoRead: null, beforePlayback: null, beforeDayRead: null };
   db.request = async (path, options = {}) => {
     const method = options.method || 'GET';
     db.calls.push({ path, method, body: options.body ? clone(options.body) : undefined });
     if (path === '/months') { await db.beforeArchive?.(); return { months: [...new Set([...db.days.keys()].map(date => date.slice(0, 7)))], latestDate: [...db.days.keys()].sort().at(-1) }; }
     if (path.startsWith('/months?')) { const month = new URLSearchParams(path.split('?')[1]).get('month'); return { month, days: [...db.days.values()].filter(day => day.date.startsWith(month) && (day.revision || day.records.length || day.tracks.length)).map(summarizeDay) }; }
-    if (path.startsWith('/playback?')) { const query = new URLSearchParams(path.split('?')[1]); await db.beforePlayback?.(query, options); const remaining = [...db.days.values()].filter(day => day.date >= query.get('from') && day.date <= query.get('to') && (!query.get('after') || day.date > query.get('after'))).sort((a, b) => a.date.localeCompare(b.date)); const page = remaining.slice(0, db.pageSize); return { days: page.map(buildDayCandidates), nextCursor: remaining.length > page.length ? page.at(-1).date : null }; }
+    if (path.startsWith('/playback?')) { const query = new URLSearchParams(path.split('?')[1]); await db.beforePlayback?.(query, options); const remaining = [...db.days.values()].filter(day => day.date >= query.get('from') && day.date <= query.get('to') && (!query.get('after') || day.date > query.get('after'))).sort((a, b) => a.date.localeCompare(b.date)); const page = remaining.slice(0, db.pageSize); const result={ days: page.map(buildDayCandidates), nextCursor: remaining.length > page.length ? page.at(-1).date : null }; if(db.motionGeometry&&query.get('geometry')==='motion'){result.format='journey-motion-v1';result.motionScenes=selectJourneyMotionScenes(result.days,{person:query.get('person')||'all'}).map(scene=>prepareJourneyMotionScene(scene,page.find(day=>day.date===scene.date)));}return result; }
     if (path === '/photos' && method === 'POST') { db.photos.set(options.body.id, clone(options.body)); return { photo: { id: options.body.id } }; }
     if (path.startsWith('/photos/') && method === 'GET') { await db.beforePhotoRead?.(path); return new Blob(['synthetic-image'], { type: 'image/jpeg' }); }
     const match = /^\/days\/(\d{4}-\d{2}-\d{2})(\/import)?$/.exec(path);
@@ -69,13 +70,14 @@ async function harness(t, { db = database(), preparePhoto, waitForReady = true, 
   const root = dom.window.document.querySelector('[data-private-root]'); root.hidden = false;
   let clock = 0, frameId = 0; const frames = new Map(), storyCalls = [];
   const $ = id => root.querySelector('#' + id), workers = [], map = {
-    ready: Promise.resolve(true), renders: [], sceneRenders: [], resizeCount: 0, fitCount: 0, overview: null,
+    ready: Promise.resolve(true), renders: [], sceneRenders: [], motionRenders: [], resizeCount: 0, fitCount: 0, overview: null,
     render(day, options) { this.renders.push({ day: clone(day), options }); },
     renderScene(scene, options) { this.sceneRenders.push({ scene: clone(scene), options: clone(options) }); },
+    renderMotion(scenes,state){this.motionRenders.push({scenes:clone(scenes),state:clone(state)});this.sceneRenders.push({scene:clone(state.scene),options:{progress:state.sceneProgress}});},
     showAllScenes(scenes) { this.overview = clone(scenes); }, fitCurrentScene() { this.fitCount++; },
     resize() { this.resizeCount++; }, setPicking() {}, destroy() {}
   };
-  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: ({ onStatus }) => { map.reportStatus=onStatus;onStatus({ ready: true }); return map; }, storyProcessor: async (type, payload) => { storyCalls.push({ type, payload: clone(payload) }); return storyProcessor ? storyProcessor(type, payload) : type === 'select' ? selectJourneyScenes(payload.days, payload.options) : prepareJourneyScene(payload.scene, payload.day); }, playbackFactory: options => createJourneyPlayback({ ...options, now: () => clock, requestFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; }, cancelFrame: id => frames.delete(id) }), ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
+  const app = mountJourney({ root, request: db.request, member: { name: '성우' }, mapFactory: ({ onStatus,onCameraChange }) => { map.reportStatus=onStatus;map.reportCamera=onCameraChange;onStatus({ ready: true }); return map; }, storyProcessor: async (type, payload) => { storyCalls.push({ type, payload: clone(payload) }); return storyProcessor ? storyProcessor(type, payload) : type === 'motion-select' ? selectJourneyMotionScenes(payload.days, payload.options) : prepareJourneyMotionScene(payload.scene, payload.day); }, playbackFactory: options => createJourneyPlayback({ ...options, now: () => clock, requestFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; }, cancelFrame: id => frames.delete(id) }), ...(preparePhoto ? { preparePhoto } : {}), workerFactory: url => {
     assert.match(String(url), /import-worker\.mjs$/);
     const worker = { payload: null, terminated: false, postMessage(payload) { this.payload = payload; }, terminate() { this.terminated = true; }, respond(result) { this.onmessage?.({ data: { ok: true, result } }); } };
     workers.push(worker); return worker;
@@ -264,7 +266,7 @@ test('startup archive response cannot undo a month navigation made while it was 
 test('map keeps the current journey while the story rail and calendar collapse independently', async t => {
   const db = database(fixtureDay([visit()], { imports: [source], tracks: [{ id: 'track-a', person: 'sungwoo', sourceId: source.id, points: [{ lat: 37.5, lng: 127, time: TIME }, { lat: 37.501, lng: 127.001, time: TIME + 60000 }] }] }));
   const h = await harness(t, { db });
-  assert.equal(h.$('calendarPanel').hidden, true); assert.equal(h.$('recordsPanel').hidden, true); assert.equal(h.$('storyPanel').hidden, false);
+  assert.equal(h.$('calendarPanel').hidden, true); assert.equal(h.$('recordsPanel').hidden, true); assert.equal(h.$('storyPanel').hidden, true); h.$('toggleStory').click();
   h.$('playDay').click(); h.advance(15000); const before = h.app.getPlayback();
   h.$('toggleCalendar').click(); assert.equal(h.$('calendarPanel').hidden, false); assert.equal(h.$('recordsPanel').hidden, true);
   h.$('closeStory').click(); assert.equal(h.$('storyPanel').hidden, true); assert.equal(h.$('toggleStory').getAttribute('aria-expanded'), 'false');
@@ -303,7 +305,7 @@ test('a single date-only place remains visible without inventing a playback time
   const h = await harness(t, { db: database(fixtureDay([record], { revision: 1 })) });
   assert.equal(h.$('playDay').disabled, true); assert.equal(h.$('playSeek').disabled, true); assert.equal(h.$('showAllScenes').disabled, false); assert.equal(h.$('toggleRecords').disabled, false);
   const state = h.app.getPlayback(); assert.equal(state.scenes.length, 1); assert.equal(state.scene.time, null); assert.equal(state.scene.endTime, null); assert.deepEqual(state.scene.segments, []); assert.equal(state.time, null);
-  h.$('showAllScenes').click(); assert.equal(h.map.overview[0].title, record.title); h.$('toggleRecords').click(); await until(() => h.$('records').textContent.includes(record.title));
+  h.$('showAllScenes').click(); assert.equal(h.map.overview[0].records[0].title, record.title); h.$('toggleRecords').click(); await until(() => h.$('records').textContent.includes(record.title));
   assert.doesNotMatch(h.$('records').textContent, /GPS|수동|시간 미기록|사진 기록/); assert.equal(h.$('recordDialog').open, false); assert.equal(h.db.calls.filter(call => call.method !== 'GET').length, 0);
 });
 
@@ -384,7 +386,7 @@ test('period validation and cancellation leave the active story unchanged', asyn
 test('refreshing a changed scene keeps its position and never starts automatically', async t => {
   const db = periodDatabase(), h = await harness(t, { db }); h.$('nextScene').click(); h.$('playDay').click(); h.advance(5000); const prior = h.app.getPlayback(), changed = clone(db.days.get('2025-07-08'));
   changed.records[0].title = '함께 다시 찾은 동네'; changed.revision++; db.days.set(changed.date, validateDay(changed)); h.$('refreshDay').click();
-  await until(() => h.app.getPlayback().scene?.title === changed.records[0].title); const result = h.app.getPlayback(); assert.equal(result.scene.id, prior.scene.id); assert.equal(result.sceneProgress, prior.sceneProgress); assert.equal(result.playing, false); assert.equal(result.scene.revision, changed.revision); assert.match(h.$('storyList').textContent, /함께 다시 찾은 동네/);
+  await until(() => h.app.getPlayback().scene?.records[0]?.title === changed.records[0].title); const result = h.app.getPlayback(); assert.equal(result.scene.id, prior.scene.id); assert.equal(result.sceneProgress, prior.sceneProgress); assert.equal(result.playing, false); assert.equal(result.scene.revision, changed.revision); assert.match(h.$('storyList').textContent, /이날의 기억/);
 });
 
 test('disposing a pending period load clears private scenes and ignores its response', async t => {
@@ -406,7 +408,7 @@ test('a day revision changing during preparation requires an explicit fresh retr
   db.beforeDayRead = date => { if (change) { change = false; const updated = clone(db.days.get(date)); updated.revision++; updated.records[0].title = '새로 확인한 첫 장소'; db.days.set(date, validateDay(updated)); } };
   const h = await harness(t, { db, waitForReady: false }); await until(() => !h.$('retryPlayback').hidden); assert.match(h.$('globalError').textContent, /기록이 새로 바뀌었어요/); assert.equal(h.$('playDay').disabled, true); assert.equal(h.app.getPlayback().scenes.length, 0);
   const before = db.calls.filter(call => call.path === '/months').length; h.$('retryPlayback').click(); await until(() => h.app.getPlayback().scenes.length === 3);
-  assert.equal(db.calls.filter(call => call.path === '/months').length, before + 1); assert.equal(h.app.getPlayback().scene.title, '새로 확인한 첫 장소'); assert.equal(h.app.getPlayback().scene.revision, 2); assert.equal(h.app.getPlayback().playing, false);
+  assert.equal(db.calls.filter(call => call.path === '/months').length, before + 1); assert.equal(h.app.getPlayback().scene.records[0].title, '새로 확인한 첫 장소'); assert.equal(h.app.getPlayback().scene.revision, 2); assert.equal(h.app.getPlayback().playing, false);
 });
 
 test('calendar selection restores the selected scene after inspecting a full-day route', async t => {
@@ -430,4 +432,49 @@ test('empty and failed period notices remain below a visible map connection noti
   await new Promise(resolve=>setTimeout(resolve,25));assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'114px','wrapped connection text reserves its whole visible height');
   notice.hidden=true;h.map.reportStatus({ready:true});
   await new Promise(resolve=>setTimeout(resolve,25));assert.equal(wrap.style.getPropertyValue('--journey-map-message-offset'),'0px','a recovered map returns the period notice to its normal position');
+});
+
+test('motion playback keeps every daily track and advances the prominent date without source badges', async t => {
+  const days = ['2026-10-17', DATE].map((date, dayIndex) => {
+    const start = Date.parse(date + 'T10:00:00+09:00');
+    return validateDay({ ...emptyDay(date), revision: 1, imports: ['sungwoo','sohee'].map(person=>({...source,id:'motion-source-'+person,person})), tracks: Array.from({ length: 9 }, (_, index) => ({ id: `all-${dayIndex}-${index}`, person: index % 2 ? 'sohee' : 'sungwoo', sourceId:'motion-source-'+(index%2?'sohee':'sungwoo'), points: [{ lat: 37.5 + index / 100, lng: 127, time: start + index * 120000 }, { lat: 37.51 + index / 100, lng: 127.01, time: start + index * 120000 + 60000 }] })) });
+  });
+  const db = database(days[0]); db.days.set(DATE, days[1]); const h = await harness(t, { db });
+  assert.equal(h.$('storyPanel').hidden, true, 'the map is unobstructed on first load');
+  assert.equal(h.app.getPlayback().scenes.flatMap(scene => scene.segments).length, 18, 'daily representative caps do not discard recorded travel');
+  assert.equal(h.$('motionYear').textContent, '2026'); assert.equal(h.$('motionDay').textContent, '10.17'); assert.equal(h.$('motionDate').getAttribute('aria-live'), 'off');
+  assert.match(h.$('motionClock').textContent, /10:00 · 한국 시간/); assert.match(h.$('motionLegend').textContent, /성우소희/); assert.doesNotMatch(h.$('motionLegend').textContent, /함께|GPS|사진|수동/);
+  h.$('playDay').click(); h.advance(45000);
+  assert.equal(h.$('motionDay').textContent, '10.18'); assert.equal(h.map.motionRenders.at(-1).scenes.flatMap(scene => scene.segments).length, 18);
+  const frame = h.app.getPlayback(); h.$('toggleStory').click(); h.$('closeStory').click();
+  assert.equal(h.app.getPlayback().playing, true); assert.equal(h.app.getPlayback().time, frame.time);
+  h.$('showAllScenes').click(); assert.equal(h.$('showAllScenes').getAttribute('aria-pressed'), 'true'); h.$('followMotion').click(); assert.equal(h.$('followMotion').getAttribute('aria-pressed'), 'true');
+  h.map.reportCamera('manual'); assert.equal(h.$('followMotion').getAttribute('aria-pressed'), 'false'); assert.equal(h.$('showAllScenes').getAttribute('aria-pressed'), 'false');
+  h.$('stopDay').click(); assert.equal(h.$('motionDay').textContent, '10.18'); assert.equal(db.calls.filter(call => call.method !== 'GET').length, 0);
+});
+
+test('server-projected motion geometry avoids one raw-day request per stored date', async t => {
+  const db = periodDatabase(); db.motionGeometry = true; const h = await harness(t, { db });
+  assert.equal(h.app.getPlayback().scenes.length, 3); assert.equal(db.calls.filter(call => /^\/days\//.test(call.path)).length, 0);
+  const query = new URLSearchParams(db.calls.find(call => call.path.startsWith('/playback?')).path.split('?')[1]);
+  assert.equal(query.get('geometry'), 'motion'); assert.equal(query.get('person'), 'all');
+  assert.equal(h.$('motionClock').hidden, true, 'date-only memories do not invent a clock time');
+  h.$('nextScene').click(); h.$('toggleRecords').click(); await until(() => h.$('records').textContent.includes('다시 만난 동네'));
+  assert.equal(db.calls.filter(call => /^\/days\//.test(call.path)).length, 1, 'the full day is only read for requested details');
+});
+
+test('weighted month labels keep readable spacing and reflow after a narrow resize', async t => {
+  const dates=Array.from({length:10},(_,index)=>`2024-${String(index+1).padStart(2,'0')}-02`);
+  const days=dates.map((date,index)=>validateDay({...emptyDay(date),revision:1,records:[memory('tick-'+index,'기억',{position:{lat:37.5,lng:127}})]}));
+  const db=database(days[0]);for(const day of days.slice(1))db.days.set(day.date,day);const h=await harness(t,{db}),win=h.root.ownerDocument.defaultView;
+  let tickWidth=900;Object.defineProperty(h.$('playTicks'),'clientWidth',{configurable:true,get:()=>tickWidth});win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve=>setTimeout(resolve,25));
+  const positions=()=>[...h.$('playTicks').children].map(node=>({label:node.textContent,pixel:parseFloat(node.style.left)/100*tickWidth}));
+  let ticks=positions();assert.equal(ticks[0].label,'2024.01');assert.equal(ticks.at(-1).label,'2024.10');assert.ok(ticks.length>4);
+  for(let index=1;index<ticks.length;index++)assert.ok(ticks[index].pixel-ticks[index-1].pixel>=70);
+  tickWidth=260;Object.defineProperty(win,'innerWidth',{configurable:true,value:320});win.dispatchEvent(h.event('resize'));
+  await new Promise(resolve=>setTimeout(resolve,25));ticks=positions();assert.ok(ticks.length<=4);assert.equal(ticks[0].label,'2024.01');assert.equal(ticks.at(-1).label,'2024.10');
+  for(let index=1;index<ticks.length;index++)assert.ok(ticks[index].pixel-ticks[index-1].pixel>=55);
+  const last=clone(days.at(-1)),start=Date.parse(last.date+'T01:00:00+09:00');last.revision++;last.imports=[source];last.tracks=[{id:'long-tick-route',sourceId:source.id,person:'sungwoo',points:[{lat:37.5,lng:127,time:start},{lat:35.1,lng:129,time:start+20*3600000}]}];db.days.set(last.date,validateDay(last));h.$('refreshDay').click();
+  await until(()=>h.app.getPlayback().scenes.at(-1)?.segments.length===1);ticks=positions();assert.deepEqual(ticks.map(tick=>tick.label),['2024.01','2024.10'],'short early memories no longer pile month labels onto the left edge');
 });
