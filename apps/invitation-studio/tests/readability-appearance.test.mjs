@@ -187,8 +187,10 @@ test('reading styles retain narrow-layout escape routes and authored line breaks
   assert.match(readingCss, /\.recipient-picker[\s\S]*flex-wrap:wrap/);
   assert.match(readingCss, /\.account-number\{min-width:0;overflow-wrap:anywhere\}/);
   assert.match(readingCss, /html\.large-text body\[data-text-size\]/, 'explicit guest readability remains stronger than a saved mood');
-  assert.match(readingCss, /body\[data-text-size\]:not\(\[data-text-size=original\]\) \.invitation-copy\{font-size:max\(18px,calc\(var\(--reading-body-size\) \+ 1px\)\)\}/,
+  assert.match(readingCss, /body\[data-font\]\[data-text-size\]:not\(\[data-text-size=original\]\) \.invitation-copy\{font-size:max\(18px,calc\(var\(--reading-body-size\) \+ 1px\)\);overflow-wrap:anywhere\}/,
     'comfortable must not shrink the existing 18px letter invitation; large adds a step');
+  assert.doesNotMatch(readingCss, /:is\([^{}]*\.invitation-copy[^{}]*\)\{\s*font-size:var\(--reading-body-size\)/,
+    'a grouped paragraph selector must not override the invitation size through :is specificity');
   const relaxedRules = [...readingCss.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]*data-line-space=relaxed[^{}]*)\{([^{}]*)\}/g)];
   assert.ok(relaxedRules.length >= 2);
   for (const rule of relaxedRules) {

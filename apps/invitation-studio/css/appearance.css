@@ -115,10 +115,10 @@ body[data-divider=line][data-story=constellation] main.paper>#our-story::before{
    preserving the existing handwriting, title sizes, fixed dock and media geometry. */
 body[data-text-size=comfortable]{--body-size:17px;--reading-body-size:17px;--reading-note-size:15px;--reading-action-size:15px;--reading-map-size:13px}
 body[data-text-size=large]{--body-size:18px;--reading-body-size:18px;--reading-note-size:16px;--reading-action-size:16px;--reading-map-size:14px}
-body[data-text-size]:not([data-text-size=original]) :is(.invitation-copy,.guest-message,.account-intro,.story-page-copy>p:not(.story-note),.closing-copy){
+body[data-text-size]:not([data-text-size=original]) :is(.guest-message,.account-intro,.story-page-copy>p:not(.story-note),.closing-copy){
   font-size:var(--reading-body-size);overflow-wrap:anywhere;
 }
-body[data-text-size]:not([data-text-size=original]) .invitation-copy{font-size:max(18px,calc(var(--reading-body-size) + 1px))}
+body[data-font][data-text-size]:not([data-text-size=original]) .invitation-copy{font-size:max(18px,calc(var(--reading-body-size) + 1px));overflow-wrap:anywhere}
 body[data-text-size]:not([data-text-size=original]) .section-title>p:not(.eyebrow):not(.korean-heading){font-size:var(--reading-body-size)}
 body[data-text-size]:not([data-text-size=original]) :is(.family-person>p:first-child,.family-person>p:first-child>span,.family-person small,.arrival-title .address,.arrival-steps p,.journey-note,.car-destination span,.account-bank,.account-help,.demo-note,.guest-status,.date-copy,.story-copy>span:nth-child(2),.story-copy>small,.story-page-copy .story-note,.gallery-tools p,.countdown-label,.dday){
   font-size:var(--reading-note-size);overflow-wrap:anywhere;
