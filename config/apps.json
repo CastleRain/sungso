@@ -209,7 +209,7 @@
       "source": "apps/invitation-studio/dist",
       "output": "lab/studio",
       "build": "apps/invitation-studio/scripts/build.mjs",
-      "files": ["index.html", "catalog.css", "catalog.mjs", "runtime.mjs", "preview", "css", "js", "themes", "assets"]
+      "files": ["index.html", "catalog.css", "catalog.mjs", "guided-steps.mjs", "runtime.mjs", "preview", "css", "js", "themes", "assets"]
     },
     {
       "id": "table",

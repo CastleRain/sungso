@@ -37,7 +37,9 @@ export function setupGallery({ photos: initialPhotos, motion }) {
     full.hidden = false; $('#photo-error').hidden = true;
     full.src = photo.src; full.alt = photo.alt;
     $('#photo-counter').textContent = `${index + 1} / ${photos.length}`;
-    const save = $('#photo-save'); save.href = photo.src; save.download = `sungso-${photo.id}.${photo.src.split('.').pop().split('?')[0]}`;
+    const save = $('#photo-save'); save.href = photo.src;
+    const extension = photo.src.startsWith('data:image/') ? (photo.src.startsWith('data:image/png') ? 'png' : photo.src.startsWith('data:image/webp') ? 'webp' : 'jpg') : (photo.src.match(/\.(jpe?g|png|webp)(?:[?#]|$)/i)?.[1] || 'jpg');
+    save.download = `sungso-${photo.id}.${extension}`;
     $('#photo-prev').disabled = photos.length < 2; $('#photo-next').disabled = photos.length < 2;
     updateDialogRoute(dialog, `#photo/${index + 1}`);
   }

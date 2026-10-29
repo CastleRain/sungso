@@ -9,7 +9,7 @@ test('all mood and scene combinations with distributed motion choices survive UR
     const params = compositionParams({ ...state, mode: 'live', origin: 'https://evil.example', account: '1234' });
     assert.equal(params.get('version'), '1');
     assert.deepEqual(readComposition(params.toString()), state);
-    assert.equal(params.size, CHOICE_KEYS.length + 5);
+    assert.equal(params.size, CHOICE_KEYS.length + 9);
     count++;
   }
   assert.equal(count, ['palette', 'font', 'cover', 'opening', 'intro', 'date', 'story', 'album'].reduce((total, key) => total * CHOICES[key].length, 1));
@@ -252,7 +252,7 @@ test('the longest valid combination URL fits the parser without truncating its f
   assert.deepEqual(readComposition(url.searchParams), state);
   assert.equal(url.searchParams.get('order'), state.order.join(','));
   assert.equal(url.searchParams.get('version'), '1');
-  assert.deepEqual([...url.searchParams.keys()].sort(), [...CHOICE_KEYS, 'version', 'motionSpeed', 'motionStrength', 'extras', 'order'].sort());
+  assert.deepEqual([...url.searchParams.keys()].sort(), [...CHOICE_KEYS, 'version', 'motionSpeed', 'motionStrength', 'textScale', 'lineScale', 'sectionSpace', 'sectionTuning', 'extras', 'order'].sort());
 });
 
 test('each recommended combination is already normalized so applying it retains its selected indicator', () => {

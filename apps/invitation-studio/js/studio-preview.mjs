@@ -10,6 +10,8 @@ import { mountOptionalScenes } from './optional-scenes.mjs';
 import { mountSentimentScenes } from './sentiment-scenes.mjs';
 import { mountPhotoFinishScenes } from './photo-finish-scenes.mjs';
 import { mountGuestPass } from './guest-pass.mjs';
+import { normalizeContentDraft } from './content-draft.mjs';
+import { mountFineAppearance } from './fine-appearance.mjs';
 
 export const STUDIO_SECTIONS = Object.freeze(['top', ...ORDER_SECTIONS.map(section => section.id), 'closing']);
 
@@ -18,6 +20,9 @@ export function studioMessage(event, { origin, parent, embedded }) {
   if (!embedded || !event || event.origin !== origin || event.source !== parent) return null;
   const data = event.data;
   if (!data || typeof data !== 'object') return null;
+  if (data.type === 'invitation-studio:content') {
+    try { return {type:'content', draft:normalizeContentDraft(data.draft)}; } catch { return null; }
+  }
   const requestId = Number.isSafeInteger(data.requestId) && data.requestId >= 0 ? data.requestId : null;
   if (data.type === 'invitation-studio:apply') return { type: 'apply', composition: normalizeComposition(data.composition), ...(requestId !== null ? { requestId } : {}), ...(data.previewOnly === true ? { previewOnly: true } : {}) };
   if (data.type === 'invitation-studio:demo' && requestId !== null && CHOICE_KEYS.includes(data.key)) return { type: 'demo', requestId, key: data.key };
@@ -57,6 +62,7 @@ export function mountStudio({ doc = document, win = window, gallery, wedding, en
     controllers.push(content = mountContentScenes({ doc, win, gallery, enabled, composition: current }));
     controllers.push(finish = mountPhotoFinishScenes({ doc, win, gallery, enabled, composition: current }));
     controllers.push(scroll = mountScrollEffects({ doc, win, enabled, mode: current.motion, speed: current.motionSpeed, strength: current.motionStrength }));
+    controllers.push(mountFineAppearance({doc,win,composition:current}));
     updateMotion();
   } catch (error) { controllers.reverse().forEach(controller => controller.destroy()); throw error; }
   return {

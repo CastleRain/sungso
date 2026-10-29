@@ -11,6 +11,7 @@ import { mountStudio, studioMessage, STUDIO_SECTIONS } from './studio-preview.mj
 import { scrollPreviewTo, afterPreviewScroll } from './preview-scroll.mjs';
 import { createSceneReview } from './scene-review.mjs';
 import { createSceneDemo } from './scene-demo.mjs';
+import { mountContentPreview } from './content-preview.mjs';
 
 const variant = document.body.dataset.variant;
 if (!/^[fg]$/.test(variant) || config.mode !== 'demo') throw new Error('Invitation lab requires a recognized demo edition.');
@@ -46,6 +47,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 let effects = readPreference('sungso_invitation_studio_motion', 'on') !== 'off';
 const motion = () => effects && !reduced.matches;
 let themeController, revealObserver, sceneReview, sceneDemo, visualOnly = false;
+let contentPreview;
 let latestApplyId = -1, stoppedDemoId = -1;
 let awaitingApplyId = null;
 
@@ -227,6 +229,7 @@ featureResults.forEach((result, index) => {
 });
 try {
   themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, wedding: config.wedding, composition, onChange: next => { if (!visualOnly) syncCompositionLinks(next); } });
+  if (comparison) contentPreview = mountContentPreview({doc:document,win:window,gallery,config,onLayout:()=>themeController?.refresh()});
   requestAnimationFrame(() => themeController.refresh());
 } catch (error) { console.error('Invitation motion fallback', error); revealAll(); document.documentElement.classList.remove('js-motion'); }
 if (comparison && themeController) sceneDemo = createSceneDemo({
@@ -247,7 +250,10 @@ if (comparison) {
 window.addEventListener('message', async event => {
   const request = studioMessage(event, { origin: location.origin, parent: window.parent, embedded: comparison });
   if (!request) return;
-  if (request.type === 'apply' && themeController) {
+  if (request.type === 'content' && contentPreview) {
+    stopPendingDemo(); sceneDemo?.cancel('content-edit'); cancelPreviewJump(); cancelInitialAnchor();
+    contentPreview.setDraft(request.draft);
+  } else if (request.type === 'apply' && themeController) {
     if (request.requestId !== undefined && request.requestId < latestApplyId) return;
     if (request.requestId !== undefined) latestApplyId = request.requestId;
     awaitingApplyId = request.requestId ?? null;

@@ -1,3 +1,4 @@
+import { normalizeTextScale } from './composition.mjs';
 /** Appearance changes are visual only; never read/write invitation data or media. */
 export const APPEARANCE_PALETTES = Object.freeze(Object.fromEntries(Object.entries({
   mist: { label: '안개 블루', paper: '#fcfdfd', ink: '#243b50', accent: '#436c92', muted: '#5a7285', line: '#d9e4ec', soft: '#edf4f8', outer: '#e6edf2', surface: '#ffffff', tint: '#e6eff7', night: '#20394a' },
@@ -21,6 +22,7 @@ export function appearanceChoices(value) {
     spacing: ['compact', 'balanced', 'airy'].includes(value?.spacing) ? value.spacing : 'balanced',
     divider: ['none', 'line', 'chapter'].includes(value?.divider) ? value.divider : 'none',
     textSize: ['original', 'comfortable', 'large'].includes(value?.textSize) ? value.textSize : 'original',
+    textScale: normalizeTextScale(value?.textScale),
     lineSpace: ['original', 'relaxed'].includes(value?.lineSpace) ? value.lineSpace : 'original',
     photoTone: ['original', 'soft', 'mono'].includes(value?.photoTone) ? value.photoTone : 'original',
     coverFocus: ['original', 'upper', 'lower'].includes(value?.coverFocus) ? value.coverFocus : 'original',
@@ -28,8 +30,9 @@ export function appearanceChoices(value) {
 }
 
 export function mountAppearance({ doc = document, win = window, composition, onLayout = () => {} } = {}) {
-  const body = doc.body, dataKeys = ['palette', 'font', 'spacing', 'divider', 'textSize', 'lineSpace', 'photoTone', 'coverFocus'];
+  const body = doc.body, dataKeys = ['palette', 'font', 'spacing', 'divider', 'textSize', 'textScale', 'lineSpace', 'photoTone', 'coverFocus'];
   const originalData = Object.fromEntries(dataKeys.map(key => [key, body.dataset[key]]));
+  const originalScale = [body.style.getPropertyValue('--studio-text-scale'), body.style.getPropertyPriority('--studio-text-scale')];
   const tokens = Object.keys(APPEARANCE_PALETTES.mist).filter(key => key !== 'label');
   const originalTokens = tokens.map(key => [key, body.style.getPropertyValue(`--${key}`), body.style.getPropertyPriority(`--${key}`)]);
   const waits = new Set();
@@ -60,9 +63,10 @@ export function mountAppearance({ doc = document, win = window, composition, onL
     const next = appearanceChoices(value), previousFont = current?.font;
     // Colour, image tone and focal point do not change boxes. Reading settings do,
     // so the existing scene controllers remeasure without remounting their nodes.
-    const layoutChanged = current && ['spacing', 'divider', 'textSize', 'lineSpace'].some(key => current[key] !== next[key]);
+    const layoutChanged = current && ['spacing', 'divider', 'textSize', 'textScale', 'lineSpace'].some(key => current[key] !== next[key]);
     current = next;
     for (const key of dataKeys) body.dataset[key] = next[key];
+    body.style.setProperty('--studio-text-scale', String(next.textScale));
     for (const key of tokens) body.style.setProperty(`--${key}`, APPEARANCE_PALETTES[next.palette][key]);
     if (layoutChanged) onLayout();
     if (previousFont !== next.font) ready = loadFont(next.font);
@@ -84,6 +88,8 @@ export function mountAppearance({ doc = document, win = window, composition, onL
       for (const [key, value, priority] of originalTokens) {
         if (value) body.style.setProperty(`--${key}`, value, priority); else body.style.removeProperty(`--${key}`);
       }
+      if (originalScale[0]) body.style.setProperty('--studio-text-scale', ...originalScale);
+      else body.style.removeProperty('--studio-text-scale');
     },
   };
 }

@@ -1,5 +1,9 @@
 import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDER_SECTIONS, OPTIONAL_SECTIONS, SECTION_IDS, moveSection, normalizeComposition, readComposition, compositionParams, sameComposition } from './js/composition.mjs';
 import runtime from './runtime.mjs';
+import { readSectionTuning, setSectionTuning } from './js/fine-tuning.mjs';
+import { mountGuidedSteps } from './guided-steps.mjs';
+import { mountContentEditor } from './js/content-editor.mjs';
+import { mountLivePhotoManager } from './js/live-photo-manager.mjs';
 import { APPEARANCE_PALETTES, APPEARANCE_FONTS } from './js/appearance.mjs';
 import { LIBRARY_LIMIT, LIBRARY_BYTES, cleanName, cleanNote, cleanRating, parseLibrary, selectSaved, updateSaved, exportSelection, parseImport } from './js/saved-library.mjs';
 
@@ -12,12 +16,14 @@ const detailChildren = { cover: ['coverFocus'], date: ['calendarMark'], album: [
 const detailParents = Object.fromEntries(Object.entries(detailChildren).flatMap(([parent, children]) => children.map(key => [key, parent])));
 const styleGroups = { all: globalKeys, type: ['palette', 'font', 'textSize', 'lineSpace'], photo: ['photoTone'], motion: ['motion', 'spacing', 'divider'] };
 let styleGroup = 'all';
+let guidedSteps, contentEditor, livePhotoManager, contentEditTimer;
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, motionReady = true;
 let audioPhase = 'paused';
 let savedReadFailed = false, savedSnapshot = null, saved = readSaved(), visibleSavedCount = 6, draftRating = 0, editingRecordId;
-let editorTab = 'style', openKey = 'motion', beforeVisible = false;
+let editorTab = 'style', openKey = null, beforeVisible = false;
 let requestSerial = 0, activeRequest = null, activeReviewKey = null, lastChange = null, demoPhase = 'idle';
 const choiceRows = new Map(), optionStates = new Map(), tabScroll = new Map();
+const fineControls = [];
 const sectionKeys = { invitation: 'intro', 'wedding-day': 'date', location: 'arrival', 'our-story': 'story', gallery: 'album', accounts: 'gifting', guestbook: 'wishes', ...Object.fromEntries(OPTIONAL_SECTIONS.map(section => [section.id, section.key])) };
 
 function tuningSummary(value) { return `속도 ${Number(value.motionSpeed ?? 1).toFixed(2)}× · 강도 ${Number(value.motionStrength ?? 1).toFixed(2)}×`; }
@@ -117,11 +123,14 @@ function renderChoices() {
     choiceRows.get(key)?.querySelectorAll('[data-option]').forEach(button => { const selected = button.dataset.option === composition[key]; button.setAttribute('aria-pressed', String(selected)); button.querySelector('.current-marker').textContent = selected ? '선택 중' : '바로 보기'; });
   }
   document.querySelectorAll('[data-preset]').forEach(button => button.setAttribute('aria-pressed', String(sameComposition(composition, PRESETS.find(item => item.id === button.dataset.preset).composition))));
-  $('#preview-summary').textContent = [...globalKeys.map(key => CHOICES[key].find(item => item.id === composition[key]).label), tuningSummary(composition)].join(' · ');
+  $('#preview-summary').textContent = [...globalKeys.map(key => CHOICES[key].find(item => item.id === composition[key]).label), `글자 ${Math.round(composition.textScale * 100)}%`, tuningSummary(composition)].join(' · ');
   $('#preview-summary').title = [...keys.filter(key => visibleChoice(key, composition)).map(key => `${labels[key]}: ${CHOICES[key].find(item => item.id === composition[key]).label}`), tuningSummary(composition)].join('\n');
   $('#undo-change').disabled = history.length === 0;
   renderTuning();
+  renderTextScale();
+  renderFineControls();
   renderOrder();
+  guidedSteps?.refresh();
   updateURL();
 }
 function previewLabel(key, value = composition[key]) { return `${labels[key]} · ${CHOICES[key].find(choice => choice.id === value)?.label || ''}`; }
@@ -157,8 +166,8 @@ function restoreCurrent() {
 }
 function apply(next, { section, replayOpening = false, reviewKey, changedField, remember = true } = {}) {
   const normalized = normalizeComposition(next), previous = normalizeComposition(composition);
-  const changed = [...keys, ...tuningKeys].filter(key => composition[key] !== normalized[key]);
-  if (!reviewKey && changed.length) reviewKey = changed.includes('opening') ? 'opening' : tuningKeys.includes(changed[0]) ? 'motion' : changed[0];
+  const changed = [...keys, ...tuningKeys, 'textScale', 'lineScale', 'sectionSpace', 'sectionTuning'].filter(key => composition[key] !== normalized[key]);
+  if (!reviewKey && changed.length) reviewKey = changed.includes('opening') ? 'opening' : tuningKeys.includes(changed[0]) ? 'motion' : ({textScale:'textSize',lineScale:'lineSpace',sectionSpace:'spacing',sectionTuning:'intro'}[changed[0]] || changed[0]);
   if (!section && reviewKey) section = SECTION_IDS[reviewKey];
   if (!section && composition.order.some((id, index) => id !== normalized.order[index])) section = normalized.order.find((id, index) => id !== composition.order[index]);
   if (!sameComposition(composition, normalized) && remember) { history.push(previous); if (history.length > 30) history.shift(); }
@@ -171,7 +180,7 @@ function apply(next, { section, replayOpening = false, reviewKey, changedField, 
   requestPreview(composition, { key: activeReviewKey, section, replayOpening });
 }
 function setEditorTab(tab) {
-  if (!['style', 'scenes', 'library'].includes(tab)) return;
+  if (!['style', 'scenes', 'content', 'library'].includes(tab)) return;
   restoreCurrent();
   const content = $('#editor-content'); tabScroll.set(editorTab, content.scrollTop); editorTab = tab;
   document.body.dataset.tab = tab;
@@ -180,6 +189,65 @@ function setEditorTab(tab) {
     document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
   });
   content.scrollTop = tabScroll.get(tab) || 0;
+  if(tab==='content' && contentEditor) contentEditor.openSection(contentEditor.getActiveSection(),{focus:false});
+  guidedSteps?.refresh();
+}
+function renderTextScale() {
+  const input = $('#text-scale'); if (!input) return;
+  input.value = String(Math.round(composition.textScale * 100));
+  $('#text-scale-value').textContent = `${input.value}%`;
+  input.setAttribute('aria-valuetext', `선택한 크기의 ${input.value}퍼센트`);
+}
+function mountTextScale(container) {
+  const box = node('section', 'type-tuning');
+  const label = node('label', '', '글자 크기 세밀하게'); label.htmlFor = 'text-scale';
+  const value = node('output'); value.id = 'text-scale-value'; value.htmlFor = 'text-scale';
+  const heading = node('div', 'tuning-heading'); heading.append(label, value);
+  const input = node('input'); input.id = 'text-scale'; input.type = 'range'; input.min = '90'; input.max = '120'; input.step = '5';
+  input.addEventListener('input', () => { $('#text-scale-value').textContent = `${input.value}%`; input.setAttribute('aria-valuetext', `선택한 크기의 ${input.value}퍼센트`); });
+  input.addEventListener('change', () => apply({...composition, textScale:Number(input.value)/100}, {reviewKey:'textSize', changedField:'textScale'}));
+  box.append(heading, input, node('p', 'helper', '아래에서 기본 크기를 고른 뒤 90–120%로 조절해요. 손글씨는 원래 모습을 유지해요.'));
+  container.append(box);
+}
+function fineRange(container, {field,label,min,max,onCommit}) {
+  const row=node('div','fine-range'), heading=node('label'), output=node('output');
+  const input=node('input'); input.type='range'; input.min=String(min); input.max=String(max); input.step='5';
+  input.id=`fine-${fineControls.length}-${field}`; heading.htmlFor=input.id; output.htmlFor=input.id;
+  heading.append(node('span','',label),output);
+  function setValue(value){input.value=String(Math.round(value*100)); output.textContent=`${input.value}%`;input.setAttribute('aria-valuetext',`${label} ${input.value}퍼센트`);}
+  input.addEventListener('input',()=>setValue(Number(input.value)/100));
+  input.addEventListener('change',()=>onCommit(Number(input.value)/100));
+  row.append(heading,input);container.append(row);return {input,setValue};
+}
+function mountGlobalFine(container,field,label,min,max,key) {
+  const box=node('section','type-tuning');
+  const range=fineRange(box,{field,label,min,max,onCommit:value=>apply({...composition,[field]:value},{reviewKey:key,changedField:field})});
+  fineControls.push({field,...range});
+  box.append(node('p','helper','기본 표현을 고른 뒤 바를 움직여 조절해요. 100%는 선택한 표현의 원래 값이에요.'));
+  container.append(box);
+}
+function mountSceneFine(container,key) {
+  const section=key==='cover'?'top':SECTION_IDS[key];if(!section)return;
+  const box=node('details','scene-fine'), summary=node('summary','','이 장면만 세부 조절');
+  const label=node('label','scene-fine-switch'), toggle=node('input');toggle.type='checkbox';
+  label.append(toggle,node('span','','이 장면에 다른 값 사용'));box.append(summary,label);
+  const ranges=node('div','scene-fine-ranges');box.append(ranges);
+  const controller={section,key,toggle,ranges,fields:{}};
+  toggle.addEventListener('change',()=>apply({...composition,sectionTuning:setSectionTuning(composition.sectionTuning,section,toggle.checked?{textScale:composition.textScale,lineScale:composition.lineScale,sectionSpace:composition.sectionSpace}:null)},{reviewKey:key,changedField:'sectionTuning'}));
+  for(const [field,name,min,max] of [['textScale','글자 크기',90,120],['lineScale','줄 간격',90,140],['sectionSpace','위아래 여백',70,140]]) {
+    if(section==='top' && field==='sectionSpace') continue;
+    controller.fields[field]=fineRange(ranges,{field,label:name,min,max,onCommit:value=>apply({...composition,sectionTuning:setSectionTuning(composition.sectionTuning,section,{[field]:value})},{reviewKey:key,changedField:'sectionTuning'})});
+  }
+  box.append(node('p','helper',section==='top'?'체크를 끄면 전체 설정을 따라가요. 표지 높이와 첫 손글씨는 유지돼요.':'체크를 끄면 전체 설정을 따라가요. 버튼의 최소 터치 크기는 유지해요.'));
+  fineControls.push(controller);container.append(box);
+}
+function renderFineControls() {
+  const overrides=readSectionTuning(composition.sectionTuning);
+  for(const control of fineControls) {
+    if(control.field){control.setValue(composition[control.field]);continue;}
+    const value=overrides[control.section];control.toggle.checked=Boolean(value);control.ranges.hidden=!value;
+    for(const [field,range] of Object.entries(control.fields)){range.input.disabled=!value;range.setValue(value?.[field]||1);}
+  }
 }
 function renderTuning() {
   for (const field of tuningKeys) {
@@ -289,6 +357,7 @@ function syncExpanded() {
     row.classList.toggle('is-expanded', expanded); row.querySelector('.choice-open').setAttribute('aria-expanded', String(expanded)); row.querySelector('.inline-options').hidden = !expanded;
   });
   syncChoiceVisibility();
+  guidedSteps?.refresh();
 }
 function syncChoiceVisibility() {
   choiceRows.forEach((row, key) => {
@@ -329,13 +398,17 @@ function mountChoices() {
     const number = node('span', 'choice-number', globalKeys.includes(key) ? 'STYLE' : 'SCENE');
     text.append(number, node('strong', '', labels[key]), selected);
     const count = node('span', 'choice-count', `${CHOICES[key].length}가지`); count.append(node('span', 'expand-symbol', '＋'));
-    button.append(sample, text, count); button.addEventListener('click', () => { const scroll = $('#editor-content'), oldTop = group.getBoundingClientRect().top; restoreCurrent(); openKey = openKey === key ? null : key; syncExpanded(); scroll.scrollTop += group.getBoundingClientRect().top - oldTop; if (openKey) { activeReviewKey = key; requestPreview(composition, { key }); } });
+    button.append(sample, text, count); button.addEventListener('click', () => { const scroll = $('#editor-content'), oldTop = group.getBoundingClientRect().top; restoreCurrent(); openKey = openKey === key ? null : key; syncExpanded(); guidedSteps?.refresh(); scroll.scrollTop += group.getBoundingClientRect().top - oldTop; if (openKey) { activeReviewKey = key; requestPreview(composition, { key }); } });
     const content = node('div', 'inline-options'); content.id = `options-${key}`;
     content.append(node('p', 'inline-hint', key === 'motion'
       ? '같은 초대글과 날짜 구간에서 비교해요. 방향·크기·초점의 차이를 봐주세요.'
       : ['albumColumns', 'albumRatio'].includes(key) ? '고른 사진첩의 배열에 바로 적용돼요. 다른 배열로 바꿔도 이 설정은 기억해요.'
       : '표현을 누르면 실제 장면이 바로 재생돼요.'));
     if (key === 'motion') mountTuning(content);
+    if (key === 'textSize') mountTextScale(content);
+    if (key === 'lineSpace') mountGlobalFine(content,'lineScale','줄 간격 세밀하게',90,140,'lineSpace');
+    if (key === 'spacing') mountGlobalFine(content,'sectionSpace','장면 여백 세밀하게',70,140,'spacing');
+    if (['cover','intro','date','story','album','arrival','gifting','wishes','ending',...OPTIONAL_SECTIONS.map(s=>s.key)].includes(key)) mountSceneFine(content,key);
     optionStates.set(key, { search: '', limit: 6 });
     if (CHOICES[key].length > 6) {
       const search = node('input', 'options-search'); search.type = 'search'; search.placeholder = '이름이나 느낌 찾기'; search.setAttribute('aria-label', `${labels[key]} 표현 검색`);
@@ -420,7 +493,7 @@ function renderSaved() {
     open.append(node('strong', '', item.name), node('span', '', '불러오기 ↗'));
     open.addEventListener('click', () => { loadMetadata(item); apply(item.composition, { section: 'top', replayOpening: true }); notify(`‘${item.name}’ 조합을 불러왔어요.`); });
     heading.append(open); li.append(heading);
-    const summary = node('p', 'saved-style', [...globalKeys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label), tuningSummary(item.composition)].join(' · ')); li.append(summary);
+    const summary = node('p', 'saved-style', [...globalKeys.map(key => CHOICES[key].find(choice => choice.id === item.composition[key]).label), `글자 ${Math.round(item.composition.textScale * 100)}%`, tuningSummary(item.composition)].join(' · ')); li.append(summary);
     const stars = node('div', 'rating-stars'); stars.setAttribute('role', 'group'); stars.setAttribute('aria-label', `${item.name} 별점`);
     mountStars(stars, item.rating, (rating, focusValue) => {
       if (persistSaved(updateSaved(saved, item.id, { rating }))) {
@@ -453,10 +526,42 @@ function downloadJSON(value, filename) {
 async function copyURL(kind) {
   restoreCurrent();
   const url = urlFor(kind);
-  try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(url); notify(kind === 'editor' ? '조립 화면 주소를 복사했어요.' : '선택한 조합의 미리보기 주소를 복사했어요.'); }
+  try { if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(url); notify(kind === 'editor' ? '디자인 편집 주소를 복사했어요. 문구·사진 초안은 이 기기에 따로 보관돼요.' : '디자인 조합 주소를 복사했어요. 편집한 문구·사진은 내용 파일로 옮겨 주세요.'); }
   catch { $('#link-value').value = url; $('#fallback-link').href = url; $('#link-dialog').showModal(); $('#link-value').focus(); $('#link-value').select(); }
 }
 mountChoices(); mountOrder(); mountExtras(); renderChoices(); renderSaved(); renderDraftStars(); renderDemoTools();
+contentEditor = mountContentEditor({
+  root: $('#content-editor'), config: runtime,
+  onChange(draft, {section} = {}) {
+    restoreCurrent();
+    clearTimeout(contentEditTimer);
+    contentEditTimer=setTimeout(()=>{if(ready) post({type:'invitation-studio:content', draft});},160);
+  },
+  onNavigate(section) { restoreCurrent(); if (ready) post({type:'invitation-studio:jump',section}); },
+  onSectionChange() { guidedSteps?.refresh(); },
+  getComposition:()=>composition,
+  onComposition:next=>apply(next,{section:'invitation'}),
+});
+livePhotoManager = mountLivePhotoManager({root:$('#live-photo-manager'), managerURL:'/manage.html'});
+const contentStepLabels = {family:'두 사람 · 가족', invitation:'초대 문구', story1:'이야기 첫 장', story2:'이야기 두 번째 장', story3:'이야기 마지막 장', closing:'마지막 인사', photos:'시안 사진'};
+guidedSteps = mountGuidedSteps({
+  container:$('#guided-steps'), labels:{...labels, ...contentStepLabels},
+  readState:()=>({composition, tab:editorTab, key:editorTab==='content' ? contentEditor.getActiveSection() : openKey}),
+  config:{globalKeys, sectionKeys, detailChildren, extraSteps:Object.keys(contentStepLabels).map(key=>({key,tab:'content'}))},
+  onOpen({key,tab}) {
+    setEditorTab(tab);
+    if(tab==='content') { contentEditor.openSection(key); return; }
+    if(tab==='style') {
+      styleGroup='all';
+      document.querySelectorAll('[data-style-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.styleGroup==='all')));
+    }
+    openKey=key; syncExpanded(); activeReviewKey=key; requestPreview(composition,{key});
+    const row=choiceRows.get(key), scroller=$('#editor-content');
+    if(row) { scroller.scrollTop+=row.getBoundingClientRect().top-scroller.getBoundingClientRect().top-12; row.querySelector('.choice-open')?.focus({preventScroll:true}); }
+  },
+  onFinish:()=>$('#go-save').click(),
+});
+
 document.querySelectorAll('[data-style-group]').forEach(button => button.addEventListener('click', () => {
   styleGroup = button.dataset.styleGroup;
   if (!Object.hasOwn(styleGroups, styleGroup)) styleGroup = 'all';
@@ -472,6 +577,7 @@ window.addEventListener('message', event => {
     motionReady = data.motionReady !== false;
     if (!motionReady) { ready = false; $('#preview-status').textContent = '장면을 준비하지 못했어요. 처음부터 보기로 다시 시도해 주세요.'; return; }
     ready = true;
+    if (contentEditor) post({type:'invitation-studio:content', draft:contentEditor.getDraft()});
     if (activeRequest) post({ type: 'invitation-studio:apply', composition: activeRequest.composition, requestId: activeRequest.requestId, previewOnly: activeRequest.previewOnly });
     else requestPreview(composition);
     post({ type: 'invitation-lab:control', action: 'audio', enabled: audioEnabled });

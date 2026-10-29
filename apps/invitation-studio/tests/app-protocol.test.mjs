@@ -30,7 +30,7 @@ function fixture() {
     post: message => requests.push(message), $: () => status, renderDemoTools() {}, renderAudioState() {},
   });
   vm.runInContext(`let requestSerial = 0, activeRequest = null, activeReviewKey = null, demoPhase = 'idle';
-    let ready = true, motionReady = true, audioEnabled = false;
+    let ready = true, motionReady = true, audioEnabled = false, contentEditor = null;
     const labels = { motion: 'scroll', font: 'font', album: 'album' };
     let composition = ${JSON.stringify(DEFAULT_COMPOSITION)};
     ${requestSource}\n${parentSource}`, parent);
@@ -43,7 +43,7 @@ function fixture() {
     themeController: { composition: normalizeComposition(DEFAULT_COMPOSITION), whenReady: Promise.resolve(),
       setComposition(next) { this.composition = next; this.whenReady = readyByFont.get(next.font) || Promise.resolve(); } },
   });
-  vm.runInContext(`let latestApplyId = -1, stoppedDemoId = -1, awaitingApplyId = null, visualOnly = false;
+  vm.runInContext(`let latestApplyId = -1, stoppedDemoId = -1, awaitingApplyId = null, visualOnly = false, contentPreview = null;
     ${pendingStopSource}\n${childSource}`, child);
   const select = (composition, options = { key: 'motion' }) => {
     parent.selected = composition; parent.options = options;

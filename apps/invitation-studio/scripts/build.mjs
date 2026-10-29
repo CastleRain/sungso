@@ -57,7 +57,7 @@ export async function buildInvitationStudio({ outDir, assetBase = '/v6/assets/',
   }
   const catalog = await readFile(join(source, 'catalog/index.html'), 'utf8');
   await writeFile(join(output, 'index.html'), replace(catalog, { canonicalRoot, assetBase }));
-  for (const filename of ['catalog.css', 'catalog.mjs']) await cp(join(source, 'catalog', filename), join(output, filename));
+  for (const filename of ['catalog.css', 'catalog.mjs', 'guided-steps.mjs']) await cp(join(source, 'catalog', filename), join(output, filename));
   return { outDir: output, variants: ['preview'], mode: 'demo', photos: photos.length };
 }
 

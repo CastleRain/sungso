@@ -1,0 +1,12 @@
+/* Only opted-in reading scenes receive these reflow safeguards. Ink paths, fixed
+   controls and photographs keep their own geometry; no text is transform-scaled. */
+[data-fine-type="true"] :is(p,h2,h3,h4,blockquote,.account-number,.hero-venue,.story-copy) { overflow-wrap: anywhere; }
+[data-fine-type="true"] :is(.family-lines,.recipient-picker,.location-actions,.closing-actions,.gallery-tools,.hero-names) { flex-wrap: wrap; }
+[data-fine-type="true"] :is(.family-person,.account-row,.arrival-steps li>div,.editorial-action>span,.date-face,.date-detail) { min-width: 0; max-width: 100%; }
+[data-fine-type="true"] .date-copy { white-space: normal; }
+[data-fine-type="true"] .map-apps :is(a,button) { min-width: 0; white-space: normal; }
+@media(max-width:480px) {
+  [data-fine-type="true"] .date-ticket { grid-template-columns: minmax(0,1fr); }
+  [data-fine-type="true"] .date-detail { width: 100%; max-width: 330px; justify-self: center; }
+  [data-fine-type="true"] .hero-date { flex-wrap: wrap; justify-content: center; row-gap: 6px; }
+}

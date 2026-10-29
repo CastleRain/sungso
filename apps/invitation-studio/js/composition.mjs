@@ -1,3 +1,4 @@
+import { normalizeFineTuning, normalizeSectionTuning } from './fine-tuning.mjs';
 /** Only visual choices may cross the editor/preview boundary. Never accepts data mode or URLs. */
 export const OPTIONAL_SECTIONS = Object.freeze([
   { id: 'day-pass', label: '당일 안내 패스', key: 'dayPass', detail: '시간·층·주소와 길찾기를 한 장에서 바로 확인해요.', group: 'utility' },
@@ -19,7 +20,7 @@ export const ORDER_SECTIONS = Object.freeze([
   ...OPTIONAL_SECTIONS,
 ].map(section => Object.freeze(section)));
 export const DEFAULT_ORDER = Object.freeze(ORDER_SECTIONS.filter(section => !section.group).map(section => section.id));
-export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', textSize: 'original', lineSpace: 'original', photoTone: 'original', coverFocus: 'original', albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
+export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', textSize: 'original', textScale: 1, lineScale: 1, sectionSpace: 1, sectionTuning: '', lineSpace: 'original', photoTone: 'original', coverFocus: 'original', albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
 export const CHOICES = Object.freeze({
   textSize: Object.freeze([
     { id: 'original', label: '지금의 글자 크기', detail: '기존의 섬세한 균형을 그대로 유지해요.' },
@@ -224,12 +225,16 @@ export function normalizeComposition(input) {
     if (Object.hasOwn(candidate, key) && typeof candidate[key] === 'string' && CHOICES[key].some(choice => choice.id === candidate[key])) result[key] = candidate[key];
   }
   for (const key of ['motionSpeed', 'motionStrength']) if (Object.hasOwn(candidate, key)) result[key] = normalizeMotionTuning(candidate[key]);
+  if (Object.hasOwn(candidate, 'textScale')) result.textScale = normalizeTextScale(candidate.textScale);
+  if (Object.hasOwn(candidate, 'lineScale')) result.lineScale = normalizeFineTuning(candidate.lineScale,{min:.9,max:1.4,step:.05});
+  if (Object.hasOwn(candidate, 'sectionSpace')) result.sectionSpace = normalizeFineTuning(candidate.sectionSpace,{min:.7,max:1.4,step:.05});
+  if (Object.hasOwn(candidate, 'sectionTuning')) result.sectionTuning = normalizeSectionTuning(candidate.sectionTuning);
   if (Object.hasOwn(candidate, 'extras')) result.extras = normalizeExtras(candidate.extras);
   result.order = normalizeOrder(Object.hasOwn(candidate, 'order') ? candidate.order : [], result.extras);
   return result;
 }
 export function readComposition(search = '') {
-  const params = search instanceof URLSearchParams ? search : new URLSearchParams(typeof search === 'string' ? search.slice(0, 2048) : '');
+  const params = search instanceof URLSearchParams ? search : new URLSearchParams(typeof search === 'string' ? search.slice(0, 4096) : '');
   return normalizeComposition(Object.fromEntries(params));
 }
 export function compositionParams(input) {
@@ -237,5 +242,11 @@ export function compositionParams(input) {
   return new URLSearchParams({ version: '1', ...result, extras: result.extras.join(','), order: result.order.join(',') });
 }
 export function sameComposition(left, right) {
-  return [...CHOICE_KEYS, 'motionSpeed', 'motionStrength'].every(key => left?.[key] === right?.[key]) && ['extras', 'order'].every(key => Array.isArray(left?.[key]) && Array.isArray(right?.[key]) && left[key].length === right[key].length && left[key].every((id, index) => id === right[key][index]));
+  return [...CHOICE_KEYS, 'motionSpeed', 'motionStrength', 'textScale', 'lineScale', 'sectionSpace', 'sectionTuning'].every(key => left?.[key] === right?.[key]) && ['extras', 'order'].every(key => Array.isArray(left?.[key]) && Array.isArray(right?.[key]) && left[key].length === right[key].length && left[key].every((id, index) => id === right[key][index]));
+}
+
+export function normalizeTextScale(value) {
+  if (!['number', 'string'].includes(typeof value) || value === '') return 1;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.round(Math.min(1.2, Math.max(.9, number)) * 20) / 20 : 1;
 }
