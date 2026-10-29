@@ -1,0 +1,12 @@
+/* Editor-only affordances do not occupy space or replace guest actions. */
+[data-studio-picker=on] [data-studio-scene]{outline:1px solid transparent;outline-offset:-2px}
+[data-studio-picker=on] [data-studio-scene][data-studio-picked=true]{outline:2px solid #6f9abd;outline-offset:-2px}
+.studio-scene-edit{position:absolute!important;z-index:16;top:10px;left:10px;min-width:44px!important;min-height:44px!important;padding:7px 12px!important;border:1px solid #9eb7cb!important;border-radius:6px!important;background:#f7fbfff5!important;color:#315b7b!important;font:11px/1.4 var(--font,sans-serif)!important;letter-spacing:0!important;opacity:0;pointer-events:none;box-shadow:0 2px 8px #23445a0c;transition:opacity .15s}
+[data-studio-picker=on] [data-studio-scene]:hover>.studio-scene-edit,[data-studio-picker=on] [data-studio-scene]:focus-within>.studio-scene-edit,[data-studio-picker=on] [data-studio-picked=true]>.studio-scene-edit,[data-studio-picker=on] .studio-scene-edit:focus-visible{opacity:1;pointer-events:auto}
+.studio-scene-edit:focus-visible{outline:2px solid #315b7b!important;outline-offset:3px!important}
+.experience-dock>.studio-scene-edit{top:auto;bottom:calc(100% + 8px);left:0;transform:none!important;flex:none!important;width:auto!important}
+[data-studio-picker=on] .experience-dock{overflow:visible}
+[data-studio-picker=off] .studio-scene-edit{display:none!important}
+@media(hover:hover){[data-studio-picker=on] [data-studio-scene]:hover:not([data-studio-picked=true]){outline-color:#9eb7cb}}
+@media(hover:none){[data-studio-picker=on] [data-studio-scene]>.studio-scene-edit{opacity:.88;pointer-events:auto}}
+@media(prefers-reduced-motion:reduce){.studio-scene-edit{transition:none}}

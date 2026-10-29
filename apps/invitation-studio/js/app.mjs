@@ -12,6 +12,7 @@ import { scrollPreviewTo, afterPreviewScroll } from './preview-scroll.mjs';
 import { createSceneReview } from './scene-review.mjs';
 import { createSceneDemo } from './scene-demo.mjs';
 import { mountContentPreview } from './content-preview.mjs';
+import { mountScenePicker } from './scene-picker.mjs';
 
 const variant = document.body.dataset.variant;
 if (!/^[fg]$/.test(variant) || config.mode !== 'demo') throw new Error('Invitation lab requires a recognized demo edition.');
@@ -48,6 +49,7 @@ let effects = readPreference('sungso_invitation_studio_motion', 'on') !== 'off';
 const motion = () => effects && !reduced.matches;
 let themeController, revealObserver, sceneReview, sceneDemo, visualOnly = false;
 let contentPreview;
+let scenePicker;
 let latestApplyId = -1, stoppedDemoId = -1;
 let awaitingApplyId = null;
 
@@ -238,6 +240,7 @@ if (comparison && themeController) sceneDemo = createSceneDemo({
   replayOpening: () => window.sungsoIntro?.replay(themeController.composition.opening, { preview: true }),
   onState: state => parentMessage({ type: 'invitation-studio:demo-state', ...state }),
 });
+if (comparison) scenePicker = mountScenePicker({ doc: document, win: window, embedded: comparison });
 function stopPendingDemo() {
   if (awaitingApplyId === null) return;
   stoppedDemoId = Math.max(stoppedDemoId, awaitingApplyId);
@@ -300,7 +303,7 @@ window.addEventListener('pageshow', () => themeController?.refresh());
 window.addEventListener('pagehide', event => {
   cancelInitialAnchor();
   if (event.persisted) return;
-  cancelPreviewJump(); sceneReview.destroy(); sceneDemo?.destroy();
+  cancelPreviewJump(); sceneReview.destroy(); sceneDemo?.destroy(); scenePicker?.destroy();
   clearInterval(countdownTimer); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
   if (cardUrl) URL.revokeObjectURL(cardUrl);
   if (calendarUrl) URL.revokeObjectURL(calendarUrl);

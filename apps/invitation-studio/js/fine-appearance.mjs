@@ -1,7 +1,7 @@
 import { FINE_SECTION_IDS, FINE_TUNING_RANGES, normalizeFineTuning, readSectionTuning } from './fine-tuning.mjs';
 
 const TEXT = 'p,h1,h2,h3,h4,h5,h6,blockquote,small,strong,span,a,button,label,li,td,th,figcaption,legend,dt,dd,time';
-const PROTECTED = 'svg,.hero-letter,#sound-dock,#music-notice,#intro-skip,.experience-dock,#quick-menu,form,input,textarea,select,.sr-only,.honeypot,[aria-hidden="true"]';
+const PROTECTED = '.studio-scene-edit,svg,.hero-letter,#sound-dock,#music-notice,#intro-skip,.experience-dock,#quick-menu,form,input,textarea,select,.sr-only,.honeypot,[aria-hidden="true"]';
 const GLYPH_ONLY = /^[\s←→↗↖↘↙↑↓×＋+−–—·|&⌄⌃]+$/;
 const round = value => `${Math.round(value * 10000) / 10000}px`;
 

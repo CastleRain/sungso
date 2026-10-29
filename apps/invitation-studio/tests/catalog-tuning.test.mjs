@@ -29,7 +29,7 @@ function fixture(initial = {}) {
   });
   vm.runInContext(`const keys = ${JSON.stringify(CHOICE_KEYS)}, tuningKeys = ['motionSpeed', 'motionStrength'], history = [];
     let composition = normalizeComposition(${JSON.stringify({ ...DEFAULT_COMPOSITION, ...initial })});
-    let lastChange = null, activeReviewKey = null, beforeVisible = false, openKey = null;
+    let lastChange = null, activeReviewKey = null, beforeVisible = false, openKey = null, focusedEditor = false;
     ${between('function tuningSummary(', '\nfunction node(')}
     ${between('function apply(', '\nfunction setEditorTab(')}
     ${between('function renderTuning(', '\nfunction makeSample(')}`, state);

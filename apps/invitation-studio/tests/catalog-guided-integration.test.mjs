@@ -21,29 +21,24 @@ class Element {
   getBoundingClientRect() { return { top: this.top || 0 }; }
 }
 
-test('shipped Next adapter opens a style item, clears its filter and scrolls only the editor', () => {
-  let adapter; const previews = [], opens = [], groups = ['all', 'type', 'photo', 'motion'].map(id => Object.assign(new Element('button'), { dataset: { styleGroup: id } }));
-  const scroller = Object.assign(new Element(), { top: 200, scrollTop: 100 }), heading = new Element('button');
-  const row = Object.assign(new Element('section'), { top: 250, querySelector: () => heading });
-  const save = new Element('button');
+test('shipped Next adapter uses the unified inspector and the last step only opens the save form', () => {
+  let adapter; const choices = [], opens = [], posts = [], save = new Element('button');
   const context = vm.createContext({
     mountGuidedSteps: options => { adapter = options; return { refresh() {} }; },
-    $: selector => selector === '#editor-content' ? scroller : selector === '#go-save' ? save : new Element(),
-    document: { querySelectorAll: selector => { assert.equal(selector, '[data-style-group]'); return groups; } },
+    $: selector => selector === '#go-save' ? save : new Element(),
     labels: {}, contentStepLabels: { family: '가족', photos: '사진' }, globalKeys: ['font'], sectionKeys: {}, detailChildren: {},
-    choiceRows: new Map([['font', row]]), syncExpanded() {}, requestPreview: (value, options) => previews.push(options),
-    contentEditor: { getActiveSection: () => 'photos', openSection: key => opens.push(key) },
-    setEditorTab: tab => vm.runInContext(`editorTab=${JSON.stringify(tab)}`, context),
+    contentEditor: { getActiveSection: () => 'photos' }, post: message => posts.push(message),
+    openEditorChoice: (key, options) => choices.push({ key, options }),
+    openInspectorContent: (key, options) => { opens.push({ key, options, priorSection: vm.runInContext('inspectorSection', context) }); vm.runInContext("inspectorSection='invitation';editorTab='content'", context); },
   });
-  vm.runInContext(`let guidedSteps, editorTab='scenes', openKey='album', styleGroup='photo', activeReviewKey=null; const composition={};
-    ${between('guidedSteps = mountGuidedSteps({', '\n\ndocument.querySelectorAll(\'[data-style-group]\')')}`, context);
+  vm.runInContext(`let guidedSteps, editorTab='scenes', openKey='album', inspectorSection='gallery', ready=true; const composition={};
+    ${between('guidedSteps = mountGuidedSteps({', "\n$('#editor-jump')")}`, context);
   adapter.onOpen({ key: 'font', tab: 'style' });
-  assert.equal(vm.runInContext('openKey', context), 'font'); assert.equal(vm.runInContext('styleGroup', context), 'all');
-  assert.equal(scroller.scrollTop, 138); assert.deepEqual(JSON.parse(JSON.stringify(heading.focusCalls)), [{ preventScroll: true }]);
-  assert.deepEqual(JSON.parse(JSON.stringify(previews)), [{ key: 'font' }]);
-  assert.equal(groups[0].attributes.get('aria-pressed'), 'true'); assert.equal(groups[2].attributes.get('aria-pressed'), 'false');
+  assert.deepEqual(JSON.parse(JSON.stringify(choices)), [{ key: 'font', options: { focus: true } }]);
+  assert.equal(posts.length, 0, 'the shared design inspector owns demonstration and focus');
   adapter.onOpen({ key: 'family', tab: 'content' });
-  assert.deepEqual(opens, ['family']); assert.equal(scroller.scrollTop, 138); assert.equal(previews.length, 1, 'content controller owns content navigation');
+  assert.deepEqual(JSON.parse(JSON.stringify(opens)), [{ key: 'family', options: { focus: true }, priorSection: null }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(posts)), [{ type: 'invitation-studio:jump', section: 'invitation' }]);
   assert.equal(adapter.readState().key, 'photos', 'content guide reads its actual active form group');
   adapter.onFinish(); assert.equal(save.clicks, 1, 'last step opens the existing form, never saves directly');
 });

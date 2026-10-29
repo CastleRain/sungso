@@ -2,6 +2,7 @@ import { CHOICES, CHOICE_KEYS, PRESETS, DEFAULT_COMPOSITION, DEFAULT_ORDER, ORDE
 import runtime from './runtime.mjs';
 import { readSectionTuning, setSectionTuning } from './js/fine-tuning.mjs';
 import { mountGuidedSteps } from './guided-steps.mjs';
+import { sceneEditorTarget, choiceSection, inspectorJumpGroups } from './inspector-model.mjs';
 import { mountContentEditor } from './js/content-editor.mjs';
 import { mountLivePhotoManager } from './js/live-photo-manager.mjs';
 import { APPEARANCE_PALETTES, APPEARANCE_FONTS } from './js/appearance.mjs';
@@ -16,6 +17,7 @@ const detailChildren = { cover: ['coverFocus'], date: ['calendarMark'], album: [
 const detailParents = Object.fromEntries(Object.entries(detailChildren).flatMap(([parent, children]) => children.map(key => [key, parent])));
 const styleGroups = { all: globalKeys, type: ['palette', 'font', 'textSize', 'lineSpace'], photo: ['photoTone'], motion: ['motion', 'spacing', 'divider'] };
 let styleGroup = 'all';
+let focusedEditor = false, inspectorSection = null, inspectorMode = 'design', pickerEnabled = true, suppressContentNavigate = false;
 let guidedSteps, contentEditor, livePhotoManager, contentEditTimer;
 let composition = readComposition(location.search), ready = false, audioEnabled = false, noticeTimer, motionReady = true;
 let audioPhase = 'paused';
@@ -113,6 +115,7 @@ function renderOrder() {
   $('#extra-count').textContent = composition.extras.length ? `${composition.extras.length}개 추가됨` : '선택 사항';
 }
 function renderChoices() {
+  const editorChanged = normalizeActiveEditor();
   const global = $('#global-controls');
   globalKeys.forEach((key, index) => { const row = choiceRows.get(key); if (row && global.children[index] !== row) global.insertBefore(row, global.children[index] || null); });
   for (const key of keys) {
@@ -130,7 +133,9 @@ function renderChoices() {
   renderTextScale();
   renderFineControls();
   renderOrder();
+  if (editorChanged) syncExpanded();
   guidedSteps?.refresh();
+  renderInspector();
   updateURL();
 }
 function previewLabel(key, value = composition[key]) { return `${labels[key]} · ${CHOICES[key].find(choice => choice.id === value)?.label || ''}`; }
@@ -179,9 +184,10 @@ function apply(next, { section, replayOpening = false, reviewKey, changedField, 
   renderChoices(); renderDemoTools();
   requestPreview(composition, { key: activeReviewKey, section, replayOpening });
 }
-function setEditorTab(tab) {
+function setEditorTab(tab, { keepInspector = false, navigateContent = true, keepDemo = false } = {}) {
   if (!['style', 'scenes', 'content', 'library'].includes(tab)) return;
-  restoreCurrent();
+  if (!keepDemo || beforeVisible) restoreCurrent();
+  if (!keepInspector) { focusedEditor = false; inspectorSection = null; inspectorMode = 'design'; }
   const content = $('#editor-content'); tabScroll.set(editorTab, content.scrollTop); editorTab = tab;
   document.body.dataset.tab = tab;
   document.querySelectorAll('.editor-tabs [data-tab]').forEach(button => {
@@ -189,8 +195,71 @@ function setEditorTab(tab) {
     document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
   });
   content.scrollTop = tabScroll.get(tab) || 0;
-  if(tab==='content' && contentEditor) contentEditor.openSection(contentEditor.getActiveSection(),{focus:false});
+  if(tab==='content' && contentEditor && navigateContent) contentEditor.openSection(contentEditor.getActiveSection(),{focus:false});
+  syncChoiceVisibility(); renderInspector();
   guidedSteps?.refresh();
+}
+function syncPicker() {
+  if (ready) post({type:'invitation-studio:picker',enabled:pickerEnabled,section:focusedEditor ? inspectorSection : null});
+}
+function revealEditorPanel() {
+  document.body.dataset.panel='expanded'; $('#panel-toggle').setAttribute('aria-expanded','true'); $('#panel-label').textContent='선택 패널 접기';
+}
+function openEditorChoice(key, { fromPreview = false, focus = false, mode = 'design', keepDemo = false } = {}) {
+  if (!keys.includes(key) || !visibleChoice(key,composition)) return;
+  const section = globalKeys.includes(key) ? null : choiceSection(key), target = section ? sceneEditorTarget(section,composition) : null;
+  focusedEditor=true; inspectorSection=target?.section || null; inspectorMode=mode;
+  styleGroup='all'; document.querySelectorAll('[data-style-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.styleGroup==='all')));
+  setEditorTab(globalKeys.includes(key)?'style':'scenes',{keepInspector:true,navigateContent:false,keepDemo});
+  openKey=key; syncExpanded(); renderInspector(); revealEditorPanel(); $('#editor-content').scrollTop=0;
+  activeReviewKey=key; renderDemoTools(); syncPicker();
+  if (!fromPreview) requestPreview(composition,{key});
+  else $('#preview-status').textContent=`${target?.label || labels[key]} 편집을 열었어요. 왼쪽에서 바꿔 보세요.`;
+  if (focus) $('#inspector-title').focus({preventScroll:true});
+}
+function openInspectorContent(key, { focus = false, keepDemo = false } = {}) {
+  if (!Object.hasOwn(contentStepLabels,key)) return;
+  if (!inspectorSection) inspectorSection=key==='photos'?'gallery':key.startsWith('story')?'our-story':key==='closing'?'closing':'invitation';
+  focusedEditor=true; inspectorMode='content';
+  setEditorTab('content',{keepInspector:true,navigateContent:false,keepDemo});
+  suppressContentNavigate=true;
+  try {contentEditor.openSection(key,{focus:false});} finally {suppressContentNavigate=false;}
+  renderInspector(); revealEditorPanel(); $('#editor-content').scrollTop=0;
+  if(focus) $('#inspector-title').focus({preventScroll:true});
+  syncPicker();
+}
+function renderInspector() {
+  if (!$('#editor-jump')) return;
+  document.body.dataset.inspector=focusedEditor ? inspectorMode : 'list';
+  $('#editor-navigator').hidden=editorTab==='library';
+  $('#context-inspector').hidden=!focusedEditor || editorTab==='library';
+  const target=inspectorSection ? sceneEditorTarget(inspectorSection,composition) : null;
+  if (inspectorSection && !target) {focusedEditor=false;inspectorSection=null;document.body.dataset.inspector='list';$('#context-inspector').hidden=true;}
+  const currentKey=editorTab==='content' ? `content:${contentEditor?.getActiveSection() || 'family'}` : openKey || '';
+  const select=$('#editor-jump'), groups=inspectorJumpGroups(composition), signature=JSON.stringify(groups);
+  if(select.dataset.signature!==signature){
+    const placeholder=node('option','','편집할 항목 바로 찾기');placeholder.value='';select.replaceChildren(placeholder);
+    for(const group of groups){const optgroup=node('optgroup');optgroup.label=group.label;for(const item of group.items){const option=node('option','',item.label);option.value=item.tab==='content'?`content:${item.key}`:item.key;optgroup.append(option);}select.append(optgroup);}
+    select.dataset.signature=signature;
+  }
+  select.value=focusedEditor ? currentKey : '';
+  $('#show-all-choices').disabled=!focusedEditor;
+  $('#inspector-title').textContent=target?.label || labels[openKey] || '선택한 항목';
+  $('#inspector-value').textContent=editorTab==='content' ? '이 브라우저에 보관되는 문구·사진 초안' : CHOICES[openKey]?.find(option=>option.id===composition[openKey])?.label || '';
+  const fineKey=target?.key, hasFine=Boolean(choiceRows.get(fineKey)?.querySelector('.scene-fine'));
+  $('#inspector-modes').hidden=!target;
+  $('#inspector-fine').hidden=!hasFine; $('#inspector-content').hidden=!target?.contentKey;
+  for(const [id,mode] of [['design','design'],['fine','fine'],['content','content']]) $(`#inspector-${id}`).setAttribute('aria-pressed',String(inspectorMode===mode));
+  $('#inspector-content').textContent=target?.contentKey==='photos'?'사진 편집':'문구 편집';
+  const related=$('#inspector-related'); related.replaceChildren();
+  const base=target?.key;
+  const relatedKeys=base==='cover'?['cover','opening','coverFocus']:base==='date'?['date','calendarMark']:base==='album'?['album',...(['grid','masonry'].includes(composition.album)?['albumColumns','albumRatio']:[])]:[];
+  if(inspectorMode==='design') for(const key of relatedKeys){const button=node('button','',labels[key]);button.type='button';button.setAttribute('aria-pressed',String(key===openKey));button.addEventListener('click',()=>openEditorChoice(key));related.append(button);}
+  if(inspectorMode==='content' && ['invitation','top','our-story'].includes(inspectorSection)) for(const key of inspectorSection==='our-story'?['story1','story2','story3']:['family','invitation']) {const button=node('button','',contentStepLabels[key]);button.type='button';button.setAttribute('aria-pressed',String(key===contentEditor?.getActiveSection()));button.addEventListener('click',()=>openInspectorContent(key));related.append(button);}
+  related.hidden=!related.children.length;
+  document.querySelectorAll('[data-content-step]').forEach(group=>{group.hidden=focusedEditor && editorTab==='content' && group.dataset.contentStep!==contentEditor?.getActiveSection();});
+  if(focusedEditor && inspectorMode==='fine'){const fine=choiceRows.get(openKey)?.querySelector('.scene-fine');if(fine){fine.open=true;fine.querySelector('.scene-fine-ranges').hidden=false;}}
+  syncPicker();
 }
 function renderTextScale() {
   const input = $('#text-scale'); if (!input) return;
@@ -246,7 +315,7 @@ function renderFineControls() {
   for(const control of fineControls) {
     if(control.field){control.setValue(composition[control.field]);continue;}
     const value=overrides[control.section];control.toggle.checked=Boolean(value);control.ranges.hidden=!value;
-    for(const [field,range] of Object.entries(control.fields)){range.input.disabled=!value;range.setValue(value?.[field]||1);}
+    for(const [field,range] of Object.entries(control.fields)){range.input.disabled=!value;range.setValue(value?.[field]??composition[field]);}
   }
 }
 function renderTuning() {
@@ -351,12 +420,25 @@ function makeSample(key, value, mini = false) {
   }[value]));
   return sample;
 }
+function normalizeActiveEditor() {
+  if (!focusedEditor || editorTab === 'content') return false;
+  if (['albumColumns', 'albumRatio'].includes(openKey) && !['grid', 'masonry'].includes(composition.album)) {
+    openKey = 'album'; inspectorSection = 'gallery'; inspectorMode = 'design'; activeReviewKey = 'album';
+    return true;
+  }
+  if ((openKey && !visibleChoice(openKey, composition)) || (inspectorSection && !sceneEditorTarget(inspectorSection, composition))) {
+    focusedEditor = false; inspectorSection = null; inspectorMode = 'design'; openKey = null; activeReviewKey = null;
+    return true;
+  }
+  return false;
+}
 function syncExpanded() {
+  normalizeActiveEditor();
   choiceRows.forEach((row, key) => {
     const expanded = key === openKey;
     row.classList.toggle('is-expanded', expanded); row.querySelector('.choice-open').setAttribute('aria-expanded', String(expanded)); row.querySelector('.inline-options').hidden = !expanded;
   });
-  syncChoiceVisibility();
+  syncChoiceVisibility(); renderInspector();
   guidedSteps?.refresh();
 }
 function syncChoiceVisibility() {
@@ -365,7 +447,8 @@ function syncChoiceVisibility() {
     row.hidden = !visibleChoice(key, composition)
       || (globalKeys.includes(key) && !styleGroups[styleGroup].includes(key))
       || (['albumColumns', 'albumRatio'].includes(key) && !['grid', 'masonry'].includes(composition.album))
-      || Boolean(parent && openKey !== parent && detailParents[openKey] !== parent);
+      || Boolean(parent && openKey !== parent && detailParents[openKey] !== parent)
+      || (focusedEditor && key !== openKey);
   });
 }
 function renderOptions(key) {
@@ -398,7 +481,7 @@ function mountChoices() {
     const number = node('span', 'choice-number', globalKeys.includes(key) ? 'STYLE' : 'SCENE');
     text.append(number, node('strong', '', labels[key]), selected);
     const count = node('span', 'choice-count', `${CHOICES[key].length}가지`); count.append(node('span', 'expand-symbol', '＋'));
-    button.append(sample, text, count); button.addEventListener('click', () => { const scroll = $('#editor-content'), oldTop = group.getBoundingClientRect().top; restoreCurrent(); openKey = openKey === key ? null : key; syncExpanded(); guidedSteps?.refresh(); scroll.scrollTop += group.getBoundingClientRect().top - oldTop; if (openKey) { activeReviewKey = key; requestPreview(composition, { key }); } });
+    button.append(sample, text, count); button.addEventListener('click', () => openEditorChoice(key));
     const content = node('div', 'inline-options'); content.id = `options-${key}`;
     content.append(node('p', 'inline-hint', key === 'motion'
       ? '같은 초대글과 날짜 구간에서 비교해요. 방향·크기·초점의 차이를 봐주세요.'
@@ -537,8 +620,8 @@ contentEditor = mountContentEditor({
     clearTimeout(contentEditTimer);
     contentEditTimer=setTimeout(()=>{if(ready) post({type:'invitation-studio:content', draft});},160);
   },
-  onNavigate(section) { restoreCurrent(); if (ready) post({type:'invitation-studio:jump',section}); },
-  onSectionChange() { guidedSteps?.refresh(); },
+  onNavigate(section) { if(suppressContentNavigate)return; restoreCurrent(); if (ready) post({type:'invitation-studio:jump',section}); },
+  onSectionChange() { guidedSteps?.refresh(); if(editorTab==='content')renderInspector(); },
   getComposition:()=>composition,
   onComposition:next=>apply(next,{section:'invitation'}),
 });
@@ -549,18 +632,19 @@ guidedSteps = mountGuidedSteps({
   readState:()=>({composition, tab:editorTab, key:editorTab==='content' ? contentEditor.getActiveSection() : openKey}),
   config:{globalKeys, sectionKeys, detailChildren, extraSteps:Object.keys(contentStepLabels).map(key=>({key,tab:'content'}))},
   onOpen({key,tab}) {
-    setEditorTab(tab);
-    if(tab==='content') { contentEditor.openSection(key); return; }
-    if(tab==='style') {
-      styleGroup='all';
-      document.querySelectorAll('[data-style-group]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.styleGroup==='all')));
-    }
-    openKey=key; syncExpanded(); activeReviewKey=key; requestPreview(composition,{key});
-    const row=choiceRows.get(key), scroller=$('#editor-content');
-    if(row) { scroller.scrollTop+=row.getBoundingClientRect().top-scroller.getBoundingClientRect().top-12; row.querySelector('.choice-open')?.focus({preventScroll:true}); }
+    if(tab==='content') { inspectorSection=null; openInspectorContent(key,{focus:true}); if(ready)post({type:'invitation-studio:jump',section:inspectorSection}); }
+    else openEditorChoice(key,{focus:true});
   },
   onFinish:()=>$('#go-save').click(),
 });
+
+$('#editor-jump').addEventListener('change',event=>{const key=event.target.value;if(key.startsWith('content:')){inspectorSection=null;openInspectorContent(key.slice(8),{focus:true});if(ready)post({type:'invitation-studio:jump',section:inspectorSection});}else openEditorChoice(key,{focus:true});});
+$('#show-all-choices').addEventListener('click',()=>{focusedEditor=false;inspectorSection=null;inspectorMode='design';openKey=null;syncExpanded();$('#editor-content').scrollTop=0;syncPicker();});
+$('#inspector-design').addEventListener('click',()=>{const target=sceneEditorTarget(inspectorSection,composition);if(target)openEditorChoice(target.key,{fromPreview:true,keepDemo:true});});
+$('#inspector-fine').addEventListener('click',()=>{const target=sceneEditorTarget(inspectorSection,composition);if(target)openEditorChoice(target.key,{fromPreview:true,mode:'fine',keepDemo:true});});
+$('#inspector-content').addEventListener('click',()=>{const target=sceneEditorTarget(inspectorSection,composition);if(target?.contentKey)openInspectorContent(target.contentKey,{keepDemo:true});});
+$('#pick-preview').addEventListener('click',()=>{pickerEnabled=!pickerEnabled;$('#pick-preview').setAttribute('aria-pressed',String(pickerEnabled));$('#pick-preview').textContent=pickerEnabled?'장면 선택 켜짐':'장면 선택 꺼짐';$('#picker-hint').textContent=pickerEnabled?'오른쪽 장면을 누르면 편집 항목이 열려요.':'장면 선택을 쉬고 청첩장을 둘러보고 있어요.';syncPicker();});
+renderInspector();
 
 document.querySelectorAll('[data-style-group]').forEach(button => button.addEventListener('click', () => {
   styleGroup = button.dataset.styleGroup;
@@ -573,10 +657,15 @@ const initial = new URL('./preview/', location.href); initial.search = compositi
 window.addEventListener('message', event => {
   if (event.origin !== location.origin || event.source !== frame.contentWindow || !event.data || typeof event.data !== 'object') return;
   const data = event.data;
+  if (data.type === 'invitation-studio:select' && pickerEnabled) {
+    const target=sceneEditorTarget(data.section,composition);
+    if(target)openEditorChoice(target.key,{fromPreview:true});
+    return;
+  }
   if (data.type === 'invitation-studio:ready') {
     motionReady = data.motionReady !== false;
     if (!motionReady) { ready = false; $('#preview-status').textContent = '장면을 준비하지 못했어요. 처음부터 보기로 다시 시도해 주세요.'; return; }
-    ready = true;
+    ready = true; syncPicker();
     if (contentEditor) post({type:'invitation-studio:content', draft:contentEditor.getDraft()});
     if (activeRequest) post({ type: 'invitation-studio:apply', composition: activeRequest.composition, requestId: activeRequest.requestId, previewOnly: activeRequest.previewOnly });
     else requestPreview(composition);
