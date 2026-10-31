@@ -42,6 +42,7 @@ export const definition = {
     },
   ],
   links: [
+    { title: '우리 청첩장 작업실', description: '공동 초안을 고르고 하객 화면에 공개하기', href: './invitation.html' },
     { title: '청첩장', description: '우리에게 어울리는 디자인 고르기', href: '../invitation/' },
     { title: '결혼비용', description: '예산과 지금까지의 지출 보기', href: '../wecost/' },
     { title: '리조트 비교', description: '신혼여행 숙소와 견적 살펴보기', href: '../honeymoon/' },

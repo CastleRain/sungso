@@ -1,3 +1,4 @@
+import { createStudioApi, createStudioStore } from '../../invitation/server/studio.mjs';
 import {createRsvpApi,createRsvpStore} from '../../invitation/server/rsvp.mjs';
 import { createAccountApi, createAccountStore } from '../../invitation/server/accounts.mjs';
 import { readFile } from 'node:fs/promises';
@@ -30,7 +31,8 @@ async function start() {
   const accounts = createAccountApi({store:createAccountStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
   // Daily records and paged motion geometry share the same private member gate.
   const journey = createJourneyApi({ store: createJourneyStore({ db }), authenticate: createSiteMemberGate({ db, auth: getAuth(app) }) });
-  const server = createRenderServer({ api, guestbook, album, rsvp, accounts, journey });
+  const studio = createStudioApi({ store: createStudioStore({ db }), authenticate: createSiteMemberGate({ db, auth: getAuth(app) }) });
+  const server = createRenderServer({ api, guestbook, album, rsvp, accounts, journey, studio });
   const maintenance = createFirestoreMaintenance({ db });
   const clean = () => { void maintenance.runIfDue().catch(() => {}); void rsvpStore.purgeExpired().catch(() => {}); };
   const interval = setInterval(clean, 6 * 60 * 60 * 1000);

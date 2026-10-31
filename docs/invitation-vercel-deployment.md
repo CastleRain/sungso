@@ -119,3 +119,14 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 - 기존 전체 MP3·글꼴·정적 사진은 `/v6/assets/`를 재사용한다. 공개 사진첩의 일곱 번째 사진만 읽기 전용으로 받아 비교실에 동봉했다. 새 시안은 빌드 시 고정한 `demo` 모드로만 작동하며 URL로 운영 모드로 바꿀 수 없다. 방명록은 시안별·기기별 저장, 계좌는 가상 예시다. 기존 운영 데이터·관리 인증·API/CORS·Firebase 도메인은 변경하지 않는다.
 - `verify-invitation-live.mjs`는 manifest의 lab 항목이 있을 때 다섯 HTML/ICS 주소·CSP·데모 모드와 추가 제외 경로를 검사한다. 결과는 `docs/invitation-lab/live-check.json`에 기록하여 기존 VER6 기록을 덮어쓰지 않는다. 새 lab 관리자·원본·테스트 경로와 다른 sungso 앱 경로는 404여야 한다.
 - 이 절은 빌드 준비 기록이며 배포 완료를 뜻하지 않는다. 실제 배포 ID·공개 경로 상태·제공 파일 해시·API 경계 검증은 배포 뒤 별도 결과에 기록한다.
+
+
+## 2026-10-31 공동 저장·공개 연결
+
+`build-invitation-connected.mjs`는 기존 정적 전용 빌드를 검증한 후 별도의 새 출력 디렉터리에 Build Output API v3를 만든다. `/lab/**` 파일은 함수 내부의 allowlist에만 들어간다. 로그인 화면은 공개지만 스튜디오 HTML/JS/미리보기는 승인된 Google 토큰에서 발급한 HttpOnly·Secure·SameSite=Strict 쿠키를 검사한다. 병렬 모듈 요청의 회원 검증은 최대10초만 합친다. 다른 Vercel 호스트는 API CORS에 추가하지 않는다.
+
+공동 API는 `/api/invitation/studio/{session,manage,draft/:id,published,photo/:hash}`다. 읽기로 문서를 만들지 않는다. 서버 전용 `wedding_studio/sungso_20270306` 아래에 초안과 제한된 사진을 보관한다. 초안40개·공개 기록20개·사진200개가 상한이다. 현재 공개본은 초안의 복사본이므로 저장/수정만으로 바뀌지 않는다. 마지막 확인한 revision과 요청 ID를 검사하며 공개 기록에서 되돌려도 공동 초안·기존 계좌·방명록·운영 앨범은 지워지지 않는다.
+
+루트는 공개 스냅샷이 없거나 VER5.6 복원을 선택하면 보존한 VER5.6 HTML을 반환한다. 공개본을 선택하면 동일 주소에서 스튜디오 장면 렌더러와 기존 운영 API를 사용한다. 기존 음악·손글씨·공유 루트·일정 링크를 유지한다. 공개 HTML 캐시는10초, 서버 일시 장애 때 이미 캐시된 공개 HTML은 유지한다. 개인 관리 응답은 항상no-store다.
+
+배포는 먼저 최신 master에 필요한 서버/shared/wedding 파일만 통합하여 Render/Pages를 검증한 뒤, Vercel `--prebuilt`로 검증한 전용 출력만 배포한다. 초기 공개 선택과 DB 시딩은 수행하지 않는다. 운영 관리자 계정에서 공동 초안을 저장/공개하는 최종 실사용은 사용자가 진행한다. 무료 기존 프로젝트만 사용한다.

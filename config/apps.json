@@ -209,13 +209,30 @@
       "source": "apps/invitation-studio/dist",
       "output": "lab/studio",
       "build": "apps/invitation-studio/scripts/build.mjs",
-      "files": ["index.html", "catalog.css", "catalog.mjs", "guided-steps.mjs", "inspector-model.mjs", "runtime.mjs", "preview", "css", "js", "themes", "assets"]
+      "files": [
+        "index.html",
+        "catalog.css",
+        "catalog.mjs",
+        "guided-steps.mjs",
+        "inspector-model.mjs",
+        "runtime.mjs",
+        "preview",
+        "css",
+        "js",
+        "themes",
+        "assets"
+      ]
     },
     {
       "id": "journey",
       "source": "apps/journey",
       "output": "journey",
-        "files": ["index.html", "style.css", "js", "assets"]
+      "files": [
+        "index.html",
+        "style.css",
+        "js",
+        "assets"
+      ]
     },
     {
       "id": "table",
@@ -241,7 +258,8 @@
       "output": "wedding",
       "files": [
         "index.html",
-        "js"
+        "js",
+        "invitation.html"
       ]
     },
     {
@@ -263,7 +281,12 @@
     {
       "source": "shared/journey",
       "output": "shared/journey",
-        "files": ["core.mjs", "import.mjs", "playback-core.mjs", "motion-core.mjs"]
+      "files": [
+        "core.mjs",
+        "import.mjs",
+        "playback-core.mjs",
+        "motion-core.mjs"
+      ]
     },
     {
       "source": "shared/finance",

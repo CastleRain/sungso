@@ -20,6 +20,7 @@ export async function buildInvitationStudio({ outDir, assetBase = '/v6/assets/',
   await mkdir(output, { recursive: true });
   await mkdir(join(output, 'assets'), { recursive: true });
   for (const directory of ['js', 'css', 'themes']) await cp(join(source, directory), join(output, directory), { recursive: true });
+  for (const name of ['composition', 'fine-tuning', 'content-draft']) await cp(new URL('../../../shared/invitation/studio/' + name + '.mjs', import.meta.url), join(output, 'js', name + '.mjs'));
   const [template, handwriting] = await Promise.all([
     readFile(join(source, 'src/index.template.html'), 'utf8'), readFile(join(source, 'src/hero-handwriting.svg'), 'utf8'),
   ]);
