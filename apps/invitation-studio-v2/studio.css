@@ -12,3 +12,12 @@
 @media(max-width:740px){.app-header{gap:4px}.wordmark{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:1}.wordmark small{display:none}.history-actions{border:0;padding:0}.history-actions button{width:44px}.preview-actions{flex-shrink:0}.preview-bottom{display:flex;min-height:44px;justify-content:center}.preview-bottom #preview-status{display:none}.preview-bottom button{min-height:44px}.content-editor .content-photo-actions button{min-width:44px}}
 
 @media(max-width:740px){#sheet-toggle{min-height:44px;height:44px}.inspector{height:86px}.preview-panel{padding-bottom:96px}}
+.option-sample.receipt-sample{display:flex;flex-direction:column;gap:5px;background:var(--brand-surface,#fff);margin:8px auto;width:78%;min-height:106px;height:auto;padding:12px 8px;border-block:1px dashed var(--brand-border,#d9e4ec);font-family:RIDIBatang,serif;text-align:center;box-shadow:0 3px 12px #243b5010}
+.receipt-sample small{font-size:8px;letter-spacing:.08em}.receipt-sample strong{font-size:14px}.option-sample.receipt-sample span{position:static;font:12px/1.4 RIDIBatang,serif;color:var(--ss-text);text-shadow:none}
+.option-sample.film-sample{display:flex;gap:5px;align-items:center;overflow:hidden;padding:10px 7px;border-block:6px dotted #c7d7e4;background:#20394a}
+.option-sample.film-sample img{width:calc((100% - 10px)/3);height:100%;max-height:100px;object-fit:cover}
+.option-sample.print-sample{display:flex;flex-direction:column;justify-content:center;gap:12px;margin:8px auto;width:86%;height:110px;border:9px solid white;border-bottom-width:21px;background:#edf4f8;box-shadow:0 3px 12px #243b5012;transform:rotate(-2deg);font-family:RIDIBatang,serif}
+.option-sample.print-sample span{position:static;font:27px PinyonScript,cursive;color:var(--ss-accent);text-shadow:none}.print-sample small{font-size:9px}
+.option-sample.breath-sample{display:flex;align-items:center;justify-content:center;gap:8px;font-size:34px;color:#436c92}.breath-sample i{font-size:23px;font-style:normal}
+.option-sample.breath-sample span{position:static;font:34px serif;color:inherit;text-shadow:none}
+.preset-archive{margin-top:16px;border-top:1px solid var(--ss-line)}.preset-archive summary{padding:16px 4px;min-height:44px;font-size:13px;cursor:pointer}.preset-archive[open]{display:block}.preset-archive .preset-option{margin-top:10px;width:100%}

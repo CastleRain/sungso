@@ -1,0 +1,14 @@
+{
+  "legacyRootUnchanged": true,
+  "unchangedPublicFiles": 196,
+  "updatedPublishedRuntime": [
+    "published\\js\\appearance.mjs",
+    "published\\js\\composition.mjs",
+    "published\\js\\content-scenes.mjs",
+    "published\\js\\gallery-experience.mjs",
+    "published\\js\\guest-pass.mjs",
+    "published\\js\\scene-demo.mjs",
+    "published\\js\\studio-preview.mjs",
+    "published\\js\\utility-scenes.mjs"
+  ]
+}

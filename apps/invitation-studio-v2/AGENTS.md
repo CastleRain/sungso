@@ -9,6 +9,14 @@
 
 ## Progress
 
+### 2026-11-01 — 선택형 표현 3단계 배포
+
+- 영수증형 당일 안내·필름 사진첩·인화지 메시지·사진첩 앞 짧은 나비 연결, 추천 3조합을 추가했다. 예전 추천은 접힌 영역에 남기며 문구/사진은 추천으로 덮어쓰지 않는다. 세부 옵션 선택과 재시연은 실제 변경한 key로 동작한다.
+- 기존 형식 1/공동 저장/명시적 공개·음악/입력 상태를 보존한다. 서버 새 허용값 4개도 반영됐다. 전체 2,545검사·Emulator16개 통과, 5개 화면 폭·합성 저장/공개·배포 익명 경계를 확인했다.
+- Vercel `dpl_9Qm27ML6gqqDYZnPFTMqDhAvGxup` READY, 기존 Render 배포 `dep-dbj1etetlv9c73bvrk3g` Live. 공개본/운영 데이터 QA 변경 없음. 상세와 사용법: `docs/invitation-studio/v2-scenes/README.md`.
+
+**다음:** 새 추천을 공동 초안으로 비교하고 실제 자산/내용에 근거한 4단계 확장만 별도로 진행한다.
+
 2026-11-01: V2 implementation started from `docs/invitation-studio/v2-analysis/PLAN.md`, prioritizing editor layout, unified controls and save compatibility.
 
 ### 2026-11-01 — Studio V2 별도 편집기 구현과 보호 배포

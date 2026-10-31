@@ -131,7 +131,8 @@ export function createSceneDemo({ doc = document, win = window, controller, onSt
     const interactionSelector = request.key === 'album' && ['grid', 'masonry'].includes(getController()?.composition?.album) ? '#gallery-grid' : interactionTargets[request.key];
     const interaction = interactionSelector ? target.querySelector(interactionSelector) : null;
     const interactionBounds = interaction?.getBoundingClientRect();
-    const route = demoRoute({ key: request.key, top: topOf(target), height: target.getBoundingClientRect().height, nextTop: next ? topOf(next) : undefined, interactionTop: interactionBounds?.height > 0 ? topOf(interaction) : undefined, viewport: win.innerHeight, maxScroll: Math.max(0, doc.documentElement.scrollHeight - win.innerHeight), speed: getController()?.composition?.motionSpeed });
+    const bridgeDemo = request.key === 'divider' && getController()?.composition?.divider === 'breath';
+    const route = demoRoute({ key: bridgeDemo ? 'bridge-entry' : request.key, top: topOf(target), height: target.getBoundingClientRect().height, nextTop: next ? topOf(next) : undefined, interactionTop: interactionBounds?.height > 0 ? topOf(interaction) : undefined, viewport: win.innerHeight, maxScroll: Math.max(0, doc.documentElement.scrollHeight - win.innerHeight), speed: getController()?.composition?.motionSpeed });
     const statically = cannotMove() || route.duration === 0;
     const detail = staticTargets[request.key] ? target.querySelector(staticTargets[request.key]) : null;
     const visibleDetail = detail?.getBoundingClientRect().height > 0 ? detail : target;
@@ -169,7 +170,7 @@ export function createSceneDemo({ doc = document, win = window, controller, onSt
     current = request;
     const reason = blocked();
     if (reason) { finish(request, 'blocked', reason); return true; }
-    const target = doc.getElementById(SECTION_IDS[request.key]);
+    const target = doc.getElementById(request.key === 'divider' && getController()?.composition?.divider === 'breath' ? 'gallery' : SECTION_IDS[request.key]);
     if (!target || target.hidden || !getController()) { finish(request, 'blocked', 'unavailable'); return true; }
     finishOpening(); emit(request, 'preparing');
     let started = false;

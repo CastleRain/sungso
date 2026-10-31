@@ -1,7 +1,7 @@
 import { mountGalleryExperience } from './gallery-experience.mjs';
 
 const STORIES = new Set(['chapters', 'line', 'fold', 'light', 'constellation', 'cafe']);
-const ALBUMS = new Set(['stack', 'contact', 'grid', 'masonry']);
+const ALBUMS = new Set(['stack', 'contact', 'grid', 'masonry', 'film']);
 const isThumbnailAlbum = album => album === 'grid' || album === 'masonry';
 export function contentChoices(value = {}) {
   return { story: STORIES.has(value?.story) ? value.story : 'chapters', album: ALBUMS.has(value?.album) ? value.album : 'stack' };
@@ -78,6 +78,7 @@ export function mountContentScenes({ doc = document, win = window, gallery, enab
     if (next.story !== choices.story) progress = 0;
     choices = next;
     doc.body.dataset.story = choices.story; doc.body.dataset.album = choices.album;
+    album.setPresentation?.(choices.album);
     // Keep the same album controller and thumbnail nodes through every presentation.
     if (grid) grid.hidden = !isThumbnailAlbum(choices.album);
     sync(); album.refresh();

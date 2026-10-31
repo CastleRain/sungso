@@ -149,7 +149,7 @@ test('all four utility presentations survive saving, sharing and reordering with
     assert.equal(Object.hasOwn(normalizeComposition({ ...state, mode: 'live', account: '123456', api: 'https://example.test' }), 'mode'), false);
     count++;
   }
-  assert.equal(count, 567);
+  assert.equal(count, 756);
   const previous = { palette: 'azure', font: 'editorial', motion: 'focus', cover: 'aperture', opening: 'flow', intro: 'ribbon', date: 'flip', story: 'line', album: 'contact', order: [...DEFAULT_ORDER] };
   const upgraded = normalizeComposition(previous);
   for (const key of ['arrival', 'gifting', 'wishes', 'navigation']) assert.equal(upgraded[key], DEFAULT_COMPOSITION[key]);

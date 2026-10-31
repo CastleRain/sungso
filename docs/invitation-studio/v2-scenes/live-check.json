@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-31T16:35:12.772Z",
+  "deployment": "dpl_9Qm27ML6gqqDYZnPFTMqDhAvGxup",
+  "checks": [
+    {
+      "url": "/",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/v6/",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/v6/assets/photos/forest-640.webp",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/css/scene-accents.css",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/composition.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/lab/studio/",
+      "status": 303
+    },
+    {
+      "url": "/lab/studio-v2/",
+      "status": 303
+    },
+    {
+      "url": "/lab/studio-v2/studio.mjs",
+      "status": 401
+    },
+    {
+      "url": "/api/studio/manage",
+      "status": 401
+    },
+    {
+      "url": "/homehunt/",
+      "status": 404
+    },
+    {
+      "url": "/wecost/",
+      "status": 404
+    },
+    {
+      "url": "/honeymoon/",
+      "status": 404
+    },
+    {
+      "url": "music range",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "url": "Render health",
+      "status": 200
+    }
+  ]
+}

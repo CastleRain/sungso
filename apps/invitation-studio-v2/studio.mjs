@@ -6,6 +6,7 @@ import {APPEARANCE_PALETTES,APPEARANCE_FONTS} from './js/appearance.mjs';
 import runtime from './runtime.mjs';
 import {GLOBAL_KEYS,LABELS,SCENE_KEYS,CONTENT_GROUPS,sectionFor,scenes,settingsFor,snapshot,createHistory} from './model.mjs';
 import {mountLibrary} from './library.mjs';
+import {V2_PRESETS} from './recommendations.mjs';
 
 const $=id=>document.getElementById(id),frame=$('invitation-preview'),WORKING='sungso_studio_v2_working_design';
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -13,6 +14,7 @@ const post=data=>frame.contentWindow?.postMessage(data,location.origin);
 let composition=readComposition(location.search);
 if(!new URLSearchParams(location.search).has('version'))try{const saved=JSON.parse(localStorage.getItem(WORKING));if(saved?.version===1)composition=normalizeComposition(saved.composition);}catch{}
 let currentContent=normalizeContentDraft(),ready=false,contentLoaded=false,muting=false,selectedKey='cover',activeScene='top',orderEditing=false,pickerEnabled=true,audioPhase='paused';
+let lastReviewKey='cover';
 let serial=0,request=null,baseline=null,comparing=false,noticeTimer,contentTimer,saveTimer,lastTyping=0,lastContentSection=null,pointerDrag=null;
 const history=createHistory(snapshot(composition,currentContent));
 const rangeControls=[],optionStates=new Map();
@@ -21,7 +23,7 @@ export function getSnapshot(){return snapshot(composition,currentContent);}
 function notify(message){$('notice').textContent=message;$('notice').hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>$('notice').hidden=true,4200);}
 function stopDemo(){if(request){request.key=null;request.section=null;post({type:'invitation-studio:demo-stop',requestId:request.id});}$('stop-demo').hidden=true;}
 function preview(value=getSnapshot(),{key=null,section=null,preserve=true}={}){
-  stopDemo();request={id:++serial,key,section,snapshot:value,preserve,sent:false};
+  if(key)lastReviewKey=key;stopDemo();request={id:++serial,key,section,snapshot:value,preserve,sent:false};
   if(!ready)return;
   post({type:'studio-v2:prepare',requestId:request.id,preserve});
   const fingerprint=JSON.stringify(value.content);
@@ -34,11 +36,11 @@ function exitComparison(){if(!comparing)return;comparing=false;document.body.dat
 function updateURL(){const url=new URL(location.href);url.search=compositionParams(composition).toString();window.history.replaceState(null,'',url);const full=new URL('./preview/',location.href);full.search=url.search;$('open-preview').href=full.href;}
 function record({coalesce=false}={}){history.commit(getSnapshot(),{coalesce});$('undo').disabled=!history.canUndo;$('redo').disabled=!history.canRedo;}
 function persistWorking(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(WORKING,JSON.stringify({version:1,composition}));$('save-status').textContent='디자인은 이 기기에 보관됨';}catch{$('save-status').textContent='기기 저장 불가 · 파일로 보관해 주세요.';}},350);}
-function apply(next,{demo=false,coalesce=false,recordChange=true}={}){
+function apply(next,{demo=false,demoKey=selectedKey,coalesce=false,recordChange=true}={}){
   exitComparison();composition=normalizeComposition(next);if(recordChange)record({coalesce});
   if(!GLOBAL_KEYS.includes(selectedKey)&&!scenes(composition).some(s=>s.key===selectedKey)&&!['coverFocus','calendarMark','albumColumns','albumRatio'].includes(selectedKey))selectScene('invitation',{jump:false});
   updateURL();renderRail();updateSelections();updateRanges();persistWorking();
-  preview(getSnapshot(),{key:demo?selectedKey:null,preserve:!demo});
+  preview(getSnapshot(),{key:demo?demoKey:null,preserve:!demo});
 }
 export async function loadSnapshot(value){
   await contentEditor.ready;exitComparison();stopDemo();muting=true;
@@ -69,14 +71,18 @@ window.addEventListener('pointermove',event=>{if(!pointerDrag||event.pointerId!=
 function finishDrag(event){if(!pointerDrag)return;const drag=pointerDrag;pointerDrag=null;document.querySelectorAll('.scene-row').forEach(n=>n.classList.remove('drop-target','dragging'));if(event.type==='pointerup'&&drag.moved&&drag.target&&drag.target!==drag.id)reorder(drag.id,composition.order.indexOf(drag.target));}
 window.addEventListener('pointerup',finishDrag);window.addEventListener('pointercancel',finishDrag);window.addEventListener('keydown',e=>{if(e.key==='Escape'){finishDrag({type:'cancel'});stopDemo();if(comparing){exitComparison();preview();}}});
 function selectScene(id,{jump=true,focus=false}={}){
-  const scene=scenes(composition).find(s=>s.id===id);if(!scene)return;exitComparison();stopDemo();activeScene=id;selectedKey=scene.key;renderRail();renderInspector();syncPicker();document.body.dataset.rail='closed';
+  const scene=scenes(composition).find(s=>s.id===id);if(!scene)return;exitComparison();stopDemo();activeScene=id;selectedKey=scene.key;lastReviewKey=scene.key;renderRail();renderInspector();syncPicker();document.body.dataset.rail='closed';
   if(matchMedia('(max-width:740px)').matches)document.body.dataset.sheet='half';
   if(jump)preview(getSnapshot(),{section:id==='opening'?'top':id==='navigation'?null:id,preserve:false});
   if(focus)$('inspector-title').focus({preventScroll:true});
 }
-function selectGlobal(key){if(!GLOBAL_KEYS.includes(key))return;const wasComparing=comparing;exitComparison();stopDemo();selectedKey=key;renderInspector();document.body.dataset.rail='closed';document.body.dataset.sheet='half';$('mood-dialog').close();if(wasComparing)preview();}
+function selectGlobal(key){if(!GLOBAL_KEYS.includes(key))return;const wasComparing=comparing;exitComparison();stopDemo();selectedKey=key;lastReviewKey=key;renderInspector();document.body.dataset.rail='closed';document.body.dataset.sheet='half';$('mood-dialog').close();if(wasComparing)preview();}
 function sample(key,id){
   const wrap=node('div','option-sample');wrap.setAttribute('aria-hidden','true');wrap.dataset.sampleKey=key;wrap.dataset.sampleValue=id;
+  if(key==='dayPass'&&id==='receipt'){wrap.classList.add('receipt-sample');wrap.append(node('small','','A TABLE FOR TWO'),node('strong','','성우 & 소희'),node('span','','2027. 03. 06'),node('small','','목화웨딩홀 · 15F'));return wrap;}
+  if(key==='album'&&id==='film'){wrap.classList.add('film-sample');for(const photo of runtime.photos.slice(0,3)){const img=node('img');img.src=thumb(photo);img.alt='';img.loading='lazy';wrap.append(img);}return wrap;}
+  if(key==='wishes'&&id==='polaroid'){wrap.classList.add('print-sample');wrap.append(node('span','','A little note'),node('small','','두 사람에게, 축하의 마음'));return wrap;}
+  if(key==='divider'&&id==='breath'){wrap.classList.add('breath-sample');wrap.append(node('span','','〰'),node('i','','ʚɞ'),node('span','','〰'));return wrap;}
   if(key==='palette'){wrap.classList.add('palette-sample');const p=APPEARANCE_PALETTES[id];for(const tone of [p.paper,p.soft,p.accent,p.ink]){const dot=node('i');dot.style.background=tone;wrap.append(dot);}}
   else if(key==='font'){wrap.classList.add('font-sample');wrap.style.fontFamily=id==='modern'?'Pretendard Variable':APPEARANCE_FONTS[id].body;wrap.append(node('div','','성우 & 소희'),node('small','','함께해 주셔서 고마워요. 03.06'));}
   else if(key==='motion'){wrap.classList.add('motion-sample');wrap.dataset.motion=id;wrap.append(node('i'),node('i'));}
@@ -89,7 +95,7 @@ function sample(key,id){
 function mountOptions(key){
   const box=node('section','setting-group');box.dataset.optionGroup=key;box.append(node('h3','',LABELS[key]));const grid=node('div','option-grid'),more=node('button','more-options','더 보기');let state=optionStates.get(key)||{search:'',limit:6};optionStates.set(key,state);
   let search;if(CHOICES[key].length>6){search=node('input','option-search');search.type='search';search.placeholder='표현 찾기';search.setAttribute('aria-label',`${LABELS[key]} 검색`);search.value=state.search;box.append(search);search.oninput=()=>{state.search=search.value;state.limit=6;paint();};}
-  function paint(){grid.replaceChildren();const found=CHOICES[key].filter(c=>`${c.label} ${c.detail}`.includes(state.search.trim()));for(const choice of found.slice(0,state.limit)){const button=node('button','option-card');button.dataset.choice=key;button.dataset.value=choice.id;button.setAttribute('aria-pressed',String(composition[key]===choice.id));button.append(sample(key,choice.id),node('strong','',choice.label),node('small','',choice.detail));button.onclick=()=>{const topology=key==='album';apply({...composition,[key]:choice.id},{demo:!GLOBAL_KEYS.includes(key)});if(topology)renderInspector();};grid.append(button);}more.hidden=found.length<=state.limit;}
+  function paint(){grid.replaceChildren();const found=CHOICES[key].filter(c=>`${c.label} ${c.detail}`.includes(state.search.trim()));for(const choice of found.slice(0,state.limit)){const button=node('button','option-card');button.dataset.choice=key;button.dataset.value=choice.id;button.setAttribute('aria-pressed',String(composition[key]===choice.id));button.append(sample(key,choice.id),node('strong','',choice.label),node('small','',choice.detail));button.onclick=()=>{const topology=key==='album';apply({...composition,[key]:choice.id},{demo:!GLOBAL_KEYS.includes(key)||(key==='divider'&&choice.id==='breath'),demoKey:key});if(topology)renderInspector();};grid.append(button);}more.hidden=found.length<=state.limit;}
   more.onclick=()=>{state.limit+=6;paint();};box.append(grid,more);paint();return box;
 }
 function updateSelections(){document.querySelectorAll('[data-choice]').forEach(b=>b.setAttribute('aria-pressed',String(composition[b.dataset.choice]===b.dataset.value)));document.querySelectorAll('[data-global]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.global===selectedKey)));}
@@ -141,7 +147,7 @@ for(const id of ['open-library','mobile-library'])$(id).onclick=()=>{stopDemo();
 for(const button of document.querySelectorAll('[data-global]'))button.onclick=()=>selectGlobal(button.dataset.global);
 $('edit-order').onclick=()=>{orderEditing=!orderEditing;$('edit-order').setAttribute('aria-pressed',String(orderEditing));renderRail();};
 for(const [id,direction] of [['previous',-1],['next',1]])$(id).onclick=()=>{const all=scenes(composition),index=all.findIndex(s=>s.id===activeScene);if(all[index+direction])selectScene(all[index+direction].id);};
-$('replay-scene').onclick=()=>{exitComparison();preview(getSnapshot(),{key:selectedKey,preserve:false});};$('stop-demo').onclick=stopDemo;
+$('replay-scene').onclick=()=>{exitComparison();preview(getSnapshot(),{key:lastReviewKey,preserve:false});};$('stop-demo').onclick=stopDemo;
 $('pin-baseline').onclick=()=>{exitComparison();baseline=getSnapshot();$('compare').disabled=false;preview();notify('현재 디자인·문구·사진을 비교 기준으로 고정했어요.');};
 $('compare').onclick=()=>{if(!baseline)return;comparing=!comparing;document.body.dataset.compare=String(comparing);$('compare').setAttribute('aria-pressed',String(comparing));$('compare').textContent=comparing?'현재 조합 보기':'기준과 비교';syncPicker();preview(comparing?baseline:getSnapshot());};
 for(const [id,method] of [['undo','undo'],['redo','redo']])$(id).onclick=async()=>{const value=history[method]();if(!value)return;muting=true;try{await contentEditor.setDraft(value.content);currentContent=contentEditor.getDraft();}finally{muting=false;}apply(value.composition,{recordChange:false});renderInspector();$('undo').disabled=!history.canUndo;$('redo').disabled=!history.canRedo;};
@@ -152,7 +158,9 @@ function share(){const url=new URL(location.href);url.search=compositionParams(c
 $('share').onclick=share;
 $('add-scene').onclick=()=>{stopDemo();$('extra-options').replaceChildren();for(const section of OPTIONAL_SECTIONS){const button=node('button','extra-option');const exists=composition.extras.includes(section.id);button.append(node('strong','',`${section.label}${exists?' · 사용 중':''}`),node('small','',section.detail));button.disabled=exists;button.onclick=()=>{const order=[...composition.order],after=order.indexOf(activeScene);order.splice(after<0?order.length:after+1,0,section.id);apply({...composition,extras:[...composition.extras,section.id],order});$('add-dialog').close();selectScene(section.id);};$('extra-options').append(button);}$('add-dialog').showModal();};
 $('open-presets').onclick=()=>{stopDemo();$('preset-dialog').showModal();};
-for(const preset of PRESETS){const button=node('button','preset-option');button.append(node('strong','',preset.label),node('small','',preset.detail));button.onclick=()=>{apply(preset.composition);$('preset-dialog').close();selectScene('top');notify('추천 디자인을 적용했어요. 문구와 사진은 유지돼요.');};$('presets').append(button);}
+const presetArchive=node('details','preset-archive');presetArchive.append(node('summary','','이전 추천 조합도 보기'));
+for(const preset of [...V2_PRESETS,...PRESETS]){const button=node('button','preset-option');button.dataset.preset=preset.id;button.append(node('strong','',preset.label),node('small','',preset.detail));button.onclick=()=>{apply(preset.composition);$('preset-dialog').close();selectScene('top');notify('추천 디자인을 적용했어요. 문구와 사진은 유지돼요.');};(V2_PRESETS.includes(preset)?$('presets'):presetArchive).append(button);}
+$('presets').append(presetArchive);
 document.querySelectorAll('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 $('import-v1-content').onclick=async()=>{if(!confirm('V1의 문구·사진을 V2 작업 초안으로 가져올까요? V1 원본은 유지되고 현재 V2 내용은 바뀝니다.'))return;const store=createContentStore(window.indexedDB);try{const result=await store.read();await loadSnapshot({...getSnapshot(),content:result.draft});notify('V1 내용을 V2로 가져왔어요. V1 원본은 그대로예요.');}catch{notify('V1 초안을 읽지 못했어요. 원본은 바꾸지 않았어요.');}finally{await store.close();}};
 $('sheet-toggle').onclick=()=>{const heights=['peek','half','full'];document.body.dataset.sheet=heights[(heights.indexOf(document.body.dataset.sheet)+1)%3];};

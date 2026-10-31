@@ -20,12 +20,18 @@ export function albumSwipe(start, end) {
   return Math.abs(x) >= 48 && Math.abs(x) > Math.abs(y) * 1.8 ? (x < 0 ? 1 : -1) : 0;
 }
 
+export function albumFrames(presentation, direction = 1) {
+  return presentation === 'film'
+    ? [{ opacity: .3, transform: `translateX(${direction < 0 ? -24 : 24}px) scale(1.025)` }, { opacity: 1, transform: 'none' }]
+    : [{ opacity: .35, transform: 'scale(1.018)' }, { opacity: 1, transform: 'none' }];
+}
+
 export function mountGalleryExperience({ doc = document, win = window, gallery, enabled = true } = {}) {
   const stage = doc.getElementById('gallery-stage'), grid = doc.getElementById('gallery-grid');
   if (!stage || !grid || !gallery) return { setEnabled() {}, refresh() {}, destroy() {} };
   const previousHidden = grid.hidden, cleanups = [], reduced = win.matchMedia?.('(prefers-reduced-motion: reduce)');
   let photos = [], index = -1, selectedId, fingerprint = '', requested = enabled, active = false, disposed = false, frame = 0;
-  let startPointer, suppressClick = false, engaged = false, animation, scrollEnabled = true;
+  let startPointer, suppressClick = false, engaged = false, animation, scrollEnabled = true, presentation = 'stack';
   const create = (tag, className, text) => { const node = doc.createElement(tag); node.className = className; if (text) node.textContent = text; return node; };
   const listen = (target, type, fn, options) => { target?.addEventListener?.(type, fn, options); cleanups.push(() => target?.removeEventListener?.(type, fn, options)); };
   const root = create('div', 'experience-album'); root.setAttribute('aria-label', '두 사람의 사진첩');
@@ -60,7 +66,7 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   }
   function queue() { if (!disposed && canAnimate() && scrollEnabled && !frame) frame = win.requestAnimationFrame(paintProgress); }
   function settle() { engaged = true; root.style.setProperty('--album-reveal', '1'); }
-  function renderSelection({ animate = false, scrollThumbnail = false } = {}) {
+  function renderSelection({ animate = false, scrollThumbnail = false, direction = 1 } = {}) {
     const photo = photos[index]; if (!photo) return;
     selectedId = photo.id;
     picture.hidden = false; error.hidden = true;
@@ -82,14 +88,15 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
       if (other) { image.src = other.thumb || other.src; image.width = other.width || 1440; image.height = other.height || 2160; }
     });
     cancelAnimation();
-    if (animate && canAnimate() && picture.animate) animation = picture.animate([{ opacity: .35, transform: 'scale(1.018)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    if (animate && canAnimate() && picture.animate) animation = picture.animate(albumFrames(presentation, direction), { duration: presentation === 'film' ? 420 : 260, easing: 'cubic-bezier(.2,.7,.3,1)' });
   }
   function select(nextIndex, userAction = false) {
     if (!photos.length) return;
     const changed = index !== nextIndex;
+    const direction = nextIndex < index ? -1 : 1;
     index = albumStep(nextIndex, photos.length, 0);
     if (userAction) settle();
-    renderSelection({ animate: userAction && changed, scrollThumbnail: userAction });
+    renderSelection({ animate: userAction && changed, scrollThumbnail: userAction, direction });
   }
   function move(delta) { if (photos.length > 1) select(albumStep(index, photos.length, delta), true); }
   function refresh() {
@@ -163,6 +170,7 @@ export function mountGalleryExperience({ doc = document, win = window, gallery, 
   refresh(); setEnabled(enabled);
   return {
     setEnabled, refresh,
+    setPresentation(value) { if (disposed) return; presentation = value === 'film' ? 'film' : 'stack'; cancelAnimation(); },
     setScrollEnabled(value) { scrollEnabled = Boolean(value); setEnabled(requested); },
     get index() { return index; },
     prepareDemo() { engaged = false; queue(); return () => settle(); },

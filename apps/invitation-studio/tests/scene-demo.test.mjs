@@ -49,6 +49,14 @@ function fixture({ reduced = false, readiness = Promise.resolve(), staticOff = f
   return { demo, doc, win, media, controller, sections, states, moves, step, complete, get pendingFrames() { return frames.size; }, get pendingTimers() { return timers.size; }, get prepared() { return prepared; }, get restored() { return restored; }, get interacted() { return interacted; }, get interactionRestored() { return interactionRestored; }, get finishCount() { return finishCount; }, get replayCount() { return replayCount; } };
 }
 const flush = () => Promise.resolve();
+test('the optional breath divider demonstrates only the album entrance and cancels on manual input',async()=>{
+  const f=fixture();f.controller.composition={...DEFAULT_COMPOSITION,divider:'breath'};
+  f.demo.start({requestId:701,key:'divider'});await flush();f.step(16);f.step(100);
+  const album=f.doc.getElementById('gallery');
+  assert.ok(f.moves[0].top>=album.top-f.win.innerHeight);
+  assert.ok(f.moves[0].top<album.top);assert.ok(f.prepared>0);
+  f.win.emit('wheel');assert.equal(f.pendingFrames,0);assert.equal(f.interacted,0);assert.equal(f.restored,1);f.demo.destroy();
+});
 
 test('all choices have bounded scene routes, with a common motion route and readable appearance positions', () => {
   const geometry = { top: 1000, height: 700, nextTop: 1700, interactionTop: 1400, viewport: 800, maxScroll: 4000 };

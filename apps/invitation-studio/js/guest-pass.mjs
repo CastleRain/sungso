@@ -3,7 +3,7 @@ import { compositionParams, DEFAULT_COMPOSITION } from './composition.mjs';
 import { formatWedding } from './core.mjs';
 import { copyText } from './ui.mjs';
 
-export const GUEST_PASS_CHOICES = Object.freeze(['boarding', 'concise']);
+export const GUEST_PASS_CHOICES = Object.freeze(['boarding', 'concise', 'receipt']);
 const PREVIEW_URL = 'https://sungso-wedding.vercel.app/lab/studio/preview/';
 const clean = value => typeof value === 'string' ? value.trim().slice(0, 600) : '';
 
@@ -65,6 +65,9 @@ export function mountGuestPass({ doc = document, win = window, wedding = {}, com
     const title = element('h2', '', 'Your day pass', heading); title.id = 'day-pass-title';
     element('p', '', '함께할 하루의 안내', heading);
     const card = element('article', 'guest-pass-card', undefined, inner);
+    const receiptHeader = element('div', 'receipt-only receipt-header', undefined, card);
+    element('span', '', 'A TABLE FOR TWO', receiptHeader);
+    element('p', '', '커피 한 잔에서 시작된,\n우리의 다음 장.', receiptHeader);
     const names = [clean(wedding.groom), clean(wedding.bride)].filter(Boolean).join(' & ');
     element('p', 'guest-pass-kicker', 'YOU ARE INVITED', card); element('p', 'guest-pass-names', names, card);
     let date = {}; try { date = formatWedding(wedding.startsAt); } catch { /* No invented date. */ }
@@ -80,6 +83,7 @@ export function mountGuestPass({ doc = document, win = window, wedding = {}, com
     anchor('', '네이버지도 ↗', `https://map.naver.com/p/search/${query}`, routes, true);
     anchor('', '카카오맵 ↗', 'https://place.map.kakao.com/24484800', routes, true);
     const tmap = button('', '티맵 ↗', routes); tmap.dataset.open = 'tmap-dialog'; tmap.setAttribute('aria-haspopup', 'dialog');
+    element('p', 'receipt-only receipt-signature', 'See you on our day', card);
     const actions = element('div', 'guest-pass-actions', undefined, inner);
     const copy = button('', '주소 복사', actions); copy.id = 'guest-pass-copy'; copy.disabled = !clean(wedding.address);
     anchor('', '자세한 오시는 길 →', '#location', actions);

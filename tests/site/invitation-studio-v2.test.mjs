@@ -11,6 +11,19 @@ const model=await import(pathToFileURL(path.join(output,'model.mjs')));
 const composition=await import(pathToFileURL(path.join(output,'js/composition.mjs')));
 const content=await import(pathToFileURL(path.join(output,'js/content-draft.mjs')));
 const saved=await import(pathToFileURL(path.join(output,'js/saved-library.mjs')));
+const {V2_PRESETS}=await import(pathToFileURL(path.join(output,'recommendations.mjs')));
+test('V2 recipes survive URL, whole-project history and existing favorite files with optional scenes explicit',()=>{
+  assert.equal(V2_PRESETS.length,3);
+  for(const preset of V2_PRESETS){
+    const c=preset.composition;assert.deepEqual(composition.normalizeComposition(c),c);
+    assert.deepEqual(composition.readComposition(composition.compositionParams(c)),c);
+    const library=saved.parseImport(JSON.stringify({version:1,kind:'sungso-studio-library',items:[{id:preset.id,name:preset.label,rating:5,note:'나중에 비교',createdAt:1,updatedAt:2,composition:c}]}));
+    assert.deepEqual(library.items[0].composition,c);assert.equal(library.items[0].rating,5);
+  }
+  const cafe=V2_PRESETS.find(p=>p.id==='v2-cafe').composition;
+  assert.deepEqual(cafe.extras,['day-pass']);assert.equal(cafe.dayPass,'receipt');assert.equal(cafe.album,'film');assert.equal(cafe.wishes,'polaroid');
+  assert.equal(V2_PRESETS.find(p=>p.id==='v2-comfort').composition.motion,'still');
+});
 test('V2 uses unchanged v1 URLs and keeps every required scene when optional ones move',()=>{
   const original=composition.readComposition('?version=1&palette=rose&font=modern&motionSpeed=.75&textScale=1.15&extras=day-pass&order=gallery,day-pass,invitation');
   const roundtrip=composition.readComposition(composition.compositionParams(original).toString());

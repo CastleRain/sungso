@@ -12,6 +12,7 @@ import { mountPhotoFinishScenes } from './photo-finish-scenes.mjs';
 import { mountGuestPass } from './guest-pass.mjs';
 import { normalizeContentDraft } from './content-draft.mjs';
 import { mountFineAppearance } from './fine-appearance.mjs';
+import { mountSceneAccents } from './scene-accents.mjs';
 
 export const STUDIO_SECTIONS = Object.freeze(['top', ...ORDER_SECTIONS.map(section => section.id), 'closing']);
 
@@ -38,7 +39,7 @@ export function studioMessage(event, { origin, parent, embedded }) {
 export function mountStudio({ doc = document, win = window, gallery, wedding, enabled = true, composition, onChange = () => {} } = {}) {
   let current = normalizeComposition(composition), disposed = false, requested = Boolean(enabled);
   const controllers = [];
-  let experience, upper, content, scroll, utilities, extras, sentiment, finish, guestPass;
+  let experience, upper, content, scroll, utilities, extras, sentiment, finish, guestPass, accents;
   function updateMotion() {
     const sectionMotion = requested && current.motion !== 'still';
     experience?.setEnabled(requested);
@@ -49,6 +50,7 @@ export function mountStudio({ doc = document, win = window, gallery, wedding, en
     utilities?.setEnabled(requested); utilities?.setScrollEnabled(sectionMotion);
     extras?.setEnabled(sectionMotion); sentiment?.setEnabled(sectionMotion);
     finish?.setEnabled(sectionMotion); guestPass?.setEnabled(sectionMotion);
+    accents?.setEnabled(sectionMotion);
   }
   try {
     controllers.push(mountAppearance({ doc, win, composition: current, onLayout: () => { if (!disposed) doc.dispatchEvent(new win.Event('lab:layout-changed')); } }));
@@ -63,6 +65,7 @@ export function mountStudio({ doc = document, win = window, gallery, wedding, en
     controllers.push(finish = mountPhotoFinishScenes({ doc, win, gallery, enabled, composition: current }));
     controllers.push(scroll = mountScrollEffects({ doc, win, enabled, mode: current.motion, speed: current.motionSpeed, strength: current.motionStrength }));
     controllers.push(mountFineAppearance({doc,win,composition:current}));
+    controllers.push(accents = mountSceneAccents({doc,win,composition:current,enabled}));
     updateMotion();
   } catch (error) { controllers.reverse().forEach(controller => controller.destroy()); throw error; }
   return {
@@ -70,7 +73,7 @@ export function mountStudio({ doc = document, win = window, gallery, wedding, en
     get whenReady() { return controllers[0]?.whenReady || Promise.resolve(); },
     prepareDemo(key) {
       if (disposed) return () => {};
-      const cleanups = [scroll.prepareDemo?.(key), upper.prepareDemo?.(key), content.prepareDemo?.(key), finish.prepareDemo?.(key)].filter(Boolean);
+      const cleanups = [scroll.prepareDemo?.(key), upper.prepareDemo?.(key), content.prepareDemo?.(key), finish.prepareDemo?.(key), accents.prepareDemo?.(key)].filter(Boolean);
       return () => cleanups.forEach(clean => clean());
     },
     demoInteraction(key) {

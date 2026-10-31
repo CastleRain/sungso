@@ -20,7 +20,7 @@ export function appearanceChoices(value) {
     palette: typeof value?.palette === 'string' && Object.hasOwn(APPEARANCE_PALETTES, value.palette) ? value.palette : 'mist',
     font: typeof value?.font === 'string' && Object.hasOwn(APPEARANCE_FONTS, value.font) ? value.font : 'letter',
     spacing: ['compact', 'balanced', 'airy'].includes(value?.spacing) ? value.spacing : 'balanced',
-    divider: ['none', 'line', 'chapter'].includes(value?.divider) ? value.divider : 'none',
+    divider: ['none', 'line', 'chapter', 'breath'].includes(value?.divider) ? value.divider : 'none',
     textSize: ['original', 'comfortable', 'large'].includes(value?.textSize) ? value.textSize : 'original',
     textScale: normalizeTextScale(value?.textScale),
     lineSpace: ['original', 'relaxed'].includes(value?.lineSpace) ? value.lineSpace : 'original',

@@ -30,7 +30,7 @@ class Element extends EventTarget {
   getBoundingClientRect() { return { top: this.top ?? 500, bottom: 1000, width: 350, height: 500 }; }
   scrollTo({ left }) { this.scrollLeft = left; }
   focus() { this.focused = true; }
-  animate() { this.animation = { cancelled: false, cancel() { this.cancelled = true; } }; return this.animation; }
+  animate(frames, options) { this.animation = { frames, options, cancelled: false, cancel() { this.cancelled = true; } }; return this.animation; }
 }
 const photos = count => Array.from({ length: count }, (_, i) => ({ id: `p${i}`, src: `/full-${i}.webp`, thumb: `/thumb-${i}.webp`, alt: `사진 ${i + 1}`, width: 1440, height: 2160 }));
 function fixture(initial, { enabled = true, reduced = false } = {}) {
@@ -96,4 +96,25 @@ test('cancelling before direct gesture lets the requested next photo win and pre
   restore(); f.click(f.node('.album-next')); assert.equal(f.controller.index, 2);
   f.flush(); assert.equal(f.node('.experience-album').style.values.get('--album-reveal'), '1');
   assert.equal(f.opens.length, 0); f.controller.destroy();
+});
+
+test('film reuses photo identity, navigation, lightbox and demo restoration without rebuilding its nodes', () => {
+  const f = fixture(photos(4)), image = f.node('.album-feature-image'), strip = f.node('.album-filmstrip');
+  f.click(f.node('.album-next')); const thumbnail = strip.children[1];
+  f.controller.setPresentation('film'); f.controller.refresh();
+  assert.equal(f.controller.index,1); assert.equal(strip.children[1],thumbnail); assert.equal(f.node('.album-feature-image'),image);
+  f.fire(f.node('.experience-album'),'keydown',{key:'ArrowRight'});
+  assert.equal(f.controller.index,2); assert.match(image.animation.frames[0].transform,/translateX/);
+  assert.equal(image.animation.options.duration,420);
+  f.click(f.node('.album-feature')); assert.equal(f.opens[0].index,2);
+  const cleanup=f.controller.demoNext(); cleanup(); assert.equal(f.controller.index,2);
+  f.controller.setPresentation('contact'); assert.equal(f.controller.index,2); f.controller.destroy();
+});
+
+test('film respects reduced motion and effects off while photo controls remain usable', () => {
+  for (const options of [{reduced:true},{enabled:false}]) {
+    const f=fixture(photos(3),options);f.controller.setPresentation('film');
+    f.click(f.node('.album-next'));assert.equal(f.controller.index,1);assert.equal(f.node('.album-feature-image').animation,undefined);
+    f.fire(f.node('.experience-album'),'keydown',{key:'End'});assert.equal(f.controller.index,2);f.controller.destroy();
+  }
 });

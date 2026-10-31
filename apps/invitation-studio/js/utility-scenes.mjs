@@ -2,7 +2,7 @@
 export const UTILITY_CHOICES = Object.freeze({
   arrival: Object.freeze(['unfold', 'itinerary', 'postcard']),
   gifting: Object.freeze(['card', 'ledger', 'letter']),
-  wishes: Object.freeze(['envelope', 'postcard', 'notebook']),
+  wishes: Object.freeze(['envelope', 'postcard', 'notebook', 'polaroid']),
   navigation: Object.freeze(['dock', 'ribbon', 'compact']),
 });
 
