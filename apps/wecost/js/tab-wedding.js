@@ -1,5 +1,5 @@
 import { addItem, updateItem, deleteItem } from "./firebase.js";
-import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingDisplayItems, weddingTravelActions, weddingTravelAdd, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
+import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingDisplayItems, weddingForeignAmount, weddingForeignNote, weddingTravelActions, weddingTravelAdd, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
 import { registerPrivateCleanup } from "../../../shared/firebase/site-auth.mjs";
 import {
   CATEGORY_CHOICES,
@@ -84,7 +84,7 @@ function dueRow(item) {
 }
 function itemSummary(item, nested = false) {
   const p = paymentState(item);
-  return `${itemName(item, nested)}${paidPair(p.paid, p.planned)}<span class="wed-child-balance">잔금 ${amt(p.remaining, true)}</span>${bar(p)}`;
+  return `${itemName(item, nested)}${weddingForeignAmount(item) ? `<span class="wed-paid-pair">${weddingForeignAmount(item)}<small>지급 ${money(p.paid)}</small></span>` : paidPair(p.paid, p.planned)}<span class="wed-child-balance">잔금 ${amt(p.remaining, true)}</span>${bar(p)}`;
 }
 function categoryHTML([cat, items]) {
   const t = aggregate(items),
@@ -94,7 +94,7 @@ function categoryHTML([cat, items]) {
 }
 function tableRow(item, rowId = "", hidden = false) {
   const p = paymentState(item), grouped = ui.groupBy === "category";
-  return `<tr${grouped ? ' class="wed-nested-row"' : ''}${rowId ? ` id="${rowId}"` : ""}${hidden ? " hidden" : ""}><td>${itemName(item, grouped)}${item.travelDetailError ? `<small class="wed-overpaid">${esc(item.travelDetailError)}</small>` : ""}${p.overpaid ? `<small class="wed-overpaid">예상보다 ${money(p.overpaid)} 더 지급</small>` : ""}</td>${grouped ? "" : `<td class="wed-category-cell">${esc(categoryLabel(weddingCategory(item)))}</td>`}<td class="amt wed-planned">${amt(p.planned)}</td><td class="amt">${amt(p.deposit)}</td><td class="amt">${amt(p.remaining, true)}</td><td class="amt">${amt(p.paid)}</td><td>${bar(p)}</td><td>${edit(item)}</td></tr>`;
+  return `<tr${grouped ? ' class="wed-nested-row"' : ''}${rowId ? ` id="${rowId}"` : ""}${hidden ? " hidden" : ""}><td>${itemName(item, grouped)}${item.travelDetailError ? `<small class="wed-overpaid">${esc(item.travelDetailError)}</small>` : ""}${p.overpaid ? `<small class="wed-overpaid">예상보다 ${money(p.overpaid)} 더 지급</small>` : ""}</td>${grouped ? "" : `<td class="wed-category-cell">${esc(categoryLabel(weddingCategory(item)))}</td>`}<td class="amt wed-planned">${weddingForeignAmount(item) || amt(p.planned)}</td><td class="amt">${amt(p.deposit)}</td><td class="amt">${amt(p.remaining, true)}</td><td class="amt">${amt(p.paid)}</td><td>${bar(p)}</td><td>${edit(item)}</td></tr>`;
 }
 function mobileItem(item, nested = false) {
   const p = paymentState(item),
@@ -159,7 +159,7 @@ function ledgerHTML(v) {
   const t = v.totals, scope = weddingScope(v);
   return `<details class="card wed-section" data-disclosure="ledger" id="wed-ledger"${opened("ledger")}><summary><h2 class="card-title">항목별 상세 <small id="tbl-count">${v.filtered.length}개 표시 / ${scope}</small></h2><span class="wed-chevron" aria-hidden="true"></span></summary><div class="wed-ledger-toolbar"><div class="wed-filters" role="group" aria-label="항목 필터"><div class="wed-status-filters">${[["all", "전체", t.count], ["unpaid", "미납", t.unpaid], ["partial", "일부 납부", t.partial], ["done", "완납", t.done], ...(t.empty ? [["empty", "금액 미정", t.empty]] : [])].map(([key, label, count]) => `<button type="button" data-focus="status-${key}" data-action="status" data-status="${key}" aria-pressed="${ui.status === key}">${label} ${count}</button>`).join("")}</div></div>${ledgerControls(v)}</div>${ui.status !== "all" ? `<button class="wed-text-button" data-action="reset-filter" data-focus="reset-filter">필터 해제 · 전체 항목 보기</button>` : ""}
  ${ui.groupBy === "category" ? `<p class="wed-note wed-group-note">${({ amount: "예정 합계가 큰 카테고리부터", "amount-asc": "예정 합계가 작은 카테고리부터", remaining: "잔금 합계가 큰 카테고리부터", due: "가장 빠른 납부일이 있는 카테고리부터", unpriced: "금액 미정 항목이 있는 카테고리부터", name: "카테고리 가나다순" })[ui.sort]} · 제목을 누르면 접을 수 있어요.</p>` : ""}
- <div id="tbl-body-wrap" class="wed-desktop-ledger"><div class="table-wrap"><table class="wed-table"><thead><tr><th scope="col">${ui.groupBy === "category" ? "카테고리 / 세부 항목" : "항목"}</th>${ui.groupBy === "category" ? "" : '<th scope="col">카테고리</th>'}<th scope="col" class="amt">예정금액</th><th scope="col" class="amt">계약금</th><th scope="col" class="amt">잔금</th><th scope="col" class="amt">누적 지급</th><th scope="col">지급률</th><th scope="col"><span class="wed-sr-only">추가 / 수정</span></th></tr></thead><tbody id="tbl-body">${ledgerRows(v)}</tbody></table></div></div><div class="wed-mobile-ledger">${mobileLedger(v)}</div>${!v.filtered.length ? empty("조건에 맞는 항목이 없어요.") : ""}</details>`;
+ ${weddingForeignNote(v.filtered)}<div id="tbl-body-wrap" class="wed-desktop-ledger"><div class="table-wrap"><table class="wed-table"><thead><tr><th scope="col">${ui.groupBy === "category" ? "카테고리 / 세부 항목" : "항목"}</th>${ui.groupBy === "category" ? "" : '<th scope="col">카테고리</th>'}<th scope="col" class="amt">예정금액</th><th scope="col" class="amt">계약금</th><th scope="col" class="amt">잔금</th><th scope="col" class="amt">누적 지급</th><th scope="col">지급률</th><th scope="col"><span class="wed-sr-only">추가 / 수정</span></th></tr></thead><tbody id="tbl-body">${ledgerRows(v)}</tbody></table></div></div><div class="wed-mobile-ledger">${mobileLedger(v)}</div>${!v.filtered.length ? empty("조건에 맞는 항목이 없어요.") : ""}</details>`;
 }
 function renderLedger() {
   const ledger = $("wed-ledger");

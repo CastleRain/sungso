@@ -14,15 +14,29 @@ const dollars = value => `US$${Number(value).toLocaleString('en-US', { maximumFr
 const button = (action, text, id = '', row = '') => `<button type="button" class="tbl-action-btn" data-finance="${action}" data-id="${esc(id)}" data-row="${esc(row)}">${text}</button>`;
 const el = id => document.getElementById(id);
 const hasFunds = () => state.funds?.cashKrw !== undefined;
+const quoteStamp = quote => new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(quote.asOf);
+function foreignReferenceHTML(amount) {
+  const { quote, loading, error } = fxState, valuation = dollarValuation(amount, 0, quote);
+  if (!valuation) return `<span>${loading ? '원화 환산 확인 중…' : error ? '원화 환산 조회 실패' : '원화 환산 확인 전'}</span>`;
+  return `<span title="${esc(`${won(valuation.value)} · ${quoteStamp(quote)} KST 고시 · 1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원`)}">${quoteIsOld(quote) ? '이전 고시' : '현재'} 약 ${compact(valuation.value)}</span>`;
+}
+export function weddingForeignAmount(item) {
+  if (!item.travelRowId || item.currency !== 'USD' || !Number.isFinite(item.nativeAmount) || item.nativeAmount < 0) return '';
+  return `<span class="wed-foreign-amount"><strong>${dollars(item.nativeAmount)}</strong><small class="wed-foreign-reference" data-wed-usd-reference="${item.nativeAmount}">${foreignReferenceHTML(item.nativeAmount)}</small><small class="wed-foreign-budget">장부 예산 ${compact(item.planned)}</small></span>`;
+}
+export function weddingForeignNote(items) {
+  return items.some(item => item.travelRowId && item.currency === 'USD') ? '<p class="wed-note wed-currency-note">달러 금액은 고정이고 원화 환산액은 환율에 따라 달라져요. 합계·잔금·정렬은 장부 예산 기준이에요. <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API ↗</a></p>' : '';
+}
 function fxHTML() {
   const { quote, loading, error } = fxState;
   const valuation = dollarValuation(state.funds?.usdBalance, state.funds?.usdCostKrw, quote);
-  const stamp = quote ? new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(quote.asOf) : '';
+  const stamp = quote ? quoteStamp(quote) : '';
   const difference = valuation ? valuation.difference === 0 ? '환전 원가와 같아요' : `환전 원가보다 ${compact(Math.abs(valuation.difference))} ${valuation.difference < 0 ? '낮아요' : '높아요'}` : '';
   return `<div class="wf-fx-value"><span>${quote && quoteIsOld(quote) ? '이전 고시 환율로 환산' : '현재 환율로 본 달러'}</span><strong${valuation ? ` title="${won(valuation.value)}"` : ''}>${valuation ? `약 ${compact(valuation.value)}` : loading ? '환율 확인 중…' : '—'}</strong>${valuation ? `<small>${difference}</small>` : ''}</div><div class="wf-fx-meta">${quote ? `<span>1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원</span><small>${stamp} KST 고시 · 일 1회 갱신</small>` : '<span>최신 고시 환율을 확인해요</span>'}<a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API ↗</a></div><button type="button" class="tbl-action-btn" data-finance="refresh-fx" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><p class="wf-fx-note" role="status">${error ? `${esc(error)} ` : ''}참고 환산액이에요. 은행의 실제 환전액과 다를 수 있으며 합계와 추가로 모을 돈에 반영돼요. 실제 원가·지급 기록은 유지해요.</p>`;
 }
 export function ensureWeddingFx() {
-  if (!retired && fxReader && hasFunds() && state.funds.usdBalance > 0) void fxReader.refresh();
+  const hasUsdCosts = state.plan?.rows?.some(row => row.currency === 'USD');
+  if (!retired && fxReader && (hasUsdCosts || (hasFunds() && state.funds.usdBalance > 0))) void fxReader.refresh();
 }
 const field = (id, label, value, unit = '원', extra = '') => `<label class="wf-field" for="${id}"><span>${label}</span><span class="wf-input"><input id="${id}" inputmode="decimal" autocomplete="off" value="${esc(value ?? '')}" ${extra}><small>${unit}</small></span></label>`;
 const num = id => {
@@ -164,7 +178,7 @@ export function registerWeddingFinance(getSt, render) {
   getState = getSt; rerender = render;
   let storage = null;
   try { storage = window.localStorage; } catch { /* Public quote caching is optional. */ }
-  fxReader = createFxReader({ storage, onChange: next => { if (retired) return; fxState = next; const panel = el('wf-fx-panel'); if (panel) panel.innerHTML = fxHTML(); if (el('wf-current-total')) el('wf-current-total').innerHTML = currentTotalHTML(); if (el('wf-funding-card')) el('wf-funding-card').innerHTML = fundingCardContent(getState().items); if (dialog?.open && mode === 'balances') preview(); } });
+  fxReader = createFxReader({ storage, onChange: next => { if (retired) return; fxState = next; for (const node of document.querySelectorAll('[data-wed-usd-reference]')) node.innerHTML = foreignReferenceHTML(Number(node.dataset.wedUsdReference)); const panel = el('wf-fx-panel'); if (panel) panel.innerHTML = fxHTML(); if (el('wf-current-total')) el('wf-current-total').innerHTML = currentTotalHTML(); if (el('wf-funding-card')) el('wf-funding-card').innerHTML = fundingCardContent(getState().items); if (dialog?.open && mode === 'balances') preview(); } });
   fxState = fxReader.snapshot();
   dialog = document.createElement('dialog'); dialog.id = 'wf-dialog'; dialog.className = 'wf-dialog'; dialog.setAttribute('aria-labelledby', 'wf-title');
   document.querySelector('[data-private-root]').append(dialog);

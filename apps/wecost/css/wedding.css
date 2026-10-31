@@ -624,6 +624,17 @@ body.wed-modal-open {overflow:hidden;}
 #tab-wedding .wf-fx-note {grid-column:1/-1;color:var(--ss-muted);font-size:11px;line-height:1.6;margin:0;}
 #tab-wedding .wf-fx-panel button {min-height:36px;}
 #tab-wedding .wf-fx-panel button:disabled {opacity:.65;cursor:wait;}
+#tab-wedding .wed-foreign-amount {display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.5;font-variant-numeric:tabular-nums;}
+#tab-wedding .wed-foreign-amount strong {font-size:13px;font-weight:650;color:var(--ss-text);}
+#tab-wedding .wed-foreign-amount small {display:block;font-size:11px;font-weight:400;white-space:normal;}
+#tab-wedding .wed-foreign-reference {color:var(--ss-link);}
+#tab-wedding .wed-foreign-budget {color:var(--ss-muted);}
+#tab-wedding .wed-paid-pair:has(.wed-foreign-amount)>small {display:block;margin-top:3px;}
+#tab-wedding .wed-currency-note {font-size:11px;line-height:1.7;margin:6px 0 10px;}
+#tab-wedding .wed-currency-note a {color:var(--ss-muted);text-underline-offset:3px;}
+@media(max-width:900px){
+ #tab-wedding .wed-paid-pair .wed-foreign-amount {align-items:flex-start;text-align:left;}
+}
 @media(max-width:768px){
  #tab-wedding .wf-fx-panel {grid-template-columns:minmax(0,1fr) auto;gap:8px;}
  #tab-wedding .wf-fx-meta {grid-column:1/-1;grid-row:2;}

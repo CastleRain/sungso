@@ -177,6 +177,8 @@ function renderEnvironment(finance = {}) {
     weddingFundsHTML: () => "",
     weddingDisplayItems: items => items,
     weddingTravelActions: () => "",
+    weddingForeignAmount: () => "",
+    weddingForeignNote: () => "",
     weddingTravelAdd: () => "",
     weddingRemaining: items => core.aggregate(items).remaining,
     ...finance,

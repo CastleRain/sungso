@@ -25,7 +25,7 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
   const source = readFileSync(new URL('../apps/wecost/js/wedding-funds-ui.mjs', import.meta.url), 'utf8').replace(/^import\s[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd};', c);
+  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingForeignNote,ensureWeddingFx};', c);
   c.api.registerWeddingFinance(() => ledger, () => { renders++; });
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
@@ -145,4 +145,36 @@ test('no rate shows an unknown current total and savings goal instead of the his
   assert.equal(e.d.querySelector('#s-funding-gap').textContent, '—');
   assert.match(e.d.querySelector('.wf-funds').textContent, /환전 원가 36만원/);
   e.dom.window.close();
+});
+
+test('USD prices keep the native amount and booked budget while every visible reference updates in place', () => {
+  const e = env(), item = { travelRowId: 'usd-stay', currency: 'USD', nativeAmount: 500, planned: 650000 };
+  const before = structuredClone(e.data);
+  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingForeignAmount(item) + e.c.api.weddingForeignAmount(item);
+  const originals = [...e.d.querySelectorAll('.wed-foreign-amount strong')];
+  assert.equal(originals[0].textContent, 'US$500');
+  assert.match(e.d.body.textContent, /약 60만원/); assert.match(e.d.body.textContent, /장부 예산 65만원/);
+  e.rateChange({ quote: { rate: 1300, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }, loading: false, error: '' });
+  for (const node of e.d.querySelectorAll('[data-wed-usd-reference]')) {
+    assert.match(node.textContent, /약 65만원/); assert.match(node.firstElementChild.title, /650,000원.*KST/);
+  }
+  assert.equal(e.d.querySelector('.wed-foreign-amount strong'), originals[0]);
+  assert.equal(originals[0].textContent, 'US$500'); assert.equal(item.planned, 650000);
+  assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
+  assert.equal(e.c.api.weddingForeignAmount({ ...item, currency: 'KRW' }), '');
+  assert.equal(e.c.api.weddingForeignAmount({ ...item, nativeAmount: '<script>' }), '');
+  e.rateChange({ quote: null, loading: false, error: 'offline' });
+  assert.match(e.d.body.textContent, /원화 환산 조회 실패/); assert.doesNotMatch(e.d.body.textContent, /약 0원/);
+  assert.match(e.d.body.textContent, /US\$500/); assert.match(e.d.body.textContent, /장부 예산 65만원/);
+  e.dom.window.close();
+});
+
+test('USD cost valuation still loads without a registered USD wallet', () => {
+  const e = env(); e.data.funds = null;
+  e.data.plan = { rows: [{ currency: 'USD', amount: 500 }] }; e.receive(e.data);
+  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingForeignAmount({ travelRowId: 'usd-stay', currency: 'USD', nativeAmount: 500, planned: 650000 });
+  e.rateChange({ quote: null, loading: true, error: '' });
+  assert.match(e.d.body.textContent, /원화 환산 확인 중/);
+  e.c.api.ensureWeddingFx(); assert.match(e.d.body.textContent, /약 60만원/);
+  assert.equal(e.writes.length, 0); e.dom.window.close();
 });
