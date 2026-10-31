@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile, cp } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
 import { buildInvitation } from './build-invitation-vercel.mjs';
 import { listFiles } from './check-site.mjs';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -37,6 +38,21 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   let contentEditor = await readFile(path.join(studio, 'js/content-editor.mjs'), 'utf8');
   contentEditor = contentEditor.replace('이곳의 문구와 사진은 조립용 초안이에요. 이 브라우저에 따로 보관되며, 현재 하객용 청첩장에는 반영되지 않아요. 조합 링크에는 포함되지 않으니 내용 파일로 함께 옮겨 주세요.', '편집 중인 내용은 이 브라우저에 자동 보관돼요. 두 사람이 함께 보려면 위의 공동 저장 · 공개에서 초안으로 저장해 주세요. 공개하기 전에는 하객 화면이 바뀌지 않아요.');
   await writeFile(path.join(studio, 'js/content-editor.mjs'), contentEditor);
+  // Keep the private gate, but avoid dozens of simultaneous membership checks
+  // across cold function instances for a single module graph.
+  const { build } = createRequire(new URL('../services/homehunt/render/package.json', import.meta.url))('esbuild');
+  const entries = new Set();
+  for (const file of privateFiles.filter(file => file.endsWith('.html'))) {
+    const filename = path.join(fn, 'private', file);
+    const html = await readFile(filename, 'utf8');
+    for (const match of html.matchAll(/<script type="module" src="([^"]+)"/g)) {
+      if (match[1].startsWith('.')) entries.add(path.resolve(path.dirname(filename), match[1]));
+    }
+  }
+  for (const entry of entries) {
+    const result = await build({ entryPoints: [entry], bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022', external: ['https://*', '/shared/*', '/studio-login/*'], logLevel: 'silent' });
+    await writeFile(entry, result.outputFiles[0].contents);
+  }
   await writeFile(path.join(fn, 'private-manifest.json'), JSON.stringify(privateFiles));
 
   // Separate build-selected guest entry. No URL or imported composition can select live API mode.

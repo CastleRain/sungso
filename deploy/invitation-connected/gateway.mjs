@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setTimeout as delay } from 'node:timers/promises';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const ORIGIN = 'https://sungso-wedding.vercel.app';
 const API = 'https://sungso-homehunt-api.onrender.com/api/invitation/studio';
@@ -17,9 +18,18 @@ export function createGateway({ directory = ROOT, fetcher = fetch, origin = ORIG
     const old = authenticated.get(token);
     if (old && old.expires > Date.now()) return old.pending;
     if (authenticated.size > 100) authenticated.clear();
-    const pending = remote('/session', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok).catch(() => false);
+    const pending = (async () => {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const response = await remote('/session', { headers: { Authorization: `Bearer ${token}` } });
+        if (response.ok) return true;
+        if (![429, 502, 503, 504].includes(response.status)) return false;
+        await delay(500 + attempt * 300 + Math.random() * 700);
+      }
+      return false;
+    })().catch(() => false);
     // Coalesce parallel module requests; never cache an authorization for more than ten seconds.
     authenticated.set(token, { pending, expires: Date.now() + 10000 });
+    void pending.then(ok => { if (!ok && authenticated.get(token)?.pending === pending) authenticated.delete(token); });
     return pending;
   }
   async function bytes(req, limit) {

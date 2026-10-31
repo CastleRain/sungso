@@ -38,3 +38,14 @@ test('publication builder is separate from preserved static releases and exclude
   assert.match(text, /private-manifest/); assert.match(text, /mode = 'published'/); assert.match(text, /const comparison = false/);
   assert.match(text, /Use a fresh connected output/); assert.match(text, /legacy\.html/);
 });
+
+test('transient upstream saturation is retried without admitting an unverified account', async () => {
+  let calls = 0;
+  const server = createServer(); await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const origin = 'http://127.0.0.1:' + server.address().port;
+  server.on('request', createGateway({ origin, fetcher: async () => new Response('{}', { status: ++calls === 1 ? 503 : 403 }) }));
+  try {
+    const response = await fetch(origin + '/api/studio/session', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ token: 'not-approved' }) });
+    assert.equal(response.status, 403); assert.equal(calls, 2); assert.equal(response.headers.get('set-cookie'), null);
+  } finally { await new Promise(r => server.close(r)); }
+});

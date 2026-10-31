@@ -130,3 +130,17 @@ Vercel은 Hobby, Firebase는 Spark, Render는 Free를 사용한다. 새 DB·유�
 루트는 공개 스냅샷이 없거나 VER5.6 복원을 선택하면 보존한 VER5.6 HTML을 반환한다. 공개본을 선택하면 동일 주소에서 스튜디오 장면 렌더러와 기존 운영 API를 사용한다. 기존 음악·손글씨·공유 루트·일정 링크를 유지한다. 공개 HTML 캐시는10초, 서버 일시 장애 때 이미 캐시된 공개 HTML은 유지한다. 개인 관리 응답은 항상no-store다.
 
 배포는 먼저 최신 master에 필요한 서버/shared/wedding 파일만 통합하여 Render/Pages를 검증한 뒤, Vercel `--prebuilt`로 검증한 전용 출력만 배포한다. 초기 공개 선택과 DB 시딩은 수행하지 않는다. 운영 관리자 계정에서 공동 초안을 저장/공개하는 최종 실사용은 사용자가 진행한다. 무료 기존 프로젝트만 사용한다.
+
+
+### 2026-10-31 — 공동 초안·명시적 공개 운영 연결 완료
+
+- Vercel 배포 `dpl_AbfT4cfidUECVLGs87MapKYyuDgt`가 READY이며 기본 주소를 유지한다. 구현 소스는 `codex/invitation-publishing`, 서버·Wedding 통합은 master `4c41a45`, Pages 실행 `41209052942` 성공이다. 다른 최신 WeCost 변경은 보존했다.
+- `/lab/**`는 서버에서 기존 두 승인 회원을 검증하고 HttpOnly·Secure·SameSite=Strict 세션으로 제공한다. 실제 로그인 후 스튜디오와 Wedding 공동 보관함 GET을 확인했다. 초기 모듈 요청 집중으로 발생한 401을 관측해 모듈 그래프를 번들링하고 서버 혼잡 재시도를 추가했다. 회원 검증을 완화하지 않았다.
+- 운영 공개 상태는 revision 0 / release null / 공동 초안 0개다. 루트 VER5.6 HTML과 VER6가 기존 파일과 일치하고 음악·글꼴200, 익명 스튜디오303→로그인·소스401·관리401, 다른 앱3개 경로404를 확인했다. 기존 방명록·사진·계좌 GET200, 다른 Vercel origin과 기존 앱 API CORS403을 확인했다. 운영 DB QA 쓰기는 없다.
+- 로컬 합성 환경에서 문구·추가 사진 저장→공개 전 기존화면 유지→명시적 공개→8장 사진 로딩→이전공개본 복원을 확인했다. 구현 브랜치 전체2,530개·통합 최신master 전체2,172개·관련8개·Emulator16개 검사와 서비스 번들 통과. 실제 브라우저320/390/1440px 넘침 없음과 운영 스튜디오 초기화 오류 없음을 확인했다.
+- Firestore 명시적 deny 규칙의 CLI 배포는 로컬 Firebase 인증 부재로 수행되지 않았다. 기존 기본 거부 규칙이 전용 경로를 이미 차단하며 운영 익명 직접 GET403과 Emulator의 두 회원/타인/익명 직접 read/write/delete 차단을 확인했다. Admin API만 새 컬렉션을 사용하며 승인 도메인·요금제는 변경하지 않았다.
+
+**다음:** 두 분이 실제 조합을 공동 초안으로 저장한 뒤, 미리보기를 확인하고 공개하기를 누른다. 운영 공개 쓰기 자체는 사용자 선택 전까지 실행하지 않는다.
+
+
+번들 빌드는 `services/homehunt/render`의 잠금된 esbuild 의존성을 이용한다. 새 출력 폴더로 `node scripts/build-invitation-connected.mjs .local/<새 이름>`을 실행하고 Vercel 기존 sungso-wedding 프로젝트에 link 후 `deploy --prebuilt --prod`한다. 기본 정적 빌드로 덮어쓰면 공동 공개 및 실험실 서버 게이트가 없어지므로 후속 배포에도 connected 빌드를 사용한다.
