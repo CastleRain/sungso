@@ -52,7 +52,7 @@ export async function setupGuestbook(adapter) {
   let entries = [], deleting;
   const form = $('#guestbook-form'), submit = $('button[type=submit]', form);
   function messageNode(entry) {
-    const item = document.createElement('li');
+    const item = document.createElement('li'); item.dataset.messageId=entry.id;if(entry.paper)item.dataset.paper=entry.paper;if(entry.stamp){const stamp=document.createElement('span');stamp.className='message-stamp';stamp.textContent=({coffee:'☕',flowers:'💐',ring:'💍',cheers:'🥂',heart:'♡'})[entry.stamp]||'';stamp.setAttribute('aria-hidden','true');item.append(stamp);}
     const header = document.createElement('div'); header.className = 'guest-head';
     const name = document.createElement('strong'); name.textContent = entry.name;
     const date = document.createElement('time'); date.dateTime = entry.createdAt;
@@ -68,7 +68,7 @@ export async function setupGuestbook(adapter) {
   }
   async function refresh() {
     try {
-      entries = await adapter.messages();
+      entries = await adapter.messages(); queueMicrotask(()=>document.dispatchEvent(new Event('experience:messages-rendered')));
       $('#guestbook-list').replaceChildren(...entries.slice(0, 2).map(messageNode));
       $('#guestbook-all-list').replaceChildren(...entries.map(messageNode));
       $('#guestbook-all-open').hidden = entries.length <= 2;
@@ -85,7 +85,7 @@ export async function setupGuestbook(adapter) {
     event.preventDefault(); if (submit.disabled) return; submit.disabled = true;
     $('#guest-form-status').textContent = '체험 메시지를 저장하고 있어요.';
     try {
-      await adapter.write({ name: $('#guest-name').value, message: $('#guest-message').value, consent: $('#guest-consent').checked, website: $('#guest-website').value });
+      await adapter.write({ name: $('#guest-name').value, message: $('#guest-message').value, consent: $('#guest-consent').checked, website: $('#guest-website').value, ...(!form.querySelector('.message-decoration')?.hidden ? {stamp:form.elements.stamp?.value,paper:form.elements.paper?.value}:{}) });
       form.reset(); $('#message-count').textContent = '0'; $('#guest-form-status').textContent = '';
       $('#guestbook-composer').close(); await refresh(); document.dispatchEvent(new Event('experience:message-saved')); toast('이 시안에 체험 메시지를 남겼어요.');
     } catch (error) { $('#guest-form-status').textContent = error.message || '저장하지 못했어요. 내용을 유지한 채 다시 시도해 주세요.'; }

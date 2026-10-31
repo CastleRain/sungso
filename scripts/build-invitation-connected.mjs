@@ -28,7 +28,7 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   await cp(path.join(SOURCE, 'session.mjs'), path.join(staticDir, 'studio-login/session.mjs'));
   await cp(path.join(SOURCE, 'login.html'), path.join(staticDir, 'studio-login/index.html'));
   const studio = path.join(fn, 'private/lab/studio');
-  for (const file of ['cloud-panel.mjs', 'cloud.css']) { await cp(path.join(SOURCE, file), path.join(studio, file)); privateFiles.push('/lab/studio/' + file); }
+  for (const file of ['cloud-panel.mjs', 'cloud.css', 'replies-panel.mjs']) { await cp(path.join(SOURCE, file), path.join(studio, file)); privateFiles.push('/lab/studio/' + file); }
   let catalog = await readFile(path.join(studio, 'catalog.mjs'), 'utf8');
   catalog = `import { mountCloudPanel } from './cloud-panel.mjs';\nconst initialSharedDraft = new URLSearchParams(location.search).get('draft');\n` + catalog;
   catalog += `\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentEditor.ready,getSnapshot:()=>({composition,content:contentEditor.getDraft()}),loadSnapshot:async value=>{await contentEditor.setDraft(value.content);apply(value.composition,{section:'top'});}});\n`;
@@ -42,14 +42,14 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   await writeFile(path.join(studio, 'js/content-editor.mjs'), contentEditor);
   // V2 is a separate protected shell; V1 and the guest runtime remain unchanged.
   const studioV2 = path.join(fn, 'private/lab/studio-v2');
-  for (const file of ['cloud-panel.mjs', 'cloud.css']) {
+  for (const file of ['cloud-panel.mjs', 'cloud.css', 'replies-panel.mjs']) {
     let source = await readFile(path.join(SOURCE, file), 'utf8');
     if (file === 'cloud-panel.mjs') source = source.replaceAll('/lab/studio/', '/lab/studio-v2/');
     await writeFile(path.join(studioV2, file), source); privateFiles.push('/lab/studio-v2/' + file);
   }
   let v2 = await readFile(path.join(studioV2, 'studio.mjs'), 'utf8');
-  v2 = `import { mountCloudPanel } from './cloud-panel.mjs';\nconst initialSharedDraft = new URLSearchParams(location.search).get('draft');\n` + v2;
-  v2 += `\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentReady,getSnapshot,loadSnapshot});\n`;
+  v2 = `import { mountRepliesPanel } from './replies-panel.mjs';\nimport { mountCloudPanel } from './cloud-panel.mjs';\nconst initialSharedDraft = new URLSearchParams(location.search).get('draft');\n` + v2;
+  v2 += `\nmountRepliesPanel();\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentReady,getSnapshot,loadSnapshot});\n`;
   await writeFile(path.join(studioV2, 'studio.mjs'), v2);
   let v2html = await readFile(path.join(studioV2, 'index.html'), 'utf8');
   v2html = v2html.replace("connect-src 'self'", "connect-src 'self' https://*.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com https://sungso-358cb.firebaseapp.com").replace('</head>', '<link rel="stylesheet" href="./cloud.css"></head>');
@@ -84,14 +84,14 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   app = replaceOnce(app, "import { createDemoAdapter } from './demo-data.mjs';", "import { createLiveAdapter, loadPublicPhotos } from './live-adapter.mjs';");
   app = replaceOnce(app, "config.mode !== 'demo'", "config.mode !== 'published'");
   app = replaceOnce(app, "const comparison = window.parent !== window && new URLSearchParams(location.search).get('compare') === '1';", 'const comparison = false;');
-  app = replaceOnce(app, 'let composition = readComposition(location.search);', 'let composition = config.publication.snapshot.composition;');
+  app = replaceOnce(app, 'let composition = readComposition(location.search);', 'let composition = guestEdition(config.publication.snapshot.composition,config.publication.snapshot.content.experience,location.search);');
   app = replaceOnce(app, 'canonicalUrl = `${config.canonicalRoot}preview/?${parameters}`;', 'canonicalUrl = config.canonicalRoot;');
-  app = replaceOnce(app, "history.replaceState(history.state, '', `${location.pathname}?${parameters}${comparison ? '&compare=1' : ''}${location.hash}`);", "history.replaceState(history.state, '', `${location.pathname}${location.hash}`);");
+  app = replaceOnce(app, "history.replaceState(history.state, '', `${location.pathname}?${parameters}${comparison ? '&compare=1' : ''}${location.hash}`);", "history.replaceState(history.state, '', `${location.pathname}${location.search}${location.hash}`);");
   app = replaceOnce(app, "document.querySelector('.lab-return').href = `../?${parameters}`;", "document.querySelector('.lab-return')?.remove();");
   app = replaceOnce(app, 'const adapter = createDemoAdapter({ variant, photos: config.photos, storage: storageOrNull() });', 'const adapter = createLiveAdapter();');
   app = replaceOnce(app, 'if (comparison) contentPreview = mountContentPreview({doc:document,win:window,gallery,config,onLayout:()=>themeController?.refresh()});', `contentPreview = mountContentPreview({doc:document,win:window,config,onLayout:()=>themeController?.refresh()});
-  contentPreview.setDraft({...config.publication.snapshot.content,photos:[],albumOrder:null});
-  void loadPublicPhotos(config.photos,config.publication.snapshot.content).then(photos=>{gallery.render(photos);themeController?.refresh();});`);
+  contentPreview.setDraft({...config.publication.snapshot.content,photos:[],albumOrder:null,...(config.publication.snapshot.content.experience?{experience:{...config.publication.snapshot.content.experience,media:[]}}:{})});
+  void loadPublicPhotos(config.photos,config.publication.snapshot.content).then(photos=>{gallery.render(photos);expanded.render(contentPreview.getDraft());themeController?.refresh();});`);
   app = app.replaceAll('이 시안의 주소', '청첩장 주소').replaceAll('공유할 시안 주소', '청첩장 주소').replaceAll(' · 비교 시안', '').replaceAll('일부 체험 기능', '일부 기능');
   await writeFile(path.join(published, 'js/app.mjs'), app);
   let boot = await readFile(path.join(published, 'js/intro-boot.js'), 'utf8');
@@ -107,7 +107,7 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   let html = await readFile(path.join(staging, 'lab/studio/preview/index.html'), 'utf8');
   html = html.replaceAll('../css/', '/published/css/').replaceAll('../js/', '/published/js/').replaceAll('../assets/', '/published/assets/');
   html = html.replaceAll('https://sungso-wedding.vercel.app/lab/studio/preview/', config.canonicalRoot);
-  html = html.replace("connect-src 'self'", "connect-src 'self' https://sungso-homehunt-api.onrender.com");
+  html = html.replace("connect-src 'self'", "connect-src 'self' https://sungso-homehunt-api.onrender.com https://api.open-meteo.com https://kauth.kakao.com https://kapi.kakao.com");
   html = html.replace('<script src="/published/js/intro-boot.js">', '<!--PUBLICATION--><script src="/published/js/intro-boot.js">');
   html = html.replace('data-mode="demo"', 'data-mode="published"').replaceAll('VER6.1 조립 시안', '모바일 청첩장').replaceAll('우리의 조합', '우리의 결혼식').replace('VER6.1 STUDIO · 조합 미리보기', 'SUNGWOO &amp; SOHEE');
   html = html.replace(/<a[^>]*class="lab-return"[\s\S]*?<\/a>/, '').replaceAll('예시 계좌', '계좌').replaceAll('체험 방명록', '축하의 편지');

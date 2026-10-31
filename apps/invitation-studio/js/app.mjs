@@ -1,3 +1,5 @@
+import {mountExpandedScenes,guestEdition} from './expanded-scenes.mjs';
+import {mountExpandedSocial} from './expanded-social.mjs';
 import config from '../runtime.mjs';
 import { $, $$, storageOrNull, readPreference, savePreference, toast, setupDialogs, openDialog, closeDialogs, updateDialogRoute, copyText, addSwipe } from './ui.mjs';
 import { countdown, calendarEvent } from './core.mjs';
@@ -48,7 +50,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 let effects = readPreference('sungso_invitation_studio_motion', 'on') !== 'off';
 const motion = () => effects && !reduced.matches;
 let themeController, revealObserver, sceneReview, sceneDemo, visualOnly = false;
-let contentPreview;
+let contentPreview, expanded;
 let scenePicker;
 let latestApplyId = -1, stoppedDemoId = -1;
 let awaitingApplyId = null;
@@ -229,6 +231,8 @@ const featureResults = await Promise.allSettled([setupAccounts(adapter), setupGu
 featureResults.forEach((result, index) => {
   if (result.status === 'rejected') { console.error(`Invitation feature ${index} failed`, result.reason); toast('일부 체험 기능을 준비하지 못했어요. 새로고침해 주세요.'); }
 });
+expanded = mountExpandedScenes({config,gallery,adapter,motion,composition,onWedding:()=>updateCountdown()});
+expanded.mountSocial(mountExpandedSocial({config,adapter,motion}));
 try {
   themeController = mountStudio({ doc: document, win: window, enabled: motion(), gallery, wedding: config.wedding, composition, onChange: next => { if (!visualOnly) syncCompositionLinks(next); } });
   if (comparison) contentPreview = mountContentPreview({doc:document,win:window,gallery,config,onLayout:()=>themeController?.refresh()});
@@ -266,6 +270,7 @@ window.addEventListener('message', async event => {
       if (!$('dialog[open]')) window.sungsoIntro?.finish();
       visualOnly = request.previewOnly === true;
       themeController.setComposition(request.composition);
+      expanded.setComposition(request.composition);
       visualOnly = false;
     }
     if (!request.previewOnly) syncCompositionLinks(request.composition);
@@ -304,7 +309,7 @@ window.addEventListener('pagehide', event => {
   cancelInitialAnchor();
   if (event.persisted) return;
   cancelPreviewJump(); sceneReview.destroy(); sceneDemo?.destroy(); scenePicker?.destroy();
-  clearInterval(countdownTimer); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
+  clearInterval(countdownTimer); expanded?.destroy(); themeController?.destroy(); audio.destroy(); revealObserver?.disconnect(); coverObserver?.disconnect();
   if (cardUrl) URL.revokeObjectURL(cardUrl);
   if (calendarUrl) URL.revokeObjectURL(calendarUrl);
 });

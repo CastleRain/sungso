@@ -72,6 +72,7 @@ export function mountContentPreview({ doc = document, win = window, gallery, con
     });
     const photos = resolveDraftPhotos(current, basePhotos), nextFingerprint = JSON.stringify(photos.map(photo => [photo.id, photo.src]));
     if (gallery && photoFingerprint !== nextFingerprint) { photoFingerprint = nextFingerprint; gallery.render(photos); }
+    doc.dispatchEvent(new (win.CustomEvent || CustomEvent)('invitation:content-change',{detail:current}));
     onLayout();
     doc.dispatchEvent(new win.Event('lab:layout-changed'));
   }

@@ -1,3 +1,4 @@
+import { normalizeContentDraft } from './content-draft.mjs';
 import { CHOICE_KEYS, CHOICES, normalizeComposition } from './composition.mjs';
 
 export const LIBRARY_LIMIT = 40;
@@ -8,7 +9,7 @@ export const cleanRating = value => Number.isInteger(value) && value >= 0 && val
 const cleanTime = value => Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
 export function normalizeSaved(item) {
   if (!item || typeof item !== 'object' || Array.isArray(item) || typeof item.id !== 'string' || !item.id || item.id.length > 80 || !item.composition || typeof item.composition !== 'object' || Array.isArray(item.composition)) throw new Error('record');
-  return { id: item.id, name: cleanName(item.name) || '이름 없는 조합', rating: cleanRating(item.rating), note: cleanNote(item.note), createdAt: cleanTime(item.createdAt), updatedAt: cleanTime(item.updatedAt), composition: normalizeComposition(item.composition) };
+  return { id: item.id, name: cleanName(item.name) || '이름 없는 조합', rating: cleanRating(item.rating), note: cleanNote(item.note), createdAt: cleanTime(item.createdAt), updatedAt: cleanTime(item.updatedAt), composition: normalizeComposition(item.composition), ...(item.text?{text:normalizeContentDraft({text:item.text}).text}:{}) };
 }
 /** Reading never writes, trims the library, or discards valid older selections. */
 export function parseLibrary(raw) {

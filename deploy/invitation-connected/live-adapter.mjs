@@ -14,6 +14,8 @@ export function createLiveAdapter() {
   persist();
   return {
     live: true, persistent: true,
+    engagementRead:()=>request('/api/invitation/studio/engagement'),
+    engagementVote:input=>request('/api/invitation/studio/engagement',{method:'POST',body:JSON.stringify({...input,clientId})}),
     async accounts() {
       const data = await request('/api/invitation/v5/accounts');
       return ['groom','bride'].map(side => ({ id: side, accounts: data.groups.filter(g => g.id === side || g.id === side + '-parents').flatMap(g => g.accounts) }));
@@ -24,14 +26,14 @@ export function createLiveAdapter() {
         const data = await request(BOOK + (next ? '?before=' + encodeURIComponent(next) : ''));
         rows.push(...data.messages); if (!data.next || data.next === next) break; next = data.next;
       }
-      return rows.map(m => ({ id: m.id, name: m.name, message: m.text, createdAt: new Date(m.createdAt).toISOString(), owned: Boolean(proofs[m.id]) }));
+      return rows.map(m => ({ id: m.id, name: m.name, message: m.text, stamp:m.stamp,paper:m.paper, createdAt: new Date(m.createdAt).toISOString(), owned: Boolean(proofs[m.id]) }));
     },
-    async write({ name, message, consent, website }) {
+    async write({ name, message, consent, website, stamp, paper }) {
       name = name.trim(); const text = message.trim();
       if (!consent || !name || !text || [...name].length > 20 || [...text].length > 300) throw Error('이름 20자, 메시지 300자 이내와 공개 동의를 확인해 주세요.');
-      if (!draft || draft.name !== name || draft.text !== text) {
+      if (!draft || draft.name !== name || draft.text !== text || draft.stamp !== stamp || draft.paper !== paper) {
         const deleteToken = Array.from(crypto.getRandomValues(new Uint8Array(32)), n => n.toString(16).padStart(2, '0')).join('');
-        draft = { name, text, consent: true, website, clientId, requestId: crypto.randomUUID(), deleteToken };
+        draft = { name, text,...(stamp?{stamp}:{}),...(paper?{paper}:{}), consent: true, website, clientId, requestId: crypto.randomUUID(), deleteToken };
         proofs[draft.requestId] = deleteToken; persist();
       }
       const result = await request(BOOK, { method: 'POST', body: JSON.stringify(draft) });

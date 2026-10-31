@@ -43,7 +43,7 @@ function fixture() {
     themeController: { composition: normalizeComposition(DEFAULT_COMPOSITION), whenReady: Promise.resolve(),
       setComposition(next) { this.composition = next; this.whenReady = readyByFont.get(next.font) || Promise.resolve(); } },
   });
-  vm.runInContext(`let latestApplyId = -1, stoppedDemoId = -1, awaitingApplyId = null, visualOnly = false, contentPreview = null;
+  vm.runInContext(`let latestApplyId = -1, stoppedDemoId = -1, awaitingApplyId = null, visualOnly = false, contentPreview = null, expanded = {setComposition(){}};
     ${pendingStopSource}\n${childSource}`, child);
   const select = (composition, options = { key: 'motion' }) => {
     parent.selected = composition; parent.options = options;

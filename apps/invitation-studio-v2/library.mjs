@@ -22,7 +22,7 @@ export function mountLibrary({getSnapshot,loadSnapshot,notify}) {
     if(!readFailed)$('library-status').textContent=`이 기기에 ${records.length} / ${LIBRARY_LIMIT}개 · 검색 결과 ${found.length}개`;
     for(const item of found.slice(0,visible)){
       const li=document.createElement('li'),name=document.createElement('strong'),note=document.createElement('p');name.textContent=item.name;note.textContent=`${'★'.repeat(item.rating)} ${item.note}`;
-      const load=document.createElement('button');load.textContent='불러오기';load.onclick=async()=>{await loadSnapshot({...getSnapshot(),composition:item.composition});fill(item);dialog.close();notify('디자인을 불러왔어요. 현재 문구·사진은 유지해요.');};
+      const load=document.createElement('button');load.textContent='불러오기';load.onclick=async()=>{await loadSnapshot({...getSnapshot(),composition:item.composition,content:{...getSnapshot().content,text:{...getSnapshot().content.text,...item.text}}});fill(item);dialog.close();notify('디자인을 불러왔어요. 저장한 문구도 반영하고 현재 사진은 유지해요.');};
       const edit=document.createElement('button');edit.textContent='이름·별점 수정';edit.onclick=()=>{editing=item.id;fill(item);$('save-combination').textContent='이름·별점·메모 저장';$('combination-name').focus();};
       const remove=document.createElement('button');remove.textContent='보관 해제';remove.onclick=()=>{if(confirm(`‘${item.name}’을 이 기기 보관함에서 삭제할까요?`))persist(records.filter(r=>r.id!==item.id));};
       li.append(name,note,load,edit,remove);$('library-list').append(li);
@@ -31,7 +31,7 @@ export function mountLibrary({getSnapshot,loadSnapshot,notify}) {
   $('save-combination').onclick=()=>{
     if(editing){if(persist(updateSaved(records,editing,metadata()))){editing=null;$('save-combination').textContent='디자인 새로 보관 ＋';notify('이름과 메모를 저장했어요.');}return;}
     if(records.length>=LIBRARY_LIMIT){notify('디자인은 40개까지 보관할 수 있어요.');return;}
-    const now=Date.now();if(persist([{id:crypto.randomUUID(),...metadata(),createdAt:now,updatedAt:now,composition:normalizeComposition(getSnapshot().composition)},...records]))notify('디자인을 이 기기 보관함에 저장했어요.');
+    const now=Date.now();if(persist([{id:crypto.randomUUID(),...metadata(),createdAt:now,updatedAt:now,composition:normalizeComposition(getSnapshot().composition),text:{...getSnapshot().content.text}},...records]))notify('디자인을 이 기기 보관함에 저장했어요.');
   };
   for(const id of ['library-search','library-favorites','library-sort'])$(id).addEventListener('input',()=>{visible=6;render();});
   $('library-more').onclick=()=>{visible+=6;render();};

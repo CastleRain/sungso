@@ -8,6 +8,14 @@ const API = 'https://sungso-homehunt-api.onrender.com/api/invitation/studio';
 const COOKIE = '__Host-wedding_studio';
 const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.ics': 'text/calendar; charset=utf-8' };
 const escapeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+export function publicationMetadata(html,release){
+  const content=release?.snapshot?.content||{},v=content.experience?.values||{},t=content.text||{};
+  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const title=`${t.groom||'성우'} · ${t.bride||'소희'}의 결혼식`,description=`${v.weddingDate||'2027-03-06'} ${v.weddingTime||'15:30'} · ${v.venue||'부산 목화웨딩홀'} ${v.room||'15층 벨리스홀'}`;
+  html=html.replace(/<title>[\s\S]*?<\/title>/,()=>`<title>${escape(title)}</title>`);
+  for(const [key,value]of [['og:title',title],['og:description',description],['description',description],...(v.shareImage?[['og:image',v.shareImage]]:[])])html=html.replace(new RegExp(`(<meta (?:property|name)="${key}" content=")[^"]*("[^>]*>)`),(_a,start,end)=>start+escape(value)+end);
+  return html;
+}
 export function createGateway({ directory = ROOT, fetcher = fetch, origin = ORIGIN, api = API } = {}) {
   const authenticated = new Map();
   async function remote(suffix, options = {}) {
@@ -62,16 +70,16 @@ export function createGateway({ directory = ROOT, fetcher = fetch, origin = ORIG
         if (!response.ok) throw Error('PUBLISH_UNAVAILABLE');
         const data = await response.json(); if (data.ok !== true) throw Error('INVALID_PUBLICATION');
         let html = await readFile(path.join(directory, data.release ? 'published.html' : 'legacy.html'), 'utf8');
-        if (data.release) html = html.replace('<!--PUBLICATION-->', `<script id="wedding-publication" type="application/json">${escapeJSON(data.release)}</script>`);
+        if (data.release) html = publicationMetadata(html,data.release).replace('<!--PUBLICATION-->', `<script id="wedding-publication" type="application/json">${escapeJSON(data.release)}</script>`);
         // Public HTML only. Changes appear on the permanent address within 10 seconds.
         res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=10, stale-while-revalidate=86400'); res.removeHeader('Vary');
         return send(200, html, MIME['.html']);
       }
       if (pathname.startsWith('/api/studio/')) {
         const suffix = pathname.slice('/api/studio'.length);
-        if (!/^\/(?:manage|draft\/[a-f0-9-]{36})$/i.test(suffix)) return send(404, '{"ok":false}');
+        if (!/^\/(?:manage|engagement|reply|replies|draft\/[a-f0-9-]{36})$/i.test(suffix)) return send(404, '{"ok":false}');
         if (!await member(token)) return send(401, '{"ok":false,"error":"로그인을 다시 확인해 주세요."}');
-        if (!['GET','POST'].includes(req.method) || (req.method === 'POST' && suffix !== '/manage')) return send(405, '{"ok":false}');
+        if (!['GET','POST'].includes(req.method) || (req.method === 'POST' && !['/manage','/reply'].includes(suffix))) return send(405, '{"ok":false}');
         if (req.method === 'POST' && (req.headers.origin !== origin || !/^application\/json(?:;|$)/i.test(req.headers['content-type'] || ''))) return send(403, '{"ok":false}');
         const response = await remote(suffix, { method: req.method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, ...(req.method === 'POST' ? { body: await bytes(req, 4 * 1024 * 1024) } : {}) });
         return send(response.status, await response.text());

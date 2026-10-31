@@ -7,6 +7,8 @@ import runtime from './runtime.mjs';
 import {GLOBAL_KEYS,LABELS,SCENE_KEYS,CONTENT_GROUPS,sectionFor,scenes,settingsFor,snapshot,createHistory} from './model.mjs';
 import {mountLibrary} from './library.mjs';
 import {V2_PRESETS} from './recommendations.mjs';
+import {experienceDefaults,normalizeExperience} from './js/experience-config.mjs';
+import {mountExperienceEditor} from './experience-editor.mjs';
 
 const $=id=>document.getElementById(id),frame=$('invitation-preview'),WORKING='sungso_studio_v2_working_design';
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -15,6 +17,9 @@ let composition=readComposition(location.search);
 if(!new URLSearchParams(location.search).has('version'))try{const saved=JSON.parse(localStorage.getItem(WORKING));if(saved?.version===1)composition=normalizeComposition(saved.composition);}catch{}
 let currentContent=normalizeContentDraft(),ready=false,contentLoaded=false,muting=false,selectedKey='cover',activeScene='top',orderEditing=false,pickerEnabled=true,audioPhase='paused';
 let lastReviewKey='cover';
+let experienceEditor;
+const hiddenScenes=()=>new Set((currentContent.experience?.values?.hiddenScenes||'').split(',').filter(Boolean));
+async function toggleScene(id){const e=experienceDefaults(currentContent.experience),hidden=hiddenScenes();if(hidden.has(id))hidden.delete(id);else hidden.add(id);e.values.hiddenScenes=[...hidden].join(',');await contentEditor.setDraft({...currentContent,experience:normalizeExperience(e)});renderRail();}
 let serial=0,request=null,baseline=null,comparing=false,noticeTimer,contentTimer,saveTimer,lastTyping=0,lastContentSection=null,pointerDrag=null;
 const history=createHistory(snapshot(composition,currentContent));
 const rangeControls=[],optionStates=new Map();
@@ -52,16 +57,16 @@ function rowFocusToken(){const a=document.activeElement;return a?.closest('#scen
 function renderRail(){
   const token=rowFocusToken(),list=$('scene-list'),rail=document.querySelector('.scene-rail'),scrollTop=rail.scrollTop;list.replaceChildren();
   for(const item of scenes(composition)){
-    const li=node('li','scene-row');li.dataset.scene=item.id;if(item.id===activeScene)li.classList.add('selected');
+    const li=node('li','scene-row');li.dataset.scene=item.id;if(hiddenScenes().has(item.id))li.classList.add('scene-hidden');if(item.id===activeScene)li.classList.add('selected');
     const button=node('button','scene-select');button.dataset.action='select';button.setAttribute('aria-pressed',String(item.id===activeScene));button.onclick=()=>selectScene(item.id);
     if(item.id==='top'){const img=node('img','scene-thumb');img.src=thumb();img.alt='';button.append(img);}else button.append(node('span','scene-number',item.movable?String(composition.order.indexOf(item.id)+1).padStart(2,'0'):item.id==='opening'?'✎':item.id==='navigation'?'≡':'&'));
-    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);
+    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);if(item.movable){const visible=node('button','scene-visibility',hiddenScenes().has(item.id)?'◌':'◉');visible.setAttribute('aria-label',`${item.label} ${hiddenScenes().has(item.id)?'보이기':'숨기기'}`);visible.onclick=()=>void toggleScene(item.id);li.append(visible);}
     if(orderEditing&&item.movable){
       const controls=node('div','scene-order-tools'),handle=node('button','drag-handle','⠿');handle.dataset.action='drag';handle.setAttribute('aria-label',`${item.label} 순서 드래그`);handle.addEventListener('pointerdown',e=>{if(e.button!==0)return;pointerDrag={id:item.id,pointer:e.pointerId,x:e.clientX,y:e.clientY,moved:false,target:null,handle};handle.setPointerCapture(e.pointerId);});
-      const position=node('select');position.dataset.action='position';position.setAttribute('aria-label',`${item.label} 위치`);composition.order.forEach((_,i)=>{const option=node('option','',`${i+1}번째`);option.value=i;position.append(option);});position.value=composition.order.indexOf(item.id);position.onchange=()=>reorder(item.id,Number(position.value));
+      const position=node('select');position.dataset.action='position';position.setAttribute('aria-label',`${item.label} 위치`);composition.order.forEach((_,i)=>{const option=node('option','',`${i+1}번째 (${LABELS[SCENE_KEYS[composition.order[i]]]} 자리)`);option.value=i;position.append(option);});position.value=composition.order.indexOf(item.id);position.onchange=()=>reorder(item.id,Number(position.value));
       const up=node('button','','↑'),down=node('button','','↓');up.dataset.action='up';down.dataset.action='down';up.setAttribute('aria-label',`${item.label} 위로`);down.setAttribute('aria-label',`${item.label} 아래로`);const index=composition.order.indexOf(item.id);up.disabled=index===0;down.disabled=index===composition.order.length-1;up.onclick=()=>reorder(item.id,index-1);down.onclick=()=>reorder(item.id,index+1);controls.append(handle,position,up,down);li.append(controls);
     }
-    list.append(li);
+    list.append(li);if(orderEditing&&item.movable){const insert=node('button','scene-insert','＋ 여기에 장면 넣기');insert.onclick=()=>{activeScene=item.id;$('add-scene').click();};li.append(insert);}
   }
   if(token){const row=[...list.children].find(r=>r.dataset.scene===token.scene),control=row?.querySelector(`[data-action="${token.action}"]`);(control?.disabled?row.querySelector('[data-action=position]'):control)?.focus({preventScroll:true});}
   rail.scrollTop=scrollTop;
@@ -109,6 +114,7 @@ function range(root,{name,field,min,max,step=.05,get,set}){
   rangeControls.push({input,number,get});
 }
 function updateRanges(){rangeControls.forEach(({input,number,get})=>{input.value=get();if(document.activeElement!==number)number.value=get();});}
+function renderMobileChips(){const host=$('mobile-options');host.replaceChildren();for(const choice of CHOICES[selectedKey]||[]){const b=node('button','',choice.label);b.setAttribute('aria-pressed',String(composition[selectedKey]===choice.id));b.onclick=()=>{apply({...composition,[selectedKey]:choice.id},{demo:!GLOBAL_KEYS.includes(selectedKey)});renderMobileChips();};host.append(b);}}
 function renderInspector(){
   $('inspector-title').textContent=LABELS[selectedKey];$('inspector-kicker').textContent=GLOBAL_KEYS.includes(selectedKey)?'THE OVERALL MOOD':'EDIT THIS SCENE';$('inspector-subtitle').textContent=GLOBAL_KEYS.includes(selectedKey)?'지금 보는 위치에서 바로 비교해요.':'디자인부터 문구까지, 이 장면을 한곳에서.';
   const keys=selectedKey==='textSize'?['textSize','lineSpace']:selectedKey==='spacing'?['spacing','divider']:settingsFor(selectedKey,composition);
@@ -128,10 +134,12 @@ function renderInspector(){
   document.querySelectorAll('[data-content-step]').forEach(group=>{group.hidden=!groups.includes(group.dataset.contentStep);group.open=!group.hidden;});
   $('scene-notes').replaceChildren();
   const notes={date:'날짜·시간은 표지와 일정 파일에 같은 예식 정보를 사용해요.',arrival:'길찾기·교통 안내는 유지돼요. 시연으로 외부 지도는 열지 않아요.',gifting:'계좌는 예시로 보여요. 실제 계좌 등록은 공동 저장 창의 사진·계좌 관리에서 할 수 있어요.',wishes:'이곳은 체험 방명록이에요. 공개 청첩장의 축하 메시지는 그대로 유지돼요.'};
+  if(!GLOBAL_KEYS.includes(selectedKey)){const reset=node('button','reset-scene','이 장면의 디자인 초기화');reset.onclick=()=>{const patch=Object.fromEntries(settingsFor(selectedKey,composition).map(k=>[k,DEFAULT_COMPOSITION[k]]));apply({...composition,...patch,sectionTuning:setSectionTuning(composition.sectionTuning,sectionFor(selectedKey),null)});renderInspector();};$('scene-notes').append(reset);}
   if(notes[selectedKey])$('scene-notes').append(node('p','scene-note',notes[selectedKey]));
+  experienceEditor?.render(selectedKey==='opening'?'opening':sectionFor(selectedKey));
   const optional=OPTIONAL_SECTIONS.find(s=>s.key===selectedKey);if(optional){const remove=node('button','','이 장면 빼기');remove.onclick=()=>{apply({...composition,extras:composition.extras.filter(id=>id!==optional.id)});selectScene('invitation');};$('scene-notes').append(remove);}
   const all=scenes(composition),index=all.findIndex(s=>s.id===activeScene);$('previous').disabled=index<=0;$('next').disabled=index===all.length-1;
-  $('editor-content').scrollTop=0;updateSelections();updateRanges();
+  $('editor-content').scrollTop=0;updateSelections();updateRanges();renderMobileChips();
 }
 // A V2 draft never overwrites the V1 working content database.
 const v2IDB=window.indexedDB?{open:(_name,version)=>window.indexedDB.open('sungso-invitation-studio-v2-content',version)}:undefined;
@@ -142,6 +150,8 @@ contentEditor=mountContentEditor({root:$('content-editor'),config:runtime,store:
 },onNavigate:()=>{},onSectionChange:()=>{}});
 export const contentReady=contentEditor.ready.then(()=>{currentContent=contentEditor.getDraft();contentLoaded=true;history.reset(getSnapshot());renderInspector();preview();});
 export const studioReady=contentReady;
+const experienceRoot=node('section','experience-editor');$('editor-content').insertBefore(experienceRoot,$('scene-notes'));
+experienceEditor=mountExperienceEditor({root:experienceRoot,getSnapshot,config:runtime,notify,onDraft:draft=>contentEditor.setDraft(draft)});
 const library=mountLibrary({getSnapshot,loadSnapshot,notify});
 for(const id of ['open-library','mobile-library'])$(id).onclick=()=>{stopDemo();library.open();};
 for(const button of document.querySelectorAll('[data-global]'))button.onclick=()=>selectGlobal(button.dataset.global);
@@ -177,11 +187,13 @@ window.addEventListener('message',async event=>{
   else if(d.type==='invitation-studio:select'&&pickerEnabled&&!comparing&&scenes(composition).some(s=>s.id===d.section))selectScene(d.section,{jump:false});
   else if(d.type==='invitation-lab:audio-state'&&['paused','loading','playing','blocked','error'].includes(d.phase)){audioPhase=d.phase;$('audio-toggle').setAttribute('aria-pressed',String(d.phase==='playing'));$('audio-toggle').setAttribute('aria-label',d.phase==='playing'?'음악 끄기':'음악 켜기');$('audio-toggle').textContent=d.phase==='playing'?'♫ 켜짐':'♫';if(d.phase==='blocked')notify('청첩장 오른쪽 위 음악 아이콘을 눌러 주세요.');}
   else if(d.type==='studio-v2:text'&&pickerEnabled&&!comparing){const field=CONTENT_FIELDS.find(f=>f.id===d.field);if(!field||typeof d.value!=='string'||d.value.length>field.limit)return;try{await loadSnapshot({...getSnapshot(),content:{...currentContent,text:{...currentContent.text,[field.id]:d.value}}});selectScene(field.section,{jump:false});notify('문구를 반영했어요.');}catch{notify('문구를 확인해 주세요.');}}
+  else if(d.type==='studio-v2:cover-photo'&&pickerEnabled&&!comparing){selectScene('top',{jump:false});document.querySelector('[aria-label="대표 사진"]')?.focus();}
   else if(d.type==='studio-v2:photos'&&pickerEnabled&&!comparing){selectScene('gallery',{jump:false});$('content-wrap').scrollIntoView({block:'start'});}
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden){stopDemo();if(comparing){exitComparison();preview();}}});
 for(const type of ['wheel','touchstart','keydown'])document.querySelector('.inspector').addEventListener(type,()=>{if(!$('stop-demo').hidden)stopDemo();},{passive:true});
-window.addEventListener('pagehide',()=>{stopDemo();void contentEditor.flush();});
+window.addEventListener('pagehide',()=>{stopDemo();experienceEditor?.stop();void contentEditor.flush();});
 window.addEventListener('popstate',()=>apply(readComposition(location.search)));
+const compact=node('button','compact-toggle','작게 보기');compact.setAttribute('aria-pressed','false');compact.onclick=()=>{const on=document.body.dataset.compact!=='true';document.body.dataset.compact=String(on);compact.setAttribute('aria-pressed',String(on));compact.textContent=on?'크게 보기':'작게 보기';};document.querySelector('.inspector-heading').append(compact);
 renderRail();renderInspector();updateURL();
 post({type:'studio-v2:hello'});

@@ -1,0 +1,24 @@
+{
+  "previousFiles": 206,
+  "unchanged": 196,
+  "changedPublishedRuntime": [
+    "published/js/app.mjs",
+    "published/js/composition.mjs",
+    "published/js/content-draft.mjs",
+    "published/js/content-preview.mjs",
+    "published/js/demo-data.mjs",
+    "published/js/fine-tuning.mjs",
+    "published/js/guest-features.mjs",
+    "published/js/live-adapter.mjs",
+    "published/js/saved-library.mjs",
+    "published/js/scene-demo.mjs"
+  ],
+  "newPublicFiles": [
+    "published/css/expanded.css",
+    "published/js/expanded-media.mjs",
+    "published/js/expanded-scenes.mjs",
+    "published/js/expanded-social.mjs",
+    "published/js/experience-config.mjs",
+    "published/js/print-ticket.mjs"
+  ]
+}

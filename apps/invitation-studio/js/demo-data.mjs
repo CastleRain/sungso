@@ -22,7 +22,7 @@ export function validateMessage({ name, message, consent, website = '' }) {
 export function createDemoAdapter({ variant, photos, storage, now = () => new Date(), uuid = () => crypto.randomUUID() }) {
   if (!/^[fg]$/.test(variant)) throw new TypeError('Unknown invitation variant');
   const key = `sungso_invitation_studio_6_1_${variant}_guestbook`;
-  let messages = [], persistent = true;
+  let messages = [], persistent = true;const engagement={revision:0,counts:{},replies:{}},votes=new Set();
   try {
     const saved = JSON.parse(storage?.getItem(key) || '[]');
     if (Array.isArray(saved)) messages = saved.filter(item => item && typeof item.id === 'string' && typeof item.name === 'string' && typeof item.message === 'string' && Number.isFinite(Date.parse(item.createdAt))).slice(0, 100);
@@ -35,13 +35,15 @@ export function createDemoAdapter({ variant, photos, storage, now = () => new Da
   }
   return {
     mode: DATA_MODE,
+    engagementRead:async()=>clone(engagement),
+    async engagementVote({kind,key,choice}){const id=kind==='celebrate'?'celebrate':kind+':'+key;if(!votes.has(id)){votes.add(id);const c=engagement.counts[id]||{a:0,b:0,total:0};if(kind==='quiz'&&['a','b'].includes(choice))c[choice]++;c.total++;engagement.counts[id]=c;engagement.revision++;}return clone(engagement);},
     get persistent() { return persistent; },
     photos: async () => clone(photos),
     accounts: async () => clone(SAMPLE_ACCOUNTS),
     messages: async () => clone(messages),
     async write(input) {
       const fields = validateMessage(input);
-      const entry = { id: uuid(), ...fields, createdAt: now().toISOString(), owned: true };
+      const entry = { id: uuid(), ...fields,...(['coffee','flowers','ring','cheers','heart'].includes(input.stamp)?{stamp:input.stamp}:{}),...(['mist','rose','cream'].includes(input.paper)?{paper:input.paper}:{}), createdAt: now().toISOString(), owned: true };
       messages = [entry, ...messages].slice(0, 100); persist(); return clone(entry);
     },
     async remove(id) {
