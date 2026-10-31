@@ -2,6 +2,13 @@
 
 Implementation checks: passed. Approved compact-ledger refinement: implemented and visually checked (2026-10-31).
 
+## 운영 검수 완료
+
+- 최종 코드 `dbda510`, [Pages 41200283385](https://github.com/CastleRain/sungso/actions/runs/41200283385)의 검사·서비스 번들·배포가 성공했다. 공개 파일 21개와 실제 캐시 버전 URL 4개가 줄바꿈 정규화 후 로컬 산출물과 일치한다. 내부 AGENTS·테스트·로컬 캡처·검수 문서 경로 4개는 404다.
+- 기존 캐시 세션에서 새로고침 후 본문이 정상 표시된다. 실제 22행의 ID와 예정/계약금/잔금/누적 지급 원 단위가 승인된 로컬 화면과 일치한다. 카테고리 현황 접힘/상세 11그룹 전체 펼침, 모두 접기 시 22행 숨김과 복원, 잔금순 11그룹 내림차순과 기본 정렬 복원, 항목 수정창 열기/취소를 확인했다.
+- 실제 운영 1440px와 390px에 가로 넘침이 없고 모바일 편집창 폭 390px·하단 저장 버튼 노출을 확인했다. 브라우저 오류/경고는 관측되지 않았다. 수정값 입력·저장/삭제와 DB 이전은 하지 않았다. 저장 성공/실패·충돌/재시도는 앞선 합성 대역으로 검증하며 실제 운영 쓰기 확인으로 표현하지 않는다.
+- 원본 캡처는 Git 제외 `.local/wedding-qa/release-before-production.jpg`, `release-production-desktop.jpg`, `release-production-editor-desktop.jpg`, `release-production-mobile-ledger.jpg`, `release-production-editor-mobile.jpg`, `release-production-final.jpg`에 보관한다. 공개 해시 보고서는 같은 폴더 `public-release.json`이다. 전체 2,156개 검사·890개 참조·265개 JavaScript 검사가 통과했다. 실제 휴대폰 키보드/터치는 별도 사용자 확인 범위다.
+
 ## 운영 배포 준비
 
 - 첫 공개 `35848c7`/Pages 41199737046은 성공했고 공개 21개 파일이 일치했으나, 실제 기존 방문 세션은 새 HTML과 캐시된 이전 렌더러의 혼합으로 본문이 비었다. 배포 완료와 사용자 화면 완료를 구분하며 캐시 보완 후 재검수한다. HTML import map을 모듈 로드 전에 선언해 모든 저장소 import를 단일 버전 URL로 맞추고 wedding renderer/core/CSS를 갱신한다. 공통 인증/금융 모듈 URL과 다른 탭 소스는 유지한다. [import map의 경로 정규화·적용 순서](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap)를 확인했다.
