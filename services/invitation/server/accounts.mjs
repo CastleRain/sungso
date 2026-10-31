@@ -1,26 +1,29 @@
-import { ACCOUNTS_PATH, AccountError, emptyAccounts, validateAccounts, accountGroups } from '../../../shared/invitation/account-core.mjs';
+import { ACCOUNTS_PATH, AccountError, emptyAccounts, validateAccounts } from '../../../shared/invitation/account-core.mjs';
+import { validateAccountOrder, orderedAccountData } from '../../../shared/invitation/account-order.mjs';
 const ROOT = 'wedding_accounts/sungso_20270306';
 function state(raw) {
-  if (raw === undefined) return { revision: 0, accounts: emptyAccounts() };
+  if (raw === undefined) return { revision: 0, accounts: emptyAccounts(), order: validateAccountOrder() };
   if (raw.schema !== 1 || !Number.isSafeInteger(raw.revision) || raw.revision < 1) throw Error('INVALID_STATE');
-  return { revision: raw.revision, accounts: validateAccounts(raw.accounts) };
+  return { revision: raw.revision, accounts: validateAccounts(raw.accounts), order: validateAccountOrder(raw.order) };
 }
 export function createAccountStore({ db, now = Date.now }) {
   const ref = db.doc(ROOT);
   return {
     async read() { const snap = await ref.get(); return state(snap.exists ? snap.data() : undefined); },
     async save(body, member) {
-      if (!body || Array.isArray(body) || Object.keys(body).some(k => !['accounts', 'expectedRevision'].includes(k)) ||
+      if (!body || Array.isArray(body) || Object.keys(body).some(k => !['accounts', 'order', 'expectedRevision'].includes(k)) ||
         !Number.isSafeInteger(body.expectedRevision) || body.expectedRevision < 0) throw new AccountError('저장할 내용을 확인해 주세요.');
       const accounts = validateAccounts(body.accounts);
+      const requestedOrder = Object.hasOwn(body, 'order') ? validateAccountOrder(body.order) : undefined;
       return db.runTransaction(async tx => {
         const snap = await tx.get(ref), old = state(snap.exists ? snap.data() : undefined);
+        const order = requestedOrder || old.order; // Older managers must retain the saved recipient order.
         // Exact retries are idempotent; a different stale edit must never overwrite.
-        if (JSON.stringify(old.accounts) === JSON.stringify(accounts)) return old;
+        if (JSON.stringify(old.accounts) === JSON.stringify(accounts) && JSON.stringify(old.order) === JSON.stringify(order)) return old;
         if (old.revision !== body.expectedRevision) throw new AccountError('다른 기기에서 수정했어요. 입력한 내용은 남겨 두었으니 최신 내용을 확인해 주세요.', 'CONFLICT', 409);
-        const next = { schema: 1, revision: old.revision + 1, accounts, updatedBy: member.uid, updatedAt: now() };
+        const next = { schema: 1, revision: old.revision + 1, accounts, order, updatedBy: member.uid, updatedAt: now() };
         tx.set(ref, next);
-        return { revision: next.revision, accounts };
+        return { revision: next.revision, accounts, order };
       });
     },
   };
@@ -49,7 +52,7 @@ export function createAccountApi({ store, authenticate }) {
       }
       if (req.method !== 'GET') return res.status(405).json({ ok: false });
       const data = await store.read();
-      return res.status(200).json({ ok: true, revision: data.revision, groups: accountGroups(data.accounts) });
+      return res.status(200).json({ ok: true, revision: data.revision, ...orderedAccountData(data.accounts, data.order) });
     } catch (error) {
       const known = error instanceof AccountError || ['AUTH_REQUIRED', 'AUTH_INVALID', 'MEMBERSHIP_REQUIRED', 'MEMBERSHIP_UNAVAILABLE'].includes(error.code);
       return res.status(known ? error.status : 503).json({ ok: false, code: known ? error.code : 'ACCOUNTS_UNAVAILABLE', error: known ? error.message : '계좌 정보를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.' });
