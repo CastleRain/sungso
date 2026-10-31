@@ -61,7 +61,7 @@ test('every private entry defers scripts until auth; only the explicit guest inv
         assert.doesNotMatch(attrs, /(?:data-)?src=/);
         const map = JSON.parse(content);
         assert.deepEqual(Object.keys(map), ['imports']);
-        assert.deepEqual(Object.keys(map.imports).sort(), ['./js/firebase.js', './js/tab-wedding.js', './js/wedding-core.mjs']);
+        assert.deepEqual(Object.keys(map.imports).sort(), ['./js/firebase.js', './js/tab-wedding.js', './js/wedding-core.mjs', './js/wedding-funds-core.mjs', './js/wedding-funds-store.mjs', './js/wedding-funds-ui.mjs']);
         for (const [specifier, target] of Object.entries(map.imports)) {
           assert.ok(target.startsWith(`${specifier}?v=`));
           assert.match(target.slice(specifier.length), /^\?v=[a-zA-Z0-9-]+$/);

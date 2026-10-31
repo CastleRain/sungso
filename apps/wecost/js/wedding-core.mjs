@@ -88,10 +88,10 @@ export function daysUntil(date, today = localDate()) {
       )
     : null;
 }
-export function aggregate(items) {
+export function aggregate(items, readPayment = paymentState) {
   return items.reduce(
     (a, item) => {
-      const p = paymentState(item);
+      const p = readPayment(item);
       for (const key of ["planned", "paid", "remaining", "overpaid"])
         a[key] += p[key];
       a.count++;
@@ -121,6 +121,7 @@ export function weddingView(
     groupBy = "none",
     today = localDate(),
   } = {},
+  readPayment = paymentState,
 ) {
   const scoped = items.filter(
     (item) => includeTravel || !isWeddingTravel(item),
@@ -132,7 +133,7 @@ export function weddingView(
     categories.get(key).push(item);
   }
   const dues = scoped
-    .filter((i) => paymentState(i).remaining > 0)
+    .filter((i) => readPayment(i).remaining > 0)
     .sort((a, b) =>
       (validDate(a.balanceDue) ? a.balanceDue : "9999").localeCompare(
         validDate(b.balanceDue) ? b.balanceDue : "9999",
@@ -161,7 +162,7 @@ export function weddingView(
   }
   const filtered = scoped.filter(
     (i) =>
-      (status === "all" || paymentState(i).status === status) &&
+      (status === "all" || readPayment(i).status === status) &&
       (!category || weddingCategory(i) === category),
   );
   filtered.sort((a, b) => {
@@ -174,9 +175,9 @@ export function weddingView(
         validDate(b.balanceDue) ? b.balanceDue : "9999",
       ) || byName
     );
-    if (sort === "amount-asc") return paymentState(a).planned - paymentState(b).planned || byName;
-    if (sort === "remaining") return paymentState(b).remaining - paymentState(a).remaining || byName;
-    return paymentState(b).planned - paymentState(a).planned || byName;
+    if (sort === "amount-asc") return readPayment(a).planned - readPayment(b).planned || byName;
+    if (sort === "remaining") return readPayment(b).remaining - readPayment(a).remaining || byName;
+    return readPayment(b).planned - readPayment(a).planned || byName;
   });
   const grouped = new Map();
   if (groupBy === "category") for (const item of filtered) {
@@ -184,7 +185,7 @@ export function weddingView(
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key).push(item);
   }
-  const groups = [...grouped].map(([category, items]) => ({ category, items, totals: aggregate(items) })).sort((a, b) => {
+  const groups = [...grouped].map(([category, items]) => ({ category, items, totals: aggregate(items, readPayment) })).sort((a, b) => {
     const byCategory = categoryLabel(a.category).localeCompare(categoryLabel(b.category), "ko");
     if (sort === "name") return byCategory;
     if (sort === "unpriced") {
@@ -199,9 +200,9 @@ export function weddingView(
   });
   return {
     scoped,
-    totals: aggregate(scoped),
+    totals: aggregate(scoped, readPayment),
     categories: [...categories].sort(
-      (a, b) => aggregate(b[1]).planned - aggregate(a[1]).planned,
+      (a, b) => aggregate(b[1], readPayment).planned - aggregate(a[1], readPayment).planned,
     ),
     dues,
     soon,
@@ -209,7 +210,7 @@ export function weddingView(
     months: [...months],
     filtered,
     groups,
-    completed: scoped.filter((i) => paymentState(i).status === "done"),
+    completed: scoped.filter((i) => readPayment(i).status === "done"),
   };
 }
 export function parseWon(value) {

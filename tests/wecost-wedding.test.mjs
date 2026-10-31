@@ -165,6 +165,16 @@ function renderEnvironment() {
   let fail = false;
   const context = vm.createContext({
     ...core,
+    basePaymentState: core.paymentState,
+    baseAggregate: core.aggregate,
+    baseWeddingView: core.weddingView,
+    withWeddingDetails: (item, payment) => payment,
+    registerWeddingFinance: () => {},
+    handleWeddingFinance: () => false,
+    weddingFundingCard: () => "",
+    weddingFundsHTML: () => "",
+    weddingTravelDetails: () => "",
+    weddingRemaining: items => core.aggregate(items).remaining,
     document: w.document,
     window: w,
     CSS: { escape: (s) => s },
@@ -210,7 +220,7 @@ function renderEnvironment() {
 test("renderer exposes full ledger, working expansion, filtering and correct progress without mutation", () => {
   const env = renderEnvironment(),
     d = env.w.document;
-  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header)").length, 22);
+  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)").length, 22);
   const category = [...d.querySelectorAll(".wed-category")].find((e) =>
     e.textContent.includes("혼주·가족"),
   );
@@ -224,7 +234,7 @@ test("renderer exposes full ledger, working expansion, filtering and correct pro
     true,
   );
   d.querySelector('[data-status="done"]').click();
-  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header)").length, 6);
+  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)").length, 6);
   assert.ok(
     [...d.querySelectorAll("#tbl-body [role=progressbar]")].every(
       (e) => e.getAttribute("aria-valuenow") === "100",
@@ -236,7 +246,7 @@ test("renderer exposes full ledger, working expansion, filtering and correct pro
   check.checked = false;
   check.dispatchEvent(new env.w.Event("change", { bubbles: true }));
   assert.equal(env.state.items.length, 22);
-  assert.ok(d.querySelector("#s-total-hint").textContent.includes("21개"));
+  assert.ok(d.querySelector("#s-total-hint").textContent.includes("22개"));
   env.dom.window.close();
 });
 test("editor failure retains draft and retry saves the corrected balance", async () => {
@@ -367,14 +377,14 @@ test("ledger grouping and sorting work together and leave the overview untouched
   const e=renderEnvironment(), d=e.w.document;
   const total=d.querySelector('#s-total').textContent;
   assert.equal(d.querySelectorAll('#tbl-body .wed-ledger-group-header').length,11);
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header)').length,22);
+  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length,22);
   assert.equal(d.querySelectorAll('.wed-mobile-ledger .wed-ledger-group').length,11);
   d.querySelector('#wed-sort-trigger').click();
   d.querySelector('[data-action="choose-sort"][data-value="amount-asc"]').click();
   const section=d.querySelector('.wed-mobile-ledger section[aria-label="스드메 항목"]');
   assert.match(section.querySelector('.wed-mobile-item > summary').textContent,/스드메 계약/);
   d.querySelector('[data-status="done"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header)').length,6);
+  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length,6);
   assert.equal(d.querySelector('#s-total').textContent,total);
   d.querySelector('[data-action="group"][data-value="none"]').click();
   assert.equal(d.querySelectorAll('#tbl-body .wed-ledger-group-header').length,0);
@@ -437,7 +447,7 @@ test("only the sorting panel remains and closes with focus restored without chan
   assert.equal(d.activeElement.id, 'wed-sort-trigger');
   d.querySelector('[data-status="done"]').click();
   d.querySelector('[data-action="reset-filter"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header)').length, 22);
+  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length, 22);
   assert.equal(d.querySelector('#s-total').textContent, total);
   assert.equal(e.writes.length, 0);
   assert.deepEqual(e.state.items, original);
@@ -519,7 +529,7 @@ test("category groups collapse independently, keep their totals and synchronize 
   assert.ok(controlledRows().every(row=>row.hidden));
   assert.equal(d.getElementById(mobile().getAttribute('aria-controls')).hidden, true);
   assert.deepEqual(subtotalText(), totals);
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 4);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 4);
   e.context.render(e.state);
   assert.ok(controlledRows().every(row=>row.hidden));
   d.querySelector('#wed-sort-trigger').click();
@@ -530,30 +540,30 @@ test("category groups collapse independently, keep their totals and synchronize 
   assert.ok(controlledRows().every(row=>row.hidden));
   d.querySelector('[data-action="reset-filter"]').click();
   d.querySelector('[data-action="group"][data-value="none"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
   d.querySelector('[data-action="group"][data-value="category"]').click();
   assert.ok(controlledRows().every(row=>row.hidden));
   mobile().click();
   assert.equal(desktop().getAttribute('aria-expanded'), 'true');
   assert.ok(controlledRows().every(row=>!row.hidden));
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 22);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 22);
   assert.equal(d.querySelectorAll('#tbl-body .wed-group-subtotal').length, 44);
   assert.equal(d.querySelector('[data-action="toggle-ledger-groups"]').textContent, '모두 펼치기');
   e.w.HTMLElement.prototype.scrollIntoView = () => {};
   d.querySelector('[data-action="show-category"][data-category="👗스드메"]').click();
   assert.ok(controlledRows().every(row=>!row.hidden));
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 18);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 18);
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
   assert.equal(d.querySelector('#s-remain').textContent, summary);
   assert.equal(e.writes.length, 0);
   assert.deepEqual(e.state.items, original);
   desktop().click();
   e.cleanups.forEach(fn=>fn());
   e.context.render(e.state);
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
   e.dom.window.close();
 });
 
@@ -567,7 +577,7 @@ test("fresh visits expand every group and view clicks preserve cards instead of 
     assert.deepEqual([...d.querySelectorAll('#tab-wedding .card')], cards);
     assert.equal(d.querySelector('#wed-ledger'), ledger);
   };
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
   assert.equal(d.querySelectorAll('.wed-group-toggle[aria-expanded="true"]').length, 22);
   group.focus();
   group.click();
@@ -595,7 +605,7 @@ test("fresh visits expand every group and view clicks preserve cards instead of 
   assert.equal(e.writes.length, 0);
   e.dom.window.close();
   const fresh = renderEnvironment();
-  assert.equal(fresh.w.document.querySelectorAll('#tbl-body tr[hidden]').length, 0);
+  assert.equal(fresh.w.document.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
   fresh.dom.window.close();
 });
 

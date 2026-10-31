@@ -16,7 +16,7 @@ import { decideItemWrite, sameItem } from './wedding-core.mjs';
 
 const app = getApps().find(item => item.name === '[DEFAULT]') || initializeApp(FIREBASE_CONFIG);
 await syncAppAuth(app);
-const db  = getFirestore(app);
+export const db  = getFirestore(app);
 const memberWork = createMemberWork({ getMember, registerPrivateCleanup });
 let targetPriceWriteSequence = 0;
 
