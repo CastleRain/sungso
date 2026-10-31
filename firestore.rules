@@ -16,6 +16,8 @@ service cloud.firestore {
     function memberRole() {
       return get(/databases/$(database)/documents/site_members/$(request.auth.uid)).data.role;
     }
+    // Studio drafts and publication snapshots are server-only, including both members.
+    match /wedding_studio/{document=**} { allow read, write: if false; }
     // Only administrators can grant membership. Clients read only their own status.
     match /site_members/{uid} {
       allow get: if googleUser() && request.auth.uid == uid;

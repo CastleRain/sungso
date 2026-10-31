@@ -180,6 +180,7 @@
       "output": "wedding",
       "files": [
         "index.html",
+        "invitation.html",
         "js"
       ]
     },

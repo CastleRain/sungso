@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { isAlbumRoute } from '../../../shared/invitation/album-core.mjs';
+import { isStudioRoute, STUDIO_BODY_LIMIT } from '../../invitation/server/studio.mjs';
 import { isJourneyRoute } from '../../journey/api.mjs';
 const MAX_BODY_BYTES = 750 * 1024;
 const ALLOWED_ORIGINS = new Set(['https://castlerain.github.io', 'http://localhost:8000', 'http://127.0.0.1:8000']);
@@ -24,7 +25,7 @@ async function readBody(req, limit = MAX_BODY_BYTES) {
   });
 }
 /** Node adapter; liveness proves the process is awake, never API access. */
-export function createRenderServer({ api, guestbook, album, rsvp, accounts, journey, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
+export function createRenderServer({ api, guestbook, album, rsvp, accounts, journey, studio, maxActiveRequests = 2, maxQueuedRequests = 8 } = {}) {
   if (typeof api !== 'function') throw new TypeError('An API handler is required');
   if (!Number.isSafeInteger(maxActiveRequests) || maxActiveRequests < 1
     || !Number.isSafeInteger(maxQueuedRequests) || maxQueuedRequests < 0) throw new RangeError('Invalid request limits');
@@ -54,6 +55,7 @@ export function createRenderServer({ api, guestbook, album, rsvp, accounts, jour
     const albumRequest = typeof album === 'function' && isAlbumRoute(pathname);
     const rsvpRequest = typeof rsvp === 'function' && /^\/api\/invitation\/v5\/rsvp(?:\/manage)?$/.test(pathname);
     const accountRequest = typeof accounts === 'function' && /^\/api\/invitation\/v5\/accounts(?:\/manage)?$/.test(pathname);
+    const studioRequest = typeof studio === 'function' && isStudioRoute(pathname);
     const journeyRequest = typeof journey === 'function' && isJourneyRoute(pathname);
     const origin = String(req.headers.origin || '');
     res.setHeader('Vary', 'Origin');
@@ -61,7 +63,7 @@ export function createRenderServer({ api, guestbook, album, rsvp, accounts, jour
     // One production invitation origin, only on its required routes. Never add
     // this origin to the shared app allowlist or allow arbitrary Vercel previews.
     const standaloneInvitation = origin === 'https://sungso-wedding.vercel.app'
-      && (publicGuestbook || albumRequest || accountRequest);
+      && (publicGuestbook || albumRequest || accountRequest || studioRequest);
     if (origin && !ALLOWED_ORIGINS.has(origin) && !guestLocal && !standaloneInvitation) {
       req.resume(); return failure(res, 403, 'ORIGIN_DENIED', '허용되지 않은 페이지입니다.');
     }
@@ -80,7 +82,7 @@ export function createRenderServer({ api, guestbook, album, rsvp, accounts, jour
       req.resume(); return failure(res, 404, 'NOT_FOUND', '지원하지 않는 요청입니다.');
     }
     let rawBody;
-    try { rawBody = await readBody(req, accountRequest ? 8192 : (publicGuestbook || rsvpRequest) ? 6144 : MAX_BODY_BYTES); }
+    try { rawBody = await readBody(req, studioRequest ? STUDIO_BODY_LIMIT : accountRequest ? 8192 : (publicGuestbook || rsvpRequest) ? 6144 : MAX_BODY_BYTES); }
     catch (error) {
       req.resume();
       return failure(res, error instanceof RangeError ? 413 : 400,
@@ -99,7 +101,7 @@ export function createRenderServer({ api, guestbook, album, rsvp, accounts, jour
       req.body = rawBody.length ? rawBody : {};
       res.status = status => { res.statusCode = status; return res; };
       res.json = value => { res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(value)); return res; };
-      await (publicGuestbook ? guestbook : albumRequest ? album : rsvpRequest ? rsvp : accountRequest ? accounts : journeyRequest ? journey : api)(req, res);
+      await (publicGuestbook ? guestbook : albumRequest ? album : rsvpRequest ? rsvp : accountRequest ? accounts : studioRequest ? studio : journeyRequest ? journey : api)(req, res);
     } catch { failure(res, 503, 'SERVICE_UNAVAILABLE', '서비스에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.'); }
     finally { release(heavy); }
   });
