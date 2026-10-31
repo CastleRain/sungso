@@ -52,3 +52,12 @@
 - e9ed9d6 Render 배포 후 공개 상태 API 200/접수 가능과 비회원 관리 401을 확인했다. 운영 검증용 응답·비공개 문서 본문 조회는 수행하지 않았다.
 
 **다음:** 두 회원의 실제 참석 관리 사용과 행사 후 정리 주기를 확인한다.
+
+
+### 2026-10-31 — Studio 공동 초안과 공개본
+
+사용자 요청에 따라 `/api/invitation/studio`의 session/manage/draft/published/photo 전용 경로를 추가했다. `wedding_studio/sungso_20270306`와 drafts/photos 하위 문서만 Admin API로 접근한다. 기존 두 Google 활성 역할 검사와 정확한 운영 origin만 유지한다. 공동 저장은 공개하지 않으며 명시적 publish/restore만 하객 snapshot을 변경한다. 초안40개·공개 이력20개·불변사진200개·추가사진합계3MB와 revision/멱등 요청 검증을 적용한다. 기존 방명록·계좌·사진첩을 복제하거나 초기화하지 않는다.
+
+전체통합2,172개·관련5개·Emulator16개 검사 및 Render 번들 통과. master4c41a45 배포 후 공개 GET200/release null·관리401·기존공개API200을 확인했다. 운영 검증용 초안·사진·공개 쓰기는 하지 않았다.
+
+**다음:** 실제 사용자가 공동 초안을 저장하고 확인 후 공개한다.
