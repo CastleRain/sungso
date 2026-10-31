@@ -13,6 +13,10 @@ export async function refreshSession() {
     const token = await user.getIdToken();
     if (current !== epoch) throw Error('로그인 계정이 바뀌었어요.');
     const response = await fetch('/api/studio/session', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+    if (current !== epoch) {
+      await fetch('/api/studio/session', { method: 'DELETE', credentials: 'same-origin' });
+      throw Error('로그인 계정이 바뀌었어요.');
+    }
     if (!response.ok) throw Error('관리 권한을 확인하지 못했어요. 승인 계정과 서버 연결을 확인해 주세요.');
     ready = true; return true;
   })().finally(() => { running = null; });
