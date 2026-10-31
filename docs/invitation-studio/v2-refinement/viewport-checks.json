@@ -1,0 +1,291 @@
+{
+  "guest": [
+    {
+      "maps": [
+        {
+          "height": 76,
+          "labelHeight": 0,
+          "labelWidth": 0,
+          "lineHeight": "18.48px",
+          "name": "네이버지도",
+          "whiteSpace": "nowrap",
+          "width": 76
+        },
+        {
+          "height": 76,
+          "labelHeight": 0,
+          "labelWidth": 0,
+          "lineHeight": "18.48px",
+          "name": "카카오맵",
+          "whiteSpace": "nowrap",
+          "width": 76
+        },
+        {
+          "height": 76,
+          "labelHeight": 0,
+          "labelWidth": 0,
+          "lineHeight": "18.48px",
+          "name": "티맵",
+          "whiteSpace": "nowrap",
+          "width": 76
+        }
+      ],
+      "overflow": false,
+      "width": 320
+    },
+    {
+      "maps": [
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 64.453125,
+          "lineHeight": "20.16px",
+          "name": "네이버지도",
+          "whiteSpace": "nowrap",
+          "width": 92
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 51.5625,
+          "lineHeight": "20.16px",
+          "name": "카카오맵",
+          "whiteSpace": "nowrap",
+          "width": 92
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 25.78125,
+          "lineHeight": "20.16px",
+          "name": "티맵",
+          "whiteSpace": "nowrap",
+          "width": 92
+        }
+      ],
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "maps": [
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 64.453125,
+          "lineHeight": "20.16px",
+          "name": "네이버지도",
+          "whiteSpace": "nowrap",
+          "width": 105
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 51.5625,
+          "lineHeight": "20.16px",
+          "name": "카카오맵",
+          "whiteSpace": "nowrap",
+          "width": 105
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 25.78125,
+          "lineHeight": "20.16px",
+          "name": "티맵",
+          "whiteSpace": "nowrap",
+          "width": 105
+        }
+      ],
+      "overflow": false,
+      "width": 430
+    },
+    {
+      "maps": [
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 64.453125,
+          "lineHeight": "20.16px",
+          "name": "네이버지도",
+          "whiteSpace": "nowrap",
+          "width": 167
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 51.5625,
+          "lineHeight": "20.16px",
+          "name": "카카오맵",
+          "whiteSpace": "nowrap",
+          "width": 167
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 25.78125,
+          "lineHeight": "20.16px",
+          "name": "티맵",
+          "whiteSpace": "nowrap",
+          "width": 167
+        }
+      ],
+      "overflow": false,
+      "width": 1100
+    },
+    {
+      "maps": [
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 64.453125,
+          "lineHeight": "20.16px",
+          "name": "네이버지도",
+          "whiteSpace": "nowrap",
+          "width": 167
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 51.5625,
+          "lineHeight": "20.16px",
+          "name": "카카오맵",
+          "whiteSpace": "nowrap",
+          "width": 167
+        },
+        {
+          "height": 76,
+          "labelHeight": 20.15625,
+          "labelWidth": 25.78125,
+          "lineHeight": "20.16px",
+          "name": "티맵",
+          "whiteSpace": "nowrap",
+          "width": 167
+        }
+      ],
+      "overflow": false,
+      "width": 1440
+    }
+  ],
+  "editorBeforeCompactHeaderFix": [
+    {
+      "overflow": false,
+      "panel": {
+        "bottom": 884,
+        "height": 766,
+        "left": 1120,
+        "right": 1440,
+        "top": 118,
+        "width": 320,
+        "x": 1120,
+        "y": 118
+      },
+      "remove": {
+        "bottom": 258.78125,
+        "height": 44,
+        "left": 1143,
+        "right": 1215.453125,
+        "top": 214.78125,
+        "width": 72.453125,
+        "x": 1143,
+        "y": 214.78125
+      },
+      "width": 1440
+    },
+    {
+      "overflow": false,
+      "panel": {
+        "bottom": 884,
+        "height": 766,
+        "left": 810,
+        "right": 1100,
+        "top": 118,
+        "width": 290,
+        "x": 810,
+        "y": 118
+      },
+      "remove": {
+        "bottom": 256.78125,
+        "height": 44,
+        "left": 828,
+        "right": 900.453125,
+        "top": 212.78125,
+        "width": 72.453125,
+        "x": 828,
+        "y": 212.78125
+      },
+      "width": 1100
+    },
+    {
+      "overflow": false,
+      "panel": {
+        "bottom": 776,
+        "height": 86,
+        "left": 0,
+        "right": 430,
+        "top": 690,
+        "width": 430,
+        "x": 0,
+        "y": 690
+      },
+      "remove": {
+        "bottom": 804.59375,
+        "height": 44,
+        "left": 21,
+        "right": 93.453125,
+        "top": 760.59375,
+        "width": 72.453125,
+        "x": 21,
+        "y": 760.59375
+      },
+      "width": 430
+    },
+    {
+      "overflow": false,
+      "panel": {
+        "bottom": 776,
+        "height": 86,
+        "left": 0,
+        "right": 390,
+        "top": 690,
+        "width": 390,
+        "x": 0,
+        "y": 690
+      },
+      "remove": {
+        "bottom": 804.59375,
+        "height": 44,
+        "left": 21,
+        "right": 93.453125,
+        "top": 760.59375,
+        "width": 72.453125,
+        "x": 21,
+        "y": 760.59375
+      },
+      "width": 390
+    },
+    {
+      "overflow": false,
+      "panel": {
+        "bottom": 776,
+        "height": 86,
+        "left": 0,
+        "right": 320,
+        "top": 690,
+        "width": 320,
+        "x": 0,
+        "y": 690
+      },
+      "remove": {
+        "bottom": 804.59375,
+        "height": 44,
+        "left": 21,
+        "right": 93.453125,
+        "top": 760.59375,
+        "width": 72.453125,
+        "x": 21,
+        "y": 760.59375
+      },
+      "width": 320
+    }
+  ]
+}

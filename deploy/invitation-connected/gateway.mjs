@@ -6,7 +6,7 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const ORIGIN = 'https://sungso-wedding.vercel.app';
 const API = 'https://sungso-homehunt-api.onrender.com/api/invitation/studio';
 const COOKIE = '__Host-wedding_studio';
-const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.ics': 'text/calendar; charset=utf-8' };
+const MIME = { '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.ics': 'text/calendar; charset=utf-8' };
 const escapeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 export function publicationMetadata(html,release){
   const content=release?.snapshot?.content||{},v=content.experience?.values||{},t=content.text||{};

@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-31T18:11:03.210Z",
+  "checks": [
+    {
+      "url": "/",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/v6/",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/v6/assets/photos/forest-640.webp",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/composition.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/appearance.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/css/map-actions.css",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/css/font-options.css",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/assets/fonts/NanumPenScript-Regular.ttf",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/lab/studio/",
+      "status": 303
+    },
+    {
+      "url": "/lab/studio-v2/",
+      "status": 303
+    },
+    {
+      "url": "/lab/studio-v2/studio.mjs",
+      "status": 401
+    },
+    {
+      "url": "/lab/studio-v2/experience-editor.mjs",
+      "status": 401
+    },
+    {
+      "url": "/api/studio/manage",
+      "status": 401
+    },
+    {
+      "url": "/api/studio/replies",
+      "status": 401
+    },
+    {
+      "url": "/homehunt/",
+      "status": 404
+    },
+    {
+      "url": "/wecost/",
+      "status": 404
+    },
+    {
+      "url": "/honeymoon/",
+      "status": 404
+    },
+    {
+      "url": "music range",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "url": "Render /healthz",
+      "status": 200,
+      "cors": null
+    },
+    {
+      "url": "Render /api/invitation/studio/engagement",
+      "status": 200,
+      "cors": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "url": "Render /api/invitation/studio/replies",
+      "status": 401,
+      "cors": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "origin": "https://unrelated.vercel.app",
+      "status": 403,
+      "cors": null
+    },
+    {
+      "origin": "https://sungso-wedding.vercel.app.evil.example",
+      "status": 403,
+      "cors": null
+    }
+  ]
+}

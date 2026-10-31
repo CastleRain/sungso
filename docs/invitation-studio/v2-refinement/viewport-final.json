@@ -1,0 +1,187 @@
+[
+  {
+    "width": 1440,
+    "editor": {
+      "buttonHeight": 44,
+      "buttonWithinPanel": true,
+      "overflow": false
+    },
+    "map": [
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "네이버지도",
+        "nowrap": "nowrap",
+        "width": 47.29218673706055
+      },
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "카카오맵",
+        "nowrap": "nowrap",
+        "width": 37.8306884765625
+      },
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "티맵",
+        "nowrap": "nowrap",
+        "width": 18.9229736328125
+      }
+    ]
+  },
+  {
+    "width": 1100,
+    "editor": {
+      "buttonHeight": 44,
+      "buttonWithinPanel": true,
+      "overflow": false
+    },
+    "map": [
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "네이버지도",
+        "nowrap": "nowrap",
+        "width": 47.29218673706055
+      },
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "카카오맵",
+        "nowrap": "nowrap",
+        "width": 37.8306884765625
+      },
+      {
+        "available": 87,
+        "display": "block",
+        "height": 14.0469970703125,
+        "lineHeight": "14.364px",
+        "name": "티맵",
+        "nowrap": "nowrap",
+        "width": 18.9229736328125
+      }
+    ]
+  },
+  {
+    "width": 430,
+    "editor": {
+      "buttonHeight": 44,
+      "buttonWithinPanel": true,
+      "overflow": false
+    },
+    "map": [
+      {
+        "available": 89,
+        "display": "block",
+        "height": 13.96490478515625,
+        "lineHeight": "14.364px",
+        "name": "네이버지도",
+        "nowrap": "nowrap",
+        "width": 47.015628814697266
+      },
+      {
+        "available": 89,
+        "display": "block",
+        "height": 13.96490478515625,
+        "lineHeight": "14.364px",
+        "name": "카카오맵",
+        "nowrap": "nowrap",
+        "width": 37.60945129394531
+      },
+      {
+        "available": 89,
+        "display": "block",
+        "height": 13.96490478515625,
+        "lineHeight": "14.364px",
+        "name": "티맵",
+        "nowrap": "nowrap",
+        "width": 18.81231689453125
+      }
+    ]
+  },
+  {
+    "width": 390,
+    "editor": {
+      "buttonHeight": 44,
+      "buttonWithinPanel": true,
+      "overflow": false
+    },
+    "map": [
+      {
+        "available": 82,
+        "display": "block",
+        "height": 13.9638671875,
+        "lineHeight": "14.364px",
+        "name": "네이버지도",
+        "nowrap": "nowrap",
+        "width": 47.01213073730469
+      },
+      {
+        "available": 82,
+        "display": "block",
+        "height": 13.9638671875,
+        "lineHeight": "14.364px",
+        "name": "카카오맵",
+        "nowrap": "nowrap",
+        "width": 37.60667419433594
+      },
+      {
+        "available": 82,
+        "display": "block",
+        "height": 13.9638671875,
+        "lineHeight": "14.364px",
+        "name": "티맵",
+        "nowrap": "nowrap",
+        "width": 18.81092834472656
+      }
+    ]
+  },
+  {
+    "width": 320,
+    "editor": {
+      "buttonHeight": 44,
+      "buttonWithinPanel": true,
+      "overflow": false
+    },
+    "map": [
+      {
+        "available": 67,
+        "display": "block",
+        "height": 12.5213623046875,
+        "lineHeight": "13.167px",
+        "name": "네이버지도",
+        "nowrap": "nowrap",
+        "width": 42.07942962646485
+      },
+      {
+        "available": 67,
+        "display": "block",
+        "height": 12.5213623046875,
+        "lineHeight": "13.167px",
+        "name": "카카오맵",
+        "nowrap": "nowrap",
+        "width": 33.65760040283203
+      },
+      {
+        "available": 67,
+        "display": "block",
+        "height": 12.5213623046875,
+        "lineHeight": "13.167px",
+        "name": "티맵",
+        "nowrap": "nowrap",
+        "width": 16.82879638671875
+      }
+    ]
+  }
+]

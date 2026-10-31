@@ -1,0 +1,10 @@
+/* Locally hosted, unmodified OFL fonts. Licenses travel with each build. */
+@font-face{font-family:StudioGowun;src:url('../assets/fonts/GowunBatang-Regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:StudioSuit;src:url('../assets/fonts/SUIT-Regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:StudioSuit;src:url('../assets/fonts/SUIT-Medium.woff2') format('woff2');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:StudioHand;src:url('../assets/fonts/NanumPenScript-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+body[data-font=gowun]{--font:StudioGowun,RIDIBatang,serif;--font-title:StudioGowun,RIDIBatang,serif;letter-spacing:-.015em}
+body[data-font=suit]{--font:StudioSuit,StudioModern,sans-serif;--font-title:StudioSuit,StudioModern,sans-serif;letter-spacing:-.015em}
+body[data-font=hand]{--font:StudioHand,RIDIBatang,serif;--font-title:StudioHand,RIDIBatang,serif;font-weight:400;letter-spacing:0}
+body[data-font=hand] :is(.invitation-copy,.guest-message,.closing-copy){font-size:21px;line-height:1.85}
+body[data-font=hand] :is(.hero-names,.family-person strong){font-weight:400}

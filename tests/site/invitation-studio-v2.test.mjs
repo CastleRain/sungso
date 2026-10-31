@@ -74,3 +74,30 @@ test('late parent handshake responds only to the same-origin parent and never re
   assert.equal(sent.length,1);assert.equal(sent[0].data.motionReady,true);assert.equal(sent[0].origin,win.location.origin);
   dispose();assert.equal(handlers.size,0);
 });
+
+
+test('removed base and optional scenes retain content, order and undo/file restoration',()=>{
+  const initial=model.snapshot({extras:['day-pass']},{text:{invitation:'보관할 초대글'}});
+  const removed=model.snapshot(initial.composition,{...initial.content,experience:{version:1,values:{hiddenScenes:'invitation,day-pass'}}});
+  const list=model.sceneVisibility(removed.composition,removed.content);
+  assert.deepEqual(list.removed.map(s=>s.id),['invitation','day-pass']);
+  assert.ok(!list.visible.some(s=>['invitation','day-pass'].includes(s.id)));
+  assert.equal(removed.content.text.invitation,initial.content.text.invitation);
+  assert.deepEqual(removed.composition.order,initial.composition.order);
+  const imported=model.validateSnapshot(JSON.parse(JSON.stringify(removed)));
+  assert.deepEqual(model.sceneVisibility(imported.composition,imported.content),list);
+  const history=model.createHistory(initial);history.commit(removed);
+  assert.deepEqual(history.undo(),initial);assert.deepEqual(history.redo(),removed);
+  const allHidden=model.snapshot(initial.composition,{experience:{version:1,values:{hiddenScenes:initial.composition.order.join(',')+',top,closing,navigation'}}});
+  assert.deepEqual(model.sceneVisibility(allHidden.composition,allHidden.content).visible.map(s=>s.id),['top','opening','closing','navigation']);
+});
+
+test('six locally served font choices survive URL/history and ship with original licenses',async()=>{
+  assert.equal(composition.CHOICES.font.length,6);
+  for(const font of ['gowun','suit','hand']){
+    const c=composition.normalizeComposition({font});assert.equal(c.font,font);
+    assert.equal(composition.readComposition(composition.compositionParams(c)).font,font);
+    assert.equal(model.validateSnapshot({composition:c}).composition.font,font);
+  }
+  for(const file of ['GowunBatang-Regular.woff2','SUIT-Regular.woff2','SUIT-Medium.woff2','NanumPenScript-Regular.ttf','GowunBatang-OFL.txt','SUIT-OFL.txt','NanumPenScript-OFL.txt'])assert.ok((await readFile(path.join(output,'assets/fonts',file))).length>1000);
+});

@@ -230,7 +230,15 @@ async function verifyLabOutput(distDir, files, collectionPath = INVITATION_LAB_P
     if (!event.includes(`URL:${base}${id}/`)) throw Error(`Wrong invitation study calendar: ${id}`);
   }
   for (const file of labFiles) {
-    if (/\.(?:mp3|ttf|woff2)$/.test(file)) throw Error(`Invitation study duplicates shared media: ${file}`);
+    // New Studio-only typefaces are not part of the preserved V6 media set.
+    // Keep the exception literal and verify it against the bundled original font.
+    if (/\.(?:mp3|ttf|woff2)$/.test(file)) {
+      const font=file.slice(`${INVITATION_STUDIO_PATH}/assets/fonts/`.length);
+      const allowed=collectionPath===INVITATION_STUDIO_PATH&&file.startsWith(`${INVITATION_STUDIO_PATH}/assets/fonts/`)&&['GowunBatang-Regular.woff2','SUIT-Regular.woff2','SUIT-Medium.woff2','NanumPenScript-Regular.ttf'].includes(font);
+      if(!allowed)throw Error(`Invitation study duplicates shared media: ${file}`);
+      const [actual,original]=await Promise.all([readFile(path.join(distDir,file)),readFile(path.join(PROJECT_ROOT,'apps/invitation-studio/assets/fonts',font))]);
+      if(!actual.equals(original))throw Error(`Unexpected Studio font bytes: ${file}`);
+    }
     if (!/\.(?:html|mjs|js|css)$/.test(file)) continue;
     const source = await readFile(path.join(distDir, file), 'utf8');
     if (/firebasejs|auth-boot|site-auth|data-private-root/.test(source)) throw Error(`Authentication must not be loaded by a study: ${file}`);

@@ -30,6 +30,7 @@ export async function buildInvitationStudio({ outDir, assetBase = '/v6/assets/',
     if (Array.isArray(snapshot) && snapshot.length) photos = snapshot.map(photo => ({ ...photo, src: photo.localFile ? `../assets/photos/${photo.localFile}` : `${assetBase}photos/${photo.id}-1440.webp`, thumb: photo.localFile ? `../assets/photos/${photo.thumbFile || photo.localFile}` : `${assetBase}photos/${photo.id}-640.webp` }));
     await cp(join(source, 'assets'), join(output, 'assets'), { recursive: true });
   } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  await cp(join(source, 'assets/fonts'), join(output, 'assets/fonts'), { recursive: true });
   const chapters = storyChapters.map(chapter => ({ ...chapter, image: `${assetBase}photos/${chapter.image}` }));
   const data = { mode: 'demo', assetBase, canonicalRoot, wedding: { ...wedding, canonicalUrl: canonicalRoot }, family, chapters, photos, music: { ...music, src: `${assetBase}audio/wedding-day.mp3` } };
   await writeFile(join(output, 'runtime.mjs'), `// Build-selected preview data. URL/storage cannot change mode.\nexport default ${JSON.stringify(data, null, 2)};\n`);

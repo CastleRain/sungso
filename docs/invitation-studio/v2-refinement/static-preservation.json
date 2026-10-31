@@ -1,0 +1,22 @@
+{
+  "before": 212,
+  "after": 221,
+  "preserved": 210,
+  "changed": [
+    "published/js/appearance.mjs",
+    "published/js/composition.mjs"
+  ],
+  "removed": [],
+  "added": [
+    "published/assets/fonts/GowunBatang-OFL.txt",
+    "published/assets/fonts/GowunBatang-Regular.woff2",
+    "published/assets/fonts/NanumPenScript-OFL.txt",
+    "published/assets/fonts/NanumPenScript-Regular.ttf",
+    "published/assets/fonts/SUIT-Medium.woff2",
+    "published/assets/fonts/SUIT-OFL.txt",
+    "published/assets/fonts/SUIT-Regular.woff2",
+    "published/css/font-options.css",
+    "published/css/map-actions.css"
+  ],
+  "legacyRootPreserved": true
+}

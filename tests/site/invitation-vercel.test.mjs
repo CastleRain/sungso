@@ -13,7 +13,7 @@ test('standalone invitation preserves Pages source and publishes only its depend
   const pagesSource = await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html'));
   const result = await buildInvitation({ distDir: path.join(root, 'dist') });
   // Expanded scene controllers are part of the invitation-only dependency closure.
-  assert.ok(result.fileCount <= 285);
+  assert.ok(result.fileCount <= 294);
   assert.deepEqual(await readFile(path.join(PROJECT_ROOT, 'apps/invitation-v5/index.html')), pagesSource);
   for (const required of ['index.html', 'map.html', 'wedding.ics', 'manage.html', 'accounts.html',
     'assets/audio/wedding-day.mp3', 'assets/fonts/RIDIBatang-Regular.woff2',

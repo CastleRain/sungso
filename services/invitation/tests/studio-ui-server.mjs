@@ -13,7 +13,7 @@ const db = createMemoryFirestore(); db.doc = p => { const a = p.split('/'), id =
 const store = createStudioStore({ db });
 const guestbook=createGuestbookStore({db});
 const files = path.join(build, '.vercel/output/static'), privateDir = path.join(build, '.vercel/output/functions/gateway.func');
-const MIME = { '.html':'text/html', '.mjs':'text/javascript', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webp':'image/webp', '.jpg':'image/jpeg', '.woff2':'font/woff2', '.mp3':'audio/mpeg', '.svg':'image/svg+xml' };
+const MIME = { '.ttf':'font/ttf', '.html':'text/html', '.mjs':'text/javascript', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webp':'image/webp', '.jpg':'image/jpeg', '.woff2':'font/woff2', '.mp3':'audio/mpeg', '.svg':'image/svg+xml' };
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`), p = url.pathname;
   const send = (code, text, type='application/json') => { res.writeHead(code, {'Content-Type':type,'Cache-Control':'no-store'});res.end(text); };

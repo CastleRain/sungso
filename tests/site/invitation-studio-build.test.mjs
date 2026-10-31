@@ -16,7 +16,7 @@ test('studio is additive to all 205 verified files and cannot publish real-data 
   const added = built.files.filter(item => !old.has(item));
   assert.ok(added.length > 20);
   assert.ok(added.every(item => item.startsWith('lab/studio/')));
-  assert.ok(!added.some(item => /\.(mp3|woff2|ttf)$/.test(item)));
+  assert.ok(!added.some(item => /\.(mp3|woff2|ttf)$/.test(item) && !/^lab\/studio\/assets\/fonts\/(?:GowunBatang-Regular\.woff2|SUIT-(?:Regular|Medium)\.woff2|NanumPenScript-Regular\.ttf)$/.test(item)));
   for (const file of ['js/optional-scenes.mjs', 'css/optional-scenes.css', 'js/sentiment-scenes.mjs', 'css/sentiment-scenes.css']) {
     assert.ok(added.includes(`lab/studio/${file}`), `new scenes must stay in the isolated Studio: ${file}`);
   }

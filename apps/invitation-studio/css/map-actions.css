@@ -1,0 +1,9 @@
+/* Stable three-column targets: icon, single-line name, independent external marker. */
+body .map-apps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+body .map-apps>a,body .map-apps>button{position:relative;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:26px auto;align-content:center;justify-items:center;gap:7px;min-width:0;min-height:78px;padding:12px 3px 10px;border:1px solid var(--line);border-radius:9px}
+body .map-apps img{width:26px;height:26px;grid-row:1}
+body .map-apps .map-label{display:block;grid-row:2;white-space:nowrap;font-family:var(--font);font-size:12px;line-height:1.4;letter-spacing:-.035em;font-weight:400}
+body .map-apps .map-external{display:block;position:absolute;top:5px;right:6px;font:11px/1.2 sans-serif;color:var(--muted)}
+body .map-apps :is(a,button):hover{border-color:var(--accent);background:var(--soft)}
+body .map-apps :is(a,button):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:340px){body .map-apps .map-label{font-size:11px}}

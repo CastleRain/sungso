@@ -4,7 +4,7 @@ import {mountContentEditor} from './js/content-editor.mjs';
 import {readSectionTuning,setSectionTuning} from './js/fine-tuning.mjs';
 import {APPEARANCE_PALETTES,APPEARANCE_FONTS} from './js/appearance.mjs';
 import runtime from './runtime.mjs';
-import {GLOBAL_KEYS,LABELS,SCENE_KEYS,CONTENT_GROUPS,sectionFor,scenes,settingsFor,snapshot,createHistory} from './model.mjs';
+import {GLOBAL_KEYS,LABELS,SCENE_KEYS,CONTENT_GROUPS,sectionFor,scenes,sceneVisibility,settingsFor,snapshot,createHistory} from './model.mjs';
 import {mountLibrary} from './library.mjs';
 import {V2_PRESETS} from './recommendations.mjs';
 import {experienceDefaults,normalizeExperience} from './js/experience-config.mjs';
@@ -19,7 +19,28 @@ let currentContent=normalizeContentDraft(),ready=false,contentLoaded=false,mutin
 let lastReviewKey='cover';
 let experienceEditor;
 const hiddenScenes=()=>new Set((currentContent.experience?.values?.hiddenScenes||'').split(',').filter(Boolean));
-async function toggleScene(id){const e=experienceDefaults(currentContent.experience),hidden=hiddenScenes();if(hidden.has(id))hidden.delete(id);else hidden.add(id);e.values.hiddenScenes=[...hidden].join(',');await contentEditor.setDraft({...currentContent,experience:normalizeExperience(e)});renderRail();}
+let visibilityBusy=false;
+const visibleScenes=()=>sceneVisibility(composition,currentContent).visible;
+async function toggleScene(id){
+  if(visibilityBusy||!scenes(composition).some(s=>s.id===id&&s.movable))return;
+  visibilityBusy=true;stopDemo();exitComparison();
+  const before=visibleScenes(),index=before.findIndex(s=>s.id===id),hidden=hiddenScenes(),restoring=hidden.has(id);
+  const e=experienceDefaults(currentContent.experience);
+  if(restoring)hidden.delete(id);else hidden.add(id);
+  e.values.hiddenScenes=[...hidden].join(',');
+  try{
+    lastTyping=0;
+    await contentEditor.setDraft({...currentContent,experience:normalizeExperience(e)});
+    clearTimeout(contentTimer);
+    const next=restoring?id:activeScene===id?(before[index+1]||before[index-1]).id:activeScene;
+    selectScene(next);
+    if(!restoring)$('removed-scenes').open=true;
+    notify(restoring?'장면을 원래 순서에 다시 넣었어요.':'장면을 뺐어요. 내용은 보관되며 ‘뺀 장면’에서 다시 넣을 수 있어요.');
+    if(restoring)$('remove-scene').focus({preventScroll:true});else $('removed-list').querySelector(`[data-restore="${id}"]`)?.focus({preventScroll:true});
+  }catch{notify('장면 변경을 저장하지 못했어요. 다시 시도해 주세요.');}
+  finally{visibilityBusy=false;}
+}
+
 let serial=0,request=null,baseline=null,comparing=false,noticeTimer,contentTimer,saveTimer,lastTyping=0,lastContentSection=null,pointerDrag=null;
 const history=createHistory(snapshot(composition,currentContent));
 const rangeControls=[],optionStates=new Map();
@@ -55,12 +76,13 @@ export async function loadSnapshot(value){
 function thumb(photo=runtime.photos[0]){return new URL(photo.thumb||photo.src,new URL('./preview/',location.href)).href;}
 function rowFocusToken(){const a=document.activeElement;return a?.closest('#scene-list')?{scene:a.closest('[data-scene]')?.dataset.scene,action:a.dataset.action||'select'}:null;}
 function renderRail(){
+  if(!visibleScenes().some(s=>s.id===activeScene)){activeScene=visibleScenes()[0].id;selectedKey=SCENE_KEYS[activeScene];}
   const token=rowFocusToken(),list=$('scene-list'),rail=document.querySelector('.scene-rail'),scrollTop=rail.scrollTop;list.replaceChildren();
-  for(const item of scenes(composition)){
+  for(const item of visibleScenes()){
     const li=node('li','scene-row');li.dataset.scene=item.id;if(hiddenScenes().has(item.id))li.classList.add('scene-hidden');if(item.id===activeScene)li.classList.add('selected');
     const button=node('button','scene-select');button.dataset.action='select';button.setAttribute('aria-pressed',String(item.id===activeScene));button.onclick=()=>selectScene(item.id);
     if(item.id==='top'){const img=node('img','scene-thumb');img.src=thumb();img.alt='';button.append(img);}else button.append(node('span','scene-number',item.movable?String(composition.order.indexOf(item.id)+1).padStart(2,'0'):item.id==='opening'?'✎':item.id==='navigation'?'≡':'&'));
-    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);if(item.movable){const visible=node('button','scene-visibility',hiddenScenes().has(item.id)?'◌':'◉');visible.setAttribute('aria-label',`${item.label} ${hiddenScenes().has(item.id)?'보이기':'숨기기'}`);visible.onclick=()=>void toggleScene(item.id);li.append(visible);}
+    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);
     if(orderEditing&&item.movable){
       const controls=node('div','scene-order-tools'),handle=node('button','drag-handle','⠿');handle.dataset.action='drag';handle.setAttribute('aria-label',`${item.label} 순서 드래그`);handle.addEventListener('pointerdown',e=>{if(e.button!==0)return;pointerDrag={id:item.id,pointer:e.pointerId,x:e.clientX,y:e.clientY,moved:false,target:null,handle};handle.setPointerCapture(e.pointerId);});
       const position=node('select');position.dataset.action='position';position.setAttribute('aria-label',`${item.label} 위치`);composition.order.forEach((_,i)=>{const option=node('option','',`${i+1}번째 (${LABELS[SCENE_KEYS[composition.order[i]]]} 자리)`);option.value=i;position.append(option);});position.value=composition.order.indexOf(item.id);position.onchange=()=>reorder(item.id,Number(position.value));
@@ -69,6 +91,9 @@ function renderRail(){
     list.append(li);if(orderEditing&&item.movable){const insert=node('button','scene-insert','＋ 여기에 장면 넣기');insert.onclick=()=>{activeScene=item.id;$('add-scene').click();};li.append(insert);}
   }
   if(token){const row=[...list.children].find(r=>r.dataset.scene===token.scene),control=row?.querySelector(`[data-action="${token.action}"]`);(control?.disabled?row.querySelector('[data-action=position]'):control)?.focus({preventScroll:true});}
+  const removed=sceneVisibility(composition,currentContent).removed;
+  $('removed-scenes').hidden=!removed.length;$('removed-count').textContent=removed.length;
+  $('removed-list').replaceChildren(...removed.map(item=>{const row=node('li');row.append(node('span','',item.label));const restore=node('button','','다시 넣기');restore.dataset.restore=item.id;restore.setAttribute('aria-label',`${item.label} 다시 넣기`);restore.onclick=()=>void toggleScene(item.id);row.append(restore);return row;}));
   rail.scrollTop=scrollTop;
 }
 function reorder(id,index){apply({...composition,order:moveSection(composition.order,id,index,composition.extras)});$('order-status').textContent=`${LABELS[SCENE_KEYS[id]]} · ${index+1}번째로 이동했어요.`;}
@@ -76,7 +101,7 @@ window.addEventListener('pointermove',event=>{if(!pointerDrag||event.pointerId!=
 function finishDrag(event){if(!pointerDrag)return;const drag=pointerDrag;pointerDrag=null;document.querySelectorAll('.scene-row').forEach(n=>n.classList.remove('drop-target','dragging'));if(event.type==='pointerup'&&drag.moved&&drag.target&&drag.target!==drag.id)reorder(drag.id,composition.order.indexOf(drag.target));}
 window.addEventListener('pointerup',finishDrag);window.addEventListener('pointercancel',finishDrag);window.addEventListener('keydown',e=>{if(e.key==='Escape'){finishDrag({type:'cancel'});stopDemo();if(comparing){exitComparison();preview();}}});
 function selectScene(id,{jump=true,focus=false}={}){
-  const scene=scenes(composition).find(s=>s.id===id);if(!scene)return;exitComparison();stopDemo();activeScene=id;selectedKey=scene.key;lastReviewKey=scene.key;renderRail();renderInspector();syncPicker();document.body.dataset.rail='closed';
+  const scene=visibleScenes().find(s=>s.id===id);if(!scene)return;exitComparison();stopDemo();activeScene=id;selectedKey=scene.key;lastReviewKey=scene.key;renderRail();renderInspector();syncPicker();document.body.dataset.rail='closed';
   if(matchMedia('(max-width:740px)').matches)document.body.dataset.sheet='half';
   if(jump)preview(getSnapshot(),{section:id==='opening'?'top':id==='navigation'?null:id,preserve:false});
   if(focus)$('inspector-title').focus({preventScroll:true});
@@ -116,6 +141,8 @@ function range(root,{name,field,min,max,step=.05,get,set}){
 function updateRanges(){rangeControls.forEach(({input,number,get})=>{input.value=get();if(document.activeElement!==number)number.value=get();});}
 function renderMobileChips(){const host=$('mobile-options');host.replaceChildren();for(const choice of CHOICES[selectedKey]||[]){const b=node('button','',choice.label);b.setAttribute('aria-pressed',String(composition[selectedKey]===choice.id));b.onclick=()=>{apply({...composition,[selectedKey]:choice.id},{demo:!GLOBAL_KEYS.includes(selectedKey)});renderMobileChips();};host.append(b);}}
 function renderInspector(){
+  if(!visibleScenes().some(s=>s.id===activeScene)){activeScene=visibleScenes()[0].id;selectedKey=SCENE_KEYS[activeScene];}
+  $('remove-scene').hidden=GLOBAL_KEYS.includes(selectedKey)||!scenes(composition).find(s=>s.id===activeScene)?.movable;
   $('inspector-title').textContent=LABELS[selectedKey];$('inspector-kicker').textContent=GLOBAL_KEYS.includes(selectedKey)?'THE OVERALL MOOD':'EDIT THIS SCENE';$('inspector-subtitle').textContent=GLOBAL_KEYS.includes(selectedKey)?'지금 보는 위치에서 바로 비교해요.':'디자인부터 문구까지, 이 장면을 한곳에서.';
   const keys=selectedKey==='textSize'?['textSize','lineSpace']:selectedKey==='spacing'?['spacing','divider']:settingsFor(selectedKey,composition);
   $('design-settings').replaceChildren(...keys.map(mountOptions));$('fine-settings').replaceChildren();rangeControls.length=0;
@@ -137,26 +164,27 @@ function renderInspector(){
   if(!GLOBAL_KEYS.includes(selectedKey)){const reset=node('button','reset-scene','이 장면의 디자인 초기화');reset.onclick=()=>{const patch=Object.fromEntries(settingsFor(selectedKey,composition).map(k=>[k,DEFAULT_COMPOSITION[k]]));apply({...composition,...patch,sectionTuning:setSectionTuning(composition.sectionTuning,sectionFor(selectedKey),null)});renderInspector();};$('scene-notes').append(reset);}
   if(notes[selectedKey])$('scene-notes').append(node('p','scene-note',notes[selectedKey]));
   experienceEditor?.render(selectedKey==='opening'?'opening':sectionFor(selectedKey));
-  const optional=OPTIONAL_SECTIONS.find(s=>s.key===selectedKey);if(optional){const remove=node('button','','이 장면 빼기');remove.onclick=()=>{apply({...composition,extras:composition.extras.filter(id=>id!==optional.id)});selectScene('invitation');};$('scene-notes').append(remove);}
-  const all=scenes(composition),index=all.findIndex(s=>s.id===activeScene);$('previous').disabled=index<=0;$('next').disabled=index===all.length-1;
+
+  const all=visibleScenes(),index=all.findIndex(s=>s.id===activeScene);$('previous').disabled=index<=0;$('next').disabled=index===all.length-1;
   $('editor-content').scrollTop=0;updateSelections();updateRanges();renderMobileChips();
 }
 // A V2 draft never overwrites the V1 working content database.
 const v2IDB=window.indexedDB?{open:(_name,version)=>window.indexedDB.open('sungso-invitation-studio-v2-content',version)}:undefined;
 contentEditor=mountContentEditor({root:$('content-editor'),config:runtime,store:createContentStore(v2IDB),getComposition:()=>composition,onComposition:next=>apply(next),onChange:(draft,meta)=>{
   currentContent=draft;if(muting)return;
-  if(contentLoaded){exitComparison();const now=Date.now();record({coalesce:meta?.section===lastContentSection&&now-lastTyping<650});lastTyping=now;lastContentSection=meta?.section;}
+  if(contentLoaded){exitComparison();const now=Date.now();record({coalesce:Boolean(meta?.section)&&meta.section===lastContentSection&&now-lastTyping<650});lastTyping=now;lastContentSection=meta?.section;}
   clearTimeout(contentTimer);contentTimer=setTimeout(()=>preview(),90);
 },onNavigate:()=>{},onSectionChange:()=>{}});
-export const contentReady=contentEditor.ready.then(()=>{currentContent=contentEditor.getDraft();contentLoaded=true;history.reset(getSnapshot());renderInspector();preview();});
+export const contentReady=contentEditor.ready.then(()=>{currentContent=contentEditor.getDraft();contentLoaded=true;history.reset(getSnapshot());renderRail();renderInspector();preview();});
 export const studioReady=contentReady;
 const experienceRoot=node('section','experience-editor');$('editor-content').insertBefore(experienceRoot,$('scene-notes'));
 experienceEditor=mountExperienceEditor({root:experienceRoot,getSnapshot,config:runtime,notify,onDraft:draft=>contentEditor.setDraft(draft)});
 const library=mountLibrary({getSnapshot,loadSnapshot,notify});
 for(const id of ['open-library','mobile-library'])$(id).onclick=()=>{stopDemo();library.open();};
 for(const button of document.querySelectorAll('[data-global]'))button.onclick=()=>selectGlobal(button.dataset.global);
+$('remove-scene').onclick=()=>void toggleScene(activeScene);
 $('edit-order').onclick=()=>{orderEditing=!orderEditing;$('edit-order').setAttribute('aria-pressed',String(orderEditing));renderRail();};
-for(const [id,direction] of [['previous',-1],['next',1]])$(id).onclick=()=>{const all=scenes(composition),index=all.findIndex(s=>s.id===activeScene);if(all[index+direction])selectScene(all[index+direction].id);};
+for(const [id,direction] of [['previous',-1],['next',1]])$(id).onclick=()=>{const all=visibleScenes(),index=all.findIndex(s=>s.id===activeScene);if(all[index+direction])selectScene(all[index+direction].id);};
 $('replay-scene').onclick=()=>{exitComparison();preview(getSnapshot(),{key:lastReviewKey,preserve:false});};$('stop-demo').onclick=stopDemo;
 $('pin-baseline').onclick=()=>{exitComparison();baseline=getSnapshot();$('compare').disabled=false;preview();notify('현재 디자인·문구·사진을 비교 기준으로 고정했어요.');};
 $('compare').onclick=()=>{if(!baseline)return;comparing=!comparing;document.body.dataset.compare=String(comparing);$('compare').setAttribute('aria-pressed',String(comparing));$('compare').textContent=comparing?'현재 조합 보기':'기준과 비교';syncPicker();preview(comparing?baseline:getSnapshot());};
@@ -166,7 +194,7 @@ $('audio-toggle').onclick=()=>post({type:'invitation-lab:control',action:'audio'
 document.querySelectorAll('[data-width]').forEach(b=>{if(b.tagName!=='BUTTON')return;b.onclick=()=>{document.querySelector('.preview-stage').dataset.width=b.dataset.width;document.querySelectorAll('button[data-width]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));};});
 function share(){const url=new URL(location.href);url.search=compositionParams(composition).toString();$('link-value').value=url.href;$('link-dialog').showModal();$('link-value').select();}
 $('share').onclick=share;
-$('add-scene').onclick=()=>{stopDemo();$('extra-options').replaceChildren();for(const section of OPTIONAL_SECTIONS){const button=node('button','extra-option');const exists=composition.extras.includes(section.id);button.append(node('strong','',`${section.label}${exists?' · 사용 중':''}`),node('small','',section.detail));button.disabled=exists;button.onclick=()=>{const order=[...composition.order],after=order.indexOf(activeScene);order.splice(after<0?order.length:after+1,0,section.id);apply({...composition,extras:[...composition.extras,section.id],order});$('add-dialog').close();selectScene(section.id);};$('extra-options').append(button);}$('add-dialog').showModal();};
+$('add-scene').onclick=()=>{stopDemo();$('extra-options').replaceChildren();for(const section of OPTIONAL_SECTIONS){const button=node('button','extra-option');const exists=composition.extras.includes(section.id),removed=hiddenScenes().has(section.id);button.append(node('strong','',`${section.label}${removed?' · 다시 넣기':exists?' · 사용 중':''}`),node('small','',section.detail));button.disabled=exists&&!removed;button.onclick=()=>{if(exists&&removed){$('add-dialog').close();void toggleScene(section.id);return;}const order=[...composition.order],after=order.indexOf(activeScene);order.splice(after<0?order.length:after+1,0,section.id);apply({...composition,extras:[...composition.extras,section.id],order});$('add-dialog').close();selectScene(section.id);};$('extra-options').append(button);}$('add-dialog').showModal();};
 $('open-presets').onclick=()=>{stopDemo();$('preset-dialog').showModal();};
 const presetArchive=node('details','preset-archive');presetArchive.append(node('summary','','이전 추천 조합도 보기'));
 for(const preset of [...V2_PRESETS,...PRESETS]){const button=node('button','preset-option');button.dataset.preset=preset.id;button.append(node('strong','',preset.label),node('small','',preset.detail));button.onclick=()=>{apply(preset.composition);$('preset-dialog').close();selectScene('top');notify('추천 디자인을 적용했어요. 문구와 사진은 유지돼요.');};(V2_PRESETS.includes(preset)?$('presets'):presetArchive).append(button);}

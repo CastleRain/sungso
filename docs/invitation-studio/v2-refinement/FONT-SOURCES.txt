@@ -1,0 +1,6 @@
+Studio additional typefaces
+GowunBatang-Regular.woff2 / GowunBatang-OFL.txt: preserved local invitation-v5 font source.
+SUIT-Regular.woff2 / SUIT-Medium.woff2 / SUIT-OFL.txt: preserved local invitation-v5 font source.
+NanumPenScript-Regular.ttf (unmodified): https://github.com/google/fonts/blob/main/ofl/nanumpenscript/NanumPenScript-Regular.ttf
+NanumPenScript-OFL.txt: https://github.com/google/fonts/blob/main/ofl/nanumpenscript/OFL.txt
+Downloaded 2026-11-01. Fonts are loaded from the deployed site, never a remote font CDN.

@@ -13,6 +13,9 @@ export const APPEARANCE_FONTS = Object.freeze({
   letter: Object.freeze({ label: '단정한 편지', body: 'RIDIBatang', title: 'Hahmlet', bodyWeight: 400, titleWeight: 500 }),
   editorial: Object.freeze({ label: '또렷한 세리프', body: 'Hahmlet', title: 'Hahmlet', bodyWeight: 500, titleWeight: 500 }),
   modern: Object.freeze({ label: '가벼운 모던', body: 'StudioModern', title: 'StudioModern', bodyWeight: 400, titleWeight: 500 }),
+  gowun: Object.freeze({ label: '다정한 고운바탕', body: 'StudioGowun', title: 'StudioGowun', bodyWeight: 400, titleWeight: 400 }),
+  suit: Object.freeze({ label: '담백한 SUIT', body: 'StudioSuit', title: 'StudioSuit', bodyWeight: 400, titleWeight: 500 }),
+  hand: Object.freeze({ label: '나눔 손글씨', body: 'StudioHand', title: 'StudioHand', bodyWeight: 400, titleWeight: 400 }),
 });
 
 export function appearanceChoices(value) {

@@ -10,6 +10,11 @@ export function scenes(value) {
   const c=normalizeComposition(value);
   return [{id:'top',key:'cover',label:'첫 화면'},{id:'opening',key:'opening',label:'첫 손글씨'},...c.order.map(id=>({id,key:SCENE_KEYS[id],label:ORDER_SECTIONS.find(s=>s.id===id).label,movable:true,optional:OPTIONAL_SECTIONS.some(s=>s.id===id)})),{id:'closing',key:'ending',label:'마지막 인사'},{id:'navigation',key:'navigation',label:'빠른 메뉴'}];
 }
+export function sceneVisibility(composition, content) {
+  const hidden=new Set((content?.experience?.values?.hiddenScenes||'').split(','));
+  const all=scenes(composition);
+  return {visible:all.filter(s=>!s.movable||!hidden.has(s.id)),removed:all.filter(s=>s.movable&&hidden.has(s.id))};
+}
 export function settingsFor(key,c) {
   if(key==='cover')return ['cover','coverFocus'];
   if(key==='date')return ['date','calendarMark'];
