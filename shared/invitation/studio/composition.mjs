@@ -126,6 +126,9 @@ export const CHOICES = Object.freeze({
     { id: 'letter', label: '단정한 편지', detail: '부드러운 리디바탕 본문과 또렷한 함렛 제목.', source: 'ORIGINAL · 글씨체' },
     { id: 'editorial', label: '또렷한 세리프', detail: '함렛의 단단한 획으로 이름과 문장을 선명하게.', source: 'SERIF · 글씨체' },
     { id: 'modern', label: '가벼운 모던', detail: '정돈된 프리텐다드 본문에 기존 손글씨를 함께.', source: 'MODERN · 글씨체' },
+    { id: 'gowun', label: '다정한 고운바탕', detail: '둥글고 부드러운 고운바탕으로 편안한 초대.', source: 'GOWUN · 글씨체' },
+    { id: 'suit', label: '담백한 SUIT', detail: '간결한 선과 열린 자간으로 또렷하고 가볍게.', source: 'SUIT · 글씨체' },
+    { id: 'hand', label: '나눔 손글씨', detail: '펜으로 쓴 듯 자연스러운 한글, 조금 더 친근한 편지.', source: 'NANUM PEN · 글씨체' },
   ]),
   motion: Object.freeze([
     { id: 'signature', label: '장면 고유 효과만', detail: '리본·날짜 넘김 등 고른 장면의 연출만 사용해요. 공통 움직임은 더하지 않아요.', source: 'ORIGINAL · 스크롤' },
