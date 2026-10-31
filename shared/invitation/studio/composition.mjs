@@ -63,6 +63,7 @@ export const CHOICES = Object.freeze({
     { id: 'underline', label: '작은 밑줄', detail: '날짜 아래 선을 그어 담백하게 표시해요.' },
   ]),
   dayPass: Object.freeze([
+    { id: 'receipt', label: '카페에서 온 초대', detail: '영수증처럼 펼쳐지는 한 장에 예식과 길찾기를 담아요.', source: 'V2 · NEW' },
     { id: 'boarding', label: '한 장의 당일 패스', detail: '날짜·시간·홀·길찾기를 티켓처럼 한곳에 모아요.' },
     { id: 'concise', label: '빠르게 보는 예식 안내', detail: '큰 시간과 꼭 필요한 정보로 간결하게 읽어요.' },
   ]),
@@ -80,6 +81,7 @@ export const CHOICES = Object.freeze({
     { id: 'airy', label: '넉넉한 여백', detail: '장면 사이에 쉬어 갈 공간을 더해요.' },
   ]),
   divider: Object.freeze([
+    { id: 'breath', label: '사진 앞의 작은 숨', detail: '사진첩 앞에서만 가는 선이 나비로 이어져요. 짧게 한 번, 스크롤에 맞춰 그려져요.' },
     { id: 'none', label: '자연스럽게 연결', detail: '추가 구분 없이 사진과 글이 이어져요.' },
     { id: 'line', label: '가는 구분선', detail: '장면 사이에 가느다란 선을 더해요.' },
     { id: 'chapter', label: '작은 장 번호', detail: '읽는 순서대로 작은 번호를 붙여요.' },
@@ -154,6 +156,7 @@ export const CHOICES = Object.freeze({
     { id: 'cafe', label: '커피 한 잔의 시작', detail: '커피숍에서 만난 두 사람의 작은 편지.', source: 'E · 이야기' },
   ]),
   album: Object.freeze([
+    { id: 'film', label: '한 컷씩, 필름 사진첩', detail: '필름 프레임 안의 사진을 옆으로 넘겨요. 아래 작은 사진으로도 바로 골라요.', source: 'V2 · NEW' },
     { id: 'stack', label: '겹쳐지는 사진', detail: '여러 순간이 한 장의 사진첩으로 모여요.', source: 'F · 사진첩' },
     { id: 'contact', label: '펼쳐지는 필름', detail: '사진들이 가볍게 펼쳐지고 한 장을 골라요.', source: 'G · 사진첩' },
     { id: 'grid', label: '한눈에 보는 사진첩', detail: '모든 순간을 차분한 격자로 살펴봐요.', source: 'VER6 · 사진첩' },
@@ -170,6 +173,7 @@ export const CHOICES = Object.freeze({
     { id: 'letter', label: '마음을 담은 편지', detail: '편지지 위에 받는 분과 계좌를 차분히 펼쳐요.', source: 'LETTER · 마음 전하실 곳' },
   ]),
   wishes: Object.freeze([
+    { id: 'polaroid', label: '한 장의 축하', detail: '남겨 주신 이름과 메시지를 작은 인화지처럼 모아요.', source: 'V2 · NEW' },
     { id: 'envelope', label: '열어 보는 봉투', detail: '봉투를 열고 축하의 편지를 남겨요.', source: 'ORIGINAL · 방명록' },
     { id: 'postcard', label: '축하의 엽서', detail: '한 장의 엽서에서 짧은 인사를 시작해요.', source: 'POSTCARD · 방명록' },
     { id: 'notebook', label: '우리의 축하 노트', detail: '노트에 한 줄을 남기듯 두 사람에게 마음을 전해요.', source: 'NOTEBOOK · 방명록' },
