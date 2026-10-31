@@ -225,14 +225,14 @@ test('every new research choice survives V1 links and envelopes alongside all ot
   }
 });
 
-test('day pass is explicitly optional, retains its format while disabled, and joins seven required plus seven optional sections', () => {
-  assert.equal(DEFAULT_ORDER.length, 7); assert.equal(OPTIONAL_SECTIONS.length, 7); assert.equal(ORDER_SECTIONS.length, 14);
+test('day pass is explicitly optional, retains its format while disabled, and joins seven required plus twelve optional sections', () => {
+  assert.equal(DEFAULT_ORDER.length, 7); assert.equal(OPTIONAL_SECTIONS.length, 12); assert.equal(ORDER_SECTIONS.length, 19);
   const allExtras = OPTIONAL_SECTIONS.map(section => section.id);
   const full = normalizeComposition({ extras: allExtras, order: ['day-pass', ...ORDER_SECTIONS.map(section => section.id)], dayPass: 'concise' });
-  assert.equal(full.order[0], 'day-pass'); assert.equal(full.order.length, 14); assert.equal(new Set(full.order).size, 14);
+  assert.equal(full.order[0], 'day-pass'); assert.equal(full.order.length, 19); assert.equal(new Set(full.order).size, 19);
   for (let position = 0; position < full.order.length; position++) {
     const order = moveSection(full.order, 'day-pass', position, full.extras);
-    assert.equal(order[position], 'day-pass'); assert.equal(new Set(order).size, 14);
+    assert.equal(order[position], 'day-pass'); assert.equal(new Set(order).size, 19);
     assert.deepEqual(readComposition(compositionParams({ ...full, order })), { ...full, order });
   }
   const removed = normalizeComposition({ ...full, extras: allExtras.filter(id => id !== 'day-pass') });

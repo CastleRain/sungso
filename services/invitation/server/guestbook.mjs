@@ -8,15 +8,16 @@ const day = now => new Date(now + 9 * 3600000).toISOString().slice(0,10);
 export class GuestbookError extends Error { constructor(code, message, status = 400) { super(message); this.code=code; this.status=status; } }
 const reject = (code, message, status) => { throw new GuestbookError(code,message,status); };
 export function validateMessage(body) {
-  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k=>!['name','text','clientId','requestId','deleteToken','consent','website'].includes(k))) reject('INVALID_MESSAGE','입력 내용을 확인해 주세요.');
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k=>!['name','text','clientId','requestId','deleteToken','consent','website','stamp','paper'].includes(k))) reject('INVALID_MESSAGE','입력 내용을 확인해 주세요.');
   if (body.consent !== true || body.website) reject('INVALID_MESSAGE','이름과 메시지 공개에 동의해 주세요.');
   if (!UUID.test(body.clientId || '') || !UUID.test(body.requestId || '') || !TOKEN.test(body.deleteToken || '')) reject('INVALID_MESSAGE','페이지를 다시 열고 작성해 주세요.');
   if (typeof body.name !== 'string' || typeof body.text !== 'string') reject('INVALID_MESSAGE','이름과 축하 메시지를 입력해 주세요.');
   const name=body.name.trim().normalize('NFC'), text=body.text.trim().replace(/\r\n?/g,'\n').normalize('NFC');
   if (![...name].length || [...name].length>20 || ![...text].length || [...text].length>300 || /[\x00-\x08\x0b-\x1f\x7f]/.test(name+text) || /\n/.test(name) || text.split('\n').length>8) reject('INVALID_MESSAGE','이름은 20자, 메시지는 300자 이내로 적어 주세요.');
-  return {name,text,clientId:body.clientId,requestId:body.requestId,deleteToken:body.deleteToken};
+  if(body.stamp!==undefined&&!['coffee','flowers','ring','cheers','heart'].includes(body.stamp)||body.paper!==undefined&&!['mist','rose','cream'].includes(body.paper))reject('INVALID_MESSAGE','엽서 선택을 확인해 주세요.');
+  return {name,text,...(body.stamp?{stamp:body.stamp}:{}),...(body.paper?{paper:body.paper}:{}),clientId:body.clientId,requestId:body.requestId,deleteToken:body.deleteToken};
 }
-const publicMessage = ({id,name,text,createdAt}) => ({id,name,text,createdAt});
+const publicMessage = ({id,name,text,createdAt,stamp,paper}) => ({id,name,text,createdAt,...(stamp?{stamp}:{}),...(paper?{paper}:{})});
 function state(value) {
   if (value === undefined) return {schema:1,messages:[],daily:{date:'',count:0},visitors:[]};
   if (value?.schema!==1 || !Array.isArray(value.messages) || value.messages.length>300 || !value.daily || !Number.isSafeInteger(value.daily.count) || value.daily.count<0 || !Array.isArray(value.visitors) || value.visitors.length>300) throw Error('INVALID_GUESTBOOK_STATE');
@@ -33,13 +34,13 @@ export function createGuestbookStore({ db, now = Date.now }) {
       return db.runTransaction(async tx=>{
         const snap=await tx.get(ref), next=state(snap.exists?snap.data():undefined);
         const existing=next.messages.find(m=>m.id===input.requestId);
-        if(existing){ if(existing.deleteHash!==hash(input.deleteToken) || existing.name!==input.name || existing.text!==input.text) reject('REQUEST_CONFLICT','이미 처리된 요청입니다.',409); return publicMessage(existing); }
+        if(existing){ if(existing.deleteHash!==hash(input.deleteToken) || existing.name!==input.name || existing.text!==input.text || existing.stamp!==input.stamp || existing.paper!==input.paper) reject('REQUEST_CONFLICT','이미 처리된 요청입니다.',409); return publicMessage(existing); }
         if(next.messages.length>=300) reject('GUESTBOOK_FULL','방명록이 가득 찼어요. 두 사람에게 직접 마음을 전해 주세요.',409);
         const daily=next.daily.date===date?next.daily:{date,count:0};
         if(daily.count>=100) reject('DAILY_LIMIT','오늘은 많은 축하가 도착했어요. 내일 다시 남겨 주세요.',429);
         const visitors=next.visitors.filter(v=>v.date===date), visitor=visitors.find(v=>v.key===key);
         if(visitor && (visitor.count>=3 || time-visitor.lastAt<60000)) reject('TOO_MANY_MESSAGES','잠시 기다린 뒤 남겨 주세요. 하루 세 번까지 작성할 수 있어요.',429);
-        const row={id:input.requestId,name:input.name,text:input.text,createdAt:time,deleteHash:hash(input.deleteToken)};
+        const row={id:input.requestId,name:input.name,text:input.text,...(input.stamp?{stamp:input.stamp}:{}),...(input.paper?{paper:input.paper}:{}),createdAt:time,deleteHash:hash(input.deleteToken)};
         next.messages.push(row); next.daily={date,count:daily.count+1};
         next.visitors=[...visitors.filter(v=>v.key!==key).slice(-299),{key,date,count:(visitor?.count||0)+1,lastAt:time}];
         tx.set(ref,next); return publicMessage(row);

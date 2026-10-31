@@ -17,10 +17,10 @@ test('numeric settings clamp, round by .05 including midpoint values and reject 
   assert.throws(() => normalizeFineTuning(1, { min: .9, max: 1.4, step: 0 }), RangeError);
 });
 
-test('section settings are canonical, sorted and bounded to the allowlisted 16 destinations', () => {
+test('section settings are canonical, sorted and bounded to the allowlisted 21 destinations', () => {
   const input = FINE_SECTION_IDS.toReversed().map(id => `${id}:1.2:1.4:0.7`).join(';');
   const normalized = normalizeSectionTuning(input), rows = readSectionTuning(normalized);
-  assert.equal(FINE_SECTION_LIMIT, 16); assert.equal(Object.keys(rows).length, 16);
+  assert.equal(FINE_SECTION_LIMIT, 21); assert.equal(Object.keys(rows).length, 21);
   assert.deepEqual(Object.keys(rows), FINE_SECTION_IDS);
   for (const values of Object.values(rows)) assert.deepEqual(values, { textScale: 1.2, lineScale: 1.4, sectionSpace: .7 });
   assert.equal(normalizeSectionTuning(normalized), normalized);

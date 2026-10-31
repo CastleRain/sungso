@@ -215,7 +215,7 @@ test('journey archive, days and photo bytes remain server-only for all browser i
 
 // Publication never grants direct Firestore access, even to either editor.
 test('studio drafts, current release and photo bytes are server-only for all clients', async () => {
-  for (const target of ['wedding_studio/sungso_20270306', 'wedding_studio/sungso_20270306/drafts/fixture', 'wedding_studio/sungso_20270306/photos/fixture']) {
+  for (const target of ['wedding_studio/sungso_20270306', 'wedding_studio/sungso_20270306/drafts/fixture', 'wedding_studio/sungso_20270306/photos/fixture', 'wedding_studio/sungso_20270306/media/fixture', 'wedding_studio/sungso_20270306/media/fixture/chunks/0', 'wedding_studio/sungso_20270306/engagement/current']) {
     await seed(target, { fixture: true });
     for (const db of [env.unauthenticatedContext().firestore(), client(), client(partner), client('outsider')]) {
       await assertFails(getDoc(doc(db, target)));

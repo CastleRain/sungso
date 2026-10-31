@@ -1,4 +1,5 @@
-/** Portable, local-only content. No credentials, endpoint, HTML, or public-write flag is accepted. */
+import {normalizeExperience} from './experience-config.mjs';
+/** Portable content. No credentials, endpoint, HTML, or public-write flag is accepted. */
 export const CONTENT_VERSION = 1;
 export const CONTENT_MAX_PHOTOS = 20;
 export const CONTENT_MAX_BYTES = 10 * 1024 * 1024;
@@ -55,7 +56,8 @@ export function normalizeContentDraft(value = {}) {
     if (!Array.isArray(value.albumOrder) || value.albumOrder.length > CONTENT_MAX_PHOTOS || !value.albumOrder.every(safeId) || new Set(value.albumOrder).size !== value.albumOrder.length) throw new Error('사진 순서가 올바르지 않아요.');
     albumOrder = [...value.albumOrder];
   }
-  const result = { version: CONTENT_VERSION, text, photos, albumOrder };
+  const experience=normalizeExperience(value.experience);
+  const result = { version: CONTENT_VERSION, text, photos, albumOrder, ...(experience?{experience}:{}) };
   if (JSON.stringify(result).length > CONTENT_MAX_BYTES) throw new Error('내용과 사진은 합계 10MB까지 보관할 수 있어요. 사진 수를 줄여 주세요.');
   return result;
 }

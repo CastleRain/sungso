@@ -13,6 +13,7 @@ const SCENES = new Map([
 ]);
 // Kept independent of source/build relative paths; tests assert parity with OPTIONAL_SECTIONS.
 const OPTIONAL = new Map([
+  ['couple-profile',{key:'profileStyle',label:'두 사람 소개 · 인터뷰'}],['wedding-quiz',{key:'quizStyle',label:'우리의 작은 퀴즈'}],['busan-guide',{key:'busanStyle',label:'두 사람이 추천하는 부산'}],['playlist',{key:'playlistStyle',label:'우리의 플레이리스트'}],['time-machine',{key:'portraitStyle',label:'그때와 지금'}],
   ['day-pass', { key: 'dayPass', label: '당일 안내 패스' }],
   ['guest-guide', { key: 'guestGuide', label: '하객 안내' }],
   ['day-checklist', { key: 'checklist', label: '당일 체크리스트' }],
