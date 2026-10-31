@@ -12,6 +12,15 @@ function fixture() {
 }
 const shot = text => ({ composition: normalizeComposition({ palette: 'rose', motionSpeed: .75 }), content: { version: 1, text: { invitation: text }, photos: [], albumOrder: null } });
 const save = (revision = 0, extra = {}) => ({ action: 'save', operationId: randomUUID(), expectedRevision: revision, id: randomUUID(), expectedDraftRevision: 0, name: '합성 초안', rating: 4, note: '개인 메모', snapshot: shot('초대 문구'), ...extra });
+test('new V2 scene selections persist privately and reach an explicit public release unchanged', async()=>{
+  const f=fixture(),a=save();
+  a.snapshot.composition=normalizeComposition({album:'film',dayPass:'receipt',wishes:'polaroid',divider:'breath',extras:['day-pass']});
+  await f.store.change(a,f.member);
+  assert.equal((await f.store.published()).release,null);
+  assert.deepEqual((await f.store.draft(a.id)).snapshot.composition,a.snapshot.composition);
+  await f.store.change({action:'publish',id:a.id,operationId:randomUUID(),expectedRevision:1,expectedDraftRevision:1},f.member);
+  assert.deepEqual((await f.store.published()).release.snapshot.composition,a.snapshot.composition);
+});
 test('studio read never seeds; shared drafts stay private until explicit immutable publication', async () => {
   const f = fixture(); assert.equal((await f.store.read()).revision, 0); assert.equal((await f.store.published()).release, null); assert.equal(f.db.calls.writes, 0);
   const a = save(); await f.store.change(a, f.member); assert.equal((await f.store.published()).release, null);
