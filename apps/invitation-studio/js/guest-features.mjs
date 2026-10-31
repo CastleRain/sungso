@@ -1,7 +1,8 @@
 import { $, $$, openDialog, copyText, toast, readPreference, savePreference } from './ui.mjs';
 
 export async function setupAccounts(adapter) {
-  const groups = await adapter.accounts(), panel = $('#account-panel');
+  let groups = await adapter.accounts(); const panel = $('#account-panel');
+  let previewOnly = false;
   let side = readPreference('sungso_invitation_experience_account_side', 'groom');
   function render(next) {
     side = groups.some(group => group.id === next) ? next : groups[0]?.id;
@@ -18,12 +19,14 @@ export async function setupAccounts(adapter) {
       const button = document.createElement('button'); button.className = 'account-copy'; button.textContent = '계좌번호 복사';
       button.setAttribute('aria-label', `${account.relation} ${account.holder} 예시 계좌번호 복사`);
       button.addEventListener('click', async () => {
+        if (previewOnly) return;
         button.disabled = true;
         try {
           const ok = await copyText(account.number.replace(/\D/g, ''), `${account.holder}님의 예시 번호를 복사했어요.`);
           if (ok && button.isConnected) { button.textContent = '복사했어요'; button.classList.add('is-copied'); setTimeout(() => { if (button.isConnected) { button.textContent = '계좌번호 복사'; button.classList.remove('is-copied'); } }, 2200); }
         } finally { button.disabled = false; }
       });
+      if (previewOnly) { button.disabled = true; button.textContent = '계좌 미리보기'; button.setAttribute('aria-label', `${account.relation} 계좌 미리보기`); }
       row.append(owner, number, button); panel.append(row);
     }
     $$('[data-account-side]').forEach(button => {
@@ -31,7 +34,8 @@ export async function setupAccounts(adapter) {
       button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
     });
     panel.setAttribute('aria-labelledby', `tab-${side}`);
-    $('#accounts').hidden = !groups.some(group => group.accounts.length);
+    if (previewOnly && !accounts.length) { const empty = document.createElement('p'); empty.className = 'section-subtitle'; empty.textContent = '공개할 계좌를 등록하면 이곳에 보여요.'; panel.append(empty); }
+    $('#accounts').hidden = !previewOnly && !groups.some(group => group.accounts.length);
     savePreference('sungso_invitation_experience_account_side', side);
     document.dispatchEvent(new Event('lab:layout-changed'));
   }
@@ -45,7 +49,7 @@ export async function setupAccounts(adapter) {
     });
   });
   render(side);
-  return { render };
+  return { render, replaceGroups(next, options = {}) { groups = next; previewOnly = Boolean(options.previewOnly); render(side); } };
 }
 
 export async function setupGuestbook(adapter) {

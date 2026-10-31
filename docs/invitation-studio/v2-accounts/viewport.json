@@ -1,0 +1,32 @@
+[
+  {
+    "minMove": 44,
+    "overflow": 0,
+    "panelOverflow": 0,
+    "width": 320
+  },
+  {
+    "minMove": 44,
+    "overflow": 0,
+    "panelOverflow": 0,
+    "width": 390
+  },
+  {
+    "minMove": 44,
+    "overflow": 0,
+    "panelOverflow": 0,
+    "width": 430
+  },
+  {
+    "minMove": 44,
+    "overflow": 0,
+    "panelOverflow": 0,
+    "width": 1100
+  },
+  {
+    "minMove": 44,
+    "overflow": 0,
+    "panelOverflow": 0,
+    "width": 1440
+  }
+]

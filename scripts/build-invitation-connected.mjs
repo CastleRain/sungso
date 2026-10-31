@@ -42,18 +42,24 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   await writeFile(path.join(studio, 'js/content-editor.mjs'), contentEditor);
   // V2 is a separate protected shell; V1 and the guest runtime remain unchanged.
   const studioV2 = path.join(fn, 'private/lab/studio-v2');
-  for (const file of ['cloud-panel.mjs', 'cloud.css', 'replies-panel.mjs']) {
+  for (const file of ['cloud-panel.mjs', 'cloud.css', 'replies-panel.mjs', 'accounts-editor.mjs', 'accounts-editor.css', 'accounts-preview.mjs']) {
     let source = await readFile(path.join(SOURCE, file), 'utf8');
     if (file === 'cloud-panel.mjs') source = source.replaceAll('/lab/studio/', '/lab/studio-v2/');
     await writeFile(path.join(studioV2, file), source); privateFiles.push('/lab/studio-v2/' + file);
   }
+  for (const file of ['account-core.mjs','account-order.mjs']) { await cp(path.join(ROOT,'shared/invitation',file),path.join(studioV2,file)); privateFiles.push('/lab/studio-v2/'+file); }
+  const previewApp = path.join(studioV2,'js/app.mjs');
+  await writeFile(previewApp,(await readFile(previewApp,'utf8'))+`\nimport {mountAccountPreview} from '../accounts-preview.mjs';\nif(comparison)mountAccountPreview(featureResults[0]?.value);\n`);
   let v2 = await readFile(path.join(studioV2, 'studio.mjs'), 'utf8');
+  v2 = `import {mountAccountEditor} from './accounts-editor.mjs';\n` + v2;
+  v2 = v2.replace('계좌는 예시로 보여요. 실제 계좌 등록은 공동 저장 창의 사진·계좌 관리에서 할 수 있어요.', '위에서 실제 계좌와 표시 순서를 관리할 수 있어요. 계좌 반영은 조합 저장·공개와 별도로 적용돼요.');
   v2 = `import { mountRepliesPanel } from './replies-panel.mjs';\nimport { mountCloudPanel } from './cloud-panel.mjs';\nconst initialSharedDraft = new URLSearchParams(location.search).get('draft');\n` + v2;
-  v2 += `\nmountRepliesPanel();\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentReady,getSnapshot,loadSnapshot});\n`;
+  v2 += `\nmountRepliesPanel();\nmountAccountEditor({getSelectedKey:()=>selectedKey,stopDemo});\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentReady,getSnapshot,loadSnapshot});\n`;
   await writeFile(path.join(studioV2, 'studio.mjs'), v2);
   let v2html = await readFile(path.join(studioV2, 'index.html'), 'utf8');
   v2html = v2html.replace("connect-src 'self'", "connect-src 'self' https://*.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com https://sungso-358cb.firebaseapp.com").replace('</head>', '<link rel="stylesheet" href="./cloud.css"></head>');
   await writeFile(path.join(studioV2, 'index.html'), v2html);
+  await writeFile(path.join(studioV2,'index.html'),v2html.replace('</head>','<link rel="stylesheet" href="./accounts-editor.css"></head>'));
   // Keep the private gate, but avoid dozens of simultaneous membership checks
   // across cold function instances for a single module graph.
   const { build } = createRequire(new URL('../services/homehunt/render/package.json', import.meta.url))('esbuild');

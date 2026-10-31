@@ -6,19 +6,24 @@ import path from 'node:path';
 import { createMemoryFirestore } from '../../../apps/homehunt/tests/helpers/firestore-memory.mjs';
 import { createStudioStore } from '../server/studio.mjs';
 import {createGuestbookStore} from '../server/guestbook.mjs';
+import {createAccountStore} from '../server/accounts.mjs';
+import {orderedAccountData} from '../../../shared/invitation/account-order.mjs';
 const build = path.resolve(process.argv[2]);
 const port = Number(process.env.STUDIO_QA_PORT || 8041);
 if (!build.includes(`${path.sep}.local${path.sep}`)) throw Error('A local generated fixture is required');
 const db = createMemoryFirestore(); db.doc = p => { const a = p.split('/'), id = a.pop(); return db.collection(a.join('/')).doc(id); };
 const store = createStudioStore({ db });
 const guestbook=createGuestbookStore({db});
+const accounts=createAccountStore({db});
 const files = path.join(build, '.vercel/output/static'), privateDir = path.join(build, '.vercel/output/functions/gateway.func');
 const MIME = { '.ttf':'font/ttf', '.html':'text/html', '.mjs':'text/javascript', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webp':'image/webp', '.jpg':'image/jpeg', '.woff2':'font/woff2', '.mp3':'audio/mpeg', '.svg':'image/svg+xml' };
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`), p = url.pathname;
   const send = (code, text, type='application/json') => { res.writeHead(code, {'Content-Type':type,'Cache-Control':'no-store'});res.end(text); };
   try {
-    if (p === '/studio-login/session.mjs') return send(200, `export async function studioRequest(path,opts={}){const r=await fetch('/api/studio/'+path,{...opts,headers:{'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.error);return d;}export const logout=()=>{};`, 'text/javascript');
+    if (p === '/studio-login/session.mjs') return send(200, `export async function studioRequest(path,opts={}){const r=await fetch('/api/studio/'+path,{...opts,headers:{'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.error);return d;}export const logout=()=>{};export const registerStudioCleanup=fn=>window.addEventListener('qa:logout',fn);`, 'text/javascript');
+    if(p==='/api/studio/accounts'&&req.method==='GET')return send(200,JSON.stringify({ok:true,...await accounts.read()}));
+    if(p==='/api/studio/accounts'&&req.method==='PUT'){let raw='';for await(const c of req)raw+=c;return send(200,JSON.stringify({ok:true,...await accounts.save(JSON.parse(raw),{uid:'fixture-only'})}));}
     if (p === '/api/studio/manage' && req.method === 'GET') return send(200, JSON.stringify({ok:true,...await store.read()}));
     if (p === '/api/studio/manage' && req.method === 'POST') {
       let raw='';for await(const c of req)raw+=c;if(raw.length>4*1024*1024)throw Error('Too large');
@@ -33,7 +38,7 @@ const server = createServer(async (req, res) => {
       if(p.includes('/studio/media/')){const src=await store.media(p.split('/').pop());return send(200,Buffer.from(src.split(',')[1],'base64'),src.slice(5,src.indexOf(';')));}
       if(p.endsWith('/studio/engagement'))return send(200,JSON.stringify({ok:true,...await store.engagement.read()}));
       if(p.includes('/studio/photo/')){const src=await store.photo(p.split('/').pop());return send(200,Buffer.from(src.split(',')[1],'base64'),src.slice(5,src.indexOf(';')));}
-      if(p.endsWith('/accounts'))return send(200,'{"ok":true,"groups":[]}');
+      if(p.endsWith('/accounts')){const data=await accounts.read();return send(200,JSON.stringify({ok:true,revision:data.revision,...orderedAccountData(data.accounts,data.order)}));}
       if(p.endsWith('/album'))return send(200,'{"ok":true,"configured":false}');
       if(p.endsWith('/guestbook'))return send(200,JSON.stringify({ok:true,messages:await guestbook.list()}));
       return send(404,'{"ok":false}');

@@ -167,6 +167,7 @@ function renderInspector(){
 
   const all=visibleScenes(),index=all.findIndex(s=>s.id===activeScene);$('previous').disabled=index<=0;$('next').disabled=index===all.length-1;
   $('editor-content').scrollTop=0;updateSelections();updateRanges();renderMobileChips();
+  document.dispatchEvent(new Event('studio-v2:selection'));
 }
 // A V2 draft never overwrites the V1 working content database.
 const v2IDB=window.indexedDB?{open:(_name,version)=>window.indexedDB.open('sungso-invitation-studio-v2-content',version)}:undefined;

@@ -18,7 +18,7 @@ export function createLiveAdapter() {
     engagementVote:input=>request('/api/invitation/studio/engagement',{method:'POST',body:JSON.stringify({...input,clientId})}),
     async accounts() {
       const data = await request('/api/invitation/v5/accounts');
-      return ['groom','bride'].map(side => ({ id: side, accounts: data.groups.filter(g => g.id === side || g.id === side + '-parents').flatMap(g => g.accounts) }));
+      return data.sides || ['groom','bride'].map(side => ({ id: side, accounts: data.groups.filter(g => g.id === side || g.id === side + '-parents').flatMap(g => g.accounts) }));
     },
     async messages() {
       const rows = []; let next = null;

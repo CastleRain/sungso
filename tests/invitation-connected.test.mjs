@@ -45,6 +45,23 @@ test('publication builder is separate from preserved static releases and exclude
   assert.match(text, /Use a fresh connected output/); assert.match(text, /legacy\.html/);
 });
 
+test('studio account proxy is member-only, exact origin, bounded and pinned to the account manager', async () => {
+  const calls=[];const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port;
+  server.on('request',createGateway({origin,fetcher:async(url,opts)=>{if(url.endsWith('/session'))return new Response('{}',{status:opts.headers.Authorization==='Bearer approved'?200:403});calls.push({url,opts});return Response.json({ok:true,revision:2});}}));
+  const headers={Cookie:'__Host-wedding_studio=approved',Origin:origin,'Content-Type':'application/json'};
+  try{
+    assert.equal((await fetch(origin+'/api/studio/accounts')).status,401);
+    assert.equal((await fetch(origin+'/api/studio/accounts',{method:'PUT',headers:{...headers,Origin:'https://evil.test'},body:'{}'})).status,403);
+    assert.equal((await fetch(origin+'/api/studio/accounts',{method:'POST',headers,body:'{}'})).status,405);
+    assert.equal((await fetch(origin+'/api/studio/accounts',{method:'PUT',headers,body:'x'.repeat(8193)})).status,413);
+    assert.equal(calls.length,0);
+    assert.equal((await fetch(origin+'/api/studio/accounts',{headers})).status,200);
+    assert.equal((await fetch(origin+'/api/studio/accounts',{method:'PUT',headers,body:'{"expectedRevision":1}'})).status,200);
+    assert.equal(calls.length,2);for(const c of calls){assert.equal(c.url,'https://sungso-homehunt-api.onrender.com/api/invitation/v5/accounts/manage');assert.equal(c.opts.headers.Authorization,'Bearer approved');}
+    assert.equal((await fetch(origin+'/api/studio/accounts/other',{headers})).status,404);
+  }finally{await new Promise(r=>server.close(r));}
+});
+
 test('transient upstream saturation is retried without admitting an unverified account', async () => {
   let calls = 0;
   const server = createServer(); await new Promise(r => server.listen(0, '127.0.0.1', r));

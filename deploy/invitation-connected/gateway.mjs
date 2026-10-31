@@ -75,6 +75,13 @@ export function createGateway({ directory = ROOT, fetcher = fetch, origin = ORIG
         res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=10, stale-while-revalidate=86400'); res.removeHeader('Vary');
         return send(200, html, MIME['.html']);
       }
+      if (pathname === '/api/studio/accounts') {
+        if (!await member(token)) return send(401, '{"ok":false,"error":"로그인을 다시 확인해 주세요."}');
+        if (!['GET','PUT'].includes(req.method)) return send(405, '{"ok":false}');
+        if (req.method === 'PUT' && (req.headers.origin !== origin || !/^application\/json(?:;|$)/i.test(req.headers['content-type'] || ''))) return send(403, '{"ok":false}');
+        const response = await fetcher(new URL('../v5/accounts/manage', api + '/').href, {method:req.method, headers:{Authorization:`Bearer ${token}`, 'Content-Type':'application/json'}, ...(req.method === 'PUT' ? {body:await bytes(req,8192)} : {}), redirect:'error', signal:AbortSignal.timeout(55000)});
+        return send(response.status, await response.text());
+      }
       if (pathname.startsWith('/api/studio/')) {
         const suffix = pathname.slice('/api/studio'.length);
         if (!/^\/(?:manage|engagement|reply|replies|draft\/[a-f0-9-]{36})$/i.test(suffix)) return send(404, '{"ok":false}');

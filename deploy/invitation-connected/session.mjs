@@ -2,6 +2,7 @@ import { subscribeAuth, signInMember, signOutMember, registerPrivateCleanup, req
 import { getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 let ready = false, running, epoch = 0;
+export const registerStudioCleanup = registerPrivateCleanup;
 const status = document.querySelector('#login-status');
 export async function refreshSession() {
   if (running) return running;
@@ -28,7 +29,7 @@ export async function studioRequest(suffix, options = {}) {
   const response = await fetch('/api/studio/' + suffix, { ...options, credentials: 'same-origin', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(60000) });
   const data = await response.json();
   if (currentEpoch !== epoch) throw Error('로그인 계정이 바뀌었어요.');
-  if (!response.ok || !data.ok) { if (response.status === 401) ready = false; throw Error(data.error || '서버에 연결하지 못했어요. 다시 시도해 주세요.'); }
+  if (!response.ok || !data.ok) { if (response.status === 401) ready = false; const error = Error(data.error || '서버에 연결하지 못했어요. 다시 시도해 주세요.'); error.code=data.code; error.status=response.status; throw error; }
   return data;
 }
 export async function logout() {
@@ -38,7 +39,7 @@ export async function logout() {
 }
 document.querySelector('#login-google')?.addEventListener('click', async () => { try { await signInMember(); } catch { status.textContent = '로그인 팝업을 확인해 주세요.'; } });
 document.querySelector('#login-switch')?.addEventListener('click', () => { void logout().catch(e => { if(status)status.textContent=e.message; }); });
-registerPrivateCleanup(() => { epoch++; ready = false; void fetch('/api/studio/session', { method: 'DELETE', credentials: 'same-origin', keepalive: true }); document.querySelector('.workspace')?.replaceChildren(); });
+registerPrivateCleanup(() => { epoch++; ready = false; void fetch('/api/studio/session', { method: 'DELETE', credentials: 'same-origin', keepalive: true }); document.querySelector('.workspace')?.replaceChildren(); document.querySelector('.workbench')?.replaceChildren(); });
 subscribeAuth(async state => {
   const button = document.querySelector('#login-google'); if (button) button.disabled = state.status === 'loading';
   if (state.status !== 'member') { ready = false; if (status) status.textContent = state.error || '승인된 두 사람의 Google 계정으로 로그인해 주세요.'; return; }
