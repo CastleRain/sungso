@@ -12,6 +12,8 @@ import { createRenderServer } from './node-server.mjs';
 import { createGuestbookApi, createGuestbookStore } from '../../invitation/server/guestbook.mjs';
 import { createAlbumApi, createAlbumStore } from '../../invitation/server/album.mjs';
 import { createSiteMemberGate } from '../server/site-members.cjs';
+import { createJourneyStore } from '../../journey/store.mjs';
+import { createJourneyApi } from '../../journey/api.mjs';
 
 async function start() {
   const config = readRenderConfiguration();
@@ -26,7 +28,9 @@ async function start() {
   const rsvpStore=createRsvpStore({db});
   const rsvp=createRsvpApi({store:rsvpStore,authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
   const accounts = createAccountApi({store:createAccountStore({db}),authenticate:createSiteMemberGate({db,auth:getAuth(app)})});
-  const server = createRenderServer({ api, guestbook, album, rsvp, accounts });
+  // Daily records and paged motion geometry share the same private member gate.
+  const journey = createJourneyApi({ store: createJourneyStore({ db }), authenticate: createSiteMemberGate({ db, auth: getAuth(app) }) });
+  const server = createRenderServer({ api, guestbook, album, rsvp, accounts, journey });
   const maintenance = createFirestoreMaintenance({ db });
   const clean = () => { void maintenance.runIfDue().catch(() => {}); void rsvpStore.purgeExpired().catch(() => {}); };
   const interval = setInterval(clean, 6 * 60 * 60 * 1000);

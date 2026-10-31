@@ -8,10 +8,11 @@ import {
   doc, collection,
   onSnapshot,
   getDoc, setDoc, addDoc, updateDoc, deleteDoc,
-  serverTimestamp,
+  serverTimestamp, runTransaction,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
 import { homeTargetPriceBridge } from '../../../shared/finance/home-target-price.mjs';
+import { decideItemWrite, sameItem } from './wedding-core.mjs';
 
 const app = getApps().find(item => item.name === '[DEFAULT]') || initializeApp(FIREBASE_CONFIG);
 await syncAppAuth(app);
@@ -133,8 +134,22 @@ export async function updateSettings(fields) {
 
 // ===== items (결혼비용) =====
 
-export async function addItem(item) {
+export async function addItem(item, operationId = null) {
   const request = memberWork.capture();
+  if (operationId) {
+    const ref = doc(db, 'wecost_items', operationId);
+    await runTransaction(db, async tx => {
+      request.assert();
+      const snap = await tx.get(ref);
+      request.assert();
+      if (snap.exists()) {
+        if (!Object.entries(item).every(([key,value]) => (snap.data()[key] ?? null) === (value ?? null))) throw new Error('이미 저장된 항목이에요. 목록에서 다시 열어주세요.');
+        return;
+      }
+      tx.set(ref, { ...item, updatedAt: serverTimestamp() });
+    });
+    request.assert(); return ref;
+  }
   const result = await addDoc(collection(db, 'wecost_items'), {
     ...item,
     updatedAt: serverTimestamp(),
@@ -149,16 +164,27 @@ export async function updateItem(id, fields, expectedItem = null) {
     request.assert();
     return saveTravelLedgerItem(id, fields, expectedItem);
   }
-  await updateDoc(doc(db, 'wecost_items', id), {
-    ...fields,
-    updatedAt: serverTimestamp(),
+  await runTransaction(db, async tx => {
+    request.assert();
+    const ref = doc(db, 'wecost_items', id), snap = await tx.get(ref);
+    request.assert();
+    if (decideItemWrite(snap.exists() ? snap.data() : null, expectedItem, fields)) tx.update(ref, { ...fields, updatedAt: serverTimestamp() });
   });
   request.assert();
 }
 
-export async function deleteItem(id) {
+export async function deleteItem(id, expectedItem = null) {
   const request = memberWork.capture();
-  await deleteDoc(doc(db, 'wecost_items', id));
+  if (expectedItem) {
+    await runTransaction(db, async tx => {
+      request.assert();
+      const ref=doc(db,'wecost_items',id), snap=await tx.get(ref);
+      request.assert();
+      if (!snap.exists()) return;
+      if (!sameItem(snap.data(),expectedItem)) throw new Error('다른 기기에서 항목이 변경됐어요. 다시 확인 후 삭제해주세요.');
+      tx.delete(ref);
+    });
+  } else await deleteDoc(doc(db, 'wecost_items', id));
   request.assert();
 }
 

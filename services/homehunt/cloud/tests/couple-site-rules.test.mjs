@@ -198,3 +198,17 @@ test('account drafts and writes stay server-only even for both approved members'
   await assertFails(getDoc(doc(db,path)));await assertFails(setDoc(doc(db,path),{schema:1,revision:2,accounts:[]}));await assertFails(getDocs(collection(db,'wedding_accounts')));
  }
 });
+
+test('journey archive, days and photo bytes remain server-only for all browser identities', async () => {
+  const root = 'journey_private/shared';
+  const paths = [root, root + '/days/2024-03-02', root + '/months/2024-03', root + '/photos/fixture'];
+  for (const path of paths) await seed(path, { schema: 1, fixture: 'private journey' });
+  for (const db of [env.unauthenticatedContext().firestore(), client('outsider'), client(), client(partner)]) {
+    for (const path of paths) {
+      await assertFails(getDoc(doc(db, path)));
+      await assertFails(setDoc(doc(db, path), { overwritten: true }));
+      await assertFails(deleteDoc(doc(db, path)));
+    }
+    for (const name of ['days', 'months', 'photos']) await assertFails(getDocs(collection(db, root + '/' + name)));
+  }
+});

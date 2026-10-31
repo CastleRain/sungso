@@ -8,6 +8,7 @@ await prepareAppBuilds();
 
 const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/homehunt-v2/tests', 'apps/homehunt-v2/js', 'apps/invitation/tests', 'apps/invitation-v2/tests', 'apps/invitation-v3/tests', 'apps/invitation-v4/tests', 'apps/invitation-v5/tests', 'apps/invitation-v6/tests', 'apps/invitation-lab/tests', 'apps/invitation-experience/tests', 'apps/invitation-studio/tests', 'apps/sohee/sales/tests', 'services/sohee/tests', 'services/invitation/tests'];
 const files = [];
+directories.push('apps/journey/tests', 'services/journey/tests');
 for (const directory of directories) {
   for (const file of (await readdir(path.join(PROJECT_ROOT, directory))).sort()) {
     if (file.endsWith('.test.mjs')) files.push(path.join(directory, file));

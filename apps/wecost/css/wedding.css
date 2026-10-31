@@ -158,9 +158,355 @@
   .cat-bar-wrap { display: none; }
 }
 
-/* Travel uses the same expense row; this link does not add another cost. */
-.wecost-travel-summary { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; margin-bottom:20px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
-.wecost-travel-summary strong { font-size:14px; }
-.wecost-travel-summary p { font-size:12px; color:var(--text-muted); margin:7px 0 0; }
-.wecost-travel-summary a { color:var(--primary); font-weight:600; font-size:12px; white-space:nowrap; }
-@media(max-width:600px) { .wecost-travel-summary { align-items:flex-start; flex-direction:column; } }
+/* Wedding-only refinement: shared chrome and other tabs retain their existing styles. */
+#tab-wedding { --wed-rose:#a44568; --wed-rose-soft:#fff2f6; max-width:1380px; font-size:14px; }
+#tab-wedding .page-hdr h1 {font-size:22px;font-weight:650;}
+#tab-wedding .card {padding:18px 20px;border-radius:20px;box-shadow:0 2px 10px var(--ss-shadow);margin-bottom:16px;}
+#tab-wedding.active .card {animation:none;}
+#tab-wedding .card:hover {transform:none;}
+#tab-wedding h2 {margin:0;font-size:14px;font-weight:650;}
+#tab-wedding .card-title small {font-size:12px;font-weight:400;color:var(--ss-muted);margin-left:8px;}
+#tab-wedding .metric-grid {gap:12px;margin-bottom:16px;}
+#tab-wedding .metric-card {padding:18px 16px;border-radius:18px;min-width:0;border-color:var(--ss-border);}
+#tab-wedding .mc-value {font-size:24px;font-weight:650;line-height:1.5;color:var(--ss-link);font-variant-numeric:tabular-nums;white-space:nowrap;}
+#tab-wedding .mc-sub {font-size:12px;line-height:1.6;}
+#tab-wedding .mc-label {font-size:12px;font-weight:500;}
+#tab-wedding .wed-balance-card {background:var(--wed-rose-soft);}
+#tab-wedding .wed-owed {color:var(--wed-rose);font-weight:600;}
+#tab-wedding .wed-zero {color:var(--ss-muted);font-weight:400;}
+#tab-wedding .wed-page-actions {display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end;}
+#tab-wedding .wed-budget-link {color:var(--ss-link);font-size:12px;white-space:nowrap;}
+#tab-wedding .wed-switch {display:flex;gap:8px;align-items:center;cursor:pointer;font-size:12px;min-height:36px;}
+#tab-wedding input[type=checkbox] {accent-color:var(--ss-link);width:17px;height:17px;}
+#tab-wedding .wed-icon {display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;border-radius:10px;background:var(--ss-soft);font-size:16px;}
+#tab-wedding .wed-note,#item-drawer .wed-note,#wed-payment-dialog .wed-note {font-size:12px;line-height:1.65;color:var(--ss-muted);margin:8px 0;}
+#tab-wedding .wed-overview-grid,#tab-wedding .wed-reference-sections {display:grid;gap:14px;margin-bottom:14px;}
+#tab-wedding :is(.wed-overview-grid,.wed-reference-sections) > .card {margin-bottom:0;min-width:0;}
+@media(min-width:1000px){
+ #tab-wedding .wed-reference-sections {grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;}
+ #tab-wedding .wed-reference-sections:has(> details[open]) {grid-template-columns:minmax(0,1fr);}
+}
+@media(min-width:1200px){
+ #tab-wedding .page-hdr {margin-bottom:18px;}
+ #tab-wedding .metric-card {padding-block:14px;}
+ #tab-wedding .wed-overview-grid {grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);}
+ #tab-wedding .wed-total-progress {display:flex;flex-direction:column;justify-content:center;}
+ #tab-wedding .wed-total-progress .wed-between {align-items:flex-start;flex-direction:column;gap:12px;}
+ #tab-wedding .wed-next .wed-due-row {grid-template-columns:92px minmax(0,1fr) 90px 84px;gap:9px;}
+ #tab-wedding .wed-next .card-hdr .wed-text-button {min-height:28px;padding-block:4px;}
+ #tab-wedding .wed-reference-sections > .card:not([open]) {padding-block:10px;}
+ #tab-wedding .wed-ledger-toolbar {display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px 24px;margin:12px 0 6px;}
+ #tab-wedding .wed-ledger-toolbar .wed-filters,#tab-wedding .wed-ledger-toolbar .wed-ledger-tools {margin:0;}
+ #tab-wedding .wed-ledger-toolbar .wed-choice-panel {grid-column:1/-1;margin:0;}
+}
+#tab-wedding .wed-between {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+#tab-wedding #prog-info {font-size:12px;color:var(--ss-muted);}
+#tab-wedding .wed-progress {display:flex;align-items:center;gap:8px;min-width:90px;font-size:11px;color:var(--ss-muted);font-variant-numeric:tabular-nums;}
+#tab-wedding .wed-progress>span:last-child {min-width:30px;text-align:right;}
+#tab-wedding .wed-track {height:6px;background:var(--ss-border);border-radius:10px;overflow:hidden;display:block;flex:1;min-width:40px;}
+#tab-wedding .wed-track>span {display:block;height:100%;border-radius:inherit;background:var(--ss-link);}
+#tab-wedding .wed-total-progress>.wed-progress {margin-top:12px;}
+#tab-wedding .wed-total-progress>.wed-progress>.wed-track {height:9px;}
+#tab-wedding .wed-total-progress>.wed-progress>span:last-child {display:none;}
+#tab-wedding summary {cursor:pointer;list-style:none;}
+#tab-wedding summary::-webkit-details-marker {display:none;}
+#tab-wedding .wed-section>summary {display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px;}
+#tab-wedding .wed-section:not([open])>summary {min-height:32px;}
+#tab-wedding .wed-chevron {border:solid var(--ss-muted);border-width:0 1.5px 1.5px 0;width:7px;height:7px;transform:rotate(45deg);margin:0 5px 4px;flex-shrink:0;}
+#tab-wedding details[open]>summary>.wed-chevron {transform:rotate(225deg);margin-bottom:0;}
+#tab-wedding .wed-category {border-top:1px solid var(--ss-border);}
+#tab-wedding .wed-category>summary {display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,220px) 120px 135px 16px;gap:16px;align-items:center;padding:12px 0;}
+#tab-wedding .wed-category>summary:hover {background:var(--ss-soft);border-radius:10px;}
+#tab-wedding .wed-cat-name {display:flex;gap:12px;align-items:center;font-weight:600;font-size:13px;}
+#tab-wedding .wed-cat-name small {display:block;color:var(--ss-muted);font-size:11px;font-weight:400;margin-top:2px;}
+#tab-wedding .wed-paid-pair {font-size:13px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+#tab-wedding .wed-paid-pair small {color:var(--ss-muted);font-size:12px;}
+#tab-wedding .wed-cat-remain {text-align:right;font-size:13px;white-space:nowrap;}
+#tab-wedding .wed-cat-remain small {color:var(--ss-muted);font-weight:400;}
+#tab-wedding .wed-category-children {padding:4px 14px 12px;border-radius:12px;background:var(--ss-soft);margin-bottom:10px;}
+#tab-wedding .wed-child-row {display:grid;grid-template-columns:minmax(160px,1fr) 175px 120px 110px 52px;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--ss-border);}
+#tab-wedding .wed-item-name {display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;min-width:0;overflow-wrap:anywhere;}
+#tab-wedding .wed-item-name .wed-icon {flex-basis:26px;width:26px;height:26px;font-size:14px;}
+#tab-wedding .wed-item-name .status-badge {display:inline-block;margin:3px 0 0 3px;vertical-align:middle;}
+#tab-wedding .wed-branch {display:inline-block;width:10px;height:10px;flex:0 0 10px;border-left:1px solid var(--ss-border-strong);border-bottom:1px solid var(--ss-border-strong);margin:0 3px 5px 0;}
+#tab-wedding .wed-nested-row .wed-item-name {padding-left:23px;}
+#tab-wedding .wed-category-add {border:0;background:transparent;color:var(--ss-link);font:inherit;font-size:11px;white-space:nowrap;min-height:30px;padding:4px 6px;cursor:pointer;border-radius:6px;}
+#tab-wedding .wed-category-add:hover {background:var(--ss-hover);}
+#tab-wedding .wed-child-balance {text-align:right;font-size:12px;white-space:nowrap;}
+#tab-wedding .wed-text-button {background:none;border:0;color:var(--ss-link);font:inherit;font-size:12px;cursor:pointer;padding:8px 0;min-height:36px;text-decoration:underline;text-underline-offset:3px;}
+#tab-wedding .wed-due-row {display:grid;grid-template-columns:110px minmax(100px,1fr) 120px 84px;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--ss-border);font-size:13px;}
+#tab-wedding .wed-date {display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums;}
+#tab-wedding .wed-date small {font-size:11px;color:var(--ss-link);background:var(--ss-soft);padding:3px 6px;border-radius:8px;white-space:nowrap;}
+#tab-wedding .wed-due-name {overflow-wrap:anywhere;}
+#tab-wedding .wed-due-row>.wed-owed {text-align:right;white-space:nowrap;}
+#tab-wedding .wed-overdue-link {font:inherit;font-size:12px;color:var(--wed-rose);padding:8px 10px;margin-top:8px;border:1px solid currentColor;border-radius:10px;background:var(--wed-rose-soft);cursor:pointer;}
+#tab-wedding .wed-month {border-top:1px solid var(--ss-border);}
+#tab-wedding .wed-month>summary {display:flex;gap:16px;align-items:center;padding:12px 0;font-size:13px;}
+#tab-wedding .wed-month>summary small {flex:1;color:var(--ss-muted);font-size:12px;}
+#tab-wedding .wed-completed {padding-top:10px;font-size:12px;color:var(--ss-muted);}
+#tab-wedding .wed-completed>summary {padding:8px 0;}
+#tab-wedding .wed-completed-row {display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ss-border);}
+#tab-wedding .wed-completed-row>span:first-child {flex:1;}
+#tab-wedding .wed-filters {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0;}
+#tab-wedding .wed-status-filters {display:flex;flex-wrap:wrap;gap:6px;}
+#tab-wedding .wed-status-filters button {font:inherit;font-size:12px;color:var(--ss-muted);border:1px solid var(--ss-border);background:var(--ss-surface);border-radius:999px;padding:7px 12px;cursor:pointer;min-height:36px;}
+#tab-wedding .wed-status-filters button[aria-pressed=true] {background:var(--ss-accent);color:var(--ss-on-accent);border-color:var(--ss-border-strong);}
+#tab-wedding select {font:inherit;font-size:12px;border:1px solid var(--ss-border);color:var(--ss-text);border-radius:9px;background:var(--ss-surface);padding:7px 9px;min-height:36px;max-width:100%;}
+#tab-wedding .wed-table {table-layout:auto;width:100%;}
+#tab-wedding .wed-table th {font-size:11px;font-weight:500;white-space:nowrap;padding:10px 6px;}
+#tab-wedding .wed-table td {padding:6px;font-size:12px;}
+#tab-wedding .wed-table thead th:first-child {width:28%;}
+#tab-wedding .wed-table .amt {white-space:nowrap;font-weight:500;font-variant-numeric:tabular-nums;}
+#tab-wedding .wed-category-cell {white-space:nowrap;font-size:11px!important;color:var(--ss-muted);}
+#tab-wedding .tbl-action-btn {font-size:11px;min-height:32px;white-space:nowrap;color:var(--ss-link);border:1px solid var(--ss-border-strong);padding:5px 10px;background:var(--ss-surface);}
+#tab-wedding .tbl-action-btn:hover {background:var(--ss-soft);}
+#tab-wedding .status-badge {font-size:10px;font-weight:500;border-radius:6px;line-height:1.5;}
+#tab-wedding .status-badge.done {color:var(--ss-muted);background:var(--ss-soft);}
+#tab-wedding .status-badge.partial {color:var(--ss-link);background:var(--ss-soft);}
+#tab-wedding .status-badge.unpaid {color:var(--wed-rose);background:var(--wed-rose-soft);}
+#tab-wedding .wed-empty {text-align:center;padding:18px 8px;font-size:13px;color:var(--ss-muted);line-height:1.7;}
+#tab-wedding .wed-overpaid {display:block;font-size:11px;color:var(--ss-muted);margin-top:5px;}
+#tab-wedding .wed-mobile-ledger {display:none;}
+#tab-wedding .wed-sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+#tab-wedding :is(button,summary,a,select,input):focus-visible {outline:2px solid var(--ss-focus);outline-offset:3px;}
+#tab-wedding #wed-schedule,#tab-wedding #wed-ledger {scroll-margin-top:72px;}
+body.wed-modal-open {overflow:hidden;}
+#item-drawer,#wed-payment-dialog {width:420px;max-width:100%;}
+#item-drawer textarea {resize:vertical;min-height:80px;}
+#wed-form-error,#wed-payment-error {color:var(--expense);font-size:13px;line-height:1.7;margin:0;}
+#wed-payment-dialog .drawer-body label {font-size:13px;font-weight:600;}
+#wed-payment-dialog p {font-size:13px;line-height:1.7;}
+#wed-payment-dialog .drawer-footer {justify-content:flex-end;}
+@media(max-width:1100px){
+ #tab-wedding .wed-category>summary {grid-template-columns:minmax(130px,1fr) 165px 100px 95px 10px;gap:8px;}
+ #tab-wedding .wed-child-row {grid-template-columns:minmax(130px,1fr) 155px 100px 90px 48px;gap:8px;}
+ #tab-wedding .wed-table thead th:first-child {width:auto;}
+}
+@media(max-width:900px){
+ #tab-wedding .wed-desktop-ledger {display:none;}
+ #tab-wedding .wed-mobile-ledger {display:block;}
+ #tab-wedding .wed-mobile-item {border-top:1px solid var(--ss-border);}
+ #tab-wedding .wed-mobile-item>summary {display:grid;grid-template-columns:minmax(0,1fr) auto 10px;gap:10px;padding:14px 0;align-items:center;}
+ #tab-wedding .wed-mobile-item .wed-item-name {grid-column:1/3;}
+ #tab-wedding .wed-mobile-item .wed-paid-pair {grid-column:1;text-align:left;font-size:12px;}
+ #tab-wedding .wed-mobile-item .wed-child-balance {grid-column:2;}
+ #tab-wedding .wed-mobile-item .wed-progress {grid-column:1/3;}
+ #tab-wedding .wed-mobile-item .wed-chevron {grid-column:3;grid-row:1;}
+ #tab-wedding .wed-mobile-more {padding:8px 12px 14px;background:var(--ss-soft);border-radius:12px;margin-bottom:10px;}
+ #tab-wedding .wed-mobile-more dl {display:grid;grid-template-columns:85px 1fr;gap:10px;font-size:12px;}
+ #tab-wedding .wed-mobile-more dt {color:var(--ss-muted);}
+ #tab-wedding .wed-mobile-more dd {margin:0;white-space:pre-wrap;overflow-wrap:anywhere;}
+ #tab-wedding .wed-row-actions {display:flex;gap:10px;justify-content:flex-end;}
+ #tab-wedding .wed-child-row {grid-template-columns:minmax(0,1fr) auto;}
+ #tab-wedding .wed-child-row .wed-item-name {grid-column:1/3;}
+ #tab-wedding .wed-child-row .wed-paid-pair {text-align:left;}
+ #tab-wedding .wed-child-row .wed-progress {grid-column:1;}
+}
+@media(max-width:768px){
+ #tab-wedding {padding:20px 14px 90px;}
+ #tab-wedding .page-hdr {gap:12px;}
+ #tab-wedding .page-hdr p {font-size:12px;}
+ #tab-wedding .page-hdr .btn {font-size:12px;white-space:nowrap;}
+ #tab-wedding .page-hdr {flex-wrap:wrap;}
+ #tab-wedding .wed-page-actions {width:100%;justify-content:flex-start;gap:12px;}
+ #tab-wedding .wed-page-actions .btn {margin-left:auto;}
+ #tab-wedding .card {padding:14px;border-radius:17px;}
+ #tab-wedding .metric-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+ #tab-wedding .metric-card {padding:13px 12px;}
+ #tab-wedding .mc-value {font-size:21px;}
+ #tab-wedding .mc-sub {font-size:11px;}
+ #tab-wedding .wed-category>summary {grid-template-columns:minmax(0,1fr) auto 10px;gap:8px;padding:13px 0;}
+ #tab-wedding .wed-cat-name {grid-column:1/3;gap:9px;}
+ #tab-wedding .wed-cat-name small {display:inline;margin-left:8px;}
+ #tab-wedding .wed-category>summary>.wed-paid-pair {grid-column:1;text-align:left;font-size:12px;}
+ #tab-wedding .wed-cat-remain {grid-column:2;font-size:12px;}
+ #tab-wedding .wed-category>summary>.wed-progress {grid-column:1/3;}
+ #tab-wedding .wed-category>summary>.wed-chevron {grid-row:1;grid-column:3;}
+ #tab-wedding .wed-between {flex-wrap:wrap;}
+ #tab-wedding .wed-category-children {padding-inline:9px;}
+ #tab-wedding .wed-due-row {grid-template-columns:85px minmax(0,1fr) auto;gap:7px;font-size:12px;}
+ #tab-wedding .wed-due-name {grid-column:2/4;}
+ #tab-wedding .wed-due-row>.wed-owed {grid-column:2;text-align:left;}
+ #tab-wedding .wed-due-row>.tbl-action-btn {grid-column:3;}
+ #tab-wedding .wed-date {gap:5px;font-size:11px;}
+ #tab-wedding .tbl-action-btn {min-height:40px;}
+ #tab-wedding .wed-filters {gap:8px;}
+ #tab-wedding .wed-status-filters button {min-height:40px;padding:6px 10px;}
+ #item-drawer,#wed-payment-dialog {width:100%;height:92dvh;}
+ #item-drawer .drawer-footer,#wed-payment-dialog .drawer-footer {padding-bottom:max(14px,env(safe-area-inset-bottom));}
+}
+@media(prefers-reduced-motion:reduce){#item-drawer,#wed-payment-dialog,#item-drawer-backdrop{animation:none;}}
+#wed-form-error:empty, #wed-last-payment:empty { display:none; }
+#item-drawer .wed-inline-confirm { padding:14px; margin:0 0 18px; border:1px solid #edcbd7; border-radius:14px; background:#fff4f7; font-size:13px; }
+#item-drawer .wed-inline-confirm[hidden] { display:none; }
+#item-drawer .wed-inline-confirm p { margin:7px 0 12px; }
+#item-drawer .wed-inline-confirm > div { display:flex; flex-wrap:wrap; gap:8px; }
+#wed-delete-apply { color:#a34766; }
+#tab-wedding .wed-pair-label { display:none; }
+#tab-wedding .wed-category-columns { display:grid; grid-template-columns:minmax(180px,1fr) minmax(180px,220px) 120px 135px 16px; gap:16px; padding:9px 0; font-size:11px; color:var(--ss-muted); background:var(--ss-soft); border-radius:9px; }
+#tab-wedding .wed-category-columns > :first-child { padding-left:10px; }
+#tab-wedding .wed-category-columns > :nth-child(2), #tab-wedding .wed-category-columns > :nth-child(3) { text-align:right; }
+#tab-wedding .wed-category>summary { padding-block:9px; }
+#tab-wedding .wed-cat-name small { display:inline; margin-left:8px; }
+@media(max-width:1100px){ #tab-wedding .wed-category-columns { grid-template-columns:minmax(130px,1fr) 165px 100px 95px 10px; gap:8px; } }
+@media(max-width:900px){ #tab-wedding .wed-mobile-ledger .wed-pair-label, #tab-wedding .wed-child-row .wed-pair-label { display:inline; font-size:11px; color:var(--ss-muted); } }
+@media(max-width:768px){
+ #tab-wedding .wed-category-columns { display:none; }
+ #tab-wedding .wed-category>summary { padding-block:13px; }
+ #tab-wedding .wed-category>summary .wed-pair-label { display:inline; font-size:11px; color:var(--ss-muted); }
+ #tab-wedding .wed-paid-pair { white-space:normal; }
+}
+#tab-wedding .wed-group-name { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; margin:0; }
+#tab-wedding .wed-group-name small { font-size:11px; font-weight:400; color:var(--ss-muted); }
+#tab-wedding .wed-group-toggle { display:flex; gap:12px; align-items:center; width:100%; min-height:34px; padding:4px 6px; border:0; border-radius:6px; background:transparent; color:var(--ss-text); font:inherit; text-align:left; cursor:pointer; scroll-margin-top:72px; }
+#tab-wedding .wed-group-toggle:hover { background:var(--ss-hover); }
+#tab-wedding .wed-group-toggle .wed-icon { flex-basis:20px; width:20px; height:20px; font-size:14px; background:transparent; }
+#tab-wedding .wed-group-toggle[aria-expanded=true] > .wed-chevron { transform:rotate(225deg); }
+#tab-wedding .wed-group-totals { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; font-variant-numeric:tabular-nums; }
+#tab-wedding .wed-group-metric { display:flex; flex-direction:column; gap:3px; text-align:left; }
+#tab-wedding .wed-group-metric small { font-size:11px; font-weight:400; color:var(--ss-muted); }
+#tab-wedding .wed-group-metric strong { font-size:13px; font-weight:600; line-height:1.4; white-space:nowrap; }
+#tab-wedding .wed-ledger-group-header > :is(th,td) { padding:0 6px; background:var(--ss-soft); border-bottom:1px solid var(--ss-border); }
+#tab-wedding .wed-ledger-group-header > th { padding-left:0; text-align:left; }
+#tab-wedding .wed-table .wed-group-subtotal { font-size:12px; font-weight:500; }
+#tab-wedding .wed-table .wed-group-caption { font-size:11px; color:var(--ss-muted); }
+#tab-wedding #tbl-body tr[hidden] { display:none; }
+#tab-wedding .wed-ledger-group { margin-top:10px; }
+#tab-wedding .wed-ledger-group > div { padding:0 4px; }
+#tab-wedding .wed-ledger-group > div[hidden] { display:none; }
+#tab-wedding .wed-fold-all { display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:9px 13px;min-height:44px;white-space:nowrap;border:1px solid var(--ss-border-strong);border-radius:11px;background:var(--ss-soft);color:var(--ss-link);font:inherit;font-size:12px;font-weight:500;cursor:pointer; }
+#tab-wedding .wed-fold-all::before { content:"";width:7px;height:7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(225deg);margin-top:4px; }
+#tab-wedding .wed-fold-all[data-value=expand]::before {transform:rotate(45deg);margin-top:-4px;}
+#tab-wedding .wed-fold-all:hover {background:var(--ss-hover);border-color:var(--ss-link);}
+#tab-wedding .wed-fold-all:active {background:var(--ss-accent);}
+@media(max-width:900px){
+ #tab-wedding .wed-mobile-group-heading {position:relative;background:var(--ss-soft);border-radius:9px;}
+ #tab-wedding .wed-mobile-group-heading > .wed-category-add {position:absolute;right:8px;top:5px;min-height:36px;}
+ #tab-wedding .wed-group-toggle { display:grid; grid-template-columns:minmax(0,1fr) 10px; gap:8px; padding:10px; border-radius:9px; }
+ #tab-wedding .wed-group-toggle .wed-group-name {padding-right:68px;}
+ #tab-wedding .wed-group-name { font-size:13px; }
+ #tab-wedding .wed-group-toggle > .wed-chevron {position:absolute;right:54px;top:18px;}
+ #tab-wedding .wed-group-totals { grid-column:1/-1; grid-row:2; gap:6px; }
+ #tab-wedding .wed-group-metric strong { white-space:normal; overflow-wrap:anywhere; }
+ #tab-wedding .wed-ledger-group > div {margin-left:10px;padding-left:10px;border-left:1px solid var(--ss-border);}
+}
+@media(max-width:768px){
+ #tab-wedding .wed-group-note { line-height:1.7; }
+}
+#tab-wedding .wed-ledger-tools { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin:0 0 12px; }
+#tab-wedding .wed-view-toggle { display:flex; gap:3px; padding:3px; background:var(--ss-soft); border-radius:12px; }
+#tab-wedding .wed-view-toggle button { font:inherit; font-size:12px; min-height:38px; padding:7px 12px; border:1px solid transparent; border-radius:9px; color:var(--ss-muted); background:transparent; cursor:pointer; }
+#tab-wedding .wed-view-toggle button[aria-pressed=true] { color:var(--ss-link); background:var(--ss-surface); border-color:var(--ss-border); font-weight:600; }
+#tab-wedding .wed-picker-triggers { display:flex; gap:8px; }
+#tab-wedding .wed-picker-trigger { display:flex; align-items:center; gap:8px; font:inherit; font-size:12px; color:var(--ss-text); background:var(--ss-surface); border:1px solid var(--ss-border); border-radius:11px; padding:9px 12px; min-height:44px; cursor:pointer; }
+#tab-wedding .wed-tool-label { color:var(--ss-muted); font-size:11px; }
+#tab-wedding .wed-picker-trigger:hover { background:var(--ss-soft); }
+#tab-wedding .wed-picker-trigger[aria-expanded=true] { border-color:var(--ss-link); color:var(--ss-link); background:var(--ss-soft); }
+#tab-wedding .wed-picker-trigger .wed-chevron { margin:0 2px 3px 4px; width:5px; height:5px; }
+#tab-wedding .wed-picker-trigger[aria-expanded=true] .wed-chevron { transform:rotate(225deg); margin-top:5px; }
+#tab-wedding .wed-choice-panel { margin:0 0 14px; padding:12px; border:1px solid var(--ss-border); border-radius:14px; background:var(--ss-soft); }
+#tab-wedding .wed-choice-panel[hidden] { display:none; }
+#tab-wedding .wed-choice-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; font-size:12px; color:var(--ss-muted); }
+#tab-wedding .wed-choice-heading button { min-height:32px; flex-shrink:0; }
+#tab-wedding .wed-sort-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+#tab-wedding .wed-choice { display:flex; align-items:center; gap:8px; text-align:left; min-width:0; min-height:48px; padding:9px 10px; border:1px solid var(--ss-border); border-radius:11px; background:var(--ss-surface); color:var(--ss-text); font:inherit; font-size:12px; cursor:pointer; }
+#tab-wedding .wed-choice:hover { border-color:var(--ss-border-strong); }
+#tab-wedding .wed-choice[aria-pressed=true] { border-color:var(--ss-link); background:var(--ss-surface); color:var(--ss-link); }
+#tab-wedding .wed-choice-name { flex:1; min-width:0; overflow-wrap:anywhere; font-weight:500; }
+#tab-wedding .wed-choice small { color:var(--ss-muted); font-size:11px; font-weight:400; }
+#tab-wedding .wed-choice-name small { display:block; margin-top:4px; line-height:1.5; }
+#tab-wedding .wed-choice-check { width:12px; flex-shrink:0; visibility:hidden; font-weight:600; }
+#tab-wedding .wed-choice[aria-pressed=true] .wed-choice-check { visibility:visible; }
+@media(max-width:560px){
+ #tab-wedding .wed-view-toggle { width:100%; }
+ #tab-wedding .wed-view-toggle button { flex:1; }
+ #tab-wedding .wed-picker-triggers { width:100%; }
+ #tab-wedding .wed-picker-trigger { flex:1; min-width:0; flex-wrap:wrap; gap:4px 7px; padding:9px; }
+ #tab-wedding .wed-tool-label { flex-basis:100%; text-align:left; }
+ #tab-wedding .wed-picker-trigger .wed-chevron { margin-left:auto; }
+ #tab-wedding .wed-choice-panel { padding:9px; }
+ #tab-wedding .wed-sort-options { grid-template-columns:minmax(0,1fr); }
+ #tab-wedding .wed-choice { padding:8px; gap:5px; }
+ #tab-wedding .wed-choice .wed-icon { width:24px; height:26px; font-size:15px; }
+}
+/* Light typography polish, scoped to wedding content and its editors. */
+@font-face {
+ font-family:'WeCost Pretendard'; font-style:normal; font-weight:100 900; font-display:swap;
+ src:url('/sungso/shared/theme/fonts/PretendardVariable.woff2') format('woff2');
+}
+#tab-wedding,#item-drawer,#wed-payment-dialog { font-family:'WeCost Pretendard',var(--ss-font-sans); }
+#tab-wedding .page-hdr h1 { font-weight:650; letter-spacing:-.035em; }
+#tab-wedding h2 { font-size:15px; font-weight:600; letter-spacing:-.02em; }
+#tab-wedding .mc-value { line-height:1.35; font-weight:650; letter-spacing:-.025em; }
+#tab-wedding .mc-sub { margin-top:6px; }
+#tab-wedding .wed-table th { font-size:12px; font-weight:500; }
+#tab-wedding .wed-table td { font-size:13px; }
+#tab-wedding .wed-table .amt { text-align:right; font-weight:500; }
+#tab-wedding .wed-table .wed-planned { font-weight:650; }
+#tab-wedding .wed-table .wed-item-name { gap:6px; }
+#tab-wedding .wed-table .wed-item-name .wed-icon { flex-basis:22px; width:22px; height:22px; font-size:14px; }
+#tab-wedding .wed-table .tbl-action-btn { min-height:28px; padding:3px 9px; }
+#tab-wedding .wed-category-cell { font-size:12px!important; }
+#tab-wedding .status-badge { font-size:11px; padding-inline:5px; }
+#tab-wedding .wed-item-name { font-weight:500; }
+#tab-wedding .tbl-action-btn { font-size:12px; }
+#tab-wedding .wed-next { padding-block:14px; }
+#tab-wedding .wed-next .card-hdr { margin-bottom:8px; }
+#tab-wedding .wed-next .wed-due-row { padding-block:7px; }
+#tab-wedding .wed-table tbody tr:not(.wed-ledger-group-header):hover { background:var(--ss-soft); }
+#item-drawer input,#item-drawer select,#item-drawer textarea,#item-drawer button,
+#wed-payment-dialog input,#wed-payment-dialog button { font-family:inherit; }
+
+/* Wedding editor: readable groups and an unsaved calculation preview. */
+#item-drawer {--wed-rose:#a44568;--wed-rose-soft:#fff2f6;width:500px;color:var(--ss-text);}
+#item-drawer .drawer-hdr {padding:20px 24px 16px;gap:16px;align-items:flex-start;}
+#item-drawer .drawer-hdr h3 {font-size:18px;font-weight:650;letter-spacing:-.02em;}
+#item-drawer .drawer-hdr .wed-note {margin:7px 0 0;font-size:12px;line-height:1.6;}
+#item-drawer .drawer-close {width:36px;height:36px;flex:0 0 36px;border:1px solid var(--ss-border);border-radius:10px;background:var(--ss-soft);font-size:16px;}
+#item-drawer .drawer-close:hover {background:var(--ss-hover);}
+#item-drawer .drawer-body {padding:20px 24px;gap:20px;min-height:0;overscroll-behavior:contain;}
+#item-drawer .wed-editor-section {display:flex;flex-direction:column;gap:12px;}
+#item-drawer .wed-editor-section + .wed-editor-section {padding-top:18px;border-top:1px solid var(--ss-border);}
+#item-drawer .wed-editor-section h4 {display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:650;letter-spacing:-.01em;margin:0;}
+#item-drawer .wed-editor-section h4 small {font-size:11px;font-weight:400;color:var(--ss-muted);}
+#item-drawer .wed-editor-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+#item-drawer .wed-editor-basic {grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);}
+#item-drawer .inp-grp {gap:6px;min-width:0;}
+#item-drawer .inp-grp label {font-size:12px;font-weight:500;color:var(--ss-text);line-height:1.5;}
+#item-drawer .input-field {width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--ss-border-strong);border-radius:11px;font-size:14px;line-height:1.4;font-weight:450;color:var(--ss-text);background:var(--ss-surface);}
+#item-drawer .input-field:focus {border-color:var(--ss-focus);box-shadow:0 0 0 3px var(--ss-soft);}
+#item-drawer .input-field:disabled {color:var(--ss-muted);background:var(--ss-soft);opacity:1;cursor:default;}
+#item-drawer .input-field[aria-invalid=true] {border-color:var(--wed-rose);}
+#item-drawer .wed-money-input {text-align:right;font-variant-numeric:tabular-nums;font-weight:550;}
+#item-drawer #di-planned {font-size:16px;font-weight:600;}
+#item-drawer .wed-money-hint {font-size:11px;text-align:right;color:var(--ss-muted);min-height:16px;line-height:1.45;}
+#item-drawer .wed-editor-help {font-size:11px;color:var(--ss-muted);line-height:1.65;margin:0;}
+#item-drawer .wed-editor-help[hidden] {display:none;}
+#item-drawer .wed-editor-preview {padding-top:2px;}
+#item-drawer .wed-preview-totals {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+#item-drawer .wed-preview-totals > div {padding:12px 14px;border-radius:12px;background:var(--ss-soft);}
+#item-drawer .wed-preview-totals span {display:block;font-size:11px;color:var(--ss-muted);}
+#item-drawer .wed-preview-totals strong {display:block;margin-top:5px;font-size:18px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+#item-drawer .wed-preview-totals .wed-preview-balance {background:var(--wed-rose-soft);color:var(--wed-rose);}
+#item-drawer #wed-draft-note {margin:8px 0 0;font-size:11px;color:var(--ss-muted);line-height:1.6;}
+#item-drawer textarea.input-field {min-height:84px;line-height:1.6;}
+#item-drawer .drawer-footer {padding:14px 24px;background:var(--ss-surface);gap:12px;}
+#item-drawer .drawer-footer .btn {min-height:42px;min-width:72px;border-radius:11px;font-size:13px;}
+#item-drawer #drawer-delete-btn {min-width:54px;color:var(--wed-rose);background:transparent;border-color:var(--ss-border);}
+#item-drawer #drawer-delete-btn:hover {background:var(--wed-rose-soft);}
+#item-drawer .wed-editor-actions {display:flex;gap:8px;margin-left:auto;}
+#item-drawer :is(button,select,input,textarea):focus-visible {outline:2px solid var(--ss-focus);outline-offset:2px;}
+@media(max-width:768px){
+ #item-drawer {width:100%;}
+ #item-drawer .drawer-hdr {padding:16px 20px;}
+ #item-drawer .drawer-close {width:40px;height:40px;flex-basis:40px;}
+ #item-drawer .drawer-body {padding:18px 20px;}
+ #item-drawer .drawer-footer {padding:12px 20px max(12px,env(safe-area-inset-bottom));}
+ #item-drawer .input-field {font-size:16px;}
+ #item-drawer .drawer-footer .btn {min-height:44px;}
+}
+@media(max-width:420px){
+ #item-drawer .wed-editor-grid {grid-template-columns:minmax(0,1fr);}
+ #item-drawer .wed-preview-totals > div {padding:11px 10px;}
+ #item-drawer .wed-preview-totals strong {font-size:16px;}
+}

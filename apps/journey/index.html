@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+  <title>우리의 발자취 · sungso</title>
+  <link rel="stylesheet" href="../shared/theme/brand.css?v=sky-1">
+  <link rel="stylesheet" href="./assets/maplibre/maplibre-gl.css">
+  <link rel="stylesheet" href="./style.css?v=3.1.0">
+  <script type="module" src="../shared/firebase/boot.mjs"></script>
+</head>
+<body data-app="journey">
+<main data-private-root hidden>
+  <header class="journey-header">
+    <a href="../" aria-label="sungso 우리 홈"><img class="sungso-wordmark" src="../shared/theme/sungso-wordmark-sky.png" alt="sungso" width="2091" height="752"></a>
+    <h1>우리의 발자취</h1>
+    <div class="view-modes" role="group" aria-label="재생 방식"><button data-mode="fast" aria-pressed="true">한눈에 보기</button><button data-mode="slow" aria-pressed="false">천천히 보기</button></div>
+    <div class="header-actions"><button id="addRecord" class="add-action">기록 추가</button><details id="moreMenu" class="more-menu"><summary aria-label="더 보기">더 보기</summary><div><button id="openImport">타임라인 가져오기</button><button id="refreshDay">새로 불러오기</button><a href="../footprints/">기존 장소·방문 기록</a></div></details></div>
+  </header>
+  <div class="journey-shell" id="journeyLayout">
+    <aside class="story-rail" id="storyPanel" aria-label="날짜별 이동 기록" hidden>
+      <div class="rail-heading"><button id="openPeriod" class="period-action" aria-haspopup="dialog"><span id="periodTitle">전체 기간</span><img src="./assets/icons/chevron-down.svg" alt=""></button><p id="periodRange">저장한 기록을 확인하고 있어요</p><button id="toggleCalendar" class="text-action date-find" aria-controls="calendarPanel" aria-expanded="false"><img src="./assets/icons/calendar3.svg" alt="">날짜 찾기</button></div>
+      <div id="storyList" class="story-list"></div>
+      <p id="storyEmpty" class="rail-empty" hidden>남기고 싶은 장소를 하나씩 채워보세요.</p>
+      <button id="closeStory" class="rail-collapse icon-button" aria-label="기록 목록 접기"><img class="chevron-left" src="./assets/icons/chevron-down.svg" alt=""></button>
+    </aside>
+    <section class="content" aria-label="우리의 이동 지도">
+      <div class="map-wrap"><div id="journeyMap" class="map" aria-label="우리의 이동 지도"></div>
+        <div class="map-top-controls"><button id="toggleStory" aria-controls="storyPanel" aria-expanded="false">기록 목록</button><div class="camera-actions" role="group" aria-label="지도 보기"><button id="followMotion" aria-label="이동 따라가기" aria-pressed="true">따라가기</button><button id="showAllScenes" aria-pressed="false"><img src="./assets/icons/geo-alt.svg" alt="">전체 경로</button></div></div>
+        <div id="motionDate" class="motion-date" aria-live="off" hidden><span id="motionYear" class="motion-year"></span><strong id="motionDay" class="motion-day"></strong><span id="motionClock" class="motion-clock" hidden></span></div>
+        <div id="motionLegend" class="motion-legend" aria-label="경로 색상" hidden></div>
+        <div class="story-status" id="statusPanel"><p class="save-state" id="saveState" role="status" aria-live="polite">저장한 기록을 불러오는 중…</p><div id="globalError" role="alert" hidden></div><button id="retryPlayback" class="text-action" hidden>이어서 불러오기</button></div>
+        <div class="map-controls" aria-label="전체 기간 재생">
+          <div class="playback-top">
+            <div class="playback-buttons"><button id="playDay" class="play-main" aria-label="우리의 발자취 재생" disabled><img src="./assets/icons/play-fill.svg" alt=""></button><button id="stopDay" class="play-main" aria-label="일시정지" hidden><img src="./assets/icons/pause-fill.svg" alt=""></button><button id="previousScene" class="icon-button" aria-label="이전 기록 날짜" disabled><img class="chevron-left" src="./assets/icons/chevron-down.svg" alt=""></button><button id="nextScene" class="icon-button" aria-label="다음 기록 날짜" disabled><img class="chevron-right" src="./assets/icons/chevron-down.svg" alt=""></button><button id="restartDay" class="icon-button" aria-label="처음부터 보기" disabled><img src="./assets/icons/arrow-clockwise.svg" alt=""></button></div>
+            <div class="playback-clock"><time id="playDate">기록을 기다리는 중</time><span><strong id="playTime">00:00</strong> / <span id="playRange">01:00</span></span></div>
+            <div id="durationChoices" class="duration-choices" role="group" aria-label="재생 길이"></div>
+            <button id="toggleRecords" class="text-action detail-action" aria-controls="recordsPanel" aria-expanded="false">이 순간 자세히<img src="./assets/icons/arrow-right.svg" alt=""></button>
+          </div>
+          <label class="sr-only" for="playSeek">전체 기간 재생 위치</label><input id="playSeek" type="range" min="0" max="1000" step="1" value="0" disabled aria-valuetext="재생할 기록 없음">
+          <div id="playTicks" class="play-ticks" aria-hidden="true"></div><span id="playState" class="sr-only" aria-live="off"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+  <section id="recordsPanel" class="detail-panel" aria-label="이날의 사진과 기록" hidden>
+    <div class="record-heading"><div><p id="selectedDate" class="selected-date"></p><h2 id="dayTitle">이날 남긴 기억</h2></div><button id="closeRecords" class="text-action" aria-label="상세 기록 닫기">닫기</button></div>
+    <div class="detail-tools"><button id="previousDay" aria-label="이전 기록 있는 날">이전 날</button><button id="nextDay" aria-label="다음 기록 있는 날">다음 날</button><button id="showDayRoute">하루 경로 보기</button><button id="addPhoto">사진 추가</button></div>
+    <div id="detailStatus" class="field-note" role="status"></div><div id="records" class="records"></div>
+  </section>
+  <section id="calendarPanel" class="calendar-panel" aria-label="날짜 찾아보기" hidden>
+    <div class="panel-heading"><h2>날짜 찾아보기</h2><button id="closeCalendar" class="text-action" aria-label="달력 닫기">닫기</button></div>
+    <div class="month-nav"><button id="previousMonth" class="text-action" aria-label="이전 달">이전</button><h3 id="monthTitle"></h3><button id="nextMonth" class="text-action" aria-label="다음 달">다음</button></div>
+    <div class="weekdays" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div id="calendar" class="calendar"></div>
+    <label class="archive-label" for="archiveMonth">저장한 달</label><select id="archiveMonth"></select><div id="dayList" class="month-records"></div><button id="addOldPhoto" class="text-action">이날의 기억 남기기</button>
+  </section>
+  <dialog id="periodDialog" aria-labelledby="periodDialogTitle"><form id="periodForm"><header class="dialog-heading"><h2 id="periodDialogTitle">어느 시간을 볼까요?</h2><button type="button" data-close="periodDialog" class="text-action">닫기</button></header><div class="form-body">
+    <label>기간<select id="periodPreset"><option value="all">전체 기간</option><option value="custom">직접 선택</option></select></label><div class="form-row"><label>시작일<input id="periodFrom" type="date" required></label><label>종료일<input id="periodTo" type="date" required></label></div>
+    <div class="people" role="group" aria-label="이동한 사람"><button type="button" data-person="all" aria-pressed="true">전체</button><button type="button" data-person="sungwoo" aria-pressed="false">성우</button><button type="button" data-person="sohee" aria-pressed="false">소희</button><button type="button" data-person="together" aria-pressed="false">함께</button></div><p id="periodError" class="form-error" role="alert"></p>
+    </div><footer class="dialog-footer"><button type="button" data-close="periodDialog">취소</button><button type="submit" class="primary">이 기간 보기</button></footer></form></dialog>
+  <dialog id="recordDialog" aria-labelledby="recordDialogTitle"><form id="recordForm">
+    <header class="dialog-heading"><div><p class="eyebrow">OUR MEMORY</p><h2 id="recordDialogTitle">기억 한 장 남기기</h2></div><button type="button" data-close="recordDialog" class="text-action">닫기</button></header>
+    <div class="form-body">
+      <label class="photo-input">사진 <span>선택 · JPG, PNG, WebP · 20MB 이하</span><input id="photoFile" type="file" accept="image/jpeg,image/png,image/webp"></label><img id="photoPreview" class="photo-preview" alt="저장할 사진 미리보기" hidden>
+      <button id="viewPhoto" type="button" class="text-action" hidden>사진 크게 보기</button>
+      <p id="photoNote" class="field-note"></p>
+      <div class="form-row"><label>날짜<input id="recordDate" type="date" required></label><label>시간 <span>모르면 비워두세요</span><input id="recordTime" type="time"></label></div>
+      <label>누구의 기록<select id="recordPerson"><option value="together">함께</option><option value="sungwoo">성우</option><option value="sohee">소희</option></select></label>
+      <label>장소 또는 기억의 제목<input id="recordTitle" maxlength="100" required placeholder="어디에서 무엇을 했나요?"></label>
+      <label>짧은 메모<textarea id="recordNote" rows="3" maxlength="2000" placeholder="이날 기억하고 싶은 이야기"></textarea></label>
+      <div class="location-heading"><span>위치 <small>선택</small></span><button type="button" id="pickLocation" class="text-action">지도에서 위치 고르기</button></div>
+      <div class="form-row"><label>위도<input id="recordLat" type="number" step="any" min="-90" max="90" placeholder="37.5"></label><label>경도<input id="recordLng" type="number" step="any" min="-180" max="180" placeholder="127.0"></label></div>
+      <p class="field-note">사진의 날짜·위치를 확인해 채워요. 위치를 모르면 사진과 메모만 저장할 수 있어요.</p>
+      <p id="recordError" class="form-error" role="alert"></p>
+    </div><footer class="dialog-footer"><button type="button" data-close="recordDialog">취소</button><button id="saveRecord" type="submit" class="primary">기록 저장</button></footer>
+  </form></dialog>
+  <dialog id="photoDialog" class="photo-viewer" aria-labelledby="photoViewTitle">
+    <header class="dialog-heading"><h2 id="photoViewTitle">이날의 사진</h2><button id="closePhotoView" type="button" class="text-action" autofocus>기록으로 돌아가기</button></header>
+    <p id="photoViewStatus" class="field-note" role="status" aria-live="polite"></p>
+    <img id="fullPhoto" alt="이날의 사진" hidden>
+  </dialog>
+  <dialog id="importDialog" aria-labelledby="importTitle"><form id="importForm">
+    <header class="dialog-heading"><div><p class="eyebrow">ADD YOUR TIMELINE</p><h2 id="importTitle">우리의 길을 가져와요</h2></div><button type="button" data-close="importDialog" class="text-action">닫기</button></header>
+    <div class="form-body"><p class="dialog-copy">Google 타임라인 JSON 파일을 선택해 주세요. 날짜별로 확인하고 기존 기록에 추가합니다.</p>
+    <label>누구의 타임라인인가요?<select id="importPerson"><option value="sungwoo">성우</option><option value="sohee">소희</option></select></label>
+    <label class="file-area">타임라인 파일 선택 <span>JSON · 128MB 이하</span><input id="timelineFile" type="file" accept=".json,application/json"></label>
+    <p id="importProgress" role="status" aria-live="polite"></p><div id="importPreview" class="import-preview"></div><p id="importError" class="form-error" role="alert"></p>
+    <p class="field-note">같은 시각·좌표의 중복 경로는 건너뛰며, 직접 수정한 기록을 덮어쓰지 않아요. 원본 파일은 컴퓨터에 보관해 주세요.</p>
+    </div><footer class="dialog-footer"><button type="button" data-close="importDialog">닫기</button><button id="saveImport" class="primary" type="submit" disabled>확인한 기록 추가</button></footer>
+  </form></dialog>
+  <div id="pickNotice" class="pick-notice" hidden><span>지도에서 기억하는 장소를 눌러주세요.</span><button id="cancelPick">취소</button></div>
+</main>
+<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=3.1.0"></script>
+</body></html>

@@ -66,6 +66,21 @@ test('every private entry defers scripts until auth; only the explicit guest inv
     for (const [, attrs, content] of scripts) {
       if (attrs.includes('firebase/boot.mjs')) continue;
       assert.match(attrs, /type="application\/x-sungso-script"/, app);
+      if (/data-type="importmap"/.test(attrs)) {
+        // This inert JSON is registered after membership checks, before app.js.
+        // Allow only versioned local WeCost assets, never auth/shared remapping.
+        assert.equal(app, 'wecost');
+        assert.doesNotMatch(attrs, /(?:data-)?src=/);
+        const map = JSON.parse(content);
+        assert.deepEqual(Object.keys(map), ['imports']);
+        assert.deepEqual(Object.keys(map.imports).sort(), ['./js/firebase.js', './js/tab-wedding.js', './js/wedding-core.mjs']);
+        for (const [specifier, target] of Object.entries(map.imports)) {
+          assert.ok(target.startsWith(`${specifier}?v=`));
+          assert.match(target.slice(specifier.length), /^\?v=[a-zA-Z0-9-]+$/);
+        }
+        assert.ok(html.indexOf('data-type="importmap"') < html.indexOf('data-src="js/app.js"'));
+        continue;
+      }
       assert.equal(content.trim(), '', `${app}: inline personal code must not execute`);
     }
   }

@@ -2,7 +2,7 @@ import { requireMember, getMember, syncAppAuth, registerPrivateCleanup } from '.
 import { FIREBASE_CONFIG } from '../../../shared/firebase/config.mjs';
 import { APP_REGISTRY, normalizeHomeConfig, moveApp, moveGroup, upcomingEvents, featuredEvents, koreanToday, dayLabel, canDeleteNote } from '../../../shared/home/home-core.mjs';
 import { createHomeStore } from '../../../shared/home/home-store.mjs';
-import { SHORTCUT_LIMIT, getHomeShortcuts, getLibraryApps, getBrowsableApps, withHomeShortcuts, paginateApps } from './view-core.mjs';
+import { SHORTCUT_LIMIT, getHomeShortcuts, getLibraryApps, getBrowsableApps, withHomeShortcuts, paginateApps } from './view-core.mjs?v=journey-1';
 
 const member = await requireMember();
 const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
