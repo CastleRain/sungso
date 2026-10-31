@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "url": "/",
+      "status": 200,
+      "matchesCurrentPublication": true,
+      "hasUserPublication": true
+    },
+    {
+      "url": "/v6/",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/v6/assets/photos/forest-640.webp",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/falling-petals.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/live-adapter.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/published/js/guest-features.mjs",
+      "status": 200,
+      "matchesBuild": true
+    },
+    {
+      "url": "/lab/studio-v2/",
+      "status": 303
+    },
+    {
+      "url": "/lab/studio-v2/accounts-editor.mjs",
+      "status": 401
+    },
+    {
+      "url": "/api/studio/accounts",
+      "status": 401
+    },
+    {
+      "url": "/lab/studio-v2/scenarios.mjs",
+      "status": 401
+    },
+    {
+      "url": "/api/studio/manage",
+      "status": 401
+    },
+    {
+      "url": "/homehunt/",
+      "status": 404
+    },
+    {
+      "url": "/wecost/",
+      "status": 404
+    },
+    {
+      "url": "/honeymoon/",
+      "status": 404
+    },
+    {
+      "url": "audio range",
+      "status": 206,
+      "bytes": 256
+    },
+    {
+      "url": "accounts public",
+      "status": 200,
+      "revision": 0,
+      "groupCount": 0,
+      "sideCount": 2,
+      "cors": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "url": "accounts manage",
+      "origin": "https://sungso-wedding.vercel.app",
+      "status": 401,
+      "cors": "https://sungso-wedding.vercel.app"
+    },
+    {
+      "url": "accounts manage",
+      "origin": "https://unrelated.vercel.app",
+      "status": 403,
+      "cors": null
+    }
+  ],
+  "changedPublicFiles": [
+    "published/css/expanded.css",
+    "published/js/content-editor.mjs",
+    "published/js/expanded-scenes.mjs",
+    "published/js/experience-config.mjs"
+  ]
+}

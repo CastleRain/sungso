@@ -101,3 +101,28 @@ test('six locally served font choices survive URL/history and ship with original
   }
   for(const file of ['GowunBatang-Regular.woff2','SUIT-Regular.woff2','SUIT-Medium.woff2','NanumPenScript-Regular.ttf','GowunBatang-OFL.txt','SUIT-OFL.txt','NanumPenScript-OFL.txt'])assert.ok((await readFile(path.join(output,'assets/fonts',file))).length>1000);
 });
+
+
+test('curated scene examples preserve custom copy, photos, accounts exclusion and history/file roundtrip',async()=>{
+  const {SCENARIOS,applyScenario}=await import(pathToFileURL(path.join(output,'scenarios.mjs')));
+  const photos=[{id:'first',src:'/photo-a.webp',width:800,height:1200},{id:'second',src:'/photo-b.webp',width:800,height:1200}];
+  const start=model.snapshot({}, {text:{invitation:'직접 쓴 초대'},experience:{version:1,values:{groomStory:'직접 쓴 기억'},lists:{contacts:[{role:'groom',name:'합성',phone:'01000000000'}]}}});
+  for(const recipe of SCENARIOS){
+    const next=applyScenario(start,recipe.id,photos),h=model.createHistory(start);h.commit(next);
+    assert.equal(next.content.text.invitation,'직접 쓴 초대');assert.equal(next.content.experience.values.groomStory,'직접 쓴 기억');
+    assert.deepEqual(next.content.experience.lists.contacts,start.content.experience.lists.contacts);
+    assert.deepEqual(model.validateSnapshot(JSON.parse(JSON.stringify(next))),next);
+    assert.deepEqual(h.undo(),start);assert.deepEqual(h.redo(),next);
+    assert.ok(!JSON.stringify(next).includes('accountNumber'));assert.equal(next.content.photos.length,0);
+    assert.deepEqual(applyScenario(next,recipe.id,photos),next);
+  }
+  const story=applyScenario(start,'story-perspective',photos);assert.equal(story.content.experience.values.storyMode,'perspective');assert.ok(story.content.experience.values.brideStory);
+  const compare=applyScenario(start,'photos-two',photos);assert.equal(compare.content.experience.values.beforePhoto,'first');assert.equal(compare.content.experience.values.afterPhoto,'second');
+});
+
+test('resizable panels remain bounded without shrinking the preview below its usable width',async()=>{
+  const {panelWidths}=await import('../../apps/invitation-studio-v2/panel-layout.mjs');
+  for(const width of [741,820,1100,1440,1920])for(const wanted of [{},{left:900,right:900},{left:-100,right:20},{left:300,right:420}]){
+    const p=panelWidths(width,wanted);assert.ok(p.left>=160&&p.left<=360);assert.ok(p.right>=280&&p.right<=520);assert.ok(width-p.left-p.right-16>=(width<1000?260:360));
+  }
+});

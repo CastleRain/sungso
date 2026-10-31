@@ -25,3 +25,20 @@ test('static media hides controls without loading video, cancels late play and p
   enabled=true;doc.dispatchEvent(new Event('lab:motion-change'));await Promise.resolve();assert.equal(button.hidden,false);assert.equal(video.paused,false);
   button.onclick();assert.equal(video.paused,true);controller.update(settings);observe([{isIntersecting:true}]);assert.equal(video.paused,true);controller.destroy();
 });
+
+
+test('falling petals remain bounded and release every particle when hidden, motion disabled or dialog opens',async()=>{
+  const {mountFallingPetals}=await import('../js/falling-petals.mjs');
+  class Element{constructor(){this.children=[];this.style={};this.dataset={};}get childElementCount(){return this.children.length;}append(n){this.children.push(n);}replaceChildren(){this.children=[];}setAttribute(){}remove(){this.removed=true;}}
+  const hero=new Element(),doc=new EventTarget(),reduced=new EventTarget();let intersect,mutation,enabled=true,dialog=false;
+  reduced.matches=false;Object.assign(doc,{hidden:false,body:new Element(),createElement:()=>new Element(),querySelector:s=>s==='.hero'?hero:dialog?{}:null});
+  const win={matchMedia:()=>reduced,IntersectionObserver:class{constructor(cb){intersect=cb;}observe(){}disconnect(){}},MutationObserver:class{constructor(cb){mutation=cb;}observe(){}disconnect(){}}};
+  const c=mountFallingPetals({doc,win,motion:()=>enabled}),layer=hero.children[0];c.update('rose');assert.equal(layer.childElementCount,0);intersect([{isIntersecting:true}]);assert.equal(layer.childElementCount,14);
+  for(let i=0;i<10;i++)c.update('rose');assert.equal(layer.childElementCount,14);
+  enabled=false;doc.dispatchEvent(new Event('lab:motion-change'));assert.equal(layer.childElementCount,0);
+  enabled=true;doc.dispatchEvent(new Event('lab:motion-change'));assert.equal(layer.childElementCount,14);
+  doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));assert.equal(layer.childElementCount,0);doc.hidden=false;doc.dispatchEvent(new Event('visibilitychange'));
+  dialog=true;mutation();assert.equal(layer.childElementCount,0);dialog=false;mutation();assert.equal(layer.childElementCount,14);
+  reduced.matches=true;reduced.dispatchEvent(new Event('change'));assert.equal(layer.childElementCount,0);reduced.matches=false;reduced.dispatchEvent(new Event('change'));
+  intersect([{isIntersecting:false}]);assert.equal(layer.childElementCount,0);c.destroy();assert.equal(layer.removed,true);
+});

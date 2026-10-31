@@ -190,7 +190,7 @@ export function mountContentEditor({ root, config = {}, doc = document, win = wi
   const ready = load();
   return {
     ready, getDraft: snapshot, getActiveSection: () => active, openSection, flush,
-    async setDraft(value) { await ready; photoOperation++; commit(normalizeContentDraft(value), undefined, { render: true }); return flush(); },
+    async setDraft(value,{section}={}) { await ready; photoOperation++; commit(normalizeContentDraft(value), section, { render: true }); return flush(); },
     destroy() { if (disposed) return; void flush(); disposed = true; photoOperation++; win.clearTimeout(timer); cleanups.forEach(clean => clean()); void persistPromise.finally(() => store.close?.()); },
   };
 }

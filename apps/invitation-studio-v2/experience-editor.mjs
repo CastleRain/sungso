@@ -1,12 +1,12 @@
 import {EXPERIENCE_FIELDS,EXPERIENCE_LISTS,experienceDefaults,normalizeExperience,MEDIA_LIMIT,personalizedLink} from './js/experience-config.mjs';
 import {resolveDraftPhotos} from './js/content-draft.mjs';
 
-export function mountExperienceEditor({root,getSnapshot,onDraft,config,notify,doc=document,win=window}) {
+export function mountExperienceEditor({root,getSnapshot,onDraft,config,notify,onMode=()=>{},doc=document,win=window}) {
   let queue=Promise.resolve();
   let group='top',generation=0,recording,stream,recordTimer;
   const el=(tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n;};
   const state=()=>experienceDefaults(getSnapshot().content.experience);
-  const save=change=>{const job=queue.then(async()=>{try{const current=state();change(current);await onDraft({...getSnapshot().content,experience:normalizeExperience(current)});return true;}catch(e){notify(e.message);return false;}});queue=job.catch(()=>{});return job;};
+  const save=change=>{const section=group;const job=queue.then(async()=>{try{const current=state();change(current);await onDraft({...getSnapshot().content,experience:normalizeExperience(current)},{section});return true;}catch(e){notify(e.message);return false;}});queue=job.catch(()=>{});return job;};
   function inputFor(f,value,change){
     const label=el('label','experience-field'),title=el('span','',f.label);label.append(title);
     const input=el(f.type==='textarea'?'textarea':['select','photo','media'].includes(f.type)?'select':'input');
@@ -21,7 +21,10 @@ export function mountExperienceEditor({root,getSnapshot,onDraft,config,notify,do
     if(f.type==='number'){input.type='range';input.min=f.min;input.max=f.max;input.step=1;}
     if(f.type==='textarea')input.rows=3;
     input.setAttribute('aria-label',f.label);if(f.type==='number'){const valueLabel=el('output','',String(input.value)+'%');input.oninput=()=>valueLabel.textContent=input.value+'%';label.append(valueLabel);}
-    input.onchange=async()=>{const value=f.type==='checkbox'?input.checked:f.type==='number'?Number(input.value):input.value;input.setAttribute('aria-invalid',String(!await change(value)));};
+    let lastSent=String(input.value);
+    const update=async()=>{const value=f.type==='checkbox'?input.checked:f.type==='number'?Number(input.value):input.value;if(f.type!=='checkbox'&&String(value)===lastSent)return;lastSent=String(value);input.setAttribute('aria-invalid',String(!await change(value)));};
+    input.onchange=update;
+    if(['text','textarea'].includes(f.type)){input.oninput=event=>{if(!event.isComposing)void update();};input.oncompositionend=()=>void update();}
     label.append(input);return label;
   }
   async function addMedia(file){
@@ -35,8 +38,13 @@ export function mountExperienceEditor({root,getSnapshot,onDraft,config,notify,do
   function render(id){group=id;generation++;root.replaceChildren();const fields=EXPERIENCE_FIELDS.filter(f=>f.group===id);const lists=Object.entries(EXPERIENCE_LISTS).filter(([,s])=>s.group===id);root.hidden=!fields.length&&!lists.length; if(root.hidden)return;
     root.append(el('h3','','이 장면에 더할 내용'),el('p','helper','입력한 내용만 보여요. 공동 저장 후 공개하기 전까지 하객 화면은 바뀌지 않아요.'));
     const e=state();
-    for(const f of fields)root.append(inputFor(f,e.values[f.id],v=>save(e=>e.values[f.id]=v)));
+    const storyMode=e.values.storyMode;
+    if(id==='our-story')root.append(el('p','experience-status',storyMode==='original'?'현재: 기존 3장 이야기 · 아래 기억을 적으면 시점 전환으로 보여요.':storyMode==='perspective'?'현재: 성우 · 소희 · 함께 탭으로 읽는 이야기':'현재: 다음 문장으로 이어 읽는 대화'));
+    for(const f of fields){if(['groomStory','brideStory'].includes(f.id)&&storyMode==='chat')continue;
+      root.append(inputFor(f,e.values[f.id],async v=>{const auto=['groomStory','brideStory'].includes(f.id)&&v&&state().values.storyMode==='original';const ok=await save(e=>{e.values[f.id]=v;if(auto)e.values.storyMode='perspective';});if(ok&&f.id==='storyMode'){render(group);onMode();}if(auto){const select=root.querySelector('[aria-label="두 사람의 시선"]');if(select)select.value='perspective';const status=root.querySelector('.experience-status');if(status)status.textContent='현재: 성우 · 소희 · 함께 탭으로 읽는 이야기';onMode();}return ok;}));}
+    const missing=[];if(e.values.coverMedia!=='photo'&&!e.values.coverVideo&&id==='top')missing.push('표지 영상을 선택하면 재생돼요. 지금은 사진으로 보여요.');if(id==='playlist'&&!(e.lists.playlist||[]).some(r=>r.audio))missing.push('미리 듣기는 자료 보관함에 파일을 추가한 뒤 곡에 연결해 주세요. 음원 링크와 배경음악은 그대로 이용할 수 있어요.');if(missing.length)root.append(el('p','experience-status',missing.join(' ')));
     for(const [key,spec]of lists){const details=el('details','experience-repeater');details.open=true;const summary=el('summary','',`${spec.label} · ${(e.lists[key]||[]).length}/${spec.max}`);details.append(summary);
+      if(key==='dialogue'&&storyMode!=='chat')continue;
       (e.lists[key]||[]).forEach((row,i)=>{const box=el('fieldset');box.append(el('legend','',`${i+1}번째`));for(const f of spec.fields)box.append(inputFor(f,row[f.id],v=>save(e=>e.lists[key][i][f.id]=v)));const remove=el('button','','이 항목 제외');remove.type='button';remove.onclick=async()=>{if(await save(e=>e.lists[key].splice(i,1)))render(group);};box.append(remove);details.append(box);});
       const add=el('button','experience-add','＋ 항목 추가');add.type='button';add.disabled=(e.lists[key]||[]).length>=spec.max;add.onclick=async()=>{if(await save(e=>(e.lists[key]??=[]).push({})))render(group);};details.append(add);root.append(details);
     }

@@ -9,6 +9,8 @@ import {mountLibrary} from './library.mjs';
 import {V2_PRESETS} from './recommendations.mjs';
 import {experienceDefaults,normalizeExperience} from './js/experience-config.mjs';
 import {mountExperienceEditor} from './experience-editor.mjs';
+import {mountPanelLayout} from './panel-layout.mjs';
+import {scenariosFor,applyScenario} from './scenarios.mjs';
 
 const $=id=>document.getElementById(id),frame=$('invitation-preview'),WORKING='sungso_studio_v2_working_design';
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -18,6 +20,7 @@ if(!new URLSearchParams(location.search).has('version'))try{const saved=JSON.par
 let currentContent=normalizeContentDraft(),ready=false,contentLoaded=false,muting=false,selectedKey='cover',activeScene='top',orderEditing=false,pickerEnabled=true,audioPhase='paused';
 let lastReviewKey='cover';
 let experienceEditor;
+const panelLayout=mountPanelLayout();
 const hiddenScenes=()=>new Set((currentContent.experience?.values?.hiddenScenes||'').split(',').filter(Boolean));
 let visibilityBusy=false;
 const visibleScenes=()=>sceneVisibility(composition,currentContent).visible;
@@ -82,7 +85,7 @@ function renderRail(){
     const li=node('li','scene-row');li.dataset.scene=item.id;if(hiddenScenes().has(item.id))li.classList.add('scene-hidden');if(item.id===activeScene)li.classList.add('selected');
     const button=node('button','scene-select');button.dataset.action='select';button.setAttribute('aria-pressed',String(item.id===activeScene));button.onclick=()=>selectScene(item.id);
     if(item.id==='top'){const img=node('img','scene-thumb');img.src=thumb();img.alt='';button.append(img);}else button.append(node('span','scene-number',item.movable?String(composition.order.indexOf(item.id)+1).padStart(2,'0'):item.id==='opening'?'✎':item.id==='navigation'?'≡':'&'));
-    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);
+    const copy=node('span','scene-copy');copy.append(node('strong','',item.label),node('small','',item.id==='our-story'&&currentContent.experience?.values?.storyMode==='perspective'?'서로의 시선':item.id==='our-story'&&currentContent.experience?.values?.storyMode==='chat'?'이어지는 대화':CHOICES[item.key].find(c=>c.id===composition[item.key])?.label));button.append(copy);li.append(button);
     if(orderEditing&&item.movable){
       const controls=node('div','scene-order-tools'),handle=node('button','drag-handle','⠿');handle.dataset.action='drag';handle.setAttribute('aria-label',`${item.label} 순서 드래그`);handle.addEventListener('pointerdown',e=>{if(e.button!==0)return;pointerDrag={id:item.id,pointer:e.pointerId,x:e.clientX,y:e.clientY,moved:false,target:null,handle};handle.setPointerCapture(e.pointerId);});
       const position=node('select');position.dataset.action='position';position.setAttribute('aria-label',`${item.label} 위치`);composition.order.forEach((_,i)=>{const option=node('option','',`${i+1}번째 (${LABELS[SCENE_KEYS[composition.order[i]]]} 자리)`);option.value=i;position.append(option);});position.value=composition.order.indexOf(item.id);position.onchange=()=>reorder(item.id,Number(position.value));
@@ -160,15 +163,24 @@ function renderInspector(){
   $('content-wrap').hidden=!groups.length;
   document.querySelectorAll('[data-content-step]').forEach(group=>{group.hidden=!groups.includes(group.dataset.contentStep);group.open=!group.hidden;});
   $('scene-notes').replaceChildren();
-  const notes={date:'날짜·시간은 표지와 일정 파일에 같은 예식 정보를 사용해요.',arrival:'길찾기·교통 안내는 유지돼요. 시연으로 외부 지도는 열지 않아요.',gifting:'계좌는 예시로 보여요. 실제 계좌 등록은 공동 저장 창의 사진·계좌 관리에서 할 수 있어요.',wishes:'이곳은 체험 방명록이에요. 공개 청첩장의 축하 메시지는 그대로 유지돼요.'};
+  const notes={date:'날짜·시간은 표지와 일정 파일에 같은 예식 정보를 사용해요.',arrival:'길찾기·교통 안내는 유지돼요. 시연으로 외부 지도는 열지 않아요.',gifting:'위 계좌 설정에서 등록·순서 변경 후 별도로 반영할 수 있어요.',wishes:'이곳은 체험 방명록이에요. 공개 청첩장의 축하 메시지는 그대로 유지돼요.'};
   if(!GLOBAL_KEYS.includes(selectedKey)){const reset=node('button','reset-scene','이 장면의 디자인 초기화');reset.onclick=()=>{const patch=Object.fromEntries(settingsFor(selectedKey,composition).map(k=>[k,DEFAULT_COMPOSITION[k]]));apply({...composition,...patch,sectionTuning:setSectionTuning(composition.sectionTuning,sectionFor(selectedKey),null)});renderInspector();};$('scene-notes').append(reset);}
   if(notes[selectedKey])$('scene-notes').append(node('p','scene-note',notes[selectedKey]));
   experienceEditor?.render(selectedKey==='opening'?'opening':sectionFor(selectedKey));
+  renderScenarios();
+  syncStoryFields();
 
   const all=visibleScenes(),index=all.findIndex(s=>s.id===activeScene);$('previous').disabled=index<=0;$('next').disabled=index===all.length-1;
   $('editor-content').scrollTop=0;updateSelections();updateRanges();renderMobileChips();
   document.dispatchEvent(new Event('studio-v2:selection'));
 }
+const scenarioRoot=node('section','scenario-picker');$('editor-content').prepend(scenarioRoot);
+function renderScenarios(){
+  const recipes=GLOBAL_KEYS.includes(selectedKey)?[]:scenariosFor(sectionFor(selectedKey));scenarioRoot.hidden=!recipes.length;scenarioRoot.replaceChildren();if(!recipes.length)return;
+  scenarioRoot.append(node('h3','','완성 예시로 시작'),node('p','helper','제안 문구와 사진으로 동작을 확인해요. 적어 둔 내용은 유지하고 빈 곳만 채워요. 공개 전 두 사람의 말로 다듬어 주세요.'));
+  for(const recipe of recipes){const b=node('button','scenario-option');b.append(node('strong','',recipe.title),node('small','',recipe.detail),node('span','scenario-cta','예시 넣고 보기 ↗'));b.onclick=async()=>{b.disabled=true;try{await loadSnapshot(applyScenario(getSnapshot(),recipe.id,runtime.photos));selectScene(recipe.section);notify('예시를 넣었어요. 바로 수정하거나 되돌릴 수 있어요. 아직 공개하지 않았어요.');}catch(e){notify(e.message);}finally{b.disabled=false;}};scenarioRoot.append(b);}
+}
+function syncStoryFields(){const expanded=selectedKey==='story'&&experienceDefaults(currentContent.experience).values.storyMode!=='original';$('design-settings').hidden=expanded;if(selectedKey==='story')$('content-wrap').hidden=expanded;}
 // A V2 draft never overwrites the V1 working content database.
 const v2IDB=window.indexedDB?{open:(_name,version)=>window.indexedDB.open('sungso-invitation-studio-v2-content',version)}:undefined;
 contentEditor=mountContentEditor({root:$('content-editor'),config:runtime,store:createContentStore(v2IDB),getComposition:()=>composition,onComposition:next=>apply(next),onChange:(draft,meta)=>{
@@ -179,7 +191,7 @@ contentEditor=mountContentEditor({root:$('content-editor'),config:runtime,store:
 export const contentReady=contentEditor.ready.then(()=>{currentContent=contentEditor.getDraft();contentLoaded=true;history.reset(getSnapshot());renderRail();renderInspector();preview();});
 export const studioReady=contentReady;
 const experienceRoot=node('section','experience-editor');$('editor-content').insertBefore(experienceRoot,$('scene-notes'));
-experienceEditor=mountExperienceEditor({root:experienceRoot,getSnapshot,config:runtime,notify,onDraft:draft=>contentEditor.setDraft(draft)});
+experienceEditor=mountExperienceEditor({root:experienceRoot,getSnapshot,config:runtime,notify,onMode:()=>{syncStoryFields();renderRail();},onDraft:(draft,meta)=>contentEditor.setDraft(draft,meta)});
 const library=mountLibrary({getSnapshot,loadSnapshot,notify});
 for(const id of ['open-library','mobile-library'])$(id).onclick=()=>{stopDemo();library.open();};
 for(const button of document.querySelectorAll('[data-global]'))button.onclick=()=>selectGlobal(button.dataset.global);
@@ -195,7 +207,7 @@ $('audio-toggle').onclick=()=>post({type:'invitation-lab:control',action:'audio'
 document.querySelectorAll('[data-width]').forEach(b=>{if(b.tagName!=='BUTTON')return;b.onclick=()=>{document.querySelector('.preview-stage').dataset.width=b.dataset.width;document.querySelectorAll('button[data-width]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));};});
 function share(){const url=new URL(location.href);url.search=compositionParams(composition).toString();$('link-value').value=url.href;$('link-dialog').showModal();$('link-value').select();}
 $('share').onclick=share;
-$('add-scene').onclick=()=>{stopDemo();$('extra-options').replaceChildren();for(const section of OPTIONAL_SECTIONS){const button=node('button','extra-option');const exists=composition.extras.includes(section.id),removed=hiddenScenes().has(section.id);button.append(node('strong','',`${section.label}${removed?' · 다시 넣기':exists?' · 사용 중':''}`),node('small','',section.detail));button.disabled=exists&&!removed;button.onclick=()=>{if(exists&&removed){$('add-dialog').close();void toggleScene(section.id);return;}const order=[...composition.order],after=order.indexOf(activeScene);order.splice(after<0?order.length:after+1,0,section.id);apply({...composition,extras:[...composition.extras,section.id],order});$('add-dialog').close();selectScene(section.id);};$('extra-options').append(button);}$('add-dialog').showModal();};
+$('add-scene').onclick=()=>{stopDemo();$('extra-options').replaceChildren();for(const section of OPTIONAL_SECTIONS){const button=node('button','extra-option');const exists=composition.extras.includes(section.id),removed=hiddenScenes().has(section.id);button.append(node('strong','',`${section.label}${removed?' · 다시 넣기':exists?' · 사용 중':''}`),node('small','',section.detail));button.disabled=exists&&!removed;button.onclick=async()=>{if(exists&&removed){$('add-dialog').close();void toggleScene(section.id);return;}const order=[...composition.order],after=order.indexOf(activeScene);order.splice(after<0?order.length:after+1,0,section.id);const next={...getSnapshot(),composition:{...composition,extras:[...composition.extras,section.id],order}},recipe=scenariosFor(section.id)[0];await loadSnapshot(recipe?applyScenario(next,recipe.id,runtime.photos):next);$('add-dialog').close();selectScene(section.id);notify(recipe?'완성 예시를 함께 넣었어요. 내용을 두 사람의 말로 수정해 주세요.':'장면을 넣었어요. 기존 예식 정보와 제안 문구를 바로 확인해 보세요.');};$('extra-options').append(button);}$('add-dialog').showModal();};
 $('open-presets').onclick=()=>{stopDemo();$('preset-dialog').showModal();};
 const presetArchive=node('details','preset-archive');presetArchive.append(node('summary','','이전 추천 조합도 보기'));
 for(const preset of [...V2_PRESETS,...PRESETS]){const button=node('button','preset-option');button.dataset.preset=preset.id;button.append(node('strong','',preset.label),node('small','',preset.detail));button.onclick=()=>{apply(preset.composition);$('preset-dialog').close();selectScene('top');notify('추천 디자인을 적용했어요. 문구와 사진은 유지돼요.');};(V2_PRESETS.includes(preset)?$('presets'):presetArchive).append(button);}
