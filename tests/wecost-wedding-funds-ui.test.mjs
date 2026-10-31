@@ -9,7 +9,7 @@ import { dollarValuation, quoteIsOld } from '../apps/wecost/js/wedding-fx.mjs';
 const require = createRequire(new URL('../apps/sohee/sales/package.json', import.meta.url));
 const { JSDOM } = require('jsdom');
 const today = '2026-10-31';
-function env(quote = null) {
+function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }) {
   const dom = new JSDOM('<body><div data-private-root><div id="s-total"></div></div></body>');
   const w = dom.window, cleanups = [], writes = [], alerts = [];
   let receive, fail = false, renders = 0, rateChange, rateDisposed = false;
@@ -25,7 +25,7 @@ function env(quote = null) {
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
   const source = readFileSync(new URL('../apps/wecost/js/wedding-funds-ui.mjs', import.meta.url), 'utf8').replace(/^import\s[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingTravelDetails};', c);
+  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd};', c);
   c.api.registerWeddingFinance(() => ledger, () => { renders++; });
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
@@ -77,10 +77,10 @@ test('travel form preserves row IDs and payment mapping, adds a row without writ
   e.open('payment'); assert.equal(e.d.querySelector('img'), null); e.dom.window.close();
 });
 
-test('reference valuation updates only its panel without changing the wallet, savings goal or DB', () => {
+test('reference valuation updates the total and savings goal together without changing the wallet or DB', () => {
   const quote = { rate: 1300, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') };
   const e = env(quote), before = structuredClone(e.data), goal = e.c.api.weddingFundingCard(e.ledger.items);
-  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingFundsHTML();
+  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingFundsHTML() + goal;
   const funds = e.d.querySelector('.wf-funds'), label = funds.querySelector('.wf-funds-title'), renders = e.renders();
   assert.match(funds.textContent, /약 39만원/); assert.match(funds.textContent, /환전 원가보다 3만원 높아요/);
   assert.match(funds.textContent, /2026.*10.*31.*09:00.*KST/);
@@ -88,8 +88,61 @@ test('reference valuation updates only its panel without changing the wallet, sa
   assert.match(funds.textContent, /약 33만원/); assert.match(funds.textContent, /환전 원가보다 3만원 낮아요/);
   assert.match(funds.textContent, /최신 조회 실패/);
   assert.equal(e.d.querySelector('.wf-funds-title'), label); assert.equal(e.renders(), renders);
-  assert.equal(e.c.api.weddingFundingCard(e.ledger.items), goal); assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
+  assert.notEqual(e.c.api.weddingFundingCard(e.ledger.items), goal); assert.match(e.d.querySelector('#wf-current-total').textContent, /58만원/); assert.match(e.d.querySelector('#s-funding-gap').textContent, /12만원/); assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
   e.open('refresh-fx'); assert.match(funds.textContent, /약 39만원/); assert.equal(e.writes.length, 0);
   e.cleanups.forEach(fn => fn()); assert.equal(e.rateDisposed(), true);
+  e.dom.window.close();
+});
+
+function addDetailedTrip(e) {
+  e.ledger.items[0] = { ...e.ledger.items[0], cat: travel.TRAVEL_CATEGORY, name: '합성 여행', planned: 400000, memo: '기존 전체 메모' };
+  e.data.plan = { linkedItemId: 'sample', baselineTotal: 400000, availableCash: null, fxRate: 1200, note: '기존 예산 메모', rows: [
+    { id: 'one', name: '합성 숙소', currency: 'KRW', amount: 200000, note: '숙소 메모' },
+    { id: 'two', name: '합성 항공', currency: 'KRW', amount: 200000, note: '항공 메모' },
+  ] };
+  e.data.funds.travel = { linkedItemId: 'sample', payments: [{ id: 'one', deposit: 100000, actual: 0 }, { id: 'two', deposit: 0, actual: 0 }] };
+  e.receive(structuredClone(e.data));
+}
+
+test('a direct travel-row edit shows one item and preserves every sibling, payment and original memo on save', async () => {
+  const e = env(); addDetailedTrip(e);
+  const rows = e.c.api.weddingDisplayItems(e.ledger.items);
+  assert.equal(rows.length, 2); assert.match(e.c.api.weddingTravelActions(rows[1]), /data-row="two"/);
+  e.open('travel-row', 'sample', 'two');
+  assert.equal(e.d.querySelectorAll('[data-row-index]').length, 1);
+  assert.equal(e.d.querySelector('[data-key=name]').value, '합성 항공');
+  e.d.querySelector('[data-key=amount]').value = '300000';
+  e.fail(true); await e.submit(); assert.equal(e.writes.length, 0);
+  assert.equal(e.d.querySelector('[data-key=amount]').value, '300000');
+  e.fail(false); await e.submit();
+  const change = e.writes[0][0];
+  assert.equal(change.plan.rows[1].amount, 300000);
+  assert.deepEqual(travel.normalizeBudgetDraft(change.plan).rows[0], e.data.plan.rows[0]);
+  assert.deepEqual(JSON.parse(JSON.stringify(change.payments)), e.data.funds.travel.payments);
+  assert.equal(change.plan.note, '기존 예산 메모'); assert.equal(change.ledgerMemo, '기존 전체 메모');
+  e.open('payment', 'sample', 'two'); assert.equal(e.d.querySelector('#wf-target').value, 'two');
+  e.dom.window.close();
+});
+
+test('category add opens one blank travel item and appends it without copying the parent expense', async () => {
+  const e = env(); addDetailedTrip(e);
+  assert.match(e.c.api.weddingTravelAdd(travel.TRAVEL_CATEGORY), /data-finance="travel-add"/);
+  e.open('travel-add');
+  assert.equal(e.d.querySelectorAll('[data-row-index]').length, 1); assert.equal(e.writes.length, 0);
+  e.d.querySelector('[data-key=name]').value = '합성 이동'; e.d.querySelector('[data-key=amount]').value = '50000';
+  await e.submit(); const change = e.writes[0][0];
+  assert.equal(change.plan.rows.length, 3); assert.equal(change.payments.length, 3);
+  assert.equal(change.plan.rows[2].name, '합성 이동');
+  assert.deepEqual(travel.normalizeBudgetDraft(change.plan).rows.slice(0, 2), e.data.plan.rows);
+  assert.equal(change.payments[2].actual, 0); assert.equal(change.payments[2].deposit, 0);
+  e.dom.window.close();
+});
+
+test('no rate shows an unknown current total and savings goal instead of the historical cost', () => {
+  const e = env(null);
+  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingFundsHTML() + e.c.api.weddingFundingCard(e.ledger.items);
+  assert.equal(e.d.querySelector('#wf-current-total strong').textContent, '—');
+  assert.equal(e.d.querySelector('#s-funding-gap').textContent, '—');
+  assert.match(e.d.querySelector('.wf-funds').textContent, /환전 원가 36만원/);
   e.dom.window.close();
 });

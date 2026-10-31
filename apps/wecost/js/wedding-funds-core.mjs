@@ -12,14 +12,31 @@ export function normalizeFunds(value) {
   amount(cashKrw + usdCostKrw, '자금 합계');
   return { cashKrw, usdBalance, usdCostKrw };
 }
-export function fundingSummary(items, funds, plan = null) {
+export function fundingSummary(items, funds, plan = null, quote = null) {
   const remaining = items.reduce((sum, i) => {
     const detail = travelBreakdown(i, plan, funds);
     return sum + (detail.rows.length ? detail.rows.reduce((s, row) => s + row.remaining, 0) : Math.max((i.planned || 0) - (i.deposit || 0) - (i.actual || 0), 0));
   }, 0);
   if (!funds || funds.cashKrw === undefined) return { remaining, available: null, needed: null, surplus: null };
-  const f = normalizeFunds(funds), available = f.cashKrw + f.usdCostKrw;
-  return { remaining, available, needed: Math.max(remaining - available, 0), surplus: Math.max(available - remaining, 0), rate: f.usdBalance ? f.usdCostKrw / f.usdBalance : null };
+  const f = normalizeFunds(funds), rate = typeof quote?.rate === 'number' && Number.isFinite(quote.rate) && quote.rate > 0 ? quote.rate : null;
+  if (f.usdBalance && !rate) return { remaining, available: null, needed: null, surplus: null, missingRate: true };
+  const available = amount(f.cashKrw + Math.round(f.usdBalance * (rate || 0)), '현재 환산 합계');
+  return { remaining, available, needed: Math.max(remaining - available, 0), surplus: Math.max(available - remaining, 0), rate, costRate: f.usdBalance ? f.usdCostKrw / f.usdBalance : null };
+}
+
+// Replace the linked parent only in the wedding view. Stable row IDs route edits
+// to the existing plan/payment transaction; shared ledger documents stay intact.
+export function travelLedgerItems(items, plan, funds) {
+  return items.flatMap(item => {
+    const detail = travelBreakdown(item, plan, funds);
+    if (!detail.rows.length) return [detail.error ? { ...item, travelDetailError: detail.error } : item];
+    return detail.rows.map(row => ({
+      id: `travel:${JSON.stringify([item.id, row.id])}`, name: row.name, cat: item.cat,
+      planned: row.planned, deposit: row.deposit, actual: row.actual, balance: row.remaining,
+      balanceDue: item.balanceDue || '', memo: row.note,
+      travelParentId: item.id, travelRowId: row.id, currency: row.currency, nativeAmount: row.amount,
+    }));
+  });
 }
 export function normalizePayments(plan, payments) {
   if (!Array.isArray(payments) || payments.length !== plan.rows.length) throw Error('각 세부 비용의 지급 내역을 확인해주세요.');

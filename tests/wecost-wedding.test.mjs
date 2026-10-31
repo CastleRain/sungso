@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { createRequire } from "node:module";
 import * as core from "../apps/wecost/js/wedding-core.mjs";
+import { travelLedgerItems } from "../apps/wecost/js/wedding-funds-core.mjs";
 import { weddingItems } from "./fixtures/wedding-items.mjs";
 const sample = weddingItems(),
   today = "2026-10-31";
@@ -153,7 +154,7 @@ const require = createRequire(
   new URL("../apps/sohee/sales/package.json", import.meta.url),
 );
 const { JSDOM } = require("jsdom");
-function renderEnvironment() {
+function renderEnvironment(finance = {}) {
   const html = readFileSync(
     new URL("../apps/wecost/index.html", import.meta.url),
     "utf8",
@@ -174,8 +175,11 @@ function renderEnvironment() {
     handleWeddingFinance: () => false,
     weddingFundingCard: () => "",
     weddingFundsHTML: () => "",
-    weddingTravelDetails: () => "",
+    weddingDisplayItems: items => items,
+    weddingTravelActions: () => "",
+    weddingTravelAdd: () => "",
     weddingRemaining: items => core.aggregate(items).remaining,
+    ...finance,
     document: w.document,
     window: w,
     CSS: { escape: (s) => s },
@@ -218,6 +222,33 @@ function renderEnvironment() {
     setFail: (v) => (fail = v),
   };
 }
+
+test('travel details are direct category rows on both surfaces and obey filtering, sorting and folding', () => {
+  const parent = { id: 'synthetic-trip', name: '합성 여행 총액', cat: '✈️신혼여행', planned: 600000, deposit: 0, actual: 200000 };
+  const plan = { linkedItemId: parent.id, baselineTotal: parent.planned, availableCash: null, fxRate: 1200, note: '', rows: [
+    { id: 'hotel', name: '합성 숙소', currency: 'KRW', amount: 400000, note: '' },
+    { id: 'air', name: '합성 항공', currency: 'KRW', amount: 200000, note: '' },
+  ] };
+  const funds = { travel: { linkedItemId: parent.id, payments: [{ id: 'hotel', deposit: 0, actual: 0 }, { id: 'air', deposit: 0, actual: 200000 }] } };
+  const e = renderEnvironment({ weddingDisplayItems: items => travelLedgerItems(items, plan, funds) });
+  e.state.items = [parent]; e.context.render(e.state); const d = e.w.document;
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row').length, 2);
+  assert.equal(d.querySelectorAll('.wf-travel-row, .wf-travel-details').length, 0);
+  assert.equal(d.querySelectorAll('.wed-mobile-item').length, 2);
+  assert.doesNotMatch(d.querySelector('#wed-ledger').textContent, /합성 여행 총액/);
+  assert.match(d.querySelector('#s-total').textContent, /60만원/);
+  assert.match(d.querySelector('#s-paid').textContent, /20만원/);
+  const toggle = d.querySelector('[data-action=toggle-ledger-group]'); toggle.click();
+  assert.ok([...d.querySelectorAll('.wed-nested-row')].every(row => row.hidden));
+  toggle.click(); assert.ok([...d.querySelectorAll('.wed-nested-row')].every(row => !row.hidden));
+  d.querySelector('[data-status=done]').click();
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row').length, 1);
+  assert.match(d.querySelector('#tbl-body').textContent, /합성 항공/);
+  d.querySelector('[data-status=all]').click();
+  d.querySelector('[data-action=choose-sort][data-value=amount-asc]').click();
+  assert.match(d.querySelector('#tbl-body .wed-nested-row').textContent, /합성 항공/);
+  assert.equal(e.writes.length, 0); e.dom.window.close();
+});
 test("renderer exposes full ledger, working expansion, filtering and correct progress without mutation", () => {
   const env = renderEnvironment(),
     d = env.w.document;

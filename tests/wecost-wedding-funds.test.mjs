@@ -25,7 +25,7 @@ test('exchange is an asset, missing balances stay unknown, and expense refunds n
   assert.deepEqual(core.normalizeFunds(funds), { cashKrw: 200000, usdBalance: 500, usdCostKrw: 600000 });
   const before = original(), next = core.buildFundingChange(before, { kind: 'balances', balances: funds }, before, today);
   assert.equal(next.itemPatch, null);
-  const sum = core.fundingSummary([{ planned: 100000, actual: 120000 }, { planned: 200000 }], funds);
+  const sum = core.fundingSummary([{ planned: 100000, actual: 120000 }, { planned: 200000 }], funds, null, { rate: 1200 });
   assert.equal(sum.remaining, 200000); assert.equal(sum.surplus, 600000);
   assert.throws(() => core.normalizeFunds({ ...funds, usdBalance: 0 }), /함께/);
   assert.throws(() => core.normalizeFunds({ ...funds, usdBalance: 2.001 }), /올바르게/);
@@ -61,7 +61,7 @@ test('cash payment changes funds and debt together; credit card uses outside fun
   const pay = { kind: 'payment', direction: 'payment', source: 'cash', amount: 50000, date: today };
   const next = core.buildFundingChange(before, pay, before, today);
   assert.equal(next.funds.cashKrw, 150000); assert.equal(next.itemPatch.actual, 50000);
-  assert.equal(core.fundingSummary([before.item], before.funds).needed, core.fundingSummary([{ ...before.item, ...next.itemPatch }], next.funds).needed);
+  assert.equal(core.fundingSummary([before.item], before.funds, null, { rate: 1000 }).needed, core.fundingSummary([{ ...before.item, ...next.itemPatch }], next.funds, null, { rate: 1000 }).needed);
   const card = core.buildFundingChange(before, { ...pay, source: 'outside' }, before, today);
   assert.equal(card.funds.cashKrw, funds.cashKrw);
   for (const change of [{ amount: 300000 }, { amount: -1 }, { amount: 0 }, { date: '2026-11-01' }, { date: '2026-02-30' }, { source: '' }]) assert.throws(() => core.buildFundingChange(before, { ...pay, ...change }, before, today));
@@ -83,6 +83,36 @@ test('detail-aware wedding view keeps a due item visible even when another sub-c
   assert.equal(view.filtered.length, 1); assert.equal(view.soon.length, 1); assert.equal(view.completed.length, 0);
   assert.equal(view.totals.remaining, 20); assert.equal(view.groups[0].totals.remaining, 20);
   assert.equal(weddingView([paid], { today }).totals.remaining, 0, 'existing callers retain the existing calculation');
+});
+
+test('current funds and required saving use the same FX rate; missing rates never fall back to acquisition cost', () => {
+  const before = structuredClone(funds), costs = [{ planned: 1000000 }];
+  assert.equal(core.fundingSummary(costs, funds).available, null);
+  assert.equal(core.fundingSummary(costs, funds, null, { rate: NaN }).needed, null);
+  const a = core.fundingSummary(costs, funds, null, { rate: 1000 });
+  const b = core.fundingSummary(costs, funds, null, { rate: 1400 });
+  assert.equal(a.available, 700000); assert.equal(a.needed, 300000);
+  assert.equal(b.available, 900000); assert.equal(b.needed, 100000);
+  assert.deepEqual(funds, before);
+  assert.equal(core.fundingSummary(costs, { cashKrw: 1100000, usdBalance: 0, usdCostKrw: 0 }).surplus, 100000);
+});
+
+test('travel rows replace the parent once and participate in category totals, filters and ordering', () => {
+  const state = detailed(), other = { id: 'hall', cat: '🏰웨딩홀', name: '합성 홀', planned: 300000, deposit: 0, actual: 0 };
+  const before = structuredClone(state), rows = core.travelLedgerItems([state.item, other], state.plan, state.funds);
+  assert.equal(rows.length, 3); assert.ok(rows.every(row => row.id !== state.item.id));
+  assert.equal(new Set(rows.map(row => row.id)).size, 3);
+  assert.equal(rows[0].travelParentId, state.item.id); assert.equal(rows[0].travelRowId, 'stay');
+  const view = weddingView(rows, { groupBy: 'category', sort: 'amount', today });
+  const group = view.groups.find(g => g.category === travel.TRAVEL_CATEGORY);
+  assert.deepEqual(group.items.map(i => i.name), ['합성 숙소', '합성 항공']);
+  assert.equal(group.totals.planned, state.item.planned); assert.equal(group.totals.paid, state.item.deposit + state.item.actual);
+  assert.equal(weddingView(rows, { status: 'done', today }).filtered[0].travelRowId, 'flight');
+  assert.equal(weddingView(rows, { includeTravel: false, today }).filtered.length, 1);
+  assert.deepEqual(state, before);
+  const inconsistent = core.travelLedgerItems([{ ...state.item, actual: 120000 }], state.plan, state.funds);
+  assert.equal(inconsistent.length, 1); assert.equal(inconsistent[0].id, state.item.id);
+  assert.match(inconsistent[0].travelDetailError, /다른 화면/);
 });
 
 function storeEnv() {
