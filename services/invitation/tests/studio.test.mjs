@@ -81,3 +81,18 @@ test('studio API has the same two-member gate, exact invitation CORS and no publ
     assert.equal((await fetch(base + STUDIO_PATH + '/published', { method: 'POST', body: '{}' })).status, 401);
   } finally { await new Promise(r => server.close(r)); }
 });
+
+
+test('additional font choices and removed scenes round trip through private save and explicit publication',async()=>{
+  for(const font of ['gowun','suit','hand']){
+    const f=fixture(),a=save();a.snapshot.composition=normalizeComposition({font,extras:['day-pass']});
+    a.snapshot.content.experience={version:1,values:{hiddenScenes:'our-story,day-pass'}};
+    await f.store.change(a,f.member);
+    const draft=await f.store.draft(a.id);assert.equal(draft.snapshot.composition.font,font);
+    assert.equal(draft.snapshot.content.experience.values.hiddenScenes,'our-story,day-pass');
+    assert.equal((await f.store.published()).release,null);
+    await f.store.change({action:'publish',id:a.id,operationId:randomUUID(),expectedRevision:1,expectedDraftRevision:1},f.member);
+    const published=(await f.store.published()).release.snapshot;
+    assert.equal(published.composition.font,font);assert.equal(published.content.experience.values.hiddenScenes,'our-story,day-pass');
+  }
+});
