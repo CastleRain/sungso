@@ -1,6 +1,6 @@
 /** Numeric, visual-only settings. Neither selectors nor CSS strings cross this boundary. */
 export const FINE_SECTION_IDS = Object.freeze([
-  'top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook',
+  'couple-profile','wedding-quiz','busan-guide','playlist','time-machine','top', 'invitation', 'wedding-day', 'location', 'our-story', 'gallery', 'accounts', 'guestbook',
   'day-pass', 'guest-guide', 'day-checklist', 'keepsake', 'promises', 'couple-notes', 'thank-you', 'closing',
 ]);
 export const FINE_SECTION_LIMIT = FINE_SECTION_IDS.length;

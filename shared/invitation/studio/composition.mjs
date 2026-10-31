@@ -1,6 +1,11 @@
 import { normalizeFineTuning, normalizeSectionTuning } from './fine-tuning.mjs';
 /** Only visual choices may cross the editor/preview boundary. Never accepts data mode or URLs. */
 export const OPTIONAL_SECTIONS = Object.freeze([
+  {id:'couple-profile',label:'두 사람 소개 · 인터뷰',key:'profileStyle',detail:'직접 적은 일문일답과 사진을 넘겨 봐요.',group:'sentiment'},
+  {id:'wedding-quiz',label:'우리의 작은 퀴즈',key:'quizStyle',detail:'두 사람이 적은 질문과 답으로 함께해요.',group:'sentiment'},
+  {id:'busan-guide',label:'두 사람이 추천하는 부산',key:'busanStyle',detail:'직접 추천한 장소와 지도 링크를 모아요.',group:'utility'},
+  {id:'playlist',label:'우리의 플레이리스트',key:'playlistStyle',detail:'직접 준비한 음악과 공식 링크를 함께 들어요.',group:'sentiment'},
+  {id:'time-machine',label:'그때와 지금',key:'portraitStyle',detail:'두 장의 사진을 슬라이더로 겹쳐 봐요.',group:'sentiment'},
   { id: 'day-pass', label: '당일 안내 패스', key: 'dayPass', detail: '시간·층·주소와 길찾기를 한 장에서 바로 확인해요.', group: 'utility' },
   { id: 'guest-guide', label: '하객 안내', key: 'guestGuide', detail: '교통과 등록된 주차·식사 정보를 한곳에 모아요.', group: 'utility' },
   { id: 'day-checklist', label: '당일 체크리스트', key: 'checklist', detail: '일정과 교통편을 확인하며 가볍게 체크해요.', group: 'utility' },
@@ -20,8 +25,13 @@ export const ORDER_SECTIONS = Object.freeze([
   ...OPTIONAL_SECTIONS,
 ].map(section => Object.freeze(section)));
 export const DEFAULT_ORDER = Object.freeze(ORDER_SECTIONS.filter(section => !section.group).map(section => section.id));
-export const DEFAULT_COMPOSITION = Object.freeze({ palette: 'mist', font: 'letter', textSize: 'original', textScale: 1, lineScale: 1, sectionSpace: 1, sectionTuning: '', lineSpace: 'original', photoTone: 'original', coverFocus: 'original', albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
+export const DEFAULT_COMPOSITION = Object.freeze({ profileStyle:'interview',quizStyle:'balance',busanStyle:'postcards',playlistStyle:'records',portraitStyle:'slider',palette: 'mist', font: 'letter', textSize: 'original', textScale: 1, lineScale: 1, sectionSpace: 1, sectionTuning: '', lineSpace: 'original', photoTone: 'original', coverFocus: 'original', albumColumns: 'auto', albumRatio: 'auto', ending: 'original', calendarMark: 'original', dayPass: 'boarding', motion: 'signature', motionSpeed: 1, motionStrength: 1, spacing: 'balanced', divider: 'none', cover: 'cinema', opening: 'ink', intro: 'letter', date: 'ticket', story: 'chapters', album: 'stack', arrival: 'unfold', gifting: 'card', wishes: 'envelope', navigation: 'dock', guestGuide: 'folded', checklist: 'list', keepsake: 'ticket', promiseStyle: 'lines', noteStyle: 'conversation', thanksStyle: 'letter', extras: Object.freeze([]), order: DEFAULT_ORDER });
 export const CHOICES = Object.freeze({
+  profileStyle:[{id:'interview',label:'서로에게 묻는 말',detail:'한 질문씩 넘기는 인터뷰.'},{id:'magazine',label:'두 사람의 작은 매거진',detail:'답과 사진을 차분히 모아 봐요.'}],
+  quizStyle:[{id:'balance',label:'두 가지 중에 하나',detail:'답을 고르면 작은 이야기가 열려요.'},{id:'cards',label:'한 장씩 퀴즈',detail:'질문을 카드로 넘기며 맞혀 봐요.'}],
+  busanStyle:[{id:'postcards',label:'부산의 작은 엽서',detail:'직접 추천한 곳을 엽서처럼 담아요.'},{id:'list',label:'짧은 여행 목록',detail:'이름과 지도 링크를 간결하게 읽어요.'}],
+  playlistStyle:[{id:'records',label:'작은 레코드 가게',detail:'준비한 곡을 한 곡씩 들어요.'},{id:'list',label:'우리의 음악 목록',detail:'곡과 공식 재생 링크를 한눈에.'}],
+  portraitStyle:[{id:'slider',label:'그때에서 지금으로',detail:'손잡이를 움직여 두 순간을 겹쳐요.'},{id:'pair',label:'나란히 놓인 순간',detail:'두 사진을 함께 바라봐요.'}],
   textSize: Object.freeze([
     { id: 'original', label: '지금의 글자 크기', detail: '기존의 섬세한 균형을 그대로 유지해요.' },
     { id: 'comfortable', label: '조금 더 편안하게', detail: '본문과 안내를 한 단계 키워 읽기 편하게 해요.' },
