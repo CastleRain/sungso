@@ -31,3 +31,11 @@ test('a selected cover photo outside the album is public but an unused draft pho
 
 
 test('hidden optional scenes remove their private content and media from the published DTO',async()=>{const f=fixture();f.request.snapshot.content.experience=exp({values:{hiddenScenes:'wedding-quiz,invitation',voice:media.id},media:[media],lists:{quizzes:[{question:'hidden question',a:'A',b:'B',answer:'a'}]}});await publish(f);const out=JSON.stringify(await f.store.published());assert.ok(!out.includes('hidden question'));assert.ok(!out.includes(media.id));});
+
+
+test('optional hero petals validate and survive shared draft/publication without changing old content',async()=>{
+  assert.equal(experienceDefaults().values.petals,'none');assert.throws(()=>exp({values:{petals:'script'}}));
+  const f=fixture();f.request.snapshot.content.experience.values.petals='rose';await publish(f);
+  assert.equal((await f.store.draft(f.request.id)).snapshot.content.experience.values.petals,'rose');
+  assert.equal((await f.store.published()).release.snapshot.content.experience.values.petals,'rose');
+});

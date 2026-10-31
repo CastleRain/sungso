@@ -7,6 +7,7 @@ export const MEDIA_TOTAL = 2400000;
 const field=(id,label,group,type='text',extra={})=>({id,label,group,type,...extra});
 export const EXPERIENCE_FIELDS = [
   field('hiddenScenes','숨긴 장면','internal'),
+  field('petals','표지에 떨어지는 꽃잎','top','select',{options:['none','rose','ivory'],labels:['꽃잎 없음','로즈 꽃잎','아이보리 꽃잎']}),
   field('coverMedia','표지 사진·영상','top','select',{options:['photo','loop','hold'],labels:['정지 사진','무음 영상 반복','길게 눌러 라이브 포토']}),
   field('coverVideo','표지 영상','top','media',{accept:'video'}),
   field('coverPhoto','대표 사진','top','photo'),field('coverX','가로 초점 (%)','top','number',{min:0,max:100,default:50}),field('coverY','세로 초점 (%)','top','number',{min:0,max:100,default:50}),
@@ -33,7 +34,7 @@ export const EXPERIENCE_FIELDS = [
   field('readable','하객용 읽기 편한 모드 버튼','top','checkbox'),field('personalized','이름별 초대 링크 허용','top','checkbox'),
   field('afterEnabled','예식 후 감사장으로 전환','closing','checkbox'),field('afterAt','감사장 전환 시각 (한국 시간)','closing','datetime-local'),field('afterText','예식 후 감사 인사','closing','textarea'),
   field('kakaoKey','카카오 JavaScript 앱 키 (공개 키)','closing','key'),field('shareImage','공유 카드 이미지 HTTPS 주소','closing','url',{kind:'image'}),
-  field('beforePhoto','어릴 적 사진','time-machine','photo'),field('afterPhoto','지금의 사진','time-machine','photo'),
+  field('beforePhoto','왼쪽 사진','time-machine','photo'),field('afterPhoto','오른쪽 사진','time-machine','photo'),
 ];
 export const EXPERIENCE_LISTS = {
   contacts:{label:'연락처',group:'invitation',max:6,fields:[field('role','구분','','select',{options:['groom','bride','groomFather','groomMother','brideFather','brideMother'],labels:['신랑','신부','신랑 아버지','신랑 어머니','신부 아버지','신부 어머니']}),field('name','표시 이름',''),field('phone','전화번호','','tel')]},
