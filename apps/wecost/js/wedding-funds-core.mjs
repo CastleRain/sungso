@@ -39,6 +39,7 @@ export function travelLedgerItems(items, plan, funds, quote = null) {
       balanceDue: item.balanceDue || '', memo: row.note,
       travelParentId: item.id, travelRowId: row.id, currency: row.currency, nativeAmount: row.amount,
       fxPending: row.currency === 'USD' && detail.missingRate,
+      usdPaid: row.usdPaid || 0, nativeRemaining: row.nativeRemaining, valuedPaid: row.valuedPaid,
     }));
   });
 }
@@ -49,8 +50,23 @@ export function normalizePayments(plan, payments) {
     const payment = payments.find(p => p.id === row.id);
     if (!payment || ids.has(payment.id)) throw Error('세부 비용과 지급 기록이 맞지 않아요.');
     ids.add(payment.id);
-    return { id: row.id, deposit: amount(payment.deposit, '계약금'), actual: amount(payment.actual, '계약금 외 지급액') };
+    const result = { id: row.id, deposit: amount(payment.deposit, '계약금'), actual: amount(payment.actual, '계약금 외 지급액') };
+    const usdPaid = amount(payment.usdPaid ?? 0, '달러 지급 누계', 2), usdPaidKrw = amount(payment.usdPaidKrw ?? 0, '달러 지급 원화 기록');
+    if ((usdPaid === 0) !== (usdPaidKrw === 0) || usdPaidKrw > result.actual) throw Error('달러 지급액과 원화 기록을 함께 확인해주세요.');
+    if (usdPaid && row.currency !== 'USD') throw Error('달러 지급 내역이 있는 항목은 통화를 바꾸기 전에 지급 내역을 확인해주세요.');
+    return usdPaid ? { ...result, usdPaid, usdPaidKrw } : result;
   });
+}
+// Explicit edits separate KRW payments from USD payments. Preserve the booked
+// value of existing dollars; only an added/reversed quantity changes that value.
+export function travelPaymentDraft(row, previous, rate) {
+  const usdPaid = amount(row.usdPaid ?? 0, '달러 지급 누계', 2), oldUsd = previous?.usdPaid || 0, oldWon = previous?.usdPaidKrw || 0;
+  let usdPaidKrw = oldWon;
+  if (usdPaid !== oldUsd) {
+    if (!Number.isFinite(rate) || rate <= 0) throw Error('현재 환율을 확인한 뒤 달러 지급액을 수정해주세요.');
+    usdPaidKrw = usdPaid > oldUsd ? oldWon + Math.round((usdPaid - oldUsd) * rate) : Math.round(oldWon * usdPaid / oldUsd);
+  }
+  return { id: row.id, deposit: amount(row.deposit, '원화 계약금'), actual: amount(amount(row.actual, '추가 원화 지급') + usdPaidKrw), ...(usdPaid ? { usdPaid, usdPaidKrw } : {}) };
 }
 export function travelBreakdown(item, plan, funds) {
   if (!item || !isTravelItem(item) || plan?.linkedItemId !== item.id) return { rows: [], error: '' };
@@ -69,8 +85,12 @@ export function currentTravelBreakdown(item, plan, funds, quote = null) {
   const detail = travelBreakdown(item, plan, funds);
   const rate = typeof quote?.rate === 'number' && Number.isFinite(quote.rate) && quote.rate > 0 ? quote.rate : null;
   return { ...detail, missingRate: !rate && detail.rows.some(row => row.currency === 'USD'), rows: detail.rows.map(row => {
-    const planned = row.currency === 'USD' && rate ? amount(Math.round(row.amount * rate), '달러 예산 환산액') : row.planned;
-    return { ...row, planned, remaining: Math.max(planned - row.paid, 0) };
+    const appliedRate = rate || plan?.fxRate, isUsd = row.currency === 'USD';
+    const planned = isUsd && rate ? amount(Math.round(row.amount * rate), '달러 예산 환산액') : row.planned;
+    const valuedPaid = isUsd ? row.paid - (row.usdPaidKrw || 0) + Math.round((row.usdPaid || 0) * appliedRate) : row.paid;
+    const remaining = Math.max(planned - valuedPaid, 0);
+    const nativeRemaining = isUsd ? Math.max(row.amount - (row.usdPaid || 0) - (row.paid - (row.usdPaidKrw || 0)) / appliedRate, 0) : undefined;
+    return { ...row, planned, valuedPaid, nativeRemaining, remaining };
   }) };
 }
 function unchanged(current, expected) {
@@ -135,11 +155,17 @@ export function buildFundingChange(current, command, expected, today) {
         if (!paymentTarget) throw Error('납부·환불할 신혼여행 세부 비용을 선택해주세요.');
         payments = structuredClone(funds.travel.payments);
       }
-      if (refund && won > (paymentTarget[component] || 0)) throw Error('기록된 지급액보다 많이 환불할 수 없어요.');
+      const refundable = (paymentTarget[component] || 0) - (component === 'actual' ? paymentTarget.usdPaidKrw || 0 : 0);
+      if (refund && won > refundable) throw Error('기록된 원화 지급액보다 많이 환불할 수 없어요. 달러 지급 정정은 항목 수정에서 확인해주세요.');
       const nextValue = amount((paymentTarget[component] || 0) + (refund ? -won : won));
       itemPatch = {};
       if (payments) {
-        payments.find(p => p.id === paymentTarget.id)[component] = nextValue;
+        const target = payments.find(p => p.id === paymentTarget.id);
+        target[component] = nextValue;
+        if (!refund && command.source === 'usd' && paymentTarget.currency === 'USD') {
+          target.usdPaid = amount(Math.round(((target.usdPaid || 0) + native) * 100) / 100, '달러 지급 누계', 2);
+          target.usdPaidKrw = amount((target.usdPaidKrw || 0) + won);
+        }
         funds.travel = { ...funds.travel, payments };
         for (const key of ['deposit', 'actual']) itemPatch[key] = amount(payments.reduce((s, p) => s + p[key], 0));
       } else itemPatch[component] = nextValue;

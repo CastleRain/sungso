@@ -179,6 +179,8 @@ function renderEnvironment(finance = {}) {
     weddingDisplayItems: items => items,
     weddingTravelActions: () => "",
     weddingForeignAmount: () => "",
+    weddingForeignRemaining: () => "",
+    weddingFxHTML: () => "",
     weddingForeignNote: () => "",
     weddingRateHint: () => "",
     weddingTravelAdd: () => "",
@@ -278,12 +280,27 @@ test("renderer exposes full ledger, working expansion, filtering and correct pro
   );
   assert.equal(d.querySelectorAll('#tbl-body [data-action="edit"]').length, 6);
   assert.ok(!d.querySelector("#tbl-body").textContent.includes("삭제"));
-  const check = d.querySelector("#wed-include-travel");
-  check.checked = false;
-  check.dispatchEvent(new env.w.Event("change", { bubbles: true }));
+  assert.equal(d.querySelector("#wed-include-travel"), null);
   assert.equal(env.state.items.length, 22);
   assert.ok(d.querySelector("#s-total-hint").textContent.includes("22개"));
   env.dom.window.close();
+});
+
+test('status filters combine unpaid and partial, toggle independently, preserve sorting and leave overview splits unchanged', () => {
+  const e = renderEnvironment(), d = e.w.document, original = structuredClone(e.state.items);
+  const overview = d.querySelector('#tab-wedding .metric-grid').textContent;
+  assert.match(overview, /신혼여행/); assert.match(overview, /그 외 결혼준비/);
+  const count = () => d.querySelectorAll('#tbl-body .wed-nested-row').length;
+  d.querySelector('[data-status=unpaid]').click(); assert.equal(count(), 9);
+  d.querySelector('[data-status=partial]').click(); assert.equal(count(), 16);
+  assert.equal(d.querySelector('[data-status=unpaid]').getAttribute('aria-pressed'), 'true');
+  assert.equal(d.querySelector('[data-status=partial]').getAttribute('aria-pressed'), 'true');
+  assert.equal(d.querySelector('[data-status=all]').getAttribute('aria-pressed'), 'false');
+  d.querySelector('[data-action=choose-sort][data-value=remaining]').click(); assert.equal(count(), 16);
+  d.querySelector('[data-status=unpaid]').click(); assert.equal(count(), 7);
+  d.querySelector('[data-status=all]').click(); assert.equal(count(), 22);
+  assert.equal(d.querySelector('#tab-wedding .metric-grid').textContent, overview);
+  assert.deepEqual(e.state.items, original); assert.equal(e.writes.length, 0); e.dom.window.close();
 });
 test("editor failure retains draft and retry saves the corrected balance", async () => {
   const e = renderEnvironment(),
@@ -500,7 +517,7 @@ test("overview starts folded, keeps user expansion on refresh, and grouped items
   assert.equal(d.querySelector('#wed-schedule').open, false);
   assert.equal(d.querySelector('#wed-ledger').open, true);
   assert.equal(d.querySelector('.wecost-travel-summary'), null);
-  assert.equal(d.querySelector('#wed-include-travel').checked, true);
+  assert.equal(d.querySelector('#wed-include-travel'), null);
   assert.equal(d.querySelector('.wed-budget-link').getAttribute('href'), '../travel/#budget');
   assert.equal(d.querySelectorAll('#tbl-body .wed-category-cell').length, 0);
   assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row .wed-branch').length, 22);

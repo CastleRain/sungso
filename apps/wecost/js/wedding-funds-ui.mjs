@@ -1,5 +1,5 @@
 import { subscribeWeddingFunds, saveWeddingFinance, exportWeddingBackup } from './wedding-funds-store.mjs';
-import { normalizeFunds, fundingSummary, travelBreakdown, currentTravelBreakdown, travelLedgerItems, buildFundingChange } from './wedding-funds-core.mjs';
+import { normalizeFunds, fundingSummary, travelBreakdown, currentTravelBreakdown, travelLedgerItems, travelPaymentDraft, buildFundingChange } from './wedding-funds-core.mjs';
 import { deriveBudgetDraft, isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
 import { registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { localDate } from './wedding-core.mjs';
@@ -31,10 +31,15 @@ export function weddingForeignNote(items) {
 }
 function fxHTML() {
   const { quote, loading, error } = fxState;
-  const valuation = dollarValuation(state.funds?.usdBalance, state.funds?.usdCostKrw, quote);
-  const stamp = quote ? quoteStamp(quote) : '';
-  const difference = valuation ? valuation.difference === 0 ? '환전 원가와 같아요' : `환전 원가보다 ${compact(Math.abs(valuation.difference))} ${valuation.difference < 0 ? '낮아요' : '높아요'}` : '';
-  return `<div class="wf-fx-value"><span>${quote && quoteIsOld(quote) ? '이전 고시 환율로 환산' : '현재 환율로 본 달러'}</span><strong${valuation ? ` title="${won(valuation.value)}"` : ''}>${valuation ? `약 ${compact(valuation.value)}` : loading ? '환율 확인 중…' : '—'}</strong>${valuation ? `<small>${difference}</small>` : ''}</div><div class="wf-fx-meta">${quote ? `<span>1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원</span><small>${stamp} KST 고시 · 일 1회 갱신</small>` : '<span>최신 고시 환율을 확인해요</span>'}<a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API ↗</a></div><button type="button" class="tbl-action-btn" data-finance="refresh-fx" data-focus="fx-refresh" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><p class="wf-fx-note" role="status">${error ? `${esc(error)} ` : ''}참고 환산액이에요. 은행의 실제 환전액과 다를 수 있으며 합계와 추가로 모을 돈에 반영돼요. 실제 원가·지급 기록은 유지해요.</p>`;
+  return `<span class="wf-fx-rate">${quote ? `1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원` : '환율 확인 중'}</span>${quote ? `<small>${quoteStamp(quote)} KST ${quoteIsOld(quote) ? '이전 고시' : '고시'}</small>` : ''}<button type="button" class="tbl-action-btn" data-finance="refresh-fx" data-focus="fx-refresh" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" title="일 1회 갱신 · 은행 실제 환전액과 다를 수 있어요">Rates By Exchange Rate API ↗</a>${error ? `<span class="wf-fx-error" role="status">${esc(error)}</span>` : ''}`;
+}
+export function weddingFxHTML() {
+  return (state.funds?.usdBalance > 0 || state.plan?.rows?.some(row => row.currency === 'USD')) ? `<div id="wf-fx-panel" class="wf-fx-compact" aria-label="적용 환율">${fxHTML()}</div>` : '';
+}
+function usdValueHTML() { return foreignReferenceHTML(state.funds?.usdBalance || 0); }
+export function weddingForeignRemaining(item) {
+  if (item.currency !== 'USD' || !Number.isFinite(item.nativeRemaining)) return '';
+  return `<span class="wed-foreign-amount wed-foreign-remaining"><strong class="${item.balance > 0 ? 'wed-owed' : 'wed-zero'}">${dollars(item.nativeRemaining)}</strong><small title="${won(item.balance)}">${item.fxPending ? '저장 환율' : '약'} ${compact(item.balance)}</small></span>`;
 }
 export function ensureWeddingFx() {
   const hasUsdCosts = state.plan?.rows?.some(row => row.currency === 'USD');
@@ -74,14 +79,17 @@ export function weddingTravelActions(item) {
 }
 export function weddingRemaining(items) { return fundingSummary(items, state.funds, state.plan, fxState.quote).remaining; }
 export function withWeddingDetails(item, payment) {
+  if (item.travelRowId && item.currency === 'USD' && Number.isFinite(item.valuedPaid)) {
+    return { ...payment, remaining: item.balance, progress: payment.planned > 0 ? Math.min(100, Math.round(item.valuedPaid / payment.planned * 100)) : 0, overpaid: Math.max(item.valuedPaid - payment.planned, 0), status: item.balance > 0 ? (payment.paid > 0 ? 'partial' : 'unpaid') : payment.planned > 0 ? 'done' : payment.status };
+  }
   const detail = currentTravelBreakdown(item, state.plan, state.funds, fxState.quote);
   if (!detail.rows.length) return payment;
   const remaining = detail.rows.reduce((sum, row) => sum + row.remaining, 0), planned = detail.rows.reduce((sum, row) => sum + row.planned, 0);
-  return { ...payment, planned, progress: planned > 0 ? Math.min(100, Math.round(payment.paid / planned * 100)) : 0, remaining, status: remaining > 0 ? (payment.paid > 0 ? 'partial' : 'unpaid') : planned > 0 ? 'done' : payment.status, overpaid: detail.rows.reduce((sum, row) => sum + Math.max(row.paid - row.planned, 0), 0) };
+  return { ...payment, planned, progress: planned > 0 ? Math.min(100, Math.round(detail.rows.reduce((sum, row) => sum + row.valuedPaid, 0) / planned * 100)) : 0, remaining, status: remaining > 0 ? (payment.paid > 0 ? 'partial' : 'unpaid') : planned > 0 ? 'done' : payment.status, overpaid: detail.rows.reduce((sum, row) => sum + Math.max(row.valuedPaid - row.planned, 0), 0) };
 }
 export function weddingFundsHTML() {
   const f = state.funds;
-  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title">남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small>남은 달러의 환전 원가 ${compact(f.usdCostKrw)}</small></div><div class="wf-fund-amount wf-total" id="wf-current-total">${currentTotalHTML()}</div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}${hasFunds() && f.usdBalance > 0 ? `<div id="wf-fx-panel" class="wf-fx-panel" aria-label="보유 달러 현재 환산액">${fxHTML()}</div>` : ''}<p class="wf-funds-caption">기존 저축과 별도 · 달러는 원화 카드대금과 구분해요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
+  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title">남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small id="wf-usd-current">${usdValueHTML()}</small></div><div class="wf-fund-amount wf-total" id="wf-current-total">${currentTotalHTML()}</div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}<p class="wf-funds-caption">기존 저축과 별도 · 달러는 원화 카드대금과 구분해요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
 }
 
 function shell(title, subtitle, body, saveLabel = '저장') {
@@ -105,13 +113,20 @@ function openFunds() {
   preview();
 }
 function travelInputs() {
-  return draft.rows.map((row, index) => travelFocusId && row.id !== travelFocusId ? '' : `<section class="wf-edit-row" data-row-index="${index}">${travelFocusId ? '' : `<div class="wf-row-heading"><strong>세부 비용 ${index + 1}</strong><button type="button" class="wf-remove" data-remove="${index}" aria-label="세부 비용 ${index + 1} 삭제">삭제</button></div>`}<label class="wf-field"><span>항목명</span><input data-key="name" value="${esc(row.name)}" maxlength="100" required></label><div class="wf-two"><label class="wf-field"><span>예정 금액</span><input data-key="amount" value="${esc(row.amount ?? '')}" inputmode="decimal" required></label><label class="wf-field"><span>통화</span><select data-key="currency"><option value="KRW" ${row.currency === 'KRW' ? 'selected' : ''}>원화 KRW</option><option value="USD" ${row.currency === 'USD' ? 'selected' : ''}>미국 달러 USD</option></select></label></div><div class="wf-two"><label class="wf-field"><span>지급한 계약금 (원)</span><input data-key="deposit" value="${row.deposit ?? ''}" inputmode="numeric" required></label><label class="wf-field"><span>계약금 외 지급액 (원)</span><input data-key="actual" value="${row.actual ?? ''}" inputmode="numeric" required></label></div><label class="wf-field"><span>메모 · 확정/추정 근거</span><input data-key="note" value="${esc(row.note)}" maxlength="2000"></label></section>`).join('');
+  return draft.rows.map((row, index) => travelFocusId && row.id !== travelFocusId ? '' : `<section class="wf-edit-row" data-row-index="${index}">${travelFocusId ? '' : `<div class="wf-row-heading"><strong>세부 비용 ${index + 1}</strong><button type="button" class="wf-remove" data-remove="${index}" aria-label="세부 비용 ${index + 1} 삭제">삭제</button></div>`}<label class="wf-field"><span>항목명</span><input data-key="name" value="${esc(row.name)}" maxlength="100" required></label><div class="wf-two"><label class="wf-field"><span>예정 금액</span><input data-key="amount" value="${esc(row.amount ?? '')}" inputmode="decimal" required></label><label class="wf-field"><span>통화</span><select data-key="currency"><option value="KRW" ${row.currency === 'KRW' ? 'selected' : ''}>원화 KRW</option><option value="USD" ${row.currency === 'USD' ? 'selected' : ''}>미국 달러 USD</option></select></label></div><div class="wf-two"><label class="wf-field"><span>원화 계약금 (원)</span><input data-key="deposit" value="${esc(row.deposit ?? '')}" inputmode="numeric" required></label><label class="wf-field"><span>추가 원화 지급 (원)</span><input data-key="actual" value="${esc(row.actual ?? '')}" inputmode="numeric" required></label></div><div class="wf-usd-payment"${row.currency === 'USD' || row.usdPaid ? '' : ' hidden'}><label class="wf-field"><span>달러로 지급한 누계 (USD)</span><input data-key="usdPaid" value="${esc(row.usdPaid || 0)}" inputmode="decimal" required></label><p class="wf-help">달러로 낸 금액만 입력해요. 위 원화 지급액과 중복 입력하지 않아요.</p></div><label class="wf-field"><span>메모 · 확정/추정 근거</span><input data-key="note" value="${esc(row.note)}" maxlength="2000"></label></section>`).join('');
 }
 function openTravel(item, rowId = null, add = false) {
   capture(item); mode = 'travel';
   const plan = deriveBudgetDraft(item, state.plan);
   const saved = state.funds?.travel?.linkedItemId === item.id ? state.funds.travel.payments : [];
-  draft = { ...plan, rows: plan.rows.map((row, index) => ({ ...row, deposit: saved.find(p => p.id === row.id)?.deposit ?? (plan.rows.length === 1 && index === 0 ? item.deposit || 0 : (item.deposit || 0) > 0 ? null : 0), actual: saved.find(p => p.id === row.id)?.actual ?? (plan.rows.length === 1 && index === 0 ? item.actual || 0 : (item.actual || 0) > 0 ? null : 0) })) };
+  draft = { ...plan, rows: plan.rows.map((row, index) => {
+    const payment = saved.find(p => p.id === row.id), single = plan.rows.length === 1 && index === 0;
+    return { ...row,
+      deposit: payment?.deposit ?? (single ? item.deposit || 0 : (item.deposit || 0) > 0 ? null : 0),
+      actual: payment ? payment.actual - (payment.usdPaidKrw || 0) : single ? item.actual || 0 : (item.actual || 0) > 0 ? null : 0,
+      usdPaid: payment?.usdPaid || 0,
+    };
+  }) };
   travelFocusId = rowId;
   if (add) {
     if (draft.rows.length >= 50) throw Error('여행 비용은 최대 50개까지 등록할 수 있어요.');
@@ -129,7 +144,7 @@ function readTravelRows() {
       const raw = value(key).replaceAll(',', '').trim();
       return raw === '' ? null : /^\d+(?:\.\d+)?$/.test(raw) ? Number(raw) : NaN;
     };
-    draft.rows[Number(section.dataset.rowIndex)] = { id: original.id, name: value('name'), currency: value('currency'), amount: number('amount'), deposit: number('deposit'), actual: number('actual'), note: value('note') };
+    draft.rows[Number(section.dataset.rowIndex)] = { id: original.id, name: value('name'), currency: value('currency'), amount: number('amount'), deposit: number('deposit'), actual: number('actual'), usdPaid: number('usdPaid'), note: value('note') };
   }
 }
 function openPayment(item, rowId = '') {
@@ -145,7 +160,7 @@ function command() {
     readTravelRows();
     const hasUsd = draft.rows.some(row => row.currency === 'USD');
     if (hasUsd && !fxState.quote) throw Error('현재 환율을 불러온 뒤 달러 비용을 저장해주세요.');
-    return { kind: mode, plan: { ...draft, fxRate: hasUsd ? fxState.quote.rate : draft.fxRate, note: el('wf-travel-memo')?.value ?? draft.note }, ledgerMemo: el('wf-travel-memo')?.value ?? (currentItem.memo || ''), payments: draft.rows.map(row => ({ id: row.id, deposit: row.deposit, actual: row.actual })) };
+    return { kind: mode, plan: { ...draft, fxRate: hasUsd ? fxState.quote.rate : draft.fxRate, note: el('wf-travel-memo')?.value ?? draft.note }, ledgerMemo: el('wf-travel-memo')?.value ?? (currentItem.memo || ''), payments: draft.rows.map(row => travelPaymentDraft(row, expected.funds?.travel?.payments?.find(p => p.id === row.id), fxState.quote?.rate)) };
   }
   return { kind: 'payment', direction: dialog.querySelector('[name="direction"]:checked')?.value, source: dialog.querySelector('[name="source"]:checked')?.value || '', amount: num('wf-payment'), rowId: el('wf-target')?.value || '', component: el('wf-component').value, date: el('wf-date').value };
 }
@@ -160,12 +175,14 @@ function preview() {
       const p = next.itemPatch;
       const row = next.plan.rows.find(row => row.id === travelFocusId);
       const payment = row && next.funds.travel.payments.find(value => value.id === row.id);
-      const planned = row && Math.round(row.amount * (row.currency === 'USD' ? next.plan.fxRate : 1));
-      el('wf-preview').textContent = row ? `이 항목 예정 ${compact(planned)} · 지급 ${compact(payment.deposit + payment.actual)} · 잔금 ${compact(Math.max(planned - payment.deposit - payment.actual, 0))}` : `예정 ${compact(p.planned)} · 지급 ${compact(p.deposit + p.actual)} · 잔금 ${compact(p.balance)} (기존 예정 ${compact(currentItem.planned)} · 기존 지급 ${compact((currentItem.deposit || 0) + (currentItem.actual || 0))})`;
+      const valuation = row && currentTravelBreakdown({ ...currentItem, ...p }, next.plan, next.funds, fxState.quote).rows.find(value => value.id === row.id);
+      const planned = valuation?.planned, left = valuation?.currency === 'USD' ? `${dollars(valuation.nativeRemaining)} · 약 ${compact(valuation.remaining)}` : compact(valuation?.remaining || 0);
+      el('wf-preview').textContent = row ? `이 항목 예정 ${compact(planned)} · 지급 ${compact(payment.deposit + payment.actual)} · 잔금 ${left}` : `예정 ${compact(p.planned)} · 지급 ${compact(p.deposit + p.actual)} · 잔금 ${compact(p.balance)} (기존 예정 ${compact(currentItem.planned)} · 기존 지급 ${compact((currentItem.deposit || 0) + (currentItem.actual || 0))})`;
     } else {
       const f = next.funds, m = next.movement;
-      const remaining = fundingSummary([{ ...currentItem, ...next.itemPatch }], f, expected.plan, fxState.quote).remaining;
-      el('wf-preview').textContent = `장부 ${m.direction === 'refund' ? '환불' : '지급'} ${won(m.won)} · 남은 잔금 ${compact(remaining)}${f.cashKrw !== undefined ? ` · 결혼자금 원화 ${compact(f.cashKrw)} / 달러 ${dollars(f.usdBalance)}` : ''}`;
+      const updated = { ...currentItem, ...next.itemPatch }, row = currentTravelBreakdown(updated, expected.plan, f, fxState.quote).rows.find(value => value.id === input.rowId);
+      const remaining = row ? `${row.currency === 'USD' ? dollars(row.nativeRemaining) + ' · 약 ' : ''}${compact(row.remaining)}` : compact(fundingSummary([updated], f, expected.plan, fxState.quote).remaining);
+      el('wf-preview').textContent = `장부 ${m.direction === 'refund' ? '환불' : '지급'} ${won(m.won)} · ${row ? '이 항목' : '남은'} 잔금 ${remaining}${f.cashKrw !== undefined ? ` · 결혼자금 원화 ${compact(f.cashKrw)} / 달러 ${dollars(f.usdBalance)}` : ''}`;
     }
   } catch (error) { el('wf-preview').textContent = error.message; }
 }
@@ -199,6 +216,7 @@ export function registerWeddingFinance(getSt, render) {
     }
     for (const node of document.querySelectorAll('[data-wed-usd-reference]')) node.innerHTML = foreignReferenceHTML(Number(node.dataset.wedUsdReference));
     if (el('wf-fx-panel')) el('wf-fx-panel').innerHTML = fxHTML();
+    if (el('wf-usd-current')) el('wf-usd-current').innerHTML = usdValueHTML();
     if (el('wf-current-total')) el('wf-current-total').innerHTML = currentTotalHTML();
     if (el('wf-funding-card')) el('wf-funding-card').innerHTML = fundingCardContent(getState().items);
     if (dialog?.open) {
@@ -214,6 +232,7 @@ export function registerWeddingFinance(getSt, render) {
   dialog.addEventListener('close', () => { paymentCalendar?.destroy(); paymentCalendar = null; dialog.replaceChildren(); expected = null; currentItem = null; draft = null; travelFocusId = null; document.body.classList.remove('wf-modal-open'); });
   dialog.addEventListener('input', preview);
   dialog.addEventListener('change', e => {
+    if (e.target.dataset.key === 'currency') { const section = e.target.closest('[data-row-index]'); section.querySelector('.wf-usd-payment').hidden = e.target.value !== 'USD' && !Number(section.querySelector('[data-key=usdPaid]').value); }
     if (e.target.name === 'source') { el('wf-payment').value = ''; el('wf-payment').closest('.wf-input').querySelector('small').textContent = e.target.value === 'usd' ? 'USD' : '원'; }
     if (e.target.name === 'direction') {
       const refund = e.target.value === 'refund';

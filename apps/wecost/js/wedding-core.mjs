@@ -116,6 +116,7 @@ export function weddingView(
   {
     includeTravel = true,
     status = "all",
+    statuses = null,
     category = "",
     sort = "amount",
     groupBy = "none",
@@ -162,7 +163,7 @@ export function weddingView(
   }
   const filtered = scoped.filter(
     (i) =>
-      (status === "all" || readPayment(i).status === status) &&
+      (Array.isArray(statuses) ? !statuses.length || statuses.includes(readPayment(i).status) : status === "all" || readPayment(i).status === status) &&
       (!category || weddingCategory(i) === category),
   );
   filtered.sort((a, b) => {

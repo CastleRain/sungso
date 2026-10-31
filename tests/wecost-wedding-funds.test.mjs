@@ -143,6 +143,36 @@ test('missing quotes keep an explicitly flagged saved forecast and do not claim 
   assert.equal(summary.available, cash.cashKrw); assert.equal(summary.needed, null); assert.equal(summary.missingRate, true);
 });
 
+test('USD payment corrections retain native dollars and old KRW basis across rates without moving the wallet', () => {
+  const before = detailed(), previous = before.funds.travel.payments[0];
+  const paid = core.travelPaymentDraft({ id: 'stay', deposit: 20000, actual: 30000, usdPaid: 200 }, previous, 1250);
+  assert.deepEqual(paid, { id: 'stay', deposit: 20000, actual: 280000, usdPaid: 200, usdPaidKrw: 250000 });
+  const next = core.buildFundingChange(before, { kind: 'travel', plan: before.plan, payments: [paid, before.funds.travel.payments[1]] }, before, today);
+  const after = { item: { ...before.item, ...next.itemPatch }, plan: next.plan, funds: next.funds };
+  assert.equal(next.funds.usdBalance, before.funds.usdBalance); assert.equal(next.funds.cashKrw, before.funds.cashKrw);
+  assert.equal(core.currentTravelBreakdown(after.item, after.plan, after.funds, { rate: 1500 }).rows[0].remaining, 400000);
+  assert.equal(core.currentTravelBreakdown(after.item, after.plan, after.funds, { rate: 1000 }).rows[0].remaining, 250000);
+  const unchanged = core.travelPaymentDraft({ id: 'stay', deposit: 20000, actual: 30000, usdPaid: 200 }, paid, 1500);
+  assert.deepEqual(unchanged, paid, 'Reopening or editing the memo must not revalue old USD payments');
+  const reduced = core.travelPaymentDraft({ id: 'stay', deposit: 20000, actual: 30000, usdPaid: 100 }, paid, 1500);
+  assert.equal(reduced.usdPaidKrw, 125000); assert.equal(reduced.actual, 155000);
+  assert.throws(() => core.normalizePayments(before.plan, [{ ...paid, usdPaidKrw: 300000 }, payments[1]]), /달러 지급액/);
+  assert.throws(() => core.travelPaymentDraft({ id: 'stay', deposit: 0, actual: 0, usdPaid: 0.001 }, previous, 1200), /누계/);
+});
+
+test('a fully paid USD bill never reopens when FX rises; source-USD payments record dollars and KRW once', () => {
+  const before = detailed();
+  const next = core.buildFundingChange(before, { kind: 'payment', direction: 'payment', source: 'usd', amount: 500, rowId: 'stay', date: today }, before, today);
+  const after = { item: { ...before.item, ...next.itemPatch }, plan: before.plan, funds: next.funds };
+  assert.equal(next.funds.travel.payments[0].usdPaid, 500); assert.equal(next.funds.travel.payments[0].usdPaidKrw, 600000);
+  for (const rate of [1000, 1500, 2000]) {
+    const row = core.currentTravelBreakdown(after.item, after.plan, after.funds, { rate }).rows[0];
+    assert.equal(row.remaining, 0); assert.equal(row.nativeRemaining, 0);
+    assert.equal(row.paid, 620000);
+  }
+  assert.throws(() => core.buildFundingChange(after, { kind: 'payment', direction: 'refund', source: 'outside', component: 'actual', amount: 1, rowId: 'stay', date: today }, after, today), /달러 지급 정정/);
+});
+
 function storeEnv() {
   const docs = new Map([['wecost_settings/wedding_funds', structuredClone(funds)], ['wecost_items/test-trip', structuredClone(item)]]);
   const callbacks = [], cleanups = [];
@@ -191,4 +221,17 @@ test('failed commit and member change preserve all documents; stale snapshot can
     await assert.rejects(e.api.saveWeddingFinance({ kind: 'travel', plan, payments }, original(), `operation-${mode}`));
     assert.deepEqual([...e.docs], before); assert.equal(e.writes, 0);
   }
+});
+
+test('USD detail save and payment replay persist native settlement once with the original siblings intact', async () => {
+  const e = storeEnv(); await Promise.resolve();
+  await e.api.saveWeddingFinance({ kind: 'travel', plan, payments }, original(), 'operation-usd-details');
+  const before = { item: { ...e.docs.get('wecost_items/test-trip'), id: item.id }, plan: e.docs.get('itineraries/honeymoon_2027_budget'), funds: e.docs.get('wecost_settings/wedding_funds') };
+  const command = { kind: 'payment', direction: 'payment', source: 'usd', amount: 100, rowId: 'stay', date: today };
+  await e.api.saveWeddingFinance(command, before, 'operation-usd-payment');
+  const stored = e.docs.get('wecost_settings/wedding_funds'), count = e.writes;
+  assert.equal(stored.travel.payments[0].usdPaid, 100); assert.equal(stored.usdBalance, 400);
+  assert.deepEqual(stored.travel.payments[1], before.funds.travel.payments[1]);
+  await e.api.saveWeddingFinance(command, before, 'operation-usd-payment');
+  assert.equal(e.writes, count); assert.equal(e.docs.get('wecost_settings/wedding_funds').usdBalance, 400);
 });

@@ -626,6 +626,20 @@ body.wed-modal-open {overflow:hidden;}
 #tab-wedding .wf-fx-panel button:disabled {opacity:.65;cursor:wait;}
 #tab-wedding .wed-foreign-amount {display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;line-height:1.5;font-variant-numeric:tabular-nums;}
 #tab-wedding .wed-foreign-amount strong {font-size:13px;font-weight:650;color:var(--ss-text);}
+#tab-wedding .wed-foreign-remaining strong.wed-owed {color:var(--wed-rose);}
+#tab-wedding .wed-foreign-remaining strong.wed-zero {color:var(--ss-muted);}
+#tab-wedding .wed-cost-split {border-top:1px solid var(--ss-border);margin-top:10px;padding-top:8px;display:grid;gap:5px;font-size:11px;color:var(--ss-muted);}
+#tab-wedding .wed-cost-split>div {display:flex;justify-content:space-between;gap:6px;align-items:baseline;}
+#tab-wedding .wed-cost-split strong {font-size:12px;color:var(--ss-text);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;}
+#tab-wedding .wf-fx-compact {display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px 12px;margin:-8px 0 14px;color:var(--ss-muted);font-size:11px;}
+#tab-wedding .wf-fx-compact .wf-fx-rate {color:var(--ss-link);font-weight:600;font-variant-numeric:tabular-nums;}
+#tab-wedding .wf-fx-compact small {font-size:10px;}
+#tab-wedding .wf-fx-compact a {font-size:10px;color:var(--ss-muted);text-underline-offset:3px;}
+#tab-wedding .wf-fx-compact button {font-size:11px;min-height:30px;padding:5px 9px;}
+#tab-wedding .wf-fx-error {width:100%;text-align:right;}
+.wf-usd-payment {background:var(--ss-soft);border:1px solid var(--ss-border);border-radius:12px;padding:12px;margin:4px 0 16px;}
+.wf-dialog .wf-usd-payment .wf-field {margin-bottom:0;}
+@media(max-width:768px){#tab-wedding .wf-fx-compact {justify-content:flex-start;gap:5px 8px;}#tab-wedding .wf-fx-compact a {margin-left:auto;}#tab-wedding .wf-fx-compact button {min-height:36px;}#tab-wedding .wed-cost-split>div {flex-wrap:wrap;}}
 #tab-wedding .wed-foreign-amount small {display:block;font-size:11px;font-weight:400;white-space:normal;}
 #tab-wedding .wed-foreign-reference {color:var(--ss-link);}
 #tab-wedding .wed-foreign-budget {color:var(--ss-muted);}
