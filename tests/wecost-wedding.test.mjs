@@ -170,6 +170,7 @@ function renderEnvironment() {
     baseWeddingView: core.weddingView,
     withWeddingDetails: (item, payment) => payment,
     registerWeddingFinance: () => {},
+    ensureWeddingFx: () => {},
     handleWeddingFinance: () => false,
     weddingFundingCard: () => "",
     weddingFundsHTML: () => "",

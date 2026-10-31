@@ -5,20 +5,22 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import * as core from '../apps/wecost/js/wedding-funds-core.mjs';
 import * as travel from '../shared/finance/travel-budget-core.mjs';
+import { dollarValuation, quoteIsOld } from '../apps/wecost/js/wedding-fx.mjs';
 const require = createRequire(new URL('../apps/sohee/sales/package.json', import.meta.url));
 const { JSDOM } = require('jsdom');
 const today = '2026-10-31';
-function env() {
+function env(quote = null) {
   const dom = new JSDOM('<body><div data-private-root><div id="s-total"></div></div></body>');
   const w = dom.window, cleanups = [], writes = [], alerts = [];
-  let receive, fail = false, renders = 0;
+  let receive, fail = false, renders = 0, rateChange, rateDisposed = false;
+  const fx = { quote, loading: false, error: '' };
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
   w.HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new w.Event('close')); };
   w.alert = text => alerts.push(text);
   const item = { id: 'sample', name: '합성 예식 비용', cat: '웨딩홀', planned: 800000, deposit: 100000, actual: 0 };
   const ledger = { items: [item] };
   const data = { connection: 'live', error: '', funds: { cashKrw: 250000, usdBalance: 300, usdCostKrw: 360000 }, plan: null };
-  const c = vm.createContext({ ...core, ...travel, document: w.document, window: w, structuredClone, crypto: { randomUUID: () => 'synthetic-operation' }, localDate: () => today,
+  const c = vm.createContext({ ...core, ...travel, dollarValuation, quoteIsOld, createFxReader: ({ onChange }) => { rateChange = onChange; return { snapshot: () => fx, dispose() { rateDisposed = true; }, refresh: async () => onChange(fx) }; }, document: w.document, window: w, structuredClone, crypto: { randomUUID: () => 'synthetic-operation' }, localDate: () => today,
     registerPrivateCleanup: fn => cleanups.push(fn), subscribeWeddingFunds: fn => { receive = fn; fn(structuredClone(data)); },
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
@@ -28,7 +30,7 @@ function env() {
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
   const submit = async () => { w.document.querySelector('form').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await new Promise(resolve => setImmediate(resolve)); };
-  return { dom, w, d: w.document, c, data, ledger, writes, alerts, cleanups, open, set, submit, receive, fail: v => { fail = v; } };
+  return { dom, w, d: w.document, c, data, ledger, writes, alerts, cleanups, open, set, submit, receive, rateChange, rateDisposed: () => rateDisposed, renders: () => renders, fail: v => { fail = v; } };
 }
 test('fund editor previews balances without writing, retains failed draft and cleans private data', async () => {
   const e = env(); e.open('funds');
@@ -73,4 +75,21 @@ test('travel form preserves row IDs and payment mapping, adds a row without writ
   row.querySelector('[data-key=name]').value = '합성 추가'; row.querySelector('[data-key=amount]').value = '10000';
   await e.submit(); assert.equal(e.writes[0][0].plan.rows.length, 2); assert.equal(e.writes[0][0].payments[0].deposit, 100000);
   e.open('payment'); assert.equal(e.d.querySelector('img'), null); e.dom.window.close();
+});
+
+test('reference valuation updates only its panel without changing the wallet, savings goal or DB', () => {
+  const quote = { rate: 1300, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') };
+  const e = env(quote), before = structuredClone(e.data), goal = e.c.api.weddingFundingCard(e.ledger.items);
+  e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingFundsHTML();
+  const funds = e.d.querySelector('.wf-funds'), label = funds.querySelector('.wf-funds-title'), renders = e.renders();
+  assert.match(funds.textContent, /약 39만원/); assert.match(funds.textContent, /환전 원가보다 3만원 높아요/);
+  assert.match(funds.textContent, /2026.*10.*31.*09:00.*KST/);
+  e.rateChange({ quote: { ...quote, rate: 1100 }, loading: false, error: '최신 조회 실패' });
+  assert.match(funds.textContent, /약 33만원/); assert.match(funds.textContent, /환전 원가보다 3만원 낮아요/);
+  assert.match(funds.textContent, /최신 조회 실패/);
+  assert.equal(e.d.querySelector('.wf-funds-title'), label); assert.equal(e.renders(), renders);
+  assert.equal(e.c.api.weddingFundingCard(e.ledger.items), goal); assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
+  e.open('refresh-fx'); assert.match(funds.textContent, /약 39만원/); assert.equal(e.writes.length, 0);
+  e.cleanups.forEach(fn => fn()); assert.equal(e.rateDisposed(), true);
+  e.dom.window.close();
 });

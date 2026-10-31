@@ -3,8 +3,10 @@ import { normalizeFunds, fundingSummary, travelBreakdown, buildFundingChange } f
 import { deriveBudgetDraft, isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
 import { registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { localDate } from './wedding-core.mjs';
+import { createFxReader, dollarValuation, quoteIsOld } from './wedding-fx.mjs';
 
 let state = { funds: null, plan: null, connection: 'loading', error: '' }, getState, rerender, dialog, expected, currentItem, draft, mode, operationId, busy = false, retired = false;
+let fxReader, fxState = { quote: null, loading: false, error: '' };
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 const won = value => `${Number(value).toLocaleString('ko-KR')}원`;
 const compact = value => value >= 10000 ? `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}만원` : won(value);
@@ -12,6 +14,16 @@ const dollars = value => `US$${Number(value).toLocaleString('en-US', { maximumFr
 const button = (action, text, id = '', row = '') => `<button type="button" class="tbl-action-btn" data-finance="${action}" data-id="${esc(id)}" data-row="${esc(row)}">${text}</button>`;
 const el = id => document.getElementById(id);
 const hasFunds = () => state.funds?.cashKrw !== undefined;
+function fxHTML() {
+  const { quote, loading, error } = fxState;
+  const valuation = dollarValuation(state.funds?.usdBalance, state.funds?.usdCostKrw, quote);
+  const stamp = quote ? new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(quote.asOf) : '';
+  const difference = valuation ? valuation.difference === 0 ? '환전 원가와 같아요' : `환전 원가보다 ${compact(Math.abs(valuation.difference))} ${valuation.difference < 0 ? '낮아요' : '높아요'}` : '';
+  return `<div class="wf-fx-value"><span>${quote && quoteIsOld(quote) ? '이전 고시 환율로 환산' : '현재 환율로 본 달러'}</span><strong${valuation ? ` title="${won(valuation.value)}"` : ''}>${valuation ? `약 ${compact(valuation.value)}` : loading ? '환율 확인 중…' : '—'}</strong>${valuation ? `<small>${difference}</small>` : ''}</div><div class="wf-fx-meta">${quote ? `<span>1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원</span><small>${stamp} KST 고시 · 일 1회 갱신</small>` : '<span>최신 고시 환율을 확인해요</span>'}<a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API ↗</a></div><button type="button" class="tbl-action-btn" data-finance="refresh-fx" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><p class="wf-fx-note" role="status">${error ? `${esc(error)} ` : ''}참고 환산액이에요. 은행의 실제 환전액과 다를 수 있으며 원가·납부액·저축 목표는 그대로예요.</p>`;
+}
+export function ensureWeddingFx() {
+  if (!retired && fxReader && hasFunds() && state.funds.usdBalance > 0) void fxReader.refresh();
+}
 const field = (id, label, value, unit = '원', extra = '') => `<label class="wf-field" for="${id}"><span>${label}</span><span class="wf-input"><input id="${id}" inputmode="decimal" autocomplete="off" value="${esc(value ?? '')}" ${extra}><small>${unit}</small></span></label>`;
 const num = id => {
   const text = el(id).value.replaceAll(',', '').trim();
@@ -33,7 +45,7 @@ export function withWeddingDetails(item, payment) {
 }
 export function weddingFundsHTML() {
   const f = state.funds;
-  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title">남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small>남은 달러의 환전 원가 ${compact(f.usdCostKrw)}</small></div><div class="wf-fund-amount wf-total"><span>원가 환산 합계</span><strong>${compact(f.cashKrw + f.usdCostKrw)}</strong><small>현재 환율 평가액과 달라요</small></div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}<p class="wf-funds-caption">기존 저축과 별도 · 달러는 원화 카드대금과 구분해요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
+  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title">남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small>남은 달러의 환전 원가 ${compact(f.usdCostKrw)}</small></div><div class="wf-fund-amount wf-total"><span>원가 환산 합계</span><strong>${compact(f.cashKrw + f.usdCostKrw)}</strong><small>현재 환율 평가액과 달라요</small></div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}${hasFunds() && f.usdBalance > 0 ? `<div id="wf-fx-panel" class="wf-fx-panel" aria-label="보유 달러 현재 환산액">${fxHTML()}</div>` : ''}<p class="wf-funds-caption">기존 저축과 별도 · 달러는 원화 카드대금과 구분해요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
 }
 export function weddingTravelDetails(item, surface = 'desktop') {
   if (!isTravelItem(item)) return '';
@@ -114,6 +126,7 @@ function preview() {
 export function handleWeddingFinance(target) {
   const action = target.dataset.finance || (target.dataset.action === 'pay' ? 'payment' : '');
   if (!action) return false;
+  if (action === 'refresh-fx') { if (fxReader) void fxReader.refresh(true); return true; }
   if (busy) return true;
   try {
     const item = getState().items.find(i => i.id === target.dataset.id);
@@ -125,6 +138,10 @@ export function handleWeddingFinance(target) {
 }
 export function registerWeddingFinance(getSt, render) {
   getState = getSt; rerender = render;
+  let storage = null;
+  try { storage = window.localStorage; } catch { /* Public quote caching is optional. */ }
+  fxReader = createFxReader({ storage, onChange: next => { if (retired) return; fxState = next; const panel = el('wf-fx-panel'); if (panel) panel.innerHTML = fxHTML(); } });
+  fxState = fxReader.snapshot();
   dialog = document.createElement('dialog'); dialog.id = 'wf-dialog'; dialog.className = 'wf-dialog'; dialog.setAttribute('aria-labelledby', 'wf-title');
   document.querySelector('[data-private-root]').append(dialog);
   dialog.addEventListener('cancel', e => { if (busy) e.preventDefault(); });
@@ -183,5 +200,5 @@ export function registerWeddingFinance(getSt, render) {
     }
   });
   subscribeWeddingFunds(next => { if (retired) return; state = next; if (el('s-total')) rerender(getState()); });
-  registerPrivateCleanup(() => { retired = true; busy = false; state = { funds: null, plan: null, connection: 'loading', error: '' }; dialog.close(); dialog.remove(); expected = null; draft = null; currentItem = null; });
+  registerPrivateCleanup(() => { retired = true; fxReader?.dispose(); fxState = { quote: null, loading: false, error: '' }; busy = false; state = { funds: null, plan: null, connection: 'loading', error: '' }; dialog.close(); dialog.remove(); expected = null; draft = null; currentItem = null; });
 }

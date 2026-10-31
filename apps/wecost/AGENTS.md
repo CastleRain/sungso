@@ -23,7 +23,9 @@
 | `wecost_loans/{id}` | name, amount, rate, term, grace, type, enabled, updatedAt |
 | `wecost_adjustments/{id}` | name, amount, sign (+/-), updatedAt |
 
-결혼비용 전용 자금은 `wecost_settings/wedding_funds`에 저장한다. `cashKrw`·`usdBalance`·`usdCostKrw`는 현재 잔액/남은 외화의 원가이며, `travel.linkedItemId`·`travel.payments`는 기존 Travel 가격 행 ID별 원화 계약금/추가 지급액이다. 가격 원본은 기존 Travel 예산 문서를 유지한다. 원본 `wecost_settings/main`과 `wecost_savings/main`에는 더하지 않는다. `wedding_funds_log_{operationId}`는 변경 전후 원본과 작성자/서버 시각을 보존하며 같은 요청의 재시도를 중복 반영하지 않는다. 자금·세부 예산 조회는 자동 시딩/환율 조회/실제 지급 추정을 하지 않는다. `wedding-funds-core/store/ui`는 이 탭에서만 사용하는 모듈이다.
+결혼비용 전용 자금은 `wecost_settings/wedding_funds`에 저장한다. `cashKrw`·`usdBalance`·`usdCostKrw`는 현재 잔액/남은 외화의 원가이며, `travel.linkedItemId`·`travel.payments`는 기존 Travel 가격 행 ID별 원화 계약금/추가 지급액이다. 가격 원본은 기존 Travel 예산 문서를 유지한다. 원본 `wecost_settings/main`과 `wecost_savings/main`에는 더하지 않는다. `wedding_funds_log_{operationId}`는 변경 전후 원본과 작성자/서버 시각을 보존하며 같은 요청의 재시도를 중복 반영하지 않는다. 자금·세부 예산 조회는 자동 시딩/환율 DB 갱신/실제 지급 추정을 하지 않는다. `wedding-funds-core/store/ui`는 이 탭에서만 사용하는 모듈이다.
+
+사용자 요청에 따른 보유 달러 참고 평가는 `wedding-fx.mjs`가 ExchangeRate-API의 공개 USD 기준 환율을 읽어 표시한다. 고시 시각·출처·실제 환전액과의 차이를 표시하고 일 단위 캐시/수동 재조회·조회 실패 시 이전 고시 구분을 제공한다. 공개 환율만 브라우저에 캐시하며 보유액·회원 정보를 외부 API에 보내지 않는다. 원가·예산 환율·지급액·추가 저축 목표·기존 환율 문서는 자동 변경하지 않는다.
 
 `cat`를 `category`로 바꾸지 않는다. 대출 `type`은 `원리금` / `원금` / `만기` / `company`. settings와 savings가 없어도 문서를 자동 생성하지 않는다. 빈 날짜·0원은 메모리의 빈 화면 기본값이며 실제 재무 데이터나 시딩 결과로 취급하지 않는다. 기존 운영 문서가 우선이며 이전은 백업·원본 대조를 거친 관리자 절차로만 수행한다. 5개 구독의 준비 상태와 pending writes 처리·목표가격 전파 순서를 보존한다.
 
@@ -39,6 +41,14 @@
 검증: 네 탭·계산·저축·대출·조정 저장 흐름과 HomeHunt 목표 집값 연결을 확인한다. 1440px/390px에서 신혼여행 요약·Travel 왕복 링크와 같은 장부 항목의 지급·예상액 반영을 확인한다. 두 회원·비회원·로그아웃, 빈 문서의 자동 시딩 없음, 저장 성공·실패·동시 변경·이력은 대역·Emulator에서 검증하며 운영 데이터에 테스트 값을 쓰지 않는다. 여행 결정 패널을 추가하지 않는다.
 
 ## 진행 상황
+
+### 2026-10-31 — 보유 달러 최신 환율 참고 평가
+
+- 남아 있는 결혼자금에 최신 고시 환율의 원화 환산액·환전 원가와의 차이·한국 시각·출처·새로고침을 추가했다. 조회 결과는 해당 영역만 갱신하며 일 단위 공개 환율 캐시, 중복 요청/재시도 제한, 실패 시 마지막 고시 유지, 로그아웃 시 요청 중단을 처리한다.
+- 환율은 참고 표시 전용이다. 실제 자금·예산·지급·추가 저축 계산과 다른 세 탭, Firebase 문서/규칙은 변경하지 않는다. 개인 보유액은 환율 제공자에 전송하거나 공개 테스트에 넣지 않는다.
+- 관련 33개와 전체 2,179개 검사, 910개 참조·270개 JavaScript 검사 및 빌드를 통과했다. 실제 회원 화면에서 환율 조회/새로고침·원가와 목표 보존·1440/390px 가로 넘침 없음·브라우저 오류 0을 확인했다. 운영 DB 쓰기는 없다.
+
+**다음:** 공개 배포와 실제 운영 환율 표시를 확인하고, 실제 결제 시에는 기존 납부 기록 흐름을 사용한다.
 
 ### 2026-10-31 — 결혼 잔여자금·신혼여행 세부 비용 구현
 

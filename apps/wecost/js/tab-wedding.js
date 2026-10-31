@@ -1,5 +1,5 @@
 import { addItem, updateItem, deleteItem } from "./firebase.js";
-import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingTravelDetails, weddingRemaining, withWeddingDetails } from './wedding-funds-ui.mjs';
+import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingTravelDetails, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
 import { registerPrivateCleanup } from "../../../shared/firebase/site-auth.mjs";
 import {
   CATEGORY_CHOICES,
@@ -220,6 +220,7 @@ export function renderWedding(st) {
  }<details class="wed-completed" data-disclosure="completed"${opened("completed")}><summary>완납 항목 ${v.completed.length}개 보기</summary>${v.completed.map((i) => `<div class="wed-completed-row"><span>${esc(i.name)}</span><span>${money(paymentState(i).paid)}</span>${edit(i)}</div>`).join("") || empty("완납 항목이 없어요.")}</details></div></details>
  </div>${ledgerHTML(v)}`;
   restoreViewFocus(root, focus);
+  ensureWeddingFx();
   for (const detail of root.querySelectorAll('.wf-travel-details')) detail.open = ui.open.has(detail.dataset.disclosure);
 }
 function error(message) {

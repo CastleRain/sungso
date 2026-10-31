@@ -616,3 +616,16 @@ body.wed-modal-open {overflow:hidden;}
  .wf-dialog form {max-height:calc(100dvh - 18px);}
  .wf-dialog .btn {min-height:44px;}
 }
+#tab-wedding .wf-fx-panel {grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:6px 18px;align-items:center;border-top:1px solid var(--ss-border);padding-top:12px;}
+#tab-wedding .wf-fx-value > span,#tab-wedding .wf-fx-meta {font-size:12px;color:var(--ss-muted);}
+#tab-wedding .wf-fx-value strong {display:block;font-size:17px;font-weight:650;letter-spacing:-.02em;margin-top:3px;color:var(--ss-link);font-variant-numeric:tabular-nums;}
+#tab-wedding .wf-fx-value small,#tab-wedding .wf-fx-meta small {display:block;font-size:11px;line-height:1.6;color:var(--ss-muted);}
+#tab-wedding .wf-fx-meta a {font-size:10px;color:var(--ss-muted);text-underline-offset:3px;}
+#tab-wedding .wf-fx-note {grid-column:1/-1;color:var(--ss-muted);font-size:11px;line-height:1.6;margin:0;}
+#tab-wedding .wf-fx-panel button {min-height:36px;}
+#tab-wedding .wf-fx-panel button:disabled {opacity:.65;cursor:wait;}
+@media(max-width:768px){
+ #tab-wedding .wf-fx-panel {grid-template-columns:minmax(0,1fr) auto;gap:8px;}
+ #tab-wedding .wf-fx-meta {grid-column:1/-1;grid-row:2;}
+ #tab-wedding .wf-fx-panel > button {grid-column:2;grid-row:1;}
+}
