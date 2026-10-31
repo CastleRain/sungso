@@ -5,12 +5,26 @@ import { createAccountStore, createAccountApi } from '../server/accounts.mjs';
 import { ACCOUNTS_PATH, emptyAccounts, validateAccounts, accountGroups, safePayUrl } from '../../../shared/invitation/account-core.mjs';
 import { createRenderServer } from '../../homehunt/render/node-server.mjs';
 import { createSiteMemberGate } from '../../homehunt/server/site-members.cjs';
+import {validateAccountOrder, orderedAccountData} from '../../../shared/invitation/account-order.mjs';
 function fixture() {
   const db = createMemoryFirestore();
   db.doc = path => { const parts = path.split('/'), id = parts.pop(); return db.collection(parts.join('/')).doc(id); };
   return { db, store: createAccountStore({db}), member: {uid:'test-sungwoo'} };
 }
 const filled = () => emptyAccounts().map((a,i) => ({...a,enabled:true,bank:'예시은행',holder:'예시 '+i,number:'123-'+String(i).padStart(3,'0')}));
+test('recipient ordering is validated, private drafts excluded, old managers preserve order and retries remain safe', async () => {
+  const f=fixture(), accounts=filled(), order=['groom-mother','groom','groom-father','bride-father','bride-mother','bride'];
+  const first=await f.store.save({accounts,order,expectedRevision:0},f.member);
+  assert.deepEqual(first.order,order);
+  assert.deepEqual(orderedAccountData(first.accounts,first.order).sides[0].accounts.map(a=>a.relation),['어머니','신랑','아버지']);
+  await f.store.save({accounts,order,expectedRevision:0},f.member);assert.equal(f.db.calls.writes,1);
+  await assert.rejects(f.store.save({accounts,order:validateAccountOrder(),expectedRevision:0},f.member),{code:'CONFLICT'});
+  accounts[0].number='999-888';const oldClient=await f.store.save({accounts,expectedRevision:1},f.member);assert.deepEqual(oldClient.order,order);
+  accounts[2].enabled=false;accounts[2].holder='PRIVATE MOTHER';const pub=orderedAccountData(accounts,order);
+  assert.equal(pub.sides[0].accounts[0].relation,'신랑');assert.ok(!JSON.stringify(pub).includes('PRIVATE MOTHER'));
+  for(const bad of [null,[],order.slice(1),[...order.slice(0,5),'groom'],[order[3],...order.slice(1,3),order[0],...order.slice(4)],order.map(v=>v==='groom'?'forged':v)])assert.throws(()=>validateAccountOrder(bad));
+  await f.db.doc('wedding_accounts/sungso_20270306').set({schema:1,revision:3,accounts});assert.deepEqual((await f.store.read()).order,validateAccountOrder());
+});
 test('account read never seeds; fixed six slots map into four groups, hidden drafts stay private', async () => {
   const f = fixture(), first = await f.store.read();
   assert.equal(first.revision,0); assert.equal(f.db.calls.writes,0);
@@ -53,7 +67,7 @@ test('account routes enforce real member gate, no direct public writes, strict C
   const url='http://127.0.0.1:'+server.address().port, body=JSON.stringify({accounts:filled(),expectedRevision:0});
   const write=(token,payload=body)=>fetch(url+ACCOUNTS_PATH+'/manage',{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:payload});
   try {
-    assert.deepEqual(await (await fetch(url+ACCOUNTS_PATH)).json(),{ok:true,revision:0,groups:[]});
+    assert.deepEqual(await (await fetch(url+ACCOUNTS_PATH)).json(),{ok:true,revision:0,groups:[],sides:[{id:'groom',accounts:[]},{id:'bride',accounts:[]}]});
     assert.equal((await fetch(url+ACCOUNTS_PATH+'/manage')).status,401);
     assert.equal((await write('test-disabled')).status,403);
     assert.equal((await write('outsider')).status,401);
