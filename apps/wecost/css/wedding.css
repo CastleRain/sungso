@@ -630,6 +630,49 @@ body.wed-modal-open {overflow:hidden;}
 #tab-wedding .wed-foreign-reference {color:var(--ss-link);}
 #tab-wedding .wed-foreign-budget {color:var(--ss-muted);}
 #tab-wedding.wed-fx-updating .card {animation:none;}
+.wed-date-picker {width:100%;min-width:0;}
+.wed-date-control {display:flex;align-items:center;position:relative;}
+.wed-date-control input {width:100%;padding-right:48px!important;cursor:pointer;}
+.wed-date-toggle {position:absolute;right:4px;width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--ss-link);cursor:pointer;}
+.wed-date-toggle:hover,.wed-date-toggle[aria-expanded=true] {background:var(--ss-soft);}
+.wed-date-panel {margin:10px 0 4px;padding:14px;border:1px solid var(--ss-border);border-radius:18px;background:var(--ss-surface);box-shadow:0 4px 18px var(--ss-shadow);}
+.wed-date-panel[hidden],.wed-date-shortcuts [hidden] {display:none!important;}
+.wed-date-heading {display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px;}
+.wed-date-heading strong {font-size:12px;font-weight:650;color:var(--ss-text);}
+.wed-date-heading span {font-size:11px;color:var(--ss-muted);}
+.wed-date-mount .wed-calendar {width:100%;box-shadow:none;border:0;border-radius:0;background:var(--ss-surface);font-family:var(--ss-font-sans);}
+.wed-calendar.inline {top:0;}
+.wed-calendar:before,.wed-calendar:after {display:none;}
+.wed-calendar .flatpickr-months {padding:4px 0 10px;align-items:center;}
+.wed-calendar .flatpickr-month {height:36px;color:var(--ss-text);fill:var(--ss-text);}
+.wed-calendar .flatpickr-current-month {display:flex;flex-direction:row-reverse;justify-content:center;align-items:center;gap:4px;font-size:15px;padding-top:7px;font-weight:600;}
+.wed-calendar .flatpickr-current-month .cur-month {margin-left:0;}
+.wed-calendar .flatpickr-current-month input.cur-year {font-family:inherit;font-weight:600;}
+.wf-dialog .wed-calendar input.cur-year {min-height:0;height:auto;padding:0 0 0 .5ch;border:0;border-radius:0;background:transparent;font-size:15px;font-weight:600;line-height:inherit;}
+.wed-calendar .flatpickr-prev-month,.wed-calendar .flatpickr-next-month {height:36px;width:36px;padding:10px;border:1px solid var(--ss-border);border-radius:11px;color:var(--ss-link);fill:var(--ss-link);}
+.wed-calendar .flatpickr-prev-month:hover,.wed-calendar .flatpickr-next-month:hover {background:var(--ss-soft);}
+.wed-calendar .flatpickr-prev-month:hover svg,.wed-calendar .flatpickr-next-month:hover svg {fill:var(--ss-link);}
+.wed-calendar .flatpickr-weekdays {height:32px;background:var(--ss-soft);border-radius:9px;}
+.wed-calendar span.flatpickr-weekday {color:var(--ss-muted);font-size:11px;font-weight:500;}
+.wed-calendar .flatpickr-days,.wed-calendar .dayContainer {width:100%;min-width:0;max-width:none;}
+.wed-calendar .flatpickr-innerContainer,.wed-calendar .flatpickr-rContainer {width:100%;}
+.wed-calendar .dayContainer {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px 0;padding-top:5px;}
+.wed-calendar .flatpickr-day {width:100%;max-width:none;height:39px;line-height:37px;border-radius:11px;font-size:13px;color:var(--ss-text);}
+.wed-calendar .flatpickr-day:hover,.wed-calendar .flatpickr-day:focus {background:var(--ss-soft);border-color:var(--ss-border);}
+.wed-calendar .flatpickr-day.today {border-color:var(--ss-border-strong);color:var(--ss-link);font-weight:600;}
+.wed-calendar .flatpickr-day.selected,.wed-calendar .flatpickr-day.selected:hover,.wed-calendar .flatpickr-day.selected:focus {background:var(--ss-accent);border-color:var(--ss-accent);color:var(--ss-on-accent);font-weight:700;}
+.wed-calendar .flatpickr-day:is(.prevMonthDay,.nextMonthDay,.flatpickr-disabled) {color:var(--ss-muted);opacity:.45;}
+.wed-date-shortcuts {display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ss-border);}
+.wed-date-shortcuts button {font:500 12px var(--ss-font-sans);min-height:36px;padding:7px 12px;border:1px solid var(--ss-border);border-radius:10px;background:var(--ss-surface);color:var(--ss-link);cursor:pointer;}
+.wed-date-shortcuts button:hover {background:var(--ss-soft);}
+.wed-date-shortcuts [data-date-close] {margin-left:auto;}
+.wed-date-picker :is(button,[role=button],.flatpickr-day,input):focus-visible {outline:2px solid var(--ss-focus);outline-offset:2px;}
+@media(max-width:768px){
+ .wed-date-panel {padding:10px;}
+ .wed-calendar .flatpickr-day {height:42px;line-height:40px;}
+ .wed-date-shortcuts button {min-height:42px;padding-inline:10px;}
+ .wed-date-heading span {display:none;}
+}
 #tab-wedding .wed-paid-pair:has(.wed-foreign-amount)>small {display:block;margin-top:3px;}
 #tab-wedding .wed-currency-note {font-size:11px;line-height:1.7;margin:6px 0 10px;}
 #tab-wedding .wed-currency-note a {color:var(--ss-muted);text-underline-offset:3px;}

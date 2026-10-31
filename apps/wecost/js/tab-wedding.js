@@ -1,4 +1,5 @@
 import { addItem, updateItem, deleteItem } from "./firebase.js";
+import { mountWeddingCalendar } from './wedding-calendar.mjs';
 import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingDisplayItems, weddingForeignAmount, weddingForeignNote, weddingRateHint, weddingTravelActions, weddingTravelAdd, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
 import { registerPrivateCleanup } from "../../../shared/firebase/site-auth.mjs";
 import {
@@ -260,12 +261,15 @@ function updateEditorPreview() {
   $("wed-draft-remaining").textContent = valid ? money(payment.remaining) : "—";
   $("wed-draft-note").textContent = !valid ? "금액을 확인하면 누적 지급액과 잔금을 계산해요." : !payment.planned ? "예정 금액이 미정이에요. 입력하면 잔금을 계산해요." : payment.overpaid ? `예정 금액보다 ${money(payment.overpaid)} 더 지급했어요.` : "누적 지급 = 계약금 + 추가 지급 · 잔금 = 예정 − 누적 지급";
 }
+let editorCalendar = null;
 function showModal(el) {
   returnFocus = document.activeElement;
   activeModal = el;
   el.classList.remove("hidden");
   $("item-drawer-backdrop").classList.remove("hidden");
   document.body.classList.add("wed-modal-open");
+  editorCalendar?.destroy();
+  editorCalendar = mountWeddingCalendar(el.querySelector('input[type="date"]'));
 }
 function closeModal(force = false) {
   if (saving && !force) return;
@@ -281,6 +285,8 @@ function closeModal(force = false) {
   }
   $("wed-delete-confirm").hidden = true;
   $("wed-discard-confirm").hidden = true;
+  editorCalendar?.destroy();
+  editorCalendar = null;
   activeModal?.classList.add("hidden");
   $("item-drawer-backdrop").classList.add("hidden");
   document.body.classList.remove("wed-modal-open");

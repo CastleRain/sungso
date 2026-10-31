@@ -170,6 +170,7 @@ function renderEnvironment(finance = {}) {
     baseAggregate: core.aggregate,
     baseWeddingView: core.weddingView,
     withWeddingDetails: (item, payment) => payment,
+    mountWeddingCalendar: () => null,
     registerWeddingFinance: () => {},
     ensureWeddingFx: () => {},
     handleWeddingFinance: () => false,

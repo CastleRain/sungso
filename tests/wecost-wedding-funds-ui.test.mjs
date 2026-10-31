@@ -22,6 +22,7 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
   const ledger = { items: [item] };
   const data = { connection: 'live', error: '', funds: { cashKrw: 250000, usdBalance: 300, usdCostKrw: 360000 }, plan: null };
   const c = vm.createContext({ ...core, ...travel, dollarValuation, quoteIsOld, createFxReader: ({ onChange }) => { rateChange = onChange; return { snapshot: () => fx, dispose() { rateDisposed = true; }, refresh: async () => onChange(fx) }; }, document: w.document, window: w, structuredClone, crypto: { randomUUID: () => 'synthetic-operation' }, localDate: () => today,
+    mountWeddingCalendar: () => null,
     registerPrivateCleanup: fn => cleanups.push(fn), subscribeWeddingFunds: fn => { receive = fn; fn(structuredClone(data)); },
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });

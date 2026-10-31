@@ -4,9 +4,11 @@ import { deriveBudgetDraft, isTravelItem } from '../../../shared/finance/travel-
 import { registerPrivateCleanup } from '../../../shared/firebase/site-auth.mjs';
 import { localDate } from './wedding-core.mjs';
 import { createFxReader, dollarValuation, quoteIsOld } from './wedding-fx.mjs';
+import { mountWeddingCalendar } from './wedding-calendar.mjs';
 
 let state = { funds: null, plan: null, connection: 'loading', error: '' }, getState, rerender, dialog, expected, currentItem, draft, mode, operationId, busy = false, retired = false;
 let fxReader, fxState = { quote: null, loading: false, error: '' }, travelFocusId = null, restoreFxFocus = false;
+let paymentCalendar = null;
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 const won = value => `${Number(value).toLocaleString('ko-KR')}원`;
 const compact = value => value >= 10000 ? `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}만원` : won(value);
@@ -83,8 +85,10 @@ export function weddingFundsHTML() {
 }
 
 function shell(title, subtitle, body, saveLabel = '저장') {
+  paymentCalendar?.destroy();
   dialog.innerHTML = `<form id="wf-form"><header><div><h2 id="wf-title">${title}</h2><p>${subtitle}</p></div><button type="button" class="wf-close" data-close aria-label="닫기">×</button></header><div class="wf-body">${body}<p id="wf-error" class="wf-error" role="alert" tabindex="-1"></p></div><footer><button type="button" class="btn btn-ghost" data-close>취소</button><button type="submit" class="btn btn-primary">${saveLabel}</button></footer></form>`;
   dialog.showModal();
+  paymentCalendar = mountWeddingCalendar(dialog.querySelector('input[type="date"]'));
   document.body.classList.add('wf-modal-open');
   dialog.querySelector('.wf-body input, .wf-body select, .wf-body button')?.focus();
 }
@@ -133,7 +137,7 @@ function openPayment(item, rowId = '') {
   const detail = currentTravelBreakdown(item, state.plan, state.funds, fxState.quote);
   if (detail.error) { openTravel(item); return; }
   const selected = detail.rows.find(row => row.id === rowId);
-  shell('납부·환불 기록', `${esc(item.name)} · 실제 처리한 금액만 기록해요.`, `${detail.rows.length ? `<label class="wf-field"><span>신혼여행 세부 비용</span><select id="wf-target"><option value="">항목 선택</option>${detail.rows.map(row => `<option value="${esc(row.id)}" ${selected?.id === row.id ? 'selected' : ''}>${esc(row.name)} · 잔금 ${compact(row.remaining)}</option>`).join('')}</select></label>` : ''}<div class="wf-choice" role="group" aria-label="기록 종류"><label><input type="radio" name="direction" value="payment" checked> 납부</label><label><input type="radio" name="direction" value="refund"> 환불 받음</label></div><fieldset class="wf-source"><legend>어디에서 사용한 돈인가요?</legend><label><input type="radio" name="source" value="cash" ${!hasFunds() ? 'disabled' : ''}> 결혼자금 원화<small>${hasFunds() ? compact(state.funds.cashKrw) : '자금 등록 필요'}</small></label><label><input type="radio" name="source" value="usd" ${!hasFunds() || !state.funds.usdBalance ? 'disabled' : ''}> 보유 달러<small>${hasFunds() ? dollars(state.funds.usdBalance) : '자금 등록 필요'}</small></label><label><input type="radio" name="source" value="outside"> 별도 자금·카드<small>결혼자금 잔액 유지</small></label></fieldset>${field('wf-payment', '실제 납부·환불액', '', '원')}<label class="wf-field" id="wf-refund-component" hidden><span>환불받은 금액의 원래 구분</span><select id="wf-component"><option value="deposit">계약금</option><option value="actual">계약금 외 지급액</option></select></label><label class="wf-field"><span>처리 날짜</span><input id="wf-date" type="date" value="${localDate()}" max="${localDate()}" required></label><div id="wf-preview" class="wf-preview" aria-live="polite">결제 자금과 실제 금액을 선택해주세요.</div><p class="wf-help">신용카드는 실제 청구·사용한 원화 금액으로 기록하세요. 예정 환불은 입금된 뒤 기록하고, 환불받는 자금으로 원화 또는 별도 자금을 선택해요.</p>`, '기록 저장');
+  shell('납부·환불 기록', `${esc(item.name)} · 실제 처리한 금액만 기록해요.`, `${detail.rows.length ? `<label class="wf-field"><span>신혼여행 세부 비용</span><select id="wf-target"><option value="">항목 선택</option>${detail.rows.map(row => `<option value="${esc(row.id)}" ${selected?.id === row.id ? 'selected' : ''}>${esc(row.name)} · 잔금 ${compact(row.remaining)}</option>`).join('')}</select></label>` : ''}<div class="wf-choice" role="group" aria-label="기록 종류"><label><input type="radio" name="direction" value="payment" checked> 납부</label><label><input type="radio" name="direction" value="refund"> 환불 받음</label></div><fieldset class="wf-source"><legend>어디에서 사용한 돈인가요?</legend><label><input type="radio" name="source" value="cash" ${!hasFunds() ? 'disabled' : ''}> 결혼자금 원화<small>${hasFunds() ? compact(state.funds.cashKrw) : '자금 등록 필요'}</small></label><label><input type="radio" name="source" value="usd" ${!hasFunds() || !state.funds.usdBalance ? 'disabled' : ''}> 보유 달러<small>${hasFunds() ? dollars(state.funds.usdBalance) : '자금 등록 필요'}</small></label><label><input type="radio" name="source" value="outside"> 별도 자금·카드<small>결혼자금 잔액 유지</small></label></fieldset>${field('wf-payment', '실제 납부·환불액', '', '원')}<label class="wf-field" id="wf-refund-component" hidden><span>환불받은 금액의 원래 구분</span><select id="wf-component"><option value="deposit">계약금</option><option value="actual">계약금 외 지급액</option></select></label><div class="wf-field"><label for="wf-date">처리 날짜</label><input id="wf-date" type="date" value="${localDate()}" max="${localDate()}" required></div><div id="wf-preview" class="wf-preview" aria-live="polite">결제 자금과 실제 금액을 선택해주세요.</div><p class="wf-help">신용카드는 실제 청구·사용한 원화 금액으로 기록하세요. 예정 환불은 입금된 뒤 기록하고, 환불받는 자금으로 원화 또는 별도 자금을 선택해요.</p>`, '기록 저장');
 }
 function command() {
   if (mode === 'balances') return { kind: mode, balances: normalizeFunds({ cashKrw: num('wf-cash'), usdBalance: num('wf-usd'), usdCostKrw: num('wf-cost') }) };
@@ -207,7 +211,7 @@ export function registerWeddingFinance(getSt, render) {
   dialog = document.createElement('dialog'); dialog.id = 'wf-dialog'; dialog.className = 'wf-dialog'; dialog.setAttribute('aria-labelledby', 'wf-title');
   document.querySelector('[data-private-root]').append(dialog);
   dialog.addEventListener('cancel', e => { if (busy) e.preventDefault(); });
-  dialog.addEventListener('close', () => { dialog.replaceChildren(); expected = null; currentItem = null; draft = null; travelFocusId = null; document.body.classList.remove('wf-modal-open'); });
+  dialog.addEventListener('close', () => { paymentCalendar?.destroy(); paymentCalendar = null; dialog.replaceChildren(); expected = null; currentItem = null; draft = null; travelFocusId = null; document.body.classList.remove('wf-modal-open'); });
   dialog.addEventListener('input', preview);
   dialog.addEventListener('change', e => {
     if (e.target.name === 'source') { el('wf-payment').value = ''; el('wf-payment').closest('.wf-input').querySelector('small').textContent = e.target.value === 'usd' ? 'USD' : '원'; }

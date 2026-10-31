@@ -11,12 +11,13 @@
 <link rel="stylesheet" href="css/layout.css?v=20260912-calendar">
 <link rel="stylesheet" href="css/dashboard.css">
 <link rel="stylesheet" href="css/cashflow.css">
-<link rel="stylesheet" href="css/wedding.css?v=20261101-live-budget-1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<link rel="stylesheet" href="css/wedding.css?v=20261101-calendar-1">
 <link rel="stylesheet" href="css/house.css">
 <style>[data-private-root][hidden]{display:none!important}</style>
 <!-- Keep cached entry points on the same wedding renderer and single store module. -->
 <script type="application/x-sungso-script" data-type="importmap">
-{"imports":{"./js/tab-wedding.js":"./js/tab-wedding.js?v=20261101-live-budget-1","./js/firebase.js":"./js/firebase.js?v=20261101-live-budget-1","./js/wedding-core.mjs":"./js/wedding-core.mjs?v=20261101-live-budget-1","./js/wedding-funds-ui.mjs":"./js/wedding-funds-ui.mjs?v=20261101-live-budget-1","./js/wedding-fx.mjs":"./js/wedding-fx.mjs?v=20261101-live-budget-1","./js/wedding-funds-core.mjs":"./js/wedding-funds-core.mjs?v=20261101-live-budget-1","./js/wedding-funds-store.mjs":"./js/wedding-funds-store.mjs?v=20261101-live-budget-1"}}
+{"imports":{"./js/wedding-calendar.mjs":"./js/wedding-calendar.mjs?v=20261101-calendar-1","./js/tab-wedding.js":"./js/tab-wedding.js?v=20261101-calendar-1","./js/firebase.js":"./js/firebase.js?v=20261101-calendar-1","./js/wedding-core.mjs":"./js/wedding-core.mjs?v=20261101-calendar-1","./js/wedding-funds-ui.mjs":"./js/wedding-funds-ui.mjs?v=20261101-calendar-1","./js/wedding-fx.mjs":"./js/wedding-fx.mjs?v=20261101-calendar-1","./js/wedding-funds-core.mjs":"./js/wedding-funds-core.mjs?v=20261101-calendar-1","./js/wedding-funds-store.mjs":"./js/wedding-funds-store.mjs?v=20261101-calendar-1"}}
 </script>
 <script type="module" src="../shared/firebase/boot.mjs"></script>
 </head>
@@ -578,6 +579,8 @@
 <script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"
         integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi"
         crossorigin="anonymous"></script>
+<script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ko.js"></script>
 <script type="application/x-sungso-script" data-type="module" data-src="js/app.js"></script>
 </div></body>
 </html>
