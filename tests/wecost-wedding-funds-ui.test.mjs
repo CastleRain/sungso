@@ -17,6 +17,7 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
   w.HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new w.Event('close')); };
   w.alert = text => alerts.push(text);
+  w.scrollTo = () => {};
   const item = { id: 'sample', name: '합성 예식 비용', cat: '웨딩홀', planned: 800000, deposit: 100000, actual: 0 };
   const ledger = { items: [item] };
   const data = { connection: 'live', error: '', funds: { cashKrw: 250000, usdBalance: 300, usdCostKrw: 360000 }, plan: null };
@@ -25,7 +26,7 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
   const source = readFileSync(new URL('../apps/wecost/js/wedding-funds-ui.mjs', import.meta.url), 'utf8').replace(/^import\s[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingForeignNote,ensureWeddingFx};', c);
+  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingForeignNote,weddingRateHint,ensureWeddingFx};', c);
   c.api.registerWeddingFinance(() => ledger, () => { renders++; });
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
@@ -153,7 +154,7 @@ test('USD prices keep the native amount and booked budget while every visible re
   e.d.querySelector('[data-private-root]').innerHTML = e.c.api.weddingForeignAmount(item) + e.c.api.weddingForeignAmount(item);
   const originals = [...e.d.querySelectorAll('.wed-foreign-amount strong')];
   assert.equal(originals[0].textContent, 'US$500');
-  assert.match(e.d.body.textContent, /약 60만원/); assert.match(e.d.body.textContent, /장부 예산 65만원/);
+  assert.match(e.d.body.textContent, /약 60만원/); assert.doesNotMatch(e.d.body.textContent, /장부 예산/);
   e.rateChange({ quote: { rate: 1300, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }, loading: false, error: '' });
   for (const node of e.d.querySelectorAll('[data-wed-usd-reference]')) {
     assert.match(node.textContent, /약 65만원/); assert.match(node.firstElementChild.title, /650,000원.*KST/);
@@ -165,7 +166,7 @@ test('USD prices keep the native amount and booked budget while every visible re
   assert.equal(e.c.api.weddingForeignAmount({ ...item, nativeAmount: '<script>' }), '');
   e.rateChange({ quote: null, loading: false, error: 'offline' });
   assert.match(e.d.body.textContent, /원화 환산 조회 실패/); assert.doesNotMatch(e.d.body.textContent, /약 0원/);
-  assert.match(e.d.body.textContent, /US\$500/); assert.match(e.d.body.textContent, /장부 예산 65만원/);
+  assert.match(e.d.body.textContent, /US\$500/);
   e.dom.window.close();
 });
 
@@ -177,4 +178,22 @@ test('USD cost valuation still loads without a registered USD wallet', () => {
   assert.match(e.d.body.textContent, /원화 환산 확인 중/);
   e.c.api.ensureWeddingFx(); assert.match(e.d.body.textContent, /약 60만원/);
   assert.equal(e.writes.length, 0); e.dom.window.close();
+});
+
+test('a changed quote re-renders forecasts once and an explicit USD edit saves that rate while preserving payments', async () => {
+  const e = env(); addDetailedTrip(e);
+  e.data.plan.rows[0] = { ...e.data.plan.rows[0], currency: 'USD', amount: 500 };
+  e.ledger.items[0].planned = 800000; e.data.plan.baselineTotal = 800000; e.receive(e.data);
+  const before = structuredClone(e.data), count = e.renders();
+  e.rateChange({ quote: { rate: 1300, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }, loading: false, error: '' });
+  assert.equal(e.renders(), count + 1);
+  assert.equal(e.c.api.weddingDisplayItems(e.ledger.items)[0].planned, 650000);
+  assert.match(e.c.api.weddingFundingCard(e.ledger.items), /11만원/);
+  assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
+  e.open('travel-row', 'sample', 'one');
+  assert.equal(e.d.querySelector('#wf-fx').value, '1300'); assert.equal(e.d.querySelector('#wf-fx').readOnly, true);
+  assert.match(e.d.querySelector('#wf-preview').textContent, /예정 65만원.*지급 10만원.*잔금 55만원/);
+  await e.submit(); assert.equal(e.writes[0][0].plan.fxRate, 1300);
+  assert.deepEqual(JSON.parse(JSON.stringify(e.writes[0][0].payments)), before.funds.travel.payments);
+  e.dom.window.close();
 });

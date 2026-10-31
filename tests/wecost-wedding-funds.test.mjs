@@ -115,6 +115,34 @@ test('travel rows replace the parent once and participate in category totals, fi
   assert.match(inconsistent[0].travelDetailError, /다른 화면/);
 });
 
+test('the same live rate drives all USD costs, balances, category totals and required savings without rewriting history', () => {
+  const state = detailed();
+  const change = core.buildFundingChange(state, { kind: 'travel', plan: { ...state.plan, rows: [...state.plan.rows, { id: 'ship', name: '합성 선박', amount: 200, currency: 'USD', note: '카드 결제 예정' }] }, payments: [...state.funds.travel.payments, { id: 'ship', deposit: 0, actual: 0 }] }, state, today);
+  const saved = { item: { ...state.item, ...change.itemPatch }, plan: change.plan, funds: change.funds }, before = structuredClone(saved);
+  const quote = { rate: 1300 }, rows = core.travelLedgerItems([saved.item], saved.plan, saved.funds, quote);
+  assert.deepEqual(rows.map(row => row.planned), [650000, 100000, 260000]);
+  assert.deepEqual(rows.map(row => row.balance), [630000, 0, 260000]);
+  assert.deepEqual(rows.map(row => row.deposit + row.actual), [20000, 100000, 0]);
+  const view = weddingView(rows, { groupBy: 'category', today });
+  assert.equal(view.groups[0].totals.planned, 1010000); assert.equal(view.groups[0].totals.remaining, 890000);
+  const sum = core.fundingSummary([saved.item], saved.funds, saved.plan, quote);
+  assert.equal(sum.remaining, 890000); assert.equal(sum.available, 850000); assert.equal(sum.needed, 40000);
+  assert.equal(core.fundingSummary([saved.item], saved.funds, saved.plan, { rate: 1100 }).needed, 0);
+  assert.deepEqual(saved, before);
+  const paid = core.buildFundingChange(saved, { kind: 'payment', source: 'outside', direction: 'payment', amount: 250000, rowId: 'ship', date: today }, saved, today);
+  assert.equal(paid.funds.usdBalance, saved.funds.usdBalance); assert.equal(paid.funds.cashKrw, saved.funds.cashKrw);
+  assert.equal(paid.funds.travel.payments.find(row => row.id === 'ship').actual, 250000);
+});
+
+test('missing quotes keep an explicitly flagged saved forecast and do not claim a current savings goal', () => {
+  const saved = detailed(), cash = { ...saved.funds, usdBalance: 0, usdCostKrw: 0 };
+  const rows = core.travelLedgerItems([saved.item], saved.plan, cash);
+  assert.equal(rows[0].fxPending, true); assert.equal(rows[0].planned, 600000);
+  assert.equal(rows[1].fxPending, false);
+  const summary = core.fundingSummary([saved.item], cash, saved.plan);
+  assert.equal(summary.available, cash.cashKrw); assert.equal(summary.needed, null); assert.equal(summary.missingRate, true);
+});
+
 function storeEnv() {
   const docs = new Map([['wecost_settings/wedding_funds', structuredClone(funds)], ['wecost_items/test-trip', structuredClone(item)]]);
   const callbacks = [], cleanups = [];

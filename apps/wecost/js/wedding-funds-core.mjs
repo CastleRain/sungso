@@ -13,28 +13,32 @@ export function normalizeFunds(value) {
   return { cashKrw, usdBalance, usdCostKrw };
 }
 export function fundingSummary(items, funds, plan = null, quote = null) {
+  let missingRate = false;
   const remaining = items.reduce((sum, i) => {
-    const detail = travelBreakdown(i, plan, funds);
+    const detail = currentTravelBreakdown(i, plan, funds, quote);
+    missingRate ||= detail.missingRate;
     return sum + (detail.rows.length ? detail.rows.reduce((s, row) => s + row.remaining, 0) : Math.max((i.planned || 0) - (i.deposit || 0) - (i.actual || 0), 0));
   }, 0);
   if (!funds || funds.cashKrw === undefined) return { remaining, available: null, needed: null, surplus: null };
   const f = normalizeFunds(funds), rate = typeof quote?.rate === 'number' && Number.isFinite(quote.rate) && quote.rate > 0 ? quote.rate : null;
   if (f.usdBalance && !rate) return { remaining, available: null, needed: null, surplus: null, missingRate: true };
   const available = amount(f.cashKrw + Math.round(f.usdBalance * (rate || 0)), '현재 환산 합계');
+  if (missingRate) return { remaining, available, needed: null, surplus: null, missingRate: true };
   return { remaining, available, needed: Math.max(remaining - available, 0), surplus: Math.max(available - remaining, 0), rate, costRate: f.usdBalance ? f.usdCostKrw / f.usdBalance : null };
 }
 
 // Replace the linked parent only in the wedding view. Stable row IDs route edits
 // to the existing plan/payment transaction; shared ledger documents stay intact.
-export function travelLedgerItems(items, plan, funds) {
+export function travelLedgerItems(items, plan, funds, quote = null) {
   return items.flatMap(item => {
-    const detail = travelBreakdown(item, plan, funds);
+    const detail = currentTravelBreakdown(item, plan, funds, quote);
     if (!detail.rows.length) return [detail.error ? { ...item, travelDetailError: detail.error } : item];
     return detail.rows.map(row => ({
       id: `travel:${JSON.stringify([item.id, row.id])}`, name: row.name, cat: item.cat,
       planned: row.planned, deposit: row.deposit, actual: row.actual, balance: row.remaining,
       balanceDue: item.balanceDue || '', memo: row.note,
       travelParentId: item.id, travelRowId: row.id, currency: row.currency, nativeAmount: row.amount,
+      fxPending: row.currency === 'USD' && detail.missingRate,
     }));
   });
 }
@@ -58,6 +62,16 @@ export function travelBreakdown(item, plan, funds) {
     if (summary.incomplete || summary.mismatch || deposit !== (item.deposit || 0) || actual !== (item.actual || 0)) throw Error('다른 화면에서 예산 또는 지급액이 변경됐어요. 세부 비용을 다시 맞춰주세요.');
     return { rows: normalized.rows.map((row, i) => ({ ...row, ...payments[i], planned: summary.rowTotals[i], paid: payments[i].deposit + payments[i].actual, remaining: Math.max(summary.rowTotals[i] - payments[i].deposit - payments[i].actual, 0) })), error: '' };
   } catch (error) { return { rows: [], error: error.message }; }
+}
+// Rate changes affect forecast costs, never historic payments or acquisition cost.
+// Without a quote, retain the saved forecast temporarily and label it in the UI.
+export function currentTravelBreakdown(item, plan, funds, quote = null) {
+  const detail = travelBreakdown(item, plan, funds);
+  const rate = typeof quote?.rate === 'number' && Number.isFinite(quote.rate) && quote.rate > 0 ? quote.rate : null;
+  return { ...detail, missingRate: !rate && detail.rows.some(row => row.currency === 'USD'), rows: detail.rows.map(row => {
+    const planned = row.currency === 'USD' && rate ? amount(Math.round(row.amount * rate), '달러 예산 환산액') : row.planned;
+    return { ...row, planned, remaining: Math.max(planned - row.paid, 0) };
+  }) };
 }
 function unchanged(current, expected) {
   if (!sameBudgetValue(current ?? null, expected ?? null)) throw Error('다른 화면에서 내용이 바뀌었어요. 창을 닫고 최신 내용으로 다시 열어주세요.');
