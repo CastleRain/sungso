@@ -11,7 +11,7 @@ let fxReader, fxState = { quote: null, loading: false, error: '' }, travelFocusI
 let paymentCalendar = null;
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 const won = value => `${Number(value).toLocaleString('ko-KR')}원`;
-const compact = value => value >= 10000 ? `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 2 })}만원` : won(value);
+const compact = value => value === 0 ? '0원' : value > 0 && value < 5000 ? '1만원 미만' : `${Math.round(value / 10000).toLocaleString('ko-KR')}만원`;
 const dollars = value => `US$${Number(value).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 const button = (action, text, id = '', row = '') => `<button type="button" class="tbl-action-btn" data-finance="${action}" data-id="${esc(id)}" data-row="${esc(row)}">${text}</button>`;
 const el = id => document.getElementById(id);
@@ -26,12 +26,10 @@ export function weddingForeignAmount(item) {
   if (!item.travelRowId || item.currency !== 'USD' || !Number.isFinite(item.nativeAmount) || item.nativeAmount < 0) return '';
   return `<span class="wed-foreign-amount"><strong>${dollars(item.nativeAmount)}</strong><small class="wed-foreign-reference" data-wed-usd-reference="${item.nativeAmount}">${foreignReferenceHTML(item.nativeAmount)}</small>${item.fxPending ? `<small class="wed-foreign-budget">환율 확인 전 · 임시 ${compact(item.planned)}</small>` : ''}</span>`;
 }
-export function weddingForeignNote(items) {
-  return items.some(item => item.travelRowId && item.currency === 'USD') ? '<p class="wed-note wed-currency-note">달러 금액은 고정이고 원화 환산액은 환율에 따라 달라져요. 예산·잔금·합계·정렬에 같은 환율이 반영돼요. 지급한 금액은 그대로예요. <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API ↗</a></p>' : '';
-}
+
 function fxHTML() {
   const { quote, loading, error } = fxState;
-  return `<span class="wf-fx-rate">${quote ? `1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원` : '환율 확인 중'}</span>${quote ? `<small>${quoteStamp(quote)} KST ${quoteIsOld(quote) ? '이전 고시' : '고시'}</small>` : ''}<button type="button" class="tbl-action-btn" data-finance="refresh-fx" data-focus="fx-refresh" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" title="일 1회 갱신 · 은행 실제 환전액과 다를 수 있어요">Rates By Exchange Rate API ↗</a>${error ? `<span class="wf-fx-error" role="status">${esc(error)}</span>` : ''}`;
+  return `<span class="wf-fx-rate">${quote ? `1 USD ≈ ${quote.rate.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}원` : '환율 확인 중'}</span>${quote ? `<small>${quoteStamp(quote)} KST ${quoteIsOld(quote) ? '이전 고시' : '고시'}</small>` : ''}<button type="button" class="tbl-action-btn" data-finance="refresh-fx" data-focus="fx-refresh" ${loading ? 'disabled' : ''}>${loading ? '조회 중…' : '환율 새로고침'}</button><a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" title="일 1회 갱신 · 은행 실제 환전액과 다를 수 있어요">Rates By Exchange Rate API ↗</a>${error ? `<span class="wf-fx-error" role="status">${esc(error)}</span>` : ''}`;
 }
 export function weddingFxHTML() {
   return (state.funds?.usdBalance > 0 || state.plan?.rows?.some(row => row.currency === 'USD')) ? `<div id="wf-fx-panel" class="wf-fx-compact" aria-label="적용 환율">${fxHTML()}</div>` : '';
@@ -170,19 +168,19 @@ function preview() {
     const input = command(), next = buildFundingChange(expected, input, expected, localDate());
     if (mode === 'balances') {
       const summary = fundingSummary(getState().items, next.funds, state.plan, fxState.quote);
-      el('wf-preview').textContent = `현재 환산 합계 ${summary.available === null ? '환율 확인 필요' : compact(summary.available)} · ${summary.needed === null ? '추가로 모을 돈은 환율 확인 후 계산해요' : summary.surplus ? '예산보다 남는 돈 ' + compact(summary.surplus) : '추가로 모을 돈 ' + compact(summary.needed)}${summary.costRate ? ` · 평균 환전 원가 ${summary.costRate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원/USD` : ''}`;
+      el('wf-preview').textContent = `현재 환산 합계 ${summary.available === null ? '환율 확인 필요' : won(summary.available)} · ${summary.needed === null ? '추가로 모을 돈은 환율 확인 후 계산해요' : summary.surplus ? '예산보다 남는 돈 ' + won(summary.surplus) : '추가로 모을 돈 ' + won(summary.needed)}${summary.costRate ? ` · 평균 환전 원가 ${summary.costRate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원/USD` : ''}`;
     } else if (mode === 'travel') {
       const p = next.itemPatch;
       const row = next.plan.rows.find(row => row.id === travelFocusId);
       const payment = row && next.funds.travel.payments.find(value => value.id === row.id);
       const valuation = row && currentTravelBreakdown({ ...currentItem, ...p }, next.plan, next.funds, fxState.quote).rows.find(value => value.id === row.id);
-      const planned = valuation?.planned, left = valuation?.currency === 'USD' ? `${dollars(valuation.nativeRemaining)} · 약 ${compact(valuation.remaining)}` : compact(valuation?.remaining || 0);
-      el('wf-preview').textContent = row ? `이 항목 예정 ${compact(planned)} · 지급 ${compact(payment.deposit + payment.actual)} · 잔금 ${left}` : `예정 ${compact(p.planned)} · 지급 ${compact(p.deposit + p.actual)} · 잔금 ${compact(p.balance)} (기존 예정 ${compact(currentItem.planned)} · 기존 지급 ${compact((currentItem.deposit || 0) + (currentItem.actual || 0))})`;
+      const planned = valuation?.planned, left = valuation?.currency === 'USD' ? `${dollars(valuation.nativeRemaining)} · 약 ${won(valuation.remaining)}` : won(valuation?.remaining || 0);
+      el('wf-preview').textContent = row ? `이 항목 예정 ${won(planned)} · 지급 ${won(payment.deposit + payment.actual)} · 잔금 ${left}` : `예정 ${won(p.planned)} · 지급 ${won(p.deposit + p.actual)} · 잔금 ${won(p.balance)} (기존 예정 ${won(currentItem.planned)} · 기존 지급 ${won((currentItem.deposit || 0) + (currentItem.actual || 0))})`;
     } else {
       const f = next.funds, m = next.movement;
       const updated = { ...currentItem, ...next.itemPatch }, row = currentTravelBreakdown(updated, expected.plan, f, fxState.quote).rows.find(value => value.id === input.rowId);
-      const remaining = row ? `${row.currency === 'USD' ? dollars(row.nativeRemaining) + ' · 약 ' : ''}${compact(row.remaining)}` : compact(fundingSummary([updated], f, expected.plan, fxState.quote).remaining);
-      el('wf-preview').textContent = `장부 ${m.direction === 'refund' ? '환불' : '지급'} ${won(m.won)} · ${row ? '이 항목' : '남은'} 잔금 ${remaining}${f.cashKrw !== undefined ? ` · 결혼자금 원화 ${compact(f.cashKrw)} / 달러 ${dollars(f.usdBalance)}` : ''}`;
+      const remaining = row ? `${row.currency === 'USD' ? dollars(row.nativeRemaining) + ' · 약 ' : ''}${won(row.remaining)}` : won(fundingSummary([updated], f, expected.plan, fxState.quote).remaining);
+      el('wf-preview').textContent = `장부 ${m.direction === 'refund' ? '환불' : '지급'} ${won(m.won)} · ${row ? '이 항목' : '남은'} 잔금 ${remaining}${f.cashKrw !== undefined ? ` · 결혼자금 원화 ${won(f.cashKrw)} / 달러 ${dollars(f.usdBalance)}` : ''}`;
     }
   } catch (error) { el('wf-preview').textContent = error.message; }
 }

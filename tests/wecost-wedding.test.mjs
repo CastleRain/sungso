@@ -181,7 +181,6 @@ function renderEnvironment(finance = {}) {
     weddingForeignAmount: () => "",
     weddingForeignRemaining: () => "",
     weddingFxHTML: () => "",
-    weddingForeignNote: () => "",
     weddingRateHint: () => "",
     weddingTravelAdd: () => "",
     weddingRemaining: items => core.aggregate(items).remaining,
@@ -252,13 +251,13 @@ test('travel details are direct category rows on both surfaces and obey filterin
   assert.match(d.querySelector('#tbl-body').textContent, /합성 항공/);
   d.querySelector('[data-status=all]').click();
   d.querySelector('[data-action=choose-sort][data-value=amount-asc]').click();
-  assert.match(d.querySelector('#tbl-body .wed-nested-row').textContent, /합성 항공/);
+  assert.match(d.querySelector('#tbl-body .wed-nested-row').textContent, /합성 숙소/);
   assert.equal(e.writes.length, 0); e.dom.window.close();
 });
 test("renderer exposes full ledger, working expansion, filtering and correct progress without mutation", () => {
   const env = renderEnvironment(),
     d = env.w.document;
-  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)").length, 22);
+  assert.equal(d.querySelectorAll("#tbl-body .wed-nested-row").length, 22);
   const category = [...d.querySelectorAll(".wed-category")].find((e) =>
     e.textContent.includes("혼주·가족"),
   );
@@ -272,7 +271,7 @@ test("renderer exposes full ledger, working expansion, filtering and correct pro
     true,
   );
   d.querySelector('[data-status="done"]').click();
-  assert.equal(d.querySelectorAll("#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)").length, 6);
+  assert.equal(d.querySelectorAll("#tbl-body .wed-nested-row").length, 6);
   assert.ok(
     [...d.querySelectorAll("#tbl-body [role=progressbar]")].every(
       (e) => e.getAttribute("aria-valuenow") === "100",
@@ -328,9 +327,9 @@ test("editor preview uses exact amounts without writing and clears invalid or pr
   e.state.items = [item];
   e.context.render(e.state);
   e.w._openItemDrawer(item.id);
-  assert.equal(d.querySelector('#wed-draft-paid').textContent,'1,264.56만원');
-  assert.equal(d.querySelector('#wed-draft-remaining').textContent,'565.44만원');
-  assert.equal(d.querySelector('#hint-di-actual').textContent,'1,234.56만원');
+  assert.equal(d.querySelector('#wed-draft-paid').textContent,'12,645,600원');
+  assert.equal(d.querySelector('#wed-draft-remaining').textContent,'5,654,400원');
+  assert.equal(d.querySelector('#hint-di-actual').textContent,'12,345,600원');
   assert.equal(d.querySelector('#wed-category-help').hidden,false);
   const input = (id,value) => {
     const el = d.getElementById(id);
@@ -339,7 +338,7 @@ test("editor preview uses exact amounts without writing and clears invalid or pr
     return el;
   };
   assert.equal(input('di-actual','15000000').value,'15,000,000');
-  assert.equal(d.querySelector('#wed-draft-remaining').textContent,'300만원');
+  assert.equal(d.querySelector('#wed-draft-remaining').textContent,'3,000,000원');
   assert.equal(input('di-actual','1.5').value,'1.5');
   assert.equal(d.querySelector('#di-actual').getAttribute('aria-invalid'),'true');
   assert.equal(d.querySelector('#wed-draft-paid').textContent,'—');
@@ -347,7 +346,7 @@ test("editor preview uses exact amounts without writing and clears invalid or pr
   input('di-actual','18300000');
   assert.equal(d.querySelector('#di-actual').hasAttribute('aria-invalid'),false);
   assert.equal(d.querySelector('#wed-draft-remaining').textContent,'0원');
-  assert.match(d.querySelector('#wed-draft-note').textContent,/30만원 더 지급/);
+  assert.match(d.querySelector('#wed-draft-note').textContent,/300,000원 더 지급/);
   input('di-planned','');
   assert.match(d.querySelector('#wed-draft-note').textContent,/미정/);
   assert.equal(item.actual,12345600);
@@ -414,6 +413,10 @@ test("sorting and category grouping preserve every item and filtered financial t
       assert.deepEqual(group.totals,core.aggregate(group.items));
       for(let n=1;n<group.items.length;n++){
         const a=group.items[n-1],b=group.items[n];
+        const rank = { empty:0, unpaid:0, partial:1, done:2 };
+        const aRank = rank[core.paymentState(a).status], bRank = rank[core.paymentState(b).status];
+        assert.ok(aRank <= bRank);
+        if (aRank !== bRank) continue;
         if(sort==='amount')assert.ok(a.planned>=b.planned);
         if(sort==='amount-asc')assert.ok(a.planned<=b.planned);
         if(sort==='remaining')assert.ok(core.paymentState(a).remaining>=core.paymentState(b).remaining);
@@ -430,14 +433,14 @@ test("ledger grouping and sorting work together and leave the overview untouched
   const e=renderEnvironment(), d=e.w.document;
   const total=d.querySelector('#s-total').textContent;
   assert.equal(d.querySelectorAll('#tbl-body .wed-ledger-group-header').length,11);
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length,22);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row').length,22);
   assert.equal(d.querySelectorAll('.wed-mobile-ledger .wed-ledger-group').length,11);
   d.querySelector('#wed-sort-trigger').click();
   d.querySelector('[data-action="choose-sort"][data-value="amount-asc"]').click();
   const section=d.querySelector('.wed-mobile-ledger section[aria-label="스드메 항목"]');
-  assert.match(section.querySelector('.wed-mobile-item > summary').textContent,/스드메 계약/);
+  assert.equal(section.querySelector('.wed-mobile-item .status-badge').textContent,'미납');
   d.querySelector('[data-status="done"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length,6);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row').length,6);
   assert.equal(d.querySelector('#s-total').textContent,total);
   d.querySelector('[data-action="group"][data-value="none"]').click();
   assert.equal(d.querySelectorAll('#tbl-body .wed-ledger-group-header').length,0);
@@ -463,23 +466,21 @@ test("category order follows totals and earliest valid dates, recalculating afte
   assert.deepEqual(items, before);
 });
 
-test("compact category subtotals occupy the same four amount columns as item rows", () => {
+test("category chapter headers keep labeled totals visible while columns and item rows fold together", () => {
   const e = renderEnvironment(), d = e.w.document;
   const groups = core.weddingView(e.state.items, { groupBy:'category' }).groups;
   const headers = [...d.querySelectorAll('.wed-ledger-group-header')];
   assert.deepEqual(headers.map(row=>row.dataset.ledgerGroup), groups.map(group=>group.category));
   headers.forEach((row, index) => {
-    const group = groups[index], cells = [...row.cells];
-    assert.equal(cells[0].colSpan, 1);
-    assert.equal(cells.slice(1,5).every(cell=>cell.colSpan===1), true);
-    assert.equal(cells.length, 7);
-    assert.equal(row.nextElementSibling.cells.length, 7);
-    const totals = [group.totals.planned, group.items.reduce((n,i)=>n+core.paymentState(i).deposit,0), group.totals.remaining, group.totals.paid];
-    assert.deepEqual(cells.slice(1,5).map(cell=>cell.querySelector('[title]').title), totals.map(n=>`${n.toLocaleString('ko-KR')}원`));
-    const button = row.querySelector('button');
-    assert.deepEqual(button.getAttribute('aria-describedby').split(' ').map(id=>d.getElementById(id)), cells.slice(1,5));
+    const group = groups[index], button = row.querySelector('.wed-group-toggle');
+    assert.equal(row.cells[0].colSpan, 5);
+    assert.equal(row.nextElementSibling.cells.length, 5);
+    const summary = d.getElementById(button.getAttribute('aria-describedby'));
+    assert.deepEqual([...summary.querySelectorAll('.wed-group-metric small')].map(el=>el.textContent), ['예정 금액','지금까지 지급','남은 금액']);
+    assert.deepEqual([...summary.querySelectorAll('[title]')].map(el=>el.title), [group.totals.planned,group.totals.paid,group.totals.remaining].map(n=>`${n.toLocaleString('ko-KR')}원`));
+    if (button.getAttribute('aria-expanded') === 'false') button.click();
     button.click();
-    assert.ok(cells.slice(1,5).every(cell=>!cell.hidden));
+    assert.equal(summary.hidden, false);
     assert.ok(button.getAttribute('aria-controls').split(' ').every(id=>d.getElementById(id).hidden));
   });
   assert.equal(e.writes.length,0);
@@ -500,7 +501,7 @@ test("only the sorting panel remains and closes with focus restored without chan
   assert.equal(d.activeElement.id, 'wed-sort-trigger');
   d.querySelector('[data-status="done"]').click();
   d.querySelector('[data-action="reset-filter"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr:not(.wed-ledger-group-header):not(.wf-travel-row)').length, 22);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row').length, 22);
   assert.equal(d.querySelector('#s-total').textContent, total);
   assert.equal(e.writes.length, 0);
   assert.deepEqual(e.state.items, original);
@@ -573,7 +574,7 @@ test("category groups collapse independently, keep their totals and synchronize 
   const desktop = () => d.querySelector('#tbl-body [data-action="toggle-ledger-group"][data-category="👗스드메"]');
   const mobile = () => d.querySelector('.wed-mobile-ledger [data-action="toggle-ledger-group"][data-category="👗스드메"]');
   const controlledRows = () => desktop().getAttribute('aria-controls').split(' ').map(id=>d.getElementById(id));
-  const subtotalText = () => [...desktop().closest('tr').querySelectorAll('.wed-group-subtotal')].map(cell=>cell.textContent);
+  const subtotalText = () => [...desktop().closest('tr').querySelectorAll('.wed-group-metric')].map(cell=>cell.textContent);
   const totals = subtotalText();
   desktop().focus();
   desktop().click();
@@ -582,45 +583,45 @@ test("category groups collapse independently, keep their totals and synchronize 
   assert.ok(controlledRows().every(row=>row.hidden));
   assert.equal(d.getElementById(mobile().getAttribute('aria-controls')).hidden, true);
   assert.deepEqual(subtotalText(), totals);
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 4);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 5);
   e.context.render(e.state);
   assert.ok(controlledRows().every(row=>row.hidden));
   d.querySelector('#wed-sort-trigger').click();
   d.querySelector('[data-action="choose-sort"][data-value="amount-asc"]').click();
   assert.ok(controlledRows().every(row=>row.hidden));
   d.querySelector('[data-status="done"]').click();
-  assert.equal(controlledRows().length, 2);
+  assert.equal(controlledRows().length, 3);
   assert.ok(controlledRows().every(row=>row.hidden));
   d.querySelector('[data-action="reset-filter"]').click();
   d.querySelector('[data-action="group"][data-value="none"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 0);
   d.querySelector('[data-action="group"][data-value="category"]').click();
   assert.ok(controlledRows().every(row=>row.hidden));
   mobile().click();
   assert.equal(desktop().getAttribute('aria-expanded'), 'true');
   assert.ok(controlledRows().every(row=>!row.hidden));
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 22);
-  assert.equal(d.querySelectorAll('#tbl-body .wed-group-subtotal').length, 44);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 22);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-group-metric').length, 33);
   assert.equal(d.querySelector('[data-action="toggle-ledger-groups"]').textContent, '모두 펼치기');
   e.w.HTMLElement.prototype.scrollIntoView = () => {};
   d.querySelector('[data-action="show-category"][data-category="👗스드메"]').click();
   assert.ok(controlledRows().every(row=>!row.hidden));
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 18);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 18);
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
   d.querySelector('[data-action="toggle-ledger-groups"]').click();
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 0);
   assert.equal(d.querySelector('#s-remain').textContent, summary);
   assert.equal(e.writes.length, 0);
   assert.deepEqual(e.state.items, original);
   desktop().click();
   e.cleanups.forEach(fn=>fn());
   e.context.render(e.state);
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 1);
   e.dom.window.close();
 });
 
-test("fresh visits expand every group and view clicks preserve cards instead of replaying their entry animation", () => {
+test("fresh visits fold only settled categories and view clicks preserve cards instead of replaying their entry animation", () => {
   const e = renderEnvironment(), d = e.w.document;
   const cards = [...d.querySelectorAll('#tab-wedding .card')];
   const ledger = d.querySelector('#wed-ledger');
@@ -630,8 +631,8 @@ test("fresh visits expand every group and view clicks preserve cards instead of 
     assert.deepEqual([...d.querySelectorAll('#tab-wedding .card')], cards);
     assert.equal(d.querySelector('#wed-ledger'), ledger);
   };
-  assert.equal(d.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
-  assert.equal(d.querySelectorAll('.wed-group-toggle[aria-expanded="true"]').length, 22);
+  assert.equal(d.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 1);
+  assert.equal(d.querySelectorAll('.wed-group-toggle[aria-expanded="true"]').length, 20);
   group.focus();
   group.click();
   assert.equal(d.activeElement, group);
@@ -658,7 +659,7 @@ test("fresh visits expand every group and view clicks preserve cards instead of 
   assert.equal(e.writes.length, 0);
   e.dom.window.close();
   const fresh = renderEnvironment();
-  assert.equal(fresh.w.document.querySelectorAll('#tbl-body tr[hidden]:not(.wf-travel-row)').length, 0);
+  assert.equal(fresh.w.document.querySelectorAll('#tbl-body .wed-nested-row[hidden]').length, 1);
   fresh.dom.window.close();
 });
 
@@ -672,8 +673,8 @@ test("unpriced sorting puts missing and zero estimates first, including their ca
   const before = structuredClone(items);
   const view = core.weddingView(items, { sort:'unpriced', groupBy:'category' });
   assert.equal(view.groups[0].category, '나');
-  assert.deepEqual(new Set(view.groups[0].items.slice(0,2).map(i=>i.id)), new Set(['c','d']));
-  assert.equal(view.groups[0].items[2].id, 'b');
+  assert.deepEqual(view.groups[0].items.map(i=>i.id), ['c','b','d']);
+  assert.equal(core.paymentState(view.groups[0].items[2]).status, 'partial');
   assert.deepEqual(core.aggregate(view.groups.flatMap(g=>g.items)), core.aggregate(items));
   assert.deepEqual(core.weddingView(items, { sort:'unpriced' }).filtered.slice(2).map(i=>i.id), ['b','a']);
   assert.deepEqual(items, before);
@@ -686,4 +687,63 @@ test("unpriced sorting puts missing and zero estimates first, including their ca
   assert.match(d.querySelector('#wed-sort-trigger').textContent, /금액 미정 먼저/);
   assert.equal(e.writes.length, 0);
   e.dom.window.close();
+});
+
+test('initial folding uses all category items, preserves manual choices, and never treats rounded completion as paid', () => {
+  const e = renderEnvironment(), d = e.w.document;
+  e.cleanups.forEach(fn=>fn());
+  e.state.items = [];
+  e.context.render(e.state);
+  d.querySelector('[data-status=done]').click();
+  e.state.items = [
+    { id:'mixed-done', name:'완료', cat:'혼합', planned:100, actual:100 },
+    { id:'mixed-unpaid', name:'미납', cat:'혼합', planned:100 },
+    { id:'settled', name:'완료', cat:'완료 전용', planned:100, actual:100 },
+    { id:'unknown', name:'미정', cat:'미정 전용', planned:0 },
+    { id:'nearly', name:'거의 지급', cat:'진행 중', planned:10000, actual:9999 },
+  ];
+  e.context.render(e.state);
+  const toggle = cat => d.querySelector(`#tbl-body .wed-group-toggle[data-category="${cat}"]`);
+  assert.equal(toggle('혼합').getAttribute('aria-expanded'), 'true');
+  assert.equal(toggle('완료 전용').getAttribute('aria-expanded'), 'false');
+  toggle('완료 전용').click();
+  d.querySelector('[data-status=all]').click();
+  for (const cat of ['혼합','완료 전용','미정 전용','진행 중']) assert.equal(toggle(cat).getAttribute('aria-expanded'), 'true');
+  e.context.render(e.state);
+  assert.equal(toggle('완료 전용').getAttribute('aria-expanded'), 'true');
+  e.cleanups.forEach(fn=>fn()); e.context.render(e.state);
+  assert.equal(toggle('완료 전용').getAttribute('aria-expanded'), 'false');
+  assert.equal(toggle('진행 중').getAttribute('aria-expanded'), 'true');
+  assert.equal(e.writes.length,0); e.dom.window.close();
+});
+
+test('category dates remain earliest while status priority preserves same-status date order and flat sorting', () => {
+  const items = [
+    { id:'late', name:'늦은 미납', cat:'가', planned:100, balanceDue:'2030-03-01' },
+    { id:'done', name:'완료', cat:'가', planned:100, actual:100, balanceDue:'2030-01-01' },
+    { id:'early', name:'빠른 미납', cat:'가', planned:100, balanceDue:'2030-02-01' },
+    { id:'partial', name:'일부', cat:'가', planned:100, actual:1, balanceDue:'2030-01-02' },
+    { id:'other', name:'다른 분류', cat:'나', planned:100, balanceDue:'2030-01-15' },
+  ];
+  const before = structuredClone(items);
+  const grouped = core.weddingView(items,{groupBy:'category',sort:'due'});
+  assert.deepEqual(grouped.groups.map(g=>g.category),['가','나']);
+  assert.deepEqual(grouped.groups[0].items.map(i=>i.id),['early','late','partial','done']);
+  assert.deepEqual(core.weddingView(items,{sort:'due'}).filtered.map(i=>i.id),['done','partial','other','early','late']);
+  assert.deepEqual(items,before);
+});
+
+test('rounded overview keeps exact input and small remaining balances meaningful without writes', () => {
+  const e=renderEnvironment(), d=e.w.document;
+  e.state.items=[{id:'rounded',name:'소액 잔금',cat:'예식',planned:105001,deposit:100001,actual:1001}];
+  e.context.render(e.state);
+  assert.equal(d.querySelector('#s-total').textContent,'11만원');
+  assert.equal(d.querySelector('#s-remain').textContent,'1만원 미만');
+  assert.equal(d.querySelector('#tbl-body .wed-remaining-cell [title]').title,'3,999원');
+  assert.equal(d.querySelector('#tbl-body .status-badge').textContent,'일부 납부');
+  e.w._openItemDrawer('rounded');
+  assert.equal(d.querySelector('#di-planned').value,'105,001');
+  assert.equal(d.querySelector('#wed-draft-remaining').textContent,'3,999원');
+  assert.equal(e.state.items[0].actual,1001);
+  assert.equal(e.writes.length,0);e.dom.window.close();
 });

@@ -1,6 +1,6 @@
 import { addItem, updateItem, deleteItem } from "./firebase.js";
 import { mountWeddingCalendar } from './wedding-calendar.mjs';
-import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingDisplayItems, weddingForeignAmount, weddingForeignRemaining, weddingForeignNote, weddingFxHTML, weddingRateHint, weddingTravelActions, weddingTravelAdd, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
+import { registerWeddingFinance, handleWeddingFinance, weddingFundingCard, weddingFundsHTML, weddingDisplayItems, weddingForeignAmount, weddingForeignRemaining, weddingFxHTML, weddingRateHint, weddingTravelActions, weddingTravelAdd, weddingRemaining, withWeddingDetails, ensureWeddingFx } from './wedding-funds-ui.mjs';
 import { registerPrivateCleanup } from "../../../shared/firebase/site-auth.mjs";
 import {
   CATEGORY_CHOICES,
@@ -31,7 +31,8 @@ const ui = {
   sort: "amount",
   groupBy: "category",
   picker: null,
-  collapsedGroups: new Set(), // Every category starts expanded on a fresh visit.
+  collapsedGroups: new Set(),
+  initializedGroups: new Set(), // Apply initial defaults once per full category.
   open: new Set(["ledger"]),
 };
 let getState,
@@ -51,10 +52,8 @@ const esc = (value) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
-const money = (n) =>
-  n >= 10000
-    ? `${(n / 10000).toLocaleString("ko-KR", { maximumFractionDigits: 2 })}만원`
-    : `${n.toLocaleString("ko-KR")}원`;
+const money = (n) => n === 0 ? "0원" : n > 0 && n < 5000 ? "1만원 미만" : `${Math.round(n / 10000).toLocaleString("ko-KR")}만원`;
+const exactMoney = (n) => `${n.toLocaleString("ko-KR")}원`;
 const amt = (n, owed = false) =>
   `<span class="${owed && n > 0 ? "wed-owed" : n === 0 ? "wed-zero" : ""}" title="${n.toLocaleString("ko-KR")}원">${money(n)}</span>`;
 const badge = (p) =>
@@ -71,11 +70,22 @@ const icon = (cat) =>
   `<span class="wed-icon" aria-hidden="true">${esc(categoryIcon(cat))}</span>`;
 const addToCategory = (cat) => weddingTravelAdd(cat) || `<button type="button" class="wed-category-add" data-action="add" data-category="${esc(cat)}" aria-label="${esc(categoryLabel(cat))}에 항목 추가">+ 추가</button>`;
 const itemName = (item, nested = false) => `<span class="wed-item-name">${nested ? '<span class="wed-branch" aria-hidden="true"></span>' : icon(weddingCategory(item))}<span>${esc(item.name)} ${badge(paymentState(item))}</span></span>`;
-function costSplit(items, field) {
+function costSplit(items) {
   const rows = weddingDisplayItems(items), trip = aggregate(rows.filter(isWeddingTravel)), other = aggregate(rows.filter(i => !isWeddingTravel(i)));
-  return `<div class="wed-cost-split"><div><span>신혼여행</span><strong>${money(trip[field])}</strong></div><div><span>그 외 결혼준비</span><strong>${money(other[field])}</strong></div></div>`;
+  const planned = trip.planned + other.planned;
+  if (!planned) return '<p class="wed-note">예정 금액을 입력하면 비용 비중이 보여요.</p>';
+  const tripShare = trip.planned / planned * 100, tripPercent = Math.round(tripShare), otherPercent = 100 - tripPercent;
+  return `<div class="wed-budget-share"><button type="button" class="wed-share-trigger" data-action="budget-details" aria-describedby="wed-share-detail" aria-label="예산 비중: 신혼여행 ${tripPercent}%, 그 외 결혼준비 ${otherPercent}%. 상세 금액 보기"><span class="wed-share-caption">예산 비중 <small>자세히</small></span><span class="wed-share-track" aria-hidden="true"><span style="width:${tripShare}%"></span><span style="width:${100 - tripShare}%"></span></span><span class="wed-share-legend"><span><i></i>신혼여행 <b>${tripPercent}%</b></span><span><i></i>그 외 <b>${otherPercent}%</b></span></span></button><div class="wed-share-detail" id="wed-share-detail" role="tooltip"><strong>어디에 얼마나 쓸 예정인가요?</strong>${[["신혼여행", trip, tripPercent], ["그 외 결혼준비", other, otherPercent]].map(([label, total, percent]) => `<div><span>${label}<b>${percent}% · ${money(total.planned)}</b></span><small>지급 ${money(total.paid)} · 남음 ${money(total.remaining)}</small></div>`).join("")}</div></div>`;
 }
 const remainingAmount = (item, payment) => weddingForeignRemaining(item) || amt(payment.remaining, true);
+function dueHint(item, p) {
+  if (p.status === "done") return '<small class="wed-row-due">납부 완료</small>';
+  if (p.status === "empty") return '<small class="wed-row-due wed-needs-date">예정 금액 입력 필요</small>';
+  const d = daysUntil(item.balanceDue);
+  if (d === null) return '<small class="wed-row-due wed-needs-date">납부일 미정</small>';
+  const date = item.balanceDue.slice(5).replace("-", "/");
+  return `<small class="wed-row-due${d <= 0 ? " wed-due-urgent" : ""}" title="${esc(item.balanceDue)}${item.travelRowId ? ' · 여행 공통 납부일' : ''}">${date} · ${d < 0 ? `${-d}일 지남` : d === 0 ? "오늘 납부" : `D-${d}`}</small>`;
+}
 const paidPair = (paid, planned) =>
   `<span class="wed-paid-pair"><span class="wed-pair-label">지급 </span>${money(paid)} <small>/ <span class="wed-pair-label">예정 </span>${money(planned)}</small></span>`;
 function dueRow(item) {
@@ -89,7 +99,7 @@ function dueRow(item) {
 }
 function itemSummary(item, nested = false) {
   const p = paymentState(item);
-  return `${itemName(item, nested)}${weddingForeignAmount(item) ? `<span class="wed-paid-pair">${weddingForeignAmount(item)}<small>지급 ${money(p.paid)}</small></span>` : paidPair(p.paid, p.planned)}<span class="wed-child-balance">잔금 ${remainingAmount(item, p)}</span>${bar(p)}`;
+  return `${itemName(item, nested)}${weddingForeignAmount(item) ? `<span class="wed-paid-pair">${weddingForeignAmount(item)}<small>지급 ${money(p.paid)}</small></span>` : paidPair(p.paid, p.planned)}<span class="wed-child-balance">남음 ${remainingAmount(item, p)}${dueHint(item, p)}</span>${bar(p)}`;
 }
 function categoryHTML([cat, items]) {
   const t = aggregate(items),
@@ -99,7 +109,7 @@ function categoryHTML([cat, items]) {
 }
 function tableRow(item, rowId = "", hidden = false) {
   const p = paymentState(item), grouped = ui.groupBy === "category";
-  return `<tr${grouped ? ' class="wed-nested-row"' : ''}${rowId ? ` id="${rowId}"` : ""}${hidden ? " hidden" : ""}><td>${itemName(item, grouped)}${item.travelDetailError ? `<small class="wed-overpaid">${esc(item.travelDetailError)}</small>` : ""}${p.overpaid ? `<small class="wed-overpaid">예상보다 ${money(p.overpaid)} 더 지급</small>` : ""}</td>${grouped ? "" : `<td class="wed-category-cell">${esc(categoryLabel(weddingCategory(item)))}</td>`}<td class="amt wed-planned">${weddingForeignAmount(item) || amt(p.planned)}</td><td class="amt">${amt(p.deposit)}</td><td class="amt">${remainingAmount(item, p)}</td><td class="amt">${amt(p.paid)}</td><td>${bar(p)}</td><td>${edit(item)}</td></tr>`;
+  return `<tr${grouped ? ' class="wed-nested-row"' : ''}${rowId ? ` id="${rowId}"` : ""}${hidden ? " hidden" : ""}><td>${itemName(item, grouped)}${item.travelDetailError ? `<small class="wed-overpaid">${esc(item.travelDetailError)}</small>` : ""}${p.overpaid ? `<small class="wed-overpaid">예상보다 ${money(p.overpaid)} 더 지급</small>` : ""}</td>${grouped ? "" : `<td class="wed-category-cell">${esc(categoryLabel(weddingCategory(item)))}</td>`}<td class="amt wed-planned">${weddingForeignAmount(item) || (p.planned ? amt(p.planned) : '<span class="wed-zero">금액 미정</span>')}</td><td class="amt wed-paid-cell"><span class="wed-paid-line"><span title="계약금 ${exactMoney(p.deposit)} 포함">${amt(p.paid)}</span>${bar(p)}</span></td><td class="amt wed-remaining-cell">${remainingAmount(item, p)}${dueHint(item, p)}</td><td class="wed-row-actions-cell">${edit(item)}</td></tr>`;
 }
 function mobileItem(item, nested = false) {
   const p = paymentState(item),
@@ -115,22 +125,22 @@ const SORT_OPTIONS = [
   ["name", "항목명순", "가나다순으로 확인", "가"],
 ];
 function groupSummary(group) {
-  return `<span class="wed-group-metric"><small>예정</small><strong>${amt(group.totals.planned)}</strong></span><span class="wed-group-metric"><small>지급</small><strong>${amt(group.totals.paid)}</strong></span><span class="wed-group-metric wed-group-balance"><small>잔금</small><strong>${amt(group.totals.remaining, true)}</strong></span>`;
+  return `<span class="wed-group-metric"><small>예정 금액</small><strong>${amt(group.totals.planned)}</strong></span><span class="wed-group-metric"><small>지금까지 지급</small><strong>${amt(group.totals.paid)}</strong></span><span class="wed-group-metric wed-group-balance"><small>남은 금액</small><strong>${amt(group.totals.remaining, true)}</strong></span>`;
 }
 function groupToggle(group, controls, surface, index) {
   const collapsed = ui.collapsedGroups.has(group.category);
   const summaryId = `wed-group-totals-${surface}-${index}`;
-  const description = surface === "desktop" ? ["planned", "deposit", "remaining", "paid"].map(key => `${summaryId}-${key}`).join(" ") : summaryId;
-  return `<button type="button" class="wed-group-toggle" data-action="toggle-ledger-group" data-category="${esc(group.category)}" data-focus="ledger-group-${surface}-${esc(group.category)}" aria-label="${esc(categoryLabel(group.category))} 항목 ${collapsed ? "펼치기" : "접기"}" aria-expanded="${!collapsed}" aria-controls="${controls}" aria-describedby="${description}"><span class="wed-group-name">${icon(group.category)}<span>${esc(categoryLabel(group.category))}</span><small>${group.items.length}개</small></span>${surface === "mobile" ? `<span class="wed-group-totals" id="${summaryId}">${groupSummary(group)}</span>` : ""}<span class="wed-chevron" aria-hidden="true"></span></button>`;
+  return `<button type="button" class="wed-group-toggle" data-action="toggle-ledger-group" data-category="${esc(group.category)}" data-focus="ledger-group-${surface}-${esc(group.category)}" aria-label="${esc(categoryLabel(group.category))} 항목 ${collapsed ? "펼치기" : "접기"}" aria-expanded="${!collapsed}" aria-controls="${controls}" aria-describedby="${summaryId}"><span class="wed-group-name">${icon(group.category)}<span>${esc(categoryLabel(group.category))}</span><small>${group.items.length}개</small></span><span class="wed-group-totals" id="${summaryId}">${groupSummary(group)}</span><span class="wed-chevron" aria-hidden="true"></span></button>`;
+}
+function ledgerColumns(grouped, attrs = "") {
+  return `<tr${attrs}><th scope="col">항목</th>${grouped ? "" : '<th scope="col">카테고리</th>'}<th scope="col" class="amt">예정 금액</th><th scope="col" class="amt" title="계약금을 포함한 실제 지급액">지급 · 진행률</th><th scope="col" class="amt">남은 금액 <small>· 납부일</small></th><th scope="col" class="wed-actions-heading">작업</th></tr>`;
 }
 function ledgerRows(view) {
   if (ui.groupBy !== "category") return view.filtered.map(item => tableRow(item)).join("");
   return view.groups.map((group, index) => {
     const ids = group.items.map((_, n) => `wed-ledger-row-${index}-${n}`);
-    const totals = { ...group.totals, deposit: group.items.reduce((sum, item) => sum + paymentState(item).deposit, 0) };
-    const subtotalCells = [["planned", "예정"], ["deposit", "계약금"], ["remaining", "잔금"], ["paid", "누적 지급"]].map(([key, label]) => `<td class="amt wed-group-subtotal" id="wed-group-totals-desktop-${index}-${key}"><span class="wed-sr-only">${label} 합계 </span>${amt(totals[key], key === "remaining")}</td>`).join("");
-    const controlledIds = ids;
-    return `<tr class="wed-ledger-group-header" data-ledger-group="${esc(group.category)}"><th>${groupToggle(group, controlledIds.join(" "), "desktop", index)}</th>${subtotalCells}<td class="wed-group-caption">소계</td><td>${addToCategory(group.category)}</td></tr>${group.items.map((item, n) => tableRow(item, ids[n], ui.collapsedGroups.has(group.category))).join("")}`;
+    const columnsId = `wed-ledger-columns-${index}`, collapsed = ui.collapsedGroups.has(group.category);
+    return `<tr class="wed-ledger-group-header" data-ledger-group="${esc(group.category)}"><th colspan="5"><div class="wed-chapter-heading">${groupToggle(group, [columnsId, ...ids].join(" "), "desktop", index)}${addToCategory(group.category)}</div></th></tr>${ledgerColumns(true, ` class="wed-chapter-columns" id="${columnsId}"${collapsed ? " hidden" : ""}`)}${group.items.map((item, n) => tableRow(item, ids[n], collapsed)).join("")}`;
   }).join("");
 }
 function mobileLedger(view) {
@@ -148,7 +158,7 @@ function ledgerControls(view) {
     <div class="wed-picker-triggers">${ui.groupBy === "category" && view.groups.length ? `<button type="button" class="wed-fold-all" data-action="toggle-ledger-groups" data-value="${allCollapsed ? "expand" : "collapse"}" data-focus="fold-all">${allCollapsed ? "모두 펼치기" : "모두 접기"}</button>` : ""}
     <button type="button" class="wed-picker-trigger" id="wed-sort-trigger" data-action="picker" data-picker="sort" data-focus="picker-sort" aria-expanded="${ui.picker === "sort"}" aria-controls="wed-sort-panel"><span class="wed-tool-label">정렬</span><span>${sortLabel}</span><span class="wed-chevron" aria-hidden="true"></span></button></div>
   </div>
-  <section id="wed-sort-panel" class="wed-choice-panel" aria-label="정렬 선택"${ui.picker === "sort" ? "" : " hidden"}><div class="wed-choice-heading"><span>${ui.groupBy === "category" ? "카테고리와 내부 항목에 함께 적용돼요" : "전체 항목을 정렬해요"}</span><button type="button" class="wed-text-button" data-action="close-picker" aria-label="정렬 선택 닫기">닫기</button></div><div class="wed-sort-options">${SORT_OPTIONS.map(([key, label, hint, symbol]) => `<button type="button" class="wed-choice" data-action="choose-sort" data-value="${key}" data-focus="sort-option-${key}" aria-pressed="${ui.sort === key}" aria-label="${label}"><span class="wed-icon" aria-hidden="true">${symbol}</span><span class="wed-choice-name">${label}<small>${hint}</small></span><span class="wed-choice-check" aria-hidden="true">✓</span></button>`).join("")}</div></section>`;
+  <section id="wed-sort-panel" class="wed-choice-panel" aria-label="정렬 선택"${ui.picker === "sort" ? "" : " hidden"}><div class="wed-choice-heading"><span>${ui.groupBy === "category" ? "카테고리 안에서는 미납 → 일부 납부 → 완납 순, 같은 상태끼리 정렬해요" : "전체 항목을 정렬해요"}</span><button type="button" class="wed-text-button" data-action="close-picker" aria-label="정렬 선택 닫기">닫기</button></div><div class="wed-sort-options">${SORT_OPTIONS.map(([key, label, hint, symbol]) => `<button type="button" class="wed-choice" data-action="choose-sort" data-value="${key}" data-focus="sort-option-${key}" aria-pressed="${ui.sort === key}" aria-label="${label}"><span class="wed-icon" aria-hidden="true">${symbol}</span><span class="wed-choice-name">${label}<small>${hint}</small></span><span class="wed-choice-check" aria-hidden="true">✓</span></button>`).join("")}</div></section>`;
 }
 function rememberDisclosures(root) {
   for (const el of root.querySelectorAll("details[data-disclosure]"))
@@ -161,10 +171,18 @@ function weddingScope(view) {
   return `전체 ${view.scoped.length}개 항목`;
 }
 function ledgerHTML(v) {
+  // Use unfiltered categories: choosing only "done" must not collapse a
+  // category that still has unpaid items. Later renders keep manual choices.
+  for (const [category, items] of v.categories) {
+    if (ui.initializedGroups.has(category)) continue;
+    ui.initializedGroups.add(category);
+    if (items.length && items.every(item => paymentState(item).status === "done"))
+      ui.collapsedGroups.add(category);
+  }
   const t = v.totals, scope = weddingScope(v);
-  return `<details class="card wed-section" data-disclosure="ledger" id="wed-ledger"${opened("ledger")}><summary><h2 class="card-title">항목별 상세 <small id="tbl-count">${v.filtered.length}개 표시 / ${scope}</small></h2><span class="wed-chevron" aria-hidden="true"></span></summary><div class="wed-ledger-toolbar"><div class="wed-filters" role="group" aria-label="항목 필터 · 여러 상태 선택 가능"><div class="wed-status-filters">${[["all", "전체", t.count], ["unpaid", "미납", t.unpaid], ["partial", "일부 납부", t.partial], ["done", "완납", t.done], ...(t.empty ? [["empty", "금액 미정", t.empty]] : [])].map(([key, label, count]) => `<button type="button" data-focus="status-${key}" data-action="status" data-status="${key}" aria-pressed="${key === "all" ? !ui.statuses.length : ui.statuses.includes(key)}">${label} ${count}</button>`).join("")}</div></div>${ledgerControls(v)}</div>${ui.statuses.length ? `<button class="wed-text-button" data-action="reset-filter" data-focus="reset-filter">필터 해제 · 전체 항목 보기</button>` : ""}
- ${ui.groupBy === "category" ? `<p class="wed-note wed-group-note">${({ amount: "예정 합계가 큰 카테고리부터", "amount-asc": "예정 합계가 작은 카테고리부터", remaining: "잔금 합계가 큰 카테고리부터", due: "가장 빠른 납부일이 있는 카테고리부터", unpriced: "금액 미정 항목이 있는 카테고리부터", name: "카테고리 가나다순" })[ui.sort]} · 제목을 누르면 접을 수 있어요.</p>` : ""}
- ${weddingForeignNote(v.filtered)}<div id="tbl-body-wrap" class="wed-desktop-ledger"><div class="table-wrap"><table class="wed-table"><thead><tr><th scope="col">${ui.groupBy === "category" ? "카테고리 / 세부 항목" : "항목"}</th>${ui.groupBy === "category" ? "" : '<th scope="col">카테고리</th>'}<th scope="col" class="amt">예정금액</th><th scope="col" class="amt">계약금</th><th scope="col" class="amt">잔금</th><th scope="col" class="amt">누적 지급</th><th scope="col">지급률</th><th scope="col"><span class="wed-sr-only">추가 / 수정</span></th></tr></thead><tbody id="tbl-body">${ledgerRows(v)}</tbody></table></div></div><div class="wed-mobile-ledger">${mobileLedger(v)}</div>${!v.filtered.length ? empty("조건에 맞는 항목이 없어요.") : ""}</details>`;
+  return `<details class="card wed-section" data-disclosure="ledger" id="wed-ledger"${opened("ledger")}><summary><h2 class="card-title">항목별 상세 <small id="tbl-count">${v.filtered.length === v.scoped.length ? `${v.scoped.length}개 항목` : `${v.filtered.length}개 표시 / ${scope}`}</small></h2><span class="wed-chevron" aria-hidden="true"></span></summary><div class="wed-ledger-toolbar"><div class="wed-filters" role="group" aria-label="항목 필터 · 여러 상태 선택 가능"><div class="wed-status-filters">${[["all", "전체", t.count], ["unpaid", "미납", t.unpaid], ["partial", "일부 납부", t.partial], ["done", "완납", t.done], ...(t.empty ? [["empty", "금액 미정", t.empty]] : [])].map(([key, label, count]) => `<button type="button" data-focus="status-${key}" data-action="status" data-status="${key}" aria-pressed="${key === "all" ? !ui.statuses.length : ui.statuses.includes(key)}">${label} ${count}</button>`).join("")}</div></div>${ledgerControls(v)}</div>${ui.statuses.length ? `<button class="wed-text-button" data-action="reset-filter" data-focus="reset-filter">필터 해제 · 전체 항목 보기</button>` : ""}
+
+ <p class="wed-ledger-guidance">${v.filtered.filter(i => paymentState(i).remaining > 0).length}건 납부 남음${v.filtered.some(i => paymentState(i).remaining > 0 && daysUntil(i.balanceDue) === null) ? ` · 납부일 미정 ${v.filtered.filter(i => paymentState(i).remaining > 0 && daysUntil(i.balanceDue) === null).length}건` : ""}${v.filtered.some(i => paymentState(i).status === "empty") ? ` · 금액 미정 ${v.filtered.filter(i => paymentState(i).status === "empty").length}건` : ""}<span>만원 단위 반올림 · 정확한 금액은 수정에서</span></p><div id="tbl-body-wrap" class="wed-desktop-ledger"><div class="table-wrap"><table class="wed-table${ui.groupBy === "category" ? " wed-table-grouped" : ""}"><caption class="wed-sr-only">결혼비용 상세 목록</caption>${ui.groupBy === "category" ? '<colgroup><col class="wed-col-item"><col class="wed-col-planned"><col class="wed-col-paid"><col class="wed-col-remaining"><col class="wed-col-actions"></colgroup>' : `<thead>${ledgerColumns(false)}</thead>`}<tbody id="tbl-body">${ledgerRows(v)}</tbody></table></div></div><div class="wed-mobile-ledger">${mobileLedger(v)}</div>${!v.filtered.length ? empty("조건에 맞는 항목이 없어요.") : ""}</details>`;
 }
 function renderLedger() {
   const ledger = $("wed-ledger");
@@ -212,9 +230,9 @@ export function renderWedding(st, options = {}) {
   root.innerHTML = `
  <div class="page-hdr"><div><h1>결혼비용</h1><p>항목별 예산과 지급 현황을 관리해요.</p></div><div class="wed-page-actions"><a class="wed-budget-link" href="../travel/#budget">여행 예산 ↗</a><button type="button" class="btn btn-primary" data-action="add">+ 항목 추가</button></div></div>
  ${weddingFxHTML()}
- <div class="metric-grid metric-grid-4"><div class="metric-card mc-primary"><div class="mc-label">총 예정 비용</div><div class="mc-value" id="s-total">${money(t.planned)}</div><div class="mc-sub" id="s-total-hint">전체 결혼비용 · ${t.count}개 항목${weddingRateHint(items)}</div>${costSplit(items, "planned")}</div><div class="metric-card"><div class="mc-label">지금까지 지급</div><div class="mc-value" id="s-paid">${money(t.paid)}</div><div class="mc-sub" id="s-paid-hint">완납 ${t.done}개 · 일부 납부 ${t.partial}개</div>${costSplit(items, "paid")}</div><div class="metric-card wed-balance-card"><div class="mc-label">남은 잔금</div><div class="mc-value wed-owed" id="s-remain">${money(t.remaining)}</div><div class="mc-sub">각 항목의 남은 금액 합계</div></div>${weddingFundingCard(items)}</div>
+ <div class="metric-grid metric-grid-4"><div class="metric-card mc-primary"><div class="mc-label">총 예정 비용</div><div class="mc-value" id="s-total">${money(t.planned)}</div><div class="mc-sub" id="s-total-hint">전체 결혼비용 · ${t.count}개 항목${weddingRateHint(items)}</div>${costSplit(items)}</div><div class="metric-card"><div class="mc-label">지금까지 지급</div><div class="mc-value" id="s-paid">${money(t.paid)}</div><div class="mc-sub" id="s-paid-hint">완납 ${t.done}개 · 일부 납부 ${t.partial}개</div></div><div class="metric-card wed-balance-card"><div class="mc-label">남은 잔금</div><div class="mc-value wed-owed" id="s-remain">${money(t.remaining)}</div><div class="mc-sub">각 항목의 남은 금액 합계</div></div>${weddingFundingCard(items)}</div>
  ${weddingFundsHTML()}<div class="wed-overview-grid"><section class="card wed-next"><div class="card-hdr"><h2 class="card-title">다음 납부 <small id="s-soon">30일 내 ${money(aggregate(v.soon).remaining)} · ${v.soon.length}건</small></h2><button class="wed-text-button" data-action="schedule">전체 일정 보기</button></div>${near.length ? near.map(dueRow).join("") : empty("30일 내 예정된 납부가 없어요.")}${v.overdue.length ? `<button class="wed-overdue-link" data-action="overdue">지난 납부일 ${v.overdue.length}건 · ${money(aggregate(v.overdue).remaining)} 확인</button>` : ""}</section>
- <section class="card wed-total-progress"><div class="wed-between"><h2 class="card-title">지급 진행 현황</h2><span id="prog-info">${progress.progress}% · ${money(t.paid)} / ${money(t.planned)}</span></div>${bar(progress)}${t.overpaid ? `<p class="wed-note">일부 항목은 예상보다 ${money(t.overpaid)} 더 지급했어요. 다른 항목의 잔금에서 빼지 않아요.</p>` : ""}</section>
+ <section class="card wed-total-progress"><h2 class="card-title">지급 진행 현황</h2><div class="wed-progress-headline"><div id="prog-info"><strong>${progress.progress}<small>%</small></strong><span>전체 예산 대비 지급</span></div><span class="wed-progress-count">완납 <b>${t.done}</b> / ${t.count}개 항목</span></div>${bar(progress)}<div class="wed-progress-amounts"><span>지급 <strong>${money(t.paid)}</strong></span><span>남음 <strong class="wed-owed">${money(t.remaining)}</strong></span></div>${t.overpaid ? `<p class="wed-note">일부 항목은 예상보다 ${money(t.overpaid)} 더 지급했어요. 다른 항목의 잔금에서 빼지 않아요.</p>` : ""}</section>
  </div><div class="wed-reference-sections"><details class="card wed-section" id="wed-categories" data-disclosure="categories"${opened("categories")}><summary><h2 class="card-title">카테고리별 현황 <small>${v.categories.length}개 · ${v.scoped.length}항목</small></h2><span class="wed-chevron" aria-hidden="true"></span></summary><p class="wed-note">카테고리를 누르면 포함된 항목을 볼 수 있어요.</p><div class="wed-category-columns" aria-hidden="true"><span>카테고리</span><span>지급 / 예정</span><span>남은 잔금</span><span>지급률</span><span></span></div><div id="cat-rows">${v.categories.length ? v.categories.map(categoryHTML).join("") : empty("등록된 항목이 없어요. 항목 추가로 시작해보세요.")}</div></details>
  <details class="card wed-section" id="wed-schedule" data-disclosure="schedule"${opened("schedule")}><summary><h2 class="card-title">잔금 납부 일정 <small>남은 납부 ${v.dues.length}건</small></h2><span class="wed-chevron" aria-hidden="true"></span></summary><div id="timeline">${
    v.months
@@ -253,7 +271,7 @@ function updateEditorPreview() {
     const input = $(`di-${key}`), hint = $(`hint-di-${key}`);
     try {
       values[key] = parseWon(input.value);
-      hint.textContent = values[key] > 0 ? money(values[key]) : "";
+      hint.textContent = values[key] > 0 ? exactMoney(values[key]) : "";
       input.removeAttribute("aria-invalid");
     } catch {
       valid = false;
@@ -262,9 +280,9 @@ function updateEditorPreview() {
     }
   }
   const payment = valid ? paymentState(values) : null;
-  $("wed-draft-paid").textContent = valid ? money(payment.paid) : "—";
-  $("wed-draft-remaining").textContent = valid ? money(payment.remaining) : "—";
-  $("wed-draft-note").textContent = !valid ? "금액을 확인하면 누적 지급액과 잔금을 계산해요." : !payment.planned ? "예정 금액이 미정이에요. 입력하면 잔금을 계산해요." : payment.overpaid ? `예정 금액보다 ${money(payment.overpaid)} 더 지급했어요.` : "누적 지급 = 계약금 + 추가 지급 · 잔금 = 예정 − 누적 지급";
+  $("wed-draft-paid").textContent = valid ? exactMoney(payment.paid) : "—";
+  $("wed-draft-remaining").textContent = valid ? exactMoney(payment.remaining) : "—";
+  $("wed-draft-note").textContent = !valid ? "금액을 확인하면 누적 지급액과 잔금을 계산해요." : !payment.planned ? "예정 금액이 미정이에요. 입력하면 잔금을 계산해요." : payment.overpaid ? `예정 금액보다 ${exactMoney(payment.overpaid)} 더 지급했어요.` : "누적 지급 = 계약금 + 추가 지급 · 잔금 = 예정 − 누적 지급";
 }
 let editorCalendar = null;
 function showModal(el) {
@@ -333,6 +351,10 @@ export function registerWeddingHandlers(getStFn) {
     if (!target) return;
     if (handleWeddingFinance(target)) return;
     const action = target.dataset.action;
+    if (action === "budget-details") {
+      target.closest(".wed-budget-share").classList.remove("wed-tip-dismissed");
+      return;
+    }
     if (action === "picker") {
       ui.picker = ui.picker === target.dataset.picker ? null : target.dataset.picker;
       syncSortPanel();
@@ -396,7 +418,20 @@ export function registerWeddingHandlers(getStFn) {
       button?.focus({ preventScroll: true });
     }
   });
+  root.addEventListener("pointerout", (e) => {
+    const share = e.target.closest(".wed-budget-share");
+    if (share && !share.contains(e.relatedTarget)) share.classList.remove("wed-tip-dismissed");
+  });
+  root.addEventListener("focusout", (e) => {
+    const share = e.target.closest(".wed-budget-share");
+    if (share && !share.contains(e.relatedTarget)) share.classList.remove("wed-tip-dismissed");
+  });
   root.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && e.target.closest(".wed-budget-share")) {
+      e.preventDefault();
+      e.target.closest(".wed-budget-share").classList.add("wed-tip-dismissed");
+      return;
+    }
     if (e.key !== "Escape" || !ui.picker) return;
     e.preventDefault();
     const picker = ui.picker;
@@ -562,6 +597,7 @@ export function registerWeddingHandlers(getStFn) {
     ui.groupBy = "category";
     ui.picker = null;
     ui.collapsedGroups.clear();
+    ui.initializedGroups.clear();
     for (const el of $("item-drawer").querySelectorAll("input,textarea"))
       el.value = "";
     $("di-cat").replaceChildren();
@@ -594,7 +630,7 @@ function openPayment(id) {
   operationId = crypto.randomUUID();
   $("wed-payment-name").textContent = item.name;
   $("wed-payment-summary").textContent =
-    `현재 잔금 ${money(paymentState(item).remaining)} · 일부 납부도 기록할 수 있어요.`;
+    `현재 잔금 ${exactMoney(paymentState(item).remaining)} · 일부 납부도 기록할 수 있어요.`;
   $("wed-payment-amount").value =
     paymentState(item).remaining.toLocaleString("ko-KR");
   $("wed-payment-date").value = localDate();

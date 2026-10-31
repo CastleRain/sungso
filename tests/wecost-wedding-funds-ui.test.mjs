@@ -27,7 +27,7 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
   const source = readFileSync(new URL('../apps/wecost/js/wedding-funds-ui.mjs', import.meta.url), 'utf8').replace(/^import\s[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingForeignNote,weddingRateHint,weddingFxHTML,weddingForeignRemaining,withWeddingDetails,ensureWeddingFx};', c);
+  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingRateHint,weddingFxHTML,weddingForeignRemaining,withWeddingDetails,ensureWeddingFx};', c);
   c.api.registerWeddingFinance(() => ledger, () => { renders++; });
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
@@ -38,7 +38,7 @@ test('fund editor previews balances without writing, retains failed draft and cl
   const e = env(); e.open('funds');
   assert.equal(e.d.querySelector('#wf-cash').value, '250000');
   e.set('wf-cash', '300000');
-  assert.match(e.d.querySelector('#wf-preview').textContent, /4만원/);
+  assert.match(e.d.querySelector('#wf-preview').textContent, /40,000원/);
   assert.equal(e.writes.length, 0);
   e.fail(true); await e.submit();
   assert.equal(e.d.querySelector('#wf-dialog').open, true);
@@ -55,7 +55,7 @@ test('payments require explicit source, currency change clears amount, and refun
   const e = env(); e.open('payment'); e.set('wf-payment', '50000'); await e.submit();
   assert.equal(e.writes.length, 0); assert.match(e.d.querySelector('#wf-error').textContent, /자금을 선택/);
   e.d.querySelector('[name=source][value=cash]').click(); e.set('wf-payment', '50000');
-  assert.match(e.d.querySelector('#wf-preview').textContent, /원화 20만원/);
+  assert.match(e.d.querySelector('#wf-preview').textContent, /원화 200,000원/);
   e.d.querySelector('[name=source][value=usd]').click();
   assert.equal(e.d.querySelector('#wf-payment').value, '');
   e.set('wf-payment', '10'); assert.match(e.d.querySelector('#wf-preview').textContent, /12,000원/);
@@ -194,7 +194,7 @@ test('a changed quote re-renders forecasts once and an explicit USD edit saves t
   assert.deepEqual(e.data, before); assert.equal(e.writes.length, 0);
   e.open('travel-row', 'sample', 'one');
   assert.equal(e.d.querySelector('#wf-fx').value, '1300'); assert.equal(e.d.querySelector('#wf-fx').readOnly, true);
-  assert.match(e.d.querySelector('#wf-preview').textContent, /예정 65만원.*지급 10만원.*잔금 US\$423.08.*55만원/);
+  assert.match(e.d.querySelector('#wf-preview').textContent, /예정 650,000원.*지급 100,000원.*잔금 US\$423.08.*550,000원/);
   await e.submit(); assert.equal(e.writes[0][0].plan.fxRate, 1300);
   assert.deepEqual(JSON.parse(JSON.stringify(e.writes[0][0].payments)), before.funds.travel.payments);
   e.dom.window.close();
@@ -207,7 +207,7 @@ test('USD editor accepts dollar-paid totals separately, previews the native rema
   e.open('travel-row', 'sample', 'one');
   const native = e.d.querySelector('[data-key=usdPaid]');
   assert.equal(native.closest('.wf-usd-payment').hidden, false); native.value = '200'; native.dispatchEvent(new e.w.Event('input', { bubbles: true }));
-  assert.match(e.d.querySelector('#wf-preview').textContent, /잔금 US\$216.67.*26만원/);
+  assert.match(e.d.querySelector('#wf-preview').textContent, /잔금 US\$216.67.*260,000원/);
   await e.submit(); const command = e.writes[0][0];
   assert.equal(command.payments[0].usdPaid, 200); assert.equal(command.payments[0].usdPaidKrw, 240000);
   assert.equal(command.payments[0].actual, 240000); assert.equal(command.payments[0].deposit, 100000);

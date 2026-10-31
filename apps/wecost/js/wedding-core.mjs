@@ -199,6 +199,13 @@ export function weddingView(
     if (sort === "remaining") return b.totals.remaining - a.totals.remaining || byCategory;
     return b.totals.planned - a.totals.planned || byCategory;
   });
+  // Group ordering still follows the selected sort. Inside each category,
+  // unpaid work comes first; stable sorting preserves the selected order
+  // within each payment status. Unpriced items stay with unpaid work.
+  const statusOrder = { empty: 0, unpaid: 0, partial: 1, done: 2 };
+  for (const group of groups) {
+    group.items.sort((a, b) => statusOrder[readPayment(a).status] - statusOrder[readPayment(b).status]);
+  }
   return {
     scoped,
     totals: aggregate(scoped, readPayment),
