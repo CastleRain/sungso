@@ -4,6 +4,7 @@ Implementation checks: passed. Approved compact-ledger refinement: implemented a
 
 ## 운영 배포 준비
 
+- 첫 공개 `35848c7`/Pages 41199737046은 성공했고 공개 21개 파일이 일치했으나, 실제 기존 방문 세션은 새 HTML과 캐시된 이전 렌더러의 혼합으로 본문이 비었다. 배포 완료와 사용자 화면 완료를 구분하며 캐시 보완 후 재검수한다. HTML import map을 모듈 로드 전에 선언해 모든 저장소 import를 단일 버전 URL로 맞추고 wedding renderer/core/CSS를 갱신한다. 공통 인증/금융 모듈 URL과 다른 탭 소스는 유지한다. [import map의 경로 정규화·적용 순서](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap)를 확인했다.
 - 최신 master `f6ac271`과 통합한 최종 트리에서 전체 2,156개 검사·890개 로컬 참조·265개 JavaScript 검사와 빌드가 통과했다. 공개 이미지는 합성 입력이며 실제 금액·개인 캡처는 Git 제외 로컬에만 보관한다.
 - 공개 이력은 최종 트리 한 커밋으로 정리한다. 다른 앱의 최신 수집 데이터, 기존 세 탭과 공통 계산을 보존했다. DB 변경 없이 코드만 배포하며 push 뒤 Pages와 실제 공개 파일·화면을 확인한다.
 
