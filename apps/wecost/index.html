@@ -311,88 +311,9 @@
     </div>
   </div>
 
-  <!-- ===== 결혼비용 탭 ===== -->
-  <div id="tab-wedding" class="tab-page hidden">
-    <div class="page-hdr">
-      <div>
-        <h1>결혼비용</h1>
-        <p>항목별 예산과 실지출을 관리해요.</p>
-      </div>
-      <button class="btn btn-primary" onclick="window._openItemDrawer(null)">+ 항목 추가</button>
-    </div>
-
-    <div id="wecost-travel-summary" class="wecost-travel-summary"></div>
-
-    <!-- 상단 4 카드 -->
-    <div class="metric-grid metric-grid-4">
-      <div class="metric-card mc-primary">
-        <div class="mc-label">총 예정 비용</div>
-        <div class="mc-value v-primary" id="s-total">₩0</div>
-        <div class="mc-sub" id="s-total-hint"></div>
-      </div>
-      <div class="metric-card mc-income">
-        <div class="mc-label">지출 완료</div>
-        <div class="mc-value v-income" id="s-paid">₩0</div>
-        <div class="mc-sub" id="s-paid-hint"></div>
-      </div>
-      <div class="metric-card mc-expense">
-        <div class="mc-label">남은 잔금</div>
-        <div class="mc-value v-expense" id="s-remain">₩0</div>
-        <div class="mc-sub">총합 - 지출완료</div>
-      </div>
-      <div class="metric-card mc-warning">
-        <div class="mc-label">30일 내 납부액</div>
-        <div class="mc-value v-warning" id="s-soon">₩0</div>
-        <div class="mc-sub" id="s-soon-hint"></div>
-      </div>
-    </div>
-
-    <!-- 진행률 -->
-    <div class="card" style="padding:16px 20px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px">
-        <span style="font-weight:600">지출 진행 현황</span>
-        <span id="prog-info" style="color:var(--text-muted)">0% · ₩0 / ₩0</span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill" id="prog-fill" style="width:0%;background:var(--income)"></div>
-      </div>
-    </div>
-
-    <!-- 카테고리 바 -->
-    <div class="card">
-      <div class="card-hdr">
-        <span class="card-title">카테고리별 현황</span>
-      </div>
-      <div id="cat-rows"></div>
-    </div>
-
-    <!-- 잔금 타임라인 -->
-    <div class="card">
-      <div class="card-hdr">
-        <span class="card-title">잔금 납부 일정</span>
-        <span class="card-title-sub">잔금지급일 기준</span>
-      </div>
-      <div class="tl-list" id="timeline"></div>
-    </div>
-
-    <!-- 상세 테이블 (접기) -->
-    <div class="card">
-      <div class="collapsible-hdr" onclick="window._toggleTable(this)">
-        <span class="card-title">항목별 상세 <span class="card-title-sub" id="tbl-count"></span></span>
-        <span class="toggle-icon">▲</span>
-      </div>
-      <div class="collapsible-body" id="tbl-body-wrap">
-        <div class="table-wrap" style="margin-top:4px">
-          <table>
-            <thead><tr>
-              <th>항목</th><th>카테고리</th><th>예정금액</th>
-              <th>계약금</th><th>잔금</th><th>실지출</th><th>진행</th><th></th>
-            </tr></thead>
-            <tbody id="tbl-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <!-- ===== 결혼비용 탭: 회원 데이터로만 렌더 ===== -->
+  <div id="tab-wedding" class="tab-page hidden" aria-label="결혼비용">
+    <div class="page-hdr"><h1>결혼비용</h1></div>
   </div>
 
   <!-- ===== 집 시뮬레이션 탭 ===== -->
@@ -552,20 +473,30 @@
 
   <!-- 결혼비용 항목 드로어 -->
   <div class="drawer-backdrop hidden" id="item-drawer-backdrop" onclick="window._closeItemDrawer()"></div>
-  <div class="item-drawer hidden" id="item-drawer">
+  <div class="item-drawer hidden" id="item-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
     <div class="drawer-hdr">
-      <h3 id="drawer-title">항목 추가</h3>
-      <button class="drawer-close" onclick="window._closeItemDrawer()">✕</button>
+      <div><h3 id="drawer-title">항목 추가</h3><p id="wed-editor-context" class="wed-note"></p></div>
+      <button class="drawer-close" aria-label="항목 창 닫기" onclick="window._closeItemDrawer()">✕</button>
     </div>
     <div class="drawer-body">
-      <input type="hidden" id="drawer-item-id">
+      <input type="hidden" id="drawer-item-id"><p id="wed-form-error" role="alert" tabindex="-1"></p><p id="wed-last-payment" class="wed-note"></p>
+      <section id="wed-delete-confirm" class="wed-inline-confirm" hidden aria-label="삭제 확인">
+        <strong id="wed-delete-name"></strong><p>삭제한 항목은 되돌릴 수 없어요.</p>
+        <div><button type="button" class="btn btn-ghost" id="wed-delete-cancel">유지하기</button><button type="button" class="btn btn-ghost" id="wed-delete-apply">항목 삭제 확정</button></div>
+      </section>
+      <section id="wed-discard-confirm" class="wed-inline-confirm" hidden aria-label="변경 취소 확인">
+        <strong>저장하지 않은 변경이 있어요.</strong><p>변경 내용을 버리고 닫을까요?</p>
+        <div><button type="button" class="btn btn-ghost" id="wed-discard-cancel">계속 수정</button><button type="button" class="btn btn-ghost" id="wed-discard-apply">변경 취소하고 닫기</button></div>
+      </section>
+      <section class="wed-editor-section" aria-labelledby="wed-basic-title">
+      <h4 id="wed-basic-title">기본 정보</h4><div class="wed-editor-grid wed-editor-basic">
       <div class="inp-grp">
-        <label>항목명</label>
-        <input type="text" id="di-name" placeholder="예: 웨딩홀 계약금" class="input-field">
+        <label for="di-name">항목명</label>
+        <input type="text" id="di-name" placeholder="예: 본식 사진, 드레스 추가금" class="input-field" aria-describedby="wed-editor-context">
       </div>
       <div class="inp-grp">
-        <label>카테고리</label>
-        <select id="di-cat" class="input-field">
+        <label for="di-cat">카테고리</label>
+        <select id="di-cat" class="input-field" aria-describedby="wed-category-help">
           <option value="🏰웨딩홀">🏰 웨딩홀</option>
           <option value="👗스드메">👗 스드메</option>
           <option value="🤵🏻예복">🤵🏻 예복</option>
@@ -585,48 +516,59 @@
           <option value="✨기타">✨ 기타</option>
         </select>
       </div>
+      </div><p id="wed-category-help" class="wed-editor-help" hidden>여행 예산과 연결된 항목은 카테고리가 고정돼요.</p></section>
+      <section class="wed-editor-section" aria-labelledby="wed-money-title">
+      <h4 id="wed-money-title">금액 <small>원 단위로 입력</small></h4>
       <div class="inp-grp">
-        <label>예정 금액 (원)</label>
-        <div class="sav-inp-row" style="margin-bottom:0">
-          <input type="text" inputmode="numeric" id="di-planned" placeholder="예: 8,000,000" class="input-field" style="flex:1"
-                 oninput="window._fmtMoneyHint(this,'hint-di-planned')">
-          <span class="sav-amt-lbl" id="hint-di-planned"></span>
-        </div>
+        <label for="di-planned">예정 금액 (원)</label>
+        <input type="text" inputmode="numeric" id="di-planned" placeholder="예: 8,000,000" class="input-field wed-money-input" aria-describedby="hint-di-planned">
+        <span class="wed-money-hint" id="hint-di-planned"></span>
+      </div>
+      <div class="wed-editor-grid">
+      <div class="inp-grp">
+        <label for="di-deposit">계약금 (원)</label>
+        <input type="text" inputmode="numeric" id="di-deposit" placeholder="0" class="input-field wed-money-input" aria-describedby="hint-di-deposit">
+        <span class="wed-money-hint" id="hint-di-deposit"></span>
       </div>
       <div class="inp-grp">
-        <label>계약금 (원) <small style="color:var(--text-muted)">선택</small></label>
-        <div class="sav-inp-row" style="margin-bottom:0">
-          <input type="text" inputmode="numeric" id="di-deposit" placeholder="예: 1,000,000" class="input-field" style="flex:1"
-                 oninput="window._fmtMoneyHint(this,'hint-di-deposit')">
-          <span class="sav-amt-lbl" id="hint-di-deposit"></span>
-        </div>
+        <label for="di-actual">계약금 외 누적 지급 (원)</label>
+        <input type="text" inputmode="numeric" id="di-actual" placeholder="0" class="input-field wed-money-input" aria-describedby="hint-di-actual wed-payment-help">
+        <span class="wed-money-hint" id="hint-di-actual"></span>
       </div>
+      </div><p class="wed-editor-help" id="wed-payment-help">계약금 외 누적 지급에는 계약금을 제외하고 추가로 낸 금액만 입력해요.</p>
+      <div class="wed-editor-preview" aria-live="polite" aria-atomic="true">
+        <div class="wed-preview-totals"><div><span>누적 지급액</span><strong id="wed-draft-paid">0원</strong></div><div class="wed-preview-balance"><span>남은 잔금</span><strong id="wed-draft-remaining">0원</strong></div></div>
+        <p id="wed-draft-note">입력한 금액을 기준으로 계산해요.</p>
+      </div></section>
+      <section class="wed-editor-section" aria-labelledby="wed-details-title">
+      <h4 id="wed-details-title">일정과 메모 <small>선택</small></h4>
       <div class="inp-grp">
-        <label>계약금 외 실지출 (원) <small style="color:var(--text-muted)">선택</small></label>
-        <div class="sav-inp-row" style="margin-bottom:0">
-          <input type="text" inputmode="numeric" id="di-actual" placeholder="예: 0" class="input-field" style="flex:1"
-                 oninput="window._fmtMoneyHint(this,'hint-di-actual')">
-          <span class="sav-amt-lbl" id="hint-di-actual"></span>
-        </div>
-      </div>
-      <div class="inp-grp">
-        <label>잔금 납부일 <small style="color:var(--text-muted)">선택</small></label>
+        <label for="di-balance-due">잔금 납부일</label>
         <input type="date" id="di-balance-due" class="input-field">
       </div>
       <div class="inp-grp">
-        <label>메모 <small style="color:var(--text-muted)">선택</small></label>
-        <input type="text" id="di-memo" placeholder="예: 계약 완료, 추가 요청 있음" class="input-field">
+        <label for="di-memo">메모</label>
+        <textarea id="di-memo" rows="3" placeholder="예: 계약 완료, 추가 요청 있음" class="input-field"></textarea>
       </div>
+      </section>
     </div>
     <div class="drawer-footer">
-      <button class="btn btn-ghost" id="drawer-delete-btn" onclick="window._confirmDeleteItemDrawer()" style="display:none;color:var(--expense)">🗑 삭제</button>
-      <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" id="drawer-delete-btn" onclick="window._confirmDeleteItemDrawer()" style="display:none">삭제</button>
+      <div class="wed-editor-actions">
         <button class="btn btn-ghost" onclick="window._closeItemDrawer()">취소</button>
         <button class="btn btn-primary" onclick="window._saveItemDrawer()">저장</button>
       </div>
     </div>
   </div>
 
+  <div class="item-drawer hidden" id="wed-payment-dialog" role="dialog" aria-modal="true" aria-labelledby="wed-payment-title">
+    <div class="drawer-hdr"><h3 id="wed-payment-title">납부 기록</h3></div>
+    <div class="drawer-body"><strong id="wed-payment-name"></strong><p id="wed-payment-summary"></p>
+      <label for="wed-payment-amount">이번에 낸 금액 (원)</label><input id="wed-payment-amount" class="input-field" inputmode="numeric" autocomplete="off">
+      <label for="wed-payment-date">실제 납부일</label><input id="wed-payment-date" class="input-field" type="date">
+      <p class="wed-note">저장하면 누적 지급액에 더해져요. 실제 송금은 하지 않아요.</p><p id="wed-payment-error" role="alert"></p>
+    </div><div class="drawer-footer"><button type="button" class="btn btn-ghost" id="wed-payment-cancel">취소</button><button type="button" class="btn btn-primary" id="wed-payment-save">납부 기록 저장</button></div>
+  </div>
 </main><!-- app-main -->
 
 <script type="application/x-sungso-script" data-src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"
