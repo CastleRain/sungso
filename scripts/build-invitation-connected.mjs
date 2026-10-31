@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildInvitation } from './build-invitation-vercel.mjs';
+import { buildStudioV2 } from '../apps/invitation-studio-v2/build.mjs';
 import { listFiles } from './check-site.mjs';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const SOURCE = path.join(ROOT, 'deploy/invitation-connected');
@@ -11,6 +12,7 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   // A fresh output is mandatory: never accidentally leave an older public editor alongside the gateway.
   try { await readFile(path.join(output, '.vercel/output/config.json')); throw Error('Use a fresh connected output directory.'); } catch (e) { if (e.code !== 'ENOENT') throw e; }
   await buildInvitation({ distDir: staging });
+  await buildStudioV2({ outDir: path.join(staging, 'lab/studio-v2') });
   const base = path.join(output, '.vercel/output'), staticDir = path.join(base, 'static'), fn = path.join(base, 'functions/gateway.func');
   await mkdir(staticDir, { recursive: true }); await mkdir(fn, { recursive: true });
   const files = await listFiles(staging), privateFiles = [];
@@ -38,6 +40,20 @@ export async function buildConnectedInvitation({ output = path.join(ROOT, '.loca
   let contentEditor = await readFile(path.join(studio, 'js/content-editor.mjs'), 'utf8');
   contentEditor = contentEditor.replace('이곳의 문구와 사진은 조립용 초안이에요. 이 브라우저에 따로 보관되며, 현재 하객용 청첩장에는 반영되지 않아요. 조합 링크에는 포함되지 않으니 내용 파일로 함께 옮겨 주세요.', '편집 중인 내용은 이 브라우저에 자동 보관돼요. 두 사람이 함께 보려면 위의 공동 저장 · 공개에서 초안으로 저장해 주세요. 공개하기 전에는 하객 화면이 바뀌지 않아요.');
   await writeFile(path.join(studio, 'js/content-editor.mjs'), contentEditor);
+  // V2 is a separate protected shell; V1 and the guest runtime remain unchanged.
+  const studioV2 = path.join(fn, 'private/lab/studio-v2');
+  for (const file of ['cloud-panel.mjs', 'cloud.css']) {
+    let source = await readFile(path.join(SOURCE, file), 'utf8');
+    if (file === 'cloud-panel.mjs') source = source.replaceAll('/lab/studio/', '/lab/studio-v2/');
+    await writeFile(path.join(studioV2, file), source); privateFiles.push('/lab/studio-v2/' + file);
+  }
+  let v2 = await readFile(path.join(studioV2, 'studio.mjs'), 'utf8');
+  v2 = `import { mountCloudPanel } from './cloud-panel.mjs';\nconst initialSharedDraft = new URLSearchParams(location.search).get('draft');\n` + v2;
+  v2 += `\nmountCloudPanel({initialDraft:initialSharedDraft,ready:contentReady,getSnapshot,loadSnapshot});\n`;
+  await writeFile(path.join(studioV2, 'studio.mjs'), v2);
+  let v2html = await readFile(path.join(studioV2, 'index.html'), 'utf8');
+  v2html = v2html.replace("connect-src 'self'", "connect-src 'self' https://*.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com https://sungso-358cb.firebaseapp.com").replace('</head>', '<link rel="stylesheet" href="./cloud.css"></head>');
+  await writeFile(path.join(studioV2, 'index.html'), v2html);
   // Keep the private gate, but avoid dozens of simultaneous membership checks
   // across cold function instances for a single module graph.
   const { build } = createRequire(new URL('../services/homehunt/render/package.json', import.meta.url))('esbuild');

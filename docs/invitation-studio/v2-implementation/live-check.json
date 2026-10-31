@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-31T15:53:28.300Z",
+  "deployment": "dpl_39JDRvJGryxiX9R8HnoiqBwgmBjc",
+  "checks": [
+    {
+      "url": "/",
+      "status": 200,
+      "unchanged": true
+    },
+    {
+      "url": "/v6/",
+      "status": 200,
+      "unchanged": true
+    },
+    {
+      "url": "/v6/assets/audio/wedding-day.mp3",
+      "status": 200,
+      "unchanged": true
+    },
+    {
+      "url": "/v6/assets/photos/forest-640.webp",
+      "status": 200,
+      "unchanged": true
+    },
+    {
+      "url": "/lab/studio/",
+      "status": 303,
+      "location": "/studio-login/?next=%2Flab%2Fstudio%2F"
+    },
+    {
+      "url": "/lab/studio-v2/",
+      "status": 303,
+      "location": "/studio-login/?next=%2Flab%2Fstudio-v2%2F"
+    },
+    {
+      "url": "/lab/studio-v2/studio.mjs",
+      "status": 401,
+      "location": null
+    },
+    {
+      "url": "/lab/studio-v2/preview/",
+      "status": 303,
+      "location": "/studio-login/?next=%2Flab%2Fstudio-v2%2Fpreview%2F"
+    },
+    {
+      "url": "/api/studio/manage",
+      "status": 401,
+      "location": null
+    },
+    {
+      "url": "/homehunt/",
+      "status": 404,
+      "location": null
+    },
+    {
+      "url": "/wecost/",
+      "status": 404,
+      "location": null
+    },
+    {
+      "url": "/honeymoon/",
+      "status": 404,
+      "location": null
+    }
+  ],
+  "preservedStaticFiles": 204,
+  "authenticatedBrowser": {
+    "editor": true,
+    "previewReady": true,
+    "dateJumpTop": 19.8125,
+    "cloudRead": true,
+    "publicRelease": "legacy5.6",
+    "draftCount": 0,
+    "consoleErrors": 0
+  }
+}

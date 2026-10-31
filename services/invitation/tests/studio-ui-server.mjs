@@ -5,13 +5,14 @@ import path from 'node:path';
 import { createMemoryFirestore } from '../../../apps/homehunt/tests/helpers/firestore-memory.mjs';
 import { createStudioStore } from '../server/studio.mjs';
 const build = path.resolve(process.argv[2]);
+const port = Number(process.env.STUDIO_QA_PORT || 8041);
 if (!build.includes(`${path.sep}.local${path.sep}`)) throw Error('A local generated fixture is required');
 const db = createMemoryFirestore(); db.doc = p => { const a = p.split('/'), id = a.pop(); return db.collection(a.join('/')).doc(id); };
 const store = createStudioStore({ db });
 const files = path.join(build, '.vercel/output/static'), privateDir = path.join(build, '.vercel/output/functions/gateway.func');
 const MIME = { '.html':'text/html', '.mjs':'text/javascript', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.webp':'image/webp', '.jpg':'image/jpeg', '.woff2':'font/woff2', '.mp3':'audio/mpeg', '.svg':'image/svg+xml' };
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://127.0.0.1:8041'), p = url.pathname;
+  const url = new URL(req.url, `http://127.0.0.1:${port}`), p = url.pathname;
   const send = (code, text, type='application/json') => { res.writeHead(code, {'Content-Type':type,'Cache-Control':'no-store'});res.end(text); };
   try {
     if (p === '/studio-login/session.mjs') return send(200, `export async function studioRequest(path,opts={}){const r=await fetch('/api/studio/'+path,{...opts,headers:{'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.error);return d;}export const logout=()=>{};`, 'text/javascript');
@@ -36,8 +37,8 @@ const server = createServer(async (req, res) => {
     }
     if(p.includes('..')||p.includes('\\'))return send(404,'');
     const filename=path.join(p.startsWith('/lab/')?path.join(privateDir,'private'):files,p.endsWith('/')?p+'index.html':p);
-    let data=await readFile(filename);if(p.endsWith('/live-adapter.mjs'))data=data.toString().replace('https://sungso-homehunt-api.onrender.com','http://127.0.0.1:8041/qa-live');
+    let data=await readFile(filename);if(p.endsWith('/live-adapter.mjs'))data=data.toString().replace('https://sungso-homehunt-api.onrender.com',`http://127.0.0.1:${port}/qa-live`);
     send(200,data,MIME[path.extname(filename)]||'application/octet-stream');
   }catch(e){send(e.code==='ENOENT'?404:e.status||400,JSON.stringify({ok:false,error:e.message}));}
 });
-server.listen(8041,'127.0.0.1',()=>console.log('Synthetic studio UI: http://127.0.0.1:8041/lab/studio/'));
+server.listen(port,'127.0.0.1',()=>console.log(`Synthetic studio UI: http://127.0.0.1:${port}/lab/studio-v2/`));
