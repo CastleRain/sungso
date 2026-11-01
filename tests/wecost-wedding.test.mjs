@@ -1,3 +1,4 @@
+import { isBudgetIncluded } from '../apps/wecost/js/wedding-budget-core.mjs';
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -166,6 +167,9 @@ function renderEnvironment(finance = {}) {
   let fail = false;
   const context = vm.createContext({
     ...core,
+    isBudgetIncluded,
+    budgetItemControl: () => "",
+    budgetOverview: () => "",
     basePaymentState: core.paymentState,
     baseAggregate: core.aggregate,
     baseWeddingView: core.weddingView,

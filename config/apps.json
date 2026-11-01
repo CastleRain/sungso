@@ -17,7 +17,8 @@
       "files": [
         "index.html",
         "css",
-        "js"
+        "js",
+        "assets/icons"
       ]
     },
     {

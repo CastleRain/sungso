@@ -15,7 +15,7 @@ function loadModule(relative, names, overrides = {}) {
     registerPrivateCleanup:fn=>{cleanups.add(fn);return()=>cleanups.delete(fn);},
     initializeApp:()=>({name:'[DEFAULT]'}),getApps:()=>[],getFirestore:()=>({}),
     doc:(_db,...parts)=>({path:parts.join('/')}),collection:(_db,...parts)=>({path:parts.join('/')}),query:value=>value,orderBy:()=>({}),
-    onSnapshot:(ref,next,error)=>{const sub={ref,next,error,active:true};subscriptions.push(sub);return()=>{sub.active=false;};},
+    onSnapshot:(ref,...args)=>{const next=args.find(arg=>typeof arg==='function'),error=args.filter(arg=>typeof arg==='function')[1];const sub={ref,next,error,active:true,options:typeof args[0]==='object'?args[0]:null};subscriptions.push(sub);return()=>{sub.active=false;};},
     getDoc:async()=>snap(null), serverTimestamp:()=> 'server-time',increment:value=>({increment:value}),
     setDoc:async(ref,data)=>writes.push({ref,data:structuredClone(data)}),
     updateDoc:async(ref,data)=>writes.push({ref,data:structuredClone(data)}),

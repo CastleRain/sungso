@@ -73,8 +73,8 @@ function queryRows(ref) {
   if (!order.length) order = [{ field: '__name__', direction: 'asc' }];
   rows.sort((a, b) => { for (const item of order) { const av = scalar(field(a, item.field)), bv = scalar(field(b, item.field)); if (av < bv) return item.direction === 'desc' ? 1 : -1; if (av > bv) return item.direction === 'desc' ? -1 : 1; } return a.id.localeCompare(b.id); });
   for (const constraint of ref.constraints || []) {
-    if (constraint.kind === 'startAt') rows = rows.filter(row => field(row, order[0].field) >= constraint.value);
-    if (constraint.kind === 'endAt') rows = rows.filter(row => field(row, order[0].field) <= constraint.value);
+    if (constraint.kind === 'startAt') rows = rows.filter(row => order[0].direction === 'desc' ? field(row, order[0].field) <= constraint.value : field(row, order[0].field) >= constraint.value);
+    if (constraint.kind === 'endAt') rows = rows.filter(row => order[0].direction === 'desc' ? field(row, order[0].field) >= constraint.value : field(row, order[0].field) <= constraint.value);
     if (constraint.kind === 'limit') rows = rows.slice(0, constraint.value);
   }
   return rows;

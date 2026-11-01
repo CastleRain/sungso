@@ -9,6 +9,10 @@ import { mountWeddingCalendar } from './wedding-calendar.mjs';
 let state = { funds: null, plan: null, connection: 'loading', error: '' }, getState, rerender, dialog, expected, currentItem, draft, mode, operationId, busy = false, retired = false;
 let fxReader, fxState = { quote: null, loading: false, error: '' }, travelFocusId = null, restoreFxFocus = false;
 let paymentCalendar = null;
+const financeListeners = new Set();
+export const getWeddingFinanceState = () => ({ ...state, quote: fxState.quote });
+export function subscribeFinanceView(listener) { financeListeners.add(listener); return () => financeListeners.delete(listener); }
+const notifyFinanceView = () => financeListeners.forEach(listener => listener());
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 const won = value => `${Number(value).toLocaleString('ko-KR')}원`;
 const compact = value => value === 0 ? '0원' : value > 0 && value < 5000 ? '1만원 미만' : `${Math.round(value / 10000).toLocaleString('ko-KR')}만원`;
@@ -51,9 +55,9 @@ const num = id => {
 };
 function fundingCardContent(items) {
   let summary;
-  try { summary = fundingSummary(items, state.funds, state.plan, fxState.quote); } catch { summary = { needed: null }; }
+  try { summary = fundingSummary(items, state.funds, state.plan, fxState.quote, getState()?.settings?.weddingBudget); } catch { summary = { needed: null }; }
   const ready = summary.needed !== null;
-  return `<div class="mc-label">${ready && summary.surplus > 0 ? '예산보다 남는 돈' : '추가로 모을 돈'}</div><div class="mc-value" id="s-funding-gap">${ready ? compact(summary.surplus || summary.needed) : '—'}</div><div class="mc-sub">${ready ? `전체 잔금 − 현재 환산 합계 · ${rateBasis()}` : summary.missingRate ? '환율 확인 후 계산해요' : '현재 남은 결혼자금을 등록해주세요'}</div>`;
+  return `<div class="mc-label"><span class="wed-tone-icon" data-tone="rose" aria-hidden="true">🐷</span>${ready && summary.surplus > 0 ? '예산보다 남는 돈' : '추가로 모을 돈'}</div><div class="mc-value" id="s-funding-gap">${ready ? compact(summary.surplus || summary.needed) : '—'}</div><div class="mc-sub">${ready ? `포함 잔금 − 보유 자금 − 예상 수입 · ${rateBasis()}` : summary.missingRate ? '환율 확인 후 계산해요' : '현재 남은 결혼자금을 등록해주세요'}</div>`;
 }
 export const weddingFundingCard = items => `<div class="metric-card wf-goal" id="wf-funding-card">${fundingCardContent(items)}</div>`;
 const rateBasis = () => !state.funds?.usdBalance ? '원화 잔액 기준' : fxState.quote && quoteIsOld(fxState.quote) ? '마지막 확인 환율 기준' : '현재 환율 기준';
@@ -87,7 +91,7 @@ export function withWeddingDetails(item, payment) {
 }
 export function weddingFundsHTML() {
   const f = state.funds;
-  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title">남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small id="wf-usd-current">${usdValueHTML()}</small></div><div class="wf-fund-amount wf-total" id="wf-current-total">${currentTotalHTML()}</div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}<p class="wf-funds-caption">기존 저축과 별도 · 달러는 원화 카드대금과 구분해요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
+  return `<section class="card wf-funds" aria-label="남아 있는 결혼자금"><div class="wf-funds-title"><h2 class="card-title"><span class="wed-tone-icon" data-tone="cream" aria-hidden="true">👛</span>남아 있는 결혼자금</h2><p>사용 후 현재 남은 현금·달러</p></div>${hasFunds() ? `<div class="wf-fund-amount"><span>원화</span><strong>${compact(f.cashKrw)}</strong></div><div class="wf-fund-amount"><span>보유 달러</span><strong>${dollars(f.usdBalance)}</strong><small id="wf-usd-current">${usdValueHTML()}</small></div><div class="wf-fund-amount wf-total" id="wf-current-total">${currentTotalHTML()}</div>` : `<p class="wf-funds-empty">${state.error || (state.connection === 'loading' ? '결혼자금 불러오는 중…' : '현재 남은 원화와 달러를 따로 등록해요.')}</p>`}${button('funds', hasFunds() ? '자금 관리' : '자금 등록')}<p class="wf-funds-caption">현재 결혼용 잔액 · 집 자금에 다시 더하지 않아요.${state.connection !== 'live' && hasFunds() ? ' 최신 잔액 연결 확인 중' : ''}</p></section>`;
 }
 
 function shell(title, subtitle, body, saveLabel = '저장') {
@@ -167,7 +171,7 @@ function preview() {
   try {
     const input = command(), next = buildFundingChange(expected, input, expected, localDate());
     if (mode === 'balances') {
-      const summary = fundingSummary(getState().items, next.funds, state.plan, fxState.quote);
+      const summary = fundingSummary(getState().items, next.funds, state.plan, fxState.quote, getState()?.settings?.weddingBudget);
       el('wf-preview').textContent = `현재 환산 합계 ${summary.available === null ? '환율 확인 필요' : won(summary.available)} · ${summary.needed === null ? '추가로 모을 돈은 환율 확인 후 계산해요' : summary.surplus ? '예산보다 남는 돈 ' + won(summary.surplus) : '추가로 모을 돈 ' + won(summary.needed)}${summary.costRate ? ` · 평균 환전 원가 ${summary.costRate.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원/USD` : ''}`;
     } else if (mode === 'travel') {
       const p = next.itemPatch;
@@ -207,6 +211,7 @@ export function registerWeddingFinance(getSt, render) {
     if (retired) return;
     const changed = fxState.quote?.rate !== next.quote?.rate || fxState.quote?.asOf !== next.quote?.asOf;
     fxState = next;
+    notifyFinanceView();
     if (changed && el('s-total')) {
       const y = window.scrollY;
       rerender(getState(), { fxUpdate: true });
@@ -282,6 +287,6 @@ export function registerWeddingFinance(getSt, render) {
       }
     }
   });
-  subscribeWeddingFunds(next => { if (retired) return; state = next; if (el('s-total')) rerender(getState()); });
+  subscribeWeddingFunds(next => { if (retired) return; state = next; notifyFinanceView(); ensureWeddingFx(); if (el('s-total')) rerender(getState()); });
   registerPrivateCleanup(() => { retired = true; fxReader?.dispose(); fxState = { quote: null, loading: false, error: '' }; busy = false; state = { funds: null, plan: null, connection: 'loading', error: '' }; dialog.close(); dialog.remove(); expected = null; draft = null; currentItem = null; });
 }

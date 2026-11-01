@@ -1,3 +1,4 @@
+import { weddingBudgetSummary } from './wedding-budget-core.mjs';
 import { normalizeBudgetDraft, calculateTravelBudget, buildBudgetUpdate, sameBudgetValue, isTravelItem } from '../../../shared/finance/travel-budget-core.mjs';
 
 export function amount(value, label = '금액', decimals = 0) {
@@ -12,19 +13,17 @@ export function normalizeFunds(value) {
   amount(cashKrw + usdCostKrw, '자금 합계');
   return { cashKrw, usdBalance, usdCostKrw };
 }
-export function fundingSummary(items, funds, plan = null, quote = null) {
-  let missingRate = false;
-  const remaining = items.reduce((sum, i) => {
-    const detail = currentTravelBreakdown(i, plan, funds, quote);
-    missingRate ||= detail.missingRate;
-    return sum + (detail.rows.length ? detail.rows.reduce((s, row) => s + row.remaining, 0) : Math.max((i.planned || 0) - (i.deposit || 0) - (i.actual || 0), 0));
-  }, 0);
-  if (!funds || funds.cashKrw === undefined) return { remaining, available: null, needed: null, surplus: null };
+export function fundingSummary(items, funds, plan = null, quote = null, policy = {}) {
+  const rows = travelLedgerItems(items, plan, funds, quote);
+  const budget = weddingBudgetSummary(rows, policy);
+  const missingRate = budget.included.some(i => i.fxPending);
+  const remaining = budget.remaining;
+  if (!funds || funds.cashKrw === undefined) return { ...budget, remaining, available: null, needed: null, surplus: null };
   const f = normalizeFunds(funds), rate = typeof quote?.rate === 'number' && Number.isFinite(quote.rate) && quote.rate > 0 ? quote.rate : null;
-  if (f.usdBalance && !rate) return { remaining, available: null, needed: null, surplus: null, missingRate: true };
+  if (f.usdBalance && !rate) return { ...budget, remaining, available: null, needed: null, surplus: null, missingRate: true };
   const available = amount(f.cashKrw + Math.round(f.usdBalance * (rate || 0)), '현재 환산 합계');
-  if (missingRate) return { remaining, available, needed: null, surplus: null, missingRate: true };
-  return { remaining, available, needed: Math.max(remaining - available, 0), surplus: Math.max(available - remaining, 0), rate, costRate: f.usdBalance ? f.usdCostKrw / f.usdBalance : null };
+  if (missingRate) return { ...budget, remaining, available, needed: null, surplus: null, missingRate: true };
+  return { ...weddingBudgetSummary(rows, policy, available), remaining, available, rate, costRate: f.usdBalance ? f.usdCostKrw / f.usdBalance : null };
 }
 
 // Replace the linked parent only in the wedding view. Stable row IDs route edits

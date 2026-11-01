@@ -23,6 +23,7 @@ function snapshot(value, ref) {
 export async function getDoc(ref) { return snapshot(await api({ op: 'read', ref: rawRef(ref) }, ref.db), ref); }
 export const getDocFromServer = getDoc;
 export const getDocs = getDoc;
+export const getDocsFromServer = getDocs;
 export function onSnapshot(ref, ...args) {
   const success = args.find(arg => typeof arg === 'function'), error = args.filter(arg => typeof arg === 'function')[1]; let active = true, last = '';
   const poll = async () => { if (!active || ref.db.closed) return; try { const value = await api({ op: 'read', ref: rawRef(ref) }, ref.db); const hash = JSON.stringify(value); if (active && hash !== last) { last = hash; success(snapshot(value, ref)); } } catch (cause) { if (active) error?.(cause); } };

@@ -164,6 +164,16 @@
 #tab-wedding .card {padding:18px 20px;border-radius:20px;box-shadow:0 2px 10px var(--ss-shadow);margin-bottom:16px;}
 #tab-wedding.active .card {animation:none;}
 #tab-wedding .card:hover {transform:none;}
+/* Animate the stable page only on tab entry. Its cards are replaced during
+   filtering and live updates, so their entry animations must remain disabled. */
+@keyframes wedPageIn {
+  from {opacity:0;transform:translateY(8px);}
+  to {opacity:1;transform:translateY(0);}
+}
+#tab-wedding.active {animation:wedPageIn 320ms cubic-bezier(.2,.8,.2,1);}
+@media (prefers-reduced-motion:reduce) {
+  #tab-wedding.active {animation:none;}
+}
 #tab-wedding h2 {margin:0;font-size:14px;font-weight:650;}
 #tab-wedding .card-title small {font-size:12px;font-weight:400;color:var(--ss-muted);margin-left:8px;}
 #tab-wedding .metric-grid {gap:12px;margin-bottom:16px;}
@@ -671,6 +681,15 @@ body.wed-modal-open {overflow:hidden;}
 #tab-wedding .wed-foreign-remaining strong.wed-zero {color:var(--ss-muted);}
 #tab-wedding .metric-card.mc-primary {overflow:visible;z-index:2;}
 #tab-wedding .metric-card:hover {transform:none;}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  #tab-wedding .metric-card:hover,
+  #tab-wedding .wf-funds:hover,
+  #tab-wedding .wed-overview-grid > .card:hover,
+  #tab-wedding .wed-reference-sections > .card:not([open]):hover {
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-md);
+  }
+}
 #tab-wedding .wed-budget-share {position:relative;border-top:1px solid var(--ss-border);margin-top:10px;padding-top:10px;}
 #tab-wedding .wed-share-trigger {display:block;width:100%;padding:0;border:0;background:none;color:var(--ss-text);font:inherit;text-align:left;cursor:pointer;border-radius:5px;}
 #tab-wedding .wed-share-caption {display:flex;justify-content:space-between;font-size:11px;color:var(--ss-muted);margin-bottom:7px;}
@@ -828,4 +847,91 @@ body.wed-modal-open {overflow:hidden;}
  #tab-wedding .wed-mobile-group-heading .wed-chevron {top:27px;right:70px;}
  #tab-wedding .wed-mobile-group-heading .wed-group-metric + .wed-group-metric {border-left:1px solid var(--ss-border);padding-left:8px;}
  #tab-wedding .wed-ledger-group > div {border-left:2px solid var(--ss-accent);margin-left:0;padding-left:10px;}
+}
+
+/* Soft companion to the dashboard/cashflow/house concepts. Reuse the shared
+   palette locally, so other tabs keep their current appearance and behavior. */
+#tab-wedding, #item-drawer, #wed-payment-dialog, .wf-dialog {
+ --ss-border:color-mix(in srgb,var(--ss-text) 11%,var(--ss-surface));
+ --ss-border-strong:color-mix(in srgb,var(--ss-text) 23%,var(--ss-surface));
+ --ss-soft:color-mix(in srgb,var(--ss-text) 3%,var(--ss-surface));
+ --ss-shadow:color-mix(in srgb,var(--ss-text) 7%,transparent);
+ --shadow-md:0 7px 20px color-mix(in srgb,var(--ss-text) 10%,transparent);
+ --wed-sage:color-mix(in srgb,var(--income) 24%,var(--ss-muted));
+ --wed-sage-ink:color-mix(in srgb,var(--income) 20%,var(--ss-text));
+ --wed-cream:color-mix(in srgb,var(--warning-soft) 65%,var(--ss-surface));
+}
+#app-main:has(#tab-wedding.active) {
+ background:color-mix(in srgb,var(--warning-soft) 12%,var(--ss-surface));
+}
+#tab-wedding .card, #tab-wedding .metric-card {
+ border-color:var(--ss-border);
+ box-shadow:0 3px 14px var(--ss-shadow);
+}
+#tab-wedding .metric-card::after {display:none;}
+#tab-wedding .metric-card.wf-goal {background:var(--ss-surface);}
+#tab-wedding .wed-balance-card {background:color-mix(in srgb,var(--wed-rose-soft) 72%,var(--ss-surface));}
+#tab-wedding .mc-value, #tab-wedding #prog-info strong {color:var(--ss-text);}
+#tab-wedding .mc-value.wed-owed {color:var(--wed-rose);}
+#tab-wedding .mc-label {display:flex;align-items:center;gap:8px;min-height:26px;color:var(--ss-muted);}
+#tab-wedding .wed-tone-icon {
+ display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;
+ width:26px;height:26px;border-radius:10px;font-size:16px;line-height:1;
+ background:var(--ss-soft);vertical-align:middle;
+}
+#tab-wedding .wed-tone-icon[data-tone=cream] {background:var(--wed-cream);}
+#tab-wedding .wed-tone-icon[data-tone=sage] {background:var(--income-soft);}
+#tab-wedding .wed-tone-icon[data-tone=rose] {background:var(--wed-rose-soft);}
+#tab-wedding .card-title > .wed-tone-icon {margin-right:8px;}
+#tab-wedding .wed-page-title {display:flex;align-items:center;gap:12px;}
+#tab-wedding .wed-page-title .wed-title-icon {width:46px;height:46px;flex-basis:46px;border-radius:16px;font-size:27px;}
+#tab-wedding .wed-track {background:var(--ss-soft);}
+#tab-wedding .wed-track > span {background:var(--wed-sage);}
+#tab-wedding .wed-share-track > span:first-child,
+#tab-wedding .wed-share-legend i {background:color-mix(in srgb,var(--ss-link) 68%,var(--ss-surface));}
+#tab-wedding .wed-share-track > span:last-child,
+#tab-wedding .wed-share-legend > span:last-child i {background:color-mix(in srgb,var(--wed-rose) 35%,var(--ss-surface));}
+#tab-wedding .wf-fx-compact .wf-fx-rate {color:var(--ss-text);}
+#tab-wedding .wed-foreign-reference {color:var(--ss-muted);}
+#tab-wedding .wed-icon {background:var(--wed-cream);}
+#tab-wedding .wed-group-toggle:hover {background:var(--ss-soft);}
+#tab-wedding .wed-chapter-heading .wed-group-toggle .wed-icon,
+#tab-wedding .wed-mobile-group-heading .wed-icon {background:var(--wed-cream);}
+#tab-wedding .wed-table-grouped .wed-chapter-columns th:first-child,
+#tab-wedding .wed-table-grouped .wed-nested-row > td:first-child,
+#tab-wedding .wed-ledger-group > div {border-left-color:var(--ss-border);}
+#tab-wedding .status-badge.done {background:var(--income-soft);color:var(--wed-sage-ink);}
+#tab-wedding .status-badge.partial {background:color-mix(in srgb,var(--ss-accent) 24%,var(--ss-surface));color:var(--ss-link);}
+#tab-wedding .wed-status-filters button[aria-pressed=true] {
+ background:color-mix(in srgb,var(--ss-accent) 36%,var(--ss-surface));
+ color:var(--ss-link);border-color:color-mix(in srgb,var(--ss-link) 40%,var(--ss-surface));
+ font-weight:600;
+}
+#tab-wedding .wed-view-toggle button[aria-pressed=true] {color:var(--ss-text);box-shadow:0 1px 4px var(--ss-shadow);}
+#tab-wedding .wed-fold-all {background:var(--ss-surface);}
+#tab-wedding .tbl-action-btn, #tab-wedding .wed-category-add {border-radius:10px;}
+#tab-wedding .wed-next .wed-text-button {
+ padding:6px 10px;border:1px solid var(--ss-border);border-radius:10px;
+ text-decoration:none;white-space:nowrap;background:var(--ss-surface);
+}
+#tab-wedding .wed-next .wed-text-button:hover {background:var(--ss-soft);}
+@media(max-width:768px){
+ #tab-wedding .wed-tone-icon {width:23px;height:23px;flex-basis:23px;font-size:14px;border-radius:8px;}
+ #tab-wedding .mc-label {gap:6px;}
+ #tab-wedding .wed-page-title .wed-title-icon {width:40px;height:40px;flex-basis:40px;font-size:24px;}
+ #tab-wedding .wed-next .card-hdr {align-items:flex-start;gap:8px;}
+ #tab-wedding .wed-next .card-title small {display:block;margin:5px 0 0 31px;}
+}
+/* Budget scope stays separate from each item's payment status. */
+#tab-wedding .wed-budget-overview { padding: 16px 20px; }
+#tab-wedding .wed-budget-overview .plan-button { border: 1px solid var(--ss-border); border-radius: 12px; padding: 8px 12px; font: inherit; color: var(--ss-text); background: white; cursor: pointer; }
+#tab-wedding .wed-budget-equation { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 12px 0; font-size: 11px; color: var(--ss-muted); }
+#tab-wedding .wed-budget-equation strong { display: block; font-size: 16px; margin-top: 4px; color: var(--ss-text); font-variant-numeric: tabular-nums; }
+#tab-wedding .wed-record-only { color: var(--ss-muted); background: #f3f1ed; font-size: 10px; font-weight: 500; border-radius: 5px; padding: 2px 5px; white-space: nowrap; }
+#tab-wedding .wed-budget-tag { padding: 5px 8px; border: 1px solid var(--ss-border); background: white; border-radius: 8px; font: inherit; font-size: 11px; color: var(--ss-muted); cursor: pointer; }
+#tab-wedding .wed-budget-tag.excluded { background: #f3f1ed; }
+#tab-wedding .wed-budget-overview .card-hdr { flex-wrap: wrap; gap: 8px; }
+@media(max-width: 600px) {
+  #tab-wedding .wed-budget-equation { gap: 10px; }
+  #tab-wedding .wed-budget-equation strong { font-size: 14px; }
 }

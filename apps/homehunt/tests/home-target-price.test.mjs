@@ -139,7 +139,7 @@ test('WeCost settings subscription publishes only its loaded target without addi
   const published = [];
   const sandbox = { db: {}, DEFAULT_SETTINGS: {}, DEFAULT_SAVINGS: {},
     doc: (_, name) => name, collection: (_, name) => name,
-    onSnapshot: (reference, callback, error) => { subscriptions.push({ reference, callback, error }); return () => {}; },
+    onSnapshot: (reference, ...args) => { const callback=args.find(arg=>typeof arg==='function'),error=args.filter(arg=>typeof arg==='function')[1]; subscriptions.push({ reference, callback, error, options:typeof args[0]==='object'?args[0]:null }); return () => {}; },
     homeTargetPriceBridge: { publish: (value) => published.push(value), clear: (reason) => published.push(reason) },
   };
   sandbox.getMember = () => ({uid:'member-sohee',role:'sohee',name:'소희'}); sandbox.registerPrivateCleanup = () => {};
@@ -153,6 +153,9 @@ test('WeCost settings subscription publishes only its loaded target without addi
   assert.deepEqual(published, [650000000]);
   await settings.callback({ exists: () => true, data: () => ({ targetHousePrice: 700000000 }), metadata: { hasPendingWrites: true } });
   assert.deepEqual(published, [650000000], 'Pending/possibly failed writes are not presented as saved targets');
+  assert.equal(settings.options.includeMetadataChanges, true, 'Transaction acknowledgement must trigger the saved-target publication');
+  await settings.callback({ exists: () => true, data: () => ({ targetHousePrice: 700000000 }), metadata: { hasPendingWrites: false } });
+  assert.deepEqual(published, [650000000, 700000000]);
   settings.error(new Error('fixture connection failure'));
   assert.equal(published.at(-1), 'wecost-unavailable');
 });

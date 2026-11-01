@@ -1,418 +1,479 @@
-import { won, wonFull, wonDetailed } from './utils.js';
-import { calcLoanMonthly } from './calc.js';
-import { addLoan, updateLoan, deleteLoan, addAdjustment, updateAdjustment, deleteAdjustment, updateSettings } from './firebase.js';
-
-let _currentAvailCash = 0;
-
-export function initHouseInputs(st) {
-  const cfg = st.settings || {};
-
-  const limitEl = document.getElementById('inp-loan-limit');
-  if (limitEl && cfg.monthlyPaymentLimit) limitEl.value = cfg.monthlyPaymentLimit;
-
-  // 목표 집 가격 초기값
-  const houseInp = document.getElementById('house-target-price');
-  if (houseInp && !houseInp.dataset.userEdited && cfg.targetHousePrice) {
-    houseInp.value = cfg.targetHousePrice.toLocaleString();
-    const wonEl = document.getElementById('house-target-won');
-    if (wonEl) wonEl.textContent = `≈ ${won(cfg.targetHousePrice)}`;
-  }
-
-  // 조정 항목 렌더
-  renderAdjustments(st.adjustments || []);
-}
-
-export function renderHouse(st) {
-  const cfg    = st.settings     || {};
-  const loans  = st.loans        || [];
-  const adjs   = st.adjustments  || [];
-  const incS   = document.getElementById('chk-sohee-sup')?.checked || false;
-  const incW   = document.getElementById('chk-sunwo-sup')?.checked || false;
-  const supS   = incS ? (cfg.parentSupportSohee || 0) : 0;
-  const supW   = incW ? (cfg.parentSupportSunwo || 0) : 0;
-
-  const adjTotal = adjs.reduce((acc, a) => acc + (a.sign === '+' ? 1 : -1) * (a.amount || 0), 0);
-  const avail    = Math.max(0, (st.coupleSavings || 0) - (st.totalPlanned || 0) + supS + supW + adjTotal);
-  _currentAvailCash = avail;
-
-  // 가용현금 카드
-  _set('cash-savings',  won(st.coupleSavings || 0));
-  _set('cash-wedding',  `-${won(st.totalPlanned || 0)}`);
-  _set('cash-wedding-note', st.totalPlanned === 0 ? '(결혼비용 탭에서 연동)' : '(Firebase 연동)');
-  // 부모님 지원금 합산 표시 (read-only, 현금흐름 탭 입력 연동)
-  const supTotal = supS + supW;
-  const supNoteEl = document.getElementById('cash-sup-note');
-  if (supTotal > 0) {
-    _set('cash-sup-total', won(supTotal));
-    if (supNoteEl) supNoteEl.textContent = `(소희 ${won(cfg.parentSupportSohee || 0)} + 성우 ${won(cfg.parentSupportSunwo || 0)} 포함)`;
-  } else {
-    const sS = cfg.parentSupportSohee || 0;
-    const sW = cfg.parentSupportSunwo || 0;
-    _set('cash-sup-total', (sS + sW) > 0 ? `${won(sS + sW)} (미포함)` : '-');
-    if (supNoteEl) supNoteEl.textContent = '(현금흐름 탭에서 설정)';
-  }
-  _set('cash-available', wonDetailed(avail));
-
-  // 조정 항목 (매 렌더마다 갱신)
-  renderAdjustments(adjs);
-
-  // 대출 카드
-  renderLoans(loans, avail);
-
-  // 프리셋 카드
-  renderPresetCards();
-
-  // 목표 집 가격 계산기 결과 갱신 (입력값 유지 + availCash만 갱신)
-  const hInp = document.getElementById('house-target-price');
-  if (hInp && hInp.value) {
-    const price = Number(hInp.value.replace(/[^0-9]/g, '')) || 0;
-    if (price > 0) _renderHouseSimResult(price, avail, st.settings?.monthlyPaymentLimit || 0);
-  }
-}
-
-export function renderLoans(loans, availCash) {
-  const grid = document.getElementById('loan-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  let totalMonthly = 0;
-  loans.forEach((loan) => {
-    const monthly  = calcLoanMonthly(loan);
-    const enabled  = loan.enabled !== false;
-    if (enabled) totalMonthly += monthly;
-    const isCompany = loan.type === 'company';
-    const typeOpts = isCompany
-      ? `<option value="company" selected>사내대출 (무이자거치+원리금균등)</option>`
-      : ['원리금', '원금', '만기'].map(t =>
-          `<option value="${t}" ${loan.type === t ? 'selected' : ''}>${{ 원리금: '원리금균등', 원금: '원금균등', 만기: '만기일시' }[t]}</option>`
-        ).join('');
-
-    const noteText = (loan.grace || 0) > 0
-      ? (isCompany
-          ? `초기 ${loan.grace}년 무이자 거치, 이후 ${loan.term - loan.grace}년 원리금균등`
-          : `${loan.grace}년 거치 후 ${loan.term - loan.grace}년 상환 기준`)
-      : '상환 개시 후 월 납입 기준';
-
-    const div = document.createElement('div');
-    div.className = `loan-card${enabled ? '' : ' disabled-card'}`;
-    div.innerHTML = `
-      <div class="loan-card-hdr">
-        <input class="loan-name-inp" type="text" value="${_esc(loan.name)}"
-               onchange="window._updateLoan('${loan.id}','name',this.value)">
-        <div style="display:flex;align-items:center;gap:8px">
-          <label class="loan-enabled-row" style="margin:0">
-            <input type="checkbox" ${enabled ? 'checked' : ''}
-                   onchange="window._updateLoan('${loan.id}','enabled',this.checked)">
-            활성
-          </label>
-          <button class="btn btn-danger btn-sm" onclick="window._deleteLoan('${loan.id}')">삭제</button>
-        </div>
-      </div>
-      <div class="loan-form">
-        <div class="inp-grp"><label>대출금액 (원)</label>
-          <input type="number" value="${loan.amount || 0}"
-                 oninput="window._updateLoan('${loan.id}','amount',this.value)"></div>
-        <div class="inp-grp"><label>연 금리 (%)</label>
-          <input type="number" step="0.1" value="${loan.rate || 0}"
-                 oninput="window._updateLoan('${loan.id}','rate',this.value)"></div>
-        <div class="inp-grp"><label>총 기간 (년)</label>
-          <input type="number" value="${loan.term || 30}" ${isCompany ? 'readonly' : ''}
-                 oninput="window._updateLoan('${loan.id}','term',this.value)"></div>
-        <div class="inp-grp"><label>거치 (년)</label>
-          <input type="number" value="${loan.grace || 0}" ${isCompany ? 'readonly' : ''}
-                 oninput="window._updateLoan('${loan.id}','grace',this.value)"></div>
-        <div class="inp-grp"><label>상환방식</label>
-          <select ${isCompany ? 'disabled' : ''}
-                  onchange="window._updateLoan('${loan.id}','type',this.value)">${typeOpts}</select></div>
-      </div>
-      <div class="loan-result">
-        <span class="loan-result-note">${noteText}</span>
-        <span class="loan-result-val">월 ${wonFull(monthly)}</span>
-      </div>
-    `;
-    grid.appendChild(div);
+import {
+  simulation,
+  PRESET_AMOUNTS,
+  loanMonthly,
+  loanPhases,
+  validateLoan,
+} from "./planning-core.mjs";
+import {
+  money,
+  exact,
+  esc,
+  icon,
+  heading,
+  button,
+  field,
+  saveFooter,
+  bindFieldForm,
+  syncForm,
+  formValues,
+  readInput,
+  writeInput,
+  openDialog,
+  closeDialog,
+  submitCommand,
+  showError,
+} from "./planning-ui.mjs";
+import { scenarioWithRate } from './loan-rates.mjs';
+import { loanRateHTML } from './loan-rates-ui.mjs';
+let getState,
+  tab = "goal",
+  scenario = null,
+  baseline = null,
+  scenarioDirty = false,
+  scenarioError = "",
+  selected = 3e8;
+const el = (id) => document.getElementById(id);
+const types = {
+  원리금: "원리금균등",
+  원금: "원금균등",
+  만기: "만기일시",
+  company: "회사대출 (원리금균등)",
+};
+const typeField = (key = "type") =>
+  `<label class="plan-field"><span>상환 방식</span><select data-field="${key}" data-format="text">${Object.entries(
+    types,
+  )
+    .map(([k, v]) => `<option value="${k}">${v}</option>`)
+    .join("")}</select><small class="plan-field-state"></small></label>`;
+const conditions = () =>
+  `<div class="plan-form-grid four">${field("rate", "연 금리", { type: "number", suffix: "%" })}${field("term", "총 기간", { type: "number", suffix: "년" })}${field("grace", "거치 기간", { type: "number", suffix: "년" })}${typeField()}</div>`;
+export function registerHouseHandlers(getSt) {
+  getState = getSt;
+  el("tab-house").innerHTML =
+    `<header class="plan-page-head"><div>${icon("house-heart", "rose")}<div><h1>집 시뮬레이션</h1><p>집값과 대출 조건을 바꾸며, 월 부담을 비교해요.</p></div></div></header>
+ <div class="plan-house-tabs" role="tablist" aria-label="집 시뮬레이션 화면">${[
+   ["goal", "목표 집값"],
+   ["amounts", "대출 금액별 비교"],
+   ["loans", "내 대출 관리"],
+ ]
+   .map(([k, v]) =>
+     button(
+       v,
+       `role="tab" id="house-tab-${k}" data-house-tab="${k}" aria-controls="house-view-${k}" aria-selected="${k === "goal"}" tabindex="${k === "goal" ? 0 : -1}"`,
+     ),
+   )
+   .join("")}</div>
+ <section id="house-view-goal" class="house-view" role="tabpanel" aria-labelledby="house-tab-goal"><div class="plan-columns house-goal-grid"><section class="plan-card">${heading("cash-coin", "집값과 사용할 자금")}<form id="house-target-form">${field("targetHousePrice", "목표 집값")}${saveFooter("목표 저장")}</form><div class="plan-band cream" id="house-cash-band"></div><div class="plan-band sky" id="house-base-band"></div><div id="house-goal-conditions"></div></section><section class="plan-card house-result">${heading("calculator", "등록 대출을 포함한 월 부담", "", "sage")}<div id="house-goal-result"></div><form id="house-limit-form">${field("monthlyPaymentLimit", "월 상환 한도")}${saveFooter("한도 저장")}</form>${button("상환 흐름 보기", 'data-phases="goal"')}</section></div><section class="plan-card" id="house-funding"></section></section>
+ <section id="house-view-amounts" class="house-view" role="tabpanel" aria-labelledby="house-tab-amounts" hidden><section class="plan-card plan-base-equation" id="house-comparison-base"></section><section class="plan-card" id="house-amount-conditions"></section><div id="preset-grid" class="plan-presets"></div><section class="plan-card plan-selection" id="house-selection"></section><p class="plan-note">등록 대출과 추가 대출의 거치 종료 후 부담을 합한 참고값이에요. 대출 승인·가능 여부를 판단하는 값은 아니에요.</p></section>
+ <section id="house-view-loans" class="house-view" role="tabpanel" aria-labelledby="house-tab-loans" hidden><div class="plan-columns house-loans-grid"><section><div class="plan-card-head"><h2>등록한 대출 <span id="house-loan-count"></span></h2>${button("대출 추가", "data-add-loan", true)}</div><div id="loan-grid" class="plan-loan-list"></div></section><section class="plan-card" id="house-loan-summary"></section></div><p class="plan-notice">등록한 대출은 받을 예정인 조건이에요. 현재 통장 잔액이나 실제 남은 대출 원금을 뜻하지 않아요.</p></section>`;
+  const form = document.createElement("form");
+  form.id = "house-condition-form";
+  form.className = "plan-conditions";
+  form.innerHTML = `<div class="plan-form-grid">${field("fees", "추가 부대비용", { optional: true, attrs: 'placeholder="미설정"' })}${field("reserve", "남겨둘 현금", { optional: true, attrs: 'placeholder="미설정"' })}</div><p class="plan-note">이미 차감한 이사비·가전비는 다시 넣지 않아요.</p>${heading("calculator", "추가 대출 조건", "", "sage")}<label class="plan-field"><span>비교 금리 기준</span><select data-field="rateMode" data-format="text"><option value="market">최신 공표 평균 자동 반영</option><option value="manual">직접 입력한 금리</option></select></label><div id="house-rate-evidence"></div>${conditions()}<p class="plan-note">등록 대출 외에 추가로 빌릴 금액에 적용해요.</p>${saveFooter("비교 조건 저장")}`;
+  el("house-goal-conditions").append(form);
+  bindFieldForm(el("house-target-form"), "settings");
+  bindFieldForm(el("house-limit-form"), "settings");
+  form.addEventListener("input", () => {
+    scenarioDirty = true;
+    form.dataset.dirty = "true";
+    try {
+      const rateMode = form.querySelector('[data-field=rateMode]').value;
+      const rateInput = form.querySelector('[data-field=rate]');
+      if (rateMode === 'market') writeInput(rateInput, getState().marketRate?.usable ? getState().marketRate.value : null);
+      rateInput.readOnly = rateMode === 'market';
+      if (rateMode === 'market' && !getState().marketRate?.usable) throw Error('최신 공표 금리를 확인하거나 직접 입력을 선택해주세요.');
+      const v = formValues(form);
+      scenario = {
+        rateMode: v.rateMode,
+        fees: v.fees,
+        reserve: v.reserve,
+        terms: { rate: v.rate, term: v.term, grace: v.grace, type: v.type },
+      };
+      validateLoan({ ...scenario.terms, amount: 0 });
+      scenarioError = "";
+    } catch (e) {
+      scenarioError = e.message;
+    }
+    form.querySelector(".plan-save-status").textContent = "저장 전 비교 조건";
+    el('house-rate-evidence').innerHTML = loanRateHTML(getState().marketRate, form.querySelector('[data-field=rateMode]').value);
+    renderResults(getState());
   });
-
-  _set('tl-total', wonFull(totalMonthly));
-  const limit = Number(document.getElementById('inp-loan-limit')?.value) || 0;
-  const badge = document.getElementById('tl-status');
-  if (badge) {
-    if (limit === 0 || totalMonthly === 0) {
-      badge.textContent = '-'; badge.className = 'tl-status';
-    } else if (totalMonthly <= limit * 0.8) {
-      badge.textContent = '안전'; badge.className = 'tl-status status-safe';
-    } else if (totalMonthly <= limit) {
-      badge.textContent = '주의'; badge.className = 'tl-status status-caution';
-    } else {
-      badge.textContent = '한도 초과!'; badge.className = 'tl-status status-warn';
+  form.addEventListener("change", () =>
+    form.dispatchEvent(new Event("input", { bubbles: true })),
+  );
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      if (scenarioError) throw Error(scenarioError);
+      await submitCommand(form, {
+        kind: "settings",
+        values: { houseScenario: scenario },
+        expected: { houseScenario: baseline },
+      });
+      scenarioDirty = false;
+      form.dataset.dirty = "false";
+      baseline = structuredClone(scenario);
+    } catch (error) {
+      showError(form, error);
+      if (
+        error.code === "planning-conflict" &&
+        error.conflicts.includes("houseScenario")
+      ) {
+        const panel = form.querySelector(".plan-conflicts");
+        const latest = error.latest?.houseScenario;
+        panel.innerHTML = `<strong>비교 조건이 다른 기기에서 변경됐어요</strong><p>최신 조건: ${latest ? `연 ${latest.terms.rate}% · ${latest.terms.term}년 · 거치 ${latest.terms.grace}년 · 부대비용 ${money(latest.fees)} · 남겨둘 현금 ${money(latest.reserve)}` : "미설정"}</p>${button("최신 조건 사용", "data-scenario-latest")}${button("내 입력 유지", "data-scenario-mine")}`;
+        panel.querySelector("[data-scenario-latest]").onclick = () => {
+          scenarioDirty = false;
+          scenarioError = "";
+          form.dataset.dirty = "false";
+          panel.remove();
+          renderHouse(getState());
+        };
+        panel.querySelector("[data-scenario-mine]").onclick = () => {
+          baseline = structuredClone(latest ?? null);
+          form._operation = null;
+          panel.remove();
+          form.querySelector(".plan-save-status").textContent =
+            "내 입력을 유지했어요. 확인 후 다시 저장해주세요";
+        };
+      }
     }
-  }
-}
-
-export function renderPresetCards() {
-  const rate  = Number(document.getElementById('preset-rate')?.value  || 3.5);
-  const term  = Number(document.getElementById('preset-term')?.value  || 30);
-  const avail = _currentAvailCash;
-  const limit = Number(document.getElementById('inp-loan-limit')?.value) || 0;
-  const grid  = document.getElementById('preset-grid');
-  if (!grid) return;
-
-  // 대출 금액 기준: 가용현금 + 대출 = 살 수 있는 집 가격
-  const loanAmounts = [50000000, 100000000, 150000000, 200000000, 300000000, 400000000, 500000000, 600000000];
-  grid.innerHTML = loanAmounts.map(loanAmt => {
-    const housePrice = avail + loanAmt;
-    const monthly    = calcLoanMonthly({ amount: loanAmt, rate, term, grace: 0, type: '원리금' });
-    let statusCls = '', statusTxt = '';
-    if (limit > 0) {
-      if (monthly <= limit * 0.8)  { statusCls = 'preset-ok';   statusTxt = '여유'; }
-      else if (monthly <= limit)   { statusCls = 'preset-warn'; statusTxt = '주의'; }
-      else                         { statusCls = 'preset-over'; statusTxt = '부담'; }
+  });
+  el("house-target-form").addEventListener("input", () =>
+    renderResults(getState()),
+  );
+  el("tab-house").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.houseTab) showHouseTab(b.dataset.houseTab);
+    if (b.hasAttribute("data-adjustments")) openAdjustments();
+    if (b.hasAttribute("data-add-loan")) openLoan();
+    if (b.dataset.editLoan) openLoan(b.dataset.editLoan);
+    if (b.dataset.deleteLoan) confirmDelete("loan", b.dataset.deleteLoan);
+    if (b.dataset.toggleLoan) toggleLoan(b);
+    if (b.dataset.preset) {
+      selected = Number(b.dataset.preset);
+      renderResults(getState());
     }
-    return `
-      <div class="preset-card ${statusCls}">
-        <div class="preset-loan-lbl">${won(loanAmt)} 대출 시</div>
-        <div class="preset-house-price">${won(housePrice)}</div>
-        <div class="preset-monthly-val">월 ${wonFull(monthly)}</div>
-        <div class="preset-detail">현금 ${won(avail)} + 대출 ${won(loanAmt)}</div>
-        ${statusTxt ? `<div class="preset-status-badge ${statusCls}">${statusTxt}</div>` : ''}
-      </div>
-    `;
-  }).join('');
-}
-
-function _renderHouseSimResult(price, availCash, limit) {
-  const loan    = Math.max(0, price - availCash);
-  const monthly = loan > 0
-    ? calcLoanMonthly({ amount: loan, rate: 3.5, term: 30, grace: 0, type: '원리금' })
-    : 0;
-
-  _set('house-sim-avail',   wonDetailed(availCash));
-  _set('house-sim-loan',    loan > 0 ? wonDetailed(loan) : '대출 불필요');
-  _set('house-sim-monthly', monthly > 0 ? wonFull(monthly) : '-');
-
-  const statusEl  = document.getElementById('house-sim-status');
-  const statusBox = document.getElementById('house-sim-status-box');
-  if (statusEl) {
-    if (limit <= 0 || monthly <= 0) {
-      statusEl.textContent = '-';
-      if (statusBox) statusBox.className = 'sim-result-box';
-    } else if (monthly <= limit * 0.8) {
-      statusEl.textContent = '가능';
-      if (statusBox) statusBox.className = 'sim-result-box r-house';
-      statusEl.style.color = 'var(--income)';
-    } else if (monthly <= limit) {
-      statusEl.textContent = '주의';
-      if (statusBox) statusBox.className = 'sim-result-box';
-      statusEl.style.color = 'var(--warning)';
-    } else {
-      statusEl.textContent = '초과';
-      if (statusBox) statusBox.className = 'sim-result-box r-loan';
-      statusEl.style.color = 'var(--expense)';
+    if (b.hasAttribute("data-apply-preset")) {
+      try {
+        const result = simulation(getState(), {
+          ...scenario,
+          additional: selected,
+        });
+        const input = el("house-target-form").querySelector("input");
+        writeInput(input, Math.round(result.houseBudget));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        showHouseTab("goal");
+      } catch (error) {
+        scenarioError = error.message;
+        renderResults(getState());
+      }
     }
-  }
-
-  const grid = document.getElementById('house-sim-grid');
-  if (grid) grid.style.display = '';
-}
-
-function renderAdjustments(adjs) {
-  const container = document.getElementById('extra-expenses-list');
-  if (!container) return;
-  // 조정 항목 텍스트 입력 중에만 재렌더 생략 (버튼 포커스는 허용)
-  const active = document.activeElement;
-  const isTyping = active && container.contains(active) &&
-    (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
-  if (isTyping) return;
-  container.innerHTML = '';
-  adjs.forEach(adj => _appendAdjRow(container, adj));
-}
-
-function _appendAdjRow(container, adj) {
-  const sign    = adj.sign || '-';
-  const cls     = sign === '+' ? 'plus' : 'minus';
-  const hintCls = sign === '+' ? 'inc' : 'exp';
-  const hintId  = `adj-hint-${adj.id || 'new'}`;
-  const amtHint = _adjHintText(sign, adj.amount || 0);
-  const row     = document.createElement('div');
-  row.className  = 'exp-row';
-  row.dataset.id = adj.id || '';
-  row.innerHTML  = `
-    <button class="exp-sign-btn ${cls}" title="클릭해서 +수입/−지출 전환"
-            onclick="window._toggleAdjSign(this, '${adj.id}')">${sign}</button>
-    <input class="exp-inp-name" type="text"
-           placeholder="${sign === '+' ? '항목명 (예: 이사비 지원)' : '항목명 (예: 가전제품 구입)'}"
-           value="${_esc(adj.name || '')}"
-           onchange="window._updateAdjField('${adj.id}','name',this.value)">
-    <input class="exp-inp-amt" type="text" inputmode="numeric"
-           placeholder="0"
-           value="${adj.amount > 0 ? adj.amount.toLocaleString() : ''}"
-           oninput="window._onAdjAmtInput(this, '${adj.id}', '${hintId}')">
-    <span class="exp-won-hint ${hintCls}" id="${hintId}">${amtHint}</span>
-    <button class="exp-del-btn" onclick="window._deleteAdjustment('${adj.id}')">✕</button>
-  `;
-  container.appendChild(row);
-}
-
-function _adjHintText(sign, val) {
-  if (!val || val <= 0) return '';
-  let s;
-  if (val >= 100000000)     s = `${(val / 100000000).toFixed(1)}억`;
-  else if (val >= 10000000) s = `${Math.round(val / 10000000)}천만`;
-  else if (val >= 10000)    s = `${Math.round(val / 10000)}만`;
-  else                      s = `${val.toLocaleString()}`;
-  return (sign === '+' ? '+' : '−') + s;
-}
-
-// ===== 전역 핸들러 =====
-
-export function registerHouseHandlers(getStFn, recomputeFn) {
-  window._syncAmt = (src) => {
-    let raw;
-    if (src === 'slider') {
-      raw = Number(document.getElementById('add-loan-slider').value);
-      const el = document.getElementById('add-loan-amt-inp');
-      if (el) el.value = raw ? raw.toLocaleString() : '0';
-    } else {
-      raw = Number(document.getElementById('add-loan-amt-inp').value.replace(/[^0-9]/g, '')) || 0;
-      const clamped = Math.min(1000000000, Math.max(0, Math.round(raw / 10000000) * 10000000));
-      const slider  = document.getElementById('add-loan-slider');
-      if (slider) slider.value = clamped;
-      const el = document.getElementById('add-loan-amt-inp');
-      if (el) el.value = raw ? raw.toLocaleString() : '';
-    }
-    const lbl = document.getElementById('add-loan-won-lbl');
-    if (lbl) lbl.textContent = raw ? won(raw) : '';
-  };
-
-  window._addLoanFromForm = async () => {
-    const amount = Number(document.getElementById('add-loan-amt-inp')?.value.replace(/[^0-9]/g, '')) || 0;
-    if (!amount) { alert('대출 금액을 입력해주세요.'); return; }
-    await addLoan({
-      name:    document.getElementById('add-loan-name')?.value  || '대출',
-      amount,
-      rate:    Number(document.getElementById('add-loan-rate')?.value)  || 3.5,
-      term:    Number(document.getElementById('add-loan-term')?.value)  || 30,
-      grace:   Number(document.getElementById('add-loan-grace')?.value) || 0,
-      type:    document.getElementById('add-loan-type')?.value   || '원리금',
-      enabled: true,
+    if (b.dataset.phases) openPhases(b.dataset.phases);
+  });
+  el("tab-house")
+    .querySelector("[role=tablist]")
+    .addEventListener("keydown", (e) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+      e.preventDefault();
+      const keys = ["goal", "amounts", "loans"],
+        idx = keys.indexOf(tab);
+      showHouseTab(
+        e.key === "Home"
+          ? "goal"
+          : e.key === "End"
+            ? "loans"
+            : keys[(idx + (e.key === "ArrowRight" ? 1 : 2)) % 3],
+      );
+      el(`house-tab-${tab}`).focus();
     });
-  };
-
-  window._updateLoan = async (id, key, val) => {
-    const parsed = (key === 'name' || key === 'type') ? val
-                 : key === 'enabled' ? (val === true || val === 'true')
-                 : Number(val);
-    await updateLoan(id, { [key]: parsed });
-  };
-
-  window._deleteLoan = async (id) => {
-    await deleteLoan(id);
-  };
-
-  window._updatePresetRate = () => {
-    const v = Number(document.getElementById('preset-rate')?.value || 3.5).toFixed(1);
-    const disp = document.getElementById('preset-rate-display');
-    if (disp) disp.textContent = v;
-    renderPresetCards();
-  };
-  window._renderPresetCards = renderPresetCards;
-
-  let _houseTargetTimer = null;
-  window._onHouseTargetInput = (el) => {
-    el.dataset.userEdited = '1';
-    const raw   = Number(el.value.replace(/[^0-9]/g, '')) || 0;
-    const wonEl = document.getElementById('house-target-won');
-    if (wonEl) wonEl.textContent = raw ? `≈ ${won(raw)}` : '';
-
-    const st  = getStFn();
-    const lim = st.settings?.monthlyPaymentLimit || 0;
-    if (raw > 0) _renderHouseSimResult(raw, _currentAvailCash, lim);
-    else {
-      const grid = document.getElementById('house-sim-grid');
-      if (grid) grid.style.display = 'none';
-    }
-
-    clearTimeout(_houseTargetTimer);
-    _houseTargetTimer = setTimeout(async () => {
-      if (raw > 0) await updateSettings({ targetHousePrice: raw });
-    }, 800);
-  };
-
-  window._onSupportToggle = () => recomputeFn();
-
-  window._onLimitChange = async () => {
-    const val = Number(document.getElementById('inp-loan-limit')?.value) || 0;
-    await updateSettings({ monthlyPaymentLimit: val });
-  };
-
-  window._addAdjustment = async (sign = '-') => {
-    await addAdjustment({ name: '', amount: 0, sign });
-  };
-
-  window._onAdjAmtInput = (el, id, hintId) => {
-    const raw  = el.value.replace(/[^0-9]/g, '');
-    el.value   = raw ? Number(raw).toLocaleString() : '';
-    const val  = Number(raw) || 0;
-    // 행의 sign 버튼에서 현재 부호 읽기
-    const row  = el.closest('.exp-row');
-    const sign = row?.querySelector('.exp-sign-btn')?.textContent?.trim() || '-';
-    const hint = document.getElementById(hintId);
-    if (hint) {
-      hint.textContent = _adjHintText(sign, val);
-      hint.className   = `exp-won-hint ${sign === '+' ? 'inc' : 'exp'}`;
-    }
-    if (id && id !== 'undefined') {
-      clearTimeout(window._adjAmtTimer);
-      window._adjAmtTimer = setTimeout(() => updateAdjustment(id, { amount: val }), 600);
-    } else {
-      recomputeFn();
-    }
-  };
-
-  window._toggleAdjSign = async (btn, id) => {
-    const newSign = btn.textContent === '-' ? '+' : '-';
-    btn.textContent = newSign;
-    btn.className = `exp-sign-btn ${newSign === '+' ? 'plus' : 'minus'}`;
-    if (id && id !== 'undefined') await updateAdjustment(id, { sign: newSign });
-    else recomputeFn();
-  };
-
-  window._updateAdjField = async (id, field, val) => {
-    if (id && id !== 'undefined') {
-      const parsed = field === 'name' ? val : Number(val) || 0;
-      await updateAdjustment(id, { [field]: parsed });
-    } else {
-      recomputeFn();
-    }
-  };
-
-  window._deleteAdjustment = async (id) => {
-    if (id && id !== 'undefined') await deleteAdjustment(id);
-    else {
-      const row = document.querySelector(`.exp-row[data-id=""]`);
-      if (row) { row.remove(); recomputeFn(); }
-    }
-  };
+  window._showHouseView = showHouseTab;
 }
-
-function _initSupportInp(id, val) {
-  const el = document.getElementById(id);
-  if (!el || el.dataset.init) return;
-  el.value = val > 0 ? Math.round(val).toLocaleString() : '';
-  el.dataset.init = '1';
+export function showHouseTab(next) {
+  tab = next;
+  document.querySelectorAll("[data-house-tab]").forEach((b) => {
+    b.setAttribute("aria-selected", b.dataset.houseTab === tab);
+    b.tabIndex = b.dataset.houseTab === tab ? 0 : -1;
+  });
+  document
+    .querySelectorAll(".house-view")
+    .forEach((v) => (v.hidden = v.id !== `house-view-${tab}`));
+  if (tab !== "loans")
+    el(
+      tab === "goal" ? "house-goal-conditions" : "house-amount-conditions",
+    ).append(el("house-condition-form"));
+  renderHouse(getState());
 }
-
-function _syncSupportInp(id, val) {
-  const el = document.getElementById(id);
-  if (!el || document.activeElement === el) return;
-  el.value = val > 0 ? Math.round(val).toLocaleString() : '';
+function savedScenario(st) {
+  return scenarioWithRate(st.settings.houseScenario || { fees: null, reserve: null }, st.marketRate);
 }
-
-function _set(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
+export function renderHouse(st) {
+  if (!el("house-target-form")) return;
+  syncForm(el("house-target-form"), st.settings);
+  syncForm(el("house-limit-form"), st.settings);
+  if (!scenarioDirty) {
+    baseline = structuredClone(st.settings.houseScenario ?? null);
+    scenario = structuredClone(savedScenario(st));
+    const source = {
+      ...scenario.terms,
+      rateMode: scenario.rateMode,
+      fees: scenario.fees,
+      reserve: scenario.reserve,
+    };
+    for (const input of el("house-condition-form").querySelectorAll(
+      "[data-field]",
+    ))
+      writeInput(input, source[input.dataset.field]);
+  }
+  if (scenario.rateMode === 'market') {
+    scenario = scenarioWithRate(scenario, st.marketRate);
+    writeInput(el('house-condition-form').querySelector('[data-field=rate]'), scenario.terms.rate);
+  }
+  el('house-condition-form').querySelector('[data-field=rate]').readOnly = scenario.rateMode === 'market';
+  el('house-rate-evidence').innerHTML = loanRateHTML(st.marketRate, scenario.rateMode);
+  el("house-cash-band").innerHTML =
+    `${icon("piggy-bank", "rose")}<div><span>집에 쓸 예상 현금</span><strong>${money(st.availCash)}</strong><small>${st.cashShortfall ? `먼저 채울 부족액 ${money(st.cashShortfall)}` : "저축·지원금에서 결혼비용과 추가 지출 차감"}</small></div>${button("자금 계산·조정", "data-adjustments")}`;
+  const loans = st.loans.filter((l) => l.enabled !== false);
+  el("house-base-band").innerHTML =
+    `${icon("bank", "sky")}<div><span>받을 예정인 등록 대출 · 기본 포함</span><strong>${money(st.loanTotal)}</strong><small>${esc(loans.map((l) => `${l.name} · 연 ${l.rate}% · 총 ${l.term}년 · 거치 ${l.grace || 0}년`).join(" / ") || "등록한 대출이 없어요")}</small></div>${button("조건 관리", 'data-house-tab="loans"')}`;
+  el("house-loan-count").textContent =
+    `${st.loans.length}건 · 포함 ${loans.length}건`;
+  el("loan-grid").innerHTML = st.loans.length
+    ? st.loans
+        .map((l) => {
+          let m = null;
+          try {
+            m = loanMonthly(l);
+          } catch {}
+          return `<article class="plan-card plan-loan"><div class="plan-card-head"><h3>${icon("bank", "sky")}${esc(l.name)}</h3><div>${button(l.enabled === false ? "합계에서 제외됨" : "합계에 포함", `data-toggle-loan="${esc(l.id)}" aria-pressed="${l.enabled !== false}"`)}${button("수정", `data-edit-loan="${esc(l.id)}" aria-label="${esc(l.name)} 수정"`)}<details class="plan-more"><summary aria-label="${esc(l.name)} 더보기">더보기</summary>${button("대출 삭제", `data-delete-loan="${esc(l.id)}"`)}</details></div></div><dl class="plan-loan-spec">${[
+            ["대출 금액", money(l.amount)],
+            ["연 금리", `${l.rate}%`],
+            ["총 기간", `${l.term}년`],
+            ["거치 기간", `${l.grace || 0}년`],
+            ["상환 방식", types[l.type] || l.type],
+          ]
+            .map(([a, b]) => `<div><dt>${a}</dt><dd>${esc(b)}</dd></div>`)
+            .join(
+              "",
+            )}</dl><div class="plan-card-foot"><span>거치 ${l.grace || 0}년 → 상환 ${l.term - (l.grace || 0)}년${l.type === "원금" ? " · 상환 첫 달" : l.type === "만기" ? " · 원금 만기 별도" : ""}</span><strong>${m === null ? "조건 확인 필요" : `월 ${money(m)}`}</strong></div></article>`;
+        })
+        .join("")
+    : '<div class="plan-card plan-empty">등록한 대출이 없어요. 받을 예정인 조건을 추가해주세요.</div>';
+  const ratio =
+    st.settings.monthlyPaymentLimit && st.totalMonthly != null
+      ? (st.totalMonthly / st.settings.monthlyPaymentLimit) * 100
+      : null;
+  el("house-loan-summary").innerHTML =
+    `${heading("calculator", "포함한 대출 합계", "", "sage")}<dl class="plan-equation"><div><dt>대출 금액</dt><dd>${money(st.loanTotal)}</dd></div><div class="total"><dt>거치 종료 후 월</dt><dd>${money(st.totalMonthly)}</dd></div></dl>${meter(ratio)}<p class="plan-note">월 한도 ${money(st.settings.monthlyPaymentLimit)}${ratio != null ? ` · ${Math.round(ratio)}%` : ""}</p><p class="plan-notice">실행일·실제 거치 이자 조건 확인 전이에요. 원금균등은 첫 상환액, 만기일시는 이자만 포함해요.</p>${button("상환 흐름 보기", 'data-phases="loans"')}`;
+  renderResults(st);
 }
-
-function _esc(s) {
-  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function meter(ratio) {
+  return `<div class="plan-meter ${ratio > 100 ? "over" : ratio > 80 ? "near" : ""}"><span style="width:${ratio == null ? 0 : Math.min(100, Math.max(0, ratio))}%"></span></div>`;
 }
+function renderResults(st) {
+  try {
+    if (scenarioError) throw Error(scenarioError);
+    if (scenario?.rateMode === 'market' && !st.marketRate?.usable) throw Error('최신 공표 금리를 확인하거나 직접 입력을 선택해주세요.');
+    const input = el("house-target-form").querySelector(
+      "[data-field=targetHousePrice]",
+    );
+    const target = readInput(input),
+      s = simulation(st, { ...scenario, target });
+    el("house-goal-result").innerHTML =
+      `<span class="plan-chip">${s.simple ? "간편 예상" : "입력 조건 기준"}</span><div class="plan-hero-number">${money(s.monthly)}<small>/ 월</small></div>${meter(s.ratio)}<p class="plan-note">${s.ratio == null ? "월 한도를 설정해주세요" : `월 한도 대비 ${Math.round(s.ratio)}%`}</p><dl class="plan-equation"><div><dt>필요한 총 대출</dt><dd>${money(s.totalPrincipal)}</dd></div><div><dt>등록 대출 (기본 포함)</dt><dd>${money(s.basePrincipal)}</dd></div><div><dt>추가로 필요한 대출</dt><dd>${money(s.additional)}</dd></div><div class="total"><dt>${s.headroom < 0 ? "월 한도 초과" : "월 한도까지 여유"}</dt><dd class="${s.headroom < 0 ? "plan-rose" : ""}">${money(s.headroom == null ? null : Math.abs(s.headroom))}</dd></div></dl><p class="plan-notice">${s.simple ? "부대비용·남겨둘 현금 입력 전. " : ""}각 대출의 거치 종료 후 ${s.terms.type === "원금" ? "첫 상환액" : "월 부담"}을 합한 값이에요.${s.terms.type === "만기" ? " 추가 대출 원금은 만기에 별도로 갚아요." : ""}</p>`;
+    const total = Math.max(s.target, s.houseBudget, 1),
+      parts = [
+        ["우리 현금", Math.max(0, s.usableCash), "sky"],
+        ["등록 대출", s.basePrincipal, "cream"],
+        ["추가 대출", s.additional, "sage"],
+      ];
+    el("house-funding").innerHTML =
+      `${heading("house-heart", `${money(s.target)} 집값, 이렇게 마련해요`)}<div class="plan-stack">${parts.map(([label, n, tone]) => `<span class="${tone}" style="flex:${n || 0.00001}" title="${label} ${exact(n)}"></span>`).join("")}</div><div class="plan-funding-legend">${parts.map(([label, n, tone]) => `<div><span>${label}</span><strong>${money(n)} <small>(${Math.round((n / total) * 100)}%)</small></strong></div>`).join("")}</div><p class="plan-note">${s.usableCash < 0 ? `결혼비용·부대비용을 채울 부족분 ${money(-s.usableCash)}도 추가 대출 필요액에 포함했어요. ` : ""}${s.unusedFunds > 0 ? `목표보다 많은 자금 ${money(s.unusedFunds)}. 등록 대출 원금을 줄일지는 대출 관리에서 결정해주세요. ` : ""}만원 단위 반올림 · 실제 원 단위로 계산해요.</p>`;
+    const base = simulation(st, { ...scenario, additional: 0 });
+    el("house-comparison-base").innerHTML =
+      `<div><span>집에 쓸 예상 현금</span><strong>${money(st.availCash)}</strong></div><span>+</span><div><span>등록 대출 · 받을 예정</span><strong>${money(base.basePrincipal)}</strong></div><span>=</span><div><span>추가 대출 전 집 예산</span><strong>${money(base.houseBudget)}</strong></div><p class="plan-note">등록 대출만 받을 때 월 ${money(base.baseMonthly)}${scenario.fees || scenario.reserve ? " · 부대비용·남겨둘 현금 차감" : ""}${st.cashShortfall ? ` · 자금 부족 ${money(st.cashShortfall)} 반영` : ""}</p>`;
+    el("preset-grid").innerHTML = PRESET_AMOUNTS.map((amount) => {
+      const p = simulation(st, { ...scenario, additional: amount });
+      return `<button type="button" class="plan-preset ${p.ratio > 100 ? "over" : ""}" data-preset="${amount}" aria-pressed="${selected === amount}"><h3>${icon("cash-coin")}추가 ${money(amount)}</h3><p>총 대출 ${money(p.totalPrincipal)}</p><dl><div><dt>집 예산</dt><dd>${money(p.houseBudget)}</dd></div><div><dt>월 상환 합계</dt><dd>${money(p.monthly)}</dd></div></dl>${meter(p.ratio)}<small>${p.ratio == null ? "월 한도 미설정" : `월 한도 대비 ${Math.round(p.ratio)}%`}${p.headroom < 0 ? ` · ${money(-p.headroom)} 초과` : ""}</small></button>`;
+    }).join("");
+    const pick = simulation(st, { ...scenario, additional: selected });
+    el("house-selection").innerHTML =
+      `<div><span>선택한 집 예산</span><strong>${money(pick.houseBudget)}</strong></div><div><span>등록 대출 + 추가 대출</span><strong>${money(pick.basePrincipal)} + ${money(selected)}</strong></div><div><span>합산 월 상환액</span><strong>${money(pick.monthly)}</strong></div>${button("이 예산으로 목표 집값 보기", "data-apply-preset", true)}<p class="plan-note">목표 입력란에서 먼저 비교해요. 저장 전에는 기존 목표와 등록 대출이 바뀌지 않아요.</p>`;
+    if (!s.target) {
+      el("house-goal-result").innerHTML =
+        '<p class="plan-empty">목표 집값을 입력하면 등록 대출을 반영한 추가 대출과 월 부담을 계산해요.</p>';
+      el("house-funding").replaceChildren();
+    }
+  } catch (error) {
+    el("house-goal-result").innerHTML =
+      `<p class="plan-notice error" role="status">${esc(error.message)}</p>`;
+    el("preset-grid").innerHTML =
+      `<p class="plan-notice">${esc(error.message)}</p>`;
+    el("house-comparison-base").replaceChildren();
+    el("house-selection").replaceChildren();
+    el("house-funding").replaceChildren();
+  }
+}
+function openLoan(id) {
+  const existing = getState().loans.find((l) => l.id === id),
+    source = existing || {
+      name: "",
+      amount: 0,
+      rate: getState().marketRate?.usable ? getState().marketRate.value : null,
+      term: 30,
+      grace: 0,
+      type: "원리금",
+      enabled: true,
+    };
+  const loanId = id || crypto.randomUUID();
+  openDialog(
+    existing ? "대출 조건 수정" : "대출 추가",
+    `<form id="plan-loan-form"><p class="plan-note">저장하기 전에는 집 예산과 월 상환 합계에 반영되지 않아요.</p><div class="plan-form-grid">${field("name", "대출명", { type: "text" })}${field("amount", "대출 금액")}</div><label class="plan-slider-label">금액 빠르게 선택<input type="range" min="0" max="1000000000" step="10000000" id="plan-loan-slider" value="${source.amount}"></label>${conditions()}${field("enabled", "집 예산·월 상환 합계에 포함", { type: "checkbox" })}<p id="plan-loan-preview" class="plan-notice"></p>${saveFooter(existing ? "변경 저장" : "이 조건으로 추가")}</form>`,
+    (d) => {
+      const form = d.querySelector("form");
+      syncForm(form, source);
+      bindFieldForm(form, "loan", loanId, {
+        action: existing ? "update" : "create",
+        onSaved: closeDialog,
+      });
+      const preview = () => {
+        try {
+          const l = formValues(form);
+          d.querySelector("#plan-loan-preview").textContent =
+            `거치 종료 후 ${l.type === "원금" ? "첫 달" : "월"} ${money(loanMonthly(l))}${l.type === "만기" ? ` · 만기에 원금 ${money(l.amount)} 별도` : ""}`;
+        } catch (e) {
+          d.querySelector("#plan-loan-preview").textContent = e.message;
+        }
+      };
+      form.addEventListener("input", preview);
+      d.querySelector("#plan-loan-slider").addEventListener("input", (e) => {
+        const input = form.querySelector("[data-field=amount]");
+        writeInput(input, Number(e.target.value));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      preview();
+    },
+  );
+}
+async function toggleLoan(b) {
+  const loan = getState().loans.find((l) => l.id === b.dataset.toggleLoan);
+  if (!loan) return;
+  const wrap = b.closest(".plan-loan");
+  let status = wrap.querySelector(".plan-save-status");
+  if (!status) {
+    status = document.createElement("p");
+    status.className = "plan-save-status";
+    wrap.append(status);
+  }
+  try {
+    await submitCommand(wrap, {
+      kind: "loan",
+      id: loan.id,
+      values: { enabled: loan.enabled === false },
+      expected: { enabled: loan.enabled ?? null },
+    });
+  } catch (e) {
+    showError(wrap, e);
+  }
+}
+function confirmDelete(kind, id) {
+  const item = getState()[kind === "loan" ? "loans" : "adjustments"].find(
+    (i) => i.id === id,
+  );
+  if (!item) return;
+  openDialog(
+    "삭제 확인",
+    `<form><p><strong>${esc(item.name)}</strong>을 삭제할까요? 계산 합계에서 빠져요.</p>${saveFooter("삭제")}</form>`,
+    (d) => {
+      const form = d.querySelector("form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          await submitCommand(form, {
+            kind,
+            id,
+            action: "delete",
+            expected: item,
+          });
+          closeDialog();
+        } catch (error) {
+          showError(form, error);
+        }
+      });
+    },
+  );
+}
+function openAdjustments() {
+  const st = getState();
+  openDialog(
+    "집 자금 계산·조정",
+    `<dl class="plan-equation"><div><dt>결혼 시 예상 저축</dt><dd>${money(st.coupleSavings)}</dd></div><div><dt>포함한 부모님 지원</dt><dd>+ ${money(st.support)}</dd></div><div><dt>예산에 포함한 결혼비용</dt><dd>− ${money(st.totalPlanned)}</dd></div><div><dt>결혼 예상 수입</dt><dd>+ ${money(st.weddingBudget.expectedIncome)}</dd></div></dl><div class="plan-adjust-list">${st.adjustments.map((a) => `<div><span>${esc(a.name)}</span><strong>${a.sign === "+" ? "+" : "−"} ${money(a.amount)}</strong>${button("수정", `data-adjust-edit="${esc(a.id)}"`)}${button("삭제", `data-adjust-delete="${esc(a.id)}"`)}</div>`).join("")}</div>${button("수입·지출 추가", "data-adjust-add", true)}<div class="plan-notice">집 자금 ${money(st.availCash)}${st.cashShortfall ? ` · 부족 ${money(st.cashShortfall)}` : ""}</div>`,
+    (d) =>
+      d.addEventListener(
+        "click",
+        function handler(e) {
+          const b = e.target.closest("button");
+          if (b?.hasAttribute("data-adjust-add") || b?.dataset.adjustEdit) {
+            d.removeEventListener("click", handler);
+            openAdjustment(b.dataset.adjustEdit);
+          }
+          if (b?.dataset.adjustDelete) {
+            d.removeEventListener("click", handler);
+            confirmDelete("adjustment", b.dataset.adjustDelete);
+          }
+        },
+        { signal: dialogSignal(d) },
+      ),
+  );
+}
+function dialogSignal(d) {
+  const c = new AbortController();
+  d.addEventListener("close", () => c.abort(), { once: true });
+  return c.signal;
+}
+function openAdjustment(id) {
+  const existing = getState().adjustments.find((a) => a.id === id);
+  openDialog(
+    existing ? "추가 수입·지출 수정" : "추가 수입·지출 등록",
+    `<form>${field("name", "이름", { type: "text" })}${field("amount", "금액")}<label class="plan-field"><span>구분</span><select data-field="sign"><option value="-">지출 · 집 자금에서 차감</option><option value="+">수입 · 집 자금에 추가</option></select></label><p class="plan-note">결혼비용의 예상 수입으로 기록한 돈은 여기에 다시 넣지 않아요.</p>${saveFooter()}</form>`,
+    (d) => {
+      const form = d.querySelector("form");
+      syncForm(form, existing || { name: "", amount: 0, sign: "-" });
+      bindFieldForm(form, "adjustment", id || crypto.randomUUID(), {
+        action: existing ? "update" : "create",
+        onSaved: () => {
+          closeDialog();
+        },
+      });
+    },
+  );
+}
+function openPhases(mode) {
+  try {
+    const st = getState();
+    const sim = mode === "goal" ? simulation(st, {
+        ...scenario,
+        target: readInput(el("house-target-form").querySelector("input")),
+      }) : null;
+    const loans = [
+      ...(sim?.baseLoans || st.loans.filter((loan) => loan.enabled !== false)),
+      ...(sim && sim.additional > 0
+        ? [{ name: "추가 대출 (비교안)", ...sim.terms, amount: sim.additional }]
+        : []),
+    ];
+    openDialog(
+      "상환 흐름 보기",
+      `<p class="plan-notice">실제 실행일과 거치 중 납부 조건이 아직 없어요. 아래는 입력한 금리의 이자를 매월 낸다는 가정이며, 날짜별 실제 청구표는 아니에요.</p>${loans
+        .map((l) => {
+          const p = loanPhases(l);
+          return `<article class="plan-phase"><h3>${esc(l.name)}</h3><dl class="plan-equation">${p.graceMonths ? `<div><dt>거치 ${p.graceMonths}개월 · 이자만 가정</dt><dd>월 ${money(p.graceInterest)}</dd></div>` : ""}<div><dt>이후 ${p.repaymentMonths}개월 · ${p.declining ? "첫 달부터 점차 감소" : "월 부담"}</dt><dd>${money(p.monthly)}</dd></div>${p.maturityPrincipal ? `<div><dt>만기 원금 별도 상환</dt><dd>${money(p.maturityPrincipal)}</dd></div>` : ""}</dl></article>`;
+        })
+        .join("")}`,
+    );
+  } catch (e) {
+    openDialog("조건 확인", `<p>${esc(e.message)}</p>`);
+  }
+}
+export const initHouseInputs = renderHouse;

@@ -1,0 +1,4 @@
+Bootstrap Icons v1.11.3
+Source: https://github.com/twbs/icons/tree/v1.11.3/icons
+License: MIT (see LICENSE.txt)
+Unmodified SVG assets. Colors are supplied by the surrounding WeCost UI.

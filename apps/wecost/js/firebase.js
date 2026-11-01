@@ -33,7 +33,7 @@ const DEFAULT_SAVINGS = {
 
 // ===== 구독 =====
 
-export function subscribeAll(onUpdate) {
+export function subscribeAll(onUpdate, onError = () => {}) {
   const caller = getMember(); if (!caller) throw new Error('로그인이 필요해요.');
   let active = true;
   // 각 컬렉션 상태를 별도로 저장하고 모든 구독이 첫 응답 후 콜백
@@ -54,9 +54,9 @@ export function subscribeAll(onUpdate) {
 
   // settings
   const settingsRef = doc(db, 'wecost_settings', 'main');
-  const unsubSettings = memberWork.observe(onSnapshot, settingsRef, snap => {
+  const unsubSettings = memberWork.observe(onSnapshot, settingsRef, { includeMetadataChanges: true }, snap => {
     if (!snap.exists()) {
-      snapshot.settings = { ...DEFAULT_SETTINGS };
+      snapshot.settings = { ...DEFAULT_SETTINGS, _exists: false };
     } else {
       snapshot.settings = snap.data();
     }
@@ -69,40 +69,40 @@ export function subscribeAll(onUpdate) {
     }
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  }, () => { homeTargetPriceBridge.clear('wecost-unavailable'); });
+  }, error => { homeTargetPriceBridge.clear('wecost-unavailable'); onError(error); });
 
   // savings
   const savingsRef = doc(db, 'wecost_savings', 'main');
   const unsubSavings = memberWork.observe(onSnapshot, savingsRef, snap => {
     if (!snap.exists()) {
-      snapshot.savings = { ...DEFAULT_SAVINGS };
+      snapshot.savings = { ...DEFAULT_SAVINGS, _exists: false };
     } else {
       snapshot.savings = snap.data();
     }
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  });
+  }, onError);
 
   // items
   const unsubItems = memberWork.observe(onSnapshot, collection(db, 'wecost_items'), snap => {
     snapshot.items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  });
+  }, onError);
 
   // loans
   const unsubLoans = memberWork.observe(onSnapshot, collection(db, 'wecost_loans'), snap => {
     snapshot.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  });
+  }, onError);
 
   // adjustments
   const unsubAdjustments = memberWork.observe(onSnapshot, collection(db, 'wecost_adjustments'), snap => {
     snapshot.adjustments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     readyCount = Math.max(readyCount, Object.values(snapshot).filter(v => v !== null).length);
     notify();
-  });
+  }, onError);
 
   const cleanup = () => {
     if (!active) return;
