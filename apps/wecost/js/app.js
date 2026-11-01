@@ -5,6 +5,7 @@ import { createLoanRateReader } from "./loan-rates.mjs";
 import { registerWeddingBudget } from "./wedding-budget-ui.mjs";
 import { renderDashboard, registerDashboardHandlers } from "./tab-dashboard.js";
 import { renderCashflow, registerCashflowHandlers } from "./tab-cashflow.js";
+import { renderFixedCosts, registerFixedCostsHandlers } from "./tab-fixed-costs.js";
 import { renderWedding, registerWeddingHandlers } from "./tab-wedding.js";
 import { renderHouse, registerHouseHandlers } from "./tab-house.js";
 import {
@@ -23,6 +24,7 @@ let currentTab = "dashboard",
 const renderers = {
   dashboard: renderDashboard,
   cashflow: renderCashflow,
+  fixed: renderFixedCosts,
   wedding: renderWedding,
   house: renderHouse,
 };
@@ -57,7 +59,7 @@ function showTab(name) {
   });
   const label = document.querySelector(".wecost-page-label");
   if (label)
-    label.textContent = `WeCost · ${{ dashboard: "대시보드", cashflow: "현금흐름", wedding: "결혼비용", house: "집 시뮬레이션" }[name]}`;
+    label.textContent = `WeCost · ${{ dashboard: "대시보드", cashflow: "우리 자금", fixed: "고정비", wedding: "결혼비용", house: "집 시뮬레이션" }[name]}`;
   if (initialized) {
     recompute();
     renderers[name](st);
@@ -71,13 +73,14 @@ initPlanningUI((status) => {
       [...document.querySelectorAll("[data-field]")].some(
         (input) => input._dirty,
       ) || document.querySelector("form[data-dirty=true]");
-    const display = status === "saved" && pending ? "draft" : status;
+    const display = ["saved", "reset"].includes(status) && pending ? "draft" : status;
     const label = document.getElementById("planning-status");
     if (label) {
       label.textContent = {
         draft: "저장 전 변경사항",
         saving: "저장 중…",
         saved: "저장됨",
+        reset: "저장된 데이터 기준",
         error: "저장 확인 필요",
       }[display];
       label.dataset.state = display;
@@ -86,6 +89,7 @@ initPlanningUI((status) => {
 });
 registerDashboardHandlers(() => st);
 registerCashflowHandlers(() => st);
+registerFixedCostsHandlers();
 registerHouseHandlers(() => st);
 registerWeddingHandlers(() => st);
 registerWeddingBudget(() => st);

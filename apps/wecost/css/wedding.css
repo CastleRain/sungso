@@ -440,11 +440,7 @@ body.wed-modal-open {overflow:hidden;}
  #tab-wedding .wed-choice .wed-icon { width:24px; height:26px; font-size:15px; }
 }
 /* Light typography polish, scoped to wedding content and its editors. */
-@font-face {
- font-family:'WeCost Pretendard'; font-style:normal; font-weight:100 900; font-display:swap;
- src:url('/sungso/shared/theme/fonts/PretendardVariable.woff2') format('woff2');
-}
-#tab-wedding,#item-drawer,#wed-payment-dialog { font-family:'WeCost Pretendard',var(--ss-font-sans); }
+#tab-wedding,#item-drawer,#wed-payment-dialog { font-family:var(--wecost-font-sans); }
 #tab-wedding .page-hdr h1 { font-weight:650; letter-spacing:-.035em; }
 #tab-wedding h2 { font-size:15px; font-weight:600; letter-spacing:-.02em; }
 #tab-wedding .mc-value { line-height:1.35; font-weight:650; letter-spacing:-.025em; }
@@ -590,7 +586,7 @@ body.wed-modal-open {overflow:hidden;}
 #tab-wedding .wf-detail-name small {margin-top:3px;}
 #tab-wedding .wf-detail-progress .wed-track {display:block;width:100%;min-width:0;}
 .wf-modal-open {overflow:hidden;}
-.wf-dialog {width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 40px);margin:auto;padding:0;border:1px solid var(--ss-border);border-radius:20px;color:var(--ss-text);background:var(--ss-surface);font:13px/1.6 'WeCost Pretendard',var(--ss-font-sans);box-shadow:var(--shadow-md);}
+.wf-dialog {width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 40px);margin:auto;padding:0;border:1px solid var(--ss-border);border-radius:20px;color:var(--ss-text);background:var(--ss-surface);font:13px/1.6 var(--wecost-font-sans);box-shadow:var(--shadow-md);}
 .wf-dialog::backdrop {background:color-mix(in srgb,var(--ss-text) 35%,transparent);}
 .wf-dialog form {display:flex;flex-direction:column;max-height:calc(100dvh - 40px);}
 .wf-dialog header {display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 24px 16px;border-bottom:1px solid var(--ss-border);}
@@ -732,7 +728,7 @@ body.wed-modal-open {overflow:hidden;}
 .wed-date-heading {display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px;}
 .wed-date-heading strong {font-size:12px;font-weight:650;color:var(--ss-text);}
 .wed-date-heading span {font-size:11px;color:var(--ss-muted);}
-.wed-date-mount .wed-calendar {width:100%;box-shadow:none;border:0;border-radius:0;background:var(--ss-surface);font-family:var(--ss-font-sans);}
+.wed-date-mount .wed-calendar {width:100%;box-shadow:none;border:0;border-radius:0;background:var(--ss-surface);font-family:var(--wecost-font-sans);}
 .wed-calendar.inline {top:0;}
 .wed-calendar:before,.wed-calendar:after {display:none;}
 .wed-calendar .flatpickr-months {padding:4px 0 10px;align-items:center;}
@@ -755,7 +751,7 @@ body.wed-modal-open {overflow:hidden;}
 .wed-calendar .flatpickr-day.selected,.wed-calendar .flatpickr-day.selected:hover,.wed-calendar .flatpickr-day.selected:focus {background:var(--ss-accent);border-color:var(--ss-accent);color:var(--ss-on-accent);font-weight:700;}
 .wed-calendar .flatpickr-day:is(.prevMonthDay,.nextMonthDay,.flatpickr-disabled) {color:var(--ss-muted);opacity:.45;}
 .wed-date-shortcuts {display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ss-border);}
-.wed-date-shortcuts button {font:500 12px var(--ss-font-sans);min-height:36px;padding:7px 12px;border:1px solid var(--ss-border);border-radius:10px;background:var(--ss-surface);color:var(--ss-link);cursor:pointer;}
+.wed-date-shortcuts button {font:500 12px var(--wecost-font-sans);min-height:36px;padding:7px 12px;border:1px solid var(--ss-border);border-radius:10px;background:var(--ss-surface);color:var(--ss-link);cursor:pointer;}
 .wed-date-shortcuts button:hover {background:var(--ss-soft);}
 .wed-date-shortcuts [data-date-close] {margin-left:auto;}
 .wed-date-picker :is(button,[role=button],.flatpickr-day,input):focus-visible {outline:2px solid var(--ss-focus);outline-offset:2px;}

@@ -149,7 +149,11 @@ export function makePlanningState(st, finance = {}, now = new Date()) {
     (s, i) => s + (i.sign === "+" ? 1 : -1) * (i.amount || 0),
     0,
   );
-  const netCash = forecast.total + support - totalPlanned + weddingBudget.expectedIncome + adjustmentsTotal;
+  const funding = fundingSummary(st.items || [], finance.funds, finance.plan, finance.quote, cfg.weddingBudget);
+  // Current savings already reflect spent money. Only the wedding page's still
+  // unfunded amount is reserved here; its wallet and income offsets apply once.
+  const weddingCashRequired = funding.needed;
+  const netCash = cashAfterWedding(forecast.total, support, adjustmentsTotal, weddingCashRequired);
   const loans = (st.loans || []).filter((l) => l.enabled !== false),
     invalidLoans = [];
   let totalMonthly = 0;
@@ -174,23 +178,22 @@ export function makePlanningState(st, finance = {}, now = new Date()) {
     totalPlanned,
     totalPaid,
     totalBalance,
+    weddingCashRequired,
     netCash,
-    availCash: Math.max(netCash, 0),
-    cashShortfall: Math.max(-netCash, 0),
+    availCash: netCash == null ? null : Math.max(netCash, 0),
+    cashShortfall: netCash == null ? null : Math.max(-netCash, 0),
     loanTotal,
     totalMonthly: invalidLoans.length ? null : totalMonthly,
     invalidLoans,
-    houseBudget: Math.max(netCash + loanTotal, 0),
-    funding: fundingSummary(
-      st.items || [],
-      finance.funds,
-      finance.plan,
-      finance.quote,
-      cfg.weddingBudget,
-    ),
+    houseBudget: netCash == null ? null : Math.max(netCash + loanTotal, 0),
+    funding,
     financeLoading: finance.connection !== "live",
     fxPending: items.some((i) => i.fxPending),
   };
+}
+export function cashAfterWedding(coupleSavings, support, adjustments, needed) {
+  if (!Number.isFinite(needed)) return null;
+  return coupleSavings + support + adjustments - Math.max(needed, 0);
 }
 export function upcomingPayments(items, filter = "all") {
   return items
@@ -214,6 +217,8 @@ export function upcomingPayments(items, filter = "all") {
     );
 }
 export function simulation(st, draft = {}) {
+  if (st.netCash === null || st.weddingCashRequired === null)
+    throw Error("결혼비용의 보유 자금·환율을 확인하면 집 예산을 계산할 수 있어요.");
   const terms = { ...DEFAULT_TERMS, ...draft.terms };
   validateLoan({ ...terms, amount: 0 });
   // All explicitly enabled registered loans are the base. The existing company

@@ -34,16 +34,16 @@ body:has(.plan-page.active) #app-main {
   }
 }
 .plan-page h1 {
-  font-size: 24px;
-  letter-spacing: -0.7px;
-  line-height: 1.25;
-  font-weight: 750;
+  font-size: 22px;
+  letter-spacing: -0.035em;
+  line-height: 1.5;
+  font-weight: 650;
 }
 .plan-page h2,
 .plan-dialog h2 {
   font-size: 15px;
-  letter-spacing: -0.35px;
-  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 .plan-page h3,
 .plan-dialog h3 {
@@ -1181,7 +1181,7 @@ body:has(.plan-page.active) #app-main {
     padding: 20px 14px 90px;
   }
   .plan-page h1 {
-    font-size: 23px;
+    font-size: 22px;
   }
   .plan-page-head {
     gap: 10px;

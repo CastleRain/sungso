@@ -61,7 +61,7 @@ test('every private entry defers scripts until auth; only the explicit guest inv
         assert.doesNotMatch(attrs, /(?:data-)?src=/);
         const map = JSON.parse(content);
         assert.deepEqual(Object.keys(map), ['imports']);
-        assert.deepEqual(Object.keys(map.imports).sort(), ["./js/firebase.js", "./js/loan-rates-ui.mjs", "./js/loan-rates.mjs", "./js/planning-core.mjs", "./js/planning-store.mjs", "./js/planning-ui.mjs", "./js/tab-cashflow.js", "./js/tab-dashboard.js", "./js/tab-house.js", "./js/tab-wedding.js", "./js/wedding-budget-core.mjs", "./js/wedding-budget-ui.mjs", "./js/wedding-calendar.mjs", "./js/wedding-core.mjs", "./js/wedding-funds-core.mjs", "./js/wedding-funds-store.mjs", "./js/wedding-funds-ui.mjs", "./js/wedding-fx.mjs"]);
+        assert.deepEqual(Object.keys(map.imports).sort(), ["./js/firebase.js", "./js/fixed-costs-core.mjs", "./js/fixed-costs-repository.mjs", "./js/fixed-costs-store.mjs", "./js/loan-rates-ui.mjs", "./js/loan-rates.mjs", "./js/planning-core.mjs", "./js/planning-store.mjs", "./js/planning-ui.mjs", "./js/tab-cashflow.js", "./js/tab-dashboard.js", "./js/tab-fixed-costs.js", "./js/tab-house.js", "./js/tab-wedding.js", "./js/wedding-budget-core.mjs", "./js/wedding-budget-ui.mjs", "./js/wedding-calendar.mjs", "./js/wedding-core.mjs", "./js/wedding-funds-core.mjs", "./js/wedding-funds-store.mjs", "./js/wedding-funds-ui.mjs", "./js/wedding-fx.mjs"]);
         const versions = new Set(Object.values(map.imports).map(target => target.split('?v=')[1]));
         assert.equal(versions.size, 1, 'All page renderers and stores share one release version');
         assert.ok(html.includes(`data-src="js/app.js?v=${[...versions][0]}"`), 'The external module entry must also bypass its old cache');

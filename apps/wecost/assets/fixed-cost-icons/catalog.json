@@ -1,0 +1,1803 @@
+{
+  "version": 1,
+  "source": {
+    "name": "Lucide",
+    "version": "0.468.0",
+    "url": "https://github.com/lucide-icons/lucide/tree/0.468.0",
+    "archiveSha256": "d87c47325f0b2ac3ad2d6f056889da32b8f1216eafe4ed6534bc02786effe8cc"
+  },
+  "fallback": "wallet",
+  "groups": [
+    {
+      "id": "communication",
+      "label": "통신·인터넷",
+      "defaultIcon": "smartphone"
+    },
+    {
+      "id": "housing",
+      "label": "주거·관리",
+      "defaultIcon": "house"
+    },
+    {
+      "id": "utilities",
+      "label": "공과금·에너지",
+      "defaultIcon": "zap"
+    },
+    {
+      "id": "health",
+      "label": "보험·의료",
+      "defaultIcon": "shield-check"
+    },
+    {
+      "id": "transport",
+      "label": "교통·차량",
+      "defaultIcon": "car-front"
+    },
+    {
+      "id": "subscriptions",
+      "label": "영상·음악·구독",
+      "defaultIcon": "tv"
+    },
+    {
+      "id": "digital",
+      "label": "디지털·업무",
+      "defaultIcon": "cloud"
+    },
+    {
+      "id": "food",
+      "label": "식사·정기배송",
+      "defaultIcon": "utensils"
+    },
+    {
+      "id": "housekeeping",
+      "label": "생활·가전",
+      "defaultIcon": "shopping-basket"
+    },
+    {
+      "id": "beauty",
+      "label": "미용·의류",
+      "defaultIcon": "scissors"
+    },
+    {
+      "id": "exercise",
+      "label": "운동·취미",
+      "defaultIcon": "dumbbell"
+    },
+    {
+      "id": "learning",
+      "label": "교육·자기계발",
+      "defaultIcon": "book-open"
+    },
+    {
+      "id": "pets",
+      "label": "반려동물",
+      "defaultIcon": "dog"
+    },
+    {
+      "id": "family",
+      "label": "가족·돌봄",
+      "defaultIcon": "baby"
+    },
+    {
+      "id": "finance",
+      "label": "금융·회비",
+      "defaultIcon": "wallet"
+    },
+    {
+      "id": "other",
+      "label": "기타·여가",
+      "defaultIcon": "receipt"
+    }
+  ],
+  "recommended": [
+    "smartphone",
+    "wifi",
+    "shield-check",
+    "car-front",
+    "circle-parking",
+    "house",
+    "building-2",
+    "zap",
+    "tv",
+    "music",
+    "brain-circuit",
+    "cloud",
+    "dumbbell",
+    "book-open",
+    "pill",
+    "dog",
+    "hand-heart",
+    "wallet"
+  ],
+  "icons": [
+    {
+      "id": "smartphone",
+      "label": "휴대폰",
+      "group": "communication",
+      "keywords": [
+        "통신비",
+        "핸드폰",
+        "요금제",
+        "알뜰폰",
+        "SKT",
+        "KT",
+        "LG",
+        "U+",
+        "유플러스"
+      ],
+      "file": "smartphone.svg",
+      "sha256": "c65bc8668adc7fecfc12c808858afbfb9ec1b244972b4c6d32d7ae7ec0de1869"
+    },
+    {
+      "id": "phone",
+      "label": "집 전화",
+      "group": "communication",
+      "keywords": [
+        "전화",
+        "유선전화"
+      ],
+      "file": "phone.svg",
+      "sha256": "077e34b88b44c22747d0b713700773ccb0184d1b328acec56caf72c3fc9c230a"
+    },
+    {
+      "id": "router",
+      "label": "인터넷 공유기",
+      "group": "communication",
+      "keywords": [
+        "와이파이",
+        "임대",
+        "렌탈"
+      ],
+      "file": "router.svg",
+      "sha256": "36933103875686ef7f54e82cf3f2f36bb30e94af461304a8fe753b57ef00cccc"
+    },
+    {
+      "id": "wifi",
+      "label": "인터넷",
+      "group": "communication",
+      "keywords": [
+        "초고속",
+        "통신",
+        "결합"
+      ],
+      "file": "wifi.svg",
+      "sha256": "133817fce3f8f7decbf6a38965242c35a372445c8afd8f10e30c75a913520347"
+    },
+    {
+      "id": "smartphone-nfc",
+      "label": "휴대폰 부가서비스",
+      "group": "communication",
+      "keywords": [
+        "모바일",
+        "결제",
+        "NFC"
+      ],
+      "file": "smartphone-nfc.svg",
+      "sha256": "57d5d8d37a03e49adc8293ee8524ad4abf25877955ed68d0b522fb2f90618a3d"
+    },
+    {
+      "id": "tablet",
+      "label": "태블릿",
+      "group": "communication",
+      "keywords": [
+        "아이패드",
+        "갤럭시탭",
+        "데이터",
+        "요금"
+      ],
+      "file": "tablet.svg",
+      "sha256": "deac4f009711fbbf49fca2fe14001d45611ff7138c0104500e822334903d9db3"
+    },
+    {
+      "id": "antenna",
+      "label": "통신 회선",
+      "group": "communication",
+      "keywords": [
+        "안테나",
+        "위성"
+      ],
+      "file": "antenna.svg",
+      "sha256": "fc4623bf6903d10647e1f07f713388f1f0b27965ca24a76887deeb9526f435ad"
+    },
+    {
+      "id": "satellite-dish",
+      "label": "위성 방송",
+      "group": "communication",
+      "keywords": [
+        "스카이라이프",
+        "케이블"
+      ],
+      "file": "satellite-dish.svg",
+      "sha256": "53302c382ed7e91b02055fde717af4e5bc42a4c38ccca70b8fe96872db8e1584"
+    },
+    {
+      "id": "message-circle",
+      "label": "문자·메신저",
+      "group": "communication",
+      "keywords": [
+        "SMS",
+        "카카오톡",
+        "이모티콘",
+        "플러스"
+      ],
+      "file": "message-circle.svg",
+      "sha256": "f62830d9fbbbf697e53555398d31a342ddec8dd008d707f21cd90bb19befcc87"
+    },
+    {
+      "id": "house",
+      "label": "월세·주거",
+      "group": "housing",
+      "keywords": [
+        "집",
+        "임대료",
+        "전세"
+      ],
+      "file": "house.svg",
+      "sha256": "2c13f570d9b9727c9b6c23400c95acfa9737e91884ed926332edb18fd47a2a76"
+    },
+    {
+      "id": "building-2",
+      "label": "관리비",
+      "group": "housing",
+      "keywords": [
+        "아파트",
+        "오피스텔",
+        "공동주택"
+      ],
+      "file": "building-2.svg",
+      "sha256": "b8e1a849a72553128b8f4e565033ab756daf2160de3ec9ec41ccd47058942d47"
+    },
+    {
+      "id": "key-round",
+      "label": "주택 임대",
+      "group": "housing",
+      "keywords": [
+        "열쇠",
+        "월세",
+        "전세"
+      ],
+      "file": "key-round.svg",
+      "sha256": "a0d77f9b3f399ba0f44a49945b69abe0aad0e37e524fa81f7e3f271bddcc4936"
+    },
+    {
+      "id": "receipt-text",
+      "label": "주거 청구서",
+      "group": "housing",
+      "keywords": [
+        "고지서",
+        "관리비"
+      ],
+      "file": "receipt-text.svg",
+      "sha256": "f3ef8667b07dcb9ba0b9daf154376fdb9234cc858ee91fd7016d83d089340a2b"
+    },
+    {
+      "id": "door-open",
+      "label": "출입·보안",
+      "group": "housing",
+      "keywords": [
+        "도어락",
+        "출입문"
+      ],
+      "file": "door-open.svg",
+      "sha256": "638053939a5f64243e52172e8d948bb623ff32fd62adacef8d34e219b7940843"
+    },
+    {
+      "id": "fence",
+      "label": "주택 관리",
+      "group": "housing",
+      "keywords": [
+        "울타리",
+        "단독주택"
+      ],
+      "file": "fence.svg",
+      "sha256": "9243f86b717ddb89b5c40b9c61c5919ace0042dfd2636aced72b2a0e278920b3"
+    },
+    {
+      "id": "warehouse",
+      "label": "창고 임대",
+      "group": "housing",
+      "keywords": [
+        "보관",
+        "셀프스토리지"
+      ],
+      "file": "warehouse.svg",
+      "sha256": "218e4052f2de75310e9ee5226e42e13da84c5d09e620bc5500bc6e7499b79148"
+    },
+    {
+      "id": "armchair",
+      "label": "가구 렌탈",
+      "group": "housing",
+      "keywords": [
+        "의자",
+        "안마의자"
+      ],
+      "file": "armchair.svg",
+      "sha256": "3abf2e2548a4a8bb03fcc9eec5a025817bb6ac02c9f3758ec00d7ea540e5169f"
+    },
+    {
+      "id": "sofa",
+      "label": "소파·가구",
+      "group": "housing",
+      "keywords": [
+        "가구",
+        "구독"
+      ],
+      "file": "sofa.svg",
+      "sha256": "a80afdb349cb05b63f16172d65c2a74df3d9def07c622614128147a3c81b6221"
+    },
+    {
+      "id": "zap",
+      "label": "전기요금",
+      "group": "utilities",
+      "keywords": [
+        "전력",
+        "한전"
+      ],
+      "file": "zap.svg",
+      "sha256": "7253fd68ffc01a3dedeec0c788711cd41aac308cdcfa675569306a13744518a2"
+    },
+    {
+      "id": "flame",
+      "label": "가스요금",
+      "group": "utilities",
+      "keywords": [
+        "도시가스",
+        "연료"
+      ],
+      "file": "flame.svg",
+      "sha256": "144ec9d994ffee707781b8be67bd7bbb0f87d85010b37956d7bd86909053590b"
+    },
+    {
+      "id": "droplets",
+      "label": "수도·정수기",
+      "group": "utilities",
+      "keywords": [
+        "상하수도",
+        "물",
+        "수도요금",
+        "정수기",
+        "코웨이",
+        "청호",
+        "생수"
+      ],
+      "file": "droplets.svg",
+      "sha256": "7d38c15e15088cb35ee3030d634387593bea1be150a29ad0b1ce1b847a3f1e86"
+    },
+    {
+      "id": "thermometer",
+      "label": "난방비",
+      "group": "utilities",
+      "keywords": [
+        "온도",
+        "보일러"
+      ],
+      "file": "thermometer.svg",
+      "sha256": "4615c5bc7f526820f66c78d1f678f3ebd4bbf7926a2f84157c190a666837b755"
+    },
+    {
+      "id": "waves",
+      "label": "온수·지역난방",
+      "group": "utilities",
+      "keywords": [
+        "급탕",
+        "열",
+        "요금"
+      ],
+      "file": "waves.svg",
+      "sha256": "e25f9aabdab097fde6b525244fd674e49dce3274750b2124140c466a7023a3f0"
+    },
+    {
+      "id": "fan",
+      "label": "냉방·선풍기",
+      "group": "utilities",
+      "keywords": [
+        "환기",
+        "여름"
+      ],
+      "file": "fan.svg",
+      "sha256": "ff9267380bcd723628e329f85f2e1dd289824e8b4ce43886bc25ec687443a7c7"
+    },
+    {
+      "id": "air-vent",
+      "label": "에어컨 관리",
+      "group": "utilities",
+      "keywords": [
+        "필터",
+        "냉난방"
+      ],
+      "file": "air-vent.svg",
+      "sha256": "3e8e115a245d826919d5ca783c2081c473f61415058c1837f3de06a06dff3e95"
+    },
+    {
+      "id": "plug",
+      "label": "전력·충전",
+      "group": "utilities",
+      "keywords": [
+        "콘센트",
+        "충전기"
+      ],
+      "file": "plug.svg",
+      "sha256": "2cb346fd91bbdda3fc21d73625c242c2e96a5f26783fa0c9737cdd57543cc0c5"
+    },
+    {
+      "id": "lightbulb",
+      "label": "조명 관리",
+      "group": "utilities",
+      "keywords": [
+        "전구",
+        "조명",
+        "렌탈"
+      ],
+      "file": "lightbulb.svg",
+      "sha256": "31124a7d64a9f2639dbfa0441aeae845717d2fcc3e259fa6feab4b2562c969f8"
+    },
+    {
+      "id": "shield-check",
+      "label": "보험",
+      "group": "health",
+      "keywords": [
+        "보장",
+        "실손",
+        "자동차보험",
+        "운전자보험"
+      ],
+      "file": "shield-check.svg",
+      "sha256": "0e9116845c6053cd3bfa09a3e4c232f5fb28c3abab75792287d2aed31c24ebe7"
+    },
+    {
+      "id": "heart-pulse",
+      "label": "건강 관리",
+      "group": "health",
+      "keywords": [
+        "건강검진",
+        "생명보험"
+      ],
+      "file": "heart-pulse.svg",
+      "sha256": "0c868fd631022ca8e0a802cdc75db2e0daca279b5a4a0d831d7a469b15b2cd94"
+    },
+    {
+      "id": "stethoscope",
+      "label": "진료·검진",
+      "group": "health",
+      "keywords": [
+        "병원",
+        "의료비"
+      ],
+      "file": "stethoscope.svg",
+      "sha256": "ba52ad92e84d55bb40823babaa3039eb1e6ff2f7da5ff4546a8a3962d386fd87"
+    },
+    {
+      "id": "hospital",
+      "label": "병원",
+      "group": "health",
+      "keywords": [
+        "치료",
+        "통원"
+      ],
+      "file": "hospital.svg",
+      "sha256": "43766c2280fed85fd8dd91f1ae2af9b9a42b25496cef8b2af881fa4cb57c6316"
+    },
+    {
+      "id": "pill",
+      "label": "약·영양제",
+      "group": "health",
+      "keywords": [
+        "비타민",
+        "약국",
+        "정기구매"
+      ],
+      "file": "pill.svg",
+      "sha256": "4d9313dc12586b63901f8f7a8396edbe3e2d195183066a3aa8ebd09477515259"
+    },
+    {
+      "id": "syringe",
+      "label": "예방접종",
+      "group": "health",
+      "keywords": [
+        "주사",
+        "예방"
+      ],
+      "file": "syringe.svg",
+      "sha256": "1b76c4a5f3cf8fb65d462413f5ce5fa895dfca4073836489ec61ca240aca60cf"
+    },
+    {
+      "id": "eye",
+      "label": "안과",
+      "group": "health",
+      "keywords": [
+        "시력",
+        "렌즈"
+      ],
+      "file": "eye.svg",
+      "sha256": "7a23c549710b70c9eb1324540260943190190ef309e9f3604726a42c85f9b552"
+    },
+    {
+      "id": "glasses",
+      "label": "안경·렌즈",
+      "group": "health",
+      "keywords": [
+        "콘택트렌즈",
+        "정기배송"
+      ],
+      "file": "glasses.svg",
+      "sha256": "e7d7cf2eb12ed7a22b93c490ba1e62caeeddd998ba3826254d683f340839efb3"
+    },
+    {
+      "id": "ear",
+      "label": "청력 관리",
+      "group": "health",
+      "keywords": [
+        "보청기"
+      ],
+      "file": "ear.svg",
+      "sha256": "24afdf753599b6defee81397002fcbcff6dc5f5a2c3ccf6a48b1c7f529bc03ed"
+    },
+    {
+      "id": "car-front",
+      "label": "자동차",
+      "group": "transport",
+      "keywords": [
+        "차량",
+        "리스",
+        "장기렌트"
+      ],
+      "file": "car-front.svg",
+      "sha256": "a65030e7b10c22e62cd13f4d800156a2aa36e9eca2c1139860059ecd0b0d6379"
+    },
+    {
+      "id": "bus-front",
+      "label": "버스",
+      "group": "transport",
+      "keywords": [
+        "교통비",
+        "대중교통",
+        "정기권"
+      ],
+      "file": "bus-front.svg",
+      "sha256": "8eabe5a741110049eec407671d752eb3591690b524546b9921f26745580c9c22"
+    },
+    {
+      "id": "train-front",
+      "label": "지하철·기차",
+      "group": "transport",
+      "keywords": [
+        "철도",
+        "코레일",
+        "전철",
+        "KTX"
+      ],
+      "file": "train-front.svg",
+      "sha256": "d835782412fc39bb7a60e23762d348ca054daa0f4fcbe9b55ab68670b84075d5"
+    },
+    {
+      "id": "bike",
+      "label": "자전거",
+      "group": "transport",
+      "keywords": [
+        "따릉이",
+        "공유자전거"
+      ],
+      "file": "bike.svg",
+      "sha256": "d155420a779b54c532e939d2e19bb0331489784d8bd1af8b0020cef1c9e55741"
+    },
+    {
+      "id": "fuel",
+      "label": "주유비",
+      "group": "transport",
+      "keywords": [
+        "기름",
+        "휘발유",
+        "경유",
+        "충전"
+      ],
+      "file": "fuel.svg",
+      "sha256": "b4d7d3f844271b4ff32163c86654a54091db8f214cd984dc6e9200f25338baed"
+    },
+    {
+      "id": "circle-parking",
+      "label": "주차비",
+      "group": "transport",
+      "keywords": [
+        "주차장",
+        "정기주차"
+      ],
+      "file": "circle-parking.svg",
+      "sha256": "5a71e65573cc2d4a66cee2f0e8bb02e69f727afebbcb07683bc72f174d05b20d"
+    },
+    {
+      "id": "car-taxi-front",
+      "label": "택시",
+      "group": "transport",
+      "keywords": [
+        "카카오택시",
+        "우버"
+      ],
+      "file": "car-taxi-front.svg",
+      "sha256": "d665a78c3e469cd17a8ac6e611e37f9f418285b6e5a11451984d683aa214e4bd"
+    },
+    {
+      "id": "tram-front",
+      "label": "교통 정기권",
+      "group": "transport",
+      "keywords": [
+        "트램",
+        "교통패스",
+        "기후동행카드"
+      ],
+      "file": "tram-front.svg",
+      "sha256": "8ee8fdc7c6b94ffa5028a1f3b49074a1ead13fe1a69feff094e215dc5f651f8b"
+    },
+    {
+      "id": "route",
+      "label": "통행료",
+      "group": "transport",
+      "keywords": [
+        "하이패스",
+        "도로",
+        "통근"
+      ],
+      "file": "route.svg",
+      "sha256": "89ddd60ddeeb633f71890ab923509f80b18f74b116eff501fc0fb80ec542a9ee"
+    },
+    {
+      "id": "tv",
+      "label": "OTT·TV",
+      "group": "subscriptions",
+      "keywords": [
+        "넷플릭스",
+        "디즈니플러스",
+        "티빙",
+        "웨이브",
+        "쿠팡플레이",
+        "왓챠"
+      ],
+      "file": "tv.svg",
+      "sha256": "f8186154e6748a2934321e584916e028a92a73b339f7460232df8d509271caee"
+    },
+    {
+      "id": "play",
+      "label": "영상 구독",
+      "group": "subscriptions",
+      "keywords": [
+        "유튜브",
+        "프리미엄",
+        "youtube"
+      ],
+      "file": "play.svg",
+      "sha256": "f0cab5b458fdf5e5d5d1a8aeb3d368ccab337cc578b1f8081807b8e39f68f1a1"
+    },
+    {
+      "id": "circle-play",
+      "label": "스트리밍",
+      "group": "subscriptions",
+      "keywords": [
+        "동영상",
+        "플레이어"
+      ],
+      "file": "circle-play.svg",
+      "sha256": "132c3eba84be6d2e82a8165d643e78d9f2e30a2124070e20adb5679855dee63d"
+    },
+    {
+      "id": "music",
+      "label": "음악 구독",
+      "group": "subscriptions",
+      "keywords": [
+        "멜론",
+        "지니",
+        "플로",
+        "스포티파이",
+        "애플뮤직"
+      ],
+      "file": "music.svg",
+      "sha256": "5a1d5ba0146ec534bf6187a4ced0b77195ae58b98ced558a7ceb537adb62187c"
+    },
+    {
+      "id": "headphones",
+      "label": "오디오북",
+      "group": "subscriptions",
+      "keywords": [
+        "윌라",
+        "오디오",
+        "헤드폰"
+      ],
+      "file": "headphones.svg",
+      "sha256": "d6d7afb9a29cf52cf10569f3a073e03ce0cac56a1704d7e67cde7c487f6476a4"
+    },
+    {
+      "id": "podcast",
+      "label": "팟캐스트",
+      "group": "subscriptions",
+      "keywords": [
+        "방송",
+        "오디오"
+      ],
+      "file": "podcast.svg",
+      "sha256": "c13b8172ce898177fe413f6d02a59c343cda948f1435b2619499b947350c68bf"
+    },
+    {
+      "id": "gamepad-2",
+      "label": "게임 구독",
+      "group": "subscriptions",
+      "keywords": [
+        "게임패스",
+        "닌텐도",
+        "플레이스테이션",
+        "PSN",
+        "xbox"
+      ],
+      "file": "gamepad-2.svg",
+      "sha256": "995fa09af952d8fa7a6c1bef4be552483e437e96bde5238b25f06834cc065a84"
+    },
+    {
+      "id": "newspaper",
+      "label": "신문·잡지",
+      "group": "subscriptions",
+      "keywords": [
+        "언론",
+        "뉴스",
+        "정기구독"
+      ],
+      "file": "newspaper.svg",
+      "sha256": "93b228a2b745628471940db2ec570b87048503d697658f31ab2a51f268255d35"
+    },
+    {
+      "id": "radio",
+      "label": "라디오",
+      "group": "subscriptions",
+      "keywords": [
+        "오디오",
+        "채널"
+      ],
+      "file": "radio.svg",
+      "sha256": "29c6bee56a2c4e7d52b485385a175647ad4ab67689da495c01858f05e03d2d35"
+    },
+    {
+      "id": "cloud",
+      "label": "클라우드",
+      "group": "digital",
+      "keywords": [
+        "아이클라우드",
+        "구글원",
+        "드라이브",
+        "원드라이브",
+        "드롭박스",
+        "저장공간"
+      ],
+      "file": "cloud.svg",
+      "sha256": "63d076b99f2fde11de97e9cf79fc701931945bc5c8cc596c5cf55d4439dbe82b"
+    },
+    {
+      "id": "hard-drive",
+      "label": "백업·저장",
+      "group": "digital",
+      "keywords": [
+        "NAS",
+        "하드디스크"
+      ],
+      "file": "hard-drive.svg",
+      "sha256": "7ae374a543a2a9be86b258c9204075d2741187971416daead4e09f8f5359447e"
+    },
+    {
+      "id": "laptop",
+      "label": "노트북·PC",
+      "group": "digital",
+      "keywords": [
+        "컴퓨터",
+        "렌탈"
+      ],
+      "file": "laptop.svg",
+      "sha256": "76082a476fdd7c6762dc750d75c51c15952e08bb4bad75bebce87403bfea9e77"
+    },
+    {
+      "id": "monitor",
+      "label": "모니터·장비",
+      "group": "digital",
+      "keywords": [
+        "사무기기"
+      ],
+      "file": "monitor.svg",
+      "sha256": "3ef31ab3ab45c174485e0c1dfc3bd3b54ae51cb74df8230a0e136d78ca580efd"
+    },
+    {
+      "id": "code-xml",
+      "label": "개발 도구",
+      "group": "digital",
+      "keywords": [
+        "깃허브",
+        "도메인",
+        "개발",
+        "IDE"
+      ],
+      "file": "code-xml.svg",
+      "sha256": "7c6551292a71cfff12c70727124f3c76832c903263af142b9e61da826fa4b2a5"
+    },
+    {
+      "id": "brain-circuit",
+      "label": "AI 구독",
+      "group": "digital",
+      "keywords": [
+        "챗지피티",
+        "ChatGPT",
+        "Claude",
+        "클로드",
+        "코파일럿",
+        "제미나이"
+      ],
+      "file": "brain-circuit.svg",
+      "sha256": "5c275e9427615dfb6fd8a3d975e5e7badace221e63adfacfb47a7b2dc3dbb289"
+    },
+    {
+      "id": "mail",
+      "label": "이메일",
+      "group": "digital",
+      "keywords": [
+        "메일",
+        "워크스페이스"
+      ],
+      "file": "mail.svg",
+      "sha256": "8a4e4461fb1db38072eb90fa532c6b17bcd4d774951f65b6fc02c63aab547dee"
+    },
+    {
+      "id": "globe",
+      "label": "도메인·호스팅",
+      "group": "digital",
+      "keywords": [
+        "웹사이트",
+        "서버",
+        "홈페이지"
+      ],
+      "file": "globe.svg",
+      "sha256": "c3543ac3883a0841aa5d37ff974708fbc37d9c6afe64e14b03d56ed798b0b788"
+    },
+    {
+      "id": "lock-keyhole",
+      "label": "보안·VPN",
+      "group": "digital",
+      "keywords": [
+        "백신",
+        "비밀번호",
+        "관리자"
+      ],
+      "file": "lock-keyhole.svg",
+      "sha256": "d2c052ce26b89b063a4b1ecaa98198803b7d881cb0d176cb33c067e5140b2dd0"
+    },
+    {
+      "id": "utensils",
+      "label": "식사 정기권",
+      "group": "food",
+      "keywords": [
+        "식비",
+        "점심",
+        "구내식당"
+      ],
+      "file": "utensils.svg",
+      "sha256": "63fc811d3f7dde1676a3f40a44df5b2027fe1e1357f10d1bc6a77fc6597048b5"
+    },
+    {
+      "id": "coffee",
+      "label": "커피 구독",
+      "group": "food",
+      "keywords": [
+        "카페",
+        "원두"
+      ],
+      "file": "coffee.svg",
+      "sha256": "e920d9dbbaaaf46de5375ba0a4519906b99ff9ae36d0537c5d260dc19e98c42a"
+    },
+    {
+      "id": "sandwich",
+      "label": "도시락·간편식",
+      "group": "food",
+      "keywords": [
+        "샌드위치",
+        "배달"
+      ],
+      "file": "sandwich.svg",
+      "sha256": "881e52d9b746944c00ab154e1643c53385b2e596be44775021bce516500541eb"
+    },
+    {
+      "id": "cooking-pot",
+      "label": "밀키트",
+      "group": "food",
+      "keywords": [
+        "식재료",
+        "요리"
+      ],
+      "file": "cooking-pot.svg",
+      "sha256": "b64af5e9e99e91a9eaf861c7a0e5f9fa8d3b6f3e3de8a1e1e3578c4793e339a0"
+    },
+    {
+      "id": "soup",
+      "label": "반찬 정기배송",
+      "group": "food",
+      "keywords": [
+        "국",
+        "찌개",
+        "반찬"
+      ],
+      "file": "soup.svg",
+      "sha256": "7531730d44dc8d56b194fe16e3e485caefd2991fac715a0ee887852adab2d9a5"
+    },
+    {
+      "id": "beef",
+      "label": "고기 정기배송",
+      "group": "food",
+      "keywords": [
+        "육류",
+        "단백질"
+      ],
+      "file": "beef.svg",
+      "sha256": "c7ebc6df21a26ec305f75036da12171e58d730cbc4065d276822dd8d61e9fb23"
+    },
+    {
+      "id": "fish",
+      "label": "수산물",
+      "group": "food",
+      "keywords": [
+        "생선",
+        "해산물"
+      ],
+      "file": "fish.svg",
+      "sha256": "9e597178975979f56e1e09ff8823639e9bf24f2eec1f804693b7c265a28932cf"
+    },
+    {
+      "id": "apple",
+      "label": "과일 정기배송",
+      "group": "food",
+      "keywords": [
+        "사과",
+        "제철과일"
+      ],
+      "file": "apple.svg",
+      "sha256": "df5d01ea7f247f64e319714641757dd9d1c6e824cfb7ff717804833e90703af8"
+    },
+    {
+      "id": "salad",
+      "label": "샐러드",
+      "group": "food",
+      "keywords": [
+        "채소",
+        "건강식",
+        "다이어트"
+      ],
+      "file": "salad.svg",
+      "sha256": "e1af186c19509cd9a3b41f39394a04f53b9d44a7e3203e7e4b05134d0f66bb4e"
+    },
+    {
+      "id": "shopping-basket",
+      "label": "생필품",
+      "group": "housekeeping",
+      "keywords": [
+        "생활비",
+        "장보기",
+        "정기구매"
+      ],
+      "file": "shopping-basket.svg",
+      "sha256": "cfa67277bc704dfe7eb5727bd6aa2a61082e86e56cf07a8abea669f901fc2ecd"
+    },
+    {
+      "id": "package",
+      "label": "정기배송",
+      "group": "housekeeping",
+      "keywords": [
+        "택배",
+        "생수",
+        "쿠팡",
+        "와우"
+      ],
+      "file": "package.svg",
+      "sha256": "d2bb2edb3e9acc1d00535af3596837558b761b24d8933070d5565b71eeaac74f"
+    },
+    {
+      "id": "bath",
+      "label": "세제·위생",
+      "group": "housekeeping",
+      "keywords": [
+        "비누",
+        "세탁",
+        "세정",
+        "욕실"
+      ],
+      "file": "bath.svg",
+      "sha256": "ed48aefa07ce66fcba115df07a57349da16a2b8aaa9115c946db1d92321a1054"
+    },
+    {
+      "id": "washing-machine",
+      "label": "세탁",
+      "group": "housekeeping",
+      "keywords": [
+        "세탁기",
+        "렌탈",
+        "세탁소"
+      ],
+      "file": "washing-machine.svg",
+      "sha256": "3eb0e6177010e2f83c6d33b9ba40a7f3a1e247404eae76f35ae283e3760575dd"
+    },
+    {
+      "id": "refrigerator",
+      "label": "냉장고 렌탈",
+      "group": "housekeeping",
+      "keywords": [
+        "가전"
+      ],
+      "file": "refrigerator.svg",
+      "sha256": "623342dbbaf2547a6afb01cc72e9b908bcd2166bd426238df23aa36f682615ef"
+    },
+    {
+      "id": "microwave",
+      "label": "주방가전",
+      "group": "housekeeping",
+      "keywords": [
+        "전자레인지",
+        "오븐",
+        "렌탈"
+      ],
+      "file": "microwave.svg",
+      "sha256": "66e1c11384d818a2a20c5a1708275a0b5a5e2fd50c352ec862bde8b3df10f248"
+    },
+    {
+      "id": "spray-can",
+      "label": "청소 서비스",
+      "group": "housekeeping",
+      "keywords": [
+        "가사",
+        "도우미",
+        "정기청소"
+      ],
+      "file": "spray-can.svg",
+      "sha256": "18d682ba201a0f140e37e4fe3aeaf8846e6f27b828e5c43b54c784de2c149002"
+    },
+    {
+      "id": "trash-2",
+      "label": "쓰레기·폐기물",
+      "group": "housekeeping",
+      "keywords": [
+        "종량제",
+        "수거"
+      ],
+      "file": "trash-2.svg",
+      "sha256": "9268a35cfb4f9d852c3d13f2c91476dd067c21c20e2bcdb0093fd93fd0bf34b7"
+    },
+    {
+      "id": "wrench",
+      "label": "수리·유지보수",
+      "group": "housekeeping",
+      "keywords": [
+        "AS",
+        "점검",
+        "렌탈"
+      ],
+      "file": "wrench.svg",
+      "sha256": "995fe76da78e8bbdb5c326a76295e4140dc2857767118525ce42f3654f05cd0f"
+    },
+    {
+      "id": "scissors",
+      "label": "미용실",
+      "group": "beauty",
+      "keywords": [
+        "헤어",
+        "커트",
+        "염색"
+      ],
+      "file": "scissors.svg",
+      "sha256": "9ee4b96f95337d74d1a3fd68d463b3db3eeeec28aff4a4c14aa09ef39e4de2fe"
+    },
+    {
+      "id": "shirt",
+      "label": "의류 관리",
+      "group": "beauty",
+      "keywords": [
+        "옷",
+        "수선",
+        "드라이클리닝"
+      ],
+      "file": "shirt.svg",
+      "sha256": "ccf176a28a12571fd5ac2aab348c26cb8b037883104d87439ad22156a232a79c"
+    },
+    {
+      "id": "sparkles",
+      "label": "피부 관리",
+      "group": "beauty",
+      "keywords": [
+        "뷰티",
+        "에스테틱"
+      ],
+      "file": "sparkles.svg",
+      "sha256": "40a7c96d3ad44a83803c7dc2f449653b972602763cda2adfea7f72f3925c375e"
+    },
+    {
+      "id": "brush",
+      "label": "화장품",
+      "group": "beauty",
+      "keywords": [
+        "메이크업",
+        "정기배송"
+      ],
+      "file": "brush.svg",
+      "sha256": "e71265002a68a36f91ccc076536e0bfc02dcc69a7be40a67681435748482c90a"
+    },
+    {
+      "id": "paintbrush",
+      "label": "네일",
+      "group": "beauty",
+      "keywords": [
+        "손톱",
+        "페디큐어"
+      ],
+      "file": "paintbrush.svg",
+      "sha256": "3bf5b537236e0d537be42f13e4986a5123d564a6f162b24b5b2f76a75031dba2"
+    },
+    {
+      "id": "scan-face",
+      "label": "얼굴 관리",
+      "group": "beauty",
+      "keywords": [
+        "피부과",
+        "시술"
+      ],
+      "file": "scan-face.svg",
+      "sha256": "4e04473ef951b38508c7b9aca1beb05bd55f096f87dcad495d5e3be3f89465d8"
+    },
+    {
+      "id": "footprints",
+      "label": "신발·발 관리",
+      "group": "beauty",
+      "keywords": [
+        "구두",
+        "운동화"
+      ],
+      "file": "footprints.svg",
+      "sha256": "2589611ed687f4785f894b70fbc1416a876eb3f3916f2c63f53e8f29a200558f"
+    },
+    {
+      "id": "gem",
+      "label": "액세서리",
+      "group": "beauty",
+      "keywords": [
+        "주얼리",
+        "시계",
+        "관리"
+      ],
+      "file": "gem.svg",
+      "sha256": "95681f25cec993922735b97a20813ced8480a8e340fd85c41efc1374d4898c86"
+    },
+    {
+      "id": "hand",
+      "label": "손·바디 케어",
+      "group": "beauty",
+      "keywords": [
+        "마사지",
+        "관리"
+      ],
+      "file": "hand.svg",
+      "sha256": "102f6c2107e43ef50ee65910858f2a0e7bf01f5151d2c0f103c16c6271400271"
+    },
+    {
+      "id": "dumbbell",
+      "label": "헬스",
+      "group": "exercise",
+      "keywords": [
+        "운동",
+        "PT",
+        "피티",
+        "헬스장",
+        "피트니스"
+      ],
+      "file": "dumbbell.svg",
+      "sha256": "65f3d4eb53bd90c8e3e1aec3d6a0136b94f239b9d4662b207f23efaafd532d29"
+    },
+    {
+      "id": "person-standing",
+      "label": "요가·필라테스",
+      "group": "exercise",
+      "keywords": [
+        "스트레칭",
+        "자세"
+      ],
+      "file": "person-standing.svg",
+      "sha256": "d70e4eee07fb48c9362fe1a0c8788a9151708acb9cbccfce3980176fc1c71a81"
+    },
+    {
+      "id": "heart",
+      "label": "웰니스",
+      "group": "exercise",
+      "keywords": [
+        "건강",
+        "프로그램"
+      ],
+      "file": "heart.svg",
+      "sha256": "3e0ea938f896725eb5d9f1440bec881671761a6864f8d0eb1948065f3de99aae"
+    },
+    {
+      "id": "medal",
+      "label": "스포츠 수강",
+      "group": "exercise",
+      "keywords": [
+        "체육",
+        "레슨",
+        "동호회"
+      ],
+      "file": "medal.svg",
+      "sha256": "b99b5ba3f4f0164860a33f90f64e7f9f8e9123ea42a47e54fbcbff0a6f397b9f"
+    },
+    {
+      "id": "mountain",
+      "label": "등산",
+      "group": "exercise",
+      "keywords": [
+        "트레킹",
+        "산악회"
+      ],
+      "file": "mountain.svg",
+      "sha256": "7ab61c537ceaad37db7cbc142ed8aafbaafdd6a47fc4e651e911151e88013f7c"
+    },
+    {
+      "id": "sailboat",
+      "label": "수상 스포츠",
+      "group": "exercise",
+      "keywords": [
+        "요트",
+        "수영",
+        "클럽"
+      ],
+      "file": "sailboat.svg",
+      "sha256": "98b7e28944c7efc7d027babc2e412d52665294fcc323e2ce5ce58ec312b368a9"
+    },
+    {
+      "id": "tent",
+      "label": "캠핑",
+      "group": "exercise",
+      "keywords": [
+        "아웃도어",
+        "장비",
+        "대여"
+      ],
+      "file": "tent.svg",
+      "sha256": "4d6f0322be04e67c991ac28267e68f0d6a71bee4af0152d352d9844a46ab23c1"
+    },
+    {
+      "id": "tree-pine",
+      "label": "야외 활동",
+      "group": "exercise",
+      "keywords": [
+        "숲",
+        "자연",
+        "공원"
+      ],
+      "file": "tree-pine.svg",
+      "sha256": "fb5a41b17ae0d5c9bd1ebf63f58961249b8aa40e95e3a09829168eb2aa9c0561"
+    },
+    {
+      "id": "volleyball",
+      "label": "구기 스포츠",
+      "group": "exercise",
+      "keywords": [
+        "배구",
+        "축구",
+        "농구",
+        "테니스"
+      ],
+      "file": "volleyball.svg",
+      "sha256": "9044dc7223eee7f5d208c5ac4459364dc51e9d31bb41a0bab74506fc6492e0ad"
+    },
+    {
+      "id": "book-open",
+      "label": "독서 구독",
+      "group": "learning",
+      "keywords": [
+        "밀리의서재",
+        "리디",
+        "전자책"
+      ],
+      "file": "book-open.svg",
+      "sha256": "510affae1044e8637c7a85972bd192df3c762f69a38c8c7dd2097387d7fe91d2"
+    },
+    {
+      "id": "graduation-cap",
+      "label": "학원·수업",
+      "group": "learning",
+      "keywords": [
+        "교육",
+        "수강료"
+      ],
+      "file": "graduation-cap.svg",
+      "sha256": "334449ffe064e5cfdc2746ad45a8a4674949b15827e72ad7944d9e88cabefdb5"
+    },
+    {
+      "id": "languages",
+      "label": "외국어",
+      "group": "learning",
+      "keywords": [
+        "영어",
+        "일본어",
+        "중국어",
+        "듀오링고",
+        "링글"
+      ],
+      "file": "languages.svg",
+      "sha256": "a33a7bd34876dde0c5a470914dac09fca77f97da75e93e1b1687de2294874c65"
+    },
+    {
+      "id": "notebook-pen",
+      "label": "공부·필기",
+      "group": "learning",
+      "keywords": [
+        "스터디",
+        "학습지"
+      ],
+      "file": "notebook-pen.svg",
+      "sha256": "4723725b43bd649181f37fd32669650ccd8babacd3a7fae698a0e1bfbc92fe33"
+    },
+    {
+      "id": "pencil",
+      "label": "개인 레슨",
+      "group": "learning",
+      "keywords": [
+        "과외",
+        "드로잉"
+      ],
+      "file": "pencil.svg",
+      "sha256": "5ab7033f164ff2813af748eaaa5cb104f04534bde78b53d90016b1465769e575"
+    },
+    {
+      "id": "ruler",
+      "label": "디자인 수업",
+      "group": "learning",
+      "keywords": [
+        "미술",
+        "설계"
+      ],
+      "file": "ruler.svg",
+      "sha256": "c6d20063fff5b2652e74f96188381b2a25d1cde407de7016fa221db727e59e68"
+    },
+    {
+      "id": "calculator",
+      "label": "자격증 공부",
+      "group": "learning",
+      "keywords": [
+        "시험",
+        "회계"
+      ],
+      "file": "calculator.svg",
+      "sha256": "f6b93aca426580f34c7d183763bcb8fd0c7bb7e06568045c9c193d2be292695d"
+    },
+    {
+      "id": "library",
+      "label": "독서실",
+      "group": "learning",
+      "keywords": [
+        "스터디카페",
+        "도서관"
+      ],
+      "file": "library.svg",
+      "sha256": "bd225651cb9626f901f42c4cdf9561e024dd2d618400e88e4f2fc73933dd9bb8"
+    },
+    {
+      "id": "presentation",
+      "label": "온라인 강의",
+      "group": "learning",
+      "keywords": [
+        "클래스101",
+        "인프런",
+        "유데미"
+      ],
+      "file": "presentation.svg",
+      "sha256": "e229ecc31e782fe90e89f470d72f3f4bd3ca1cb7d6879b2c8a1d946800fba342"
+    },
+    {
+      "id": "dog",
+      "label": "강아지",
+      "group": "pets",
+      "keywords": [
+        "반려견",
+        "펫",
+        "사료"
+      ],
+      "file": "dog.svg",
+      "sha256": "4364f7258a440a8c33afd6d80213554744c45ae6599f9cf0ad2acd4d2334f640"
+    },
+    {
+      "id": "cat",
+      "label": "고양이",
+      "group": "pets",
+      "keywords": [
+        "반려묘",
+        "모래",
+        "사료"
+      ],
+      "file": "cat.svg",
+      "sha256": "0a3c20114a2bd6e8d3e0359b886faa4c29fc0c56473a63114c1e73c319197769"
+    },
+    {
+      "id": "paw-print",
+      "label": "반려동물 관리",
+      "group": "pets",
+      "keywords": [
+        "펫",
+        "케어",
+        "미용"
+      ],
+      "file": "paw-print.svg",
+      "sha256": "fb3c11f44314423df487f641bccf6046c7e75418dd3a8e817b1f8179eaa3104c"
+    },
+    {
+      "id": "bone",
+      "label": "간식·사료",
+      "group": "pets",
+      "keywords": [
+        "뼈",
+        "개껌"
+      ],
+      "file": "bone.svg",
+      "sha256": "8e600f248849906081e78536bec40279b47cbc76d3394da07ef1b1fedbbffd89"
+    },
+    {
+      "id": "rabbit",
+      "label": "소동물",
+      "group": "pets",
+      "keywords": [
+        "토끼",
+        "햄스터"
+      ],
+      "file": "rabbit.svg",
+      "sha256": "bb8f04a596cb642d85e3c21280f56cce591e6e0fa899641d3095dc4ae0003ea3"
+    },
+    {
+      "id": "bird",
+      "label": "새",
+      "group": "pets",
+      "keywords": [
+        "앵무새",
+        "조류"
+      ],
+      "file": "bird.svg",
+      "sha256": "8a2c30289cdf6c7924e38be0e27767cc77a75498d5909501651fe00639fea20c"
+    },
+    {
+      "id": "turtle",
+      "label": "파충류",
+      "group": "pets",
+      "keywords": [
+        "거북이",
+        "도마뱀"
+      ],
+      "file": "turtle.svg",
+      "sha256": "2e55d728678d0768c2fa76dfc2357dbc64394ac167d829cc9b12a5045f340393"
+    },
+    {
+      "id": "fish-symbol",
+      "label": "관상어",
+      "group": "pets",
+      "keywords": [
+        "어항",
+        "수족관",
+        "물고기"
+      ],
+      "file": "fish-symbol.svg",
+      "sha256": "6b37527a6b4617106018382ba03bfbd3cadd2ac7244d163755130a267d3793c1"
+    },
+    {
+      "id": "heart-handshake",
+      "label": "펫 돌봄",
+      "group": "pets",
+      "keywords": [
+        "펫시터",
+        "호텔",
+        "유치원"
+      ],
+      "file": "heart-handshake.svg",
+      "sha256": "fc112b5587d993150080f0648c6695c11c5685951d5b4a28586616fd09795f42"
+    },
+    {
+      "id": "baby",
+      "label": "육아",
+      "group": "family",
+      "keywords": [
+        "아기",
+        "분유",
+        "기저귀"
+      ],
+      "file": "baby.svg",
+      "sha256": "8d546897dbfc4384fc9b0e9e62a11a18a8d2fe437bd87c98bf377a4b9a74f1af"
+    },
+    {
+      "id": "toy-brick",
+      "label": "장난감 구독",
+      "group": "family",
+      "keywords": [
+        "아이",
+        "완구"
+      ],
+      "file": "toy-brick.svg",
+      "sha256": "a4dd66e25fe2d822cd4edc13bbaf8fca58e70aaf2672f4176e50bbd9ff929b29"
+    },
+    {
+      "id": "blocks",
+      "label": "키즈 프로그램",
+      "group": "family",
+      "keywords": [
+        "어린이",
+        "놀이"
+      ],
+      "file": "blocks.svg",
+      "sha256": "fed069f4db91d5e563a92b54054c6cc9f3cb4580e3ea2c6d788f9fe8f6cd2cdf"
+    },
+    {
+      "id": "users",
+      "label": "가족 생활비",
+      "group": "family",
+      "keywords": [
+        "부모님",
+        "용돈"
+      ],
+      "file": "users.svg",
+      "sha256": "b3ed379df6aea1aa451ff4bbf8b2884c210849ed30fc220484eced85f5d53c2c"
+    },
+    {
+      "id": "user-round",
+      "label": "개인 용돈",
+      "group": "family",
+      "keywords": [
+        "본인",
+        "생활"
+      ],
+      "file": "user-round.svg",
+      "sha256": "d7390d374551a27503c64a6c4232753f0f5ad5dc03aefa760b52c9347e5474c3"
+    },
+    {
+      "id": "accessibility",
+      "label": "돌봄 서비스",
+      "group": "family",
+      "keywords": [
+        "간병",
+        "요양",
+        "복지"
+      ],
+      "file": "accessibility.svg",
+      "sha256": "8a54f30d1948365a771a63bff172e938696b6b6ab3c11d84450b87c9af1ba5f2"
+    },
+    {
+      "id": "hand-heart",
+      "label": "기부·후원",
+      "group": "family",
+      "keywords": [
+        "정기후원",
+        "자선"
+      ],
+      "file": "hand-heart.svg",
+      "sha256": "f822fb60d00b7f2d3ebb0911c88f016d9cbcef45ce56f2d266ae1891736721d4"
+    },
+    {
+      "id": "gift",
+      "label": "경조사·선물",
+      "group": "family",
+      "keywords": [
+        "생일",
+        "기념일"
+      ],
+      "file": "gift.svg",
+      "sha256": "fdf9245646ea6b715c0a738d2e79bf9578495d07604015a3b5f826ac85aa882c"
+    },
+    {
+      "id": "party-popper",
+      "label": "모임 회비",
+      "group": "family",
+      "keywords": [
+        "동창회",
+        "친목"
+      ],
+      "file": "party-popper.svg",
+      "sha256": "9c516562a15c0b2bd31d7b48b6aad1b2c5e5ffecabd351687071989b8d018ada"
+    },
+    {
+      "id": "wallet",
+      "label": "기본 고정비",
+      "group": "finance",
+      "keywords": [
+        "지갑",
+        "기타",
+        "비용"
+      ],
+      "file": "wallet.svg",
+      "sha256": "100d8d0773d3f5d3b8c5076e32c16a829daff5211642f6cc48b9d1d6be771142"
+    },
+    {
+      "id": "credit-card",
+      "label": "카드 비용",
+      "group": "finance",
+      "keywords": [
+        "연회비",
+        "할부"
+      ],
+      "file": "credit-card.svg",
+      "sha256": "4d0394710733a8ca0db566208b0281708ebde7b167b6903491fde0be060bded1"
+    },
+    {
+      "id": "banknote",
+      "label": "대출 상환",
+      "group": "finance",
+      "keywords": [
+        "원금",
+        "회사대출",
+        "사내대출"
+      ],
+      "file": "banknote.svg",
+      "sha256": "b2590b69f44ce69c5b476ce3168e7160ab40a55d114a0341d11f93bb1c202b79"
+    },
+    {
+      "id": "landmark",
+      "label": "은행·주택대출",
+      "group": "finance",
+      "keywords": [
+        "금융",
+        "주담대",
+        "전세대출"
+      ],
+      "file": "landmark.svg",
+      "sha256": "7205e6f7c9eb22e526668fd47726d5904bf58bce5f5a1f7bc2f9ee18757200dc"
+    },
+    {
+      "id": "coins",
+      "label": "저축·납입",
+      "group": "finance",
+      "keywords": [
+        "적금",
+        "회비",
+        "연금"
+      ],
+      "file": "coins.svg",
+      "sha256": "15c74fea83191438eb16486369a151620899fcdae48ad0a7d545eb79c33b6d58"
+    },
+    {
+      "id": "percent",
+      "label": "이자",
+      "group": "finance",
+      "keywords": [
+        "금리",
+        "대출이자"
+      ],
+      "file": "percent.svg",
+      "sha256": "263c13925a156892235a4a52001683f17b37883bcf8682c988e88a0f1044b133"
+    },
+    {
+      "id": "file-text",
+      "label": "세금·수수료",
+      "group": "finance",
+      "keywords": [
+        "세무",
+        "청구",
+        "납부"
+      ],
+      "file": "file-text.svg",
+      "sha256": "512f414d72aabc5218b94a9da571df70d8e0b014cfb32ec366b559ec868952d6"
+    },
+    {
+      "id": "chart-no-axes-combined",
+      "label": "투자 서비스",
+      "group": "finance",
+      "keywords": [
+        "증권",
+        "정보",
+        "구독"
+      ],
+      "file": "chart-no-axes-combined.svg",
+      "sha256": "2a614a5c049576984707237266e260757951e92663a272550e109b06b9da7a2b"
+    },
+    {
+      "id": "circle-dollar-sign",
+      "label": "외화 결제",
+      "group": "finance",
+      "keywords": [
+        "달러",
+        "해외",
+        "구독"
+      ],
+      "file": "circle-dollar-sign.svg",
+      "sha256": "04a4b4520e9602d5b04b62ac6b2e4743712cc309f8554ddf85246533045ae9b0"
+    },
+    {
+      "id": "receipt",
+      "label": "기타 청구",
+      "group": "other",
+      "keywords": [
+        "영수증",
+        "정기",
+        "비용"
+      ],
+      "file": "receipt.svg",
+      "sha256": "89876d495a585a37c1dd49304e231201ed59455a240596dcff0d06ded7354342"
+    },
+    {
+      "id": "calendar-days",
+      "label": "정기 일정",
+      "group": "other",
+      "keywords": [
+        "월간",
+        "예약"
+      ],
+      "file": "calendar-days.svg",
+      "sha256": "b91ebeecee30b2b6f9258f4fdf25c5fc91adbd265bf071139774dea2f9e51ac7"
+    },
+    {
+      "id": "ticket",
+      "label": "멤버십·이용권",
+      "group": "other",
+      "keywords": [
+        "시즌권",
+        "공연",
+        "문화"
+      ],
+      "file": "ticket.svg",
+      "sha256": "97b4e8f7fa7995facb56ac6e4c7eea012a6674a33be0078b0afadeae8051c793"
+    },
+    {
+      "id": "plane",
+      "label": "여행 멤버십",
+      "group": "other",
+      "keywords": [
+        "항공",
+        "마일리지"
+      ],
+      "file": "plane.svg",
+      "sha256": "b8cd25a168baf165d8d98738a1ef0320f657afdecb785808899c76634742076d"
+    },
+    {
+      "id": "luggage",
+      "label": "여행 준비",
+      "group": "other",
+      "keywords": [
+        "짐",
+        "보관"
+      ],
+      "file": "luggage.svg",
+      "sha256": "b2e01c84d8f97b46a34cc5a66e3c4c4495286256fde0c39a4d906e02287c0d8a"
+    },
+    {
+      "id": "camera",
+      "label": "사진·촬영",
+      "group": "other",
+      "keywords": [
+        "장비",
+        "렌탈",
+        "편집"
+      ],
+      "file": "camera.svg",
+      "sha256": "89b7493fb7f18b3a303184f9dea61e989521eae4a98349bbaa979a586f063cba"
+    },
+    {
+      "id": "store",
+      "label": "쇼핑 멤버십",
+      "group": "other",
+      "keywords": [
+        "쇼핑몰",
+        "네이버",
+        "플러스"
+      ],
+      "file": "store.svg",
+      "sha256": "f657c652057edd2888a34308ab046d4e7e718d2a9e36eab52ed32faa4b4e543b"
+    },
+    {
+      "id": "briefcase-business",
+      "label": "업무·사무실",
+      "group": "other",
+      "keywords": [
+        "공유오피스",
+        "사업"
+      ],
+      "file": "briefcase-business.svg",
+      "sha256": "ec4df49eaa2cfd561c6eadb64e37e8adc40dd37ea42f780dd194fa8329434082"
+    },
+    {
+      "id": "ellipsis",
+      "label": "미분류",
+      "group": "other",
+      "keywords": [
+        "기타",
+        "직접",
+        "설정"
+      ],
+      "file": "ellipsis.svg",
+      "sha256": "c223eec545dc86e0de4c672e621550b391198ca97b8eabbe043613c3332d48b1"
+    }
+  ]
+}

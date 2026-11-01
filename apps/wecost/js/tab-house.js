@@ -234,7 +234,7 @@ export function renderHouse(st) {
   el('house-condition-form').querySelector('[data-field=rate]').readOnly = scenario.rateMode === 'market';
   el('house-rate-evidence').innerHTML = loanRateHTML(st.marketRate, scenario.rateMode);
   el("house-cash-band").innerHTML =
-    `${icon("piggy-bank", "rose")}<div><span>집에 쓸 예상 현금</span><strong>${money(st.availCash)}</strong><small>${st.cashShortfall ? `먼저 채울 부족액 ${money(st.cashShortfall)}` : "저축·지원금에서 결혼비용과 추가 지출 차감"}</small></div>${button("자금 계산·조정", "data-adjustments")}`;
+    `${icon("piggy-bank", "rose")}<div><span>집에 쓸 예상 현금</span><strong>${money(st.availCash)}</strong><small>${st.cashShortfall ? `먼저 채울 부족액 ${money(st.cashShortfall)}` : "저축·지원금에서 결혼 추가 필요액과 별도 지출 차감"}</small></div>${button("자금 계산·조정", "data-adjustments")}`;
   const loans = st.loans.filter((l) => l.enabled !== false);
   el("house-base-band").innerHTML =
     `${icon("bank", "sky")}<div><span>받을 예정인 등록 대출 · 기본 포함</span><strong>${money(st.loanTotal)}</strong><small>${esc(loans.map((l) => `${l.name} · 연 ${l.rate}% · 총 ${l.term}년 · 거치 ${l.grace || 0}년`).join(" / ") || "등록한 대출이 없어요")}</small></div>${button("조건 관리", 'data-house-tab="loans"')}`;
@@ -409,7 +409,7 @@ function openAdjustments() {
   const st = getState();
   openDialog(
     "집 자금 계산·조정",
-    `<dl class="plan-equation"><div><dt>결혼 시 예상 저축</dt><dd>${money(st.coupleSavings)}</dd></div><div><dt>포함한 부모님 지원</dt><dd>+ ${money(st.support)}</dd></div><div><dt>예산에 포함한 결혼비용</dt><dd>− ${money(st.totalPlanned)}</dd></div><div><dt>결혼 예상 수입</dt><dd>+ ${money(st.weddingBudget.expectedIncome)}</dd></div></dl><div class="plan-adjust-list">${st.adjustments.map((a) => `<div><span>${esc(a.name)}</span><strong>${a.sign === "+" ? "+" : "−"} ${money(a.amount)}</strong>${button("수정", `data-adjust-edit="${esc(a.id)}"`)}${button("삭제", `data-adjust-delete="${esc(a.id)}"`)}</div>`).join("")}</div>${button("수입·지출 추가", "data-adjust-add", true)}<div class="plan-notice">집 자금 ${money(st.availCash)}${st.cashShortfall ? ` · 부족 ${money(st.cashShortfall)}` : ""}</div>`,
+    `<dl class="plan-equation"><div><dt>결혼 시 예상 저축</dt><dd>${money(st.coupleSavings)}</dd></div><div><dt>포함한 부모님 지원</dt><dd>+ ${money(st.support)}</dd></div><div><dt>결혼에 추가로 모을 돈</dt><dd>${st.weddingCashRequired == null ? "—" : `− ${money(st.weddingCashRequired)}`}</dd></div></dl><p class="plan-note">남은 잔금에서 보유 결혼자금·예상 수입을 반영한 추가 필요액만 차감해요. 이미 지급한 비용은 다시 빼지 않아요.</p><div class="plan-adjust-list">${st.adjustments.map((a) => `<div><span>${esc(a.name)}</span><strong>${a.sign === "+" ? "+" : "−"} ${money(a.amount)}</strong>${button("수정", `data-adjust-edit="${esc(a.id)}"`)}${button("삭제", `data-adjust-delete="${esc(a.id)}"`)}</div>`).join("")}</div>${button("수입·지출 추가", "data-adjust-add", true)}<div class="plan-notice">집 자금 ${money(st.availCash)}${st.cashShortfall ? ` · 부족 ${money(st.cashShortfall)}` : ""}</div>`,
     (d) =>
       d.addEventListener(
         "click",

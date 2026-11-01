@@ -1,5 +1,14 @@
 /* ===== 토큰 & 리셋 ===== */
+/* All WeCost tabs and editors share the wedding page's local typeface. */
+@font-face {
+  font-family: 'WeCost Pretendard';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/sungso/shared/theme/fonts/PretendardVariable.woff2') format('woff2');
+}
 :root {
+  --wecost-font-sans: 'WeCost Pretendard', var(--ss-font-sans);
   /* 배경 / 서피스 */
   --bg:           var(--ss-bg);
   --surface:      var(--ss-surface);
@@ -36,7 +45,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--ss-font-sans);
+  font-family: var(--wecost-font-sans);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;

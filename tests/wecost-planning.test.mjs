@@ -51,7 +51,7 @@ const base = () => ({
     },
   ],
 });
-test("cash deducts total wedding cost, retains deficit, does not add wedding wallet again", () => {
+test("house cash deducts only the wedding funding gap, never spent costs or wallet surplus", () => {
   const st = base();
   let calc = makePlanningState(
     st,
@@ -62,18 +62,41 @@ test("cash deducts total wedding cost, retains deficit, does not add wedding wal
     },
     now,
   );
-  assert.equal(calc.netCash, 110000000);
+  assert.equal(calc.funding.needed, 0);
+  assert.equal(calc.weddingCashRequired, calc.funding.needed);
+  assert.equal(calc.netCash, 120000000);
   assert.equal(calc.totalBalance, 7000000);
-  assert.equal(calc.houseBudget, 310000000);
+  assert.equal(calc.houseBudget, 320000000);
   st.savings.soheeCurrent = 0;
   st.savings.sunwoCurrent = 0;
   st.settings.includeSupportSohee = false;
-  calc = makePlanningState(st, {}, now);
+  calc = makePlanningState(st, { funds: { cashKrw: 0, usdBalance: 0, usdCostKrw: 0 } }, now);
   assert.equal(calc.availCash, 0);
-  assert.equal(calc.cashShortfall, 10000000);
-  assert.equal(calc.houseBudget, 190000000);
+  assert.equal(calc.cashShortfall, 7000000);
+  assert.equal(calc.houseBudget, 193000000);
   const sim = simulation({ ...st, ...calc });
-  assert.equal(sim.additional, 410000000);
+  assert.equal(sim.additional, 407000000);
+});
+test("positive wedding gap applies once alongside support and signed adjustments", () => {
+  const st = base(), before = structuredClone(st);
+  st.adjustments = [{ name: '이사', amount: 1000000, sign: '-' }, { name: '추가 수입', amount: 500000, sign: '+' }];
+  const calc = makePlanningState(st, { funds: { cashKrw: 2000000, usdBalance: 0, usdCostKrw: 0 } }, now);
+  assert.equal(calc.funding.needed, 5000000); // 10m planned - 3m paid - 2m wallet
+  assert.equal(calc.netCash, 114500000); // 90m savings + 30m support - 5m gap - 0.5m adjustments
+  assert.equal(calc.houseBudget, 314500000); // registered company loan once
+  assert.equal(simulation({ ...st, ...calc }, { additional: 0 }).houseBudget, calc.houseBudget);
+  assert.deepEqual(st.items, before.items);
+  assert.deepEqual(st.savings, before.savings);
+});
+test("unknown wedding funds or USD valuation never make house cash look available", () => {
+  for (const finance of [{}, { funds: { cashKrw: 1000000, usdBalance: 8000, usdCostKrw: 11000000 } }]) {
+    const st = base(), calc = makePlanningState(st, finance, now);
+    assert.equal(calc.weddingCashRequired, null);
+    assert.equal(calc.netCash, null);
+    assert.equal(calc.availCash, null);
+    assert.equal(calc.houseBudget, null);
+    assert.throws(() => simulation({ ...st, ...calc }), /보유 자금·환율/);
+  }
 });
 test("old overdue never disappears; complete payment ignores stale balance; undefined date stays outside dated list", () => {
   const st = base();

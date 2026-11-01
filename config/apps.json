@@ -18,7 +18,8 @@
         "index.html",
         "css",
         "js",
-        "assets/icons"
+        "assets/icons",
+        "assets/fixed-cost-icons"
       ]
     },
     {

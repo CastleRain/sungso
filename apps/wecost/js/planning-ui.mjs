@@ -107,6 +107,18 @@ function formatValue(value, input) {
       ? exact(value)
       : (value ?? "미설정");
 }
+export function resetFieldForm(form, source) {
+  if (form._busy) return false;
+  for (const input of form.querySelectorAll("[data-field]")) input._dirty = false;
+  form._operation = null;
+  form.querySelector(".plan-conflicts")?.remove();
+  const status = form.querySelector(".plan-save-status");
+  status?.classList.remove("error");
+  if (status) status.textContent = "수정 후 저장해주세요";
+  syncForm(form, source);
+  notify("reset");
+  return true;
+}
 export function formValues(form) {
   return Object.fromEntries(
     [...form.querySelectorAll("[data-field]")].map((input) => [

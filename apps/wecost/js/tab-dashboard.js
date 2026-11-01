@@ -76,7 +76,7 @@ export function renderDashboard(st) {
       money(st.availCash),
       st.cashShortfall
         ? `<b class="plan-rose">자금 부족 ${money(st.cashShortfall)}</b>`
-        : "결혼비용·추가 지출 차감 후",
+        : st.weddingCashRequired == null ? "결혼자금·환율 확인 필요" : "결혼 추가 필요액·별도 지출 차감 후",
     ) +
     metric(
       "house-heart",
@@ -97,12 +97,11 @@ export function renderDashboard(st) {
   const lines = [
     ["결혼 시 예상 저축", st.coupleSavings],
     ["포함한 부모님 지원", st.support],
-    ["예산에 포함한 결혼비용", -st.totalPlanned],
-    ...(st.weddingBudget.expectedIncome ? [["결혼 예상 수입", st.weddingBudget.expectedIncome]] : []),
+    ["결혼에 추가로 모을 돈", st.weddingCashRequired == null ? null : -st.weddingCashRequired],
     ["추가 수입·지출", st.adjustmentsTotal],
   ];
   el("db-equation").innerHTML =
-    `<dl class="plan-equation">${lines.map(([name, n]) => `<div><dt>${name}</dt><dd class="${n < 0 ? "plan-rose" : ""}">${n > 0 && name !== "결혼 시 예상 저축" ? "+ " : ""}${money(n)}</dd></div>`).join("")}<div class="total"><dt>집에 쓸 예상 현금</dt><dd>${money(st.availCash)}</dd></div></dl><p class="plan-note">모은 돈에서 예산에 포함한 결혼비용 전체를 한 번 차감해요. 회사 대출은 현금에 섞지 않고 집 예산에 따로 더해요.${st.cashShortfall ? ` 부족액 ${money(st.cashShortfall)}도 집 예산에 반영해요.` : ""}${esc(weddingRateHint(st.items))}${st.forecast?.approximate ? " · 저축일 미설정: 월 단위 예상" : ""}</p>`;
+    `<dl class="plan-equation">${lines.map(([name, n]) => `<div><dt>${name}</dt><dd class="${n < 0 ? "plan-rose" : ""}">${n > 0 && name !== "결혼 시 예상 저축" ? "+ " : ""}${money(n)}</dd></div>`).join("")}<div class="total"><dt>집에 쓸 예상 현금</dt><dd>${money(st.availCash)}</dd></div></dl><p class="plan-note">결혼비용의 ‘추가로 모을 돈’만 차감해요. 이미 낸 비용은 다시 빼지 않으며, 보유 결혼자금·예상 수입은 추가 필요액에 반영돼 있어요. 회사 대출은 집 예산에 따로 더해요.${st.weddingCashRequired == null ? " 결혼자금·환율 확인 전에는 집 예상액을 표시하지 않아요." : ""}${st.cashShortfall ? ` 부족액 ${money(st.cashShortfall)}도 집 예산에 반영해요.` : ""}${esc(weddingRateHint(st.items))}${st.forecast?.approximate ? " · 저축일 미설정: 월 단위 예상" : ""}</p>`;
   const due = upcomingPayments(st.displayItems || [], filter);
   el("db-due-list").innerHTML = due.length
     ? due

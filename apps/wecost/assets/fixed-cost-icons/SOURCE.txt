@@ -1,0 +1,5 @@
+Lucide Static v0.468.0
+https://registry.npmjs.org/lucide-static/-/lucide-static-0.468.0.tgz
+https://github.com/lucide-icons/lucide/tree/0.468.0
+144 unmodified SVGs, selected for fixed expense use. License: see LICENSE.txt (ISC and upstream notices).
+Catalog labels and Korean search keywords curated for WeCost. No brand logos are implied by search keywords.

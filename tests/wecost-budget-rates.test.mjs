@@ -16,8 +16,8 @@ test('record-only leaves original prices/payments intact and removes them from b
   const raw = { settings: { weddingDate: '2027-03-06', weddingBudget: policy }, savings: { soheeCurrent: 20000000 }, items, loans: [{ amount: 200000000, rate: 1, term: 13, grace: 1, type: 'company' }], adjustments: [] };
   const st = { ...raw, ...makePlanningState(raw, { funds, connection: 'live' }, now) };
   assert.equal(st.totalPlanned, b.planned); assert.equal(st.totalBalance, b.remaining);
-  assert.equal(st.netCash, 15000000); assert.equal(st.funding.needed, 2000000);
-  assert.equal(st.houseBudget, 215000000); assert.equal(simulation(st, { additional: 0 }).houseBudget, 215000000);
+  assert.equal(st.netCash, 18000000); assert.equal(st.funding.needed, 2000000);
+  assert.equal(st.houseBudget, 218000000); assert.equal(simulation(st, { additional: 0 }).houseBudget, 218000000);
   assert.equal(st.displayItems.length, 2); assert.deepEqual(items, before);
 });
 test('common and linked income offset funding once; excluded/deleted links and disabled income cannot offset again', () => {
@@ -28,7 +28,7 @@ test('common and linked income offset funding once; excluded/deleted links and d
   const f = fundingSummary(items, funds, null, null, policy);
   assert.equal(f.expectedIncome, 10000000); assert.equal(f.needed, 1000000); assert.equal(f.available, 1000000);
   const st = makePlanningState({ items, savings: { soheeCurrent: 20000000 }, settings: { weddingBudget: policy } }, { funds }, now);
-  assert.equal(st.netCash, 15000000); // 20m - 15m + 10m, wallet never added again
+  assert.equal(st.netCash, 19000000); // 20m savings - 1m gap; wallet and expected income apply inside the gap once
 });
 test('surplus is separate from zero needed and unknown wallet never becomes a zero funding gap', () => {
   const policy = { incomes: [{ ...income('gift', 20000000), date: '' }] };
@@ -36,6 +36,8 @@ test('surplus is separate from zero needed and unknown wallet never becomes a ze
   assert.equal(b.needed, 0); assert.equal(b.surplus, 9000000); assert.equal(b.undatedIncome, true);
   assert.equal(weddingBudgetSummary(items, policy).needed, null);
   assert.equal(fundingSummary(items, { ...funds, usdBalance: 100, usdCostKrw: 140000 }, null, null, policy).needed, null);
+  const st = makePlanningState({ items, savings: { soheeCurrent: 20000000 }, settings: { weddingBudget: policy } }, { funds }, now);
+  assert.equal(st.netCash, 20000000); // wedding surplus is not automatically moved into house cash
 });
 test('excluding one USD travel row preserves other rows, FX valuation and exact native debt', () => {
   const raw = [{ id: 'trip', cat: '✈️신혼여행', name: '신혼여행', planned: 200000, deposit: 0, actual: 0 }];

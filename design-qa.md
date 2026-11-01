@@ -1,4 +1,88 @@
-# WeCost — 계획 화면 구현 검토
+## 2026-11-01 고정비 공통 UI 보완 — 검증 완료
+
+- 시각 기준: 이번 실행에서 직접 캡처한 대시보드/우리 자금/집 시뮬/결혼비용. 기존 글꼴 스택을 유지하고 제목24px·섹션14~15px, 같은 카드/버튼/아이콘 컨테이너를 적용했다.
+- 수정: 사람별 아이콘/색 통일, 기본 월 입력 제거, 반복 일/월 버튼 달력, Flatpickr 날짜 선택의 반폭 레이아웃 해소, 0원 비중 막대 표시 수정.
+- 브라우저: 실제 서버 연결, 조회만. 1100/1440px·390/320px 가로 넘침 없음, 캘린더 및 고정 하단 버튼 확인. 144개 이미지 깨짐 0, 검색 확인. 운영 저장 안 함. 키보드 Escape/방향키/저장값은 DOM 회귀 확인.
+- 검사: 전체 check 2,277개 통과. 마지막 아이콘 검색어 보완 후 관련14개/빌드 통과.
+- 한계: 사용자 스크린리더/모든 OS 글꼴 검증 아님. 이번 많은 항목 브라우저 캡처는 로컬 연결 실패 및 data: 오류 페이지 정책으로 중단; 검색·합계·긴 목록은 DOM 대역 검사. 실제 데이터/배포 미변경.
+- 증거: `.local/fixed-cost-qa/refinement/index.html` (비공개 비교 캡처 포함, Git 제외).
+
+# WeCost — 고정비 1안 구현 검토
+
+Date: 2026-11-01
+
+final result: passed
+
+## 비교 기준과 근거
+
+- 선택 기준: `.local/fixed-cost-design-20261101/01-owner-columns.png`와 긴 목록 보완 `01-owner-long-list-drawer.png`. 기존 글꼴과 1안의 세 담당자·합산·다가오는 출금 구조를 유지한다.
+- 구현: `/sungso/wecost/?tab=fixed`. 운영 데이터는 실제 Google 회원으로 조회했고 비어 있는 고정비 문서의 서버 응답이 ‘실시간 연결됨’으로 표시됨을 확인했다. 운영 항목 생성/수정은 하지 않았다.
+- 긴 목록 검증은 운영 앱의 동일 UI 모듈과 로컬 메모리 저장 대역을 사용하는 독립 합성 화면으로 수행했다. 성우 12/소희 9/공동 6개, 합계와 담당자 합계는 선택 시안과 같은 합성 금액이며 실제 사용자 데이터가 아니다.
+- 증거는 `.local/fixed-cost-qa/`의 `desktop-main-final.jpg`, `desktop-drawer-final.jpg`, `mobile-list.jpg`, `mobile-icons.jpg`, `live-empty.jpg`, `live-icon-picker.jpg`. 전체/세부 비교 `comparison-final.jpg`·`comparison-detail.jpg`에서 원본과 구현을 함께 열어 검토했다.
+- 데스크톱 비교 viewport 1487×1058, 모바일 390×844/320×740. 전체 목록 패널이 열린 상태를 비교했다. 앱의 기존 220px 메뉴와 홈 바, 실제 오버레이(뒤쪽 공동 카드가 가려짐)는 기존 앱 구조를 지키는 의도한 차이다. 자동화 클릭의 배경 스크롤 위치는 비교에서 제외하고 패널과 기본 화면 증거를 함께 사용했다.
+
+## 표면별 판단
+
+- 글꼴: 기존 시스템 폰트 `--ss-font-sans`를 상속. 페이지 제목 24/750, 패널 제목 20/700, 본문 13, 보조 11~12. 생성 시안의 큰 글자 대신 다른 탭과 같은 크기로 맞춘 사용자 요구를 따른다. 금액은 정렬된 숫자이며 이름 전체는 수정 창과 접근 가능한 버튼 이름으로 확인할 수 있다.
+- 배치: 월 환산 합산/담당자 비중, 세 병렬 목록, 항목 5개 제한, 별도 전체 목록과 고정 검색/하단 작업을 유지한다. 전체 목록은 본문만 스크롤하며 마지막 항목도 편집 가능하다. 모바일은 세 담당자를 세로로 배치하고 서랍은 전체 폭으로 표시한다. 확인 너비에서 가로 넘침 없으며 390px에서 하단 작업 영역이 화면 안에 있다.
+- 색상: 일반 배경·글자·테두리·선택·포커스·그림자는 공통 토큰을 사용한다. 담당자 의미색은 연분홍/크림/세이지로 제한한다. 기존 주요 버튼의 읽기용 글자 색을 유지한다.
+- 자산: 라이선스/출처를 동봉한 Lucide 0.468.0 정적 SVG 144개. 선택 시안의 돼지 아이콘은 카탈로그의 동전으로 대응한다. 카테고리 기본 아이콘·수동 선택·한글 검색이 실제 자산으로 표시되며 명칭과 함께 제공된다.
+- 내용: 월 환산 고정비와 연간 실제 결제액을 구분한다. 중지/기간·날짜 미정·연간 비용을 합계와 일정에 동일하게 적용한다. 전체 합계는 검색 및 미리보기 5개에 제한되지 않는다. 기존 순저축에서 이중 차감하지 않으며 날짜 경과로 납부 기록을 만들지 않는다.
+
+## 보완 및 검증
+
+- 동작 검사에서 출금일 미정 옵션이 빈 문자열인데 0으로 읽히는 문제를 찾아 null로 보존했다. 회귀 검사와 실제 빈 폼 취소로 재확인했다.
+- 토큰 정돈 후 비교에서 패널 배경 선언 구분 누락으로 배경이 투명해지는 P1을 발견했다. 선언을 수정하고 새 캡처/세부 비교에서 불투명 흰 배경과 입력 테두리를 재확인했다. 최종 미해결 P0/P1/P2 없음.
+- 새 핵심/UI 12개: 월/연 계산·전체 합산·0원/미등록·말일/윤년·기간·미정 날짜·144개 아이콘·긴 목록·수동 아이콘 유지·초안 보존·충돌·멱등 재시도·로그아웃 정리.
+- 실제 Firestore Emulator `demo-homehunt` 2개: 두 회원 저장/재조회·동시 독립 필드 병합·같은 필드 충돌·서버 snapshot·원자적 작성자 이력·익명/비회원 조회 및 쓰기 차단. `tests/emulator/wecost-fixed-costs.test.mjs`, 로그 `emulator-final.log`.
+- 전체 `npm run check`: 2,275개 통과, 로컬 참조 961개·JS 283개 검사. 스타일 최종 수정 후 빌드 및 관련 12개 재통과. 실계정 브라우저 오류/경고 0건. 이전 모듈 목록 고정 검사 1건은 새 고정비 4개 로컬 모듈을 명시 허용한 뒤 전체 재통과했다.
+- 운영 DB 쓰기 검증은 하지 않았다. 실기기 가상 키보드·스크린리더 전체 검증은 후속이며 브라우저 모바일 viewport/키보드 및 DOM 접근성 검증과 구분한다.
+
+## 다음
+
+고정비 실제 항목을 입력하며 확인하고, 사용자 요청 시 기존 미배포 변경과 함께 GitHub 반영한다. 운영 DB 예시 데이터 삽입·Git push·배포는 이 작업에 포함하지 않았다.
+
+---
+
+# WeCost — 우리 자금 3안 구현 검토
+
+Date: 2026-11-01
+
+final result: passed
+
+## 비교 기준
+
+- 선택 이미지: `.local/cashflow-design-20261101/03-summary-first-refined-type.png` (1487×1058). 사용자는 3안의 읽기 우선 배치를 선택하고 기존 공통 서체 유지 후 구현을 요청했다.
+- 구현: `http://127.0.0.1:8768/sungso/wecost/?tab=cashflow`, 인증된 현재 데이터의 기본 조회 상태. 월별 저축 기록 표와 이번 달 납입 버튼은 없다. 다른 세 화면의 구조·계산은 유지했다.
+- 비교 캡처: `.local/cashflow-design-20261101/implementation-desktop-v1.jpg` (1472×1112). CSS viewport 1487×1058, DPR 1; 브라우저 전체 캡처는 스크롤바를 제외한다. 생성 시안에는 없는 기존 홈/저장 상태 바와 하단 여백 때문에 전체 높이는 다르다. 이 차이를 억지로 늘이거나 자르지 않았다.
+- 전체 비교: 같은 폴더 `comparison-desktop.jpg`. 원본과 실제 캡처를 비율 유지한 동일 폭으로 한 이미지에 배치했다. 세부 비교: `comparison-typography.jpg`에 두 사람의 저축 영역을 같은 폭으로 나란히 배치했다.
+- 최종 기본 화면: `cashflow-implemented.jpg`. 편집: `implementation-editor.jpg`, `implementation-mobile-editor.jpg`. 모바일: `implementation-mobile-v1.jpg`. CSS 1440px·1100px·390px·320px에서 넘침과 관련 편집을 확인했다. 고정 하단 메뉴가 전체 캡처 중간에 찍히는 것은 캡처 특성이며 실제 화면 하단에 위치한다.
+
+## 필수 표면 평가
+
+- 서체: 공통 `--ss-font-sans`를 상속한다. PC DOM의 제목 24px/750, 구역 15px/700, 사람 이름 14px/650, 본문 13px를 확인했다. 요약 금액은 기존 계획 카드의 반응형 크기를 사용한다. 생성 이미지의 큰 제목·인명보다 작게 구현한 것은 사용자의 서체 일치 요청을 따른 의도한 차이다.
+- 배치: 가로 합산 요약 → 두 사람 병렬 저축 → 별도 부모님 지원을 유지했다. 모바일은 합산 요약을 짧은 세 행으로, 두 사람을 세로로 배치한다. 작은 회색 계획 박스는 선과 간격으로 정돈했으며 계산 기준을 접어 둔다. 지원금 수정 버튼은 기존 카드 헤더 패턴으로 통일했다.
+- 색상: 앱의 공통 텍스트·경계·버튼 토큰, 기존 계획 페이지의 크림/하늘/연분홍 아이콘 배경을 사용한다. 새로운 웹폰트·브랜드 팔레트는 없다.
+- 자산: 기존 라이선스가 포함된 Bootstrap 아이콘 SVG 파일을 재사용한다. 원본의 장식용 새싹/사람 아이콘은 앱에 있는 저금통/지갑 아이콘을 사용해 기존 화면과 일치시켰다. 새 래스터·그림 대용 코드 도형은 만들지 않았다.
+- 문구/데이터: 기존 저장 금액을 그대로 읽는다. 추가 저축은 월 합계가 아니라 `forecast.future`이며 합산식과 같은 기준이다. 지원금은 현재 저축과 분리한다. 결혼일이 없으면 미래/최종 예상액은 미확인이다. 월별 예외와 이미 기록된 납입은 삭제하지 않고 계산 기준에서 설명한다.
+
+## 상호작용 및 검사
+
+- 실제 브라우저: 저축/지원금/결혼일 수정 펼침, 초안 입력 후 대시보드 왕복, 취소와 포커스 복귀, 달력 열기→취소→재진입 시 닫힘, 집 시뮬 연결을 확인했다. 운영 저장 버튼은 누르지 않았고 테스트 금액을 DB에 쓰지 않았다.
+- 테스트 대역: 7개 신규 검사로 기존 월별 기록 보존, 필드 단위 원본 비교, 두 사람 한 번 저장, 실패 후 동일 작업 재시도, 레거시 지원금 기본 포함, 결혼일 미설정/저장, 저장 중 취소 방지를 확인했다.
+- `npm run check`: 2,259개 통과, 948개 로컬 참조와 279개 JS 문법 검사 통과. 첫 샌드박스 실행의 로컬 서버/임시 파일 접근 실패는 동일 검사를 허용된 환경에서 재실행해 해결했다. 마지막 달력 닫힘·캐시 버전 보완 뒤 빌드와 UI/회원 진입 검사 11개를 추가 통과했다.
+- 1440px/390px/320px에서 본문 가로 넘침 없음. 기본 브라우저 크기로 복구하고 미리보기를 남겼다. 확인 구간의 브라우저 오류·경고 0건.
+
+## 비교 이력과 결과
+
+- 첫 전체/확대 비교에서 미해결 P0/P1/P2 시각 차이 없음. 공통 서체·메뉴 폭·홈 바·기존 아이콘·수정 버튼 위치의 의도한 차이를 위에 구분했다. 초기 잘린 캡처는 전체 페이지 재캡처로 교체했으며 결함 수정으로 세지 않았다.
+- 동작 점검 중 달력 취소 후 펼침 상태가 남을 수 있는 부분을 닫힘 처리로 보완하고 실제 작은 화면에서 재진입해 확인했다.
+- 구현 체크: 읽기 우선, 세 편집 영역, 기본값/계산 일치, 기존 기록 보존, 모바일, 오류·취소·저장 대역 확인 완료. Git push/운영 배포는 이번 범위에 포함하지 않았다.
+- 후속: 사용자 화면 검토 후 필요 시 간격을 미세 조정하고 GitHub 배포를 별도로 진행한다. 스크린리더 전체/실기기 키보드 검증까지 완료한 것은 아니다.
+
+---
+
+## 이전 계획 화면 검토 기록
 
 Date: 2026-11-01
 
@@ -60,3 +144,18 @@ final result: passed
 - 공개 파일 43개가 로컬 검증 산출물과 일치했으며 비공개 경로 4개는 404였다. 상세 결과는 Git 제외 `.local/planning-qa/deploy-public-results.json`에 보관했다.
 - 실제 로그인 화면의 대시보드·현금흐름·결혼비용·집 시뮬과 집 시뮬 세 내부 탭, 공표 금리 표시, 기존 회사대출, 예산 범위·예상 수입 창을 확인했다. 운영 DB에는 검증용 저장을 하지 않았고 관측 console error/warn은 0이었다.
 - 최종 공개 대시보드 캡처 `.local/planning-qa/production-dashboard.png`를 확인했다. 이전의 ‘로컬만 검증’ 기록 이후 실제 배포까지 완료했으며 개인 금액 캡처는 커밋에 넣지 않았다.
+
+## 2026-11-01 Wedding funding-gap correction and fixed-cost concepts
+
+- Implemented: expected savings + included support - the wedding page funding gap + signed adjustments. Historical paid costs are not deducted again. Wallet/expected income offset the gap once; surplus is not automatically house cash. Existing enabled company loan remains separate and counted once.
+- Unknown funds/FX stays unknown in house cash/budget and budget-edit preview. Core and actual budget dialog DOM tests cover positive/zero gap, deficit, exclusions, preview-only edits, and missing valuation.
+- Validation: npm run check passed 2,261 tests, 949 local references and 279 JS syntax files. Two newly added budget-preview DOM tests then passed; no subsequent production code changes. git diff --check passed.
+- Browser limitation: old authenticated wedding view was readable. On reload, IAB displayed a blank private root with no applied CSS and no auth gate; same assets returned HTTP 200 from the local server. Latest authenticated screen/amount comparison was not verified. No production write or deployment occurred.
+- Fixed-cost tab: three independent generated 1440x1024-target concepts, saved in ignored .local/fixed-cost-design-20261101 with prompts/plan.json. Same warm rounded system font direction, synthetic nine items. Monthly equivalent 482,000 KRW; November scheduled 592,000 KRW includes annual 120,000 KRW. Generated typography/proportions are not measured CSS. No fixed-cost feature implemented yet.
+## 2026-11-01 Fixed-cost icon library
+
+- Prepared 144 unique Lucide 0.468.0 SVGs (16 groups, 9 per group), 71,164 SVG source bytes, Korean labels/keywords, stable IDs, recommended18 and wallet fallback in apps/wecost/assets/fixed-cost-icons. Original bytes match SHA-256 manifest; source/license included.
+- Self-contained local icon-picker prototype offers group/search/recent/selection/preview. It uses no DB or external scripts. Runtime test through JSDOM passed Korean synonym search, all/group counts, selection/recent, fallback and no-results recovery with zero runtime errors. HTML script syntax parsed successfully.
+- npm run build passed; every selected SVG is in the build. No full suite rerun needed for static preparation. Existing application entry points and DB behavior unchanged.
+- Actual browser inspection was blocked by the browser's file: URL security policy. No alternate-browser, server, or indirect workaround attempted. Browser layout, keyboard focus styling and mobile behavior remain unverified. Native SVG contact sheet was rendered to PNG and visually checked (144 shapes and labels fit).
+- Preview, generator, source tarballs and rendering dependency stay under ignored .local/fixed-cost-design-20261101/icon-library. Not deployed; picker not yet attached to fixed-cost forms.

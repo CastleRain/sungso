@@ -1,4 +1,5 @@
 import { weddingBudgetSummary, isBudgetIncluded, validateWeddingBudget } from './wedding-budget-core.mjs';
+import { cashAfterWedding } from './planning-core.mjs';
 import { money, exact, esc, button, openDialog, closeDialog, saveFooter, submitCommand, showError } from './planning-ui.mjs';
 import { categoryLabel, weddingCategory } from './wedding-core.mjs';
 import { mountWeddingCalendar } from './wedding-calendar.mjs';
@@ -34,7 +35,9 @@ function openWeddingBudget(focusId = '') {
       try {
         read(); validateWeddingBudget(draft);
         const b = weddingBudgetSummary(items, draft, st.funding?.available ?? null);
-        form.querySelector('#budget-preview').innerHTML = `<div><span>포함 비용</span><strong>${money(b.planned)}</strong></div><div><span>기록만</span><strong>${money(b.excludedPlanned)}</strong></div><div><span>반영할 예상 수입</span><strong>${money(b.expectedIncome)}</strong></div><div><span>추가로 모을 돈</span><strong>${money(b.needed)}</strong></div><small>저장 전 미리보기 · 집 예상 현금 ${money(st.coupleSavings + st.support + st.adjustmentsTotal - b.ownBudget)}</small>`;
+        const needed = b.included.some(item => item.fxPending) ? null : b.needed;
+        const cash = cashAfterWedding(st.coupleSavings, st.support, st.adjustmentsTotal, needed);
+        form.querySelector('#budget-preview').innerHTML = `<div><span>포함 비용</span><strong>${money(b.planned)}</strong></div><div><span>기록만</span><strong>${money(b.excludedPlanned)}</strong></div><div><span>반영할 예상 수입</span><strong>${money(b.expectedIncome)}</strong></div><div><span>추가로 모을 돈</span><strong>${money(needed)}</strong></div><small>저장 전 미리보기 · 집 예상 현금 ${money(cash == null ? null : Math.max(cash, 0))}${cash < 0 ? ` · 부족 ${money(-cash)}` : ''} · 추가 필요액만 차감</small>`;
         form.querySelector('#budget-income-timing').textContent = b.undatedIncome ? '예정일이 없는 수입이 있어요. 납부일까지 들어오는지는 따로 확인해주세요.' : b.expectedIncome ? '예상 수입은 입금된 현금이 아니에요. 납부일과 입금 예정일을 함께 확인해주세요.' : '';
         for (const row of b.incomeRows) {
           const article = [...list.children].find(el => el.dataset.incomeId === row.id);
