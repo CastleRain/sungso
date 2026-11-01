@@ -5,11 +5,11 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import * as core from '../apps/wecost/js/wedding-funds-core.mjs';
 import * as travel from '../shared/finance/travel-budget-core.mjs';
-import { dollarValuation, quoteIsOld } from '../apps/wecost/js/wedding-fx.mjs';
+import { dollarValuation, quoteIsOld, createFxReader } from '../apps/wecost/js/wedding-fx.mjs';
 const require = createRequire(new URL('../apps/sohee/sales/package.json', import.meta.url));
 const { JSDOM } = require('jsdom');
 const today = '2026-10-31';
-function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }) {
+function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nextAt: Date.parse('2026-11-01T00:00:00Z') }, realFx = false) {
   const dom = new JSDOM('<body><div data-private-root><div id="s-total"></div></div></body>');
   const w = dom.window, cleanups = [], writes = [], alerts = [];
   let receive, fail = false, renders = 0, rateChange, rateDisposed = false;
@@ -21,19 +21,40 @@ function env(quote = { rate: 1200, asOf: Date.parse('2026-10-31T00:00:00Z'), nex
   const item = { id: 'sample', name: '합성 예식 비용', cat: '웨딩홀', planned: 800000, deposit: 100000, actual: 0 };
   const ledger = { items: [item] };
   const data = { connection: 'live', error: '', funds: { cashKrw: 250000, usdBalance: 300, usdCostKrw: 360000 }, plan: null };
-  const c = vm.createContext({ ...core, ...travel, dollarValuation, quoteIsOld, createFxReader: ({ onChange }) => { rateChange = onChange; return { snapshot: () => fx, dispose() { rateDisposed = true; }, refresh: async () => onChange(fx) }; }, document: w.document, window: w, structuredClone, crypto: { randomUUID: () => 'synthetic-operation' }, localDate: () => today,
+  const readerFactory = realFx ? options => createFxReader({ ...options,
+    now: () => Date.parse('2026-10-31T14:00:00Z'),
+    storage: { getItem: () => JSON.stringify(quote) },
+    fetcher: async () => { throw Error('fresh cached rate must not fetch'); },
+  }) : ({ onChange }) => { rateChange = onChange; return { snapshot: () => fx, dispose() { rateDisposed = true; }, refresh: async () => onChange(fx) }; };
+  const c = vm.createContext({ ...core, ...travel, dollarValuation, quoteIsOld, createFxReader: readerFactory, document: w.document, window: w, structuredClone, crypto: { randomUUID: () => 'synthetic-operation' }, localDate: () => today,
     mountWeddingCalendar: () => null,
     registerPrivateCleanup: fn => cleanups.push(fn), subscribeWeddingFunds: fn => { receive = fn; fn(structuredClone(data)); },
     saveWeddingFinance: async (...args) => { if (fail) throw Error('합성 저장 실패'); writes.push(args); },
   });
   const source = readFileSync(new URL('../apps/wecost/js/wedding-funds-ui.mjs', import.meta.url), 'utf8').replace(/^import\s[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingRateHint,weddingFxHTML,weddingForeignRemaining,withWeddingDetails,ensureWeddingFx};', c);
+  vm.runInContext(source + ';this.api={registerWeddingFinance,handleWeddingFinance,weddingFundsHTML,weddingFundingCard,weddingDisplayItems,weddingTravelActions,weddingTravelAdd,weddingForeignAmount,weddingRateHint,weddingFxHTML,weddingForeignRemaining,withWeddingDetails,ensureWeddingFx,subscribeFinanceView};', c);
   c.api.registerWeddingFinance(() => ledger, () => { renders++; });
   const open = (action, id = 'sample', row = '') => c.api.handleWeddingFinance({ dataset: { finance: action, id, row } });
   const set = (id, value) => { w.document.getElementById(id).value = value; w.document.getElementById(id).dispatchEvent(new w.Event('input', { bubbles: true })); };
   const submit = async () => { w.document.querySelector('form').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await new Promise(resolve => setImmediate(resolve)); };
   return { dom, w, d: w.document, c, data, ledger, writes, alerts, cleanups, open, set, submit, receive, rateChange, rateDisposed: () => rateDisposed, renders: () => renders, fail: v => { fail = v; } };
 }
+test('real rate reader and finance subscriber do not loop when the wedding view ensures cached USD rates', () => {
+  const e = env(undefined, true);
+  let renders = 0;
+  const stop = e.c.api.subscribeFinanceView(() => {
+    if (++renders < 8) e.c.api.ensureWeddingFx();
+  });
+  // Switching into the tab checks the existing quote. A live funds event then
+  // renders the same tab, which checks the quote again through the real bridge.
+  e.c.api.ensureWeddingFx();
+  assert.equal(renders, 0);
+  e.receive(structuredClone(e.data));
+  assert.equal(renders, 1);
+  assert.equal(e.writes.length, 0);
+  stop(); e.cleanups.forEach(cleanup => cleanup()); e.dom.window.close();
+});
+
 test('fund editor previews balances without writing, retains failed draft and cleans private data', async () => {
   const e = env(); e.open('funds');
   assert.equal(e.d.querySelector('#wf-cash').value, '250000');

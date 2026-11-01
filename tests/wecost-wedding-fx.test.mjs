@@ -53,3 +53,46 @@ test('a synchronous transport failure can be retried after the cooldown', async 
   await reader.refresh(); assert.equal(calls, 2); assert.equal(reader.snapshot().quote.rate, payload.rates.KRW);
   reader.dispose();
 });
+
+test('entering a USD screen with a fresh cached quote does not restart rendering', async () => {
+  let renders = 0, requests = 0;
+  const reader = createFxReader({ now: () => now,
+    storage: { getItem: () => JSON.stringify(parseQuote(payload, now)) },
+    fetcher: async () => { requests++; return response(payload); },
+    onChange() {
+      // The finance subscriber renders the wedding tab, which ensures its rate.
+      // Bound this probe so the old implementation fails without freezing Node.
+      if (++renders < 8) void reader.refresh();
+    },
+  });
+  for (let visit = 0; visit < 5; visit++) await reader.refresh();
+  assert.equal(renders, 0, 'unchanged cached data must not notify render subscribers');
+  assert.equal(requests, 0);
+  reader.dispose();
+});
+
+for (const fails of [false, true]) test(`render-time rate checks settle after ${fails ? 'failed' : 'successful'} refresh`, async () => {
+  let requests = 0, renders = 0;
+  const states = [];
+  const reader = createFxReader({ now: () => now,
+    fetcher: async () => { requests++; if (fails) throw Error('offline'); return response(payload); },
+    onChange(state) {
+      states.push(state);
+      if (++renders < 8) void reader.refresh();
+    },
+  });
+  await reader.refresh();
+  assert.equal(requests, 1);
+  assert.equal(renders, 2, 'only loading and settled state should trigger rendering');
+  assert.deepEqual(states.map(state => state.loading), [true, false]);
+  for (let visit = 0; visit < 5; visit++) await reader.refresh();
+  assert.equal(renders, 2, 'fresh data or retry cooldown must remain quiet');
+  if (fails) {
+    await reader.refresh(true);
+    assert.match(reader.snapshot().error, /1분/);
+    assert.equal(renders, 3);
+    await reader.refresh(true);
+    assert.equal(renders, 3, 'the same cooldown message must not loop');
+  }
+  reader.dispose();
+});

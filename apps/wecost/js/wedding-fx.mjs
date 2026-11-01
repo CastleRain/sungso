@@ -29,12 +29,15 @@ export function createFxReader({ fetcher = globalThis.fetch, storage = null, now
   function refresh(force = false) {
     if (retired) return Promise.resolve(snapshot());
     if (pending) return pending;
-    if (!force && quote && !quoteIsOld(quote, now())) { emit(); return Promise.resolve(snapshot()); }
+    // Rendering may ensure the rate again. Unchanged data must not notify the
+    // same subscribers recursively (render -> refresh -> render).
+    if (!force && quote && !quoteIsOld(quote, now())) return Promise.resolve(snapshot());
     if (now() - lastAttempt < 60000) {
-      if (force) error = '방금 조회했어요. 1분 뒤 다시 확인할 수 있어요.';
-      emit(); return Promise.resolve(snapshot());
+      const cooldown = '방금 조회했어요. 1분 뒤 다시 확인할 수 있어요.';
+      if (force && error !== cooldown) { error = cooldown; emit(); }
+      return Promise.resolve(snapshot());
     }
-    lastAttempt = now(); loading = true; error = ''; controller = new AbortController(); emit();
+    lastAttempt = now(); loading = true; error = ''; controller = new AbortController();
     pending = (async () => {
       const timer = setTimeout(() => controller?.abort(), 10000);
       try {
@@ -52,6 +55,9 @@ export function createFxReader({ fetcher = globalThis.fetch, storage = null, now
       }
       return snapshot();
     })();
+    // Install the in-flight promise before notifying render subscribers, so a
+    // re-entrant ensure/refresh shares this request instead of emitting again.
+    emit();
     return pending;
   }
   return { snapshot, refresh, dispose() { retired = true; controller?.abort(); quote = null; error = ''; } };
