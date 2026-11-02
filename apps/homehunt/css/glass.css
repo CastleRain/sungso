@@ -56,8 +56,8 @@ html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar {
   min-height: 76px;
   padding: 14px 26px;
   gap: 16px;
-  background: rgba(250, 253, 255, .5);
-  border-bottom: 1px solid var(--hh-line);
+  background: var(--ss-material-fill, #f8fbff);
+  border-bottom: 1px solid var(--ss-material-border, var(--hh-line));
   box-shadow: none;
 }
 html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-context { min-width: 105px; }
@@ -119,10 +119,10 @@ html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-scope-badge { fl
 html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-map-toolbar.map-toolbar.hh-chiprow {
   grid-row: 2;
   padding: 13px 15px;
-  border: 1px solid var(--hh-line);
+  border: 1px solid var(--ss-material-border, var(--hh-line));
   border-radius: 18px;
-  background: rgba(255, 255, 255, .69);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), var(--hh-shadow-sm);
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, var(--hh-shadow-sm));
 }
 html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-results-section.map-first-shell {
   grid-row: 3;
@@ -147,11 +147,27 @@ html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-s
 
 /* All existing views, drawers and evidence retain their semantics and content. */
 html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.page-wrap:not(.recommendation-page), .candidate-review-page) { background: transparent; }
-html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.summary-card, .chart-card, .dashboard-card, .financial-card, .financial-plan, .candidate-review-card, .visit-card, .supply-card, .supply-detail, .guide-card, .connection-card, .security-note, .market-summary, .market-area-overview, .history-query-panel, .finance-panel, .finance-summary-card, .recommendation-list-pane.results-sheet.hh-panel) {
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.summary-card, .chart-card, .dashboard-card, .financial-card, .financial-plan, .candidate-review-card, .visit-card, .supply-card, .supply-detail, .guide-card, .connection-card, .security-note, .market-summary, .market-area-overview, .history-query-panel, .finance-panel, .finance-summary-card) {
+  border-color: var(--ss-material-border, var(--hh-line));
+  border-radius: 18px;
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, var(--hh-shadow-sm));
+  backdrop-filter: var(--ss-material-filter, none);
+  -webkit-backdrop-filter: var(--ss-material-filter, none);
+}
+/* The outer card owns the material; inner summaries do not add another blur pass. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.summary-card, .chart-card, .dashboard-card, .financial-card, .financial-plan, .candidate-review-card, .visit-card, .supply-card, .supply-detail, .guide-card, .connection-card, .security-note, .market-summary, .market-area-overview, .history-query-panel, .finance-panel, .finance-summary-card) :is(.summary-card, .chart-card, .dashboard-card, .financial-card, .financial-plan, .candidate-review-card, .visit-card, .supply-card, .supply-detail, .guide-card, .connection-card, .security-note, .market-summary, .market-area-overview, .history-query-panel, .finance-panel, .finance-summary-card) {
+  background: rgb(255 255 255 / 18%);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* Map result sheets remain dense enough to read over map labels. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-list-pane.results-sheet.hh-panel {
   border-color: var(--hh-line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, .72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94), var(--hh-shadow-sm);
+  background: rgba(250, 253, 255, .97);
+  box-shadow: var(--hh-shadow-sm);
 }
 html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.visit-modal, .compare-modal, .company-location-modal, .cloud-panel, .hh-select-menu, .rqf-popover) {
   background: rgba(250, 253, 255, .98);
@@ -165,7 +181,7 @@ html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.record-btn, .primary-btn, .
 html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search > button { color: #fff; }
 html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.modal-backdrop, .compare-modal-backdrop) { z-index: 220; }
 @supports (backdrop-filter: blur(12px)) {
-  html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.hh-topbar, .recommendation-map-toolbar, .recommendation-list-pane, .compare-tray) { backdrop-filter: blur(18px) saturate(1.18); -webkit-backdrop-filter: blur(18px) saturate(1.18); }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.hh-topbar, .recommendation-map-toolbar, .recommendation-list-pane, .compare-tray) { backdrop-filter: var(--ss-material-filter, none); -webkit-backdrop-filter: var(--ss-material-filter, none); }
 }
 @media (max-width: 1180px) {
   html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar { flex-wrap: wrap; gap: 10px; padding: 12px 20px; }
