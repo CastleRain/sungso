@@ -1,8 +1,9 @@
 /* Real replay dates, people and controls remain visible; only the surface changes. */
 html[data-ss-surface="glass"] body[data-app="journey"] > [data-private-root] {
-  --journey-glass-line: rgba(133, 171, 205, .3);
-  --journey-glass-card: rgba(255, 255, 255, .74);
-  --journey-glass-shadow: 0 7px 28px rgba(53, 96, 134, .07);
+  --journey-glass-line: var(--ss-material-border, var(--ss-border));
+  --journey-glass-card: var(--ss-material-fill, #fafdff);
+  --journey-glass-shadow: var(--ss-material-shadow, none);
+  --journey-glass-filter: var(--ss-material-filter, none);
   padding: 0 25px 24px;
 }
 html[data-ss-surface="glass"] body[data-app="journey"] .journey-header {
@@ -18,7 +19,7 @@ html[data-ss-surface="glass"] body[data-app="journey"] .view-modes { border-colo
 html[data-ss-surface="glass"] body[data-app="journey"] .view-modes button { min-width: 108px; border-radius: 10px; font-size: 13px; }
 html[data-ss-surface="glass"] body[data-app="journey"] .header-actions { margin-left: 0; }
 html[data-ss-surface="glass"] body[data-app="journey"] .add-action { border-radius: 12px; background: rgba(227, 243, 255, .86); border-color: rgba(133, 183, 221, .5); }
-html[data-ss-surface="glass"] body[data-app="journey"] .more-menu > div { z-index: 50; border-color: var(--journey-glass-line); background: rgba(250, 253, 255, .97); border-radius: 16px; box-shadow: 0 16px 42px rgba(53, 96, 134, .15); }
+html[data-ss-surface="glass"] body[data-app="journey"] .more-menu > div { z-index: 50; border-color: var(--journey-glass-line); background: var(--ss-suite-panel, #fafdff); border-radius: 16px; box-shadow: 0 16px 42px rgba(53, 96, 134, .15); }
 html[data-ss-surface="glass"] body[data-app="journey"] .journey-glass-toolbar {
   display: flex;
   align-items: center;
@@ -91,14 +92,19 @@ html[data-ss-surface="glass"] body[data-app="journey"] .rail-heading { padding: 
 html[data-ss-surface="glass"] body[data-app="journey"] .story-list { padding: 8px 9px 22px; }
 html[data-ss-surface="glass"] body[data-app="journey"] .story-item { border-radius: 13px; }
 html[data-ss-surface="glass"] body[data-app="journey"] .rail-collapse { z-index: 7; }
-html[data-ss-surface="glass"] body[data-app="journey"] :is(.detail-panel, .calendar-panel) { top: 156px; bottom: 20px; z-index: 120; border-color: var(--journey-glass-line); border-radius: 22px; background: rgba(249, 253, 255, .97); box-shadow: 0 20px 60px rgba(53, 96, 134, .17); }
+html[data-ss-surface="glass"] body[data-app="journey"] :is(.detail-panel, .calendar-panel) { top: 156px; bottom: 20px; z-index: 120; border-color: var(--journey-glass-line); border-radius: 22px; background: var(--ss-suite-panel, #fafdff); box-shadow: 0 20px 60px rgba(53, 96, 134, .17); }
 html[data-ss-surface="glass"] body[data-app="journey"] .calendar-panel { left: 308px; }
-html[data-ss-surface="glass"] body[data-app="journey"] dialog { border-color: rgba(255, 255, 255, .9); border-radius: 24px; background: rgba(250, 253, 255, .98); box-shadow: 0 24px 80px rgba(35, 67, 104, .2); }
+html[data-ss-surface="glass"] body[data-app="journey"] dialog { border-color: rgba(255, 255, 255, .9); border-radius: 24px; background: var(--ss-suite-panel, #fafdff); box-shadow: 0 24px 80px rgba(35, 67, 104, .2); }
 html[data-ss-surface="glass"] body[data-app="journey"] dialog::backdrop { background: rgba(39, 67, 99, .31); backdrop-filter: blur(5px); }
 html[data-ss-surface="glass"] body[data-app="journey"] :is(.dialog-heading, .dialog-footer) { background: rgba(238, 247, 255, .66); border-color: var(--journey-glass-line); }
 html[data-ss-surface="glass"] body[data-app="journey"] .dialog-heading h2 { font-size: 21px; font-weight: 650; }
-@supports (backdrop-filter: blur(12px)) {
-  html[data-ss-surface="glass"] body[data-app="journey"] :is(.journey-glass-toolbar, .map-controls, .motion-date, .motion-legend, .story-rail) { backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15); }
+/* Separate overlays blur the map; the map and its wrapper never become a backdrop layer. */
+html[data-ss-surface="glass"] body[data-app="journey"] :is(.journey-glass-toolbar, .map-controls, .motion-date, .motion-legend, .story-rail) {
+  background: var(--journey-glass-card);
+  border-color: var(--journey-glass-line);
+  box-shadow: var(--journey-glass-shadow);
+  backdrop-filter: var(--journey-glass-filter);
+  -webkit-backdrop-filter: var(--journey-glass-filter);
 }
 @media (max-width: 1180px) {
   html[data-ss-surface="glass"] body[data-app="journey"] .journey-header { flex-wrap: wrap; gap: 12px; }
@@ -143,8 +149,8 @@ html[data-ss-surface="glass"] body[data-app="journey"] .dialog-heading h2 { font
   html[data-ss-surface="glass"] body[data-app="journey"] .playback-top { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 5px 8px; }
   html[data-ss-surface="glass"] body[data-app="journey"] .playback-clock { flex-direction: column; align-items: flex-start; }
   html[data-ss-surface="glass"] body[data-app="journey"] .detail-action { padding: 0 6px; font-size: 10px; gap: 3px; }
-  html[data-ss-surface="glass"] body[data-app="journey"] :is(.story-rail, .detail-panel, .calendar-panel) { position: fixed; left: 10px; right: 10px; bottom: 10px; top: auto; width: auto; max-height: 55dvh; height: auto; z-index: 120; background: rgba(249, 253, 255, .98); }
-  html[data-ss-surface="glass"] body[data-app="journey"] .story-rail { height: 45dvh; }
+  html[data-ss-surface="glass"] body[data-app="journey"] :is(.story-rail, .detail-panel, .calendar-panel) { position: fixed; left: 10px; right: 10px; bottom: 10px; top: auto; width: auto; max-height: 55dvh; height: auto; z-index: 120; background: var(--ss-suite-panel, #fafdff); }
+  html[data-ss-surface="glass"] body[data-app="journey"] .story-rail { height: 45dvh; background: var(--journey-glass-card); }
   html[data-ss-surface="glass"] body[data-app="journey"] .calendar-panel { padding: 13px; }
   html[data-ss-surface="glass"] body[data-app="journey"] .calendar-panel .calendar,
   html[data-ss-surface="glass"] body[data-app="journey"] .calendar-panel .weekdays { width: 100%; margin-inline: 0; }
@@ -156,5 +162,8 @@ html[data-ss-surface="glass"] body[data-app="journey"] .dialog-heading h2 { font
   html[data-ss-surface="glass"] body[data-app="journey"] .view-modes button { flex: 1; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-surface="glass"] body[data-app="journey"] :is(.journey-glass-toolbar, .map-controls, .motion-date, .motion-legend, .story-rail) { background: #f8fcff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html[data-ss-surface="glass"] body[data-app="journey"] > [data-private-root] { --journey-glass-card: #fafdff; --journey-glass-filter: none; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-ss-surface="glass"] body[data-app="journey"] > [data-private-root] { --journey-glass-card: #fafdff; --journey-glass-filter: none; }
 }
