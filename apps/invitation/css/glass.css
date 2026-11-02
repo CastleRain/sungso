@@ -114,6 +114,21 @@ html[data-ss-surface="glass"] :is(.profile-photo-card, .profile-map-preview, .pr
 html[data-ss-surface="glass"] .profile-photo-card button { min-height: 36px; }
 html[data-ss-surface="glass"] .profile-field-grid :is(input, textarea) { background: rgb(255 255 255 / 80%); }
 html[data-ss-surface="glass"] .profile-editor-status [data-error="true"] { color: var(--ss-danger, #a73e4d); }
+/* Management surfaces carry the material; invitation artwork and floating
+   editors keep their own opaque presentation. Shared tokens handle fallback. */
+html[data-ss-surface="glass"] :is(.profile-summary, .library-tools, .template-card, .saved-cover, .saved-details, .desktop-options, .empty-state) {
+  border-color: var(--ss-material-border, var(--ss-suite-border));
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, var(--ss-suite-shadow));
+  backdrop-filter: var(--ss-material-filter, none);
+  -webkit-backdrop-filter: var(--ss-material-filter, none);
+}
+html[data-ss-surface="glass"] :is(.profile-dialog, .small-dialog, .options-dialog, .compare-dialog) .empty-state {
+  background: #fafdff;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 /* Keep the first designs and their actions in view on the desktop catalog. */
 @media (min-width: 1181px) {
   html[data-ss-surface="glass"] body[data-app="invitation"] > [data-private-root] > .connection-bar { margin-top: 8px; }
@@ -206,5 +221,5 @@ html[data-ss-surface="glass"] .profile-editor-status [data-error="true"] { color
   html[data-ss-surface="glass"] .mobile-preview-link { font-size: 11px; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-surface="glass"] :is(.profile-summary, .library-tools, .template-card, .desktop-options, .compare-tray) { background: #fafdff; backdrop-filter: none; }
+  html[data-ss-surface="glass"] :is(.profile-summary, .library-tools, .template-card, .desktop-options, .compare-tray) { background: #fafdff; backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
