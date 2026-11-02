@@ -2,6 +2,12 @@
    stores, editors and calendars; only the optional glass presentation changes. */
 .wc-glass-only { display: none; }
 
+/* The original mobile navigation stays above the page, so place the separate
+   appearance control above it rather than behind its five tab buttons. */
+@media (max-width: 768px) {
+  html[data-ss-suite="wecost"][data-ss-surface="solid"] .ss-appearance { bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+}
+
 html[data-ss-suite="wecost"][data-ss-surface="glass"] {
   --wc-glass: color-mix(in srgb, var(--ss-surface) 78%, transparent);
   --wc-glass-strong: color-mix(in srgb, var(--ss-surface) 94%, transparent);
