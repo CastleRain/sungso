@@ -1,6 +1,13 @@
 import { APPS, GROUPS, NAV_SELECTORS, AUXILIARY_LABELS, appForPath, normalizeSurface, writeSurface } from './suite-core.mjs';
 import { installSuiteControls } from './suite-controls.mjs';
 
+const travelGroups = [
+  { title: '일정·지도', views: ['itinerary', 'activities'] },
+  { title: '예약·이동', views: ['hotels', 'transport', 'stay'] },
+  { title: '비용', views: ['budget'] },
+  { title: '출발 준비', views: ['readiness'] }
+];
+
 const app = typeof location === 'undefined' ? null : appForPath(location.pathname);
 if (app && document.documentElement.dataset.ssSuite) {
   const ready = document.readyState === 'loading' ? new Promise(resolve => document.addEventListener('DOMContentLoaded',resolve,{once:true})) : Promise.resolve();
@@ -137,7 +144,9 @@ export function mountSuite(app) {
     if(!menuOpen)return;
     if(event.key==='Escape'){event.preventDefault();closeMenu();return;}
     if(event.key==='Tab'){
-      const nodes=[...shell.querySelectorAll('button,a,summary'),...appearance.querySelectorAll('button')].filter(node=>!node.disabled&&node.getClientRects().length);
+      // Keep DOM order, including the member bar prepended by auth, so the
+      // browser's native Tab order and our first/last wrap agree.
+      const nodes=[...document.querySelectorAll('.ss-shell button,.ss-shell a,.ss-shell summary,.ss-appearance button,.site-member-bar button,.site-member-bar a')].filter(node=>!node.disabled&&node.getClientRects().length);
       const first=nodes[0],last=nodes.at(-1);if(!nodes.includes(document.activeElement)){event.preventDefault();(event.shiftKey?last:first)?.focus();}else if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
     }
   });
@@ -169,12 +178,20 @@ export function mountSuite(app) {
     const signature=targets.map(target=>navigationLabel(target,app)+'|'+(target.id||target.getAttribute('href')||target.dataset.tab||target.dataset.viewTarget||target.dataset.viewLink||target.dataset.travelViewLink||'')).join(';;');
     if(signature!==navSignature){
       navSignature=signature;nav.replaceChildren();auxNav.replaceChildren();navControls=[];
+      const travelSections = new Map();
+      if(app.id==='travel')for(const group of travelGroups){
+        const section=element('div','ss-context-group');section.setAttribute('role','group');section.setAttribute('aria-label',group.title);
+        section.append(element('p','ss-context-group-title',group.title));travelSections.set(group,section);
+      }
       for(const target of targets){
         const label=navigationLabel(target,app);
         const entry={target,control:null,label};
         const control=button(label,navigationIcon(label),()=>{entry.target.click();closeMenu();queueRefresh();},'ss-context-item');
-        entry.control=control;(AUXILIARY_LABELS.test(label)?auxNav:nav).append(control);navControls.push(entry);
+        const group=app.id==='travel'?travelGroups.find(item=>item.views.includes(target.dataset.travelViewLink)):null;
+        entry.control=control;(AUXILIARY_LABELS.test(label)?auxNav:travelSections.get(group)||nav).append(control);navControls.push(entry);
       }
+      // Unrecognized future routes stay directly reachable instead of being dropped.
+      for(const section of travelSections.values())if(section.querySelector('button'))nav.append(section);
     }else{
       navControls.forEach((entry,index)=>entry.target=targets[index]);
     }

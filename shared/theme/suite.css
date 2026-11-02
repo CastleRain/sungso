@@ -1,4 +1,6 @@
 @font-face{font-family:'Pretendard Variable';font-style:normal;font-weight:100 900;font-display:swap;src:url('./fonts/PretendardVariable.woff2') format('woff2')}
+/* Older map labels use the short family name; keep them on the same local font. */
+@font-face{font-family:'Pretendard';font-style:normal;font-weight:100 900;font-display:swap;src:url('./fonts/PretendardVariable.woff2') format('woff2')}
 html[data-ss-suite]{
  --ss-font-sans:'Pretendard Variable',Pretendard,sans-serif;--ss-font-mono:var(--ss-font-sans);
  --ss-suite-rail:64px;--ss-suite-sidebar:224px;--ss-suite-topbar:72px;
@@ -7,7 +9,7 @@ html[data-ss-suite]{
  --ss-suite-shadow:0 4px 22px rgb(52 91 120 / 5%);--ss-suite-radius:20px;
  --ss-suite-fg:#2e3b48;--ss-suite-muted:#63798a;--ss-suite-focus:#35658a;
 }
-html[data-ss-suite] body,html[data-ss-suite] :is(button,input,select,textarea){font-family:var(--ss-font-sans)!important}
+html[data-ss-suite] body,html[data-ss-suite] :is(button,input,select,textarea):not(.invitation *){font-family:var(--ss-font-sans)!important}
 html[data-ss-suite]:not([data-ss-suite="invitation"]) :is(h1,h2,h3,h4,h5,h6){font-family:var(--ss-font-sans)!important}
 html[data-ss-suite] :where(button,input,select,textarea){font-size:inherit}
 :where(html[data-ss-suite]) button{appearance:none;border:1px solid var(--ss-border);border-radius:10px;padding:8px 13px;background:var(--ss-surface);color:var(--ss-text);cursor:pointer}
@@ -49,6 +51,8 @@ html[data-ss-surface="glass"][data-ss-ready] body{padding-left:calc(var(--ss-sui
 .ss-sidebar-heading h2{font-size:19px;font-weight:650;letter-spacing:-.035em;line-height:1.4;margin:0 10px 13px}
 .ss-sidebar-heading p{font-size:13px;line-height:1.75;color:var(--ss-suite-muted);margin:0 10px 25px;word-break:keep-all}
 .ss-context-nav{display:grid;gap:6px;border-top:1px solid var(--ss-suite-border);padding:22px 0 6px}
+.ss-context-group{display:grid;gap:4px}.ss-context-group+.ss-context-group{margin-top:12px}
+.ss-context-group-title{margin:0 12px 3px;color:var(--ss-suite-muted);font-size:11px;font-weight:500;line-height:1.5}
 .ss-context-item,.ss-app-link{width:100%;display:flex;align-items:center;gap:12px;padding:11px 12px;min-height:44px;border:1px solid transparent;border-radius:12px;background:transparent;text-align:left;font-size:14px;font-weight:450;line-height:1.45;cursor:pointer;color:var(--ss-suite-fg)}
 .ss-context-item:hover,.ss-app-link:hover{background:rgb(224 241 254 / 60%)}
 .ss-context-item[aria-current="page"],.ss-app-link[aria-current="page"]{background:color-mix(in srgb,var(--ss-app-accent) 12%,transparent);border-color:color-mix(in srgb,var(--ss-app-accent) 14%,transparent);color:var(--ss-app-accent);font-weight:600}

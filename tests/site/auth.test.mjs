@@ -53,6 +53,18 @@ test('every private entry defers scripts until auth; only the explicit guest inv
     assert.ok(scripts.some(([, attrs]) => attrs.includes('firebase/boot.mjs')), app);
     for (const [, attrs, content] of scripts) {
       if (attrs.includes('firebase/boot.mjs')) continue;
+      // These two audited presentation entries read only the appearance key.
+      // The suite observes the existing auth-owned hidden root and never starts
+      // app code, restores records or installs input handlers before it opens.
+      if (/src="(?:\.\.?\/|\/sungso\/)shared\/theme\/suite-(?:boot\.js)\?v=[\w.-]+"/.test(attrs)) {
+        assert.equal(content.trim(), '');
+        continue;
+      }
+      if (/src="(?:\.\.?\/|\/sungso\/)shared\/theme\/suite\.mjs\?v=[\w.-]+"/.test(attrs)) {
+        assert.match(attrs, /type="module"/);
+        assert.equal(content.trim(), '');
+        continue;
+      }
       assert.match(attrs, /type="application\/x-sungso-script"/, app);
       if (/data-type="importmap"/.test(attrs)) {
         // This inert JSON is registered after membership checks, before app.js.
