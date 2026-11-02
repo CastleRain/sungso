@@ -9,10 +9,11 @@
 }
 
 html[data-ss-suite="wecost"][data-ss-surface="glass"] {
-  --wc-glass: color-mix(in srgb, var(--ss-surface) 78%, transparent);
-  --wc-glass-strong: color-mix(in srgb, var(--ss-surface) 94%, transparent);
-  --wc-glass-line: color-mix(in srgb, var(--ss-surface) 76%, var(--ss-border));
-  --wc-glass-shadow: 0 7px 26px rgb(71 87 132 / 6%), inset 0 1px 0 rgb(255 255 255 / 70%);
+  --wc-glass: var(--ss-material-fill, #fafdff);
+  --wc-glass-strong: var(--ss-suite-panel, #fafdff);
+  --wc-glass-line: var(--ss-material-border, var(--ss-border));
+  --wc-glass-shadow: var(--ss-material-shadow, none);
+  --wc-glass-filter: var(--ss-material-filter, none);
   --wc-accent: #6c63ff;
   --wc-accent-soft: color-mix(in srgb, var(--wc-accent) 8%, var(--ss-surface));
   --ss-link: #5b52c8;
@@ -24,6 +25,10 @@ html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-solid-only,
 html[data-ss-suite="wecost"][data-ss-surface="glass"] #app-nav,
 html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-target-form { display: none; }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-glass-only { display: block; }
+/* Opacity entry animations isolate the backdrop from the page scene.
+   Glass panes stay still so their blur samples the real background. */
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .tab-page.active,
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .tab-page.active .card { animation: none; }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] #app-main {
   margin-left: 0;
   min-width: 0;
@@ -56,11 +61,13 @@ html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-card,.card,.metr
   border-radius: 19px;
   background: var(--wc-glass);
   box-shadow: var(--wc-glass-shadow);
-  backdrop-filter: blur(16px) saturate(115%);
-  -webkit-backdrop-filter: blur(16px) saturate(115%);
+  backdrop-filter: var(--wc-glass-filter);
+  -webkit-backdrop-filter: var(--wc-glass-filter);
 }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding :is(.card,.metric-card,.metric-card.wf-goal) { background: var(--wc-glass); }
-html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding .wed-balance-card { background: color-mix(in srgb, var(--wed-rose-soft) 70%, var(--wc-glass)); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding .wed-balance-card { background: linear-gradient(color-mix(in srgb, var(--wed-rose-soft) 70%, transparent), color-mix(in srgb, var(--wed-rose-soft) 70%, transparent)), var(--wc-glass); }
+/* Only the outer card blurs the page. Nested summaries keep their own colors. */
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-card,.card,.metric-card,.plan-dialog,.wf-dialog,.fc-drawer) :is(.plan-card,.card,.metric-card) { backdrop-filter: none; -webkit-backdrop-filter: none; }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-card,.card,.metric-card):hover { transform: none; }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-card { padding: 18px; }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-card-head { gap: 12px; }
@@ -75,8 +82,8 @@ html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics {
   border-radius: 19px;
   background: var(--wc-glass);
   box-shadow: var(--wc-glass-shadow);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: var(--wc-glass-filter);
+  -webkit-backdrop-filter: var(--wc-glass-filter);
 }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric {
   min-height: 116px;
@@ -163,8 +170,8 @@ html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-dialog,.wf-dialo
   background: var(--wc-glass-strong);
   border-color: var(--wc-glass-line);
   box-shadow: 0 18px 64px rgb(44 58 95 / 17%), inset 0 1px 0 rgb(255 255 255 / 70%);
-  backdrop-filter: blur(22px) saturate(115%);
-  -webkit-backdrop-filter: blur(22px) saturate(115%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-dialog,.wf-dialog,#wed-payment-dialog)::backdrop { background: rgb(34 45 67 / 26%); backdrop-filter: blur(4px); }
 html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-drawer::backdrop { background: rgb(34 45 67 / 26%); backdrop-filter: blur(4px); }
@@ -199,8 +206,8 @@ html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary:
   html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-target-preview > .plan-card-head .plan-button { width: 100%; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: var(--ss-surface); --wc-glass-strong: var(--ss-surface); }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: #fafdff; --wc-glass-strong: #fafdff; --wc-glass-filter: none; }
 }
-@supports not (backdrop-filter: blur(1px)) {
-  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: var(--ss-surface); --wc-glass-strong: var(--ss-surface); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: #fafdff; --wc-glass-strong: #fafdff; --wc-glass-filter: none; }
 }
