@@ -1,0 +1,166 @@
+/* HomeHunt VER2: four independent decision axes, on the shared light glass shell. */
+html[data-ss-surface="glass"] body.homehunt-v2 {
+  --sidebar: 0px;
+  --header: 76px;
+  --member-bar: 0px;
+  --blue: #1f5eff;
+  --blue-soft: rgba(225, 238, 255, .7);
+  --line: rgba(121, 159, 208, .25);
+  --surface: rgba(238, 246, 255, .63);
+  --radius: 22px;
+  color: #1e293b;
+}
+html[data-ss-surface="glass"] body.homehunt-v2 > [data-private-root] > .sidebar { display: none; }
+html[data-ss-surface="glass"] body.homehunt-v2 .shell { margin-left: 0; padding-bottom: 0; min-width: 0; background: transparent; }
+html[data-ss-surface="glass"] body.homehunt-v2 .topbar {
+  position: relative;
+  top: auto;
+  height: auto;
+  min-height: 76px;
+  padding: 14px 26px;
+  gap: 18px;
+  background: rgba(250, 253, 255, .5);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: none;
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .page-context { min-width: 110px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .page-context > span { font-size: 10px; letter-spacing: .07em; color: #64748b; }
+html[data-ss-surface="glass"] body.homehunt-v2 .page-context h1 { font-size: 21px; font-weight: 650; }
+html[data-ss-surface="glass"] body.homehunt-v2 .global-search { min-width: 120px; max-width: 430px; background: rgba(255, 255, 255, .74); border: 1px solid var(--line); border-radius: 13px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .top-actions { gap: 8px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .top-actions .button { min-height: 40px; border-radius: 12px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .page { padding: 28px 26px 36px; max-width: 1600px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero {
+  padding: 10px 2px 7px;
+  margin-bottom: 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1e293b;
+  overflow: visible;
+  gap: 24px;
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero::after { display: none; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero .hero-tag { display: none; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero h2 { margin: 0 0 12px; font-size: clamp(24px, 2.15vw, 31px); font-weight: 650; line-height: 1.35; letter-spacing: -.8px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero h2 br { display: none; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-hero p { max-width: 660px; font-size: 14px; color: #52647b; line-height: 1.65; margin-bottom: 0; }
+html[data-ss-surface="glass"] body.homehunt-v2 .hero-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 9px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .hero-actions .button { min-height: 44px; white-space: nowrap; font-size: 13px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip {
+  padding: 15px 17px;
+  gap: 9px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .73);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .96), 0 5px 20px rgba(49, 89, 140, .04);
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .label { font-size: 11px; font-weight: 600; }
+html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .chip { font-size: 12px; padding: 8px 10px; border-radius: 10px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.panel, .model-card, .guide-step, .connection-card, .supply-card) {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, .69);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .96), 0 6px 22px rgba(49, 89, 140, .045);
+  border-radius: 20px;
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .panel { padding: 21px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .panel-header h3 { font-size: 18px; font-weight: 650; }
+html[data-ss-surface="glass"] body.homehunt-v2 .panel-header > span { font-size: 11px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes {
+  order: -1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes > .panel-header { margin: 0 2px 12px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes > .panel-header h3 { font-size: 15px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card {
+  min-height: 164px;
+  padding: 20px 17px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .68);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 #fff, 0 5px 20px rgba(49, 89, 140, .035);
+}
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card > .ti { display: inline-grid; place-items: center; width: 38px; height: 38px; margin-bottom: 8px; border-radius: 12px; color: #176b58; background: rgba(205, 244, 225, .7); font-size: 24px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card:nth-child(2) > .ti { color: #1f5eff; background: rgba(212, 231, 255, .75); }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card:nth-child(3) > .ti { color: #7560ce; background: rgba(231, 221, 255, .7); }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card:nth-child(4) > .ti { color: #bd507d; background: rgba(251, 221, 233, .7); }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card strong { margin: 6px 0 9px; font-size: 17px; font-weight: 650; }
+html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card p { color: #52647b; font-size: 12px; line-height: 1.65; }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.list-row, .pending-item) { padding-block: 15px; border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 .row-icon { border-radius: 13px; background: rgba(220, 237, 255, .67); color: #1f5eff; }
+html[data-ss-surface="glass"] body.homehunt-v2 .row-copy strong { font-size: 14px; }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.row-copy small, .pending-item small) { font-size: 12px; line-height: 1.6; }
+html[data-ss-surface="glass"] body.homehunt-v2 .region-card { background: rgba(240, 247, 255, .6); border-radius: 14px; border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 .region-card:hover { border-color: #9dbced; background: rgba(224, 238, 255, .7); }
+html[data-ss-surface="glass"] body.homehunt-v2 .region-number { color: #1f5eff; }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.button, .icon-button, .choice, .record-tabs, .region-tabs, .finder-toolbar .chip) { border-radius: 11px; border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.button.primary, .search-submit) { background: #1f5eff; border-color: rgba(255, 255, 255, .7); color: #fff; box-shadow: 0 4px 12px rgba(31, 94, 255, .14); }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.button.primary, .search-submit):hover { background: #174fdc; color: #fff; }
+html[data-ss-surface="glass"] body.homehunt-v2 .finder { height: calc(100dvh - 148px - var(--access-bar)); min-height: 580px; padding: 20px 22px 22px; gap: 16px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .finder-toolbar { border: 1px solid var(--line); border-radius: 17px; background: rgba(255, 255, 255, .72); padding: 12px 14px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .finder-body { border: 1px solid var(--line); border-radius: 21px; overflow: hidden; box-shadow: 0 7px 22px rgba(49, 89, 140, .05); }
+html[data-ss-surface="glass"] body.homehunt-v2 .result-panel { background: rgba(250, 253, 255, .93); border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.candidate-card, .supply-card, .destination-card) { border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 .modal-backdrop { z-index: 220; background: rgba(32, 55, 86, .3); }
+html[data-ss-surface="glass"] body.homehunt-v2 .modal { border: 1px solid rgba(255, 255, 255, .86); background: rgba(250, 253, 255, .98); border-radius: 24px; box-shadow: 0 24px 80px rgba(31, 60, 102, .22); }
+html[data-ss-surface="glass"] body.homehunt-v2 :is(.modal-head, .modal-footer) { background: rgba(241, 248, 255, .75); border-color: var(--line); }
+html[data-ss-surface="glass"] body.homehunt-v2 .toast { left: calc(50% + 144px); z-index: 240; bottom: 22px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .boot-status { bottom: 22px; z-index: 240; }
+@supports (backdrop-filter: blur(12px)) {
+  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .condition-strip, .finder-toolbar, .result-panel) { backdrop-filter: blur(18px) saturate(1.16); -webkit-backdrop-filter: blur(18px) saturate(1.16); }
+}
+@media (max-width: 1180px) {
+  html[data-ss-surface="glass"] body.homehunt-v2 .topbar { flex-wrap: wrap; padding: 13px 22px; gap: 10px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .global-search { order: 3; width: 100%; max-width: none; flex-basis: 100%; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-hero { flex-wrap: wrap; gap: 16px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .hero-actions { justify-content: flex-start; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card { min-height: 150px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .regions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder-body { grid-template-columns: minmax(0, 1fr) 295px; }
+}
+@media (max-width: 980px) {
+  html[data-ss-surface="glass"] body.homehunt-v2 .toast { left: 50%; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder { height: calc(100dvh - 176px - var(--access-bar)); }
+}
+@media (max-width: 780px) {
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-grid { grid-template-columns: minmax(0, 1fr); }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder-body { display: block; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .result-panel { background: rgba(250, 253, 255, .98); }
+}
+@media (max-width: 600px) {
+  html[data-ss-surface="glass"] body.homehunt-v2 .topbar { padding: 11px 14px; min-height: 112px; gap: 7px 10px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .page-context h1 { font-size: 18px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .global-search { height: 40px; margin: 0; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .top-actions .button { min-height: 36px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .page { padding: 20px 14px 28px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-hero { padding: 0 2px; margin-bottom: 20px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-hero h2 { font-size: 24px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-hero p { font-size: 13px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .hero-actions { width: 100%; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .hero-actions .button { font-size: 12px; padding: 10px; flex: 1; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip { padding: 13px; gap: 7px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .chip { font-size: 11px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .text-button { min-height: 34px; font-size: 11px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-grid { gap: 10px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card { padding: 15px 13px; min-height: 160px; border-radius: 17px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card strong { font-size: 15px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card p { font-size: 12px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .panel { padding: 18px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .panel.board-axes { padding: 0; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .panel-header h3 { font-size: 16px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder { min-height: 560px; height: calc(100dvh - 176px - var(--access-bar)); padding: 13px 10px 16px; gap: 12px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder-toolbar { padding: 10px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .finder-toolbar .chip { min-height: 34px; font-size: 11px; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .result-panel { left: 8px; right: 8px; width: auto; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .modal { border-radius: 22px 22px 0 0; }
+  html[data-ss-surface="glass"] body.homehunt-v2 .toast,
+  html[data-ss-surface="glass"] body.homehunt-v2 .boot-status { bottom: 14px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .panel, .condition-strip, .finder-toolbar, .result-panel, .axis-card) { background: #f8fbff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
