@@ -1,0 +1,145 @@
+/* Managed UI only. Native form fields retain their values and validation. */
+html[data-ss-suite] .ss-enhanced-control {
+  font-family: var(--ss-suite-font, var(--ss-font-sans));
+  color: var(--ss-text);
+  border-color: var(--ss-border-strong);
+  border-radius: 10px;
+  background-color: var(--ss-surface);
+  min-height: 38px;
+  padding: 8px 12px;
+}
+html[data-ss-suite] select.ss-enhanced-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: var(--ss-suite-select-icon, none);
+  background-position: right 12px center;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+  cursor: pointer;
+}
+html[data-ss-suite] input.ss-enhanced-control {
+  background-image: var(--ss-suite-date-icon, none);
+  background-position: right 12px center;
+  background-size: 17px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+  cursor: pointer;
+}
+html[data-ss-suite] input.ss-enhanced-control::-webkit-calendar-picker-indicator { display: none; }
+html[data-ss-suite] input[type="time"].ss-enhanced-control { background-image: var(--ss-suite-time-icon, none); }
+html[data-ss-suite] .ss-enhanced-control:focus-visible {
+  outline: 2px solid var(--ss-focus);
+  outline-offset: 3px;
+}
+html[data-ss-suite] .ss-enhanced-control:disabled { cursor: not-allowed; opacity: .6; }
+html[data-ss-suite] .ss-control-panel {
+  position: fixed;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  padding: 14px;
+  overflow: auto;
+  isolation: isolate;
+  color: var(--ss-text);
+  background: var(--ss-suite-panel, var(--ss-surface));
+  border: 1px solid var(--ss-border-strong);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px var(--ss-shadow);
+  font: 400 14px/1.5 var(--ss-suite-font, var(--ss-font-sans));
+  text-align: left;
+  letter-spacing: 0;
+}
+html[data-ss-suite] .ss-control-panel * { box-sizing: border-box; }
+html[data-ss-suite] .ss-control-panel button {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  line-height: 1.4;
+  color: var(--ss-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  min-height: 36px;
+  margin: 0;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+  letter-spacing: 0;
+}
+html[data-ss-suite] .ss-control-panel button:hover:not(:disabled) {
+  color: var(--ss-link);
+  background: var(--ss-soft);
+  border-color: var(--ss-border);
+}
+html[data-ss-suite] .ss-control-panel button:focus-visible {
+  outline: 2px solid var(--ss-focus);
+  outline-offset: -2px;
+}
+html[data-ss-suite] .ss-control-panel button:disabled {
+  color: var(--ss-muted);
+  opacity: .38;
+  cursor: not-allowed;
+}
+html[data-ss-suite] .ss-control-panel .ss-control-button { padding: 7px 11px; font-size: 12px; }
+html[data-ss-suite] .ss-control-panel .ss-control-label {
+  color: var(--ss-muted);
+  font-size: 12px;
+  padding: 0 7px 10px;
+  font-weight: 500;
+}
+html[data-ss-suite] .ss-control-panel .ss-control-options { max-height: 280px; overflow: auto; overscroll-behavior: contain; }
+html[data-ss-suite] .ss-control-panel .ss-control-group {
+  font-size: 11px;
+  color: var(--ss-muted);
+  font-weight: 600;
+  padding: 12px 10px 5px;
+}
+html[data-ss-suite] .ss-control-panel .ss-control-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 11px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+html[data-ss-suite] .ss-control-panel .ss-control-option[aria-selected="true"],
+html[data-ss-suite] .ss-control-panel .ss-calendar-day[aria-selected="true"] {
+  background: var(--ss-accent);
+  color: var(--ss-on-accent);
+  font-weight: 600;
+}
+html[data-ss-suite] .ss-control-panel .ss-control-empty { padding: 14px; color: var(--ss-muted); margin: 0; }
+html[data-ss-suite] .ss-calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+html[data-ss-suite] .ss-calendar-title { font-weight: 600; font-size: 15px; white-space: nowrap; }
+html[data-ss-suite] .ss-calendar-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+html[data-ss-suite] .ss-calendar-week [role="columnheader"] {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ss-muted);
+  padding: 5px 0 9px;
+}
+html[data-ss-suite] .ss-month-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+html[data-ss-suite] .ss-month-grid { display: grid; gap: 5px; }
+html[data-ss-suite] .ss-control-panel .ss-calendar-day { min-width: 0; width: 100%; min-height: 36px; padding: 6px 0; font-size: 13px; text-align: center; }
+html[data-ss-suite] .ss-control-panel .ss-month-grid .ss-calendar-day { min-height: 43px; }
+html[data-ss-suite] .ss-control-panel .ss-calendar-day[aria-current="date"]:not([aria-selected="true"]) { border-color: var(--ss-border-strong); color: var(--ss-link); }
+html[data-ss-suite] .ss-calendar-footer { display: flex; justify-content: flex-end; gap: 5px; border-top: 1px solid var(--ss-border); margin-top: 12px; padding-top: 9px; }
+html[data-ss-suite] .ss-calendar-footer > :first-child { margin-right: auto; }
+html[data-ss-suite] .ss-time-fields { display: flex; gap: 12px; margin: 16px 0 6px; }
+html[data-ss-suite] .ss-time-field { min-width: 0; flex: 1; }
+html[data-ss-suite] .ss-time-field label { display: block; color: var(--ss-muted); font-size: 12px; margin-bottom: 5px; }
+html[data-ss-suite] .ss-control-panel .ss-time-input { width: 100%; min-width: 0; font: inherit; font-size: 24px; color: var(--ss-text); padding: 10px; background: var(--ss-soft); border: 1px solid var(--ss-border); border-radius: 10px; text-align: center; appearance: textfield; }
+html[data-ss-suite] .ss-control-panel .ss-time-input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+html[data-ss-suite] .ss-control-panel .ss-time-input:focus-visible { outline: 2px solid var(--ss-focus); outline-offset: 2px; }
+html[data-ss-suite] .ss-time-field .ss-control-button { padding: 5px 6px; font-size: 11px; width: 50%; }
+@media (max-width: 600px) {
+  html[data-ss-suite] .ss-enhanced-control { min-height: 42px; font-size: 16px; }
+  html[data-ss-suite] .ss-control-panel button { min-height: 40px; }
+  html[data-ss-suite] .ss-control-panel .ss-calendar-day { min-height: 39px; }
+}
+@media (forced-colors: active) {
+  html[data-ss-suite] .ss-control-panel { border: 1px solid CanvasText; }
+  html[data-ss-suite] .ss-control-panel [aria-selected="true"] { outline: 2px solid Highlight; }
+}
+

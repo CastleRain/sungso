@@ -156,7 +156,12 @@
       "id": "journey",
       "source": "apps/journey",
       "output": "journey",
-        "files": ["index.html", "style.css", "js", "assets"]
+      "files": [
+        "index.html",
+        "style.css",
+        "js",
+        "assets"
+      ]
     },
     {
       "id": "table",
@@ -205,7 +210,12 @@
     {
       "source": "shared/journey",
       "output": "shared/journey",
-        "files": ["core.mjs", "import.mjs", "playback-core.mjs", "motion-core.mjs"]
+      "files": [
+        "core.mjs",
+        "import.mjs",
+        "playback-core.mjs",
+        "motion-core.mjs"
+      ]
     },
     {
       "source": "shared/finance",
@@ -265,7 +275,15 @@
         "sungso-wordmark-sky.png",
         "reading-font.css",
         "fonts/PretendardVariable.woff2",
-        "fonts/Pretendard-LICENSE.txt"
+        "fonts/Pretendard-LICENSE.txt",
+        "suite-core.mjs",
+        "suite-boot.js",
+        "suite.mjs",
+        "suite.css",
+        "suite-controls.mjs",
+        "suite-controls.css",
+        "icons",
+        "suite-background.png"
       ]
     },
     {
