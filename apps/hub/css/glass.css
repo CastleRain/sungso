@@ -4,12 +4,17 @@ html[data-ss-suite="hub"][data-ss-surface="glass"] .home-content{max-width:1360p
 html[data-ss-suite="hub"][data-ss-surface="glass"] .welcome{min-height:108px;margin-bottom:25px}
 html[data-ss-suite="hub"][data-ss-surface="glass"] h1{font-size:30px;font-weight:650;letter-spacing:-.8px}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .welcome-copy{font-size:14px;line-height:1.7}
-html[data-ss-suite="hub"][data-ss-surface="glass"] .important-event{min-width:210px;padding:22px 26px;border:1px solid #d8dfed;border-radius:22px;background:linear-gradient(120deg,#ffffffb8,#f7ecff94);box-shadow:var(--ss-suite-shadow)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] .important-event{min-width:210px;padding:22px 26px;border:1px solid var(--ss-material-border);border-radius:22px;background:linear-gradient(120deg,rgb(255 255 255 / 10%),rgb(247 218 246 / 22%)),var(--ss-material-fill);box-shadow:var(--ss-material-shadow);backdrop-filter:var(--ss-material-filter);-webkit-backdrop-filter:var(--ss-material-filter)}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .important-event>strong{font-size:32px;font-weight:600;letter-spacing:.6px;color:#384a61}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .section-heading h2{font-size:17px;font-weight:600}
-html[data-ss-suite="hub"][data-ss-surface="glass"] :is(.shortcut,.library-item,.home-details>section){border:1px solid var(--ss-suite-border);border-radius:20px;background:var(--ss-suite-surface);box-shadow:var(--ss-suite-shadow);backdrop-filter:blur(14px)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] :is(.shortcut,.library-item,.home-details>section){border:1px solid var(--ss-material-border);border-radius:20px;background:var(--ss-material-fill);box-shadow:var(--ss-material-shadow);backdrop-filter:var(--ss-material-filter);-webkit-backdrop-filter:var(--ss-material-filter)}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .shortcut{min-height:116px;padding:19px 15px;gap:12px}
-html[data-ss-suite="hub"][data-ss-surface="glass"] .shortcut:hover{background:#fff;border-color:#a3c5df;transform:translateY(-2px)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] :is(.shortcut,.library-item){--ss-card-tint:rgb(185 222 246 / 18%);background:linear-gradient(140deg,var(--ss-card-tint),transparent 64%),var(--ss-material-fill)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] a[href*="wecost"]{--ss-card-tint:rgb(178 151 241 / 21%)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] a[href*="homehunt"]{--ss-card-tint:rgb(105 169 236 / 19%)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] a[href*="honeymoon"]{--ss-card-tint:rgb(99 197 164 / 21%)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] a[href*="dates"]{--ss-card-tint:rgb(238 149 189 / 21%)}
+html[data-ss-suite="hub"][data-ss-surface="glass"] .shortcut:hover{border-color:#fff;box-shadow:0 16px 38px rgb(55 85 117 / 15%),inset 0 1px 0 #fff;transform:translateY(-2px)}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .shortcut strong{font-size:14px;font-weight:600}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .shortcut small{font-size:12px}
 html[data-ss-suite="hub"][data-ss-surface="glass"] .app-icon{border:1px solid #ffffffa8;background:#e4f2ff;width:43px;height:43px;border-radius:14px}
