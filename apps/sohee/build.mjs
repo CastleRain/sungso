@@ -18,9 +18,14 @@ export async function buildApp({ outdir = path.join(here, 'dist') } = {}) {
     const version = createHash('sha256').update(await readFile(path.join(outdir, `assets/workspace.${ext}`))).digest('hex').slice(0, 16);
     html = html.replace(`/assets/workspace.${ext}"`, `/assets/workspace.${ext}?v=${version}"`);
   }
+  // The portfolio reuses this template and bundle. Add member presentation
+  // assets only to workspace routes so its existing output remains unchanged.
+  await cp(path.join(here, 'workspace/glass.css'), path.join(outdir, 'assets/workspace-glass.css'));
+  const suiteHead = '<script src="/sungso/shared/theme/suite-boot.js?v=20261103-glass-1"></script><link rel="stylesheet" href="/sungso/shared/theme/suite.css?v=20261103-glass-1"><link rel="stylesheet" href="/sungso/shared/theme/suite-controls.css?v=20261103-glass-1"><link rel="stylesheet" href="/sungso/sohee/assets/workspace-glass.css?v=20261103-glass-workspace-1"><script type="module" src="/sungso/shared/theme/suite.mjs?v=20261103-glass-1"></script>';
+  const memberHtml = html.replace('</head>', `${suiteHead}</head>`);
   for (const route of ['', 'workspace', 'portfolio', 'portfolio/cases/dessert-set', 'portfolio/about']) {
     await mkdir(path.join(outdir, route), { recursive: true });
-    await writeFile(path.join(outdir, route, 'index.html'), html);
+    await writeFile(path.join(outdir, route, 'index.html'), route.startsWith('portfolio') ? html : memberHtml);
   }
   await cp(path.join(here, 'sales/THIRD_PARTY_NOTICES.txt'), path.join(outdir, 'THIRD_PARTY_NOTICES.txt'));
   await buildSales({ outdir: path.join(outdir, 'sales') });
