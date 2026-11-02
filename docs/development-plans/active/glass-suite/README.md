@@ -28,9 +28,9 @@ A single app can be reverted with `git revert <service-commit>`; retain its comm
 Use the existing synthetic member/auth/store fixtures and emulator tests, with no production writes or extra provider calls. Run each scope's meaningful checks, browser primary flows at 1440/390px, and final site/build/regression checks. Keep private captures under ignored .local. References in this folder are synthetic image concepts, not production screenshots.
 
 ## Sprint status
-- Pre-development remote checkpoint: pending commit/push.
-- Sprint 0: source inventory completed in PLAN.md; actual baseline capture and route checks pending.
-- Sprint 1–7: not started.
+- Pre-development remote checkpoint: `4166581` and `glass-suite-baseline-20261103`, pushed before runtime edits.
+- Sprint 0–6: all 14 management apps implemented and committed separately. Original/basic remains the first-visit default; glass is light.
+- Sprint 7: local browser review and 2,323 regression checks passed. Public invitation source/output hashes match the baseline. Production/provider checks and deployment are separate release steps.
 
-Service commits and their verification are recorded in CHECKPOINTS.md.
+Service commits and selective rollback instructions are recorded in [CHECKPOINTS.md](CHECKPOINTS.md). See [IMPLEMENTATION.md](IMPLEMENTATION.md) for results and [the latest design QA](../../../../design-qa.md) for visual evidence and limits.
 

@@ -1,9 +1,59 @@
-# Glass suite checkpoints
+# Glass suite 체크포인트와 복구
 
-Baseline tag: `glass-suite-baseline-20261103`. Source baseline: `5c5b192`.
+개발 전 기준 **4166581** / 태그 **glass-suite-baseline-20261103**. 앱 소스 기준은 최신 master **5c5b192**다. 4166581에는 계획·합성 시안만 추가했으며 런타임 편집 전에 브랜치와 태그를 push했다.
 
-| Scope | Commit | Validation | Remote |
+작업 브랜치: `codex/glass-suite-20261103`. 아래 구현·보완 커밋은 모두 이 원격 브랜치에 보관했다. master 병합·Pages 배포는 실행하지 않았다. 기존 작업 폴더의 미커밋 변경은 건드리지 않았다.
+
+## 서비스별 복구 단위
+
+| 서비스 | 첫 적용 커밋 | 후속 보완 | 주 검증 |
 | --- | --- | --- | --- |
-| Before development | `4166581` / tag above | Documentation and synthetic references only; no runtime change | Pushed to `codex/glass-suite-20261103` |
+| 메인 홈 | `4d6b4ab9` | 공통 기반 참조 | 바로가기·일정·메모·초안·모바일 메뉴 |
+| 우리 일정 | `ff75d231` | — | 목록/달력·추가·핀·맞춤 날짜 |
+| WeCost | `e28e4b73` | `360c61e9`, `d087298a` | 5탭·금액 동등성·입력 초안·고정비·달력 |
+| HomeHunt | `0a42fcf7` | `836d07ed` | 6업무/2보조·조건·방문·명시적 클라우드 복원 |
+| HomeHunt VER2 | `82c8274d` | `bd2dbfc5`, `b9891d76` | 네 판단축·5업무/3보조·320px·기본 모달 |
+| Travel | `b45947ca` | — | 8뷰/4묶음·일차·결정 메모 초안·기본 토글 |
+| Honeymoon | `4a3ce627` | — | 5메뉴·Pick/상세/메모·견적·여정 펼침 |
+| 우리 식탁 | `3ef8c486` | 생활 공통 기반 참조 | 3메뉴·완료 상태·선택기·저장 안내 |
+| 우리 발자국 | `6ab0430c` | 생활 공통 기반 참조 | 장소/방문/앨범·검색·날짜 선택 |
+| 우리 결혼 | `67dd4174` | 생활 공통 기반 참조 | 하객/준비·인원·작업실 연결 |
+| Journey | `292a09b4` | — | 날짜·재생 위치·수동 입력·맞춤 시간 |
+| 소희 작업실 | `76487dc6` | — | 빈 3탭 기본 복원·매출 진입·포트폴리오 보존 |
+| Invitation 관리 | `437244bd` | — | 29개 디자인·검색·설정 취소·작품 서체·미리보기 초안 |
+| 양정커피 매출 | `54ecd1ed` | — | 4화면·기간/금액 동등성·설정 취소·과거 분석 펼침 |
 
-All app checkpoints depend on the common foundation. Later fixes and their scopes are listed separately for selective reverts.
+## 공통 기반과 검증
+
+| 범위 | 커밋 | 내용 |
+| --- | --- | --- |
+| 공통 기반 | `a8c590f1` | 기본/밝은 글래스·14앱 셸·Pretendard·맞춤 컨트롤·대역 QA |
+| 컨트롤 보완 | `b64e33da` | 변형/흐림이 있는 모달 안의 선택기 표시와 라벨 |
+| 메뉴·인증 경계 | `09869d62` | 여행 메뉴 묶음·모바일 초점·기존 인증 시작 순서 |
+| 생활 공통 | `e54ce374` | 같은 폼/로컬 기록을 사용하는 표면·작업실 연결 |
+| 생활 모바일 | `abb07d93` | 백업 버튼 글자 줄바꿈 수정 |
+| 최종 QA | `16bf67e3` | 합성 자료 보완·앱 테스트 폴더 개별 복구 지원 |
+
+전체 `npm run check`: **2,323 통과, 실패/스킵 0**. 공개 청첩장 VER2~5 소스322개·산출물256개는 기준과 동일하다. 합성 자료와 차단된 공급자의 검증 한계는 IMPLEMENTATION.md에 기록한다.
+
+## 되돌리는 방법
+
+먼저 해당 앱의 후속 보완을 최신 순으로 되돌린 다음 첫 적용 커밋을 되돌린다. 예를 들어 HomeHunt VER2만 되돌릴 때:
+
+```powershell
+git revert b9891d76
+git revert bd2dbfc5
+git revert 82c8274d
+npm run check
+git push origin codex/glass-suite-20261103
+```
+
+다른 앱은 해당 행의 커밋만 같은 순서로 처리한다. 공통 기반과 생활 공통은 사용하는 앱이 남아 있으면 유지한다. 기존 테스트 폴더가 없던 앱의 적용을 되돌릴 때 루트 `scripts/test.mjs`에 충돌이 생기면 현재의 선택적 디렉토리 수집 로직을 유지한다. 앱 테스트 폴더의 ENOENT만 허용하며 필수 검사 오류를 숨기지 않는다. 이후 추가 개발과 겹치는 충돌은 해당 변경을 함께 검토한다.
+
+전체 개발 전 코드가 필요하면 태그에서 별도 브랜치를 만든다. 공유 기록을 강제 재작성하는 reset/force-push는 사용하지 않는다.
+
+```powershell
+git switch -c recovery/glass-baseline glass-suite-baseline-20261103
+```
+
+Git 복구는 소스 복구다. Firestore·사진·사용자 기록을 되돌리지 않으며 이번 구현에는 운영 데이터 마이그레이션이 없다. 표시 설정만 기본으로 바꾸려면 화면의 **기본** 버튼을 사용한다.

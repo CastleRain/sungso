@@ -166,3 +166,69 @@ final result: passed
 - npm run build passed; every selected SVG is in the build. No full suite rerun needed for static preparation. Existing application entry points and DB behavior unchanged.
 - Actual browser inspection was blocked by the browser's file: URL security policy. No alternate-browser, server, or indirect workaround attempted. Browser layout, keyboard focus styling and mobile behavior remain unverified. Native SVG contact sheet was rendered to PNG and visually checked (144 shapes and labels fit).
 - Preview, generator, source tarballs and rendering dependency stay under ignored .local/fixed-cost-design-20261101/icon-library. Not deployed; picker not yet attached to fixed-cost forms.
+
+## 2026-11-03 — sungso 관리 앱 14개 글래스 구현 최종 QA
+
+**final result: passed** — 아래 로컬 합성 자료·관측 상태의 시각 QA 기준. 운영 배포·외부 공급자·실제 비공개 콘텐츠 전체 검증을 뜻하지 않는다. 이전 항목의 미완료 기록과 구분되는 이번 구현 결과다.
+
+### 비교 대상과 증거
+
+- Source visual truth: `docs/development-plans/active/glass-suite/references/`의 선택된 2번 셸과 14개 서비스 PNG. 모두 1487×1058px 합성 시안이다. 최신 PLAN의 서비스 정리·기존 표 밀도·밝은 모드·Pretendard 요구를 함께 적용했다.
+- Implementation: `http://127.0.0.1:8785/sungso/` 및 각 관리 경로. 회원·DB·지도·매출·여행은 로컬 검수 대역이고 실제 앱 모듈을 실행한다.
+- CSS viewport: 1440×1000, 390×844, 좁은 화면 320×740. IAB 캡처는 스크롤바/자동 축소 여부에 따라 PNG가 1440×1000 또는 1425×990, 390×844 또는 375×812, 320×740 또는 305×705로 반환됐다. CSS 너비는 DOM으로 별도 확인했다. 원본1487px과 캡처를 공통 표시 너비 기준으로 읽고 비율·텍스트·제어 영역을 대조했으며, 픽셀 차이율이나 1:1 일치를 주장하지 않는다.
+- 담당 검토자는 매 서비스의 원본 PNG와 실제 캡처를 같은 이미지 비교 입력에 함께 열었다. 서로 다른 합성 금액·날짜·항목 수는 시각 결함으로 취급하지 않았다. PC 생성 시안에 없는 모바일은 기능·넘침·읽기 기준으로 점검했다.
+- Full-view evidence: 아래 이름은 `.local/glass-qa/screenshots/` 안의 파일이다. 캡처는 Git 제외이며 공개 배포에 포함되지 않는다.
+
+| 서비스 | 원본 reference | 구현 캡처 |
+| --- | --- | --- |
+| 홈 | hub.png | hub-glass-1440.png, hub-glass-390.png |
+| 일정 | dates.png | dates-glass-1440.png, dates-calendar-1440.png, dates-glass-390.png, dates-glass-320.png |
+| WeCost | wecost.png | wecost-glass-1440.png, wecost-glass-390.png, wecost-house-390.png, wecost-wedding-calendar-1440.png, wecost-basic-toggle-390.png |
+| HomeHunt | homehunt.png | homehunt-glass-1440.png, homehunt-glass-390.png, homehunt-filter-1440.png, homehunt-basic-toggle-390.png |
+| HomeHunt VER2 | homehunt-v2.png | homehunt-v2-glass-1440.png, homehunt-v2-glass-390.png, homehunt-v2-glass-320.png |
+| Travel | travel.png | travel-glass-1440.png, travel-glass-390.png, travel-glass-320.png |
+| Honeymoon | honeymoon.png | honeymoon-glass-1440.png, honeymoon-glass-390.png, honeymoon-glass-320.png |
+| 식탁 | table.png | table-glass-1440.png, table-glass-390.png, table-glass-320.png, table-editor-select-1440.png |
+| 장소 | footprints.png | footprints-glass-1440.png, footprints-glass-390.png, footprints-glass-320.png, footprints-calendar-1440.png |
+| 결혼 | wedding.png | wedding-glass-1440.png, wedding-glass-390.png, wedding-glass-320.png |
+| 청첩장 관리 | invitation.png | invitation-glass-1440.png, invitation-glass-390.png, invitation-glass-320.png, invitation-basic-preview-390.png |
+| 이동 기록 | journey.png | journey-glass-1440.png, journey-glass-390.png, journey-glass-320.png |
+| 작업실 | sohee.png | sohee-glass-1440.png, sohee-glass-390.png, sohee-glass-320.png |
+| 매출 | sales.png | sales-glass-1440.png, sales-glass-390.png, sales-glass-320.png, sales-calendar-1440.png |
+
+Focused evidence: 편집 선택목록, 방문 달력, WeCost 납부 달력, HomeHunt 필터 제목, 매출 달력, 청첩장 첫 카드 행동줄을 확대해서 읽고 DOM 경계/색/클릭 대상과 대조했다. 전체 화면 이미지 한 장만으로 통과시키지 않았다.
+
+### 비교와 수정 이력
+
+| 발견 | 영향과 수정 | 수정 후 확인 |
+| --- | --- | --- |
+| P1 공통 선택기·달력이 흐림/변형 모달 뒤에 표시 | 기존 입력 DOM과 이벤트를 유지하고 manual popover로 최상위 표면에 표시 | Table 실제 목록 선택, Footprints 11/7 선택, WeCost 달력 위치·취소 확인 |
+| P1 Travel 기본 토글이 오른쪽 결정 패널 뒤에 가림 | 기본에서 오른쪽 패널을 피하고 작은 화면에서는 떠 있는 행동 위로 분리 | 기본→글래스 왕복·Day2·결정 메모 초안 보존 |
+| P1 기본 모바일 고정 메뉴/버튼과 토글 겹침 | WeCost, HomeHunt1/2, Invitation에 앱별 위치 보완. HH2 모달 z220 적용 | 390px 버튼 중심의 최상위 대상이 실제 글래스 버튼, 왕복 클릭·조건 취소 확인 |
+| P2 HomeHunt 필터 제목이 헤더 뒤로 가림 | 필터가 열린 동안 해당 작업 영역의 겹침 순서만 보완 | homehunt-filter-1440.png에서 제목과 닫기 보임 |
+| P2 HH2 지역5열·9px 설명, 320px 가로 넘침 | 3열/12px·좁은 화면2열, 버튼 행/제목 줄바꿈 | 최신1440 설명 읽힘, 320px clientWidth=scrollWidth=305, 넘치는 요소0 |
+| P2 Honeymoon 밝은 상단 지표의 흰 글씨 대비 | 밝은 지표 표면+짙은 녹색으로 수정 | 최신1440/390/320, 계산 대비7.04:1 |
+| P2 생활 모바일 백업 버튼 마지막 글자 줄바꿈 | nowrap 및 안내 영역 wrap | Table390/320 최신 캡처·버튼30px 높이 확인, 공통3앱 적용 |
+| P2 Invitation 상단 밀도와 첫 카드 행동 접근 | PC 제목/설명 행, 검색/필터 행, 카드 행동 순서·썸네일 비율 정돈 | 최신1440 scrollY0, 첫 비교 버튼 y935–969로 1000px 뷰포트 안. 모바일 구조 보존 |
+| P2 Sales 주요 금액 라벨 대비·팝오버 뒤 비침 | 라벨 --ss-link, 팝오버 불투명 surface | 최신390 label rgb(53,101,138), 1440 달력 rgb(255,255,255), 대비5.72:1 |
+| P2 모바일 메뉴 닫기 초점 | visibility 지연을 없애고 닫기/복귀 및 로그아웃 포함 Tab 순서를 보완 | 열 때 닫기 버튼 초점, Escape 후 앱 메뉴 열기로 복귀. 공통 회귀7개 |
+
+현재 관측 범위의 미해결 P0/P1/P2 없음. 새 비교에서 결함이 생기면 해당 서비스 체크포인트 뒤에 보완 커밋을 추가한다.
+
+### 다섯 시각 기준
+
+- **서체:** 관리 본문·제목·버튼·입력·달력은 로컬 Pretendard Variable. WeCost 작은 표 밀도를 유지했다. Invitation 작품 내부는 원래 Pinyon Script 등 작품 서체를 보존하며 computed style로 구분 확인했다.
+- **간격:** PC 64px 전역 레일+224px 업무 메뉴, 작은 화면 메뉴 서랍. 앱마다 지도·표·달력 등 기존 작업 구조를 유지했다. 하단 메뉴·저장 버튼·팝오버 가림을 수정했다.
+- **색:** 앱별 대표색과 의미색을 유지하고 밝은 유리 표면을 공통 사용한다. 위의 두 대비 결함을 수정했다. 흐림 감소/미지원 불투명 대체 CSS가 있다. 모든 텍스트에 대한 정식 WCAG 적합성 판정은 아니다.
+- **이미지:** 생성한 배경 원본과 기존 브랜드 자산, 라이선스가 있는 Lucide 파일을 사용한다. 공개 작품 사진·기존 지도 자산은 유지한다. 지도 대역과 여행 합성 본문의 사진/지리 정확도는 판정 대상에서 제외한다.
+- **문구:** 실제 기능이 없는 통계·프로젝트·자동 동기화를 꾸며 넣지 않았다. 로컬 계정 저장·출처·미확인/전망 보류·부분일/단위 안내를 유지한다. 큰 D-day처럼 보였던 Journey 숫자는 실제 재생 날짜이므로 작은 날짜 칩으로 보존했다.
+
+### 기능·검사와 한계
+
+- 14개 앱 진입과 주요 메뉴, 모드 전환, 대표 편집/취소, 검색·선택·재생 유지 및 1440/390/320 화면을 관측했다. 상세는 IMPLEMENTATION.md와 앱별 AGENTS에 기록한다. 마지막 검증 탭의 error/warn 조회는 0건이었다.
+- `npm run check`: 2,323 passed / 0 failed / 0 skipped. 로컬 참조1,075·JS문법288. 마지막 시각 수정은 CSS만이며 CSS 파싱·해당 브라우저 화면·최종 빌드로 검증했다.
+- 공개 Invitation VER2~5의 소스322개와 산출물256개는 기준 태그와 같다. 포트폴리오 HTML3개 및 원래 작업실 번들2개도 보존됐다.
+- Travel은 실제 비공개 본문 대신 합성 HTML이므로 사진·긴 예약 문구의 밀도는 미검증이다. HomeHunt 지도는 대역, PDF/외부 후기/지도·실제 클라우드 업로드·수집은 별도 실환경 확인이 필요하다. Sales 실제 수치 sentinel 검사는 비공개 아카이브가 없어 별도 boundary 검사에서 생략됐다.
+- 운영 DB 시험 쓰기·사진 업로드·유료 API 호출·master 병합·배포는 없다. 실물 기기·다른 브라우저·화면 낭독기·인쇄·저성능 기기 성능은 후속 검증 범위다.
+
+구현 체크리스트: 14앱 적용 완료 / 앱별 커밋 완료 / 원격 보관 완료 / 맞춤 컨트롤·Pretendard 완료 / 시각 수정 재확인 완료 / 운영 릴리스는 별도.
