@@ -73,6 +73,8 @@ html[data-ss-surface="glass"] .life-records:has(.life-record) {
   border-radius: 20px;
   background: var(--life-paper);
   box-shadow: var(--ss-suite-shadow);
+  backdrop-filter: var(--ss-material-filter, none);
+  -webkit-backdrop-filter: var(--ss-material-filter, none);
 }
 html[data-ss-surface="glass"] .life-record {
   display: grid;
@@ -130,14 +132,18 @@ html[data-ss-surface="glass"] :is(#life-panel[aria-labelledby="life-tab-recipes"
   border: 0;
   background: transparent;
   box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 html[data-ss-surface="glass"] :is(#life-panel[aria-labelledby="life-tab-recipes"], #life-panel[aria-labelledby="life-tab-food"], #life-panel[aria-labelledby="life-tab-albums"]) .life-record {
   display: flex;
   gap: 12px;
-  border: 1px solid var(--life-line);
+  border: 1px solid var(--ss-material-border, var(--life-line));
   border-radius: 18px;
-  background: var(--life-paper);
-  box-shadow: var(--ss-suite-shadow);
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, var(--ss-suite-shadow));
+  backdrop-filter: var(--ss-material-filter, none);
+  -webkit-backdrop-filter: var(--ss-material-filter, none);
 }
 html[data-ss-surface="glass"] :is(#life-panel[aria-labelledby="life-tab-recipes"], #life-panel[aria-labelledby="life-tab-food"], #life-panel[aria-labelledby="life-tab-albums"]) .life-record-footer { width: 100%; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--life-line); justify-content: flex-start; }
 html[data-ss-surface="glass"] .life-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--life-line); border-radius: 17px; background: var(--life-paper); margin-bottom: 20px; padding: 16px 0; }
@@ -187,6 +193,16 @@ html[data-ss-surface="glass"] #shared-drafts { display: grid; grid-template-colu
 html[data-ss-surface="glass"] #shared-drafts li { padding: 22px; border: 1px solid var(--ss-suite-border); border-radius: 18px; background: var(--ss-suite-surface); min-width: 0; overflow-wrap: anywhere; }
 html[data-ss-surface="glass"] #shared-drafts strong { font-size: 17px; font-weight: 600; }
 html[data-ss-surface="glass"] #shared-drafts :is(small, a) { font-size: 12px; }
+/* Material belongs to a list or a standalone card, never both. Shared tokens
+   supply the opaque/no-blur fallback for reduced transparency and older browsers. */
+html[data-ss-surface="glass"] :is(.life-storage-note, .life-toolbar, .life-summary, .life-empty, .life-studio-main #current-release, #shared-drafts li),
+html[data-ss-surface="glass"] #life-panel:not([aria-labelledby="life-tab-recipes"]):not([aria-labelledby="life-tab-food"]):not([aria-labelledby="life-tab-albums"]) .life-records:has(.life-record) {
+  border-color: var(--ss-material-border, var(--life-line));
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, var(--ss-suite-shadow));
+  backdrop-filter: var(--ss-material-filter, none);
+  -webkit-backdrop-filter: var(--ss-material-filter, none);
+}
 @media (max-width: 1180px) {
   html[data-ss-surface="glass"] .life-main { padding-inline: 24px; }
   html[data-ss-surface="glass"] .life-record { grid-template-columns: minmax(120px, 1fr) minmax(150px, 2fr); gap: 12px 18px; }
@@ -233,7 +249,7 @@ html[data-ss-surface="glass"] #shared-drafts :is(small, a) { font-size: 12px; }
   html[data-ss-surface="glass"] #shared-drafts { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-surface="glass"] :is(.life-records:has(.life-record), .life-storage-note, .life-toolbar, .life-dialog) { background: #fafdff; backdrop-filter: none; }
+  html[data-ss-surface="glass"] :is(.life-storage-note, .life-toolbar, .life-dialog) { background: #fafdff; backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 @media (forced-colors: active) {
   html[data-ss-surface="glass"] :is(.life-record-heading, .life-checkbox-field, .life-ingredient) input[type="checkbox"] { appearance: auto; }
