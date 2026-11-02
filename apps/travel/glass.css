@@ -7,10 +7,11 @@ html[data-ss-suite="travel"][data-ss-surface="solid"] .ss-appearance { right: 34
   html[data-ss-suite="travel"][data-ss-surface="solid"] .ss-appearance { right: 18px; bottom: 78px; }
 }
 html[data-ss-suite="travel"][data-ss-surface="glass"] {
-  --tr-glass: color-mix(in srgb, var(--ss-surface) 78%, transparent);
-  --tr-panel: color-mix(in srgb, var(--ss-surface) 95%, transparent);
-  --tr-line: color-mix(in srgb, var(--ss-surface) 70%, var(--ss-border));
-  --tr-shadow: 0 7px 26px rgb(44 93 109 / 6%), inset 0 1px 0 rgb(255 255 255 / 75%);
+  --tr-glass: var(--ss-material-fill, #fafdff);
+  --tr-panel: var(--ss-suite-panel, #fafdff);
+  --tr-line: var(--ss-material-border, var(--ss-border));
+  --tr-shadow: var(--ss-material-shadow, none);
+  --tr-glass-filter: var(--ss-material-filter, none);
   --ss-link: #167e87;
   --ss-focus: #167e87;
   --ss-accent: #d6f0f0;
@@ -30,9 +31,10 @@ html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.day-card,.map-card,.d
   border: 1px solid var(--tr-line);
   border-radius: 19px;
   box-shadow: var(--tr-shadow);
-  backdrop-filter: blur(16px) saturate(115%);
-  -webkit-backdrop-filter: blur(16px) saturate(115%);
+  backdrop-filter: var(--tr-glass-filter);
+  -webkit-backdrop-filter: var(--tr-glass-filter);
 }
+html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.day-card,.map-card,.detail-card,.hotel-card,.history-card,.trip-overview,.budget-card,.readiness-card) :is(.day-card,.map-card,.detail-card,.hotel-card,.budget-card,.readiness-card) { backdrop-filter: none; -webkit-backdrop-filter: none; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .trip-overview a { padding: 12px 18px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .sync-row { padding-block: 12px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .travel-budget-summary { border-radius: 15px; margin-bottom: 16px; }
@@ -46,6 +48,8 @@ html[data-ss-suite="travel"][data-ss-surface="glass"] .day-tabs {
   border-radius: 17px;
   background: var(--tr-glass);
   box-shadow: var(--tr-shadow);
+  backdrop-filter: var(--tr-glass-filter);
+  -webkit-backdrop-filter: var(--tr-glass-filter);
 }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .day-tab { background: transparent; border: 0; min-height: 62px; border-radius: 11px; padding: 10px 13px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .day-tab[aria-pressed="true"] { background: var(--ss-accent); box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%); }
@@ -57,7 +61,7 @@ html[data-ss-suite="travel"][data-ss-surface="glass"] .timeline time { font-size
 html[data-ss-suite="travel"][data-ss-surface="glass"] .timeline strong { font-weight: 600; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .map-card { top: 90px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] #google-map { height: 330px; }
-html[data-ss-suite="travel"][data-ss-surface="glass"] .trip-calendar { padding: 18px 20px; margin-bottom: 18px; }
+html[data-ss-suite="travel"][data-ss-surface="glass"] .trip-calendar { padding: 18px 20px; margin-bottom: 18px; background: var(--tr-panel); backdrop-filter: none; -webkit-backdrop-filter: none; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .calendar-heading { margin-bottom: 0; flex-wrap: wrap; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .calendar-heading h3 { font-size: 17px; font-weight: 600; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .calendar-kicker { display: none; }
@@ -71,8 +75,8 @@ html[data-ss-suite="travel"][data-ss-surface="glass"] .calendar-day { border-rad
 html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.button,.small-button,.place-button,.hotel-actions button,.readiness-edit) { border-radius: 11px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.hotel-choice,.booking-tips,.day-note,.room-note,.budget-message,.budget-funding,.budget-quotes article,.history-diff > div) { background: color-mix(in srgb, var(--ss-soft) 75%, transparent); border-radius: 13px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .hotel-card.is-chosen { border-color: var(--ss-link); box-shadow: var(--tr-shadow), 0 0 0 1px var(--ss-link); }
-html[data-ss-suite="travel"][data-ss-surface="glass"] .budget-hero { border: 1px solid var(--tr-line); border-radius: 19px; background: linear-gradient(120deg, var(--ss-accent), var(--tr-glass)); box-shadow: var(--tr-shadow); }
-html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.day-editor,.budget-dialog,.sg-decisions-dialog) { background: var(--tr-panel); border: 1px solid var(--tr-line); border-radius: 20px; box-shadow: 0 20px 65px rgb(35 66 87 / 18%); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+html[data-ss-suite="travel"][data-ss-surface="glass"] .budget-hero { border: 1px solid var(--tr-line); border-radius: 19px; background: linear-gradient(120deg, color-mix(in srgb, var(--ss-accent) 70%, transparent), transparent), var(--tr-glass); box-shadow: var(--tr-shadow); }
+html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.day-editor,.budget-dialog,.sg-decisions-dialog) { background: var(--tr-panel); border: 1px solid var(--tr-line); border-radius: 20px; box-shadow: 0 20px 65px rgb(35 66 87 / 18%); backdrop-filter: none; -webkit-backdrop-filter: none; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] :is(.day-editor,.budget-dialog,.sg-decisions-dialog)::backdrop { background: rgb(35 55 75 / 28%); backdrop-filter: blur(4px); }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .sg-decisions-dialog { width: min(420px,100vw); border-radius: 20px 0 0 20px; }
 html[data-ss-suite="travel"][data-ss-surface="glass"] .sg-decisions { background: transparent; }
@@ -98,8 +102,8 @@ html[data-ss-suite="travel"][data-ss-surface="glass"] .sg-decisions-toggle { z-i
   html[data-ss-suite="travel"][data-ss-surface="glass"] .sg-decisions-dialog { border-radius: 0; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-suite="travel"][data-ss-surface="glass"] { --tr-glass: var(--ss-surface); --tr-panel: var(--ss-surface); }
+  html[data-ss-suite="travel"][data-ss-surface="glass"] { --tr-glass: #fafdff; --tr-panel: #fafdff; --tr-glass-filter: none; }
 }
-@supports not (backdrop-filter: blur(1px)) {
-  html[data-ss-suite="travel"][data-ss-surface="glass"] { --tr-glass: var(--ss-surface); --tr-panel: var(--ss-surface); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-ss-suite="travel"][data-ss-surface="glass"] { --tr-glass: #fafdff; --tr-panel: #fafdff; --tr-glass-filter: none; }
 }
