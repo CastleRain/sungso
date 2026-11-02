@@ -26,6 +26,18 @@ export function createTripCalendar(container, {days, selectedDate, onSelect}) {
  let currentDays = days, selected = selectedDate, fullMonth = false;
  container.classList.add('trip-calendar');
  container.innerHTML = `<div class="calendar-heading"><div><p class="calendar-kicker">${escapeHTML(TRIP_DAYS[0].date.slice(0,7))}</p><h3>우리의 여행 달력</h3></div><div class="calendar-view-switch" role="group" aria-label="달력 표시 범위"><button type="button" data-calendar-range="trip" aria-pressed="true">여행 기간</button><button type="button" data-calendar-range="month" aria-pressed="false">이달 전체</button></div></div><div class="calendar-wedding-banner"><span aria-hidden="true">💍</span><span><strong>${escapeHTML(weddingDate())}</strong> 우리의 결혼식</span></div><div class="calendar-legend" aria-label="여행 장소 색상"><span data-tone="singapore">싱가포르</span><span data-tone="sea">크루즈 · 해상</span><span data-tone="maldives">몰디브</span><span data-tone="korea">한국</span></div><table class="country-calendar"><caption class="calendar-sr">함께 보는 여행 일정. 여행 날짜를 누르면 위치는 유지하고 그날 일정과 지도를 바꿉니다.</caption><thead><tr>${WEEKDAYS.map((day,index)=>`<th scope="col" class="${index===0?'calendar-sunday':index===6?'calendar-saturday':''}">${day}</th>`).join('')}</tr></thead><tbody></tbody></table><div class="calendar-selection" aria-live="polite"><div><span class="calendar-selection-date"></span><strong class="calendar-selection-country"></strong></div><button type="button" class="calendar-open-day">이날 일정 보기 <span aria-hidden="true">→</span></button></div><p class="calendar-help">날짜를 누르면 달력은 그대로, 선택한 날의 내용만 바뀌어요. ‘이날 일정 보기’로 세부 일정으로 이동하세요.</p>`;
+ const fold=document.createElement('button');
+ fold.type='button';
+ fold.className='travel-calendar-fold';
+ fold.textContent='달력 펼치기';
+ fold.setAttribute('aria-expanded','false');
+ fold.addEventListener('click',()=>{
+  const expanded=container.dataset.glassExpanded!=='true';
+  container.dataset.glassExpanded=String(expanded);
+  fold.setAttribute('aria-expanded',String(expanded));
+  fold.textContent=expanded?'달력 접기':'달력 펼치기';
+ });
+ container.querySelector('.calendar-heading').append(fold);
  const tableBody=container.querySelector('tbody');
  function renderGrid() {
   const byDate=new Map(currentDays.map(day=>[day.date,day]));

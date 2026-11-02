@@ -71,7 +71,8 @@
         "budget.mjs",
         "budget.css",
         "readiness.mjs",
-        "readiness.css"
+        "readiness.css",
+        "glass.css"
       ]
     },
     {

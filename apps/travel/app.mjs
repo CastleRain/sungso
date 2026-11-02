@@ -1,5 +1,5 @@
 import { TRIP_DAYS, HOTELS, PLACES, DECISIONS, TRIP_SETTINGS } from '../../shared/travel/trip-data.mjs';
-import { createTripCalendar } from './calendar.mjs?v=20260912-calendar-icons';
+import { createTripCalendar } from './calendar.mjs?v=20261103-glass-travel-1';
 
 // Keep the local itinerary readable even if the shared storage SDK cannot load.
 let saveHotelChoice = async () => { throw new Error('공동 저장 연결을 확인해주세요.'); };

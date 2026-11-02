@@ -4,6 +4,7 @@ import { DECISIONS } from '../../shared/travel/trip-data.mjs';
 const SITE_ROOT = new URL('../', import.meta.url);
 const STATUS_LABELS = { pending: '미정', candidate: '후보 있음', confirmed: '확인 완료' };
 const desktop = window.matchMedia('(min-width: 1280px)');
+const docked = () => desktop.matches && document.documentElement.dataset.ssSurface !== 'glass';
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -22,6 +23,7 @@ function validStatus(value, fallback = 'pending') {
 
 function startPanel() {
   if (document.getElementById('sg-decisions-host')) return;
+  let retired = false;
 
   const host = element('aside', 'sg-decisions-host');
   host.id = 'sg-decisions-host';
@@ -235,11 +237,12 @@ function startPanel() {
     if (drawer.open) drawer.close();
     toggle.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('sg-decisions-open');
-    if (restoreFocus && !desktop.matches) toggle.focus();
+    if (restoreFocus && !docked()) toggle.focus();
   }
   function arrangePanel() {
+    if (retired) return;
     closeDrawer(false);
-    if (desktop.matches) {
+    if (docked()) {
       host.append(panel);
       host.hidden = false;
       toggle.hidden = true;
@@ -275,7 +278,7 @@ function startPanel() {
   document.addEventListener('travel:edit-decision', (event) => {
     const card = cards.get(event.detail?.id);
     if (!card) return;
-    if (!desktop.matches && !drawer.open) {
+    if (!docked() && !drawer.open) {
       drawer.showModal();
       toggle.setAttribute('aria-expanded', 'true');
       document.body.classList.add('sg-decisions-open');
@@ -285,9 +288,22 @@ function startPanel() {
     card.status.focus({ preventScroll: true });
   });
   desktop.addEventListener('change', arrangePanel);
+  // Move the same panel, including dirty inputs, into the drawer when the
+  // shared glass sidebar is present. Switching surfaces never saves a record.
+  window.addEventListener('sungso:surface-change', arrangePanel);
+  window.addEventListener('sungso:private-clear', () => {
+    retired = true;
+    closeDrawer(false);
+    desktop.removeEventListener?.('change', arrangePanel);
+    window.removeEventListener('sungso:surface-change', arrangePanel);
+    host.remove(); drawer.remove(); toggle.remove(); panel.replaceChildren();
+    cards.clear();
+    document.body.classList.remove('sg-has-decisions');
+  }, { once: true });
   arrangePanel();
 
   function render(state) {
+    if (retired) return;
     current = state;
     let completed = 0;
     cards.forEach((card) => {
@@ -319,6 +335,7 @@ function startPanel() {
 
   // The common entrypoint loads this module after membership and reference data.
   import('../../shared/travel/trip-store.mjs').then((store) => {
+    if (retired) return;
     saveDecision = store.saveDecision;
     const syncActor = () => {
       const savedActor = store.getActor();
