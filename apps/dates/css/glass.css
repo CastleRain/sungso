@@ -4,8 +4,9 @@ html[data-ss-suite="dates"][data-ss-surface="glass"] .main>header{text-align:lef
 html[data-ss-suite="dates"][data-ss-surface="glass"] .main>header h1{font-size:29px;font-weight:650;letter-spacing:-.8px}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .main>header .sub{font-size:14px;margin-top:8px}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-row{max-width:none;gap:16px;padding:0 0 4px}
-html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-card{min-width:240px;text-align:left;padding:24px 28px;border-radius:20px;border:1px solid #e4dced;background:linear-gradient(115deg,#fff9,#f9eefa9c);box-shadow:var(--ss-suite-shadow)}
-html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-card:nth-child(even){background:linear-gradient(115deg,#fff9,#e9f5ffb0);border-color:#cfe1f2}
+/* Inset reflections stay inside the horizontal scroll viewport without a clipped shadow band. */
+html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-card{min-width:240px;text-align:left;padding:24px 28px;border-radius:20px;border:1px solid #e4dced;background:linear-gradient(115deg,rgb(249 220 238 / 18%),transparent 70%),var(--ss-material-fill,#f8fbff);box-shadow:inset 0 1px 0 rgb(255 255 255 / 96%),inset 0 -1px 0 rgb(157 189 216 / 20%)}
+html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-card:nth-child(even){background:linear-gradient(115deg,rgb(197 228 252 / 20%),transparent 70%),var(--ss-material-fill,#f8fbff);border-color:#cfe1f2}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-label{font-size:14px;font-weight:550;letter-spacing:0;color:#485569}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-number{font-size:36px;font-weight:600;color:#344353;letter-spacing:1px;margin:10px 0 7px}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .events-wrap{width:100%;max-width:none;padding:0;background:transparent;box-shadow:none;border:0}
@@ -25,6 +26,10 @@ html[data-ss-suite="dates"][data-ss-surface="glass"] .add-btn{padding:13px 22px;
 html[data-ss-suite="dates"][data-ss-surface="glass"] .add-form{margin-top:16px;padding:22px;border-radius:20px;border:1px solid var(--ss-suite-border);background:var(--ss-suite-surface)}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-view{padding:22px;border:1px solid var(--ss-suite-border);border-radius:20px;background:var(--ss-suite-surface)}
 html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-cell{min-height:72px;border-radius:12px}
-html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-popup{background:#fff9;border:1px solid var(--ss-suite-border);border-radius:14px}
+html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-popup{background:var(--ss-suite-panel,#fafdff);border:1px solid var(--ss-suite-border);border-radius:14px}
 html[data-ss-suite="dates"][data-ss-surface="glass"] #deleteDateDialog{background:#f9fcfff5;backdrop-filter:blur(18px)}
+/* One material layer per calendar/list; rows and calendar cells stay unfiltered.
+   Shared material tokens become opaque and disable blur when transparency is unavailable. */
+html[data-ss-suite="dates"][data-ss-surface="glass"] :is(.event-list,.add-form,.cal-view){background:var(--ss-material-fill,#f8fbff);border-color:var(--ss-material-border,var(--ss-suite-border));box-shadow:var(--ss-material-shadow,var(--ss-suite-shadow))}
+html[data-ss-suite="dates"][data-ss-surface="glass"] :is(.dday-card,.event-list,.add-form,.cal-view){backdrop-filter:var(--ss-material-filter,none);-webkit-backdrop-filter:var(--ss-material-filter,none)}
 @media(max-width:600px){html[data-ss-suite="dates"][data-ss-surface="glass"] .main{padding:24px 16px 30px;gap:22px}html[data-ss-suite="dates"][data-ss-surface="glass"] .main>header h1{font-size:24px}html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-card{min-width:220px;padding:20px}html[data-ss-suite="dates"][data-ss-surface="glass"] .dday-number{font-size:30px}html[data-ss-suite="dates"][data-ss-surface="glass"] .event-list{padding:4px 14px}html[data-ss-suite="dates"][data-ss-surface="glass"] .event-row{gap:8px;padding:17px 0;flex-wrap:wrap}html[data-ss-suite="dates"][data-ss-surface="glass"] .ev-emoji{width:30px;font-size:21px}html[data-ss-suite="dates"][data-ss-surface="glass"] .ev-title{font-size:14px}html[data-ss-suite="dates"][data-ss-surface="glass"] .ev-date{font-size:11px}html[data-ss-suite="dates"][data-ss-surface="glass"] .ev-dday{padding:4px 7px;font-size:10px}html[data-ss-suite="dates"][data-ss-surface="glass"] :is(.ev-delete,.ev-pin){width:32px;height:36px;font-size:17px}html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-view{padding:14px 10px}html[data-ss-suite="dates"][data-ss-surface="glass"] .cal-cell{min-height:45px}html[data-ss-suite="dates"][data-ss-surface="glass"] .add-form{padding:17px}}
