@@ -82,7 +82,12 @@ function accessibleName(control, doc) {
     const name = labelled.split(/\s+/).map(id => doc.getElementById(id)?.textContent.trim() || '').join(' ').trim();
     if (name) return name;
   }
-  return control.getAttribute('aria-label') || [...(control.labels || [])].map(label => label.textContent.trim()).join(' ') || control.getAttribute('title') || (control.tagName === 'SELECT' ? '선택' : control.type === 'month' ? '월 선택' : control.type === 'time' ? '시간 선택' : '날짜 선택');
+  const labelText = label => {
+    const copy = label.cloneNode(true);
+    copy.querySelectorAll('input,select,textarea,button,datalist,output,[aria-hidden="true"]').forEach(element => element.remove());
+    return copy.textContent.replace(/\s+/g, ' ').trim();
+  };
+  return control.getAttribute('aria-label') || [...(control.labels || [])].map(labelText).filter(Boolean).join(' ') || control.getAttribute('title') || (control.tagName === 'SELECT' ? '선택' : control.type === 'month' ? '월 선택' : control.type === 'time' ? '시간 선택' : '날짜 선택');
 }
 function setControlValue(control, value, win) {
   if (control.value === value) return false;
@@ -146,12 +151,13 @@ export function installSuiteControls({ root = document } = {}) {
     const found = [...root.querySelectorAll(candidateSelector)];
     if (root.matches?.(candidateSelector)) found.unshift(root);
     found.filter(eligible).forEach(mark);
-    if (active && (!active.control.isConnected || !available(active.control))) close(false);
+    if (active && (!active.control.isConnected || !available(active.control) || active.modalHost && !active.modalHost.open)) close(false);
   }
   function close(restoreFocus = false) {
     if (!active) return;
     const { panel, control } = active;
     active = null;
+    try { panel.hidePopover?.(); } catch { /* Removed or already hidden. */ }
     panel.remove();
     control.setAttribute('aria-expanded', 'false');
     const old = marked.get(control)?.controls;
@@ -163,14 +169,27 @@ export function installSuiteControls({ root = document } = {}) {
     if (!active) return;
     const { control, panel, kind } = active;
     const rect = control.getBoundingClientRect(), margin = 12, gap = 6;
-    const width = Math.min(kind === 'select' ? Math.max(rect.width, 220) : 324, win.innerWidth - margin * 2);
-    panel.style.width = width + 'px';
-    panel.style.maxHeight = Math.max(120, win.innerHeight - margin * 2) + 'px';
-    const panelHeight = Math.min(panel.scrollHeight || (kind === 'select' ? 260 : 390), win.innerHeight - margin * 2);
-    const below = win.innerHeight - rect.bottom - margin;
-    const top = below >= panelHeight || rect.top < panelHeight + gap + margin ? Math.max(margin, Math.min(rect.bottom + gap, win.innerHeight - panelHeight - margin)) : rect.top - panelHeight - gap;
-    panel.style.left = Math.max(margin, Math.min(rect.left, win.innerWidth - width - margin)) + 'px';
-    panel.style.top = top + 'px';
+    let block = null;
+    // A fixed child of a blurred/transformed dialog uses that dialog's padding
+    // box, not the viewport. Top-layer popovers escape it; older engines need
+    // local coordinates and bounds so an overflow:auto dialog cannot clip them.
+    if (!active.topLayer) for (let parent = panel.parentElement; parent; parent = parent.parentElement) {
+      const style = win.getComputedStyle(parent);
+      const effect = ['transform', 'perspective', 'filter', 'backdropFilter'].some(name => style[name] && style[name] !== 'none');
+      if (effect || /layout|paint|strict|content/.test(style.contain || '') || /transform|perspective|filter/.test(style.willChange || '')) { block = parent; break; }
+    }
+    const box = block?.getBoundingClientRect(), scaleX = block?.offsetWidth ? box.width / block.offsetWidth || 1 : 1, scaleY = block?.offsetHeight ? box.height / block.offsetHeight || 1 : 1;
+    const bounds = box ? { left: Math.max(0, box.left + block.clientLeft * scaleX), top: Math.max(0, box.top + block.clientTop * scaleY), right: Math.min(win.innerWidth, box.right), bottom: Math.min(win.innerHeight, box.bottom) } : { left: 0, top: 0, right: win.innerWidth, bottom: win.innerHeight };
+    const width = Math.min(kind === 'select' ? Math.max(rect.width, 220) : 324, Math.max(80, bounds.right - bounds.left - margin * 2));
+    const maxHeight = Math.max(80, bounds.bottom - bounds.top - margin * 2);
+    panel.style.width = width / scaleX + 'px';
+    panel.style.maxHeight = maxHeight / scaleY + 'px';
+    const panelHeight = Math.min((panel.scrollHeight || (kind === 'select' ? 260 : 390)) * scaleY, maxHeight);
+    const below = bounds.bottom - rect.bottom - margin;
+    const top = below >= panelHeight || rect.top - bounds.top < panelHeight + gap + margin ? Math.max(bounds.top + margin, Math.min(rect.bottom + gap, bounds.bottom - panelHeight - margin)) : rect.top - panelHeight - gap;
+    const left = Math.max(bounds.left + margin, Math.min(rect.left, bounds.right - width - margin));
+    panel.style.left = (box ? (left - box.left) / scaleX - block.clientLeft + block.scrollLeft : left) + 'px';
+    panel.style.top = (box ? (top - box.top) / scaleY - block.clientTop + block.scrollTop : top) + 'px';
   }
   function constraints() {
     const control = active.control;
@@ -345,7 +364,12 @@ export function installSuiteControls({ root = document } = {}) {
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', accessibleName(control, doc) + (kind === 'select' ? ' 목록' : kind === 'time' ? ' 시간' : ' 달력'));
     const host = control.closest('dialog[open], [role="dialog"]') || doc.body;
     host.append(panel);
-    active = { control, panel, kind, optionIndex: control.selectedIndex };
+    active = { control, panel, kind, optionIndex: control.selectedIndex, modalHost: control.closest('dialog[open]'), topLayer: false };
+    if (typeof panel.showPopover === 'function') {
+      panel.setAttribute('popover', 'manual');
+      try { panel.showPopover(); active.topLayer = true; }
+      catch { panel.removeAttribute('popover'); }
+    }
     control.setAttribute('aria-controls', panel.id); control.setAttribute('aria-expanded', 'true');
     if (kind === 'select') renderSelect(focus);
     else if (kind === 'time') renderTime(focus);
@@ -452,6 +476,7 @@ export function installSuiteControls({ root = document } = {}) {
   listen(doc, 'input', event => { if (active?.control === event.target) refresh(); }, true);
   listen(doc, 'change', event => { if (active?.control === event.target) refresh(); }, true);
   listen(doc, 'reset', () => { close(false); win.setTimeout(scan, 0); }, true);
+  listen(doc, 'close', event => { if (active?.modalHost === event.target) close(false); }, true);
   listen(win, 'resize', place);
   listen(doc, 'scroll', place, true);
   const observer = new win.MutationObserver(records => {
@@ -466,7 +491,7 @@ export function installSuiteControls({ root = document } = {}) {
       }
     });
   });
-  observer.observe(root.nodeType === 9 ? doc.documentElement : root, { subtree: true, childList: true, attributes: true, attributeFilter: ['type', 'readonly', 'disabled', 'min', 'max', 'step', 'required', 'hidden', 'multiple', 'size', 'data-ss-native', 'data-ss-controls', 'selected', 'value', 'label'] });
+  observer.observe(root.nodeType === 9 ? doc.documentElement : root, { subtree: true, childList: true, attributes: true, attributeFilter: ['type', 'readonly', 'disabled', 'min', 'max', 'step', 'required', 'hidden', 'open', 'multiple', 'size', 'data-ss-native', 'data-ss-controls', 'selected', 'value', 'label'] });
   scan();
   const cleanup = () => {
     if (stopped) return; stopped = true; close(false); observer.disconnect();

@@ -12,6 +12,10 @@ html[data-ss-suite]:not([data-ss-suite="invitation"]) :is(h1,h2,h3,h4,h5,h6){fon
 html[data-ss-suite] :where(button,input,select,textarea){font-size:inherit}
 :where(html[data-ss-suite]) button{appearance:none;border:1px solid var(--ss-border);border-radius:10px;padding:8px 13px;background:var(--ss-surface);color:var(--ss-text);cursor:pointer}
 :where(html[data-ss-suite]) :is(input:not([type="checkbox"],[type="radio"],[type="range"],[type="hidden"],[type="file"]),select,textarea){border:1px solid var(--ss-border-strong);border-radius:10px;padding:9px 12px;background:var(--ss-surface);color:var(--ss-text)}
+:where(html[data-ss-suite]) input:is([type="checkbox"],[type="radio"]){appearance:none;display:inline-block;vertical-align:middle;width:18px;height:18px;min-width:18px;padding:0;border:1px solid var(--ss-border-strong);border-radius:5px;background:#fff;cursor:pointer}
+:where(html[data-ss-suite]) input[type="checkbox"]:checked{background:#d3eafb url('./icons/check.svg') center/14px no-repeat;border-color:#78a7c9}
+:where(html[data-ss-suite]) input[type="radio"]{border-radius:50%}
+:where(html[data-ss-suite]) input[type="radio"]:checked{background:radial-gradient(circle,#35658a 0 4px,#fff 5px);border-color:#78a7c9}
 html[data-ss-suite] :is(button,a,input,select,textarea,summary):focus-visible{outline:2px solid var(--ss-focus);outline-offset:3px}
 html[data-ss-suite] :is(button,input,select,textarea):disabled{cursor:not-allowed}
 html[data-ss-suite] .flatpickr-calendar{font-family:var(--ss-font-sans);border:1px solid var(--ss-border);border-radius:16px;box-shadow:0 14px 48px var(--ss-shadow);padding:8px}

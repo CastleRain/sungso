@@ -35,13 +35,17 @@ html[data-ss-suite] .ss-enhanced-control:focus-visible {
 html[data-ss-suite] .ss-enhanced-control:disabled { cursor: not-allowed; opacity: .6; }
 html[data-ss-suite] .ss-control-panel {
   position: fixed;
+  inset: auto;
+  margin: 0;
   z-index: 2147483000;
   box-sizing: border-box;
   padding: 14px;
   overflow: auto;
   isolation: isolate;
   color: var(--ss-text);
-  background: var(--ss-suite-panel, var(--ss-surface));
+  background: var(--ss-suite-panel, #fafdff);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--ss-border-strong);
   border-radius: 18px;
   box-shadow: 0 12px 40px var(--ss-shadow);
@@ -49,6 +53,7 @@ html[data-ss-suite] .ss-control-panel {
   text-align: left;
   letter-spacing: 0;
 }
+html[data-ss-suite] .ss-control-panel::backdrop { background: transparent; backdrop-filter: none; pointer-events: none; }
 html[data-ss-suite] .ss-control-panel * { box-sizing: border-box; }
 html[data-ss-suite] .ss-control-panel button {
   appearance: none;

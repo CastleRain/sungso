@@ -256,3 +256,59 @@ test('a disabled selected placeholder focuses the first available option and liv
   assert.equal(source.getAttribute('aria-haspopup'), null);
 });
 
+test('manual popover remains inside the modal DOM while using viewport coordinates above blur', t => {
+  const e = env(t, '<dialog open style="backdrop-filter:blur(20px);transform:translateX(0)"><select id="select"><option>A</option><option>B</option></select></dialog>');
+  const host = e.doc.querySelector('dialog'), source = e.doc.querySelector('select');
+  Object.defineProperties(e.win, { innerWidth: { value: 1440 }, innerHeight: { value: 900 } });
+  source.getBoundingClientRect = () => ({ left: 847, top: 300, bottom: 340, right: 1027, width: 180, height: 40 });
+  host.getBoundingClientRect = () => ({ left: 340, top: 100, bottom: 800, right: 1100, width: 760, height: 700 });
+  let shown = 0, hidden = 0;
+  e.win.HTMLElement.prototype.showPopover = function () { assert.equal(this.getAttribute('popover'), 'manual'); assert.equal(this.parentElement, host); shown++; };
+  e.win.HTMLElement.prototype.hidePopover = function () { hidden++; };
+  e.click(source); const panel = e.doc.querySelector('.ss-control-panel');
+  assert.equal(shown, 1);
+  assert.equal(panel.parentElement, host);
+  assert.equal(panel.style.left, '847px');
+  assert.equal(panel.style.top, '346px');
+  assert.equal(panel.style.width, '220px');
+  e.key(e.doc.activeElement, 'Escape');
+  assert.equal(hidden, 1); assert.equal(e.doc.activeElement, source);
+});
+
+test('without popover support a transformed scrolling modal gets local coordinates and clipping bounds', async t => {
+  const e = env(t, '<dialog open style="transform:translateX(0)"><select id="select"><option>A</option><option>B</option></select></dialog>');
+  const host = e.doc.querySelector('dialog'), source = e.doc.querySelector('select');
+  e.win.HTMLElement.prototype.showPopover = undefined;
+  Object.defineProperties(e.win, { innerWidth: { value: 1440 }, innerHeight: { value: 900 } });
+  Object.defineProperties(host, { offsetWidth: { value: 760 }, offsetHeight: { value: 700 }, clientLeft: { value: 2 }, clientTop: { value: 2 } });
+  host.scrollTop = 37;
+  source.getBoundingClientRect = () => ({ left: 847, top: 300, bottom: 340, right: 1027, width: 180, height: 40 });
+  host.getBoundingClientRect = () => ({ left: 340, top: 100, bottom: 800, right: 1100, width: 760, height: 700 });
+  e.click(source); const panel = e.doc.querySelector('.ss-control-panel');
+  assert.equal(panel.hasAttribute('popover'), false);
+  assert.equal(panel.style.left, '505px');
+  assert.equal(panel.style.top, '281px');
+  assert.equal(panel.style.maxHeight, '674px');
+  assert.ok(340 + 2 + parseFloat(panel.style.left) + parseFloat(panel.style.width) < 1100);
+  host.removeAttribute('open'); await tick();
+  assert.equal(e.doc.querySelector('.ss-control-panel'), null);
+});
+
+test('a rejected popover promotion safely falls back and programmatic host close removes the panel', t => {
+  const e = env(t, '<dialog open><input type="date" value="2028-02-29"></dialog>');
+  e.win.HTMLElement.prototype.showPopover = () => { throw new Error('Popover unavailable'); };
+  e.click('input');
+  assert.equal(e.doc.querySelector('.ss-control-panel').hasAttribute('popover'), false);
+  e.doc.querySelector('dialog').dispatchEvent(new e.win.Event('close'));
+  assert.equal(e.doc.querySelector('.ss-control-panel'), null);
+});
+
+test('nested labels exclude select choices and helper buttons from the accessible popup name', t => {
+  const e = env(t, '<label><span aria-hidden="true">♡</span>누가 내나요?<select><option>성우</option><option>소희</option><option>공동</option></select><button type="button">도움말</button></label>');
+  e.click('select');
+  assert.equal(e.doc.querySelector('.ss-control-label').textContent, '누가 내나요?');
+  assert.equal(e.doc.querySelector('[role="listbox"]').getAttribute('aria-label'), '누가 내나요?');
+  assert.equal(e.doc.querySelector('.ss-control-panel').getAttribute('aria-label'), '누가 내나요? 목록');
+  assert.equal(e.doc.querySelector('select').options.length, 3);
+});
+
