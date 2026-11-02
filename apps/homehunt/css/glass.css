@@ -1,4 +1,12 @@
 /* HomeHunt glass surface. Original layout, view state and map ownership stay intact. */
+/* Basic mode keeps its bottom navigation and right-side visit action. */
+@media (max-width: 1023px) {
+  html[data-ss-suite="homehunt"][data-ss-surface="solid"] .ss-appearance {
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: auto;
+    bottom: calc(var(--hh-bottomnav-h, 64px) + 16px + env(safe-area-inset-bottom, 0px));
+  }
+}
 html[data-ss-surface="glass"] body.hh-app.hh-v3 {
   height: 100dvh;
   overflow: hidden;
