@@ -1,4 +1,10 @@
 /* HomeHunt VER2: four independent decision axes, on the shared light glass shell. */
+/* A modal must cover presentation controls in both modes, especially over the
+   original mobile sheet footer. Keep the original navigation unobstructed. */
+html[data-ss-suite="homehunt-v2"] body.homehunt-v2 .modal-backdrop { z-index: 220; }
+@media (max-width: 600px) {
+  html[data-ss-suite="homehunt-v2"][data-ss-surface="solid"] .ss-appearance { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
 html[data-ss-surface="glass"] body.homehunt-v2 {
   --sidebar: 0px;
   --header: 76px;
