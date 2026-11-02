@@ -20,6 +20,12 @@ import {
 let getState,
   filter = "all";
 const el = (id) => document.getElementById(id);
+function explanation(id, title, text) {
+  // Keep a disclosure open across snapshots. The original presentation retains
+  // its always-visible note, while glass puts secondary calculation prose away.
+  const open = el(id)?.open || false;
+  return `<p class="plan-note wc-solid-only">${text}</p><details id="${id}" class="wc-glass-only wc-explanation"${open ? " open" : ""}><summary>${title}</summary><p class="plan-note">${text}</p></details>`;
+}
 export function registerDashboardHandlers(getSt) {
   getState = getSt;
   el("tab-dashboard").innerHTML =
@@ -37,7 +43,7 @@ export function registerDashboardHandlers(getSt) {
       "",
     )}</div><div id="db-due-list"></div><div class="plan-card-foot"><small>완납하기 전까지 일정에 남아요.</small>${button("전체 일정 보기", "data-wedding-schedule")}</div></section></div>
   <section class="plan-card plan-wallet" id="db-wallet"></section>
-  <section class="plan-card plan-target-preview">${heading("house-heart", "목표 집값 미리 보기", button("집 시뮬에서 조건 바꾸기", 'data-go="house"'))}<div class="plan-preview-columns"><form id="db-target-form">${field("targetHousePrice", "목표 집값")}${saveFooter("목표 저장")}</form><div id="db-goal-result"></div></div></section>`;
+  <section class="plan-card plan-target-preview">${heading("house-heart", "목표 집값 미리 보기", button("집 시뮬에서 조건 바꾸기", 'data-go="house" data-dashboard-house-target'))}<div class="plan-preview-columns"><form id="db-target-form">${field("targetHousePrice", "목표 집값")}${saveFooter("목표 저장")}</form><div class="wc-glass-only wc-saved-target"><span>저장한 목표 집값</span><strong id="db-saved-target"></strong><small>집 시뮬에서 저장한 목표와 조건으로 계산해요.</small><small id="db-target-draft" hidden>기본 화면에 저장하지 않은 목표 입력이 있어요. 전환하면 이어서 수정할 수 있어요.</small></div><div id="db-goal-result"></div></div></section>`;
   bindFieldForm(el("db-target-form"), "settings");
   el("db-target-form").addEventListener("input", () =>
     renderDashboard(getState()),
@@ -58,6 +64,7 @@ export function registerDashboardHandlers(getSt) {
       }
     }
     if (target.hasAttribute("data-finance")) handleWeddingFinance(target);
+    if (target.hasAttribute("data-dashboard-house-target")) window._showHouseView?.("goal");
   });
 }
 export function renderDashboard(st) {
@@ -100,8 +107,9 @@ export function renderDashboard(st) {
     ["결혼에 추가로 모을 돈", st.weddingCashRequired == null ? null : -st.weddingCashRequired],
     ["추가 수입·지출", st.adjustmentsTotal],
   ];
+  const equationNote = `결혼비용의 ‘추가로 모을 돈’만 차감해요. 이미 낸 비용은 다시 빼지 않으며, 보유 결혼자금·예상 수입은 추가 필요액에 반영돼 있어요. 회사 대출은 집 예산에 따로 더해요.${st.weddingCashRequired == null ? " 결혼자금·환율 확인 전에는 집 예상액을 표시하지 않아요." : ""}${st.cashShortfall ? ` 부족액 ${money(st.cashShortfall)}도 집 예산에 반영해요.` : ""}${esc(weddingRateHint(st.items))}${st.forecast?.approximate ? " · 저축일 미설정: 월 단위 예상" : ""}`;
   el("db-equation").innerHTML =
-    `<dl class="plan-equation">${lines.map(([name, n]) => `<div><dt>${name}</dt><dd class="${n < 0 ? "plan-rose" : ""}">${n > 0 && name !== "결혼 시 예상 저축" ? "+ " : ""}${money(n)}</dd></div>`).join("")}<div class="total"><dt>집에 쓸 예상 현금</dt><dd>${money(st.availCash)}</dd></div></dl><p class="plan-note">결혼비용의 ‘추가로 모을 돈’만 차감해요. 이미 낸 비용은 다시 빼지 않으며, 보유 결혼자금·예상 수입은 추가 필요액에 반영돼 있어요. 회사 대출은 집 예산에 따로 더해요.${st.weddingCashRequired == null ? " 결혼자금·환율 확인 전에는 집 예상액을 표시하지 않아요." : ""}${st.cashShortfall ? ` 부족액 ${money(st.cashShortfall)}도 집 예산에 반영해요.` : ""}${esc(weddingRateHint(st.items))}${st.forecast?.approximate ? " · 저축일 미설정: 월 단위 예상" : ""}</p>`;
+    `<dl class="plan-equation">${lines.map(([name, n]) => `<div><dt>${name}</dt><dd class="${n < 0 ? "plan-rose" : ""}">${n > 0 && name !== "결혼 시 예상 저축" ? "+ " : ""}${money(n)}</dd></div>`).join("")}<div class="total"><dt>집에 쓸 예상 현금</dt><dd>${money(st.availCash)}</dd></div></dl>${explanation("db-equation-details", "계산 기준 자세히", equationNote)}`;
   const due = upcomingPayments(st.displayItems || [], filter);
   el("db-due-list").innerHTML = due.length
     ? due
@@ -120,15 +128,19 @@ export function renderDashboard(st) {
     .forEach((b) => b.setAttribute("aria-pressed", b.dataset.due === filter));
   const f = st.funding || {};
   el("db-wallet").innerHTML =
-    `<h2>${icon("wallet2", "rose")}결혼자금 확인</h2><div><span>남은 잔금</span><strong class="plan-rose">${money(st.totalBalance)}</strong></div><div><span>보유 자금 평가액</span><strong>${money(f.available)}</strong></div><div><span>예상 수입</span><strong>${money(f.expectedIncome || 0)}</strong></div><div><span>${f.surplus > 0 ? "예산보다 남는 돈" : "추가로 모을 돈"}</span><strong class="plan-rose">${money(f.surplus || f.needed)}</strong></div>${button("예산 범위·예상 수입", 'data-wedding-budget=""')}${button("결혼비용에서 확인", 'data-go="wedding"')}<p class="plan-note">예상 수입 전 추가 필요 ${money(f.neededBeforeIncome)} · 수입 반영 후 ${money(f.needed)}. 보유 결혼자금은 집 자금에 다시 더하지 않아요.${st.financeLoading ? " 결혼자금 연결 확인 중." : ""}</p>`;
+    `<h2>${icon("wallet2", "rose")}결혼자금 확인</h2><div><span>남은 잔금</span><strong class="plan-rose">${money(st.totalBalance)}</strong></div><div><span>보유 자금 평가액</span><strong>${money(f.available)}</strong></div><div><span>예상 수입</span><strong>${money(f.expectedIncome || 0)}</strong></div><div><span>${f.surplus > 0 ? "예산보다 남는 돈" : "추가로 모을 돈"}</span><strong class="plan-rose">${money(f.surplus || f.needed)}</strong></div>${button("예산 범위·예상 수입", 'data-wedding-budget=""')}${button("결혼비용에서 확인", 'data-go="wedding"')}${explanation("db-wallet-details", "결혼자금 반영 기준", `예상 수입 전 추가 필요 ${money(f.neededBeforeIncome)} · 수입 반영 후 ${money(f.needed)}. 보유 결혼자금은 집 자금에 다시 더하지 않아요.${st.financeLoading ? " 결혼자금 연결 확인 중." : ""}`)}`;
   syncForm(el("db-target-form"), st.settings);
+  el("db-saved-target").textContent = st.settings?.targetHousePrice == null ? "미설정" : money(st.settings.targetHousePrice);
+  const targetInput = el("db-target-form").querySelector("input");
+  el("db-target-draft").hidden = !targetInput._dirty;
   try {
-    const targetInput = el("db-target-form").querySelector("input");
     const rateScenario = scenarioWithRate(st.settings?.houseScenario || {}, st.marketRate);
     if (rateScenario.rateMode === 'market' && !st.marketRate?.usable) throw Error('공표 금리 자료 확인 중이에요. 집 시뮬에서 직접 금리를 입력할 수도 있어요.');
     const sim = simulation(st, {
       ...scenarioWithRate(st.settings?.houseScenario || {}, st.marketRate),
-      target: Number(targetInput.value.replaceAll(",", "")),
+      target: document.documentElement.dataset.ssSurface === "glass"
+        ? Number(st.settings?.targetHousePrice || 0)
+        : Number(targetInput.value.replaceAll(",", "")),
     });
     el("db-goal-result").innerHTML = sim.target
       ? `<div><span>추가로 필요한 대출</span><strong>${money(sim.additional)}</strong><small>등록 대출 ${money(sim.basePrincipal)} 먼저 반영</small></div><div><span>합산 월 상환액</span><strong>${money(sim.monthly)}</strong><small>추가 대출 연 ${sim.terms.rate}% · ${sim.terms.term}년 · 거치 ${sim.terms.grace}년</small></div><p class="plan-note">거치 종료 후 ${sim.terms.type === "원금" ? "첫 달" : "상환"} 기준${sim.simple ? " · 부대비용·남겨둘 현금 입력 전" : ""}</p>`

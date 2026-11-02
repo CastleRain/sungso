@@ -1,0 +1,200 @@
+/* The original five-tab UI remains the default. These surfaces share its DOM,
+   stores, editors and calendars; only the optional glass presentation changes. */
+.wc-glass-only { display: none; }
+
+html[data-ss-suite="wecost"][data-ss-surface="glass"] {
+  --wc-glass: color-mix(in srgb, var(--ss-surface) 78%, transparent);
+  --wc-glass-strong: color-mix(in srgb, var(--ss-surface) 94%, transparent);
+  --wc-glass-line: color-mix(in srgb, var(--ss-surface) 76%, var(--ss-border));
+  --wc-glass-shadow: 0 7px 26px rgb(71 87 132 / 6%), inset 0 1px 0 rgb(255 255 255 / 70%);
+  --wc-accent: #6c63ff;
+  --wc-accent-soft: color-mix(in srgb, var(--wc-accent) 8%, var(--ss-surface));
+  --ss-link: #5b52c8;
+  --ss-focus: #655bd9;
+  --ss-accent: #d8d4ff;
+  --ss-on-accent: #46406c;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-solid-only,
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #app-nav,
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-target-form { display: none; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-glass-only { display: block; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #app-main {
+  margin-left: 0;
+  min-width: 0;
+  min-height: calc(100dvh - 72px);
+  background: transparent;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #loading-screen { margin-left: 0; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wecost-page-topbar {
+  position: static;
+  min-height: 34px;
+  padding: 6px 28px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wecost-page-topbar :is(.wecost-home-link,.wecost-page-label) { display: none; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .tab-page {
+  max-width: 1360px;
+  padding: 12px 28px 56px;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-page,.plan-dialog) {
+  --plan-border: color-mix(in srgb, var(--ss-text) 9%, transparent);
+  --plan-sky: color-mix(in srgb, var(--ss-soft) 80%, transparent);
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-page-head,.page-hdr) { margin-bottom: 18px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-fx { margin: 0 0 12px; min-height: 0; padding-left: 0; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-page-head,.page-hdr) h1 { font-size: 22px; font-weight: 650; letter-spacing: -.035em; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-card,.card,.metric-card) {
+  border: 1px solid var(--wc-glass-line);
+  border-radius: 19px;
+  background: var(--wc-glass);
+  box-shadow: var(--wc-glass-shadow);
+  backdrop-filter: blur(16px) saturate(115%);
+  -webkit-backdrop-filter: blur(16px) saturate(115%);
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding :is(.card,.metric-card,.metric-card.wf-goal) { background: var(--wc-glass); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding .wed-balance-card { background: color-mix(in srgb, var(--wed-rose-soft) 70%, var(--wc-glass)); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-card,.card,.metric-card):hover { transform: none; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-card { padding: 18px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-card-head { gap: 12px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-icon,.fc-icon,.wed-tone-icon) { box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%); }
+
+/* A single calm metric strip matches the approved dashboard, keeping all three
+   values and their calculation/limit context visible. */
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--wc-glass-line);
+  border-radius: 19px;
+  background: var(--wc-glass);
+  box-shadow: var(--wc-glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric {
+  min-height: 116px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric + .plan-metric { border-left: 1px solid var(--plan-border); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric strong { font-size: clamp(21px,1.8vw,26px); font-weight: 650; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-equation .total { background: color-mix(in srgb, var(--plan-cream) 75%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-segments,.plan-house-tabs) {
+  padding: 4px;
+  gap: 4px;
+  background: color-mix(in srgb, var(--ss-soft) 78%, transparent);
+  border: 1px solid var(--plan-border);
+  border-radius: 13px;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-segments,.plan-house-tabs) > .plan-button {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-segments [aria-pressed="true"],.plan-house-tabs [aria-selected="true"]) {
+  background: var(--ss-surface);
+  color: var(--ss-text);
+  box-shadow: 0 2px 7px rgb(71 87 132 / 8%);
+  border-color: var(--wc-glass-line);
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-due-row { gap: 8px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet { gap: 16px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet > h2 { flex-basis: 100%; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet > div { padding-left: 0; border-left: 0; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet > div + div { padding-left: 16px; border-left: 1px solid var(--plan-border); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet strong { font-size: 21px; font-weight: 650; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation { flex-basis: 100%; margin-top: 10px; min-width: 0; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 30px;
+  padding: 3px 7px;
+  margin-left: -7px;
+  border-radius: 8px;
+  list-style: none;
+  color: var(--plan-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary::-webkit-details-marker { display: none; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary::after { content: ""; width: 5px; height: 5px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin-top: -3px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation[open] > summary::after { transform: rotate(225deg); margin-top: 3px; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary:hover { background: var(--wc-accent-soft); color: var(--ss-text); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation .plan-note { margin-top: 5px!important; text-align: left; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-saved-target {
+  padding: 16px 18px;
+  border: 1px solid var(--plan-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ss-surface) 65%, transparent);
+  align-self: start;
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-saved-target > span { font-size: 12px; color: var(--plan-muted); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-saved-target > strong { display: block; margin: 7px 0 4px; font-size: 23px; font-weight: 650; font-variant-numeric: tabular-nums; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-saved-target > small { display: block; color: var(--plan-muted); font-size: 11px; line-height: 1.7; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-target-draft:not([hidden]) { margin-top: 9px; color: var(--plan-rose); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-goal-result { gap: 18px; align-content: start; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-goal-result strong { font-size: 23px; font-weight: 650; }
+
+/* Dense ledgers and fixed-cost rows stay opaque enough to read. */
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.fc-cost-row,.wed-table-grouped .wed-ledger-group-header > th) { background: transparent; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.fc-cost-row,.fc-due-row):hover { background: color-mix(in srgb, var(--wc-accent) 4%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-owner-card.plan-card { border-color: var(--wc-glass-line); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-record-table,.wed-table) { font-variant-numeric: tabular-nums; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-wedding :is(.wed-chapter-columns th,.wed-view-toggle,.wed-status-filters) { background: color-mix(in srgb, var(--ss-soft) 72%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #tab-cashflow .cf-person-expected { background: color-mix(in srgb, var(--ss-soft) 74%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-preset.selected,.plan-preset[aria-pressed="true"]) { border-color: var(--wc-accent); background: var(--wc-accent-soft); }
+
+/* Editors are shared between modes. Retain their controls, drafts and focus. */
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-dialog,.wf-dialog,.fc-drawer,#wed-payment-dialog,#item-drawer,.fc-month-panel,.wed-date-panel) {
+  background: var(--wc-glass-strong);
+  border-color: var(--wc-glass-line);
+  box-shadow: 0 18px 64px rgb(44 58 95 / 17%), inset 0 1px 0 rgb(255 255 255 / 70%);
+  backdrop-filter: blur(22px) saturate(115%);
+  -webkit-backdrop-filter: blur(22px) saturate(115%);
+}
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.plan-dialog,.wf-dialog,#wed-payment-dialog)::backdrop { background: rgb(34 45 67 / 26%); backdrop-filter: blur(4px); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-drawer::backdrop { background: rgb(34 45 67 / 26%); backdrop-filter: blur(4px); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .drawer-backdrop { background: rgb(34 45 67 / 26%); backdrop-filter: blur(4px); z-index: 1200; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] #item-drawer { z-index: 1201; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.fc-drawer-footer,#item-drawer .drawer-footer,.wf-dialog footer,.wf-dialog header) { background: color-mix(in srgb, var(--ss-surface) 80%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] :is(.fc-icon-option,.fc-recurring-panel,.plan-input,.wf-input) { background: color-mix(in srgb, var(--ss-surface) 85%, transparent); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-icon-option:hover { border-color: var(--wc-accent); background: var(--wc-accent-soft); }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wed-date-mount .wed-calendar { background: transparent; }
+html[data-ss-suite="wecost"][data-ss-surface="glass"] .wc-explanation > summary:focus-visible { outline: 2px solid var(--ss-focus); outline-offset: 3px; }
+
+@media (min-width: 981px) and (max-width: 1250px) {
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-columns { grid-template-columns: minmax(0,1fr); }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric { padding: 15px 12px; gap: 9px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric > .plan-icon { width: 34px; height: 34px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-owner-grid { grid-template-columns: minmax(0,1fr); }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-summary { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .fc-summary-shares { padding-left: 0; border-left: 0; }
+}
+@media (max-width: 768px) {
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .wecost-page-topbar { padding-inline: 16px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .tab-page { padding: 10px 14px 36px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-card { padding: 16px; border-radius: 17px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric { min-height: 0; padding: 16px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] #db-metrics .plan-metric + .plan-metric { border-left: 0; border-top: 1px solid var(--plan-border); }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet { gap: 16px 10px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet > div { flex-basis: calc(50% - 10px); }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet > div + div { padding-left: 0; border-left: 0; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-wallet strong { font-size: 19px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-preview-columns { gap: 20px; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-target-preview > .plan-card-head { flex-wrap: wrap; }
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] .plan-target-preview > .plan-card-head .plan-button { width: 100%; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: var(--ss-surface); --wc-glass-strong: var(--ss-surface); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  html[data-ss-suite="wecost"][data-ss-surface="glass"] { --wc-glass: var(--ss-surface); --wc-glass-strong: var(--ss-surface); }
+}

@@ -37,6 +37,12 @@ function render() {
   renderDashboard(st);
   if (currentTab !== "dashboard") renderers[currentTab](st);
 }
+// Surface changes repaint the dashboard's read-only saved target, using the
+// existing state and forms. No subscriptions, saves or editors are restarted.
+function refreshDashboardSurface() {
+  if (initialized && !retired) renderDashboard(st);
+}
+window.addEventListener("sungso:surface-change", refreshDashboardSurface);
 function showTab(name) {
   if (!renderers[name]) return;
   currentTab = name;
@@ -158,6 +164,7 @@ window._fmtMoneyHint = (input, hintId) => {
 };
 registerPrivateCleanup(() => {
   retired = true;
+  window.removeEventListener("sungso:surface-change", refreshDashboardSurface);
   unsubscribe?.();
   stopFinance();
   loanRates.stop();
