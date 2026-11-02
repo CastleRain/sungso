@@ -1,0 +1,193 @@
+/* HomeHunt glass surface. Original layout, view state and map ownership stay intact. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3 {
+  height: 100dvh;
+  overflow: hidden;
+  --hh-rail-w: 288px;
+  --hh-topbar-h: 76px;
+  --hh-bottomnav-h: 0px;
+  --hh-panel-w: 340px;
+  --hh-panel-min-w: 280px;
+  --hh-panel-max-w: 420px;
+  --hh-canvas: transparent;
+  --hh-surface: rgba(255, 255, 255, .76);
+  --hh-surface-2: rgba(232, 242, 255, .62);
+  --hh-surface-3: rgba(244, 249, 255, .72);
+  --hh-line: rgba(120, 158, 207, .24);
+  --hh-line-strong: rgba(110, 151, 208, .35);
+  --hh-accent: #1f5eff;
+  --hh-accent-hover: #164bdb;
+  --hh-text-on-accent: #fff;
+  --hh-radius-md: 12px;
+  --hh-radius-lg: 20px;
+  --hh-radius-xl: 24px;
+  --hh-shadow-sm: 0 5px 20px rgba(47, 91, 145, .05);
+  --hh-shadow-md: 0 10px 32px rgba(47, 91, 145, .09);
+  --hh-shadow-lg: 0 20px 60px rgba(36, 65, 112, .16);
+  --hh-font-sans: var(--ss-font-sans);
+}
+
+/* The common shell proxies the existing navigation; the functional header remains. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-shell > .portal-header.hh-rail { display: none; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-shell {
+  display: block;
+  height: calc(100dvh - var(--ss-suite-topbar, 72px));
+  min-height: 0;
+  padding-bottom: 0;
+  background: transparent;
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-main {
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: transparent;
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar {
+  position: relative;
+  inset: auto;
+  height: auto;
+  min-height: 76px;
+  padding: 14px 26px;
+  gap: 16px;
+  background: rgba(250, 253, 255, .5);
+  border-bottom: 1px solid var(--hh-line);
+  box-shadow: none;
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-context { min-width: 105px; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-context > strong { font-size: 20px; font-weight: 650; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-global-search {
+  min-width: 140px;
+  max-width: 420px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .73);
+  border-color: var(--hh-line);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions { gap: 7px; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions .record-btn {
+  position: static;
+  width: auto;
+  height: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .65);
+  border-radius: 12px;
+  color: #fff;
+  background: #1f5eff;
+  box-shadow: 0 4px 12px rgba(31, 94, 255, .17);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions .record-btn > span { display: inline; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .portal-main,
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .portal-main > .app-view { background: transparent; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .portal-main { height: auto; min-height: 0; }
+/* The drawer is fixed inside this stacking context and must cover the app header. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3.hh-filter-is-open .portal-main { z-index: var(--hh-z-drawer); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .portal-main > .recommendation-view.active { height: auto; min-height: 100%; overflow: visible; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-view > .recommendation-page.map-first-shell {
+  height: auto;
+  min-height: 100%;
+  padding: 22px 26px 26px;
+  grid-template-rows: auto auto minmax(490px, 1fr);
+  gap: 18px;
+  overflow: visible;
+  background: transparent;
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page > .recommendation-title-row {
+  display: flex;
+  position: static;
+  margin: 0;
+  padding: 0 2px;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row .page-eyebrow { display: none; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row h1 { font-size: 25px; font-weight: 650; line-height: 1.35; letter-spacing: -.7px; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row span { font-size: 13px; line-height: 1.6; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-scope-badge { flex-shrink: 0; border-radius: 14px; background: rgba(255, 255, 255, .56); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-map-toolbar.map-toolbar.hh-chiprow {
+  grid-row: 2;
+  padding: 13px 15px;
+  border: 1px solid var(--hh-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .69);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), var(--hh-shadow-sm);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-results-section.map-first-shell {
+  grid-row: 3;
+  height: max(490px, calc(100dvh - 350px));
+  min-height: 490px;
+  border: 1px solid rgba(255, 255, 255, .94);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px var(--hh-line), var(--hh-shadow-md);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-results-section.map-first-shell > .recommendation-map-workspace.map-first-shell { grid-template-columns: minmax(0, 1fr) 0; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.results-open .recommendation-map-workspace.map-first-shell,
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-results-section.results-open > .recommendation-map-workspace.map-first-shell,
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-map-workspace.map-first-shell:has(> .recommendation-list-pane[aria-hidden="false"]) { grid-template-columns: minmax(0, 1fr) var(--hh-panel-w); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-status { left: 42px; bottom: 90px; max-width: calc(100% - 84px); border-radius: 15px; background: rgba(255, 255, 255, .9); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-composer.hh-drawer--filter {
+  inset-block-start: 72px;
+  inset-inline-start: 288px;
+  max-height: calc(100dvh - 72px);
+  border-radius: 0 22px 22px 0;
+  background: rgba(250, 253, 255, .97);
+}
+
+/* All existing views, drawers and evidence retain their semantics and content. */
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.page-wrap:not(.recommendation-page), .candidate-review-page) { background: transparent; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.summary-card, .chart-card, .dashboard-card, .financial-card, .financial-plan, .candidate-review-card, .visit-card, .supply-card, .supply-detail, .guide-card, .connection-card, .security-note, .market-summary, .market-area-overview, .history-query-panel, .finance-panel, .finance-summary-card, .recommendation-list-pane.results-sheet.hh-panel) {
+  border-color: var(--hh-line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94), var(--hh-shadow-sm);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.visit-modal, .compare-modal, .company-location-modal, .cloud-panel, .hh-select-menu, .rqf-popover) {
+  background: rgba(250, 253, 255, .98);
+  border: 1px solid var(--hh-line);
+  border-radius: 20px;
+  box-shadow: var(--hh-shadow-lg);
+}
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .compare-tray { left: calc(50% + 144px); max-width: calc(100vw - 340px); border-radius: 18px; background: rgba(250, 253, 255, .96); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.map-toolbar, .records-view-switcher, .recommendation-layer-switcher, .map-status-card, .map-tool-btn, .property-card) { border-color: var(--hh-line); }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.record-btn, .primary-btn, .recommendation-submit) { color: #fff; background: #1f5eff; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-ready-search > button { color: #fff; }
+html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.modal-backdrop, .compare-modal-backdrop) { z-index: 220; }
+@supports (backdrop-filter: blur(12px)) {
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.hh-topbar, .recommendation-map-toolbar, .recommendation-list-pane, .compare-tray) { backdrop-filter: blur(18px) saturate(1.18); -webkit-backdrop-filter: blur(18px) saturate(1.18); }
+}
+@media (max-width: 1180px) {
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar { flex-wrap: wrap; gap: 10px; padding: 12px 20px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-global-search { order: 3; flex-basis: 100%; max-width: none; margin: 0; width: 100%; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions { margin-left: auto; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row { align-items: flex-start; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-scope-badge { display: none; }
+}
+@media (max-width: 980px) {
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 { --hh-rail-w: 0px; --hh-topbar-h: 112px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-composer.hh-drawer--filter { inset-inline-start: 0; inset-block-start: 64px; max-height: calc(100dvh - 64px); }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .compare-tray { left: 50%; max-width: calc(100vw - 24px); bottom: 12px; }
+}
+@media (max-width: 767px) {
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar { padding: 10px 14px; gap: 9px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-context > strong { font-size: 18px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions .record-btn { width: 40px; height: 40px; padding: 0; min-height: 40px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-topbar-actions .record-btn > span { display: none; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-global-search { display: flex; min-width: 0; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-view > .recommendation-page.map-first-shell { padding: 16px 12px; gap: 14px; grid-template-rows: auto auto minmax(540px, 1fr); }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row h1 { font-size: 21px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-title-row span { font-size: 12px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-map-toolbar.map-toolbar.hh-chiprow { padding: 11px; gap: 9px; border-radius: 16px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-map-toolbar .recommendation-toolbar-bottom { flex-wrap: wrap; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-results-section.map-first-shell { min-height: 540px; height: 68dvh; border-radius: 18px; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-results-section.map-first-shell > .recommendation-map-workspace.map-first-shell { display: block; grid-template-columns: minmax(0, 1fr); }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-page.map-first-shell > .recommendation-status { left: 22px; bottom: 78px; width: calc(100% - 44px); max-width: none; }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .recommendation-results-section .recommendation-list-pane.results-sheet.hh-panel { border-radius: 20px 20px 0 0; background: rgba(250, 253, 255, .97); }
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 .hh-mobile-record-fab { bottom: 18px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ss-surface="glass"] body.hh-app.hh-v3 :is(.hh-topbar, .recommendation-map-toolbar, .recommendation-list-pane, .compare-tray) { background: #f8fbff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
