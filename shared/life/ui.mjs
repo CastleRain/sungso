@@ -102,7 +102,7 @@ export async function mountLifeApp(definition) {
   panel.append(sectionHeading, summary, toolbar, count, picked, records);
   const connections = node('nav', 'life-connections'); connections.setAttribute('aria-label', '연결된 앱');
   for (const item of definition.links || []) {
-    if (!/^\.\.\/[a-z][a-z0-9-]*\/$/.test(item.href)) continue;
+    if (!/^\.\.\/[a-z][a-z0-9-]*\/$/.test(item.href) && item.href !== './invitation.html') continue;
     const anchor = link(`${item.title} ↗`, item.href); if (item.description) anchor.title = item.description; connections.append(anchor);
   }
   const footer = node('footer', 'life-footer'); footer.append(node('span', '', '우리의 보통날을, 함께'), node('span', '', '작은 기록부터 하나씩 ♡'));
@@ -208,7 +208,7 @@ export async function mountLifeApp(definition) {
     return empty;
   }
   function recordCard(record, tab) {
-    const card = node('article', `life-record${record.done ? ' is-done' : ''}`); card.dataset.recordId = record.id; card.tabIndex = -1;
+    const card = node('article', `life-record${record.done ? ' is-done' : ''}`); card.dataset.recordId = record.id; card.dataset.kind = tab.kind; card.tabIndex = -1;
     if (record.archived) card.append(node('span', 'life-tag', '방문 이력과 함께 보관 중'));
     const heading = node('div', 'life-record-heading');
     if (['shopping', 'tasks'].includes(tab.kind)) {
@@ -226,7 +226,7 @@ export async function mountLifeApp(definition) {
     for (const field of tab.fields) {
       if (field.name === 'title' || field.name === 'name' || field.type === 'checkbox' && !record[field.name]) continue;
       const value = record[field.name]; if (value === '' || value === undefined || value === null || Array.isArray(value) && !value.length) continue;
-      const row = node('div'), label = node('dt', '', field.label), content = node('dd');
+      const row = node('div'), label = node('dt', '', field.label), content = node('dd'); row.dataset.field = field.name;
       if (field.type === 'url') { const anchor = externalLink(value, field.label); if (anchor) content.append(anchor); else content.textContent = '링크를 확인해 주세요.'; }
       else if (field.type === 'select') content.textContent = field.options.find(option => option.value === value)?.label || value;
       else if (field.type === 'place') content.textContent = state.places.find(place => place.id === value)?.name || '보관된 장소';
