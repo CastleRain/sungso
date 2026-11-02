@@ -7,7 +7,7 @@ import { emptyCost, validateCost } from '../../apps/wecost/js/fixed-costs-core.m
 export const GLASS_QA_ROUTES = ['', 'wecost/', 'homehunt/', 'homehunt-v2/', 'honeymoon/', 'travel/', 'dates/', 'invitation/', 'journey/', 'table/', 'footprints/', 'wedding/', 'sohee/', 'sohee/sales/'];
 export function lifeFixture(date = '2026-11-03') {
   return validateState({ ...blankState(), revision: 1,
-    shopping: [{ id: 'qa-milk', name: '예시 우유', quantity: '1', unit: '팩', category: '냉장' }, { id: 'qa-eggs', name: '예시 달걀', quantity: '6', unit: '개', done: true }],
+    shopping: [{ id: 'qa-milk', name: '예시 우유', quantity: '1', unit: '팩', category: 'ingredients' }, { id: 'qa-eggs', name: '예시 달걀', quantity: '6', unit: '개', category: 'ingredients', done: true }],
     recipes: [{ id: 'qa-recipe', title: '예시 토마토 파스타', ingredients: ['예시 토마토', '예시 면'], steps: '합성 레시피 · 재료를 함께 볶아요.', memo: '운영 기록과 무관한 대역' }],
     places: [{ id: 'qa-cafe', name: '예시 작은 카페', category: 'cafe', region: '예시 동네', address: '실제 주소 아님', wish: true }, { id: 'qa-park', name: '예시 산책길', category: 'date', wish: false }],
     visits: [{ id: 'qa-visit', placeId: 'qa-park', date, memo: '합성 방문 기록' }],

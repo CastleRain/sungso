@@ -8,9 +8,18 @@ await prepareAppBuilds();
 
 const directories = ['tests', 'tests/site', 'apps/hub/tests', 'apps/homehunt/tests', 'apps/homehunt-v2/tests', 'apps/homehunt-v2/js', 'apps/invitation/tests', 'apps/invitation-v2/tests', 'apps/invitation-v3/tests', 'apps/invitation-v4/tests', 'apps/invitation-v5/tests', 'apps/sohee/sales/tests', 'services/sohee/tests', 'services/invitation/tests'];
 const files = [];
-directories.push('apps/journey/tests', 'services/journey/tests', 'tests/theme', 'apps/wecost/tests', 'apps/travel/tests', 'apps/honeymoon/tests', 'apps/table/tests');
-for (const directory of directories) {
-  for (const file of (await readdir(path.join(PROJECT_ROOT, directory))).sort()) {
+directories.push('apps/journey/tests', 'services/journey/tests', 'tests/theme');
+// An app activation can be reverted independently, removing its new test directory.
+const optionalDirectories = ['apps/wecost/tests', 'apps/travel/tests', 'apps/honeymoon/tests', 'apps/table/tests'];
+for (const directory of [...directories, ...optionalDirectories]) {
+  let entries;
+  try {
+    entries = await readdir(path.join(PROJECT_ROOT, directory));
+  } catch (error) {
+    if (error.code === 'ENOENT' && optionalDirectories.includes(directory)) continue;
+    throw error;
+  }
+  for (const file of entries.sort()) {
     if (file.endsWith('.test.mjs')) files.push(path.join(directory, file));
   }
 }
