@@ -17,6 +17,7 @@ Element.prototype.scrollIntoView=()=>{};window.scrollTo=()=>{};
 const {render,screen,fireEvent,cleanup,waitFor}=await import('@testing-library/react');
 const user=(await import('@testing-library/user-event')).default.setup({document});
 const here=path.dirname(fileURLToPath(import.meta.url)),output=path.join(here,'.component-test.cjs');
+const glassStyle=document.createElement('style');glassStyle.textContent=await readFile(path.join(here,'../src/glass.css'),'utf8');document.head.append(glassStyle);
 const charts=['ComposedChart','LabelList','ResponsiveContainer','AreaChart','Area','BarChart','Bar','LineChart','Line','XAxis','YAxis','CartesianGrid','Tooltip','Legend','Cell','ReferenceLine','Brush'];
 await build({stdin:{contents:"export * from '../src/pages.jsx'; export * from '../src/update-panel.jsx'; export * from '../src/ui.jsx'; export * from '../src/menu-editor.jsx'; export {applyMenuRules} from '../../../../services/sohee/menu-rules.mjs';",loader:'jsx',resolveDir:here},bundle:true,platform:'node',format:'cjs',outfile:output,external:['react','react-dom','react-dom/*'],plugins:[{name:'charts-only',setup(api){api.onResolve({filter:/^recharts$/},()=>({path:'charts',namespace:'test'}));api.onLoad({filter:/.*/,namespace:'test'},()=>({contents:"import React from 'react';"+charts.map(name=>`export function ${name}(props){return React.createElement('div',null,props.children)}`).join('\n'),resolveDir:here}));}}]});
 const {SalesApp,SalesUI,SourceDateTime,UpdateContext,UpdatePanel,MenuRuleContext,applyMenuRules}=createRequire(import.meta.url)(output);
@@ -76,6 +77,16 @@ try {
    await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));assert.ok(screen.getByText('이 화면의 자료 범위'));assert.equal(screen.getByRole('button',{name:'저장된 분석 다시 불러오기'}).disabled,true);
    await user.click(screen.getByRole('button',{name:'자료 기준 보기'}));
    await user.click(screen.getByRole('button',{name:'과거 변화와 비교 근거'}));assert.ok(await screen.findByRole('heading',{name:'월별 대량 주문 이력'}));
+   const comparison=r.container.querySelector('.sales-comparison-body'),comparisonPanel=comparison.firstElementChild;
+   document.documentElement.dataset.ssSuite='sohee-sales';document.documentElement.dataset.ssSurface='glass';fireEvent(window,new window.CustomEvent('sungso:surface-change'));
+   assert.equal(comparison.hidden,true,'glass folds historical discount analysis without unmounting its table');
+   assert.equal(getComputedStyle(comparison).display,'none','display:contents must not override the collapsed state');
+   await user.click(r.container.querySelector('.sales-glass-disclosure-toggle'));assert.equal(comparison.hidden,false);
+   document.documentElement.dataset.ssSurface='solid';fireEvent(window,new window.CustomEvent('sungso:surface-change'));
+   assert.equal(comparison.hidden,false);assert.equal(comparison.firstElementChild,comparisonPanel);
+   document.documentElement.dataset.ssSurface='glass';fireEvent(window,new window.CustomEvent('sungso:surface-change'));
+   assert.equal(comparison.hidden,false,'opened history remains open on another glass visit');
+   document.documentElement.dataset.ssSurface='solid';fireEvent(window,new window.CustomEvent('sungso:surface-change'));
   }
   if(route==='prep'){
    assert.equal(screen.queryByRole('button',{name:'날짜 선택',exact:true}),null);

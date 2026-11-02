@@ -1,0 +1,86 @@
+/* Existing Mantine controls, data tables and charts retain their state. */
+.sales-glass-disclosure,.sales-comparison-body { display: contents; }
+.sales-comparison-body[hidden] { display: none; }
+.sales-glass-disclosure-toggle { display: none; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] {
+  --sales-glass: color-mix(in srgb,var(--ss-surface) 80%,transparent);
+  --sales-glass-panel: var(--ss-suite-panel, var(--ss-surface));
+  --sales-glass-line: color-mix(in srgb,var(--ss-surface) 70%,var(--ss-border));
+  --sales-glass-shadow: 0 6px 25px var(--ss-shadow), inset 0 1px 0 rgb(255 255 255 / 72%);
+}
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .app { display: block; min-height: calc(100dvh - 72px); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.app-header,.navigation-shell) { display: none; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-content { max-width: 1450px; padding: 27px 28px 18px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-head { min-height: 42px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-head > div:first-child { display: block; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-head h1 { font-size: 24px; line-height: 1.35; font-weight: 650; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-head p { font-size: 12px; margin-top: 7px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.panel,.date-filter,.owner-summary,.ledger-summary,.prep-summary,.prep-brief,.prep-decision-bar,.prep-owner-summary,.stat,.source-cards > section,.update-panel) {
+  border: 1px solid var(--sales-glass-line);
+  border-radius: 18px;
+  background: var(--sales-glass);
+  box-shadow: var(--sales-glass-shadow);
+  backdrop-filter: blur(16px) saturate(110%);
+  -webkit-backdrop-filter: blur(16px) saturate(110%);
+}
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .date-filter { padding: 13px 16px; margin-bottom: 17px; gap: 12px; grid-template-columns: minmax(130px,1fr) auto; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .period-footer { grid-column: 1/-1; display: flex; flex-wrap: wrap; border-top: 1px solid var(--ss-border); padding-top: 8px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .period-footer > span { margin-left: auto; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .panel { padding: 18px; margin-bottom: 16px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.owner-main-grid,.owner-secondary-grid) { gap: 16px; margin-bottom: 16px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-main-grid { grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.owner-main-grid,.owner-secondary-grid) > .panel { padding: 18px; border-radius: 18px; margin-bottom: 0; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-main-grid .owner-trend { height: 215px; min-height: 215px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-secondary-grid .chart.weekday-chart { height: 120px; min-height: 120px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-secondary-grid .owner-hours { height: 106px; min-height: 106px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .section-head h2 { font-size: 16px; font-weight: 600; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-summary { overflow: hidden; grid-template-columns: 1.25fr repeat(4,minmax(0,1fr)); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales { background: color-mix(in srgb,var(--ss-soft) 65%,transparent); color: var(--ss-text); padding: 18px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales :is(.owner-metric-label,p) { color: var(--ss-link); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales > strong { font-size: clamp(23px,2vw,30px); font-weight: 650; color: var(--ss-text); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales .metric-comparison { color: var(--ss-link); font-size: 10px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-metric { padding: 18px 14px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-metric > strong { font-size: clamp(20px,1.7vw,25px); font-weight: 650; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.owner-menu-title strong,.owner-menu-title > span) { font-size: 12px; line-height: 1.5; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-menu-list { gap: 12px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.table-scroll,.sales-calendar) { border-radius: 12px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .table-scroll th { background: color-mix(in srgb,var(--ss-soft) 75%,transparent); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .table-scroll td { border-color: var(--ss-border); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .table-scroll tbody tr:hover { background: color-mix(in srgb,var(--ss-soft) 55%,transparent); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.sales-button,.mantine-Input-input) { border-radius: 10px; box-shadow: none; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.segmented,.local-tabs,.mantine-SegmentedControl-root) { border-radius: 12px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.mantine-Combobox-dropdown,.mantine-Popover-dropdown,.sales-chart-tip,.data-status-popover) { background: var(--sales-glass-panel); border: 1px solid var(--sales-glass-line); border-radius: 15px; box-shadow: 0 12px 35px var(--ss-shadow); backdrop-filter: blur(20px); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.sales-drawer,.mantine-Modal-content) { background: var(--sales-glass-panel); border: 1px solid var(--sales-glass-line); box-shadow: 0 18px 64px var(--ss-shadow); backdrop-filter: blur(22px); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.sales-drawer-header,.mantine-Modal-header) { background: color-mix(in srgb,var(--ss-surface) 90%,transparent); border-bottom: 1px solid var(--ss-border); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.mantine-Drawer-overlay,.mantine-Modal-overlay) { backdrop-filter: blur(4px); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.record-summary,.calendar-reading,.prep-total,.note,.chart-date-reading) { border-radius: 12px; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .sales-glass-disclosure { display: block; margin-bottom: 16px; border: 1px solid var(--ss-border); border-radius: 14px; overflow: hidden; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .sales-glass-disclosure-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border: 0; border-radius: 0; background: var(--sales-glass); font: 600 13px var(--ss-font-sans); color: var(--ss-text); cursor: pointer; text-align: left; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .sales-glass-disclosure-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .sales-comparison-body > .panel { background: transparent; border: 0; border-radius: 0; margin-bottom: 0; box-shadow: none; }
+html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .app footer { max-width: 1450px; padding: 14px 28px; }
+@media(min-width:981px) and (max-width:1250px) {
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.owner-main-grid,.ledger-day-layout) { grid-template-columns: minmax(0,1fr); }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales { grid-column: 1/-1; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-secondary-grid { grid-template-columns: minmax(0,1fr); }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.prep-decision-bar,.prep-owner-summary,.prep-brief) { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:700px) {
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-content { padding: 20px 14px 16px; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .page-head h1 { font-size: 22px; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .date-filter { grid-template-columns: minmax(0,1fr); padding: 13px; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .period-footer { display: grid; grid-template-columns: 1fr auto; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .period-footer > span { margin: 0; text-align: left; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-sales { grid-column: 1/-1; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-summary .owner-metric:last-child { grid-column: auto; display: flex; border-top: 0; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.owner-main-grid,.owner-secondary-grid) { grid-template-columns: minmax(0,1fr); }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] :is(.panel,.owner-main-grid > .panel,.owner-secondary-grid > .panel) { padding: 16px; border-radius: 16px; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .owner-metric { padding: 15px 13px; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .dashboard-bottom { align-items: flex-start; flex-direction: column; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .dashboard-bottom > div { flex-wrap: wrap; }
+  html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] .app footer { padding-inline: 14px; }
+}
+@media(prefers-reduced-transparency:reduce) { html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] { --sales-glass: var(--ss-surface); --sales-glass-panel: var(--ss-surface); } }
+@supports not (backdrop-filter:blur(1px)) { html[data-ss-suite="sohee-sales"][data-ss-surface="glass"] { --sales-glass: var(--ss-surface); --sales-glass-panel: var(--ss-surface); } }
