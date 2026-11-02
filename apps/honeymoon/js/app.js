@@ -5,7 +5,7 @@ import { initPrice } from './tab-price.js';
 import { initMap } from './tab-map.js';
 import { initTournament } from './tab-tournament.js';
 import { initPdf } from './tab-pdf.js';
-import { initPlan } from './tab-plan.js';
+import { initPlan } from './tab-plan.js?v=20261103-glass-honeymoon-1';
 import { RESORTS, TRIP_INFO, getBestPrice, getFeaturedImage } from './resorts-data.js';
 import { TRIP_DAYS, TRAVEL_LOCATIONS } from '../../../shared/travel/trip-data.mjs';
 import { subscribeComments, addComment, deleteComment, getCustomImages, saveCustomImages, subscribeAllMetaCounts } from './firebase-notes.js';

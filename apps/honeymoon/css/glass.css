@@ -1,0 +1,127 @@
+/* A bright emerald companion to the shared glass shell. App state, lazily
+   initialized tabs, PDFs, comparisons and editable notes keep their own DOM. */
+.hm-glass-resort-image { display: none; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] {
+  --hm-glass: color-mix(in srgb, var(--ss-surface) 79%, transparent);
+  --hm-panel: color-mix(in srgb, var(--ss-surface) 96%, transparent);
+  --hm-line: color-mix(in srgb, var(--ss-surface) 70%, var(--ss-border));
+  --hm-shadow: 0 6px 25px rgb(42 91 92 / 6%), inset 0 1px 0 rgb(255 255 255 / 72%);
+  --ss-link: #127e69;
+  --ss-focus: #127e69;
+  --ss-accent: #d7f0e9;
+  --ss-on-accent: #20594f;
+  --ss-hover: #c7e9df;
+}
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] body { min-width: 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .site-hero {
+  height: 154px;
+  margin: 20px 28px 0;
+  border: 1px solid var(--hm-line);
+  border-radius: 20px;
+  box-shadow: var(--hm-shadow);
+}
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-overlay { background: linear-gradient(100deg,rgb(9 63 71 / 72%),rgb(6 87 93 / 22%) 72%); color: white; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-topbar { justify-content: flex-end; padding: 9px 20px 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-topbar :is(.honeymoon-home-link,.hero-topbar-title,.hero-topbar-sep) { display: none; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-trip-link { color: #16594f; border-radius: 9px; background: rgb(248 255 253 / 94%); border: 1px solid rgb(255 255 255 / 80%); padding: 6px 10px; backdrop-filter: blur(12px); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-trip-link:hover { opacity: 1; background: #fff; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-body { padding: 0 25px 23px; align-items: center; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-title { font-size: 28px; font-weight: 650; line-height: 1.25; letter-spacing: -.035em; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-eyebrow { opacity: .85; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-subline { margin-top: 7px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-stats { gap: 8px; }
+/* Keep small labels legible even when a bright resort photo is behind them. */
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.hero-stat-dday,.hero-stat-item) { color: #16594f; background: rgb(248 255 253 / 94%); border-color: rgb(255 255 255 / 80%); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-dday-num { font-size: 23px; font-weight: 600; }
+/* Hide only the proxied tabs: memo notifications and FX controls stay usable. */
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .tab-nav > .tab-btn { display: none; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .tab-nav { margin: 0 28px; padding: 9px 0; gap: 10px; min-height: 50px; flex-wrap: wrap; background: transparent; border: 0; overflow: visible; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] #memoNotifBtn { margin-left: auto; background: var(--hm-glass); border: 1px solid var(--hm-line); border-radius: 12px; min-height: 34px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .fx-widget { margin-left: 0; padding: 4px 7px 4px 12px; border: 1px solid var(--hm-line); border-radius: 12px; background: var(--hm-glass); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.fx-toggle-btn,.fx-refresh-btn) { border-radius: 8px; min-height: 28px; background: var(--ss-surface); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .main-layout { margin: 0 28px 22px; min-width: 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-wrap { max-width: 1240px; padding: 0 2px 30px; gap: 20px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(#planCurrentTrip,.plan-resort-focus,.plan-archive,.pick-person-card,.confirmed-resort-card,.resort-card,.match-card,.result-champion,.price-summary-card,.result-rounds) {
+  background: var(--hm-glass);
+  border: 1px solid var(--hm-line);
+  border-radius: 19px;
+  box-shadow: var(--hm-shadow);
+  backdrop-filter: blur(16px) saturate(115%);
+  -webkit-backdrop-filter: blur(16px) saturate(115%);
+}
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] #planCurrentTrip { padding: 19px 20px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-trip-header { background: transparent; border: 0; padding: 0; gap: 20px; color: var(--text); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-trip-name { font-size: 20px; font-weight: 650; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-trip-icon { width: 40px; height: 40px; font-size: 25px; border-radius: 13px; background: var(--ss-accent); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-trip-dates { color: var(--text-muted); font-size: 12px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-trip-dest { color: var(--text-muted); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-link { background: #147e69; border: 1px solid #187762; color: white; padding: 10px 16px; border-radius: 13px; font-weight: 600; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-link:hover { background: #106b59; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 15px; border-top: 1px solid var(--border); padding-top: 12px; gap: 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links a { background: transparent; border: 0; border-radius: 0; color: var(--text); text-align: center; font-size: 12px; padding: 8px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links a + a { border-left: 1px solid var(--border); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links a:hover { background: var(--ss-soft); border-radius: 8px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-overview > summary { padding: 10px 13px; border: 1px solid color-mix(in srgb,var(--ss-link) 20%,transparent); border-radius: 12px; background: color-mix(in srgb,var(--ss-accent) 65%,transparent); font-weight: 600; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-resort-focus { padding: 17px 20px; gap: 18px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hm-glass-resort-image:not([hidden]) { display: block; width: 180px; height: 115px; object-fit: cover; border-radius: 13px; flex: 0 0 auto; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-resort-focus > div:first-of-type { flex: 1; min-width: 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-resort-focus h2 { font-size: 20px; font-weight: 650; margin: 9px 0 6px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-focus-label { font-weight: 600; background: var(--ss-accent); border-radius: 7px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-focus-actions { gap: 9px; border-left: 1px solid var(--border); padding-left: 18px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-focus-actions > :is(a,button) { display: flex; align-items: center; justify-content: center; width: 100%; padding: 9px 12px; min-height: 38px; border: 1px solid var(--ss-border-strong); border-radius: 11px; text-decoration: none; background: var(--hm-glass); color: var(--ss-link); font-weight: 600; font-size: 12px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-section-label { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pick-sohee-header { background: color-mix(in srgb,#d8f2e6 70%,transparent); color: #236756; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pick-sungwoo-header { background: color-mix(in srgb,#dceefa 70%,transparent); color: #2f5c7c; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .psc-name { font-weight: 600; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.cards-toolbar,.price-tab-header,.pdf-toolbar,.pdf-sidebar-header,.pdf-group-label,.tournament-setup) { background: var(--hm-panel); border-color: var(--hm-line); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.cards-toolbar,.price-tab-header) { border-radius: 16px 16px 0 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .cards-grid { max-width: none; padding: 18px 2px; gap: 16px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .resort-card { overflow: hidden; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .resort-card:hover { transform: translateY(-2px); box-shadow: 0 9px 26px rgb(42 91 92 / 11%); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.sort-btn,.pref-btn,.price-reset-btn,.pdf-page-btn,.card-detail-btn,.confirmed-detail-btn) { border-radius: 10px; box-shadow: none; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.price-left-col,.pdf-sidebar,.pdf-viewer-area,.price-right-col,.cards-right-col) { background: var(--hm-glass); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .price-split-layout { border: 1px solid var(--hm-line); border-radius: 17px; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .compare-table { background: color-mix(in srgb,var(--ss-surface) 90%,transparent); font-variant-numeric: tabular-nums; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-tab-body { border: 1px solid var(--hm-line); border-radius: 17px; overflow: hidden; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-viewer-area { min-width: 0; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-toolbar { flex-wrap: wrap; }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.detail-sheet,.memo-popup,.pick-modal,.memo-center-drawer) { background: var(--hm-panel); border: 1px solid var(--hm-line); box-shadow: 0 18px 64px rgb(35 71 81 / 20%); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.detail-sheet-header,.memo-input-area,.memo-popup-header,.pick-modal-header,.mcd-header) { background: color-mix(in srgb,var(--ss-surface) 80%,transparent); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(.ds-backdrop,.memo-center-backdrop,.memo-popup-backdrop,.pick-modal-backdrop) { background: rgb(30 55 65 / 28%); backdrop-filter: blur(4px); }
+html[data-ss-suite="honeymoon"][data-ss-surface="glass"] :is(button,a,input,select,textarea,summary):focus-visible { outline: 2px solid var(--ss-focus); outline-offset: 3px; }
+@media (min-width: 981px) and (max-width: 1250px) {
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .cards-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hm-glass-resort-image:not([hidden]) { width: 120px; height: 100px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-resort-focus { flex-wrap: wrap; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-focus-actions { flex: 1 0 100%; flex-direction: row; border-left: 0; border-top: 1px solid var(--border); padding: 12px 0 0; }
+}
+@media (max-width: 680px) {
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .site-hero { height: 145px; margin: 14px 14px 0; border-radius: 16px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-body { padding: 0 16px 18px; gap: 10px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-title { font-size: 22px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-stat-item { display: none; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-stat-dday { padding: 7px 8px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hero-dday-num { font-size: 18px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .tab-nav { margin-inline: 14px; gap: 7px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] #memoNotifBtn { margin-left: 0; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .fx-widget { margin-left: auto; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .main-layout { margin: 0 14px 14px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] #planCurrentTrip { padding: 16px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] #planCurrentTrip .plan-trip-header { padding: 0; gap: 14px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links { grid-template-columns: minmax(0,1fr); gap: 3px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links a { text-align: left; padding: 9px 6px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-current-links a + a { border-left: 0; border-top: 1px solid var(--border); }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-resort-focus { padding: 16px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .hm-glass-resort-image:not([hidden]) { width: 100%; height: 140px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .plan-focus-actions { border-left: 0; padding-left: 0; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-tab-body { flex-direction: column; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-sidebar { width: 100%; max-height: 140px; flex: 0 0 auto; border-right: 0; border-bottom: 1px solid var(--border); }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-viewer-area { min-height: 180px; }
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] .pdf-canvas-wrap { padding: 12px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] { --hm-glass: var(--ss-surface); --hm-panel: var(--ss-surface); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  html[data-ss-suite="honeymoon"][data-ss-surface="glass"] { --hm-glass: var(--ss-surface); --hm-panel: var(--ss-surface); }
+}

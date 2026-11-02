@@ -17,9 +17,11 @@ export function initPlan({ openDetailFn }) {
   if (!wrap) return;
   const stay = TRIP_DAYS.filter(day => TRAVEL_LOCATIONS[day.date]?.tone === 'maldives');
   const resort = RESORTS.find(item => item.name_ko?.includes(PLACES.resort?.name || '\0'));
+  const focusImage = resort && getFeaturedImage(resort);
   wrap.innerHTML = `
     <section id="planCurrentTrip" aria-label="현재 신혼여행 일정"></section>
     <section class="plan-resort-focus" aria-label="예약한 리조트">
+      ${focusImage ? `<img class="hm-glass-resort-image" src="${esc(focusImage)}" alt="" loading="lazy" onerror="this.hidden=true">` : ''}
       <div><span class="plan-focus-label">함께 보는 리조트</span><h2>${esc(resort?.name_ko || PLACES.resort?.name || '리조트')}</h2><p>${esc(stay[0]?.date)} – ${esc(stay.at(-1)?.date)}<br>객실·식사·수상비행기 조건은 예약서와 함께 확인해요.</p></div>
       <div class="plan-focus-actions"><button type="button" class="confirmed-detail-btn" id="openAnaneaPlan">리조트 정보·메모 보기 →</button><a class="plan-text-link" href="../travel/#resort">예약 세부사항 정리</a></div>
     </section>
@@ -68,13 +70,14 @@ function _renderCurrentTrip(data = {}) {
   const days = Array.isArray(data.days) && data.days.length ? data.days : TRIP_DAYS;
   const start = days[0]?.date?.replaceAll('-', '.') || '미정';
   const end = days.at(-1)?.date?.replaceAll('-', '.') || '미정';
+  const overviewOpen = el.querySelector('.plan-current-overview')?.open || false;
   el.innerHTML = `
     <div class="plan-trip-header">
       <div class="plan-trip-main"><div class="plan-trip-icon" aria-hidden="true">✈️</div><div class="plan-trip-info"><div class="plan-trip-name">우리의 전체 여행 일정</div><div class="plan-trip-dates">${esc(start)} — ${esc(end)}<span class="plan-trip-dur">${days.length}일</span></div><div class="plan-trip-dest">${esc([...new Set(days.map(day => TRAVEL_LOCATIONS[day.date]?.country).filter(Boolean))].join(' · '))}</div></div></div>
       <a class="plan-current-link" href="../travel/">일정·지도 보러 가기 →</a>
     </div>
     <div class="plan-current-links"><a href="../travel/#hotels">숙박 후보 고르기</a><a href="../travel/#cruise">크루즈 확인</a><a href="../travel/#flights">항공편·환승 확인</a></div>
-    <details class="plan-current-overview"><summary>현재 여정 한눈에 보기</summary><ol>${days.map(day => `<li><span>${esc(day.date?.slice(5).replace('-', '/'))}</span><div><strong>${esc(day.title)}</strong><p>${esc(day.description)}</p></div></li>`).join('')}</ol><a class="plan-text-link" href="../travel/">이 일정 자세히 보기 →</a></details>
+    <details class="plan-current-overview"${overviewOpen ? ' open' : ''}><summary>현재 여정 한눈에 보기</summary><ol>${days.map(day => `<li><span>${esc(day.date?.slice(5).replace('-', '/'))}</span><div><strong>${esc(day.title)}</strong><p>${esc(day.description)}</p></div></li>`).join('')}</ol><a class="plan-text-link" href="../travel/">이 일정 자세히 보기 →</a></details>
   `;
 }
 
