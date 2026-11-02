@@ -15,7 +15,7 @@ const $ = id => document.getElementById(id);
 const root = document.querySelector('[data-private-root]');
 const monthNow = koreanToday().slice(0, 7).split('-').map(Number);
 let calYear = monthNow[0], calMonth = monthNow[1] - 1;
-const picker = globalThis.flatpickr?.('#formDate', { locale: 'ko', dateFormat: 'Y-m-d', minDate: koreanToday(), disableMobile: true });
+const picker = globalThis.flatpickr?.('#formDate', { locale: 'ko', dateFormat: 'Y-m-d', minDate: koreanToday(), disableMobile: true, monthSelectorType: 'static' });
 if (!picker) { $('formDate').type = 'date'; $('formDate').min = koreanToday(); }
 function el(tag, cls, text) { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; }
 function formatDate(date) { return isDateOnly(date) ? new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${date}T00:00:00+09:00`)) : '날짜를 확인해 주세요'; }
