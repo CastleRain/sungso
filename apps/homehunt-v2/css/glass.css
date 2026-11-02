@@ -25,8 +25,8 @@ html[data-ss-surface="glass"] body.homehunt-v2 .topbar {
   min-height: 76px;
   padding: 14px 26px;
   gap: 18px;
-  background: rgba(250, 253, 255, .5);
-  border-bottom: 1px solid var(--line);
+  background: var(--ss-material-fill, #f8fbff);
+  border-bottom: 1px solid var(--ss-material-border, var(--line));
   backdrop-filter: none;
 }
 html[data-ss-surface="glass"] body.homehunt-v2 .page-context { min-width: 110px; }
@@ -57,17 +57,18 @@ html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip {
   padding: 15px 17px;
   gap: 9px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, .73);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .96), 0 5px 20px rgba(49, 89, 140, .04);
+  border-color: var(--ss-material-border, var(--line));
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, none);
 }
 html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .label { font-size: 11px; font-weight: 600; }
 html[data-ss-surface="glass"] body.homehunt-v2 .condition-strip .chip { font-size: 12px; padding: 8px 10px; border-radius: 10px; }
 html[data-ss-surface="glass"] body.homehunt-v2 .board-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
 html[data-ss-surface="glass"] body.homehunt-v2 .board-grid .panel > .field-row { flex-wrap: wrap; }
 html[data-ss-surface="glass"] body.homehunt-v2 :is(.panel, .model-card, .guide-step, .connection-card, .supply-card) {
-  border-color: var(--line);
-  background: rgba(255, 255, 255, .69);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .96), 0 6px 22px rgba(49, 89, 140, .045);
+  border-color: var(--ss-material-border, var(--line));
+  background: var(--ss-material-fill, #f8fbff);
+  box-shadow: var(--ss-material-shadow, none);
   border-radius: 20px;
 }
 html[data-ss-surface="glass"] body.homehunt-v2 .panel { padding: 21px; }
@@ -87,9 +88,9 @@ html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card {
   min-height: 164px;
   padding: 20px 17px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, .68);
-  border: 1px solid var(--line);
-  box-shadow: inset 0 1px 0 #fff, 0 5px 20px rgba(49, 89, 140, .035);
+  background: var(--ss-material-fill, #f8fbff);
+  border: 1px solid var(--ss-material-border, var(--line));
+  box-shadow: var(--ss-material-shadow, none);
 }
 html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card > .ti { display: inline-grid; place-items: center; width: 38px; height: 38px; margin-bottom: 8px; border-radius: 12px; color: #176b58; background: rgba(205, 244, 225, .7); font-size: 24px; }
 html[data-ss-surface="glass"] body.homehunt-v2 .board-axes .axis-card:nth-child(2) > .ti { color: #1f5eff; background: rgba(212, 231, 255, .75); }
@@ -110,7 +111,7 @@ html[data-ss-surface="glass"] body.homehunt-v2 :is(.button, .icon-button, .choic
 html[data-ss-surface="glass"] body.homehunt-v2 :is(.button.primary, .search-submit) { background: #1f5eff; border-color: rgba(255, 255, 255, .7); color: #fff; box-shadow: 0 4px 12px rgba(31, 94, 255, .14); }
 html[data-ss-surface="glass"] body.homehunt-v2 :is(.button.primary, .search-submit):hover { background: #174fdc; color: #fff; }
 html[data-ss-surface="glass"] body.homehunt-v2 .finder { height: calc(100dvh - 148px - var(--access-bar)); min-height: 580px; padding: 20px 22px 22px; gap: 16px; }
-html[data-ss-surface="glass"] body.homehunt-v2 .finder-toolbar { border: 1px solid var(--line); border-radius: 17px; background: rgba(255, 255, 255, .72); padding: 12px 14px; }
+html[data-ss-surface="glass"] body.homehunt-v2 .finder-toolbar { border: 1px solid var(--ss-material-border, var(--line)); border-radius: 17px; background: var(--ss-material-fill, #f8fbff); box-shadow: var(--ss-material-shadow, none); padding: 12px 14px; }
 html[data-ss-surface="glass"] body.homehunt-v2 .finder-body { border: 1px solid var(--line); border-radius: 21px; overflow: hidden; box-shadow: 0 7px 22px rgba(49, 89, 140, .05); }
 html[data-ss-surface="glass"] body.homehunt-v2 .result-panel { background: rgba(250, 253, 255, .93); border-color: var(--line); }
 html[data-ss-surface="glass"] body.homehunt-v2 :is(.candidate-card, .supply-card, .destination-card) { border-color: var(--line); }
@@ -120,7 +121,15 @@ html[data-ss-surface="glass"] body.homehunt-v2 :is(.modal-head, .modal-footer) {
 html[data-ss-surface="glass"] body.homehunt-v2 .toast { left: calc(50% + 144px); z-index: 240; bottom: 22px; }
 html[data-ss-surface="glass"] body.homehunt-v2 .boot-status { bottom: 22px; z-index: 240; }
 @supports (backdrop-filter: blur(12px)) {
-  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .condition-strip, .finder-toolbar, .result-panel) { backdrop-filter: blur(18px) saturate(1.16); -webkit-backdrop-filter: blur(18px) saturate(1.16); }
+  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .condition-strip, .finder-toolbar, .result-panel, .panel:not(.board-axes), .axis-card, .model-card, .guide-step, .connection-card, .supply-card) { backdrop-filter: var(--ss-material-filter, none); -webkit-backdrop-filter: var(--ss-material-filter, none); }
+}
+/* A board-axes wrapper is transparent. Other panel contents share the outer material. */
+html[data-ss-surface="glass"] body.homehunt-v2 .panel:not(.board-axes) :is(.panel, .model-card, .guide-step, .connection-card, .supply-card, .axis-card),
+html[data-ss-surface="glass"] body.homehunt-v2 .modal :is(.panel, .model-card, .guide-step, .connection-card, .supply-card, .axis-card) {
+  background: rgb(255 255 255 / 18%);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 @media (max-width: 1180px) {
   html[data-ss-surface="glass"] body.homehunt-v2 .topbar { flex-wrap: wrap; padding: 13px 22px; gap: 10px; }
@@ -172,5 +181,5 @@ html[data-ss-surface="glass"] body.homehunt-v2 .boot-status { bottom: 22px; z-in
   html[data-ss-surface="glass"] body.homehunt-v2 .boot-status { bottom: 14px; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .panel, .condition-strip, .finder-toolbar, .result-panel, .axis-card) { background: #f8fbff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  html[data-ss-surface="glass"] body.homehunt-v2 :is(.topbar, .panel:not(.board-axes), .condition-strip, .finder-toolbar, .result-panel, .axis-card) { background: #f8fbff; backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
