@@ -284,7 +284,8 @@
         "suite-controls.mjs",
         "suite-controls.css",
         "icons",
-        "suite-background.png"
+        "suite-background.png",
+        "suite-background-material.png"
       ]
     },
     {
