@@ -383,6 +383,40 @@ test('period validation and cancellation leave the active story unchanged', asyn
   h.$('openPeriod').click(); assert.equal(h.root.querySelector('[data-person="all"]').getAttribute('aria-pressed'), 'true');
 });
 
+test('glass surface moves existing navigation controls without restarting playback or discarding a draft', async t => {
+  const h = await harness(t, { db: periodDatabase() });
+  const document = h.root.ownerDocument, win = document.defaultView;
+  const controls = ['openPeriod','toggleCalendar','toggleStory'].map(id => h.$(id));
+  const originalParents = controls.map(control => control.parentElement);
+  h.$('nextScene').click(); h.$('playDay').click(); h.advance(5000);
+  const prior = h.app.getPlayback(), requests = h.db.calls.length;
+  document.documentElement.dataset.ssSurface = 'glass';
+  win.dispatchEvent(h.event('sungso:surface-change'));
+  assert.equal(h.$('journeyGlassToolbar').hidden, false);
+  assert.deepEqual(controls.map(control => control.parentElement.id), ['journeyGlassPeriod','journeyGlassCalendar','journeyGlassStory']);
+  assert.equal(h.app.getPlayback().playing, prior.playing);
+  assert.equal(h.app.getPlayback().time, prior.time);
+  assert.equal(h.app.getPlayback().progress, prior.progress);
+  assert.equal(h.db.calls.length, requests, 'surface switching never re-reads or writes the journey');
+  h.$('openPeriod').click(); assert.equal(h.$('periodDialog').open, true);
+  h.$('periodDialog').querySelector('[data-close]').click();
+  h.$('toggleStory').click(); assert.equal(h.$('storyPanel').hidden, false);
+  h.$('addRecord').click(); h.$('recordTitle').value = '저장하지 않은 기억';
+  document.documentElement.dataset.ssSurface = 'solid';
+  win.dispatchEvent(h.event('sungso:surface-change'));
+  assert.equal(h.$('journeyGlassToolbar').hidden, true);
+  controls.forEach((control, index) => assert.equal(control.parentElement, originalParents[index]));
+  assert.equal(h.$('recordDialog').open, true);
+  assert.equal(h.$('recordTitle').value, '저장하지 않은 기억');
+  assert.equal(h.db.calls.filter(call => call.method !== 'GET').length, 0);
+  h.$('recordDialog').querySelector('[data-close]').click();
+  h.$('toggleCalendar').click(); assert.equal(h.$('calendarPanel').hidden, false);
+  h.app.dispose();
+  document.documentElement.dataset.ssSurface = 'glass';
+  win.dispatchEvent(h.event('sungso:surface-change'));
+  assert.equal(h.root.childElementCount, 0, 'retired private UI is not reattached by a later surface change');
+});
+
 test('refreshing a changed scene keeps its position and never starts automatically', async t => {
   const db = periodDatabase(), h = await harness(t, { db }); h.$('nextScene').click(); h.$('playDay').click(); h.advance(5000); const prior = h.app.getPlayback(), changed = clone(db.days.get('2025-07-08'));
   changed.records[0].title = '함께 다시 찾은 동네'; changed.revision++; db.days.set(changed.date, validateDay(changed)); h.$('refreshDay').click();

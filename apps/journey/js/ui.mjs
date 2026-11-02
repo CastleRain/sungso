@@ -2,6 +2,7 @@ import { emptyDay, validateDay, dateInKorea, koreanDateTime, timeFromKorea, vali
 import { createJourneyMap } from './world-map.mjs?v=3.1.0';
 import { createJourneyPlayback } from './playback.mjs?v=3.0.0';
 import { prepareJourneyPhoto } from './photo.mjs';
+import { installJourneySurface } from './surface.mjs?v=20261103-glass-1';
 
 const names={sungwoo:'성우',sohee:'소희',together:'함께'};
 const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
@@ -106,6 +107,7 @@ export function mountJourney({root,request,member,mapFactory=createJourneyMap,pr
   Promise.resolve(map.ready).then(ready=>{if(disposed)return;mapReady=!!ready;$('pickLocation').disabled=!mapReady;showPlayback(playback.getState());});
   function scheduleMapMeasure(){if(disposed||measureFrame)return;measureFrame=window.requestAnimationFrame(()=>{measureFrame=0;if(disposed)return;const top=Math.max(0,mapWrap.getBoundingClientRect().top+window.scrollY),height=Math.max(260,Math.floor(window.innerHeight-top-1)),value=height+'px';if(mapWrap.style.getPropertyValue('--journey-map-height')!==value)mapWrap.style.setProperty('--journey-map-height',value);$('journeyLayout').style.setProperty('--journey-map-height',value);const mapMessage=$('journeyMap').querySelector('.journey-map-message'),messageHeight=mapMessage&&!mapMessage.hidden?mapMessage.getBoundingClientRect().height:0,offset=messageHeight>0?Math.ceil(messageHeight)+8:0;mapWrap.style.setProperty('--journey-map-message-offset',offset+'px');renderPlaybackTicks(playbackState.scenes||[]);map.resize?.();});}
   const mapMeasureObserver=typeof window.ResizeObserver==='function'?new window.ResizeObserver(scheduleMapMeasure):null;mapMeasureObserver?.observe(document.body);const mapMessage=$('journeyMap').querySelector('.journey-map-message');if(mapMessage)mapMeasureObserver?.observe(mapMessage);on(window,'resize',scheduleMapMeasure);if(window.visualViewport)on(window.visualViewport,'resize',scheduleMapMeasure);
+  installJourneySurface({root,resize:scheduleMapMeasure,signal:life.signal});
   function setStoryPanel(open){if(!open&&$('storyPanel').contains(document.activeElement))$('toggleStory').focus();$('storyPanel').hidden=!open;$('journeyLayout').classList.toggle('story-open',open);$('toggleStory').setAttribute('aria-expanded',String(open));scheduleMapMeasure();}
   function setCalendar(open){$('calendarPanel').hidden=!open;$('toggleCalendar').setAttribute('aria-expanded',String(open));if(open)void loadMonth(month);}
   function closeDetails(restoreFocus=true){daySeq++;photoSeq++;$('recordsPanel').hidden=true;$('toggleRecords').setAttribute('aria-expanded','false');if(detailRoute){detailRoute=false;showPlayback(playback.getState());}if(restoreFocus)($('toggleRecords').disabled?$('toggleStory'):$('toggleRecords')).focus();}

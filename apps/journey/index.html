@@ -6,7 +6,12 @@
   <link rel="stylesheet" href="../shared/theme/brand.css?v=sky-1">
   <link rel="stylesheet" href="./assets/maplibre/maplibre-gl.css">
   <link rel="stylesheet" href="./style.css?v=3.1.0">
+  <link rel="stylesheet" href="./assets/glass.css?v=20261103-glass-1">
   <script type="module" src="../shared/firebase/boot.mjs"></script>
+  <script src="../shared/theme/suite-boot.js?v=20261103-glass-1"></script>
+  <link rel="stylesheet" href="../shared/theme/suite.css?v=20261103-glass-1">
+  <link rel="stylesheet" href="../shared/theme/suite-controls.css?v=20261103-glass-1">
+  <script type="module" src="../shared/theme/suite.mjs?v=20261103-glass-1"></script>
 </head>
 <body data-app="journey">
 <main data-private-root hidden>
@@ -16,6 +21,10 @@
     <div class="view-modes" role="group" aria-label="재생 방식"><button data-mode="fast" aria-pressed="true">한눈에 보기</button><button data-mode="slow" aria-pressed="false">천천히 보기</button></div>
     <div class="header-actions"><button id="addRecord" class="add-action">기록 추가</button><details id="moreMenu" class="more-menu"><summary aria-label="더 보기">더 보기</summary><div><button id="openImport">타임라인 가져오기</button><button id="refreshDay">새로 불러오기</button><a href="../footprints/">기존 장소·방문 기록</a></div></details></div>
   </header>
+  <div class="journey-glass-toolbar" id="journeyGlassToolbar" aria-label="기간과 기록 찾기" hidden>
+    <div class="journey-glass-period" id="journeyGlassPeriod"><span>기간·사람</span></div>
+    <div id="journeyGlassCalendar"></div><div id="journeyGlassStory"></div>
+  </div>
   <div class="journey-shell" id="journeyLayout">
     <aside class="story-rail" id="storyPanel" aria-label="날짜별 이동 기록" hidden>
       <div class="rail-heading"><button id="openPeriod" class="period-action" aria-haspopup="dialog"><span id="periodTitle">전체 기간</span><img src="./assets/icons/chevron-down.svg" alt=""></button><p id="periodRange">저장한 기록을 확인하고 있어요</p><button id="toggleCalendar" class="text-action date-find" aria-controls="calendarPanel" aria-expanded="false"><img src="./assets/icons/calendar3.svg" alt="">날짜 찾기</button></div>
@@ -89,5 +98,5 @@
   </form></dialog>
   <div id="pickNotice" class="pick-notice" hidden><span>지도에서 기억하는 장소를 눌러주세요.</span><button id="cancelPick">취소</button></div>
 </main>
-<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=3.1.0"></script>
+<script type="application/x-sungso-script" data-type="module" data-src="./js/entry.mjs?v=20261103-glass-1"></script>
 </body></html>

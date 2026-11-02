@@ -239,7 +239,7 @@ export function createJourneyMap({ element, onPick = () => {}, onSelect = () => 
       for (const [person, position] of state.heads) {
         const owner = PEOPLE[person] || PEOPLE.together, description = position.state === 'gap' ? '기록 공백' : position.state === 'finished' ? '마지막 기록' : position.state === 'recorded' ? '기록 위치' : '이동 중';
         const title = `${owner.name} · ${description}`, icon = { path: maps.SymbolPath.CIRCLE, radius: 9, fillColor: owner.color, fillOpacity: position.state === 'gap' ? .35 : 1, strokeColor: '#ffffff', strokeWeight: 3 };
-        const labelContent = () => { const text = document.createElement('span'); text.textContent = title; text.style.cssText = `display:block;background:var(--ss-surface,#fff);color:var(--ss-text,#343b44);border:1px solid ${owner.color};border-radius:10px;padding:2px 7px;font:600 12px/1.5 sans-serif;white-space:nowrap;pointer-events:none`; return text; };
+        const labelContent = () => { const text = document.createElement('span'); text.textContent = title; text.style.cssText = `display:block;background:var(--ss-surface,#fff);color:var(--ss-text,#343b44);border:1px solid ${owner.color};border-radius:10px;padding:2px 7px;font:600 12px/1.5 var(--ss-font-sans);white-space:nowrap;pointer-events:none`; return text; };
         let head = heads.find(value => value.person === person);
         if (!head) {
           const marker = new maps.Marker({ map, position: coordinate(position), title, icon, clickable: false, zIndex: 100 });
