@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-05T07:18:16.609Z",
-  "lastAttemptAt": "2026-11-05T07:18:16.609Z",
+  "generatedAt": "2026-11-06T07:18:24.489Z",
+  "lastAttemptAt": "2026-11-06T07:18:24.489Z",
   "status": "partial",
   "collectionNote": "공식 공개 자료를 하루 한 번 확인합니다. 관측월·적용일과 확인시각은 다르며, 수집 실패 시 이전 자료의 기준일을 유지합니다.",
   "series": [
@@ -63,8 +63,8 @@
       "dataUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202602/202611/BECBLA0302",
       "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11066053",
       "publicationBasis": "bok_press_release_registered_at",
-      "checkedAt": "2026-11-05T07:18:16.609Z",
-      "lastAttemptAt": "2026-11-05T07:18:16.609Z",
+      "checkedAt": "2026-11-06T07:18:24.489Z",
+      "lastAttemptAt": "2026-11-06T07:18:24.489Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": null
@@ -182,8 +182,8 @@
       ],
       "publicationBasis": null,
       "publicationSourceUrl": null,
-      "checkedAt": "2026-11-05T07:18:16.609Z",
-      "lastAttemptAt": "2026-11-05T07:18:16.609Z",
+      "checkedAt": "2026-11-06T07:18:24.489Z",
+      "lastAttemptAt": "2026-11-06T07:18:24.489Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다."
@@ -240,7 +240,7 @@
         }
       ],
       "checkedAt": "2026-11-01T06:45:41.453Z",
-      "lastAttemptAt": "2026-11-05T07:18:16.609Z",
+      "lastAttemptAt": "2026-11-06T07:18:24.489Z",
       "status": "stale",
       "statusReason": "source_check_failed",
       "publicationNote": null
@@ -250,19 +250,19 @@
     {
       "id": "bok_mortgage",
       "status": "ok",
-      "checkedAt": "2026-11-05T07:18:16.609Z",
-      "lastSuccessAt": "2026-11-05T07:18:16.609Z"
+      "checkedAt": "2026-11-06T07:18:24.489Z",
+      "lastSuccessAt": "2026-11-06T07:18:24.489Z"
     },
     {
       "id": "bok_base",
       "status": "ok",
-      "checkedAt": "2026-11-05T07:18:16.609Z",
-      "lastSuccessAt": "2026-11-05T07:18:16.609Z"
+      "checkedAt": "2026-11-06T07:18:24.489Z",
+      "lastSuccessAt": "2026-11-06T07:18:24.489Z"
     },
     {
       "id": "hf_bogeumjari",
       "status": "failed",
-      "checkedAt": "2026-11-05T07:18:16.609Z",
+      "checkedAt": "2026-11-06T07:18:24.489Z",
       "lastSuccessAt": "2026-11-01T06:45:41.453Z",
       "error": "source_check_failed"
     }
