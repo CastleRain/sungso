@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T10:21:01.750Z",
-  "lastAttemptAt": "2026-11-24T10:21:01.750Z",
+  "generatedAt": "2026-11-25T09:02:01.151Z",
+  "lastAttemptAt": "2026-11-25T09:02:01.151Z",
   "status": "partial",
   "collectionNote": "공식 공개 자료를 하루 한 번 확인합니다. 관측월·적용일과 확인시각은 다르며, 수집 실패 시 이전 자료의 기준일을 유지합니다.",
   "series": [
@@ -13,10 +13,10 @@
       "frequency": "monthly",
       "unit": "%",
       "sourceName": "한국은행 ECOS",
-      "sourceUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202602/202611/BECBLA0302",
+      "sourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11066953",
       "description": "예금은행이 해당 월 새로 취급한 주택담보대출의 금액 가중평균입니다. 개인에게 제시되는 금리와 다르며 공표까지 시차가 있습니다.",
-      "value": 4.88,
-      "observationDate": "2026-09",
+      "value": 4.98,
+      "observationDate": "2026-10",
       "history": [
         {
           "date": "2025-12",
@@ -57,14 +57,18 @@
         {
           "date": "2026-09",
           "value": 4.88
+        },
+        {
+          "date": "2026-10",
+          "value": 4.98
         }
       ],
-      "publishedAt": "2026-10-29",
+      "publishedAt": "2026-11-25",
       "dataUrl": "https://ecos.bok.or.kr/api/StatisticSearch/sample/json/kr/1/10/121Y006/M/202602/202611/BECBLA0302",
+      "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11066953",
       "publicationBasis": "bok_press_release_registered_at",
-      "publicationSourceUrl": "https://www.bok.or.kr/portal/bbs/B0000501/view.do?menuNo=201264&nttId=11066053",
-      "checkedAt": "2026-11-24T10:21:01.750Z",
-      "lastAttemptAt": "2026-11-24T10:21:01.750Z",
+      "checkedAt": "2026-11-25T09:02:01.151Z",
+      "lastAttemptAt": "2026-11-25T09:02:01.151Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": null
@@ -182,8 +186,8 @@
       ],
       "publicationBasis": null,
       "publicationSourceUrl": null,
-      "checkedAt": "2026-11-24T10:21:01.750Z",
-      "lastAttemptAt": "2026-11-24T10:21:01.750Z",
+      "checkedAt": "2026-11-25T09:02:01.151Z",
+      "lastAttemptAt": "2026-11-25T09:02:01.151Z",
       "status": "ok",
       "statusReason": null,
       "publicationNote": "기준금리 추이는 변경일을 제공하며 별도 공표일은 미확인입니다."
@@ -240,7 +244,7 @@
         }
       ],
       "checkedAt": "2026-11-01T06:45:41.453Z",
-      "lastAttemptAt": "2026-11-24T10:21:01.750Z",
+      "lastAttemptAt": "2026-11-25T09:02:01.151Z",
       "status": "stale",
       "statusReason": "source_check_failed",
       "publicationNote": null
@@ -250,19 +254,19 @@
     {
       "id": "bok_mortgage",
       "status": "ok",
-      "checkedAt": "2026-11-24T10:21:01.750Z",
-      "lastSuccessAt": "2026-11-24T10:21:01.750Z"
+      "checkedAt": "2026-11-25T09:02:01.151Z",
+      "lastSuccessAt": "2026-11-25T09:02:01.151Z"
     },
     {
       "id": "bok_base",
       "status": "ok",
-      "checkedAt": "2026-11-24T10:21:01.750Z",
-      "lastSuccessAt": "2026-11-24T10:21:01.750Z"
+      "checkedAt": "2026-11-25T09:02:01.151Z",
+      "lastSuccessAt": "2026-11-25T09:02:01.151Z"
     },
     {
       "id": "hf_bogeumjari",
       "status": "failed",
-      "checkedAt": "2026-11-24T10:21:01.750Z",
+      "checkedAt": "2026-11-25T09:02:01.151Z",
       "lastSuccessAt": "2026-11-01T06:45:41.453Z",
       "error": "source_check_failed"
     }
